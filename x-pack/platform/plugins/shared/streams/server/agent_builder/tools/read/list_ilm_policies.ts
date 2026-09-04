@@ -77,13 +77,31 @@ export const createListIlmPoliciesTool = ({
     Returns policy names, full phase definitions (with min_age, rollover, delete settings),
     managed/deprecated status, and which streams and indices currently use each policy.
     Internal system policies (managed + dot-prefixed) are filtered out.
-    On serverless deployments, returns ilm_available: false.
 
     **Efficiency:** ILM policies are cluster-global. Call once per conversation, not per stream.
     Results remain valid until the user creates or modifies policies (outside this skill's scope).
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'List ILM Policies',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   schema: listIlmPoliciesSchema,
+  availability: {
+    cacheMode: 'global',
+    handler: async (_context) => {
+      if (isServerless) {
+        return {
+          status: 'unavailable',
+          reason: 'ILM is not available on serverless deployments.',
+        };
+      }
+      return { status: 'available' };
+    },
+  },
   handler: async (_input, { request }) => {
     if (isServerless) {
       return {

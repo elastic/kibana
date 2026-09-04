@@ -6,8 +6,6 @@
  */
 
 import {
-  GLOBAL_LOADING_INDICATOR,
-  GLOBAL_LOADING_INDICATOR_HIDDEN,
   GROUP_SELECTOR_DROPDOWN,
   GROUPING_LEVEL_0,
   IS_LOADING_GROUPING_TABLE,
@@ -78,10 +76,8 @@ export const interceptEntityStoreStatus = (status: 'running' | 'not_installed') 
  * Waits for in-flight search requests via API intercept before interacting.
  */
 export const selectGroupingOption = (panelSelector: string) => {
-  cy.get(GLOBAL_LOADING_INDICATOR_HIDDEN).should('exist');
-  cy.get(GLOBAL_LOADING_INDICATOR).should('not.exist');
   cy.get(IS_LOADING_GROUPING_TABLE).should('not.exist');
 
-  cy.get(`${GROUP_SELECTOR_DROPDOWN}:visible`).click();
+  cy.get(`${GROUP_SELECTOR_DROPDOWN}:visible`).should('be.enabled').click();
   cy.get(panelSelector).should('be.visible').click();
 };

@@ -8,7 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import type { AlertingTaskDefinition } from '../services/task_run_scope_service/create_task_runner';
 import { DispatcherTaskRunner } from './task_runner';
-import { DISPATCHER_TASK_TYPE } from './constants';
+import { DISPATCHER_TASK_TYPE, DISPATCHER_TASK_TIMEOUT } from './constants';
+import { stateSchemaByVersion } from './task_state';
 
 /**
  * Task definition for dispatcher.
@@ -17,9 +18,10 @@ import { DISPATCHER_TASK_TYPE } from './constants';
 export const DispatcherTaskDefinition: AlertingTaskDefinition<DispatcherTaskRunner> = {
   taskType: DISPATCHER_TASK_TYPE,
   title: 'Alerting v2 dispatcher',
-  timeout: '1m',
+  timeout: DISPATCHER_TASK_TIMEOUT,
   maxAttempts: 1,
   paramsSchema: schema.object({}),
+  stateSchemaByVersion,
   taskRunnerClass: DispatcherTaskRunner,
   requiresFakeRequest: false,
 };

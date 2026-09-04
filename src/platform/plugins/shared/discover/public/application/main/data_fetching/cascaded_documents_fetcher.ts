@@ -23,7 +23,7 @@ import type { ScopedProfilesManager } from '../../../context_awareness';
 export interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
   nodeId: string;
   timeRange: TimeRange | undefined;
-  isApproximate: boolean;
+  esqlApproximation: boolean;
 }
 
 export interface CascadedDocumentsStateManager {
@@ -57,7 +57,7 @@ export class CascadedDocumentsFetcher {
     esqlVariables,
     dataView,
     timeRange,
-    isApproximate,
+    esqlApproximation,
   }: FetchCascadedDocumentsParams) {
     this.cancelFetch(nodeId);
 
@@ -99,7 +99,7 @@ export class CascadedDocumentsFetcher {
         timeRange,
         scopedProfilesManager: this.scopedProfilesManager,
         inspectorAdapters: { requests: this.requestAdapter },
-        isApproximate,
+        esqlApproximation,
         inspectorConfig: {
           title: i18n.translate('discover.dataCascade.inspector.cascadeQueryTitle', {
             defaultMessage: 'Cascade Row Data Query',

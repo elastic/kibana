@@ -1,0 +1,31 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { inject, injectable } from 'inversify';
+import type { AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
+import type { CoreDiServiceStart } from '@kbn/core-di';
+import { ApplicationParameters, Context, CoreStart } from '@kbn/core-di-browser';
+import { PLUGIN_NAME } from '../common';
+import { App } from './components/app';
+
+@injectable()
+export class Main {
+  public static id = '<%= camelCase(name) %>';
+  public static title = PLUGIN_NAME;
+
+  constructor(
+    @inject(ApplicationParameters) private readonly params: AppMountParameters,
+    @inject(CoreStart('injection')) private readonly di: CoreDiServiceStart
+  ) {}
+
+  mount(): AppUnmount {
+    const { element } = this.params;
+    ReactDOM.render(
+      <Context.Provider value={this.di.getContainer()}>
+        <App />
+      </Context.Provider>,
+      element
+    );
+
+    return () => ReactDOM.unmountComponentAtNode(element);
+  }
+}

@@ -10,7 +10,7 @@
 import { parseDocument } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
+import { matchAllVariables } from '@kbn/workflows-yaml';
 import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_collections';
 import { validateVariables } from './validate_variables';
 import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';
@@ -37,9 +37,7 @@ function assertScenarioPassesValidation(scenario: ScenarioDefinition): void {
   expect(collectionErrors).toEqual([]);
 
   const variableItems = scenario.variableKeys.map((key) => {
-    const match = [...scenario.yaml.matchAll(VARIABLE_REGEX_GLOBAL)].find(
-      (m) => m.groups?.key === key
-    );
+    const match = matchAllVariables(scenario.yaml).find((m) => m.groups.key === key);
     expect(match).toBeDefined();
     const offset = match!.index ?? 0;
     const start = model.getPositionAt(offset);
@@ -152,9 +150,7 @@ steps:
     const collectionResults = validateLiquidForLoopCollections(yaml, doc, model, graph, definition);
     expect(collectionResults.filter((r) => r.severity === 'error')).toEqual([]);
 
-    const match = [...yaml.matchAll(VARIABLE_REGEX_GLOBAL)].find(
-      (m) => m.groups?.key === 'row.typo'
-    );
+    const match = matchAllVariables(yaml).find((m) => m.groups?.key === 'row.typo');
     expect(match).toBeDefined();
     const offset = match!.index ?? 0;
     const start = model.getPositionAt(offset);

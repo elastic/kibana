@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Direction } from '@kbn/evals-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
@@ -34,17 +35,37 @@ export interface EvaluatorResult {
   }>;
 }
 
+/**
+ * Whether an evaluator ships with Kibana or was defined by a user. Callers act
+ * on it — built-ins have no management actions — but resolution does not: a
+ * persisted definition is compiled into this same shape.
+ */
+export type EvaluatorOrigin = 'built_in' | 'user_defined';
+
 export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
   name: string;
   version: string;
   kind: 'llm' | 'code';
+  origin: EvaluatorOrigin;
   description: string;
+  direction: Direction;
   referenceDataSchema?: z.ZodType<ReferenceData>;
   evidenceSchema?: z.ZodType<Partial<EvidenceRound>>;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
 }
 
+/**
+ * Resolution within one space. Asynchronous because persisted definitions are
+ * read from Elasticsearch, and scoped because which ones exist depends on the
+ * space the caller is acting in.
+ */
+export interface ScopedEvaluatorRegistry {
+  list(): Promise<EvaluatorDefinition[]>;
+  get(name: string, version?: string): Promise<EvaluatorDefinition | undefined>;
+}
+
 export interface EvaluatorRegistry {
-  list(): EvaluatorDefinition[];
-  get(name: string, version?: string): EvaluatorDefinition | undefined;
+  /** Whether a name is taken by a built-in, and so cannot be defined by a user. */
+  isBuiltIn(name: string): boolean;
+  asScoped(options: { spaceId: string }): ScopedEvaluatorRegistry;
 }

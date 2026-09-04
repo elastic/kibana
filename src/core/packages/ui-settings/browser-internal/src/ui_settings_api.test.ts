@@ -315,7 +315,7 @@ describe('#getLoadingCount$()', () => {
     const promise = uiSettingsApi.getLoadingCount$().pipe(takeUntil(done$), toArray()).toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');
-    await expect(uiSettingsApi.batchSet('foo', 'bar')).rejects.toThrowError();
+    await expect(uiSettingsApi.batchSet('foo', 'bar')).rejects.toThrow();
 
     done$.next();
     await expect(promise).resolves.toEqual([0, 1, 0, 1, 0]);

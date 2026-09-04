@@ -423,7 +423,7 @@ describe('Endpoint fields', () => {
           beatFields,
           IndexPatterns
         );
-      }).rejects.toThrowError(/invalid_type/);
+      }).rejects.toThrow(/invalid_type/);
     });
 
     it('should throw when invalid index', async () => {
@@ -441,7 +441,7 @@ describe('Endpoint fields', () => {
           beatFields,
           IndexPatterns
         );
-      }).rejects.toThrowError('Invalid indices request invalid');
+      }).rejects.toThrow('Invalid indices request invalid');
     });
 
     it('should throw when more than one index', async () => {
@@ -459,7 +459,7 @@ describe('Endpoint fields', () => {
           beatFields,
           IndexPatterns
         );
-      }).rejects.toThrowError('Invalid indices request invalid, invalid2');
+      }).rejects.toThrow('Invalid indices request invalid, invalid2');
     });
   });
 

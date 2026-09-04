@@ -7,7 +7,6 @@ $domDragDropZLevel3: 3;
 
 // from mixins
 
-// sass-lint:disable-block indentation, no-color-keywords
 @mixin mixinDomDragDrop {
   transition: $euiAnimSpeedFast ease-in-out;
   transition-property: background-color, border-color, opacity;

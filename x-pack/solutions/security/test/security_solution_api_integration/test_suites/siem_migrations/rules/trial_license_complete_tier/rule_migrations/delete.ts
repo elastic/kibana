@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import pRetry from 'p-retry';
 import {
   createLookupsForMigrationId,
   createMacrosForMigrationId,
@@ -25,8 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const ruleMigrationRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/228826
-  describe.skip('@ess @serverless @serverlessQA Delete API', () => {
+  describe('@ess @serverless @serverlessQA Delete API', () => {
     let migrationId: string;
     beforeEach(async () => {
       await deleteAllRuleMigrations(es);
@@ -112,10 +112,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('Error handling', () => {
         it('should return 409 if migration is already running', async () => {
-          // start a migration
           await ruleMigrationRoutes.addRulesToMigration({
             migrationId,
-            payload: [splunkRuleWithResources],
+            /** enough rules to keep the migration running while delete is attempted */
+            payload: Array.from({ length: 40 }, () => splunkRuleWithResources),
           });
 
           const response = await ruleMigrationRoutes.start({
@@ -129,6 +129,16 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(response.body).toMatchObject({ started: true });
 
+          await pRetry(
+            async () => {
+              const statsResponse = await ruleMigrationRoutes.stats({ migrationId });
+              if (statsResponse.body.status !== 'running') {
+                throw new Error('Retry until migration is running');
+              }
+            },
+            { retries: 5 }
+          );
+
           const deleteResponse = await ruleMigrationRoutes.delete({
             migrationId,
             expectStatusCode: 409,
@@ -140,6 +150,9 @@ export default ({ getService }: FtrProviderContext) => {
             message:
               'A running migration cannot be deleted. Please stop the migration first and try again',
           });
+
+          /** this is the only test that leaves a migration running, stop it so it does not leak into the following tests */
+          await ruleMigrationRoutes.stop({ migrationId });
         });
 
         it('should return 404 if migration ID does not exist', async () => {

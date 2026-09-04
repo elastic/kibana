@@ -165,6 +165,7 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state
                   type: 'OPEN_CHILD_FOR_STEP',
                   step: state.step,
                   isAlert: true,
+                  focusedTab: 'recovery',
                 })
               }
               data-test-subj="ruleBuilderRecoveryPreview"
@@ -325,7 +326,7 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state
       })}
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addRecoveryCondition}
         data-test-subj="ruleBuilderAddRecoveryCondition"
       >

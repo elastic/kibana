@@ -23,12 +23,13 @@ import {
 } from './authorization';
 
 const owner: UserIdAndName = { id: 'owner-id', username: 'alice' };
-const ownerUser: CurrentUser = { id: 'owner-id', username: 'alice' };
-const bob: CurrentUser = { id: 'bob-id', username: 'bob' };
+const ownerUser: CurrentUser = { id: 'owner-id', username: 'alice', isAdmin: false };
+const bob: CurrentUser = { id: 'bob-id', username: 'bob', isAdmin: false };
+const adminUser: CurrentUser = { id: 'admin-id', username: 'admin', isAdmin: true };
 
 describe('agent access-control authorization', () => {
   describe('isAgentOwner', () => {
-    it('matches by id before username', () => {
+    it('matches by stable id', () => {
       expect(isAgentOwner({ owner, currentUser: ownerUser })).toBe(true);
       expect(
         isAgentOwner({
@@ -38,13 +39,34 @@ describe('agent access-control authorization', () => {
       ).toBe(false);
     });
 
-    it('falls back to username when ids are unavailable', () => {
+    it('falls back to username for legacy owners that never stored an id', () => {
       expect(
         isAgentOwner({
           owner: { username: 'alice' },
           currentUser: { username: 'alice' },
         })
       ).toBe(true);
+      expect(
+        isAgentOwner({
+          owner: { username: 'alice' },
+          currentUser: { id: 'realm:["file","file1","alice"]', username: 'alice' },
+        })
+      ).toBe(true);
+    });
+
+    it('does not fall back to username when the agent document stored an id', () => {
+      expect(
+        isAgentOwner({
+          owner: { id: 'owner-id', username: 'alice' },
+          currentUser: { username: 'alice' },
+        })
+      ).toBe(false);
+      expect(
+        isAgentOwner({
+          owner: { id: 'owner-id', username: 'alice' },
+          currentUser: { id: 'different-id', username: 'alice' },
+        })
+      ).toBe(false);
     });
   });
 
@@ -54,8 +76,7 @@ describe('agent access-control authorization', () => {
         getEffectiveAgentRole({
           accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner,
-          currentUser: bob,
-          isAdmin: true,
+          currentUser: adminUser,
         })
       ).toBe('admin');
 
@@ -64,7 +85,6 @@ describe('agent access-control authorization', () => {
           accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner,
           currentUser: ownerUser,
-          isAdmin: false,
         })
       ).toBe('owner');
     });
@@ -78,7 +98,6 @@ describe('agent access-control authorization', () => {
           },
           owner,
           currentUser: bob,
-          isAdmin: false,
         })
       ).toBe(AgentAccessControlRole.Manager);
 
@@ -87,9 +106,16 @@ describe('agent access-control authorization', () => {
           accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner,
           currentUser: bob,
-          isAdmin: false,
         })
       ).toBe(AgentAccessControlRole.Editor);
+    });
+
+    it('treats a missing access control as public so built-in agents stay usable', () => {
+      const args = { accessControl: undefined, owner, currentUser: bob };
+
+      expect(getEffectiveAgentRole(args)).toBe(AgentAccessControlRole.Editor);
+      expect(hasAgentReadAccess(args)).toBe(true);
+      expect(hasAgentUseAccess(args)).toBe(true);
     });
   });
 
@@ -102,7 +128,6 @@ describe('agent access-control authorization', () => {
         },
         owner,
         currentUser: bob,
-        isAdmin: false,
       };
 
       expect(hasAgentReadAccess(args)).toBe(true);
@@ -120,7 +145,6 @@ describe('agent access-control authorization', () => {
         },
         owner,
         currentUser: bob,
-        isAdmin: false,
       };
 
       expect(canDeleteAgent(args)).toBe(true);
@@ -137,7 +161,6 @@ describe('agent access-control authorization', () => {
           },
           owner,
           currentUser: bob,
-          isAdmin: false,
         })
       ).toBe(false);
     });

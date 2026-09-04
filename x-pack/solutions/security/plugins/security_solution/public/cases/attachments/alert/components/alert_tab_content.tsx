@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
+import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import type { AlertsTableOnLoadedProps } from '@kbn/response-ops-alerts-table/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { getManualAlertIds } from '@kbn/cases-plugin/common';
@@ -20,7 +20,7 @@ import { NoPrivileges } from '../../../../common/components/no_privileges';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { ALERTS_EMPTY_DESCRIPTION } from '../translations';
 
-export const AlertTabContent: React.FC<CommonAttachmentTabViewProps> = ({ caseData }) => {
+export const AlertTabContent: React.FC<CommonAttachmentListViewProps> = ({ caseData }) => {
   const {
     application: { capabilities },
   } = useKibana().services;

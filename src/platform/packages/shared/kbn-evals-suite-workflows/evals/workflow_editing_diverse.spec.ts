@@ -137,89 +137,70 @@ evaluate.describe(
   'Diverse edits on automated_triaging baseline (15 steps, alert trigger)',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate(
-      'removes both host-isolation and AI-summary steps without breaking downstream Liquid',
-      async ({ evaluateDiverseEditDataset }) => {
-        await evaluateDiverseEditDataset({
-          dataset: {
-            name: 'workflow-editing-diverse: triaging-remove-isolation',
-            description:
-              'Delete two non-adjacent steps from a 15-step nested workflow. ' +
-              'Tests multi-step removal AND that any downstream Liquid references ' +
-              'to the removed steps are also fixed up, not left dangling.',
-            examples: [
-              {
-                input: {
-                  initialYaml: automatedTriagingYaml,
-                  instruction:
-                    "Drop two things: (1) the endpoint isolation step — we don't want auto-isolation without manual review; and (2) the AI summary step — the model output is too unreliable. Anything that referenced those steps elsewhere should be cleaned up too.",
-                },
-                output: {
-                  criteria: [
-                    'The isolate_host step has been removed.',
-                    'The ai_summary step has been removed.',
-                    'No remaining step contains a Liquid reference to steps.isolate_host.* or steps.ai_summary.*.',
-                    'Any case-comment step that previously embedded the AI summary has been either removed OR rewritten so it no longer references ai_summary output.',
-                    'All other top-level and nested steps (for_each_discovery, create_case, foreach_alert_in_ad, get_details, add_to_case) are preserved byte-identically.',
-                    'The trigger type is still alert.',
-                    'No new steps were introduced as a side effect of the removals.',
-                  ],
-                  preservedStepNames: [
-                    'for_each_discovery',
-                    'create_case',
-                    'foreach_alert_in_ad',
-                    'get_details',
-                    'add_to_case',
-                  ],
-                  expectedMaxToolCalls: 3,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'diverse-edit-delete' },
+    evaluate('triaging baseline cases', async ({ evaluateDiverseEditDataset }) => {
+      await evaluateDiverseEditDataset({
+        dataset: {
+          name: 'workflow-editing-diverse: triaging',
+          description:
+            'Edits on automated_triaging baseline: multi-step removal with Liquid cleanup, and deeply-nested step modification.',
+          examples: [
+            {
+              input: {
+                initialYaml: automatedTriagingYaml,
+                instruction:
+                  "Drop two things: (1) the endpoint isolation step — we don't want auto-isolation without manual review; and (2) the AI summary step — the model output is too unreliable. Anything that referenced those steps elsewhere should be cleaned up too.",
               },
-            ],
-          },
-        });
-      }
-    );
-
-    evaluate(
-      'modifies a deeply nested step in the foreach',
-      async ({ evaluateDiverseEditDataset }) => {
-        await evaluateDiverseEditDataset({
-          dataset: {
-            name: 'workflow-editing-diverse: triaging-modify-nested',
-            description: 'Modify a specific deeply-nested step parameter in a large workflow',
-            examples: [
-              {
-                input: {
-                  initialYaml: automatedTriagingYaml,
-                  instruction:
-                    'Bump the size on get_details from 10 to 50 — we keep missing context for alerts with many events.',
-                },
-                output: {
-                  criteria: [
-                    'The get_details step is unchanged except for its size parameter.',
-                    'The size parameter on get_details is now 50.',
-                    'No other steps were modified.',
-                  ],
-                  preservedStepNames: [
-                    'for_each_discovery',
-                    'create_case',
-                    'foreach_alert_in_ad',
-                    'add_to_case',
-                    'add_analysis_to_case',
-                    'ai_summary',
-                    'isolate_host',
-                  ],
-                  expectedMaxToolCalls: 4,
-                },
-                metadata: { category: 'diverse-edit-modify-nested' },
+              output: {
+                criteria: [
+                  'The isolate_host step has been removed.',
+                  'The ai_summary step has been removed.',
+                  'No remaining step contains a Liquid reference to steps.isolate_host.* or steps.ai_summary.*.',
+                  'Any case-comment step that previously embedded the AI summary has been either removed OR rewritten so it no longer references ai_summary output.',
+                  'All other top-level and nested steps (for_each_discovery, create_case, foreach_alert_in_ad, get_details, add_to_case) are preserved byte-identically.',
+                  'The trigger type is still alert.',
+                  'No new steps were introduced as a side effect of the removals.',
+                ],
+                preservedStepNames: [
+                  'for_each_discovery',
+                  'create_case',
+                  'foreach_alert_in_ad',
+                  'get_details',
+                  'add_to_case',
+                ],
+                expectedMaxToolCalls: 3,
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
-            ],
-          },
-        });
-      }
-    );
+              metadata: { category: 'diverse-edit-delete' },
+            },
+            {
+              input: {
+                initialYaml: automatedTriagingYaml,
+                instruction:
+                  'Bump the size on get_details from 10 to 50 — we keep missing context for alerts with many events.',
+              },
+              output: {
+                criteria: [
+                  'The get_details step is unchanged except for its size parameter.',
+                  'The size parameter on get_details is now 50.',
+                  'No other steps were modified.',
+                ],
+                preservedStepNames: [
+                  'for_each_discovery',
+                  'create_case',
+                  'foreach_alert_in_ad',
+                  'add_to_case',
+                  'add_analysis_to_case',
+                  'ai_summary',
+                  'isolate_host',
+                ],
+                expectedMaxToolCalls: 4,
+              },
+              metadata: { category: 'diverse-edit-modify-nested' },
+            },
+          ],
+        },
+      });
+    });
   }
 );
 
@@ -231,11 +212,12 @@ evaluate.describe(
   'Diverse edits on alert-triage baseline (10 steps, conditional-heavy)',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('bumps ES|QL time window across queries', async ({ evaluateDiverseEditDataset }) => {
+    evaluate('alert-triage baseline cases', async ({ evaluateDiverseEditDataset }) => {
       await evaluateDiverseEditDataset({
         dataset: {
-          name: 'workflow-editing-diverse: alert-triage-bump-window',
-          description: 'Modify a parameter that appears in multiple sibling ES|QL queries',
+          name: 'workflow-editing-diverse: alert-triage',
+          description:
+            'Edits on alert-triage baseline: bump ES|QL time window across sibling queries, and insert a new sibling enrichment query.',
           examples: [
             {
               input: {
@@ -261,17 +243,6 @@ evaluate.describe(
               },
               metadata: { category: 'diverse-edit-multi-step-modify' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('inserts a new enrichment query', async ({ evaluateDiverseEditDataset }) => {
-      await evaluateDiverseEditDataset({
-        dataset: {
-          name: 'workflow-editing-diverse: alert-triage-insert-enrichment',
-          description: 'Insert a new step alongside existing siblings in a nested structure',
-          examples: [
             {
               input: {
                 initialYaml: infosecAlertTriageYaml,
@@ -314,11 +285,12 @@ evaluate.describe(
   'Diverse edits on index-backfill baseline (7 steps, scheduled trigger)',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('changes schedule and bulk size together', async ({ evaluateDiverseEditDataset }) => {
+    evaluate('index-backfill baseline cases', async ({ evaluateDiverseEditDataset }) => {
       await evaluateDiverseEditDataset({
         dataset: {
-          name: 'workflow-editing-diverse: backfill-schedule-and-limit',
-          description: 'Single-turn edit that touches the trigger AND a step parameter',
+          name: 'workflow-editing-diverse: backfill',
+          description:
+            'Edits on index-backfill baseline: change schedule + step limit together, and insert a Slack connector step consuming prior step output.',
           examples: [
             {
               input: {
@@ -342,17 +314,6 @@ evaluate.describe(
               },
               metadata: { category: 'diverse-edit-trigger-plus-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('inserts a Slack notification on success', async ({ evaluateDiverseEditDataset }) => {
-      await evaluateDiverseEditDataset({
-        dataset: {
-          name: 'workflow-editing-diverse: backfill-add-slack',
-          description: 'Insert a connector step that consumes prior step output via Liquid',
-          examples: [
             {
               input: {
                 initialYaml: infosecIndexBackfillYaml,

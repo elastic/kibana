@@ -14,6 +14,7 @@ import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   DEFAULT_COLUMNS_SETTING,
+  DEFAULT_ESQL_QUERY_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   getChartHidden,
   getTableHidden,
@@ -24,7 +25,11 @@ import {
 } from '@kbn/discover-utils';
 import { cloneDeep } from 'lodash';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
-import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
+import {
+  DISCOVER_QUERY_MODE_KEY,
+  isPersistedQueryMode,
+  type QueryMode,
+} from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState } from '../redux';
 import {
@@ -125,15 +130,30 @@ function getDefaultQuery({
   if (hasGlobalState || hasInitialUrlState)
     return initialUrlState?.query || services.data.query.queryString.getDefaultQuery();
 
+  // Only use the persisted query mode if it was recorded against today's resolved
+  // default mode - otherwise (legacy value, or the default has changed since) discard
+  // it so the current default can take effect.
+  const isEsqlDefault = services.discoverFeatureFlags.getIsEsqlDefault();
+  const liveDefaultMode: QueryMode = isEsqlDefault ? 'esql' : 'classic';
+  const persistedQueryMode = services.storage.get(DISCOVER_QUERY_MODE_KEY);
+  const queryMode =
+    isPersistedQueryMode(persistedQueryMode) && persistedQueryMode.defaultMode === liveDefaultMode
+      ? persistedQueryMode.currentMode
+      : undefined;
+
   // If the last query mode used by the user was classic, just return the default query
-  const queryMode = services.storage.get(DISCOVER_QUERY_MODE_KEY);
   if (queryMode === 'classic') return services.data.query.queryString.getDefaultQuery();
 
   // If the last query mode used by the user was esql, or if esql is default, return the initial esql query
   const canUseEsql = services.uiSettings.get(ENABLE_ESQL) && dataView instanceof DataView;
-  const isEsqlDefault = services.discoverFeatureFlags.getIsEsqlDefault();
-  if (canUseEsql && (queryMode === 'esql' || isEsqlDefault))
-    return { esql: defaultProfileEsqlQuery?.query ?? getInitialESQLQuery(dataView) };
+
+  if (canUseEsql && (queryMode === 'esql' || isEsqlDefault)) {
+    const defaultEsqlQuery = services.uiSettings.get<string>(DEFAULT_ESQL_QUERY_SETTING)?.trim();
+    // Precedence: defaultEsqlQuery space setting > default profile setting > dataview derived query
+    return {
+      esql: defaultEsqlQuery || defaultProfileEsqlQuery?.query || getInitialESQLQuery(dataView),
+    };
+  }
 
   // Lastly, fall back to classic if we can't use anything else
   return services.data.query.queryString.getDefaultQuery();
@@ -206,6 +226,8 @@ function getDefaultAppState({
     grid: undefined,
     breakdownField: undefined,
     density: undefined,
+    documentsDisplayMode: undefined,
+    jsonModeSettings: undefined,
   };
 
   if (persistedTab?.grid) {
@@ -246,6 +268,12 @@ function getDefaultAppState({
   }
   if (persistedTab?.density) {
     defaultState.density = persistedTab.density;
+  }
+  if (persistedTab?.documentsDisplayMode) {
+    defaultState.documentsDisplayMode = persistedTab.documentsDisplayMode;
+  }
+  if (persistedTab?.jsonModeSettings) {
+    defaultState.jsonModeSettings = persistedTab.jsonModeSettings;
   }
 
   return defaultState;

@@ -281,8 +281,8 @@ describe('data_fetching related hooks', () => {
         esqlQuery,
         esqlVariables: undefined,
         timeRange: undefined,
-        isApproximate: false,
-        viewModeToggle: undefined,
+        esqlApproximation: false,
+        renderViewModeToggle: undefined,
         expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
         expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),
         getExpandedDocSetter: () => jest.fn(),
@@ -392,13 +392,13 @@ describe('data_fetching related hooks', () => {
           esqlVariables: contextValue.esqlVariables,
           timeRange: contextValue.timeRange,
           dataView,
-          isApproximate: contextValue.isApproximate,
+          esqlApproximation: contextValue.esqlApproximation,
         });
       });
 
-      it('forwards isApproximate from the context so drill-downs match the active search mode', async () => {
+      it('forwards esqlApproximation from the context so drill-downs match the active search mode', async () => {
         const mockRow = createMockRowData();
-        const { Wrapper, contextValue } = createWrapper({ isApproximate: true });
+        const { Wrapper, contextValue } = createWrapper({ esqlApproximation: true });
         const dataView = dataViewWithTimefieldMock;
 
         const { result } = renderHook(() => useDataCascadeRowExpansionHandlers({ dataView }), {
@@ -414,7 +414,7 @@ describe('data_fetching related hooks', () => {
         });
 
         expect(contextValue.cascadedDocumentsFetcher.fetchCascadedDocuments).toHaveBeenCalledWith(
-          expect.objectContaining({ isApproximate: true })
+          expect.objectContaining({ esqlApproximation: true })
         );
       });
     });

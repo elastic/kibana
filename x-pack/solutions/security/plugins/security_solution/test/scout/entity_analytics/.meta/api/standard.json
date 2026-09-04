@@ -1,8 +1,7 @@
 {
-  "sha1": "0ea2f3950fb1acab1da005186b473b63cd8d0c46",
+  "sha1": "2c772a245f61fda0f3962449a60b843af676466d",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -17,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 145,
-        "column": 12
+        "line": 142,
+        "column": 11
       }
     },
     {
@@ -33,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 170,
+        "column": 27
       }
     },
     {
@@ -49,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 192,
-        "column": 12
+        "line": 194,
+        "column": 42
       }
     },
     {
@@ -65,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 228,
-        "column": 12
+        "line": 240,
+        "column": 57
       }
     },
     {
@@ -81,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 256,
-        "column": 12
+        "line": 272,
+        "column": 29
       }
     },
     {
@@ -97,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 291,
-        "column": 12
+        "line": 323,
+        "column": 67
       }
     },
     {
@@ -111,8 +110,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 53,
-        "column": 12
+        "line": 42,
+        "column": 7
       }
     },
     {
@@ -125,8 +124,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 71,
-        "column": 12
+        "line": 58,
+        "column": 52
       }
     },
     {
@@ -139,8 +138,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 95,
-        "column": 12
+        "line": 75,
+        "column": 35
       }
     },
     {
@@ -153,8 +152,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 119,
-        "column": 12
+        "line": 99,
+        "column": 27
       }
     },
     {
@@ -167,8 +166,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 130,
-        "column": 12
+        "line": 113,
+        "column": 32
       }
     },
     {
@@ -181,8 +180,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 140,
-        "column": 12
+        "line": 125,
+        "column": 98
       }
     },
     {
@@ -195,8 +194,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 155,
-        "column": 12
+        "line": 136,
+        "column": 13
       }
     },
     {
@@ -209,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 148,
+        "column": 16
       }
     },
     {
@@ -223,8 +222,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/dismiss_lead.spec.ts",
-        "line": 53,
-        "column": 12
+        "line": 42,
+        "column": 7
       }
     },
     {
@@ -237,8 +236,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/dismiss_lead.spec.ts",
-        "line": 69,
-        "column": 12
+        "line": 55,
+        "column": 27
       }
     },
     {
@@ -251,8 +250,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/dismiss_lead.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 70,
+        "column": 7
       }
     },
     {
@@ -265,8 +264,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/dismiss_lead.spec.ts",
-        "line": 113,
-        "column": 12
+        "line": 83,
+        "column": 10
       }
     },
     {
@@ -279,8 +278,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/dismiss_lead.spec.ts",
-        "line": 125,
-        "column": 12
+        "line": 94,
+        "column": 15
       }
     },
     {
@@ -293,8 +292,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/enable_disable.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 42,
+        "column": 32
       }
     },
     {
@@ -307,8 +306,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/enable_disable.spec.ts",
-        "line": 76,
-        "column": 12
+        "line": 63,
+        "column": 9
       }
     },
     {
@@ -321,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/enable_disable.spec.ts",
-        "line": 106,
-        "column": 12
+        "line": 93,
+        "column": 24
       }
     },
     {
@@ -335,8 +334,162 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/enable_disable.spec.ts",
+        "line": 100,
+        "column": 11
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-1398ee5dd60cb5a",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes returns empty result and null cursor when no leads exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
+        "line": 58,
+        "column": 13
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-359ecdc55211125",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes returns leads updated within the last 7 days and excludes older ones",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
+        "line": 67,
+        "column": 82
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-8e3fb272aa70a93",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes returns hasMore false and a checkpoint cursor when all results fit within perPage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
+        "line": 83,
+        "column": 15
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-5cf4736fbafee98",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes returns hasMore true when there are more results than perPage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-00187db41dea5b2",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes paginates through all leads using cursor across multiple pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
         "line": 116,
-        "column": 12
+        "column": 7
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-4105299c9d21adf",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes returns only leads updated after the cursor position on incremental polls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
+        "line": 147,
+        "column": 25
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-495d0bc18f1eaca",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes returns a lead that was changed after the cursor, not leads that were only created before it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
+        "line": 192,
+        "column": 32
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-4c11c73d962b9e7",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes does not return a lead when only timestamp was refreshed after the cursor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
+        "line": 211,
+        "column": 15
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-bf7a60cb7fc4904",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes returns a lead dismissed after the cursor with status dismissed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
+        "line": 241,
+        "column": 25
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-16cc843fd25b542",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes echoes the incoming cursor when polling and nothing has changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
+        "line": 279,
+        "column": 25
+      }
+    },
+    {
+      "id": "2e00f7d24e5e346-060fec86924e447",
+      "title": "Lead Generation - GET /internal/entity_analytics/leads/changes returns 400 for a malformed cursor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_lead_changes.spec.ts",
+        "line": 297,
+        "column": 33
       }
     },
     {
@@ -349,8 +502,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 45,
+        "column": 13
       }
     },
     {
@@ -363,8 +516,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 55,
+        "column": 70
       }
     },
     {
@@ -377,8 +530,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 86,
-        "column": 12
+        "line": 70,
+        "column": 95
       }
     },
     {
@@ -391,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 107,
-        "column": 12
+        "line": 89,
+        "column": 76
       }
     },
     {
@@ -405,8 +558,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 124,
-        "column": 12
+        "line": 102,
+        "column": 23
       }
     },
     {
@@ -419,8 +572,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 140,
-        "column": 12
+        "line": 118,
+        "column": 26
       }
     },
     {
@@ -433,8 +586,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 161,
-        "column": 12
+        "line": 140,
+        "column": 80
       }
     },
     {
@@ -447,8 +600,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 181,
-        "column": 12
+        "line": 153,
+        "column": 8
       }
     },
     {
@@ -461,8 +614,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 201,
-        "column": 12
+        "line": 170,
+        "column": 36
       }
     },
     {
@@ -475,8 +628,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 222,
-        "column": 12
+        "line": 186,
+        "column": 15
       }
     },
     {
@@ -489,8 +642,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/lead_generation_status.spec.ts",
-        "line": 52,
-        "column": 12
+        "line": 41,
+        "column": 7
       }
     },
     {
@@ -503,8 +656,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/lead_generation_status.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 56,
+        "column": 34
       }
     },
     {
@@ -517,8 +670,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/lead_generation_status.spec.ts",
-        "line": 89,
-        "column": 12
+        "line": 74,
+        "column": 7
       }
     },
     {
@@ -533,8 +686,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entity_maintainers.spec.ts",
-        "line": 104,
-        "column": 10
+        "line": 128,
+        "column": 18
       }
     },
     {
@@ -549,8 +702,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entity_maintainers.spec.ts",
-        "line": 132,
-        "column": 10
+        "line": 153,
+        "column": 15
       }
     },
     {
@@ -565,8 +718,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entity_maintainers.spec.ts",
-        "line": 152,
-        "column": 10
+        "line": 170,
+        "column": 92
       }
     },
     {
@@ -581,8 +734,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 158,
-        "column": 14
+        "line": 146,
+        "column": 9
       }
     },
     {
@@ -597,8 +750,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 189,
-        "column": 14
+        "line": 175,
+        "column": 28
       }
     },
     {
@@ -613,8 +766,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 252,
-        "column": 14
+        "line": 246,
+        "column": 27
       }
     },
     {
@@ -629,8 +782,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 295,
-        "column": 16
+        "line": 283,
+        "column": 31
       }
     },
     {
@@ -645,8 +798,88 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 320,
-        "column": 16
+        "line": 309,
+        "column": 82
+      }
+    },
+    {
+      "id": "d01af7376b1d366-fc0d736de0e10ee",
+      "title": "Entity Store owns maintainer (entityanalytics_entra_id, log-inverted) resolves a single-actor log document into a owns relationship on the actor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/log_inverted_relationship_maintainer.spec.ts",
+        "line": 139,
+        "column": 59
+      }
+    },
+    {
+      "id": "d01af7376b1d366-9a6020e8fee4f5b",
+      "title": "Entity Store owns maintainer (entityanalytics_entra_id, log-inverted) emits one owns relationship per actor for a multi-actor log document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/log_inverted_relationship_maintainer.spec.ts",
+        "line": 174,
+        "column": 17
+      }
+    },
+    {
+      "id": "d01af7376b1d366-3be3aac323497e2",
+      "title": "Entity Store owns maintainer (entityanalytics_entra_id, log-inverted) resolves an actor with no mail via the id fallback (owns, rank 2)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/log_inverted_relationship_maintainer.spec.ts",
+        "line": 229,
+        "column": 13
+      }
+    },
+    {
+      "id": "d01af7376b1d366-59e1593511405ec",
+      "title": "Entity Store owns maintainer (entityanalytics_entra_id, log-inverted) resolves an actor with only a user_principal_name via the upn fallback (owns, rank 3)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/log_inverted_relationship_maintainer.spec.ts",
+        "line": 270,
+        "column": 88
+      }
+    },
+    {
+      "id": "d01af7376b1d366-c9c682b33f48690",
+      "title": "Entity Store owns maintainer (entityanalytics_entra_id, log-inverted) writes no owns relationship for a log document with no actor references",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/log_inverted_relationship_maintainer.spec.ts",
+        "line": 310,
+        "column": 95
       }
     },
     {
@@ -661,8 +894,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 118,
-        "column": 14
+        "line": 104,
+        "column": 31
       }
     },
     {
@@ -677,8 +910,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 151,
-        "column": 14
+        "line": 135,
+        "column": 17
       }
     },
     {
@@ -693,8 +926,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 226,
-        "column": 14
+        "line": 222,
+        "column": 35
       }
     },
     {
@@ -709,8 +942,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 286,
-        "column": 14
+        "line": 293,
+        "column": 36
       }
     },
     {
@@ -725,8 +958,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 324,
-        "column": 14
+        "line": 320,
+        "column": 31
       }
     },
     {
@@ -741,8 +974,648 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 354,
-        "column": 14
+        "line": 351,
+        "column": 26
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-0e5ce3a83cf7fe8",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns anomalies for an entity with anomaly records",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 403,
+        "column": 32
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-22c38cd2a421215",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns correct jobName and threat fields for suspicious_login_activity_ea",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 453,
+        "column": 25
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-b2d3a104cdeea7a",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns empty anomalies for entity with no anomaly records",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 477,
+        "column": 16
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-45a7d68476464c6",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 400 when from is older than 1 year",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 487,
+        "column": 6
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-aa5fb7b00736d98",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 200 when from is within 1 year",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 497,
+        "column": 59
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-2fcbebe72aa235b",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: filters anomalies by jobIds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 506,
+        "column": 29
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-152f1dedd915235",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: respects pageSize and page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 518,
+        "column": 37
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-fbf5cf0e01a7814",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: sorts anomalies by record_score descending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 549,
+        "column": 32
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-61536a3eaf8d126",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: enriches anomalies with baseline values from source index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 575,
+        "column": 9
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-f54860260678a60",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: score_ranges filters out anomalies below the threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 600,
+        "column": 32
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-49b66af93ccd394",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: score_ranges filters out anomalies above the threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 617,
+        "column": 16
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-82a587a9803708d",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: a single score_ranges entry with both bounds narrows results to that range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 632,
+        "column": 6
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-d3b88bfc56f7f0a",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: multiple score_ranges are combined with OR semantics, not collapsed into one span",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 648,
+        "column": 29
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-3bd8452f1b39e95",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: score_ranges that exclude all anomalies returns empty results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 673,
+        "column": 66
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-9bc7ba75b7d3c9e",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 400 when a score_ranges min_score is negative",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 688,
+        "column": 34
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-387bdf49434a013",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 400 when a score_ranges max_score exceeds 100",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 701,
+        "column": 17
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-93c9d64a9a8914e",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 400 when a score_ranges min_score is greater than its max_score",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 716,
+        "column": 31
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-ded6072fe6bf787",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns expected response for entity with anomaly records",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 736,
+        "column": 34
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-e06b1e271cd726c",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: maxScore in each bucket is the highest record_score within that bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 775,
+        "column": 15
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-6f1ed87aab784d4",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns empty anomalies for entity with no anomaly records",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 799,
+        "column": 16
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-da945666b0a61dd",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 400 when from is older than 1 year",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 813,
+        "column": 7
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-520e634b940760c",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 200 when from is within 1 year",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 824,
+        "column": 6
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-6f0f14a1368c105",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: echoes explicit from and to in response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 834,
+        "column": 37
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-e4be9615159b606",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: threat_tactics filter restricts anomalies to jobs with matching tactics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 852,
+        "column": 31
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-fdfb853ed6eeb2a",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: score_ranges reduces totalAnomaliesCount to matching records",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 870,
+        "column": 34
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-58966bb4cb3aed5",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: score_ranges upper bound reduces totalAnomaliesCount to matching records",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 890,
+        "column": 34
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-225630c4c8de663",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: multiple score_ranges are combined with OR semantics, not collapsed into one span",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 911,
+        "column": 17
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-4314d51df0fdadb",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: score_ranges that exclude all anomalies returns empty response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 926,
+        "column": 51
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-ed9c0de144b5450",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 400 when a score_ranges min_score is negative",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 943,
+        "column": 51
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-fdd4e017191bdbd",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 400 when a score_ranges max_score exceeds 100",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 956,
+        "column": 61
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-b602849fd9329f9",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 400 when a score_ranges min_score is greater than its max_score",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 969,
+        "column": 62
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-b5e5613816c5993",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns 404 for an entity that does not exist in the entity store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 990,
+        "column": 6
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-61b544196f60820",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns 404 for an entity that does not exist in the entity store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 999,
+        "column": 11
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-d85bf9095b4c576",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns error for user without ML read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 1010,
+        "column": 31
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-8245b81ea78edf8",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns error for user without ML read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 1023,
+        "column": 46
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-b8feb7095100806",
+      "title": "Entity ML Anomaly Detection APIs Anomaly summary API: returns error for user without entity store access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 1037,
+        "column": 20
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-5dae622d09121bf",
+      "title": "Entity ML Anomaly Detection APIs Anomaly overview API: returns error for user without entity store access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 1049,
+        "column": 32
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-4461e8161d0af51",
+      "title": "Entity ML Anomaly Detection APIs Anomaly privileges API: returns has_all_required false for user without .ml-anomlies* access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 1062,
+        "column": 7
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-00cfca8314d833b",
+      "title": "Entity ML Anomaly Detection APIs Anomaly privileges API: returns has_all_required true for admin with ML index access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 1070,
+        "column": 25
+      }
+    },
+    {
+      "id": "4894b9b49ddf403-528e6e72b92277e",
+      "title": "Entity ML Anomaly Detection APIs Anomaly privileges API: returns has_all_required false for user without ML Kibana feature privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
+        "line": 1082,
+        "column": 26
       }
     }
   ]

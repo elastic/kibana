@@ -9,15 +9,28 @@ import { asOk } from '../lib/result_type';
 import { asTaskManagerMetricEvent } from '../task_events';
 import type { TaskManagerMetrics } from './task_metrics_collector';
 import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
 
 export const getTaskManagerMetricEvent = (value: TaskManagerMetrics) => {
   return asTaskManagerMetricEvent(asOk(value));
 };
 
+const mockDefinitions = (overrides: Record<string, { taskTypeGroup?: string }> = {}) =>
+  ({
+    get: (type: string) => overrides[type],
+  } as unknown as TaskTypeDictionary);
+
 describe('TaskOverdueMetricsAggregator', () => {
   let taskOverdueMetricsAggregator: TaskOverdueMetricsAggregator;
   beforeEach(() => {
-    taskOverdueMetricsAggregator = new TaskOverdueMetricsAggregator();
+    taskOverdueMetricsAggregator = new TaskOverdueMetricsAggregator(
+      mockDefinitions({
+        ['alerting:example']: { taskTypeGroup: 'alerting' },
+        ['alerting:.index-threshold']: { taskTypeGroup: 'alerting' },
+        ['actions:webhook']: { taskTypeGroup: 'actions' },
+        ['actions:.email']: { taskTypeGroup: 'actions' },
+      })
+    );
   });
 
   test('should correctly initialize', () => {
@@ -196,6 +209,29 @@ describe('TaskOverdueMetricsAggregator', () => {
           overdue_by_values: [0, 0, 0],
         },
       },
+    });
+  });
+
+  test('should ignore when taskTypeGroup is undefined', () => {
+    const aggregator = new TaskOverdueMetricsAggregator(
+      mockDefinitions({
+        ['actions:oauth_state_cleanup']: { taskTypeGroup: undefined },
+      })
+    );
+    aggregator.processTaskLifecycleEvent(
+      getTaskManagerMetricEvent({
+        numOverdueTasks: {
+          'actions:oauth_state_cleanup': [{ key: 0, doc_count: 1 }],
+          total: [{ key: 0, doc_count: 1 }],
+        },
+      })
+    );
+    const result = aggregator.collect();
+
+    expect(result.by_type.actions).toBeUndefined();
+    expect(result.by_type['actions:oauth_state_cleanup']).toEqual({
+      overdue_by: { counts: [1], values: [10] },
+      overdue_by_values: [0],
     });
   });
 

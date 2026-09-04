@@ -45,7 +45,7 @@ export const ConversationInputShell = React.forwardRef<
       ? euiTheme.colors.backgroundBaseDisabled
       : euiTheme.colors.backgroundBasePlain};
     min-height: ${isCollapsed ? '0' : INPUT_MIN_HEIGHT};
-    padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base};
+    padding: ${euiTheme.size.base};
     display: flex;
     flex-direction: column;
     gap: ${euiTheme.size.s};

@@ -6,10 +6,11 @@
  */
 
 import {
-  type Conversation,
   type ConversationRound,
   ConversationRoundStatus,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
+import type { ConversationWithPermissions } from '../../common/http_api/conversations';
 import type { ConversationService, ConversationClient } from '../services/conversation';
 
 export type ConversationServiceMock = jest.Mocked<ConversationService> & {
@@ -17,10 +18,12 @@ export type ConversationServiceMock = jest.Mocked<ConversationService> & {
 };
 export type ConversationClientMock = jest.Mocked<ConversationClient>;
 
-export const createEmptyConversation = (parts: Partial<Conversation> = {}): Conversation => {
+export const createEmptyConversation = (
+  parts: Partial<ConversationWithPermissions> = {}
+): ConversationWithPermissions => {
   return {
     id: 'id',
-    title: 'New conversation',
+    title: DEFAULT_CONVERSATION_TITLE,
     agent_id: 'agent_id',
     rounds: [],
     updated_at: new Date().toISOString(),
@@ -29,6 +32,7 @@ export const createEmptyConversation = (parts: Partial<Conversation> = {}): Conv
       id: 'unknown',
       username: 'unknown',
     },
+    permissions: { rename: true, delete: true, update_access_control: true },
     ...parts,
   };
 };
@@ -60,8 +64,18 @@ export const createConversationClientMock = (): ConversationClientMock => {
     getByOrigin: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    addAttachmentsToLastRound: jest.fn(),
+    upsertRound: jest.fn(),
+    appendEvents: jest.fn(),
+    replaceRoundEvents: jest.fn(),
+    updateRoundFeedback: jest.fn(),
+    markRead: jest.fn(),
+    setPinned: jest.fn(),
     list: jest.fn(),
     delete: jest.fn(),
+    updateAccessControl: jest.fn(),
+    applyTemplate: jest.fn(),
+    patchMetadata: jest.fn(),
   };
 };
 

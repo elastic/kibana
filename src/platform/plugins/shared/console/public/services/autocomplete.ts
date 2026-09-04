@@ -95,6 +95,13 @@ export class AutocompleteInfo {
   private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
   public readonly isLoading$ = this._isLoading$.asObservable();
 
+  /**
+   * Advances after every successful autocomplete_entities refresh, so consumers
+   * can lazily invalidate caches on the same clock as REST autocomplete.
+   */
+  private entitiesRefreshGeneration = 0;
+  public readonly getEntitiesRefreshGeneration = (): number => this.entitiesRefreshGeneration;
+
   public retrieve(settings: Settings, settingsToRetrieve: DevToolsSettings['autocomplete']) {
     this.clearSubscriptions();
     this._isLoading$.next(true);
@@ -105,6 +112,7 @@ export class AutocompleteInfo {
       })
       .then((data) => {
         this.load(data);
+        this.entitiesRefreshGeneration += 1;
         // Schedule next request.
         this.pollTimeoutId = setTimeout(() => {
           // This looks strange/inefficient, but it ensures correct behavior because we don't want to send

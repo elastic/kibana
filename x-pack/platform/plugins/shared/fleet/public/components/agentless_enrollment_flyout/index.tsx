@@ -32,6 +32,7 @@ import {
   useFleetStatus,
 } from '../../hooks';
 import { getDashboardsCount, buildDashboardsListLink } from '../../services';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
@@ -72,8 +73,13 @@ export const AgentlessEnrollmentFlyout = ({
   const [viewDashboardsStatus, setViewDashboardsStatus] = useState<EuiStepStatus>('disabled');
   const [agentOnline, setAgentOnline] = useState(false);
 
-  // Fetch agent for the policy identified by `policyId`, polling every 30s until online.
-  const agentKuery = `${AGENTS_PREFIX}.policy_id: "${policyId}"`;
+  // Fetch agent for the policy identified by `policyId` (including version-specific variants,
+  // e.g. `policyId#9.2`), polling every 30s until online.
+  const agentKuery = buildPolicyBaseIdWithFallbackKuery(
+    policyId,
+    `${AGENTS_PREFIX}.policy_base_id`,
+    `${AGENTS_PREFIX}.policy_id`
+  );
   const { data: agentsData } = useGetAgentsQuery(
     { kuery: agentKuery },
     { refetchInterval: agentOnline ? false : REFRESH_INTERVAL_MS }

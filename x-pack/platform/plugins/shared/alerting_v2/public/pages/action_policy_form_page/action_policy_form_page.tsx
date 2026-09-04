@@ -33,6 +33,7 @@ import { useCreateActionPolicy } from '../../hooks/use_create_action_policy';
 import { useCreateInlineWorkflows } from '../../hooks/use_create_inline_workflows';
 import { useFetchActionPolicy } from '../../hooks/use_fetch_action_policy';
 import { useUpdateActionPolicy } from '../../hooks/use_update_action_policy';
+import { useActionPolicyAutoAttach } from '../../agent_builder/use_action_policy_auto_attach';
 
 export const ActionPolicyFormPage = () => {
   const { id: policyId } = useParams<{ id?: string }>();
@@ -58,7 +59,7 @@ export const ActionPolicyFormPage = () => {
     <EuiFlexGroup justifyContent="flexStart">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           onClick={navigateToList}
           data-test-subj="returnButton"
           style={{ paddingInline: 0 }}
@@ -145,6 +146,7 @@ const ActionPolicyFormPageContent = ({
   onCancel: () => void;
   onSuccess: () => void;
 }) => {
+  useActionPolicyAutoAttach(initialPolicy);
   const { toasts } = useService(CoreStart('notifications'));
   const { mutateAsync: createPolicy, isLoading: isCreating } = useCreateActionPolicy();
   const { mutateAsync: updatePolicy, isLoading: isUpdating } = useUpdateActionPolicy();
@@ -214,11 +216,15 @@ const ActionPolicyFormPageContent = ({
   const isLoading = isCreating || isUpdating || isCreatingWorkflows;
 
   return (
-    <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
+    <EuiPageTemplate.Section
+      paddingSize="none"
+      restrictWidth={true}
+      data-test-subj="actionPolicyFormPage"
+    >
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             onClick={onCancel}
             data-test-subj="returnButton"
             style={{ paddingInline: 0 }}

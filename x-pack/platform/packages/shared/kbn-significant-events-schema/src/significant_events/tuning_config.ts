@@ -29,6 +29,7 @@ export const significantEventsTuningConfigSchema = z.object({
   rrf_rank_constant: z.number(),
   sampling_timeout_ms: z.number(),
   query_validation_timeout_ms: z.number(),
+  computed_features_timeout_ms: z.number(),
 });
 
 export type SignificantEventsTuningConfig = z.infer<typeof significantEventsTuningConfigSchema>;
@@ -48,6 +49,7 @@ export const SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS: Record<
   rrf_rank_constant: { min: 1, max: 100, integer: true },
   sampling_timeout_ms: { min: 1000, max: 240_000, integer: true },
   query_validation_timeout_ms: { min: 1000, max: 240_000, integer: true },
+  computed_features_timeout_ms: { min: 1000, max: 240_000, integer: true },
 };
 
 export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningConfig = {
@@ -62,6 +64,7 @@ export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningCo
   rrf_rank_constant: 20,
   sampling_timeout_ms: 60_000,
   query_validation_timeout_ms: 10_000,
+  computed_features_timeout_ms: 60_000,
 };
 
 /**
@@ -118,4 +121,39 @@ export function validateSignificantEventsTuningConfig(parsed: Record<string, unk
   }
 
   return errors;
+}
+
+/** Resolves a stored settings value into a full, validated config; shared by server and client so both derive identical values (e.g. KI expiry). */
+export function resolveSignificantEventsTuningConfig(
+  stored: unknown,
+  logger?: { warn: (message: string) => void }
+): SignificantEventsTuningConfig {
+  const source = stored && typeof stored === 'object' ? (stored as Record<string, unknown>) : {};
+
+  const knownKeys = new Set(Object.keys(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS));
+  const safeStored = Object.fromEntries(
+    Object.entries(source).filter(([key]) => knownKeys.has(key))
+  ) as Partial<SignificantEventsTuningConfig>;
+
+  const merged = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...safeStored };
+
+  if (merged.semantic_min_score < 0 || merged.semantic_min_score > 1) {
+    logger?.warn(
+      `semantic_min_score=${merged.semantic_min_score} is outside the valid [0, 1] range ` +
+        `(likely a pre-upgrade value on the old 0-100 scale). Resetting to default ` +
+        `${DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.semantic_min_score}.`
+    );
+    merged.semantic_min_score = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.semantic_min_score;
+  }
+
+  const errors = validateSignificantEventsTuningConfig(merged as Record<string, unknown>);
+  if (errors.length > 0) {
+    logger?.warn(
+      `Significant Events tuning config is invalid (${errors.join(', ')}). ` +
+        `Falling back to default config. Fix the config in the Settings page.`
+    );
+    return { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG };
+  }
+
+  return merged;
 }

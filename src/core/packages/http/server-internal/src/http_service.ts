@@ -55,7 +55,7 @@ import type {
 import { registerCoreHandlers } from './register_lifecycle_handlers';
 import type { ExternalUrlConfigType } from './external_url';
 import { externalUrlConfig, ExternalUrlConfig } from './external_url';
-import { createInternalHttpSelfClient } from './self_client';
+import { createInternalHttpSelfClient, type InternalHttpSelfService } from './self_client';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
@@ -79,6 +79,8 @@ export class HttpService
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
   private configSubscription?: Subscription;
+  private currentConfig?: HttpConfig;
+  private selfClient?: InternalHttpSelfService;
 
   private readonly log: Logger;
   private readonly env: Env;
@@ -181,7 +183,8 @@ export class HttpService
 
   public async setup(deps: SetupDeps): Promise<InternalHttpServiceSetup> {
     this.requestHandlerContext = deps.context.createContextContainer();
-    this.configSubscription = this.config$.subscribe(() => {
+    this.configSubscription = this.config$.subscribe((config) => {
+      this.currentConfig = config;
       if (this.httpServer.isListening()) {
         // If the server is already running we can't make any config changes
         // to it, so we warn and don't allow the config to pass through.
@@ -192,6 +195,7 @@ export class HttpService
     });
 
     const config = await firstValueFrom(this.config$);
+    this.currentConfig = config;
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup({
       config$: this.config$,
@@ -245,13 +249,15 @@ export class HttpService
       ...pick(internalSetup, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
       generateOas: (args: GenerateOasArgs) => this.generateOas(args),
       isListening: () => this.httpServer.isListening(),
-      selfClient: createInternalHttpSelfClient({
+      selfClient: (this.selfClient ??= createInternalHttpSelfClient({
         authRequestHeaders: internalSetup.authRequestHeaders,
         basePath: internalSetup.basePath,
         getServerInfo: internalSetup.getServerInfo,
+        getHttpConfig: () => this.currentConfig!,
         kibanaVersion: this.env.packageInfo.version,
+        log: this.log.get('self-client'),
         target: internalSetup.config.selfHttp.target,
-      }),
+      })),
       setRedactedSessionIdGetter: (getter) => {
         this.httpServer.setRedactedSessionIdGetter(getter);
       },
@@ -260,6 +266,7 @@ export class HttpService
 
   public async start() {
     const config = await firstValueFrom(this.config$);
+
     if (this.shouldListen(config)) {
       this.log.debug('stopping preboot server');
       await this.prebootServer.stop();
@@ -397,6 +404,8 @@ export class HttpService
 
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
+    await this.selfClient?.close();
+    this.selfClient = undefined;
   }
 }
 

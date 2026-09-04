@@ -162,6 +162,48 @@ describe('lens document equality', () => {
     ).toBeFalsy();
   });
 
+  it('treats undefined, the empty KQL default, and legacy aggregate copies as no chart filter', () => {
+    const withQuery = (query: unknown) =>
+      ({
+        ...defaultDoc,
+        state: { ...defaultDoc.state, query },
+      } as LensDocument);
+
+    const noFilterVariants = [
+      withQuery(undefined),
+      withQuery({ query: '', language: 'kuery' }),
+      withQuery({ query: '', language: 'lucene' }),
+      withQuery({ esql: 'FROM index' }), // legacy dual-written copy, dead data
+    ];
+
+    for (const doc1 of noFilterVariants) {
+      for (const doc2 of noFilterVariants) {
+        expect(
+          isLensEqual(
+            doc1,
+            doc2,
+            mockInjectFilterReferences,
+            mockDatasourceMap,
+            mockVisualizationMap,
+            mockAnnotationGroups
+          )
+        ).toBeTruthy();
+      }
+    }
+
+    // a real chart-scoped filter still compares as a difference
+    expect(
+      isLensEqual(
+        withQuery(undefined),
+        withQuery({ query: 'bytes > 100', language: 'kuery' }),
+        mockInjectFilterReferences,
+        mockDatasourceMap,
+        mockVisualizationMap,
+        mockAnnotationGroups
+      )
+    ).toBeFalsy();
+  });
+
   describe('comparing the datasources', () => {
     it('checks available datasources', () => {
       // add an extra datasource in one doc
@@ -354,5 +396,45 @@ describe('lens document equality', () => {
         mockAnnotationGroups
       )
     ).toBeTruthy();
+  });
+
+  it('should consider undefined annotation group props equivalent to non-existant props', () => {
+    // Regression test for https://github.com/elastic/kibana/issues/264301
+    // Undefined properties in annotation groups should be considered equivalent to non-existant properties
+    isLensEqual(
+      defaultDoc,
+      defaultDoc,
+      mockInjectFilterReferences,
+      mockDatasourceMap,
+      mockVisualizationMap,
+      {
+        'group-1': {
+          title: 'title',
+          description: '',
+          tags: [],
+          annotations: [],
+          indexPatternId: 'idx-1',
+          ignoreGlobalFilters: true,
+          dataViewSpec: undefined,
+        },
+      }
+    );
+
+    expect(mockVisualizationMap[visualizationType].isEqual).toHaveBeenCalledWith(
+      defaultDoc.state.visualization,
+      defaultDoc.references,
+      defaultDoc.state.visualization,
+      defaultDoc.references,
+      {
+        'group-1': {
+          title: 'title',
+          description: '',
+          tags: [],
+          annotations: [],
+          indexPatternId: 'idx-1',
+          ignoreGlobalFilters: true,
+        },
+      }
+    );
   });
 });

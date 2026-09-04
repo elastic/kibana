@@ -114,7 +114,7 @@ export const AuthorFilter = React.memo<AuthorFilterProps>(
         button={
           <EuiFilterButton
             data-test-subj="user-actions-filter-bar-author-button"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={togglePopover}
             isSelected={isPopoverOpen}
             hasActiveFilters={authors.length > 0}

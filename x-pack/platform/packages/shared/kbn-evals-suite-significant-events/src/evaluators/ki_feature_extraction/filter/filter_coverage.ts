@@ -16,6 +16,7 @@ import { getFeaturesFromOutput } from '../types';
 export const filterCoverageEvaluator = {
   name: 'filter_coverage',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     if (!expected.expect_entity_filters) {
       return { score: null, explanation: 'Entity filter evaluation not requested — skipping' };
@@ -40,7 +41,7 @@ export const filterCoverageEvaluator = {
               entities.length
             } entity feature(s) lack a filter: ${withoutFilter.map((f) => `"${f.id}"`).join(', ')}`
           : `All ${entities.length} entity feature(s) include a filter`,
-      details: {
+      metadata: {
         totalEntities: entities.length,
         withFilter: withFilter.length,
         withoutFilter: withoutFilter.map((f) => f.id),

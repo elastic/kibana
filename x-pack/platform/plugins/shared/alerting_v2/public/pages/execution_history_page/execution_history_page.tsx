@@ -6,10 +6,9 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiSpacer, euiFontSize, useEuiTheme } from '@elastic/eui';
-import { AppHeader, APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
@@ -56,16 +55,16 @@ const getExecutionHistoryTabs = ({
 
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
-  const euiThemeContext = useEuiTheme();
-  const { fontSize: titleFontSize, lineHeight: titleLineHeight } = euiFontSize(
-    euiThemeContext,
-    'm'
-  );
 
   const [selectedTabId, setSelectedTabId] = useState<TabId>(RULES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
-  const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const {
+    flyout: composeFlyout,
+    confirmationModal,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
 
   const handlePolicyClick = (policyId: string) => {
     setRuleToViewId(null);
@@ -82,18 +81,8 @@ export const ExecutionHistoryPage = () => {
     [selectedTabId]
   );
 
-  const pageStyles = useMemo(
-    () => css`
-      [data-test-subj='${APP_HEADER_TEST_SUBJECTS.root}'] h1 {
-        font-size: ${titleFontSize};
-        line-height: ${titleLineHeight};
-      }
-    `,
-    [titleFontSize, titleLineHeight]
-  );
-
   return (
-    <div css={pageStyles} data-test-subj="executionHistoryPage">
+    <div data-test-subj="executionHistoryPage">
       <AppHeader
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
@@ -132,6 +121,7 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {composeFlyout}
+      {confirmationModal}
     </div>
   );
 };

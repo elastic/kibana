@@ -15,6 +15,7 @@ interface MockEndpoint {
   task_type: string;
   service: string;
   service_settings?: Record<string, unknown>;
+  task_settings?: Record<string, unknown>;
   metadata?: {
     display?: { name?: string; model_creator?: string };
     heuristics?: {
@@ -49,9 +50,14 @@ const endpointsAsConnectors = (endpoints: MockEndpoint[]) =>
       type: '.inference',
       config: {
         inferenceId: ep.inference_id,
+        providerConfig: {
+          model_id:
+            typeof ep.service_settings?.model_id === 'string'
+              ? ep.service_settings.model_id
+              : undefined,
+        },
         taskType: ep.task_type,
         service: ep.service,
-        serviceSettings: ep.service_settings,
         modelCreator: ep.metadata?.display?.model_creator,
       },
       capabilities: {},
@@ -105,53 +111,172 @@ export async function unmockInferenceEndpoints(page: ScoutPage) {
   await page.unroute(ENDPOINTS_ROUTE);
 }
 
-const REGION_POLICY_ROUTE = '**/internal/search_inference_endpoints/region_policy';
+const REGION_POLICY_ROUTE = /\/internal\/search_inference_endpoints\/region_policy(?:\?|$)/;
 
 export interface MockRegionPolicy {
   allowed_regions?: Array<{ csp: string; region: string }>;
   allowed_geos?: string[];
 }
 
-export async function mockNoRegionPolicy(page: ScoutPage) {
+export interface RegionPolicyMockCounters {
+  getRequestCount: number;
+  putRequestCount: number;
+  forcePutRequestCount: number;
+  deleteRequestCount: number;
+}
+
+const isForcePutRequest = (requestUrl: string): boolean => {
+  return new URL(requestUrl).searchParams.get('force') === 'true';
+};
+
+async function createRegionPolicyRouteMock(
+  page: ScoutPage,
+  handlers: {
+    get: (counters: RegionPolicyMockCounters) => { status: number; body: unknown };
+    put?: (
+      counters: RegionPolicyMockCounters,
+      requestBody: MockRegionPolicy,
+      isForce: boolean
+    ) => { status: number; body: unknown };
+    delete?: (counters: RegionPolicyMockCounters) => { status: number; body: unknown };
+  }
+): Promise<RegionPolicyMockCounters> {
+  const counters: RegionPolicyMockCounters = {
+    getRequestCount: 0,
+    putRequestCount: 0,
+    forcePutRequestCount: 0,
+    deleteRequestCount: 0,
+  };
   await page.route(REGION_POLICY_ROUTE, async (route) => {
-    if (route.request().method() === 'GET') {
-      await route.fulfill({
-        status: 404,
-        contentType: 'application/json',
-        body: JSON.stringify({ message: 'No region policy found' }),
-      });
-    } else if (route.request().method() === 'PUT') {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ acknowledged: true }),
-      });
+    const method = route.request().method();
+    if (method === 'GET') {
+      counters.getRequestCount += 1;
+      const { status, body } = handlers.get(counters);
+      await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
+    } else if (method === 'PUT' && handlers.put) {
+      counters.putRequestCount += 1;
+      const isForce = isForcePutRequest(route.request().url());
+      if (isForce) {
+        counters.forcePutRequestCount += 1;
+      }
+      const requestBody = route.request().postDataJSON() as MockRegionPolicy;
+      const { status, body } = handlers.put(counters, requestBody, isForce);
+      await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
+    } else if (method === 'DELETE' && handlers.delete) {
+      counters.deleteRequestCount += 1;
+      const { status, body } = handlers.delete(counters);
+      await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
     } else {
       await route.continue();
     }
   });
+  return counters;
 }
 
-export async function mockRegionPolicy(page: ScoutPage, policy: MockRegionPolicy) {
-  await page.route(REGION_POLICY_ROUTE, async (route) => {
-    if (route.request().method() === 'GET') {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          region_policy: policy,
-          created_at: '2026-01-01T00:00:00Z',
-        }),
-      });
-    } else if (route.request().method() === 'PUT') {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ acknowledged: true }),
-      });
-    } else {
-      await route.continue();
-    }
+// PUT /_inference/_region_policy responds with the persisted RegionPolicyResponse
+// (region_policy + created_at), matching the real ES endpoint and the shape
+// server/lib/region_policy.ts's putRegionPolicy is typed to return.
+const putRegionPolicyResponse = (requestBody: MockRegionPolicy) => ({
+  status: 200,
+  body: { region_policy: requestBody, created_at: '2026-01-01T00:00:00Z' },
+});
+
+export async function mockNoRegionPolicy(page: ScoutPage): Promise<RegionPolicyMockCounters> {
+  let currentPolicy: MockRegionPolicy | null = null;
+  return createRegionPolicyRouteMock(page, {
+    get: () =>
+      currentPolicy
+        ? {
+            status: 200,
+            body: { region_policy: currentPolicy, created_at: '2026-01-01T00:00:00Z' },
+          }
+        : { status: 404, body: { message: 'No region policy found' } },
+    put: (_counters, requestBody) => {
+      currentPolicy = requestBody;
+      return putRegionPolicyResponse(requestBody);
+    },
+    delete: () => {
+      currentPolicy = null;
+      return { status: 200, body: { acknowledged: true } };
+    },
+  });
+}
+
+export async function mockRegionPolicy(
+  page: ScoutPage,
+  policy: MockRegionPolicy
+): Promise<RegionPolicyMockCounters> {
+  let currentPolicy: MockRegionPolicy | null = policy;
+  return createRegionPolicyRouteMock(page, {
+    get: () =>
+      currentPolicy
+        ? {
+            status: 200,
+            body: { region_policy: currentPolicy, created_at: '2026-01-01T00:00:00Z' },
+          }
+        : { status: 404, body: { message: 'No region policy found' } },
+    put: (_counters, requestBody) => {
+      currentPolicy = requestBody;
+      return putRegionPolicyResponse(requestBody);
+    },
+    delete: () => {
+      currentPolicy = null;
+      return { status: 200, body: { acknowledged: true } };
+    },
+  });
+}
+
+export async function mockRegionPolicyDeleteConflict(
+  page: ScoutPage,
+  policy: MockRegionPolicy
+): Promise<RegionPolicyMockCounters> {
+  return createRegionPolicyRouteMock(page, {
+    get: () => ({
+      status: 200,
+      body: { region_policy: policy, created_at: '2026-01-01T00:00:00Z' },
+    }),
+    delete: () => ({
+      status: 409,
+      body: { message: 'Region policy is currently in use.' },
+    }),
+  });
+}
+
+export async function mockRegionPolicyPutInUseConflict(
+  page: ScoutPage
+): Promise<RegionPolicyMockCounters> {
+  let currentPolicy: MockRegionPolicy | null = null;
+  return createRegionPolicyRouteMock(page, {
+    get: () =>
+      currentPolicy
+        ? {
+            status: 200,
+            body: { region_policy: currentPolicy, created_at: '2026-01-01T00:00:00Z' },
+          }
+        : { status: 404, body: { message: 'No region policy found' } },
+    put: (_counters, requestBody, isForce) => {
+      if (!isForce) {
+        return {
+          status: 409,
+          body: {
+            statusCode: 409,
+            error: 'Conflict',
+            message: 'Policy would deny endpoints currently in use.',
+            attributes: {
+              denied_endpoint_ids: ['.elser-2-elastic'],
+              referencing_pipelines: '.elser-2-elastic:region-policy-force-test',
+              referencing_indexes: ['.elser-2-elastic:region-policy-force-test-index'],
+            },
+          },
+        };
+      }
+      currentPolicy = requestBody;
+      return putRegionPolicyResponse(requestBody);
+    },
+    delete: () => {
+      currentPolicy = null;
+      return { status: 200, body: { acknowledged: true } };
+    },
   });
 }
 

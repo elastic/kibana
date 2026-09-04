@@ -17,9 +17,12 @@ export interface UiamOAuthClientLogo {
 export interface UiamOAuthConnectionsSummary {
   active?: string[];
   revoked?: string[];
+  expired?: string[];
 }
 
 export type UiamOAuthClientType = 'public' | 'confidential';
+
+export type UiamOAuthProjectType = 'elasticsearch' | 'observability' | 'security' | 'vectordb';
 
 export interface UiamOAuthClientResponse {
   id: string;
@@ -47,6 +50,8 @@ export interface UiamOAuthConnectionResponse {
   revoked?: boolean;
   revocation?: string;
   revocation_reason?: string;
+  expired?: boolean;
+  expiration?: string;
   scopes?: string[];
   user_id?: string;
 }
@@ -54,6 +59,7 @@ export interface UiamOAuthConnectionResponse {
 export interface CreateUiamOAuthClientParams {
   resource: string;
   project_id: string;
+  project_type?: UiamOAuthProjectType;
   client_name?: string;
   client_type?: UiamOAuthClientType;
   client_metadata?: Record<string, string>;
@@ -133,15 +139,26 @@ export interface UiamOAuthType {
   ): Promise<UiamOAuthClientResponse | null>;
 
   /**
-   * Lists OAuth connections, optionally filtered by client ID and/or connection ID.
+   * Permanently deletes an OAuth client along with all of its connections.
+   * @param request The Kibana request containing the authorization header.
+   * @param clientId The ID of the client to delete.
+   * @returns `true` once the client has been deleted, or `null` when security features are
+   * disabled.
+   */
+  deleteClient(request: KibanaRequest, clientId: string): Promise<true | null>;
+
+  /**
+   * Lists OAuth connections, optionally filtered by client ID, connection ID and/or project ID.
    * @param request The Kibana request containing the authorization header.
    * @param clientId Optional client ID filter.
    * @param connectionId Optional connection ID filter.
+   * @param projectId Optional project ID filter.
    */
   listConnections(
     request: KibanaRequest,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<{ connections: UiamOAuthConnectionResponse[] } | null>;
 
   /**
@@ -171,6 +188,20 @@ export interface UiamOAuthType {
     connectionId: string,
     reason?: string
   ): Promise<UiamOAuthConnectionResponse | null>;
+
+  /**
+   * Permanently deletes an OAuth connection.
+   * @param request The Kibana request containing the authorization header.
+   * @param clientId The ID of the client owning the connection.
+   * @param connectionId The ID of the connection to delete.
+   * @returns `true` once the connection has been deleted, or `null` when security features are
+   * disabled.
+   */
+  deleteConnection(
+    request: KibanaRequest,
+    clientId: string,
+    connectionId: string
+  ): Promise<true | null>;
 
   /**
    * Resolves one or more user IDs into basic user information.

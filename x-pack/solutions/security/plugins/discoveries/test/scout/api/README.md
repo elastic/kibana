@@ -36,25 +36,25 @@ Stop any locally running Elasticsearch and Kibana instances before starting the 
 ### Start the server (stateful)
 
 ```sh
-node scripts/scout.js start-server --location local --arch stateful --domain classic
+node scripts/scout start-server --location local --arch stateful --domain classic
 ```
 
 ### Or serverless (security complete)
 
 ```sh
-node scripts/scout.js start-server --location local --arch serverless --domain security_complete
+node scripts/scout start-server --location local --arch serverless --domain security_complete
 ```
 
 ### Run the tests
 
 ```sh
-npx playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local
+node scripts/playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local
 ```
 
 To run a single spec:
 
 ```sh
-npx playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local isolation.spec.ts
+node scripts/playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local isolation.spec.ts
 ```
 
 ## Test Structure
@@ -120,8 +120,8 @@ test/scout/api/
 These tests run in Buildkite. The command in CI matches the local invocation:
 
 ```sh
-node scripts/scout.js start-server --location local --arch stateful --domain classic
-npx playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local
+node scripts/scout start-server --location local --arch stateful --domain classic
+node scripts/playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local
 ```
 
 ## Troubleshooting

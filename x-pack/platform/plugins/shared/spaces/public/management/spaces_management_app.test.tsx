@@ -33,6 +33,7 @@ import {
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 
 import { spacesManagementApp } from './spaces_management_app';
@@ -57,7 +58,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
   const spacesManager = spacesManagerMock.create();
   if (spaceId) {
     spacesManager.getSpace.mockResolvedValue({
-      id: spaceId,
+      id: asSpaceId(spaceId),
       name: `space with id ${spaceId}`,
       disabledFeatures: [],
     });
@@ -156,7 +157,7 @@ describe('spacesManagementApp', () => {
           class="css-qvyf25-redirectAppLinksStyles"
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces Create Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{},"feedback":{},"tours":{}},"spacesManager":{"onActiveSpaceChange$":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"eventTracker":{"analytics":{}}}
+          Spaces Create Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{},"feedback":{},"tours":{}},"spacesManager":{"onActiveSpaceChange$":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"http":{"spaceId":"default","basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"overlays":{"banners":{}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"eventTracker":{"analytics":{}},"isCpsTierEligible":false}
         </div>
       </div>
     `);

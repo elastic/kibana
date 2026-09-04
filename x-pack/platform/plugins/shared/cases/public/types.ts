@@ -50,8 +50,6 @@ import type { CasesMetrics, CasesFindResponseUI } from '../common/ui';
 import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
-import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from './client/attachment_framework/unified_attachment_registry';
 import type {
   CasesByAlertIDRequest,
@@ -127,8 +125,6 @@ export interface RenderAppProps {
   pluginsStart: CasesPublicStartDependencies;
   storage: Storage;
   kibanaVersion: string;
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }
 
@@ -141,6 +137,7 @@ export interface CasesPublicStart {
     templatesEnabled: boolean;
     attachmentsEnabled: boolean;
     chatEnabled: boolean;
+    runWorkflowsEnabled: boolean;
     casesRedesign: {
       list: boolean;
       details: boolean;

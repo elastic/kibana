@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiBasicTable,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -38,7 +38,7 @@ import * as i18n from './translations';
 import type { DashboardMigrationStats } from '../../types';
 import { MigrationDashboardsFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
-import { EmptyMigration, SearchField } from '../../../common/components';
+import { EmptyMigration, SearchField, MemoizedBasicTable } from '../../../common/components';
 import type { FilterOptionsBase, MigrationSettingsBase } from '../../../common/types';
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
@@ -240,11 +240,32 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       [isDataLoading, migrationDashboards]
     );
 
-    const { migrationDashboardDetailsFlyout, openMigrationDashboardDetails } =
-      useMigrationDashboardDetailsFlyout({
-        isLoading: isDataLoading,
-        getMigrationDashboardData: getMigrationDashboardsData,
-      });
+    const {
+      migrationDashboardDetailsFlyout,
+      openMigrationDashboardDetails,
+      openedMigrationDashboardId,
+    } = useMigrationDashboardDetailsFlyout({
+      isLoading: isDataLoading,
+      migrationDashboards,
+      getMigrationDashboardData: getMigrationDashboardsData,
+    });
+
+    const { euiTheme } = useEuiTheme();
+    const rowProps = useCallback(
+      (dashboard: DashboardMigrationDashboard) => ({ 'data-dashboard-id': dashboard.id }),
+      []
+    );
+    const highlightCss = useMemo(
+      () =>
+        openedMigrationDashboardId
+          ? {
+              [`.euiTableRow[data-dashboard-id="${openedMigrationDashboardId}"]`]: {
+                backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+              },
+            }
+          : undefined,
+      [openedMigrationDashboardId, euiTheme.colors.backgroundBaseInteractiveSelect]
+    );
 
     const dashboardsColumns = useMigrationDashboardsTableColumns({
       shouldDisableActions: isDashboardsLoading || isTableLoading,
@@ -320,18 +341,21 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
-                <EuiBasicTable<DashboardMigrationDashboard>
-                  tableCaption={i18n.DASHBOARDS_MIGRATION_TABLE_CAPTION}
-                  loading={false}
-                  items={migrationDashboards}
-                  pagination={pagination}
-                  sorting={sorting}
-                  onChange={onTableChange}
-                  selection={tableSelection}
-                  itemId={'id'}
-                  data-test-subj={'dashboards-translation-table'}
-                  columns={dashboardsColumns}
-                />
+                <div css={highlightCss}>
+                  <MemoizedBasicTable<DashboardMigrationDashboard>
+                    tableCaption={i18n.DASHBOARDS_MIGRATION_TABLE_CAPTION}
+                    loading={false}
+                    items={migrationDashboards}
+                    pagination={pagination}
+                    sorting={sorting}
+                    onChange={onTableChange}
+                    selection={tableSelection}
+                    itemId={'id'}
+                    rowProps={rowProps}
+                    data-test-subj={'dashboards-translation-table'}
+                    columns={dashboardsColumns}
+                  />
+                </div>
               </>
             )
           }

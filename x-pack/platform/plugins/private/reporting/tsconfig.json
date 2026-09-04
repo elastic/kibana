@@ -5,6 +5,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/actions-plugin",
     "@kbn/core",
     "@kbn/data-plugin",
@@ -50,6 +51,7 @@
     "@kbn/reporting-csv-share-panel",
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
+    "@kbn/core-security-server",
     "@kbn/core-http-server-utils",
     "@kbn/core-saved-objects-server",
     "@kbn/rrule",

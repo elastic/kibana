@@ -1,0 +1,190 @@
+{
+  "sha1": "2218cf7cb31fc5ef8df72828efb5d8b2267befee",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b20c875016d5102-ff8cac6bb86c5ab",
+      "title": "Maintenance window create form creates a maintenance window with a custom recurring schedule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_create.spec.ts",
+        "line": 96,
+        "column": 8
+      }
+    },
+    {
+      "id": "b20c875016d5102-ce9f05d87274a3b",
+      "title": "Maintenance window create form shows a callout when filters toggle is on and scope query is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_create.spec.ts",
+        "line": 120,
+        "column": 5
+      }
+    },
+    {
+      "id": "8daf8b16089b617-21bd727162c6236",
+      "title": "Maintenance window update form updates a maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
+        "line": 104,
+        "column": 22
+      }
+    },
+    {
+      "id": "8daf8b16089b617-902f94c166361e6",
+      "title": "Maintenance window update form shows the multiple-solutions callout when editing a MW with legacy multi-category state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
+        "line": 133,
+        "column": 5
+      }
+    },
+    {
+      "id": "8daf8b16089b617-61a8583b57114af",
+      "title": "Maintenance window update form keeps the callout visible and submits when editing a MW that already has a scope query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
+        "line": 161,
+        "column": 18
+      }
+    },
+    {
+      "id": "f90351ddc0e1760-c77e4ca0779d951",
+      "title": "Maintenance windows table should cancel a running maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 114,
+        "column": 60
+      }
+    },
+    {
+      "id": "f90351ddc0e1760-e80ae849d265aaa",
+      "title": "Maintenance windows table should archive a finished maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 128,
+        "column": 13
+      }
+    },
+    {
+      "id": "f90351ddc0e1760-e10565be1d3ae6a",
+      "title": "Maintenance windows table should cancel and archive a running maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 153,
+        "column": 11
+      }
+    },
+    {
+      "id": "f90351ddc0e1760-b5e5531ade6172d",
+      "title": "Maintenance windows table should unarchive a maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 181,
+        "column": 14
+      }
+    },
+    {
+      "id": "f90351ddc0e1760-4b20997f1455065",
+      "title": "Maintenance windows table should filter maintenance windows by status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 210,
+        "column": 12
+      }
+    },
+    {
+      "id": "f90351ddc0e1760-22902fc39320eeb",
+      "title": "Maintenance windows table should filter maintenance windows by archived status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 252,
+        "column": 16
+      }
+    },
+    {
+      "id": "f90351ddc0e1760-1569d54895d893e",
+      "title": "Maintenance windows table paginates maintenance windows correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 304,
+        "column": 14
+      }
+    },
+    {
+      "id": "f90351ddc0e1760-1b8880c76ffd379",
+      "title": "Maintenance windows table should delete a maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 327,
+        "column": 24
+      }
+    }
+  ]
+}

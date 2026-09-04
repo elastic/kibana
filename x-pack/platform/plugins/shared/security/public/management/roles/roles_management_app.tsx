@@ -105,6 +105,7 @@ export const rolesManagementApp = Object.freeze({
                 uiCapabilities={application.capabilities}
                 dataViews={dataViews}
                 history={history}
+                navigateToUrl={application.navigateToUrl}
                 spacesApiUi={spacesApiUi}
                 buildFlavor={buildFlavor}
                 cloudOrgUrl={cloud?.organizationUrl}

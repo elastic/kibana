@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ml-cancellable-search'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/ml-ui'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/ml-cancellable-search'
   description: Moon project for @kbn/ml-cancellable-search
   channel: ''
-  owner: '@elastic/ml-ui'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/private/ml/cancellable_search
 dependsOn:
   - '@kbn/data-plugin'

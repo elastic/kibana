@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
-
 import type { DashboardState, Warnings } from '../types';
 import type { DashboardSanitizeResponseBody } from './types';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
@@ -17,8 +15,7 @@ import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function sanitize(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
-  dashboardState: DashboardState,
-  useGASchemas = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+  dashboardState: DashboardState
 ): Promise<DashboardSanitizeResponseBody> {
   const warnings: Warnings = [];
   /**
@@ -28,19 +25,13 @@ export async function sanitize(
    * state in the editor format. Once we the Lens embeddable supports the API format we can remove the
    * transformDashboardIn and transformDashboardOut calls.
    */
-  const { attributes: storedDashboardState, references } = transformDashboardIn(
-    dashboardState,
-    undefined,
-    undefined,
-    useGASchemas
-  );
+  const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
   const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
     transformDashboardOut(
       storedDashboardState ?? {},
       references ?? [],
       undefined,
-      dashboardStateSchema,
-      useGASchemas
+      dashboardStateSchema
     );
 
   const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
@@ -48,7 +39,7 @@ export async function sanitize(
   );
   warnings.push(...dashboardStateWarnings, ...scopeWarnings);
   // TODO: As part of sanitization, we should drop panels, filters, etc. that exceed their max array sizes
-  const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
+  const sanitizedDashboardState = dashboardStateSchema.parse(scopedDashboardState);
 
   // access_control is separate from the transforms and stripping logic since it is not part of the
   // dashboard saved object attributes but it should be preserved in the sanitized output if present

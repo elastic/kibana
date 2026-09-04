@@ -20,8 +20,9 @@ const _allowedExperimentalValues = {
   enableAgentPrivilegeLevelChange: true,
   installIntegrationsKnowledge: true,
   enableFleetPolicyRevisionsCleanupTask: true,
+  enableFleetOrphanedPolicySweep: true, // When enabled, the policy-revisions cleanup task also sweeps .fleet-policies docs for deleted agent policies.
   enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
-  disableAgentlessLegacyAPI: false, // When enabled, the legacy agent/package policy APIs reject agentless create, update, upgrade, and copy. Forces enableAgentlessPoliciesUI on (see below).
+  disableAgentlessLegacyAPI: true, // When enabled, the legacy agent/package policy APIs reject agentless create, update, upgrade, and copy. Forces enableAgentlessPoliciesUI on (see below).
   enableAgentlessPoliciesUI: true, // When enabled, the UI reads/writes agentless integration policies through the managed integrations API. Disable as a kill switch to fall back to the legacy APIs — but disableAgentlessLegacyAPI overrides it (the fallback would 400).
   enableEsqlViewInstall: false,
   enableSloTemplates: true,
@@ -36,6 +37,9 @@ const _allowedExperimentalValues = {
   enableOtelUI: true, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
   enableCloudOnboardingDeployments: false, // When enabled, the cloud-onboarding-deployment CRUD API is registered and available.
   enableIncludeTagsInEvents: false, // When enabled, the include_tags_in_events agent policy advanced setting is available in the UI.
+  enableOtlpOutput: false, // When enabled, OTLP output type is available for creation and management via the Fleet outputs API.
+  enableIntegrationCollectionTiles: true, // When enabled, packages sharing a `group` id are collapsed into a single collection tile in the integrations marketplace.
+  enableIntegrationTileClickToAdd: false, // When enabled, clicking an integration tile navigates directly to the add-integration page instead of the overview page.
 };
 
 /**

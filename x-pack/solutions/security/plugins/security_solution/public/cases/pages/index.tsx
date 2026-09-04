@@ -22,7 +22,6 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
-import { CASES_FEATURES } from '..';
 
 const LazySelectTimelineModal = lazy(async () => {
   const { SelectTimelineModal: Component } = await import(
@@ -71,7 +70,6 @@ const CaseContainerComponent: React.FC = () => {
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
-            ...CASES_FEATURES,
             metrics: [
               CaseMetricsFeature.ALERTS_COUNT,
               CaseMetricsFeature.ALERTS_USERS,
@@ -80,11 +78,9 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.LIFESPAN,
             ],
             alerts: {
-              isExperimental: false,
               read: hasAlertsRead,
               all: hasAlertsAll,
             },
-            events: { enabled: true },
           },
           refreshRef,
           timelineIntegration: {

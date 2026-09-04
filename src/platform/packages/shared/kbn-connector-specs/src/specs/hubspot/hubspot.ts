@@ -38,7 +38,7 @@ export const HubSpotConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -85,6 +85,7 @@ export const HubSpotConnector: ConnectorSpec = {
   actions: {
     searchCrmObjects: {
       isTool: true,
+      scope: 'read',
       description:
         'Search or list one HubSpot CRM object type: contacts, companies, deals, tickets, or engagements ' +
         '(calls, emails, meetings, notes, tasks). Omit query to list pages. For contacts with includeAssociatedDeals, ' +
@@ -141,6 +142,7 @@ export const HubSpotConnector: ConnectorSpec = {
 
     getCrmObject: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve one CRM record by object type and ID. For tickets, fetches linked notes (body text) when ' +
         'CRM scopes allow.',
@@ -218,6 +220,7 @@ export const HubSpotConnector: ConnectorSpec = {
 
     listOwners: {
       isTool: true,
+      scope: 'read',
       description:
         'List HubSpot owners (CRM users). Use to resolve names or emails to hubspot_owner_id for deal ' +
         'filters.',
@@ -237,6 +240,7 @@ export const HubSpotConnector: ConnectorSpec = {
 
     searchDeals: {
       isTool: true,
+      scope: 'read',
       description:
         'Search deals with optional keyword, owner, pipeline, and stage. Discover IDs via listPipelines ' +
         'and listOwners before filtering.',
@@ -278,6 +282,7 @@ export const HubSpotConnector: ConnectorSpec = {
 
     searchBroad: {
       isTool: true,
+      scope: 'read',
       description:
         'Run one keyword search across contacts, companies, deals, and tickets in parallel (per-type limit, ' +
         'default 5).',
@@ -300,6 +305,7 @@ export const HubSpotConnector: ConnectorSpec = {
 
     listPipelines: {
       isTool: true,
+      scope: 'read',
       description:
         'List HubSpot pipelines and stages for deals or tickets. Use returned pipeline and stage IDs with ' +
         'searchDeals.',
@@ -317,25 +323,19 @@ export const HubSpotConnector: ConnectorSpec = {
       defaultMessage: 'Verifies HubSpot connection by fetching contacts',
     }),
     handler: async (ctx) => {
-      try {
-        const response = await ctx.client.get(`${HUBSPOT_API_BASE}/crm/v3/objects/contacts`, {
-          params: { limit: 1 },
-          validateStatus: () => true,
-        });
-        if (response.status === 200 || response.status === 204) {
-          return { ok: true, message: 'Successfully connected to HubSpot API' };
-        }
-        return {
-          ok: false,
-          message:
-            `HubSpot API returned status ${response.status}. Check that your Service Key or Private App ` +
-            `token is valid and has the crm.objects.contacts.read scope.`,
-        };
-      } catch (error) {
-        const err = error as { message?: string };
-        return { ok: false, message: err.message ?? 'Unknown error connecting to HubSpot' };
+      const response = await ctx.client.get(`${HUBSPOT_API_BASE}/crm/v3/objects/contacts`, {
+        params: { limit: 1 },
+        validateStatus: () => true,
+      });
+      if (response.status !== 200 && response.status !== 204) {
+        throw new Error(
+          `HubSpot API returned status ${response.status}. Check that your Service Key or Private App ` +
+            `token is valid and has the crm.objects.contacts.read scope.`
+        );
       }
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

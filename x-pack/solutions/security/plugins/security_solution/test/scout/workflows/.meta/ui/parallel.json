@@ -1,5 +1,8 @@
 {
-  "sha1": "919f7493839d2368c7e8254f2a86acfd2d96611c",
+  "sha1": "7fefd208fdd81b7e35d744dc0404e7b9c82bc285",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "d1d2851ca1bb822-62e78b299821a45",
@@ -8,8 +11,204 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "f3bf591f6a78e68-cfd61d493a5655b",
+      "title": "security.createExceptionListItem workflow step (UI) authors and runs a workflow that adds an item to a shared exception list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts",
+        "line": 34,
+        "column": 26
+      }
+    },
+    {
+      "id": "f3bf591f6a78e68-170765897ff9d12",
+      "title": "security.createExceptionListItem workflow step (UI) authors and runs a workflow that adds an item to a space-agnostic list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts",
+        "line": 78,
+        "column": 28
+      }
+    },
+    {
+      "id": "f3bf591f6a78e68-4ef5e079a7473b9",
+      "title": "security.createExceptionListItem workflow step (UI) authors and runs a workflow that adds a list item covering every non-list operator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts",
+        "line": 140,
+        "column": 7
+      }
+    },
+    {
+      "id": "f3bf591f6a78e68-f3d759adf8d34bd",
+      "title": "security.createExceptionListItem workflow step (UI) authors and runs a workflow that adds a list item referencing value lists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts",
+        "line": 228,
+        "column": 33
+      }
+    },
+    {
+      "id": "f3bf591f6a78e68-73f8f678c32c176",
+      "title": "security.createExceptionListItem workflow step (UI) is idempotent by item_id: a second run skips and leaves the item unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts",
+        "line": 302,
+        "column": 27
+      }
+    },
+    {
+      "id": "f3bf591f6a78e68-b3c57bf43f41ca9",
+      "title": "security.createExceptionListItem workflow step (UI) is idempotent by item_id: a second run with overwrite updates the item in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts",
+        "line": 359,
+        "column": 27
+      }
+    },
+    {
+      "id": "f3bf591f6a78e68-df85623adc164d1",
+      "title": "security.createExceptionListItem workflow step (UI) fails without skipping, overwriting, or creating when item_id belongs to a different list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts",
+        "line": 439,
+        "column": 27
+      }
+    },
+    {
+      "id": "f3bf591f6a78e68-8c2ea120055667e",
+      "title": "security.createExceptionListItem workflow step (UI) shows a failed execution when the target list does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts",
+        "line": 511,
+        "column": 29
+      }
+    },
+    {
+      "id": "35bae46809cfe11-56db9ea8cb4e18f",
+      "title": "security.createRuleException workflow step (UI) authors and runs a workflow that adds a rule exception covering every non-list operator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts",
+        "line": 29,
+        "column": 34
+      }
+    },
+    {
+      "id": "35bae46809cfe11-b8ca3b64d6a63af",
+      "title": "security.createRuleException workflow step (UI) authors and runs a workflow that adds a rule exception referencing value lists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts",
+        "line": 135,
+        "column": 31
+      }
+    },
+    {
+      "id": "35bae46809cfe11-e999755333a8e16",
+      "title": "security.createRuleException workflow step (UI) is idempotent by item_id: a second run overwrites the same item in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts",
+        "line": 216,
+        "column": 27
+      }
+    },
+    {
+      "id": "35bae46809cfe11-43fd82da6a59b92",
+      "title": "security.createRuleException workflow step (UI) is idempotent by item_id: a second run skips and leaves the item unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts",
+        "line": 303,
+        "column": 27
+      }
+    },
+    {
+      "id": "35bae46809cfe11-a5cd2d5678d5f08",
+      "title": "security.createRuleException workflow step (UI) fails without skipping, overwriting, or creating when item_id belongs to a different list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts",
+        "line": 369,
+        "column": 31
+      }
+    },
+    {
+      "id": "35bae46809cfe11-35d9543189f32e2",
+      "title": "security.createRuleException workflow step (UI) shows a failed execution when the target rule does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts",
+        "line": 413,
+        "column": 29
       }
     },
     {
@@ -22,8 +221,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/run_workflow_action.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -36,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/run_workflow_action.spec.ts",
-        "line": 112,
-        "column": 12
+        "line": 99,
+        "column": 9
       }
     },
     {
@@ -50,8 +249,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/run_workflow_action.spec.ts",
-        "line": 130,
-        "column": 12
+        "line": 115,
+        "column": 5
       }
     }
   ]

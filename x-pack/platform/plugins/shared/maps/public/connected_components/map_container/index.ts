@@ -14,9 +14,8 @@ import {
   getIsFullScreen,
   getIsTimesliderOpen,
 } from '../../selectors/ui_selectors';
-import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
+import { cancelAllInFlightRequests, exitFullScreen, syncDataForAllLayers } from '../../actions';
 import {
-  isMapLoading,
   getLayerList,
   getMapInitError,
   getMapSettings,
@@ -27,7 +26,6 @@ import type { MapStoreState } from '../../reducers/store';
 function mapStateToProps(state: MapStoreState) {
   return {
     isTimesliderOpen: getIsTimesliderOpen(state),
-    isMapLoading: isMapLoading(state),
     flyoutDisplay: getFlyoutDisplay(state),
     isFullScreen: getIsFullScreen(state),
     mapInitError: getMapInitError(state),
@@ -41,6 +39,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   return {
     exitFullScreen: () => dispatch(exitFullScreen()),
     cancelAllInFlightRequests: () => dispatch(cancelAllInFlightRequests()),
+    reload: () => dispatch(syncDataForAllLayers(false)),
   };
 }
 

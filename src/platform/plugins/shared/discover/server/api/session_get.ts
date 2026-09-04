@@ -8,31 +8,55 @@
  */
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import { SavedObjectsErrorHelpers, type RequestHandlerContext } from '@kbn/core/server';
+import {
+  SavedObjectsErrorHelpers,
+  isSavedObjectErrorResult,
+  type RequestHandlerContext,
+} from '@kbn/core/server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiResponse } from './schema';
+import type { DiscoverSessionGetResponse } from './schema';
 import { transformDiscoverSessionOut } from './transforms';
 
+/** Returns the session and the resolution headers needed for alias redirects and conflicts. */
 export const getDiscoverSession = async (
   requestContext: RequestHandlerContext,
   id: string
-): Promise<DiscoverSessionApiResponse> => {
+): Promise<{ body: DiscoverSessionGetResponse; resolveHeaders: Record<string, string> }> => {
   const { core } = await requestContext.resolve(['core']);
-  const result = await core.savedObjects.client.resolve<DiscoverSessionAttributes>(
-    SavedSearchType,
-    id
-  );
+  const {
+    saved_object: savedObject,
+    outcome,
+    alias_target_id: aliasTargetId,
+    alias_purpose: aliasPurpose,
+  } = await core.savedObjects.client.resolve<DiscoverSessionAttributes>(SavedSearchType, id);
 
-  if (result.outcome === 'conflict') {
-    throw SavedObjectsErrorHelpers.createConflictError(SavedSearchType, id);
+  if (isSavedObjectErrorResult(savedObject)) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundError(SavedSearchType, id);
   }
 
-  const savedObject = result.saved_object;
+  const { sessionState, warnings } = transformDiscoverSessionOut(
+    savedObject.attributes,
+    savedObject.references
+  );
+
+  const resolveHeaders: Record<string, string> = {
+    'kbn-resolve-outcome': outcome,
+  };
+  if (aliasTargetId) {
+    resolveHeaders['kbn-resolve-alias-target-id'] = aliasTargetId;
+  }
+  if (aliasPurpose) {
+    resolveHeaders['kbn-resolve-purpose'] = aliasPurpose;
+  }
 
   return {
-    id: savedObject.id,
-    data: transformDiscoverSessionOut(savedObject.attributes, savedObject.references),
-    meta: getMeta(savedObject),
+    body: {
+      id: savedObject.id,
+      data: sessionState,
+      meta: getMeta(savedObject),
+      ...(warnings.length > 0 && { warnings }),
+    },
+    resolveHeaders,
   };
 };

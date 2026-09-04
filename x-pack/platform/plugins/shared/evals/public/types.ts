@@ -6,6 +6,10 @@
  */
 
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 export type EvalsPublicSetup = Record<string, never>;
 
@@ -59,7 +63,7 @@ export interface AddToDatasetActionConfig extends AddToDatasetFlyoutOpenOptions 
    */
   ariaLabel?: string;
   /**
-   * Icon type for the CTA (defaults to `beaker`).
+   * Icon type for the CTA (defaults to `flask`).
    */
   iconType?: string;
   /**
@@ -89,6 +93,11 @@ export interface EvalsPublicStart {
 
 export interface EvalsSetupDependencies {
   management?: ManagementSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
-export type EvalsStartDependencies = Record<string, never>;
+export interface EvalsStartDependencies {
+  spaces?: SpacesPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  lens: LensPublicStart;
+}

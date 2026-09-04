@@ -62,7 +62,7 @@ export const AlertEpisodeDetailsFlyout = ({
   const [tab, setTab] = useState<TabId>('overview');
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
 
-  const { data: episode } = useFetchEpisodeQuery({ episodeId, services });
+  const { data: episode } = useFetchEpisodeQuery({ episodeId, groupHash, services });
   const ruleId = episode?.['rule.id'];
   const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
   const showRuleDependentTabs = isRuleLoaded(ruleState);

@@ -14,10 +14,13 @@ import type {
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { buildOriginSpaceIdFilter } from './build_origin_space_id_filter';
+import { fetchOrphanActionsSpaceId } from './fetch_orphan_actions_space_id';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
-import type { OrphanResponseActionsMetadata } from '../../../lib/reference_data';
-import { REF_DATA_KEYS } from '../../../lib/reference_data';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../endpoint_app_context_services';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../common/endpoint/service/response_actions/crowdstrike';
 import type { EndpointInternalFleetServicesInterface } from '../../fleet';
 import { stringify } from '../../../utils/stringify';
@@ -35,6 +38,8 @@ import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../..
 export interface FetchActionRequestsOptions {
   spaceId: string;
   endpointService: EndpointAppContextService;
+  /** Required for the read to fan out under CPS; without it the read is origin-only */
+  scoped?: ScopedEndpointServices;
   from?: number;
   size?: number;
   startDate?: string;
@@ -72,6 +77,7 @@ interface FetchActionRequestsResponse {
 export const fetchActionRequests = async ({
   endpointService,
   spaceId,
+  scoped,
   from = 0,
   size = 10,
   agentTypes,
@@ -83,15 +89,12 @@ export const fetchActionRequests = async ({
   unExpiredOnly = false,
   types,
 }: FetchActionRequestsOptions): Promise<FetchActionRequestsResponse> => {
-  const esClient = endpointService.getInternalEsClient();
+  const cpsRead = scoped?.isCpsRead() ?? false;
+  const esClient = cpsRead && scoped ? scoped.getEsClient() : endpointService.getInternalEsClient();
   const logger = endpointService.createLogger('FetchActionRequests');
   const fleetServices = endpointService.getInternalFleetServices(spaceId);
   const additionalFilters = [];
-  const orphanActionsSpaceId = (
-    await endpointService
-      .getReferenceDataClient()
-      .get<OrphanResponseActionsMetadata>(REF_DATA_KEYS.orphanResponseActionsSpace)
-  ).metadata.spaceId;
+  const orphanActionsSpaceId = await fetchOrphanActionsSpaceId(endpointService);
 
   if (commands?.length) {
     additionalFilters.push({ terms: { 'data.command': commands } });
@@ -111,15 +114,36 @@ export const fetchActionRequests = async ({
 
   const must: QueryDslQueryContainer[] = [];
 
-  // if space awareness is enabled, then add filter for integration policy ids
+  // Under CPS, an action is visible if its originSpaceId matches OR its integration policy is shared
+  // into the active space. The Fleet round trip comes back (previously skipped) because sharing a
+  // policy into a new space should make its actions visible even when their originSpaceId differs.
+  const matchSpace: QueryDslQueryContainer = cpsRead
+    ? {
+        bool: {
+          should: [
+            buildOriginSpaceIdFilter(spaceId, { matchMissingOriginSpaceId: false }),
+            {
+              terms: {
+                'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices),
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      }
+    : {
+        terms: {
+          'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices),
+        },
+      };
+
   logger.debug(
     () =>
-      `Space awareness is enabled - adding filter to narrow results to only response actions visible in space [${spaceId}]`
+      `Narrowing results to only response actions visible in space [${spaceId}] using ${
+        cpsRead ? 'originSpaceId and integration policy ids' : 'local integration policy ids'
+      }`
   );
 
-  const matchIntegrationPolicyIds: QueryDslQueryContainer = {
-    terms: { 'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices) },
-  };
   const matchOrphanActions: QueryDslQueryContainer | undefined =
     orphanActionsSpaceId && orphanActionsSpaceId === spaceId
       ? { term: { tags: ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted } }
@@ -130,14 +154,14 @@ export const fetchActionRequests = async ({
       bool: {
         filter: {
           bool: {
-            should: [matchIntegrationPolicyIds, matchOrphanActions],
+            should: [matchSpace, matchOrphanActions],
             minimum_should_match: 1,
           },
         },
       },
     });
   } else {
-    must.push({ bool: { filter: matchIntegrationPolicyIds } });
+    must.push({ bool: { filter: matchSpace } });
   }
 
   // Add the date filters

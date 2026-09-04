@@ -5,20 +5,6 @@
  * 2.0.
  */
 
-export default function mockRolledUpData(jobName, targetIndexName, day) {
-  return {
-    index: `${targetIndexName}`,
-    body: {
-      '_rollup.version': 2,
-      '@timestamp.date_histogram.time_zone': 'UTC',
-      '@timestamp.date_histogram.timestamp': day.toISOString(),
-      '@timestamp.date_histogram.interval': '1000ms',
-      '@timestamp.date_histogram._count': 1,
-      '_rollup.id': jobName,
-    },
-  };
-}
-
 //This function just adds some stub indices that includes a timestamp and an arbritary metric. This is fine since we are not actually testing
 //rollup functionality.
 export function mockIndices(day, prepend) {

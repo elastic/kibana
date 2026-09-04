@@ -8,6 +8,7 @@
 import {
   isRequestApiKeyType,
   getApiKeyFromRequest,
+  getUiamApiKeySecret,
   createApiKey,
   getApiKeyAndUserScope,
 } from './api_key_utils';
@@ -15,6 +16,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AuthenticatedUser, FakeRawRequest } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const mockTask = {
   id: 'task',
@@ -36,6 +38,28 @@ describe('api_key_utils', () => {
     });
   });
 
+  describe('getUiamApiKeySecret', () => {
+    test('returns a raw UIAM credential as-is (grant path format)', () => {
+      expect(getUiamApiKeySecret('essu_raw_secret')).toBe('essu_raw_secret');
+    });
+
+    test('extracts the secret from the `base64(id:secret)` format (UIAM provisioning path)', () => {
+      const stored = Buffer.from('key-id:essu_converted_secret').toString('base64');
+
+      expect(getUiamApiKeySecret(stored)).toBe('essu_converted_secret');
+    });
+
+    test('returns the stored value untouched when it decodes to a non-UIAM credential', () => {
+      const stored = Buffer.from('key-id:not-a-uiam-secret').toString('base64');
+
+      expect(getUiamApiKeySecret(stored)).toBe(stored);
+    });
+
+    test('returns the stored value untouched when it is neither raw nor base64 encoded', () => {
+      expect(getUiamApiKeySecret('!!!not-base64!!!')).toBe('!!!not-base64!!!');
+    });
+  });
+
   describe('getApiKeyFromRequest', () => {
     test('should return the API key from a request', () => {
       const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
@@ -54,6 +78,17 @@ describe('api_key_utils', () => {
       const request = httpServerMock.createKibanaRequest();
       const result = getApiKeyFromRequest(request);
       expect(result).toBeNull();
+    });
+
+    test('should return a raw user-created UIAM API key without an id', () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `ApiKey essu_user_created_key`,
+        },
+      });
+
+      const result = getApiKeyFromRequest(request);
+      expect(result).toEqual({ api_key: 'essu_user_created_key' });
     });
   });
 
@@ -114,6 +149,29 @@ describe('api_key_utils', () => {
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
       expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('should throw if the request was made by a raw user-created UIAM API key', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `ApiKey essu_user_created_key`,
+        },
+      });
+
+      const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'api_key',
+        username: 'testUser',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+
+      await expect(
+        createApiKey([mockTask], request, coreStart.security)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot use a user-provided Cloud (UIAM) API key to schedule tasks in this environment; an Elasticsearch API key is required."`
+      );
     });
 
     test('should clone the API key if the request is a fake request', async () => {
@@ -310,6 +368,33 @@ describe('api_key_utils', () => {
         message: 'Could not create API key.',
       });
     });
+
+    test('reports keys created before a later task type grant fails', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createStart();
+      const onApiKeyCreated = jest.fn();
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockResolvedValue(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue({
+        authentication_type: 'basic',
+        username: 'testUser',
+      });
+      coreStart.security.authc.apiKeys.grantAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({ id: 'first-key-id', api_key: 'first-key-secret' })
+        .mockRejectedValueOnce(new Error('second grant failed'));
+
+      await expect(
+        createApiKey(
+          [mockTask, { ...mockTask, id: 'second-task', taskType: 'second-report' }],
+          request,
+          coreStart.security,
+          { onApiKeyCreated }
+        )
+      ).rejects.toThrow('second grant failed');
+
+      expect(onApiKeyCreated).toHaveBeenCalledTimes(1);
+      expect(onApiKeyCreated).toHaveBeenCalledWith({ apiKeyId: 'first-key-id' });
+    });
   });
 
   describe('getUserScope', () => {
@@ -368,7 +453,7 @@ describe('api_key_utils', () => {
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
           userName: 'testUser',
         },
@@ -398,7 +483,7 @@ describe('api_key_utils', () => {
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: true,
           userName: 'testUser',
         },
@@ -434,7 +519,7 @@ describe('api_key_utils', () => {
         apiKey: 'Y2xvbmVkQXBpS2V5SWQ6Y2xvbmVkQXBpS2V5',
         userScope: {
           apiKeyId: 'clonedApiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
           userName: 'testUser',
         },
@@ -471,7 +556,7 @@ describe('api_key_utils', () => {
         apiKey: 'Y2xvbmVkQXBpS2V5SWQ6Y2xvbmVkQXBpS2V5',
         userScope: {
           apiKeyId: 'clonedApiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
           userName: 'testUser',
         },
@@ -529,7 +614,7 @@ describe('api_key_utils', () => {
         apiKey: 'Y2xvbmVkQXBpS2V5SWQ6Y2xvbmVkQXBpS2V5',
         userScope: {
           apiKeyId: 'clonedApiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
           userProfileId: 'u_profile_enriched',
         },
@@ -561,7 +646,7 @@ describe('api_key_utils', () => {
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
           userProfileId: 'u_profile_12345',
           userName: 'testUser',
@@ -593,7 +678,7 @@ describe('api_key_utils', () => {
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: true,
           userProfileId: 'u_profile_12345',
           userName: 'testUser',

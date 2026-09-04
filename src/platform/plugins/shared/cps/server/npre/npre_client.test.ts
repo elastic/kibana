@@ -31,12 +31,12 @@ describe('NpreClient', () => {
       const mockExpression = 'project:test';
       const mockResponse = { expression: mockExpression };
 
-      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue(mockResponse);
+      mockScopedClient.asInternalUser.transport.request.mockResolvedValue(mockResponse);
 
       const result = await service.getNpre(expressionName);
 
       expect(result).toEqual(mockExpression);
-      expect(mockScopedClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+      expect(mockScopedClient.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/_project_routing/test-expression',
       });
@@ -58,7 +58,7 @@ describe('NpreClient', () => {
         meta: {} as any,
       });
 
-      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
+      mockScopedClient.asInternalUser.transport.request.mockRejectedValue(error);
 
       const result = await service.getNpre(expressionName);
 
@@ -70,7 +70,7 @@ describe('NpreClient', () => {
       const expressionName = 'test-expression';
       const error = new Error('Elasticsearch connection error');
 
-      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
+      mockScopedClient.asInternalUser.transport.request.mockRejectedValue(error);
 
       await expect(service.getNpre(expressionName)).rejects.toThrow(
         'Elasticsearch connection error'
@@ -95,7 +95,7 @@ describe('NpreClient', () => {
         meta: {} as any,
       });
 
-      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
+      mockScopedClient.asInternalUser.transport.request.mockRejectedValue(error);
 
       await expect(service.getNpre(expressionName)).rejects.toThrow();
       expect(mockLogger.error).toHaveBeenCalledWith(

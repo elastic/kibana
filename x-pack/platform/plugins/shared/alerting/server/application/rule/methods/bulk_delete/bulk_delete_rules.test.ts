@@ -5,26 +5,12 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  coreFeatureFlagsMock,
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import { schema } from '@kbn/config-schema';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { RecoveredActionGroup } from '../../../../../common';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import {
@@ -41,9 +27,7 @@ import {
   enabledRuleForBulkOpsWithActions1WithUiam,
   enabledRuleForBulkOpsWithActions2WithUiam,
 } from '../../../../rules_client/tests/test_helpers';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
@@ -56,53 +40,27 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
 }));
 
 const softDeleteGapsMock = softDeleteGaps as jest.Mock;
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const backfillClient = backfillClientMock.create();
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: createAPIKeyMock,
-  cloneAPIKey: jest.fn(),
-  logger,
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
   auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
   backfillClient,
-  uiSettings: uiSettingsServiceMock.createStartContract(),
+} = getRulesClientMockParams({
+  kibanaVersion,
+  createAPIKey: createAPIKeyMock,
+  logger,
   eventLogger,
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+});
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
   id: 'id2',
@@ -612,12 +570,14 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      expect(logger.debug).toBeCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully deleted schedules for underlying tasks: id1'
       );
-      expect(logger.error).toBeCalledTimes(1);
-      expect(logger.error).toBeCalledWith('Failure to delete schedules for underlying tasks: id2');
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failure to delete schedules for underlying tasks: id2'
+      );
     });
 
     test('should not throw an error if taskManager throw an error', async () => {
@@ -633,8 +593,8 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      expect(logger.error).toBeCalledTimes(1);
-      expect(logger.error).toBeCalledWith(
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
         'Failure to delete schedules for underlying tasks: id1, id2. TaskManager bulkRemove failed with Error: UPS'
       );
     });
@@ -664,11 +624,11 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      expect(logger.debug).toBeCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully deleted schedules for underlying tasks: id1, id2'
       );
-      expect(logger.error).toBeCalledTimes(0);
+      expect(logger.error).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -705,7 +665,7 @@ describe('bulkDelete', () => {
         statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
       });
 
-      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Unauthorized'
       );
 
@@ -721,9 +681,7 @@ describe('bulkDelete', () => {
         statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
       });
 
-      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrowError(
-        'Error'
-      );
+      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow('Error');
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');

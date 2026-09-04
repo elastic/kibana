@@ -122,8 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     return requestedBenchmarkRules.map((item) => item.attributes);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/265463
-  describe.skip('Findings Page - DataTable', function () {
+  describe('Findings Page - DataTable', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
@@ -148,11 +147,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.add(data);
 
       await findings.navigateToLatestFindingsPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor(
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     afterEach(async () => {

@@ -12,9 +12,14 @@ import {
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiData } from '../schema';
+import type {
+  DiscoverSessionApiClassicTab,
+  DiscoverSessionApiData,
+  DiscoverSessionApiEsqlTab,
+} from '../schema';
 import { transformDiscoverSessionIn } from './transform_discover_session_in';
 import { transformDiscoverSessionOut } from './transform_discover_session_out';
 import {
@@ -26,6 +31,7 @@ describe('discover session API transforms', () => {
   const apiData: DiscoverSessionApiData = {
     title: 'Session',
     description: 'Session description',
+    tags: ['tag-1', 'tag-2'],
     tabs: [
       {
         id: 'tab-classic',
@@ -43,7 +49,6 @@ describe('discover session API transforms', () => {
         hide_aggregated_preview: true,
         breakdown_field: 'host.name',
         chart_interval: 'h',
-        time_restore: true,
         time_range: { from: 'now-15m', to: 'now' },
         refresh_interval: { pause: true, value: 0 },
         vis_context: {
@@ -64,7 +69,6 @@ describe('discover session API transforms', () => {
         sort: [],
         hide_chart: false,
         hide_table: false,
-        time_restore: false,
         control_panels: [
           {
             id: 'control-1',
@@ -85,7 +89,7 @@ describe('discover session API transforms', () => {
     ],
   };
 
-  const expectedControlGroupJson = JSON.stringify({
+  const expectedControlGroup = {
     'control-1': {
       order: 0,
       type: ESQL_CONTROL,
@@ -98,12 +102,139 @@ describe('discover session API transforms', () => {
       selected_options: ['bar'],
       single_select: true,
     },
-  });
+  };
 
   describe('transform out', () => {
     it('maps saved object attributes to API data', () => {
-      const transformed = transformDiscoverSessionOut(discoverSessionAttributes);
+      const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);
+    });
+
+    it('omits the inline data view ID from self filters and preserves foreign filter IDs', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const searchSource = parseSearchSourceJSON(
+        classicTab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      const inlineDataViewId = 'inline-data-view-id';
+      searchSource.index = { id: inlineDataViewId, title: 'logs-*' };
+      searchSource.filter = [
+        {
+          meta: { index: inlineDataViewId },
+          query: { match_phrase: { 'service.name': 'api' } },
+        },
+        {
+          meta: { index: 'foreign-data-view-id' },
+          query: { match_phrase: { 'host.name': 'web-01' } },
+        },
+      ];
+
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSource) },
+            },
+          },
+        ],
+      });
+      const [selfFilter, foreignFilter] = (sessionState.tabs[0] as DiscoverSessionApiClassicTab)
+        .filters;
+
+      expect(selfFilter).not.toHaveProperty('data_view_id');
+      expect(foreignFilter).toHaveProperty('data_view_id', 'foreign-data-view-id');
+
+      const { attributes, references } = transformDiscoverSessionIn(sessionState);
+      const roundTrippedSearchSource = injectReferences(
+        parseSearchSourceJSON(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON),
+        references
+      );
+
+      expect(roundTrippedSearchSource.filter?.[0]).not.toHaveProperty('meta.index');
+      expect(roundTrippedSearchSource.filter?.[1]).toHaveProperty(
+        'meta.index',
+        'foreign-data-view-id'
+      );
+    });
+
+    it('omits time_range but preserves refresh_interval when time restore is disabled', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              timeRestore: false,
+            },
+          },
+        ],
+      });
+
+      expect(sessionState.tabs[0]).not.toHaveProperty('time_range');
+      expect(sessionState.tabs[0].refresh_interval).toEqual({
+        value: 60000,
+        pause: true,
+      });
+    });
+
+    it('preserves refresh_interval when the stored time range is absent', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              timeRestore: true,
+              timeRange: undefined,
+            },
+          },
+        ],
+      });
+
+      expect(sessionState.tabs[0]).not.toHaveProperty('time_range');
+      expect(sessionState.tabs[0].refresh_interval).toEqual({
+        value: 60000,
+        pause: true,
+      });
+    });
+
+    it('extracts tag IDs from saved object references', () => {
+      const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes, [
+        { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
+        { type: 'index-pattern', id: 'data-view-1', name: 'data-view-ref' },
+      ]);
+
+      expect(transformed.tags).toEqual(['tag-1']);
+    });
+
+    it('maps esqlApproximation to esql_approximation for ES|QL tabs', () => {
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...discoverSessionAttributes.tabs[1],
+            attributes: {
+              ...discoverSessionAttributes.tabs[1].attributes,
+              esqlApproximation: true,
+            },
+          },
+        ],
+      });
+      expect((sessionState.tabs[0] as DiscoverSessionApiEsqlTab).esql_approximation).toBe(true);
+    });
+
+    it('omits esql_approximation when esqlApproximation is absent from an ES|QL tab', () => {
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [discoverSessionAttributes.tabs[1]],
+      });
+      expect(sessionState.tabs[0]).not.toHaveProperty('esql_approximation');
     });
 
     it('converts legacy flat tab sort to API sort objects', () => {
@@ -122,7 +253,7 @@ describe('discover session API transforms', () => {
         ),
       };
 
-      const transformed = transformDiscoverSessionOut(attributes);
+      const { sessionState: transformed } = transformDiscoverSessionOut(attributes);
       expect(transformed.tabs[0].sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
     });
   });
@@ -157,7 +288,7 @@ describe('discover session API transforms', () => {
               usesAdHocDataView: true,
               kibanaSavedObjectMeta: {
                 searchSourceJSON:
-                  '{"query":{"query":"","language":"kuery"},"filter":[],"index":{"title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp"}}',
+                  '{"query":{"query":"","language":"kuery"},"filter":[],"index":{"title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp","allowHidden":false,"name":"logs*,-logstash*,filebeat-*"}}',
               },
               viewMode: VIEW_MODE.DOCUMENT_LEVEL,
               hideAggregatedPreview: false,
@@ -258,6 +389,69 @@ describe('discover session API transforms', () => {
       });
       expect(references).toEqual([]);
     });
+
+    it('enables time restore when time_range is present', () => {
+      const [classicTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [classicTab],
+      });
+
+      expect(attributes.tabs[0].attributes.timeRestore).toBe(true);
+    });
+
+    it('persists refresh_interval independently when time_range is absent', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [
+          {
+            ...esqlTab,
+            refresh_interval: { pause: false, value: 5000 },
+          },
+        ],
+      });
+
+      expect(attributes.tabs[0].attributes.timeRestore).toBe(false);
+      expect(attributes.tabs[0].attributes.refreshInterval).toEqual({
+        pause: false,
+        value: 5000,
+      });
+    });
+
+    it('maps esql_approximation to esqlApproximation for ES|QL tabs', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [{ ...esqlTab, esql_approximation: true } as DiscoverSessionApiEsqlTab],
+      });
+      expect(attributes.tabs[0].attributes.esqlApproximation).toBe(true);
+    });
+
+    it('omits esqlApproximation when esql_approximation is absent from an ES|QL tab', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({ ...apiData, tabs: [esqlTab] });
+      expect(attributes.tabs[0].attributes).not.toHaveProperty('esqlApproximation');
+    });
+
+    it('does not set esqlApproximation for classic tabs', () => {
+      const [classicTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({ ...apiData, tabs: [classicTab] });
+      expect(attributes.tabs[0].attributes).not.toHaveProperty('esqlApproximation');
+    });
+
+    it('creates unique saved object references for tags', () => {
+      const { references } = transformDiscoverSessionIn({
+        ...discoverSessionApiData,
+        tags: ['tag-1', 'tag-1', 'tag-2'],
+      });
+
+      expect(references).toEqual([
+        { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
+        { type: 'tag', id: 'tag-2', name: 'tag-ref-tag-2' },
+      ]);
+    });
+
     it('adds tab-prefixed references for data view reference tabs', () => {
       const { attributes, references } = transformDiscoverSessionIn(apiData);
 
@@ -273,7 +467,10 @@ describe('discover session API transforms', () => {
           state: { foo: 'bar' },
         },
       });
-      expect(attributes.tabs[1].attributes.controlGroupJson).toBe(expectedControlGroupJson);
+      // Order of the control group JSON is not guaranteed, so we need to parse it and compare the objects
+      expect(JSON.parse(attributes.tabs[1].attributes.controlGroupJson!)).toEqual(
+        expectedControlGroup
+      );
       expect(references).toContainEqual({
         name: 'tab_tab-classic.kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
@@ -443,15 +640,16 @@ describe('discover session API transforms', () => {
   describe('round-trip', () => {
     it('round-trips fixture API data through persistence', () => {
       const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
-      const roundTripped = transformDiscoverSessionOut(attributes, references);
+      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
 
       expect(roundTripped).toEqual(discoverSessionApiData);
     });
 
     it('round-trips fixture saved object attributes through API', () => {
-      const apiDataFromStored = transformDiscoverSessionOut(discoverSessionAttributes);
+      const { sessionState: apiDataFromStored } =
+        transformDiscoverSessionOut(discoverSessionAttributes);
       const { attributes, references } = transformDiscoverSessionIn(apiDataFromStored);
-      const roundTripped = transformDiscoverSessionOut(attributes, references);
+      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
 
       expect(apiDataFromStored).toEqual(discoverSessionApiData);
       expect(roundTripped).toEqual(discoverSessionApiData);
@@ -460,31 +658,41 @@ describe('discover session API transforms', () => {
 
     it('round-trips fixture saved object attributes preserving API-representable persistence values', () => {
       const reverted = transformDiscoverSessionIn(
-        transformDiscoverSessionOut(discoverSessionAttributes)
+        transformDiscoverSessionOut(discoverSessionAttributes).sessionState
       ).attributes;
       const expected = transformDiscoverSessionIn(discoverSessionApiData).attributes;
 
-      expect(reverted).toEqual(expected);
+      // `controlGroupJson` is a serialized string whose key order isn't guaranteed,
+      // so ignore it on each tab for the structural comparison.
+      const omitTabsControlGroupJson = (attributes: typeof reverted) => ({
+        ...attributes,
+        tabs: attributes.tabs.map(({ attributes: { controlGroupJson, ...tabAttrs }, ...tab }) => ({
+          ...tab,
+          attributes: tabAttrs,
+        })),
+      });
+
+      expect(omitTabsControlGroupJson(reverted)).toEqual(omitTabsControlGroupJson(expected));
       expect(reverted.tabs[0].attributes.controlGroupJson).toBeUndefined();
+      // Order of the control group JSON is not guaranteed, so we need to parse it and compare the objects
+      expect(JSON.parse(reverted.tabs[1].attributes.controlGroupJson!)).toEqual(
+        JSON.parse(expected.tabs[1].attributes.controlGroupJson!)
+      );
       expect(reverted.tabs[1].attributes.usesAdHocDataView).toBe(false);
     });
   });
 
   it('round-trips API data and preserves semantic values', () => {
     const { attributes, references } = transformDiscoverSessionIn(apiData);
-    const roundTripped = transformDiscoverSessionOut(attributes, references);
+    const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
     const reverted = transformDiscoverSessionIn(roundTripped);
 
     expect(roundTripped).toMatchObject(apiData);
     expect(roundTripped.tabs[0]).toMatchObject({
       column_order: [],
-      density: 'compact',
-      header_row_height: 3,
     });
     expect(roundTripped.tabs[1]).toMatchObject({
       column_order: [],
-      density: 'compact',
-      header_row_height: 3,
       control_panels: [
         {
           width: 'medium',
@@ -492,6 +700,15 @@ describe('discover session API transforms', () => {
         },
       ],
     });
+
+    expect(roundTripped.tabs[0].density).toBeUndefined();
+    expect(roundTripped.tabs[0].header_row_height).toBeUndefined();
+    expect(roundTripped.tabs[1].density).toBeUndefined();
+    expect(roundTripped.tabs[1].header_row_height).toBeUndefined();
+    expect(reverted.attributes.tabs[0].attributes.density).toBeUndefined();
+    expect(reverted.attributes.tabs[0].attributes.headerRowHeight).toBeUndefined();
+    expect(reverted.attributes.tabs[1].attributes.density).toBeUndefined();
+    expect(reverted.attributes.tabs[1].attributes.headerRowHeight).toBeUndefined();
     expect(reverted.attributes.tabs[0].attributes.visContext).toEqual({
       suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
       requestData: {
@@ -504,7 +721,10 @@ describe('discover session API transforms', () => {
         state: { foo: 'bar' },
       },
     });
-    expect(reverted.attributes.tabs[1].attributes.controlGroupJson).toBe(expectedControlGroupJson);
+    // Order of the control group JSON is not guaranteed, so we need to parse it and compare the objects
+    expect(JSON.parse(reverted.attributes.tabs[1].attributes.controlGroupJson!)).toEqual(
+      expectedControlGroup
+    );
     expect(reverted.references).toEqual(references);
   });
 });

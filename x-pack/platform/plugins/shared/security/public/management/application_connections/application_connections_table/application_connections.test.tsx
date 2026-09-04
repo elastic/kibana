@@ -81,17 +81,35 @@ describe('ApplicationConnections', () => {
       return `/mock/app/${appId}${options?.path ?? ''}`;
     });
 
-    const { findByText, findByTestId, getByTestId, getByPlaceholderText } = renderPage(coreStart);
+    const { findAllByTestId, getAllByTestId, getByTestId, getByPlaceholderText } =
+      renderPage(coreStart);
 
-    expect(await findByText(/No application connections/)).toBeInTheDocument();
-    expect(await findByText(/Get started by creating MCP clients/)).toBeInTheDocument();
-    const addButton = await findByTestId('applicationConnectionsEmptyPromptAddButton');
+    // `EuiBasicTable` renders its `noItemsMessage` twice: once in the visible table body and
+    // once inside a screen-reader-only `<caption>` that EUI mounts behind a 500ms `EuiDelayRender`.
+    // Both copies carry the `applicationConnectionsEmptyPrompt` test subject, so scope every
+    // assertion to the visible body copy — otherwise a slow first render races the delayed caption
+    // duplicate and the singular queries throw "Found multiple elements". A genuine double-render
+    // in the body would still fail the `toHaveLength(1)` guard below.
+    await findAllByTestId('applicationConnectionsEmptyPrompt');
+    const visiblePrompts = getAllByTestId('applicationConnectionsEmptyPrompt').filter(
+      (element) => !element.closest('caption')
+    );
+    expect(visiblePrompts).toHaveLength(1);
+    const [emptyPrompt] = visiblePrompts;
+
+    expect(within(emptyPrompt).getByText(/No application connections/)).toBeInTheDocument();
+    expect(
+      within(emptyPrompt).getByText(/Get started by creating MCP clients/)
+    ).toBeInTheDocument();
+    const addButton = within(emptyPrompt).getByTestId('applicationConnectionsEmptyPromptAddButton');
     expect(addButton).toBeInTheDocument();
     expect(addButton).toHaveAttribute(
       'href',
       '/mock/app/agent_builder/manage/tools/mcp_clients/new'
     );
-    const learnMoreLink = await findByTestId('applicationConnectionsEmptyPromptLearnMoreLink');
+    const learnMoreLink = within(emptyPrompt).getByTestId(
+      'applicationConnectionsEmptyPromptLearnMoreLink'
+    );
     expect(learnMoreLink).toBeInTheDocument();
     expect(learnMoreLink).toHaveAttribute(
       'href',
@@ -342,6 +360,121 @@ describe('ApplicationConnections', () => {
     fireEvent.click(getByTestId('expandRow-client-a'));
     expect(await findByText('Desktop session')).toBeInTheDocument();
     expect(queryByText('Laptop session')).not.toBeInTheDocument();
+  }, 15_000);
+
+  it('renders an "Expired" status for a connection that is expired but not revoked, and keeps it selectable', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [{ id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' }],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-expired',
+            client_id: 'client-a',
+            name: 'Stale session',
+            resource: 'cluster:elastic',
+            expired: true,
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId, queryByTestId } = renderPage(coreStart);
+
+    await findByText('My MCP app');
+    fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+    const listView = await findByTestId('applicationConnectionsListView');
+    await within(listView).findByText('Stale session');
+    expect(within(listView).getByText('Expired')).toBeInTheDocument();
+
+    expect(queryByTestId('applicationConnectionsBulkRevokeButton')).not.toBeInTheDocument();
+    const rowCheckbox = within(listView).getByLabelText(/Select connection 'Stale session'/);
+    fireEvent.click(rowCheckbox);
+    expect(await findByTestId('applicationConnectionsBulkRevokeButton')).toHaveTextContent(
+      'Revoke 1 connection'
+    );
+
+    expect(within(listView).getByTestId('revokeConnection-conn-expired')).toBeInTheDocument();
+  });
+
+  it('renders "Revoked" (not "Expired") when a connection is both expired and revoked', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [{ id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' }],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-both',
+            client_id: 'client-a',
+            name: 'Old session',
+            resource: 'cluster:elastic',
+            expired: true,
+            revoked: true,
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByText('My MCP app');
+    fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+    const listView = await findByTestId('applicationConnectionsListView');
+    await within(listView).findByText('Old session');
+    expect(within(listView).getAllByText('Revoked').length).toBeGreaterThan(0);
+    expect(within(listView).queryByText('Expired')).not.toBeInTheDocument();
+  });
+
+  it('filters by "Expired" inside a mixed-status grouped row', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [{ id: 'client-a', client_name: 'Mixed app', resource: 'cluster:elastic' }],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-active',
+            client_id: 'client-a',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+          },
+          {
+            id: 'conn-expired',
+            client_id: 'client-a',
+            name: 'Stale session',
+            resource: 'cluster:elastic',
+            expired: true,
+          },
+          {
+            id: 'conn-revoked',
+            client_id: 'client-a',
+            name: 'Desktop session',
+            resource: 'cluster:elastic',
+            revoked: true,
+          },
+        ],
+      },
+    });
+
+    const { findByRole, findByTestId, findByText, getByRole, getByTestId, queryByText } =
+      renderPage(coreStart);
+
+    expect(await findByTestId('applicationConnectionsCount-client-a')).toHaveTextContent('3');
+
+    fireEvent.click(getByRole('button', { name: /Status Selection/ }));
+    fireEvent.click(await findByRole('option', { name: /Expired/ }));
+
+    await waitFor(() => {
+      expect(getByTestId('applicationConnectionsCount-client-a')).toHaveTextContent('1');
+    });
+    fireEvent.click(getByTestId('expandRow-client-a'));
+    expect(await findByText('Stale session')).toBeInTheDocument();
+    expect(queryByText('Laptop session')).not.toBeInTheDocument();
+    expect(queryByText('Desktop session')).not.toBeInTheDocument();
   }, 15_000);
 
   it('renders the expanded connection table with the Figma-aligned columns (no Scopes, no Select-all)', async () => {
@@ -1156,5 +1289,352 @@ describe('ApplicationConnections', () => {
     expect(within(flyout).getByText('Other user app')).toBeInTheDocument();
     expect(within(flyout).getByText('non-owned-client')).toBeInTheDocument();
     expect(within(flyout).getByText(mcpServerUrl)).toBeInTheDocument();
+  });
+
+  describe('deleting revoked connections', () => {
+    function setupMixedStatusClient() {
+      setupHttpResponses(coreStart, {
+        clients: {
+          clients: [{ id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' }],
+        },
+        connections: {
+          connections: [
+            {
+              id: 'conn-1',
+              client_id: 'client-a',
+              name: 'Laptop session',
+              resource: 'cluster:elastic',
+            },
+            {
+              id: 'conn-2',
+              client_id: 'client-a',
+              name: 'Desktop session',
+              resource: 'cluster:elastic',
+              revoked: true,
+            },
+          ],
+        },
+      });
+    }
+
+    it('narrows a list view select-all to the revocable connections', async () => {
+      setupMixedStatusClient();
+      coreStart.http.post.mockResolvedValue({
+        results: [{ client_id: 'client-a', connection_id: 'conn-1', status: 'revoked' }],
+      });
+
+      const { findByText, findByTestId, getByTestId, queryByTestId } = renderPage(coreStart);
+
+      await findByText('My MCP app');
+      fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+      const listView = await findByTestId('applicationConnectionsListView');
+      await within(listView).findByText('Laptop session');
+
+      fireEvent.click(within(listView).getByTestId('checkboxSelectAll'));
+
+      const bulkRevokeButton = await findByTestId('applicationConnectionsBulkRevokeButton');
+      expect(bulkRevokeButton).toHaveTextContent('Revoke 1 connection');
+      expect(queryByTestId('applicationConnectionsBulkDeleteButton')).not.toBeInTheDocument();
+
+      fireEvent.click(bulkRevokeButton);
+      const modal = await findByTestId('applicationConnectionsRevokeModal');
+      fireEvent.click(within(modal).getByTestId('applicationConnectionsRevokeConfirmButton'));
+
+      await waitFor(() => {
+        expect(coreStart.http.post).toHaveBeenCalledWith(
+          '/internal/security/oauth/connections/_bulk_revoke',
+          {
+            body: JSON.stringify({
+              connections: [{ client_id: 'client-a', connection_id: 'conn-1' }],
+            }),
+          }
+        );
+      });
+    });
+
+    it('excludes a fully revoked client from a grouped select-all', async () => {
+      setupHttpResponses(coreStart, {
+        clients: {
+          clients: [
+            { id: 'client-a', client_name: 'Mixed app', resource: 'cluster:elastic' },
+            { id: 'client-b', client_name: 'Dead app', resource: 'cluster:elastic' },
+          ],
+        },
+        connections: {
+          connections: [
+            { id: 'conn-1', client_id: 'client-a', name: 'Laptop', resource: 'cluster:elastic' },
+            {
+              id: 'conn-2',
+              client_id: 'client-a',
+              name: 'Desktop',
+              resource: 'cluster:elastic',
+              revoked: true,
+            },
+            {
+              id: 'conn-3',
+              client_id: 'client-b',
+              name: 'Old',
+              resource: 'cluster:elastic',
+              revoked: true,
+            },
+          ],
+        },
+      });
+      coreStart.http.post.mockResolvedValue({
+        results: [{ client_id: 'client-a', connection_id: 'conn-1', status: 'revoked' }],
+      });
+
+      const { findByText, findByTestId, queryByTestId } = renderPage(coreStart);
+
+      await findByText('Mixed app');
+      const groupedTable = await findByTestId('applicationConnectionsInMemoryTable');
+      fireEvent.click(within(groupedTable).getByTestId('checkboxSelectAll'));
+
+      const bulkRevokeButton = await findByTestId('applicationConnectionsBulkRevokeButton');
+      expect(bulkRevokeButton).toHaveTextContent('Revoke 1 connection');
+      expect(queryByTestId('applicationConnectionsBulkDeleteButton')).not.toBeInTheDocument();
+
+      fireEvent.click(bulkRevokeButton);
+      const modal = await findByTestId('applicationConnectionsRevokeModal');
+      expect(within(modal).queryByText('Old')).not.toBeInTheDocument();
+      fireEvent.click(within(modal).getByTestId('applicationConnectionsRevokeConfirmButton'));
+
+      await waitFor(() => {
+        expect(coreStart.http.post).toHaveBeenCalledWith(
+          '/internal/security/oauth/connections/_bulk_revoke',
+          {
+            body: JSON.stringify({
+              connections: [{ client_id: 'client-a', connection_id: 'conn-1' }],
+            }),
+          }
+        );
+      });
+    });
+
+    it('offers Delete instead of Revoke on a revoked row and calls the bulk-delete API', async () => {
+      setupMixedStatusClient();
+      coreStart.http.post.mockResolvedValue({
+        results: [{ client_id: 'client-a', connection_id: 'conn-2', status: 'deleted' }],
+      });
+
+      const { findByText, findByTestId, getByTestId, queryByTestId } = renderPage(coreStart);
+
+      await findByText('My MCP app');
+      fireEvent.click(getByTestId('expandRow-client-a'));
+
+      const deleteLink = await findByTestId('deleteConnection-conn-2');
+      expect(deleteLink).toHaveTextContent('Delete');
+      expect(queryByTestId('revokeConnection-conn-2')).not.toBeInTheDocument();
+
+      fireEvent.click(deleteLink);
+      const modal = await findByTestId('applicationConnectionsDeleteModal');
+      expect(within(modal).getByText('Permanently delete connection?')).toBeInTheDocument();
+      fireEvent.click(within(modal).getByTestId('applicationConnectionsDeleteConfirmButton'));
+
+      await waitFor(() => {
+        expect(coreStart.http.post).toHaveBeenCalledWith(
+          '/internal/security/oauth/connections/_bulk_delete',
+          {
+            body: JSON.stringify({
+              connections: [{ client_id: 'client-a', connection_id: 'conn-2' }],
+            }),
+          }
+        );
+      });
+    });
+
+    it('collapses an expanded client row once its last connection is deleted', async () => {
+      let remainingConnections = [
+        {
+          id: 'conn-1',
+          client_id: 'client-a',
+          name: 'Laptop session',
+          resource: 'cluster:elastic',
+          revoked: true,
+        },
+      ];
+      coreStart.http.get.mockImplementation(((path: string) => {
+        if (path.endsWith('/oauth/clients')) {
+          return Promise.resolve({
+            clients: [{ id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' }],
+          });
+        }
+        if (path.endsWith('/oauth/connections')) {
+          return Promise.resolve({ connections: remainingConnections });
+        }
+        return Promise.resolve({});
+      }) as typeof coreStart.http.get);
+      coreStart.http.post.mockImplementation(() => {
+        remainingConnections = [];
+        return Promise.resolve({
+          results: [{ client_id: 'client-a', connection_id: 'conn-1', status: 'deleted' }],
+        });
+      });
+
+      const { findByText, findByTestId, getByTestId, queryByTestId } = renderPage(coreStart);
+
+      await findByText('My MCP app');
+      fireEvent.click(getByTestId('expandRow-client-a'));
+      expect(await findByTestId('applicationConnectionsChildTable-client-a')).toBeInTheDocument();
+
+      fireEvent.click(await findByTestId('deleteConnection-conn-1'));
+      const modal = await findByTestId('applicationConnectionsDeleteModal');
+      fireEvent.click(within(modal).getByTestId('applicationConnectionsDeleteConfirmButton'));
+
+      await waitFor(() => {
+        expect(queryByTestId('applicationConnectionsChildTable-client-a')).not.toBeInTheDocument();
+      });
+      expect(queryByTestId('expandRow-client-a')).not.toBeInTheDocument();
+      expect(getByTestId('applicationConnectionsCount-client-a')).toHaveTextContent('0');
+    });
+
+    it('disables revoked rows once a revoke selection is started in the list view', async () => {
+      setupMixedStatusClient();
+
+      const { findByText, findByTestId, getByTestId } = renderPage(coreStart);
+
+      await findByText('My MCP app');
+      fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+      const listView = await findByTestId('applicationConnectionsListView');
+      await within(listView).findByText('Laptop session');
+
+      // Both statuses are selectable until the first row picks the mode.
+      expect(within(listView).getByLabelText(/Select connection 'Desktop session'/)).toBeEnabled();
+
+      fireEvent.click(within(listView).getByLabelText(/Select connection 'Laptop session'/));
+
+      expect(await findByTestId('applicationConnectionsBulkRevokeButton')).toHaveTextContent(
+        'Revoke 1 connection'
+      );
+      expect(
+        within(listView).getByLabelText(
+          'This connection is already revoked. Clear your selection to delete it instead.'
+        )
+      ).toBeDisabled();
+    });
+
+    it('disables connected rows once a delete selection is started and bulk deletes', async () => {
+      setupMixedStatusClient();
+      coreStart.http.post.mockResolvedValue({
+        results: [{ client_id: 'client-a', connection_id: 'conn-2', status: 'deleted' }],
+      });
+
+      const { findByText, findByTestId, getByTestId, queryByTestId } = renderPage(coreStart);
+
+      await findByText('My MCP app');
+      fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+      const listView = await findByTestId('applicationConnectionsListView');
+      await within(listView).findByText('Desktop session');
+
+      fireEvent.click(within(listView).getByLabelText(/Select connection 'Desktop session'/));
+
+      const bulkDeleteButton = await findByTestId('applicationConnectionsBulkDeleteButton');
+      expect(bulkDeleteButton).toHaveTextContent('Delete 1 connection');
+      expect(queryByTestId('applicationConnectionsBulkRevokeButton')).not.toBeInTheDocument();
+      expect(
+        within(listView).getByLabelText(
+          'Only revoked connections can be deleted. Clear your selection to revoke this one instead.'
+        )
+      ).toBeDisabled();
+
+      fireEvent.click(bulkDeleteButton);
+      const modal = await findByTestId('applicationConnectionsDeleteModal');
+      fireEvent.click(within(modal).getByTestId('applicationConnectionsDeleteConfirmButton'));
+
+      await waitFor(() => {
+        expect(coreStart.http.post).toHaveBeenCalledWith(
+          '/internal/security/oauth/connections/_bulk_delete',
+          {
+            body: JSON.stringify({
+              connections: [{ client_id: 'client-a', connection_id: 'conn-2' }],
+            }),
+          }
+        );
+      });
+      await waitFor(() => {
+        expect(queryByTestId('applicationConnectionsBulkDeleteButton')).not.toBeInTheDocument();
+      });
+    });
+
+    it('keeps a mixed-status client row on revoke and disables the fully revoked client row', async () => {
+      setupHttpResponses(coreStart, {
+        clients: {
+          clients: [
+            { id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' },
+            { id: 'client-b', client_name: 'Retired app', resource: 'cluster:elastic' },
+          ],
+        },
+        connections: {
+          connections: [
+            {
+              id: 'conn-1',
+              client_id: 'client-a',
+              name: 'Laptop session',
+              resource: 'cluster:elastic',
+            },
+            {
+              id: 'conn-2',
+              client_id: 'client-b',
+              name: 'Retired session',
+              resource: 'cluster:elastic',
+              revoked: true,
+            },
+          ],
+        },
+      });
+
+      const { findByText, findByTestId, getByLabelText } = renderPage(coreStart);
+
+      await findByText('My MCP app');
+
+      fireEvent.click(getByLabelText("Select all connections for client 'My MCP app'"));
+
+      expect(await findByTestId('applicationConnectionsBulkRevokeButton')).toHaveTextContent(
+        'Revoke 1 connection'
+      );
+      expect(getByLabelText('All connections for this client are already revoked')).toBeDisabled();
+    });
+
+    it('starts a delete selection from a fully revoked client row and disables the others', async () => {
+      setupHttpResponses(coreStart, {
+        clients: {
+          clients: [
+            { id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' },
+            { id: 'client-b', client_name: 'Retired app', resource: 'cluster:elastic' },
+          ],
+        },
+        connections: {
+          connections: [
+            {
+              id: 'conn-1',
+              client_id: 'client-a',
+              name: 'Laptop session',
+              resource: 'cluster:elastic',
+            },
+            {
+              id: 'conn-2',
+              client_id: 'client-b',
+              name: 'Retired session',
+              resource: 'cluster:elastic',
+              revoked: true,
+            },
+          ],
+        },
+      });
+
+      const { findByText, findByTestId, getByLabelText } = renderPage(coreStart);
+
+      await findByText('Retired app');
+
+      fireEvent.click(getByLabelText("Select all connections for client 'Retired app'"));
+
+      expect(await findByTestId('applicationConnectionsBulkDeleteButton')).toHaveTextContent(
+        'Delete 1 connection'
+      );
+      expect(getByLabelText('This client has no revoked connections to delete')).toBeDisabled();
+    });
   });
 });

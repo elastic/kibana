@@ -15,6 +15,7 @@ import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
+import { useMonitorDetailsPage } from '../use_monitor_details_page';
 
 export const MONITOR_ALERTS_TABLE_ID = 'xpack.synthetics.monitor.alertTable';
 
@@ -29,6 +30,11 @@ export function MonitorDetailsAlerts() {
 
   // Configure the agent builder flyout with the monitor details
   useMonitorAttachmentConfig();
+
+  const redirect = useMonitorDetailsPage();
+  if (redirect) {
+    return redirect;
+  }
 
   if (!selectedLocation) {
     return <EuiLoadingSpinner size="xl" />;

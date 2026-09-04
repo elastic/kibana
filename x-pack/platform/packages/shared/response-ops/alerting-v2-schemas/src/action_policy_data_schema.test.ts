@@ -7,11 +7,12 @@
 
 import {
   actionPolicyDestinationSchema,
-  bulkActionActionPoliciesBodySchema,
+  bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
   snoozeActionPolicyBodySchema,
   updateActionPolicyDataSchema,
 } from './action_policy_data_schema';
+import { MAX_BULK_ITEMS } from './constants';
 
 const DESTINATIONS = [{ type: 'workflow' as const, id: 'wf-1' }];
 
@@ -22,25 +23,25 @@ describe('createActionPolicyDataSchema', () => {
     it('accepts minimal payload (defaults to per_episode, no throttle)', () => {
       const result = createActionPolicyDataSchema.parse(base);
 
-      expect(result.groupingMode).toBeUndefined();
+      expect(result.grouping_mode).toBeUndefined();
       expect(result.throttle).toBeUndefined();
     });
 
     it('accepts per_episode + on_status_change', () => {
       const result = createActionPolicyDataSchema.parse({
         ...base,
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_episode',
         throttle: { strategy: 'on_status_change' },
       });
 
-      expect(result.groupingMode).toBe('per_episode');
+      expect(result.grouping_mode).toBe('per_episode');
       expect(result.throttle?.strategy).toBe('on_status_change');
     });
 
     it('accepts per_episode + per_status_interval with interval', () => {
       const result = createActionPolicyDataSchema.parse({
         ...base,
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_episode',
         throttle: { strategy: 'per_status_interval', interval: '5m' },
       });
 
@@ -50,7 +51,7 @@ describe('createActionPolicyDataSchema', () => {
     it('accepts per_episode + every_time', () => {
       const result = createActionPolicyDataSchema.parse({
         ...base,
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_episode',
         throttle: { strategy: 'every_time' },
       });
 
@@ -60,20 +61,20 @@ describe('createActionPolicyDataSchema', () => {
     it('accepts per_field + time_interval with interval', () => {
       const result = createActionPolicyDataSchema.parse({
         ...base,
-        groupingMode: 'per_field',
-        groupBy: ['host.name'],
+        grouping_mode: 'per_field',
+        group_by: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '10m' },
       });
 
-      expect(result.groupingMode).toBe('per_field');
+      expect(result.grouping_mode).toBe('per_field');
       expect(result.throttle).toEqual({ strategy: 'time_interval', interval: '10m' });
     });
 
     it('accepts per_field + every_time', () => {
       const result = createActionPolicyDataSchema.parse({
         ...base,
-        groupingMode: 'per_field',
-        groupBy: ['host.name'],
+        grouping_mode: 'per_field',
+        group_by: ['host.name'],
         throttle: { strategy: 'every_time' },
       });
 
@@ -83,17 +84,17 @@ describe('createActionPolicyDataSchema', () => {
     it('accepts all + time_interval with interval', () => {
       const result = createActionPolicyDataSchema.parse({
         ...base,
-        groupingMode: 'all',
+        grouping_mode: 'all',
         throttle: { strategy: 'time_interval', interval: '1h' },
       });
 
-      expect(result.groupingMode).toBe('all');
+      expect(result.grouping_mode).toBe('all');
     });
 
     it('accepts all + every_time', () => {
       const result = createActionPolicyDataSchema.parse({
         ...base,
-        groupingMode: 'all',
+        grouping_mode: 'all',
         throttle: { strategy: 'every_time' },
       });
 
@@ -109,13 +110,13 @@ describe('createActionPolicyDataSchema', () => {
       expect(result.throttle).toEqual({});
     });
 
-    it('accepts no groupingMode with per_episode-compatible strategy', () => {
+    it('accepts no grouping_mode with per_episode-compatible strategy', () => {
       const result = createActionPolicyDataSchema.parse({
         ...base,
         throttle: { strategy: 'on_status_change' },
       });
 
-      expect(result.groupingMode).toBeUndefined();
+      expect(result.grouping_mode).toBeUndefined();
       expect(result.throttle?.strategy).toBe('on_status_change');
     });
   });
@@ -125,7 +126,7 @@ describe('createActionPolicyDataSchema', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
           ...base,
-          groupingMode: 'per_episode',
+          grouping_mode: 'per_episode',
           throttle: { strategy: 'time_interval', interval: '5m' },
         })
       ).toThrow('not valid for grouping mode');
@@ -135,7 +136,7 @@ describe('createActionPolicyDataSchema', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
           ...base,
-          groupingMode: 'per_field',
+          grouping_mode: 'per_field',
           throttle: { strategy: 'on_status_change' },
         })
       ).toThrow('not valid for grouping mode');
@@ -145,7 +146,7 @@ describe('createActionPolicyDataSchema', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
           ...base,
-          groupingMode: 'per_field',
+          grouping_mode: 'per_field',
           throttle: { strategy: 'per_status_interval', interval: '5m' },
         })
       ).toThrow('not valid for grouping mode');
@@ -155,7 +156,7 @@ describe('createActionPolicyDataSchema', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
           ...base,
-          groupingMode: 'all',
+          grouping_mode: 'all',
           throttle: { strategy: 'on_status_change' },
         })
       ).toThrow('not valid for grouping mode');
@@ -165,7 +166,7 @@ describe('createActionPolicyDataSchema', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
           ...base,
-          groupingMode: 'all',
+          grouping_mode: 'all',
           throttle: { strategy: 'per_status_interval', interval: '5m' },
         })
       ).toThrow('not valid for grouping mode');
@@ -175,7 +176,7 @@ describe('createActionPolicyDataSchema', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
           ...base,
-          groupingMode: 'per_episode',
+          grouping_mode: 'per_episode',
           throttle: { strategy: 'per_status_interval' },
         })
       ).toThrow('requires an interval');
@@ -185,13 +186,13 @@ describe('createActionPolicyDataSchema', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
           ...base,
-          groupingMode: 'all',
+          grouping_mode: 'all',
           throttle: { strategy: 'time_interval' },
         })
       ).toThrow('requires an interval');
     });
 
-    it('rejects omitted groupingMode with time_interval (defaults to per_episode)', () => {
+    it('rejects omitted grouping_mode with time_interval (defaults to per_episode)', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
           ...base,
@@ -264,17 +265,17 @@ describe('updateActionPolicyDataSchema', () => {
       expect(result.name).toBe('New name');
     });
 
-    it('accepts compatible groupingMode and throttle together', () => {
+    it('accepts compatible grouping_mode and throttle together', () => {
       const result = updateActionPolicyDataSchema.parse({
-        groupingMode: 'all',
+        grouping_mode: 'all',
         throttle: { strategy: 'time_interval', interval: '5m' },
       });
 
-      expect(result.groupingMode).toBe('all');
+      expect(result.grouping_mode).toBe('all');
       expect(result.throttle).toEqual({ strategy: 'time_interval', interval: '5m' });
     });
 
-    it('accepts throttle without groupingMode (skips validation)', () => {
+    it('accepts throttle without grouping_mode (skips validation)', () => {
       const result = updateActionPolicyDataSchema.parse({
         throttle: { strategy: 'time_interval', interval: '5m' },
       });
@@ -282,38 +283,38 @@ describe('updateActionPolicyDataSchema', () => {
       expect(result.throttle).toEqual({ strategy: 'time_interval', interval: '5m' });
     });
 
-    it('accepts groupingMode without throttle (skips validation)', () => {
+    it('accepts grouping_mode without throttle (skips validation)', () => {
       const result = updateActionPolicyDataSchema.parse({
-        groupingMode: 'per_field',
+        grouping_mode: 'per_field',
       });
 
-      expect(result.groupingMode).toBe('per_field');
+      expect(result.grouping_mode).toBe('per_field');
     });
 
     it('accepts setting throttle to null (clear throttle)', () => {
       const result = updateActionPolicyDataSchema.parse({
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_episode',
         throttle: null,
       });
 
       expect(result.throttle).toBeNull();
     });
 
-    it('accepts setting groupingMode to null with throttle absent (skips validation)', () => {
+    it('accepts setting grouping_mode to null with throttle absent (skips validation)', () => {
       const result = updateActionPolicyDataSchema.parse({
-        groupingMode: null,
+        grouping_mode: null,
       });
 
-      expect(result.groupingMode).toBeNull();
+      expect(result.grouping_mode).toBeNull();
     });
 
-    it('accepts setting both groupingMode and throttle to null', () => {
+    it('accepts setting both grouping_mode and throttle to null', () => {
       const result = updateActionPolicyDataSchema.parse({
-        groupingMode: null,
+        grouping_mode: null,
         throttle: null,
       });
 
-      expect(result.groupingMode).toBeNull();
+      expect(result.grouping_mode).toBeNull();
       expect(result.throttle).toBeNull();
     });
 
@@ -325,39 +326,39 @@ describe('updateActionPolicyDataSchema', () => {
       expect(result.matcher).toBeNull();
     });
 
-    it('accepts setting groupBy to null', () => {
+    it('accepts setting group_by to null', () => {
       const result = updateActionPolicyDataSchema.parse({
-        groupBy: null,
+        group_by: null,
       });
 
-      expect(result.groupBy).toBeNull();
+      expect(result.group_by).toBeNull();
     });
 
-    it('accepts groupingMode null with per_episode-compatible strategy (defaults to per_episode)', () => {
+    it('accepts grouping_mode null with per_episode-compatible strategy (defaults to per_episode)', () => {
       const result = updateActionPolicyDataSchema.parse({
-        groupingMode: null,
+        grouping_mode: null,
         throttle: { strategy: 'on_status_change' },
       });
 
-      expect(result.groupingMode).toBeNull();
+      expect(result.grouping_mode).toBeNull();
       expect(result.throttle?.strategy).toBe('on_status_change');
     });
   });
 
   describe('invalid payloads', () => {
-    it('rejects incompatible groupingMode and throttle strategy', () => {
+    it('rejects incompatible grouping_mode and throttle strategy', () => {
       expect(() =>
         updateActionPolicyDataSchema.parse({
-          groupingMode: 'per_episode',
+          grouping_mode: 'per_episode',
           throttle: { strategy: 'time_interval', interval: '5m' },
         })
       ).toThrow('not valid for grouping mode');
     });
 
-    it('rejects groupingMode null with aggregate-only strategy (null defaults to per_episode)', () => {
+    it('rejects grouping_mode null with aggregate-only strategy (null defaults to per_episode)', () => {
       expect(() =>
         updateActionPolicyDataSchema.parse({
-          groupingMode: null,
+          grouping_mode: null,
           throttle: { strategy: 'time_interval', interval: '5m' },
         })
       ).toThrow('not valid for grouping mode');
@@ -366,7 +367,7 @@ describe('updateActionPolicyDataSchema', () => {
     it('rejects strategy requiring interval when interval is missing', () => {
       expect(() =>
         updateActionPolicyDataSchema.parse({
-          groupingMode: 'all',
+          grouping_mode: 'all',
           throttle: { strategy: 'time_interval' },
         })
       ).toThrow('requires an interval');
@@ -375,13 +376,13 @@ describe('updateActionPolicyDataSchema', () => {
     it('rejects per_field + on_status_change', () => {
       expect(() =>
         updateActionPolicyDataSchema.parse({
-          groupingMode: 'per_field',
+          grouping_mode: 'per_field',
           throttle: { strategy: 'on_status_change' },
         })
       ).toThrow('not valid for grouping mode');
     });
 
-    it('rejects per_status_interval without interval even when groupingMode is omitted', () => {
+    it('rejects per_status_interval without interval even when grouping_mode is omitted', () => {
       expect(() =>
         updateActionPolicyDataSchema.parse({
           throttle: { strategy: 'per_status_interval' },
@@ -389,7 +390,7 @@ describe('updateActionPolicyDataSchema', () => {
       ).toThrow('requires an interval');
     });
 
-    it('rejects time_interval without interval even when groupingMode is omitted', () => {
+    it('rejects time_interval without interval even when grouping_mode is omitted', () => {
       expect(() =>
         updateActionPolicyDataSchema.parse({
           throttle: { strategy: 'time_interval' },
@@ -399,61 +400,60 @@ describe('updateActionPolicyDataSchema', () => {
   });
 });
 
-describe('bulkActionActionPoliciesBodySchema', () => {
-  it('accepts a delete action', () => {
-    const result = bulkActionActionPoliciesBodySchema.parse({
-      actions: [{ id: 'policy-1', action: 'delete' }],
+describe('bulkSnoozeActionPoliciesBodySchema', () => {
+  it('accepts ids plus snoozed_until', () => {
+    const result = bulkSnoozeActionPoliciesBodySchema.parse({
+      ids: ['policy-1', 'policy-2'],
+      snoozed_until: '2026-04-01T10:00:00Z',
     });
 
     expect(result).toEqual({
-      actions: [{ id: 'policy-1', action: 'delete' }],
+      ids: ['policy-1', 'policy-2'],
+      snoozed_until: '2026-04-01T10:00:00Z',
     });
   });
 
-  it('accepts mixed actions including delete', () => {
-    const result = bulkActionActionPoliciesBodySchema.parse({
-      actions: [
-        { id: 'policy-1', action: 'enable' },
-        { id: 'policy-2', action: 'disable' },
-        { id: 'policy-3', action: 'delete' },
-        { id: 'policy-4', action: 'snooze', snoozedUntil: '2026-04-01T10:00:00Z' },
-        { id: 'policy-5', action: 'unsnooze' },
-      ],
-    });
-
-    expect(result.actions).toHaveLength(5);
-    expect(result.actions[2]).toEqual({ id: 'policy-3', action: 'delete' });
-  });
-
-  it('rejects an unknown action', () => {
+  it('rejects a missing snoozed_until', () => {
     expect(() =>
-      bulkActionActionPoliciesBodySchema.parse({
-        actions: [{ id: 'policy-1', action: 'unknown' }],
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: ['policy-1'],
       })
     ).toThrow();
   });
 
-  it('rejects an empty actions array', () => {
+  it('rejects a non-datetime snoozed_until', () => {
     expect(() =>
-      bulkActionActionPoliciesBodySchema.parse({
-        actions: [],
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: ['policy-1'],
+        snoozed_until: 'not-a-date',
+      })
+    ).toThrow();
+  });
+
+  it('rejects an empty ids array', () => {
+    expect(() =>
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: [],
+        snoozed_until: '2026-04-01T10:00:00Z',
+      })
+    ).toThrow();
+  });
+
+  it('rejects more than MAX_BULK_ITEMS ids', () => {
+    expect(() =>
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `policy-${i}`),
+        snoozed_until: '2026-04-01T10:00:00Z',
       })
     ).toThrow();
   });
 
   it('rejects unknown top-level fields (strict)', () => {
     expect(() =>
-      bulkActionActionPoliciesBodySchema.parse({
-        actions: [{ id: 'policy-1', action: 'delete' }],
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: ['policy-1'],
+        snoozed_until: '2026-04-01T10:00:00Z',
         unknownField: 'x',
-      })
-    ).toThrow();
-  });
-
-  it('rejects unknown fields on a bulk action variant (strict)', () => {
-    expect(() =>
-      bulkActionActionPoliciesBodySchema.parse({
-        actions: [{ id: 'policy-1', action: 'enable', unknownField: 'x' }],
       })
     ).toThrow();
   });
@@ -463,7 +463,7 @@ describe('snoozeActionPolicyBodySchema', () => {
   it('rejects unknown top-level fields (strict)', () => {
     expect(() =>
       snoozeActionPolicyBodySchema.parse({
-        snoozedUntil: '2026-04-01T10:00:00Z',
+        snoozed_until: '2026-04-01T10:00:00Z',
         unknownField: 'x',
       })
     ).toThrow();

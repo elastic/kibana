@@ -89,7 +89,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="securitySignal" size="xl" aria-hidden={true} />
+                <EuiIcon type="radar" size="xl" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
                 <EuiText>
@@ -104,7 +104,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
                 <EuiFlexItem alignItems="center" gutterSize="s">
                   <EuiFilterGroup>
                     <EuiFilterButton
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       onClick={() => {
                         // Handle filter button click
                       }}

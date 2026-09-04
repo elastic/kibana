@@ -136,6 +136,8 @@ export function useAlertPrevalenceFromProcessTree({
     indices: alertAndOriginalIndices,
   });
 
+  const schemaReady = schema !== null && id !== null;
+
   const query = useQuery<ProcessTreeAlertPrevalenceResponse>(
     ['getAlertPrevalenceFromProcessTree', id, indexPatternsKey, interval?.from, interval?.to],
     () => {
@@ -152,14 +154,36 @@ export function useAlertPrevalenceFromProcessTree({
         }),
       });
     },
-    { enabled: schema !== null && id !== null }
+    { enabled: schemaReady }
   );
 
   const refetch = () => {
     query.refetch();
   };
 
-  if (query.isLoading || loading) {
+  // A disabled tree query can sit in `isLoading: true` in react-query v3. If entity lookup found
+  // nothing, that must surface as an error rather than an infinite Analyzer/Correlations spinner.
+  if (loading) {
+    return {
+      loading: true,
+      error: false,
+      alertIds: undefined,
+      statsNodes: undefined,
+      refetch,
+    };
+  }
+
+  if (!schemaReady) {
+    return {
+      loading: false,
+      error: true,
+      alertIds: undefined,
+      statsNodes: undefined,
+      refetch,
+    };
+  }
+
+  if (query.isLoading) {
     return {
       loading: true,
       error: false,

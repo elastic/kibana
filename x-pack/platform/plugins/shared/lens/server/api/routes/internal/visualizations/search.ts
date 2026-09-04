@@ -7,13 +7,13 @@
 
 import { isBoom, boomify } from '@hapi/boom';
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
   LENS_INTERNAL_VIS_API_PATH,
   LENS_INTERNAL_API_VERSION,
 } from '../../../../../common/constants';
-import type { LensSearchIn, LensSavedObject } from '../../../../content_management';
+import type { LensSearchIn, LensSavedObject } from '../../../../content_management/zod';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensSearchRequestQuerySchema, lensSearchResponseBodySchema } from './schema';
 import { getLensInternalResponseItem } from './utils';
@@ -96,8 +96,8 @@ export const registerLensInternalVisualizationsSearchAPIRoute: RegisterAPIRouteF
           throw error;
         }
 
-        return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
-          body: {
+        return res.ok<z.output<typeof lensSearchResponseBodySchema>>({
+          body: lensSearchResponseBodySchema.parse({
             data: hits.map((item) => {
               return getLensInternalResponseItem(builder, item);
             }),
@@ -106,7 +106,7 @@ export const registerLensInternalVisualizationsSearchAPIRoute: RegisterAPIRouteF
               perPage,
               total: pagination.total,
             },
-          },
+          }),
         });
       } catch (error) {
         if (isBoom(error) && error.output.statusCode === 403) {

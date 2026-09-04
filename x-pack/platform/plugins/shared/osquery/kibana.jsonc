@@ -24,17 +24,18 @@
       "triggersActionsUi",
       "ruleRegistry",
       "security",
-      "unifiedDocViewer"
+      "uiActions",
+      "unifiedDocViewer",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
+      "cps",
       "fleet",
       "home",
       "lens",
       "telemetry",
       "cases",
-      "spaces",
-      "uiActions",
-      "unifiedSearch"
+      "spaces"
     ],
     "requiredBundles": [
       "esUiShared",

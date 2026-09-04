@@ -70,7 +70,10 @@
     "xpack.investigationOutput": "platform/packages/shared/kbn-investigation-output",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
-    "xpack.lens": "platform/plugins/shared/lens",
+    "xpack.lens": [
+      "platform/plugins/shared/lens",
+      "../src/platform/packages/shared/kbn-lens-common"
+    ],
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
     "xpack.licenseMgmt": "platform/plugins/shared/license_management",
     "xpack.licensing": "platform/plugins/shared/licensing",
@@ -93,7 +96,8 @@
     ],
     "xpack.monitoring": ["platform/plugins/private/monitoring"],
     "xpack.observability": "solutions/observability/plugins/observability",
-    "xpack.nightshift": "solutions/observability/packages/kbn-nightshift",
+    "xpack.nightshift": "solutions/observability/plugins/nightshift",
+    "xpack.nightshiftInvestigations": ["platform/plugins/shared/nightshift_investigations"],
     "xpack.observabilityAgentBuilder": "solutions/observability/plugins/observability_agent_builder",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_ai_assistant",
@@ -107,11 +111,13 @@
     "xpack.agentBuilder": [
       "platform/plugins/shared/agent_builder",
       "platform/plugins/shared/agent_builder_visualizations",
-      "platform/packages/shared/agent-builder"
+      "platform/packages/shared/agent-builder",
+      "platform/packages/shared/agent_builder_visualizations"
     ],
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
     "xpack.osquery": ["platform/plugins/shared/osquery"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
+    "xpack.pnd": ["solutions/security/plugins/pnd", "solutions/security/packages/kbn-pnd-common"],
     "xpack.queryActivity": "platform/plugins/shared/query_activity",
     "xpack.profiling": ["solutions/observability/plugins/profiling"],
     "xpack.reindexService": "platform/plugins/private/reindex_service",
@@ -146,6 +152,7 @@
     "xpack.sharedComponents": "platform/packages/shared/kbn-shared-components",
     "xpack.changeHistoryUi": "platform/packages/shared/kbn-change-history-ui",
     "xpack.significantEvents": ["platform/plugins/shared/significant_events"],
+    "xpack.significantEventsApp": ["platform/plugins/shared/significant_events_app"],
     "xpack.streams": ["platform/plugins/shared/streams_app"],
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",

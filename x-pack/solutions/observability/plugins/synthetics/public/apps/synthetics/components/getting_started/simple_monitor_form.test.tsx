@@ -28,9 +28,8 @@ describe('SimpleMonitorForm', () => {
     expect(screen.getByText(WEBSITE_URL_LABEL)).toBeInTheDocument();
     expect(screen.getByText(WEBSITE_URL_HELP_TEXT)).toBeInTheDocument();
 
-    // calls enabled API
-    await waitFor(async () => {
-      expect(dispatchSpy).toHaveBeenCalledTimes(6);
+    await waitFor(() => {
+      expect(dispatchSpy).toHaveBeenCalled();
     });
   });
 

@@ -33,6 +33,8 @@ dependsOn:
   - '@kbn/core-plugins-browser'
   - '@kbn/config'
   - '@kbn/scout'
+  - '@kbn/ui-callout'
+  - '@kbn/core-user-profile-common'
 tags:
   - plugin
   - prod
@@ -46,6 +48,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/**/*
+    - '@kbn/core-user-settings-types'
     - '!target/**/*'
   jest-config:
     - jest.config.js

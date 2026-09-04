@@ -16,7 +16,11 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
+import type {
+  IWorkflowEventLoggerService,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';
@@ -33,7 +37,6 @@ export interface WorkflowStorageDeps {
 
 /** Deps for WorkflowCrudService (CRUD + deletion + disable-all). */
 export interface WorkflowCrudDeps extends WorkflowStorageDeps {
-  esClient: ElasticsearchClient;
   getSecurity: () => SecurityServiceStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   getTaskScheduler: () => WorkflowTaskScheduler | null;
@@ -41,17 +44,22 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   validationService: WorkflowValidationService;
   getCoreStart: () => CoreStart;
   changeHistoryService: IWorkflowChangeHistoryService;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
 }
 
 /** Deps for WorkflowSearchService. */
 export interface WorkflowSearchDeps extends WorkflowStorageDeps {
   esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
 }
 
 /** Deps for WorkflowExecutionQueryService. */
 export interface WorkflowExecutionQueryDeps {
   logger: Logger;
   esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   workflowEventLoggerService: IWorkflowEventLoggerService;
 }
 

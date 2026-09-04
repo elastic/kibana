@@ -1,5 +1,8 @@
 {
   "sha1": "046b17b193738da8477c5704b630bd16f1752ba2",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "90fff840c08261e-5a00ec1e729ddb6",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_listing_delete.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 30,
+        "column": 13
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_listing.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_listing.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 35,
+        "column": 13
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_listing.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 40,
+        "column": 23
       }
     }
   ]

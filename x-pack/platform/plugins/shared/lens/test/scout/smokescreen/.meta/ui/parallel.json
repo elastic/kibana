@@ -1,0 +1,188 @@
+{
+  "sha1": "d62be05fce331f13497465d306bf6d23978fb9a8",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e5783a730be5baa-6217f7026a7bef2",
+      "title": "Setup environment for Lens smokescreen tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "21923a7aa69bd24-ec0ed097095fb0e",
+      "title": "Lens chart creation creates and saves an XY area chart, then reopens it with the same configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_creation.spec.ts",
+        "line": 25,
+        "column": 51
+      }
+    },
+    {
+      "id": "21923a7aa69bd24-e2feb0cd547afef",
+      "title": "Lens chart creation preserves the split field when switching a saved XY chart to filters aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_creation.spec.ts",
+        "line": 52,
+        "column": 60
+      }
+    },
+    {
+      "id": "21923a7aa69bd24-42fc5ed07c9cb92",
+      "title": "Lens chart creation switches the first layer to a different data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_creation.spec.ts",
+        "line": 71,
+        "column": 15
+      }
+    },
+    {
+      "id": "22231378990ac6a-a57791d2b84d2aa",
+      "title": "Lens chart switching from scratch builds a pie chart and switches it to a datatable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching_from_scratch.spec.ts",
+        "line": 17,
+        "column": 22
+      }
+    },
+    {
+      "id": "22231378990ac6a-677d958e642f3bf",
+      "title": "Lens chart switching from scratch builds a heatmap and switches it to a bar chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching_from_scratch.spec.ts",
+        "line": 51,
+        "column": 16
+      }
+    },
+    {
+      "id": "90c04f88fddb995-934400cae65b07f",
+      "title": "Lens chart switching keeps label and value when switching a legacy metric to a datatable and back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
+        "line": 36,
+        "column": 13
+      }
+    },
+    {
+      "id": "90c04f88fddb995-28a9057ba33eae4",
+      "title": "Lens chart switching maps dimensions when switching a saved XY chart to pie and then to bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
+        "line": 50,
+        "column": 28
+      }
+    },
+    {
+      "id": "90c04f88fddb995-0cb8fe2db723154",
+      "title": "Lens chart switching keeps all dimensions when switching a bar chart to a line chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
+        "line": 77,
+        "column": 20
+      }
+    },
+    {
+      "id": "90c04f88fddb995-1ab3ad9fc990f2e",
+      "title": "Lens chart switching keeps both slice-by dimensions when switching a pie chart to a treemap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
+        "line": 92,
+        "column": 20
+      }
+    },
+    {
+      "id": "a8798169b20cbd3-f53e79983ac5ee3",
+      "title": "Lens layers transitions from a multi-layer stacked bar to a multi-layer line chart and removes all layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/layers.spec.ts",
+        "line": 14,
+        "column": 22
+      }
+    },
+    {
+      "id": "a8798169b20cbd3-7a3f4ecb8d989b8",
+      "title": "Lens layers transitions the selected layer in a multi-layer bar using layer chart switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/layers.spec.ts",
+        "line": 55,
+        "column": 29
+      }
+    },
+    {
+      "id": "a8798169b20cbd3-3812e6c2faa9713",
+      "title": "Lens layers transitions from a multi-layer stacked bar to a treemap chart using suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/layers.spec.ts",
+        "line": 96,
+        "column": 58
+      }
+    },
+    {
+      "id": "a8798169b20cbd3-7039e4f3be4ba3a",
+      "title": "Lens layers keeps suggestions up to date with the current configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/layers.spec.ts",
+        "line": 128,
+        "column": 13
+      }
+    }
+  ]
+}

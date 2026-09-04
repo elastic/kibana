@@ -22,7 +22,8 @@
     "@kbn/monaco",
     "@kbn/css-utils",
     "@kbn/licensing-types",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

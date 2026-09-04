@@ -47,6 +47,7 @@ export const InputPopoverButton: React.FC<
     <EuiButtonEmpty
       css={[truncateStyles, open && openStyles]}
       color="text"
+      size="xs"
       iconSide="left"
       flush="both"
       iconType={iconType}

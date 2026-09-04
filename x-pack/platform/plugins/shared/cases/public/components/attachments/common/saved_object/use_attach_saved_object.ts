@@ -86,8 +86,10 @@ export const useAttachSavedObject = ({
           attachments: [attachment],
         });
         toasts.addSuccess({
-          title: i18n.ATTACH_SUCCESS_TITLE,
-          text: title,
+          title: i18n.ATTACH_SUCCESS_TITLE({
+            soType: supportedType,
+            objectTitle: title,
+          }),
         });
         refreshCaseViewPage();
         onAttached();

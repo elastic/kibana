@@ -1,0 +1,47 @@
+version: "1"
+name: Alert Triage
+description: Watch Floor alert triage worker stub.
+enabled: false
+tags:
+  - watch
+  - watch-floor
+triggers:
+  - type: manual
+consts:
+  worker_settings:
+    settingsVersion: __WORKER_SETTINGS_VERSION__
+    autonomy: "__WORKER_AUTONOMY_LEVEL__"
+steps:
+  - name: triage_alerts
+    type: ai.agent
+    agent-id: alertzero-thin-agent
+    timeout: "10m"
+    create-conversation: true
+    with:
+      configuration_overrides:
+        skill_ids:
+          - alert-analysis
+      message: >
+        Triage the security alert context below. Prefer
+        recall over precision when unsure. Return a structured
+        classification.
+
+        Alert / event context:
+        {{ event | json }}
+      schema:
+        type: object
+        properties:
+          classification:
+            type: string
+            enum:
+              - true_positive
+              - false_positive
+              - inconclusive
+            description: Classification of the alert based on analysis
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+            description: Confidence from 0.0–1.0
+          rationale:
+            type: string

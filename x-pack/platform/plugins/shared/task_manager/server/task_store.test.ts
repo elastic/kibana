@@ -35,7 +35,6 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
-import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/errors';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import type {
@@ -44,6 +43,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-shared';
 import { TaskValidator } from './task_validator';
 import { EsApiKeyStrategy } from './api_key_strategy';
+import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 
 let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
 let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
@@ -142,9 +142,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -272,9 +269,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -341,7 +335,7 @@ describe('TaskStore', () => {
       const mockUserScope = {
         apiKeyId: 'apiKeyId',
         apiKeyCreatedBy: 'testUser',
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const request = httpServerMock.createKibanaRequest();
@@ -388,7 +382,12 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security, {});
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [task],
+        request,
+        coreStart.security,
+        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
+      );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -422,9 +421,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: false,
@@ -476,6 +472,89 @@ describe('TaskStore', () => {
       expect(getApiKeyAndUserScope).toHaveBeenCalled();
     });
 
+    test('invalidates the granted API keys when the task cannot be created', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('id', {
+        apiKey: Buffer.from('apiKeyId:apiKey').toString('base64'),
+        uiamApiKey: 'uiamApiKey',
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          uiamApiKeyId: 'uiamApiKeyId',
+          apiKeyCreatedByUser: false,
+          spaceId: 'testSpace',
+        },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+      scopedSavedObjectsClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError('task', 'id')
+      );
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.schedule(task as TaskInstance, { request })).rejects.toThrow(
+        'Saved object [task/id] conflict'
+      );
+
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'apiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+        {
+          attributes: {
+            apiKeyId: 'uiamApiKeyId',
+            createdAt: expect.any(String),
+            uiamApiKey: 'uiamApiKey',
+          },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
+    test('does not invalidate a caller supplied API key when the task cannot be created', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('id', {
+        apiKey: Buffer.from('apiKeyId:apiKey').toString('base64'),
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          apiKeyCreatedByUser: true,
+          spaceId: 'testSpace',
+        },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+      scopedSavedObjectsClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError('task', 'id')
+      );
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.schedule(task as TaskInstance, { request })).rejects.toThrow(
+        'Saved object [task/id] conflict'
+      );
+
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+    });
+
     test('pushes error from saved objects client to errors$', async () => {
       const task: TaskInstance = {
         id: 'id',
@@ -512,7 +591,7 @@ describe('TaskStore', () => {
         taskType: 'report',
         schedule: { interval: 'invalid-interval' },
       };
-      await expect(testSchedule(task)).rejects.toThrowError(
+      await expect(testSchedule(task)).rejects.toThrow(
         `[TaskValidator] Invalid interval "invalid-interval". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
       );
     });
@@ -547,9 +626,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -642,7 +718,7 @@ describe('TaskStore', () => {
       partition: 237,
       userScope: {
         apiKeyId: 'EJYCtpUBGuyFd3FroZmZ',
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         apiKeyCreatedByUser: false,
       },
       ownerId: 'kibana:5b2de169-2785-441b-ae8c-186a1936b17d',
@@ -674,9 +750,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -845,7 +918,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -950,7 +1022,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -1049,7 +1120,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -1166,9 +1236,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -1295,9 +1362,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -1475,7 +1539,7 @@ describe('TaskStore', () => {
         }
       );
 
-      await expect(store.update(task, { validate: true })).rejects.toThrowError(
+      await expect(store.update(task, { validate: true })).rejects.toThrow(
         `[TaskValidator] Invalid interval "invalid-interval". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
       );
     });
@@ -1507,7 +1571,7 @@ describe('TaskStore', () => {
     const mockUserScope = {
       apiKeyId: 'apiKeyId',
       apiKeyCreatedByUser: false,
-      spaceId: 'testSpace',
+      spaceId: brandSpaceId('testSpace'),
     };
 
     beforeEach(() => {
@@ -1526,9 +1590,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: mockSavedObjectsService as unknown as SavedObjectsServiceStart,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -1825,7 +1886,7 @@ describe('TaskStore', () => {
       const mockUpdatedUserScope = {
         apiKeyId: 'apiKeyIdUpdated',
         apiKeyCreatedByUser: false,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const apiKeyAndUserScopeMap = new Map();
@@ -1866,7 +1927,7 @@ describe('TaskStore', () => {
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
         mockRequest,
         coreStart.security,
-        {}
+        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -1915,7 +1976,7 @@ describe('TaskStore', () => {
       const mockUpdatedUserScope = {
         apiKeyId: 'apiKeyIdUpdated',
         apiKeyCreatedByUser: true,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const apiKeyAndUserScopeMap = new Map();
@@ -1967,7 +2028,7 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
-        {}
+        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -1991,7 +2052,7 @@ describe('TaskStore', () => {
       expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
     });
 
-    test('bulk update task with regenerated API key when api key but do not invalidate api key if the update fails', async () => {
+    test('bulk update task with regenerated API key invalidates the unused new key but keeps the in-use old key if the update fails', async () => {
       const mockScopedClient = {
         bulkUpdate: jest.fn().mockResolvedValue({
           saved_objects: [
@@ -2023,7 +2084,7 @@ describe('TaskStore', () => {
       const mockUpdatedUserScope = {
         apiKeyId: 'apiKeyIdUpdated',
         apiKeyCreatedByUser: false,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const apiKeyAndUserScopeMap = new Map();
@@ -2064,7 +2125,14 @@ describe('TaskStore', () => {
         excludedExtensions: ['security', 'spaces'],
       });
 
-      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+      // The update never landed, so the regenerated key belongs to no task and must be
+      // invalidated. The old key must be left alone: the task still runs on it.
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'apiKeyIdUpdated', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [
           {
@@ -2075,7 +2143,7 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
-        {}
+        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2097,6 +2165,64 @@ describe('TaskStore', () => {
 
       expect(logger.debug).not.toHaveBeenCalled();
       expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    test('bulk update invalidates the regenerated API key of a doc omitted during local validation', async () => {
+      const mockScopedClient = {
+        bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      };
+      mockGetScopedClient.mockReturnValue(mockScopedClient);
+
+      const mockUpdatedApiKey = Buffer.from('apiKeyIdUpdated:apiKey').toString('base64');
+      const mockUpdatedUserScope = {
+        apiKeyId: 'apiKeyIdUpdated',
+        apiKeyCreatedByUser: false,
+        spaceId: 'testSpace',
+      };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task:324242', {
+        apiKey: mockUpdatedApiKey,
+        userScope: mockUpdatedUserScope,
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      // The doc fails local validation after the key was regenerated, so it never reaches the
+      // bulk update and gets no entry in the bulk response.
+      mockGetValidatedTaskInstanceForUpdating.mockImplementation(() => {
+        throw new Error('validation failed');
+      });
+
+      const result = await store.bulkUpdate(
+        [
+          {
+            ...bulkUpdateTask,
+            apiKey: mockApiKey,
+            userScope: mockUserScope,
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest, regenerateApiKey: true },
+        }
+      );
+
+      expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith([], { refresh: false });
+      expect(logger.error).toHaveBeenCalledWith(
+        '[TaskStore] An error occured. Task task:324242 will not be updated. Error: validation failed'
+      );
+
+      // The regenerated key never made it onto the task and must be invalidated. The old key
+      // must be left alone: the task still runs on it.
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'apiKeyIdUpdated', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+
+      expect(result).toEqual([]);
     });
 
     test('bulk update task with no API key changes when api key, user scope are not available and request and regenerate api key flag are available', async () => {
@@ -2251,7 +2377,7 @@ describe('TaskStore', () => {
         apiKeyId: 'apiKeyId',
         uiamApiKeyId: 'uiamApiKeyId',
         apiKeyCreatedByUser: false,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const mockScopedClient = {
@@ -2303,7 +2429,7 @@ describe('TaskStore', () => {
                 apiKeyId: 'apiKeyId',
                 uiamApiKeyId: 'uiamApiKeyId',
                 apiKeyCreatedByUser: false,
-                spaceId: 'testSpace',
+                spaceId: brandSpaceId('testSpace'),
               },
             },
           ],
@@ -2360,9 +2486,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: {
           getScopedClient: mockGetScopedClient,
         } as unknown as SavedObjectsServiceStart,
@@ -2437,9 +2560,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -2957,7 +3077,7 @@ describe('TaskStore', () => {
           apiKeyId: 'api-key-id',
           uiamApiKeyId: 'uiam-api-key-id',
           apiKeyCreatedByUser: false,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
         },
       } as PartialConcreteTaskInstance;
 
@@ -2999,6 +3119,66 @@ describe('TaskStore', () => {
       expect(serialized).not.toContain('apiKey');
       expect(serialized).not.toContain('uiamApiKey');
     });
+
+    test(`maps each result to its own doc when two partial updates target the same task id`, async () => {
+      // All runners share one BufferedTaskStore, so partial updates for the same task
+      // id can be batched together; each result must echo its own doc, not the first.
+      const finishingUpdate: PartialConcreteTaskInstance = {
+        id: 'task_dup',
+        version: 'WzQsMV0=',
+        status: 'idle' as TaskStatus,
+        runAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      };
+      const retryAtUpdate: PartialConcreteTaskInstance = {
+        id: 'task_dup',
+        retryAt: mockedDate,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:task_dup',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:task_dup',
+              _version: 3,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 85,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([finishingUpdate, retryAtUpdate]);
+
+      expect(result[0]).toMatchObject({
+        value: { id: 'task_dup', status: 'idle', startedAt: null, retryAt: null },
+      });
+      // If the retryAt-only update inherits the finishing update's `startedAt: null`,
+      // the long-running retryAt updater builds a ready-to-run instance with a null
+      // startedAt, which later crashes the poll cycle.
+      expect(result[1]).toMatchObject({ value: { id: 'task_dup', retryAt: mockedDate } });
+      expect(result[1]).not.toMatchObject({ value: { startedAt: null } });
+    });
   });
 
   describe('remove', () => {
@@ -3025,7 +3205,7 @@ describe('TaskStore', () => {
         userScope: {
           apiKeyId: 'apiKeyId',
           apiKeyCreatedBy: 'testUser',
-          spaceId: 'testSpace',
+          spaceId: brandSpaceId('testSpace'),
         },
       },
       references: [],
@@ -3046,9 +3226,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3125,7 +3302,7 @@ describe('TaskStore', () => {
         userScope: {
           apiKeyId: 'apiKeyId1',
           apiKeyCreatedBy: 'testUser',
-          spaceId: 'testSpace',
+          spaceId: brandSpaceId('testSpace'),
         },
       },
       references: [],
@@ -3152,7 +3329,7 @@ describe('TaskStore', () => {
         userScope: {
           apiKeyId: 'apiKeyId2',
           apiKeyCreatedBy: 'testUser',
-          spaceId: 'testSpace',
+          spaceId: brandSpaceId('testSpace'),
         },
       },
       references: [],
@@ -3175,9 +3352,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3265,9 +3439,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3298,7 +3469,7 @@ describe('TaskStore', () => {
             apiKeyId: 'apiKeyId',
             uiamApiKeyId: 'uiamApiKeyId',
             apiKeyCreatedByUser: false,
-            spaceId: 'testSpace',
+            spaceId: brandSpaceId('testSpace'),
           },
         },
         references: [],
@@ -3349,9 +3520,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3403,6 +3571,62 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('taskExists', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        executionContext: mockExecutionContextStart,
+        apiKeyStrategy: new EsApiKeyStrategy(),
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
+    });
+
+    test('returns true without decrypting the task when it exists', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: 'id',
+        type: 'task',
+        attributes: {},
+        references: [],
+        version: '123',
+      });
+
+      await expect(store.taskExists('id')).resolves.toBe(true);
+
+      expect(savedObjectsClient.get).toHaveBeenCalledWith('task', 'id');
+      expect(esoClient.createPointInTimeFinderDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('returns false when the task does not exist', async () => {
+      savedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'id')
+      );
+
+      await expect(store.taskExists('id')).resolves.toBe(false);
+    });
+
+    test('pushes any other error from saved objects client to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.get.mockRejectedValueOnce(new Error('Failure'));
+
+      await expect(store.taskExists('id')).rejects.toThrow('Failure');
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
   describe('bulkGet', () => {
     let store: TaskStore;
 
@@ -3417,9 +3641,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3520,9 +3741,6 @@ describe('TaskStore', () => {
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
             allowReadingInvalidState: false,
-            requestTimeouts: {
-              update_by_query: 1000,
-            },
             savedObjectsService: coreStart.savedObjects,
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
@@ -3550,9 +3768,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3578,9 +3793,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3607,9 +3819,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3753,7 +3962,7 @@ describe('TaskStore', () => {
       const mockUserScope = {
         apiKeyId: 'apiKeyId',
         apiKeyCreatedBy: 'testUser',
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const request = httpServerMock.createKibanaRequest();
@@ -3825,7 +4034,7 @@ describe('TaskStore', () => {
         [task1, task2],
         request,
         coreStart.security,
-        {}
+        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -3870,6 +4079,325 @@ describe('TaskStore', () => {
       ]);
     });
 
+    test('invalidates every granted API key when the bulk create fails', async () => {
+      const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', {
+        apiKey: Buffer.from('reportApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'reportApiKeyId', apiKeyCreatedByUser: false },
+      });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+      scopedSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('Failure'));
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task1, task2], { request })).rejects.toThrow('Failure');
+
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'reportApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+        {
+          attributes: { apiKeyId: 'yawnApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
+    test('invalidates API keys created before a later grant fails', async () => {
+      const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };
+      (getApiKeyAndUserScope as jest.Mock).mockImplementationOnce(
+        async (_tasks, _request, _security, options) => {
+          options.onApiKeyCreated({ apiKeyId: 'partially-granted-key-id' });
+          throw new Error('second grant failed');
+        }
+      );
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(store.bulkSchedule([task1, task2], { request })).rejects.toThrow(
+        'second grant failed'
+      );
+
+      expect(scopedSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'partially-granted-key-id', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
+    test('invalidates the granted API key of a task that failed to be created', async () => {
+      const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };
+
+      const createdApiKey = Buffer.from('reportApiKeyId:apiKey').toString('base64');
+      const createdUserScope = { apiKeyId: 'reportApiKeyId', apiKeyCreatedByUser: false };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', { apiKey: createdApiKey, userScope: createdUserScope });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+      scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: 'task1',
+            type: 'task',
+            attributes: {
+              attempts: 0,
+              params: '{}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              status: 'idle',
+              taskType: 'report',
+              partition: 225,
+              apiKey: createdApiKey,
+              userScope: createdUserScope,
+            },
+            references: [],
+            version: '123',
+          },
+          {
+            id: 'task2',
+            type: 'task',
+            attributes: {},
+            references: [],
+            error: {
+              error: 'Conflict',
+              message: 'Saved object [task/task2] conflict',
+              statusCode: 409,
+            },
+          },
+        ],
+      }));
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task1, task2], { request })).rejects.toMatchObject({
+        statusCode: 409,
+      });
+
+      // Only the key of the task that was not written. The key of the task that was created
+      // stays untouched, even though both were granted in the same call.
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'yawnApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
+    test('invalidates the granted API key when an id-less task fails to be created', async () => {
+      const task = { params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      let generatedTaskId: string | undefined;
+      (getApiKeyAndUserScope as jest.Mock).mockImplementationOnce(async ([taskWithId]) => {
+        generatedTaskId = taskWithId.id;
+        return new Map([
+          [
+            generatedTaskId,
+            {
+              apiKey: Buffer.from('generatedApiKeyId:apiKey').toString('base64'),
+              userScope: { apiKeyId: 'generatedApiKeyId', apiKeyCreatedByUser: false },
+            },
+          ],
+        ]);
+      });
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+      scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async (objects) => {
+        const createdId = objects[0].id;
+        if (!createdId) {
+          throw new Error('Expected TaskStore to assign an id before bulk create');
+        }
+        return {
+          saved_objects: [
+            {
+              id: createdId,
+              type: 'task',
+              attributes: {},
+              references: [],
+              error: {
+                error: 'Conflict',
+                message: 'Saved object conflict',
+                statusCode: 409,
+              },
+            },
+          ],
+        };
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(store.bulkSchedule([task], { request })).rejects.toMatchObject({
+        statusCode: 409,
+      });
+
+      expect(generatedTaskId).toEqual(expect.any(String));
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'generatedApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
+    test('queues a key shared by several failed tasks for invalidation only once', async () => {
+      const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+
+      // Keys are granted per task type, so both tasks carry the same key set.
+      const sharedApiKeyFields = {
+        apiKey: Buffer.from('reportApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'reportApiKeyId', apiKeyCreatedByUser: false },
+      };
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', sharedApiKeyFields);
+      apiKeyAndUserScopeMap.set('task2', sharedApiKeyFields);
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+      scopedSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('Failure'));
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task1, task2], { request })).rejects.toThrow('Failure');
+
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'reportApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
+    test('invalidates the granted API key of a task omitted during local preparation', async () => {
+      const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', {
+        apiKey: Buffer.from('reportApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'reportApiKeyId', apiKeyCreatedByUser: false },
+      });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      // task2 fails local validation, so it never reaches the bulk create.
+      mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => {
+        if ((task as TaskInstance).id === 'task2') {
+          throw new Error('validation failed');
+        }
+        return task;
+      });
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+      scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: 'task1',
+            type: 'task',
+            attributes: {
+              attempts: 0,
+              params: '{}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              status: 'idle',
+              taskType: 'report',
+              partition: 225,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      }));
+
+      const request = httpServerMock.createKibanaRequest();
+
+      const result = await store.bulkSchedule([task1, task2], { request });
+
+      expect(scopedSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [expect.objectContaining({ id: 'task1' })],
+        { overwrite: true, refresh: false }
+      );
+
+      // The omitted task has no entry in the bulk response, but the key granted for it never
+      // made it onto a task and must still be invalidated.
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'yawnApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+
+      expect(result).toHaveLength(1);
+    });
+
+    test('invalidates every granted API key when a task type is not supported', async () => {
+      const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'unregistered' };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', {
+        apiKey: Buffer.from('reportApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'reportApiKeyId', apiKeyCreatedByUser: false },
+      });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: Buffer.from('unregisteredApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'unregisteredApiKeyId', apiKeyCreatedByUser: false },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task1, task2], { request })).rejects.toThrow(
+        'Unsupported task type "unregistered"'
+      );
+
+      // Nothing was written, so every key granted in this call must be invalidated.
+      expect(scopedSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'reportApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+        {
+          attributes: { apiKeyId: 'unregisteredApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
     test('errors when bulk scheduling a task with API key if unable to encrypt SO', async () => {
       store = new TaskStore({
         logger: mockLogger(),
@@ -3881,9 +4409,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: false,
@@ -3917,9 +4442,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -4177,9 +4699,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -4202,7 +4721,7 @@ describe('TaskStore', () => {
       }));
 
       // allowReadingInvalidState: false, should throw an error
-      await expect(store.schedule(task as TaskInstance)).rejects.toThrowError(
+      await expect(store.schedule(task as TaskInstance)).rejects.toThrow(
         `[TaskValidator] failed to migrate to version 1 because the data returned from the up migration doesn't match the schema: [foo]: expected value of type [string] but got [number]`
       );
     });
@@ -4230,9 +4749,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: true,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -4263,44 +4779,6 @@ describe('TaskStore', () => {
     });
   });
 
-  describe('updateByQuery', () => {
-    let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-
-    beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      store = new TaskStore({
-        logger: mockLogger(),
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        esClient,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
-        savedObjectsService: coreStart.savedObjects,
-        security: coreStart.security,
-        getIsSecurityEnabled: () => true,
-        executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
-      });
-    });
-    test('should pass requestTimeout and retryOnTimeout', async () => {
-      esClient.updateByQuery.mockResponse({
-        hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
-      } as UpdateByQueryResponse);
-      await store.updateByQuery({ script: { source: '' } }, { max_docs: 10 });
-      expect(esClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
-        requestTimeout: 1000,
-        retryOnTimeout: false,
-      });
-    });
-  });
-
   describe('bulkGetVersions', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
@@ -4317,9 +4795,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -4435,9 +4910,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,

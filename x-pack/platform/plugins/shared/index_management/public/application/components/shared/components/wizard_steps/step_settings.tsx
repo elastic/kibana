@@ -16,9 +16,9 @@ import {
   EuiFormRow,
   EuiText,
   EuiCode,
-  EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 
@@ -115,7 +115,7 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
 
         {indexMode && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -146,8 +146,6 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
                   }}
                 />
               }
-              color="warning"
-              iconType="warning"
               data-test-subj="indexModeCallout"
             />
 

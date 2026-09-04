@@ -98,7 +98,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
           const expandButton = (
             <EuiToolTip content={EXPAND_ENTITY_BUTTON} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="expand"
+                iconType="maximize"
                 color={isCurrentEntity ? 'text' : 'primary'}
                 aria-label={EXPAND_ENTITY_BUTTON}
                 disabled={isCurrentEntity}

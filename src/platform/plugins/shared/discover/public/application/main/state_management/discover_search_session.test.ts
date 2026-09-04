@@ -30,7 +30,7 @@ describe('DiscoverSearchSessionManager', () => {
         searchSessionManager.getNextSearchSessionId();
       expect(searchSessionId).toEqual(nextId);
       expect(isSearchSessionRestored).toBe(false);
-      expect(session.start).toBeCalled();
+      expect(session.start).toHaveBeenCalled();
     });
 
     test('restores a session using query param from the URL', () => {
@@ -41,7 +41,7 @@ describe('DiscoverSearchSessionManager', () => {
         searchSessionManager.getNextSearchSessionId();
       expect(searchSessionId).toEqual(nextId);
       expect(isSearchSessionRestored).toBe(true);
-      expect(session.restore).toBeCalled();
+      expect(session.restore).toHaveBeenCalled();
     });
 
     test('removes query param from the URL when navigating away from a restored session', () => {
@@ -57,7 +57,7 @@ describe('DiscoverSearchSessionManager', () => {
         searchSessionManager.getNextSearchSessionId();
       expect(searchSessionId).toEqual(nextId);
       expect(isSearchSessionRestored).toBe(false);
-      expect(session.start).toBeCalled();
+      expect(session.start).toHaveBeenCalled();
       expect(history.location.search).toMatchInlineSnapshot(`""`);
     });
   });

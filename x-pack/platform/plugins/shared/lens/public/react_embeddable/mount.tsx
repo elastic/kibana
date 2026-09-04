@@ -81,4 +81,6 @@ export const lensFlyoutProps: OverlayFlyoutOpenOptions = {
   'data-test-subj': 'customizeLens',
   isResizable: true,
   outsideClickCloses: true,
+  // Close button lives in FlyoutWrapper so it can call the same onCancel as Cancel.
+  hideCloseButton: true,
 };

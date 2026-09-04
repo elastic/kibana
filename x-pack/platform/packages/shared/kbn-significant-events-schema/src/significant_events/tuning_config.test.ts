@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { validateSignificantEventsTuningConfig } from './tuning_config';
+import {
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  resolveSignificantEventsTuningConfig,
+  validateSignificantEventsTuningConfig,
+} from './tuning_config';
 
 describe('validateSignificantEventsTuningConfig', () => {
   it('returns no errors for a valid config', () => {
@@ -72,6 +76,50 @@ describe('validateSignificantEventsTuningConfig', () => {
     });
     expect(errors).toContainEqual(
       expect.stringContaining('entity_filtered_ratio (0.7) + diverse_ratio (0.5) must be <= 1.0')
+    );
+  });
+});
+
+describe('resolveSignificantEventsTuningConfig', () => {
+  it('merges stored values over defaults for missing keys', () => {
+    expect(resolveSignificantEventsTuningConfig({ sample_size: 50 })).toEqual({
+      ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+      sample_size: 50,
+    });
+  });
+
+  it('drops unknown keys without falling back to defaults', () => {
+    const logger = { warn: jest.fn() };
+    const result = resolveSignificantEventsTuningConfig(
+      { sample_size: 30, legacy_field: 99 },
+      logger
+    );
+    expect(result).toEqual({ ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, sample_size: 30 });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('falls back to full defaults and warns on an out-of-bounds value', () => {
+    const logger = { warn: jest.fn() };
+    const result = resolveSignificantEventsTuningConfig({ sample_size: 500 }, logger);
+    expect(result).toEqual(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid'));
+  });
+
+  it('resets a legacy 0-100 semantic_min_score and warns', () => {
+    const logger = { warn: jest.fn() };
+    const result = resolveSignificantEventsTuningConfig({ semantic_min_score: 75 }, logger);
+    expect(result.semantic_min_score).toBe(
+      DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.semantic_min_score
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('semantic_min_score'));
+  });
+
+  it('returns defaults for null or non-object input', () => {
+    expect(resolveSignificantEventsTuningConfig(null)).toEqual(
+      DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
+    );
+    expect(resolveSignificantEventsTuningConfig('nonsense')).toEqual(
+      DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
     );
   });
 });

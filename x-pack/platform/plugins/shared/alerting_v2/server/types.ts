@@ -29,27 +29,48 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
+import type { ArtifactTypeDefinition } from './lib/artifact_types';
+import type { AlertEventsClient } from './lib/alert_events_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
-export type AlertingServerSetup = void;
+export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
+
+export interface AlertingServerSetup {
+  /**
+   * Registers an artifact type owned by the calling plugin. Validation and
+   * declarative SO references are applied for this type on rule create/update/read.
+   * Unregistered types pass through unchanged.
+   */
+  registerArtifactType(definition: ArtifactTypeDefinition): void;
+}
 
 export interface AlertingServerStart {
   getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): Promise<RulesClientApi>;
 
   getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;
   getActionPolicyClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): Promise<ActionPolicyClientApi>;
+
+  /**
+   * Returns an AlertEventsClient scoped to the request's credentials.
+   * NOTE: AlertEventsClient writes via the internal ES user, so callers are
+   * responsible for enforcing write-privilege checks before calling mutating
+   * methods. HTTP routes must check via their own authz; workflow steps must
+   * check via PrivilegeChecker before invoking the client.
+   */
+  getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi>;
 }
 
 export interface AlertingServerSetupDependencies {

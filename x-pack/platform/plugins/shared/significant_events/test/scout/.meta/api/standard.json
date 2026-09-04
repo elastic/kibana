@@ -1,21 +1,9 @@
 {
-  "sha1": "67cbbb93ee8b1bf8b93fca2ddad29e4426d4a9b4",
+  "sha1": "931db3fd3b67105de22259faf9f3aaab76b711b6",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "145dd70ebc9c35e-9f78923f57eb20e",
-      "title": "Teardown environment for Significant Events API tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.teardown.ts",
-        "line": 11,
-        "column": 19
-      }
-    },
     {
       "id": "aba317166d7aac7-81c41da1351e0a5",
       "title": "Setup environment for Significant Events API tests",
@@ -23,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.setup.ts",
-        "line": 11,
-        "column": 16
+        "line": 16,
+        "column": 27
       }
     },
     {
@@ -39,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -55,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 209,
-        "column": 12
+        "line": 212,
+        "column": 15
       }
     },
     {
@@ -71,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 298,
-        "column": 12
+        "line": 265,
+        "column": 44
       }
     },
     {
@@ -87,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 372,
-        "column": 12
+        "line": 335,
+        "column": 44
       }
     },
     {
@@ -103,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 435,
-        "column": 12
+        "line": 419,
+        "column": 25
       }
     },
     {
@@ -119,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 23,
-        "column": 12
+        "line": 21,
+        "column": 44
       }
     },
     {
@@ -135,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 49,
-        "column": 12
+        "line": 47,
+        "column": 6
       }
     },
     {
@@ -151,8 +139,52 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 54,
+        "column": 30
+      }
+    },
+    {
+      "id": "cf67417434c65bf-e01fb638ca0f6e9",
+      "title": "Significant Events plugin hard-disable (Logs Essentials) public significant events API returns 404 when the plugin is unloaded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_hard_disabled.spec.ts",
+        "line": 22,
+        "column": 17
+      }
+    },
+    {
+      "id": "cf67417434c65bf-5c3eced8e270bba",
+      "title": "Significant Events plugin hard-disable (Logs Essentials) availability API returns 404 when the plugin is unloaded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_hard_disabled.spec.ts",
+        "line": 32,
+        "column": 20
+      }
+    },
+    {
+      "id": "b1abf6ccaccb508-5f6e05f92b17cee",
+      "title": "Significant Events plugin loaded (Complete / classic) availability API is registered when the plugin is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_loaded.spec.ts",
+        "line": 22,
+        "column": 37
       }
     },
     {
@@ -167,24 +199,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 37,
-        "column": 14
-      }
-    },
-    {
-      "id": "0d69f0f4d0e3e1c-ce49965b1da3194",
-      "title": "Managed workflows system-significant-events-triage: is installed and valid",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 36,
+        "column": 74
       }
     },
     {
@@ -199,8 +215,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 36,
+        "column": 74
       }
     },
     {
@@ -215,8 +231,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 36,
+        "column": 74
       }
     },
     {
@@ -231,8 +247,19 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 36,
+        "column": 74
+      }
+    },
+    {
+      "id": "145dd70ebc9c35e-9f78923f57eb20e",
+      "title": "Teardown environment for Significant Events API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

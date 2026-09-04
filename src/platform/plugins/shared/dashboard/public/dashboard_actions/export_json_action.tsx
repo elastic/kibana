@@ -85,14 +85,14 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     openLazyFlyout({
       core: coreServices,
       parentApi: embeddable.parentApi,
-      loadContent: async ({ closeFlyout }) => {
-        const [{ ExportJsonFlyout }, isByReference] = await Promise.all([
+      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+        const [{ DashboardPanelExportJsonFlyout }, isByReference] = await Promise.all([
           import('../dashboard_app/top_nav/share/export_json/flyout/export_json_flyout'),
           supportsByReference ? embeddable.canUnlinkFromLibrary() : false,
         ]);
 
         return (
-          <ExportJsonFlyout
+          <DashboardPanelExportJsonFlyout
             title={embeddable.title$.value ?? `${embeddable.type}-${embeddable.uuid}`}
             objectType={embeddable.getTypeDisplayName?.() ?? embeddable.type}
             closeFlyout={closeFlyout}
@@ -130,13 +130,13 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
                 warnings: result.warnings ?? [],
               };
             }}
+            titleId={ariaLabelledBy}
           />
         );
       },
       flyoutProps: {
         'data-test-subj': 'export_json_flyout',
         focusedPanelId: embeddable.uuid,
-        triggerId: `presentationPanelContextMenu-${embeddable.uuid}`,
       },
     });
   }

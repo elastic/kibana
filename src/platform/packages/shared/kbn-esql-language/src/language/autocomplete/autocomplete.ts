@@ -9,13 +9,7 @@
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { EsqlQuery, isHeaderCommand, Walker } from '@elastic/esql';
-import type {
-  ESQLColumn,
-  ESQLAstItem,
-  ESQLCommandOption,
-  ESQLFunction,
-  ESQLAstAllCommands,
-} from '@elastic/esql/types';
+import type { ESQLColumn, ESQLCommandOption, ESQLAstAllCommands } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
 import { SuggestionOrderingEngine, SuggestionCategory } from './utils';
@@ -229,7 +223,7 @@ export async function suggest(
       return columnMapPromise;
     };
 
-    const commands = [...(root.header ?? []), ...root.commands];
+    const commands = [...(root.header ?? []), ...astContext.astForContext.commands];
     const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       fullText,
       commands,
@@ -269,9 +263,7 @@ async function getSuggestionsWithinCommandExpression(
   commands: ESQLAstAllCommands[],
   astContext: {
     command: ESQLAstAllCommands;
-    node?: ESQLAstItem;
     option?: ESQLCommandOption;
-    containingFunction?: ESQLFunction;
     isCursorInSubquery: boolean;
   },
   getColumnsByType: GetColumnsByTypeFn,

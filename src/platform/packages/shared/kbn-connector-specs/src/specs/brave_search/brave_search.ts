@@ -42,6 +42,7 @@ export const BraveSearchConnector: ConnectorSpec = {
   actions: {
     webSearch: {
       isTool: true,
+      scope: 'read',
       description:
         'Search the web using Brave Search. Returns a list of results with titles, URLs, and descriptions for a given query. Supports pagination via count and offset parameters.',
       input: lazySchema(() =>
@@ -103,32 +104,21 @@ export const BraveSearchConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        // Perform a simple test search
-        await ctx.client.get('https://api.search.brave.com/res/v1/web/search', {
-          params: {
-            q: 'test',
-            count: 1,
-          },
-          headers: {
-            Accept: 'application/json',
-            'Accept-Encoding': 'gzip',
-          },
-        });
-        return {
-          ok: true,
-          message: 'Successfully connected to Brave Search API',
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          ok: false,
-          message: `Failed to connect to Brave Search API: ${errorMessage}`,
-        };
-      }
+      await ctx.client.get('https://api.search.brave.com/res/v1/web/search', {
+        params: {
+          q: 'test',
+          count: 1,
+        },
+        headers: {
+          Accept: 'application/json',
+          'Accept-Encoding': 'gzip',
+        },
+      });
+      return {};
     },
     description: i18n.translate('connectorSpecs.braveSearch.test.description', {
       defaultMessage: 'Verifies Brave Search API key and connection',
     }),
+    enabled: true,
   },
 };

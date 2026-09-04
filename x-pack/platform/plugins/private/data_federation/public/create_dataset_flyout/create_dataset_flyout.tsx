@@ -19,17 +19,20 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useController, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
 import { DATA_SOURCE_TYPES_TO_HELP_TEXT, validateIndexNameRules } from '../../common';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
+import type { DataFederationKibanaServices } from '../types';
 import {
   buildDatasetSettingsFromFormValues,
   type CreateDatasetFormValues,
@@ -69,6 +72,11 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
   onSave,
   dataSources,
 }) => {
+  const {
+    services: { docLinks },
+  } = useKibana<DataFederationKibanaServices>();
+  const dataFederationLinks = docLinks.links.dataFederation;
+
   const isEditMode = initialDataSet !== undefined;
   const initialIdNormalized = initialDataSet?.name?.trim().toLowerCase() ?? '';
   const [saveError, setSaveError] = useState<string | undefined>();
@@ -218,7 +226,12 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
           <>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
-              <p>{createDatasetFlyoutStrings.createDescription()}</p>
+              <p>
+                {createDatasetFlyoutStrings.createDescription()}{' '}
+                <EuiLink href={dataFederationLinks.datasets} target="_blank">
+                  {createDatasetFlyoutStrings.learnMore()}
+                </EuiLink>
+              </p>
             </EuiText>
           </>
         )}

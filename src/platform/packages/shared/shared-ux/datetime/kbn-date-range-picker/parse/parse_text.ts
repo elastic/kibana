@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 import {
+  CHAINED_DATE_MATH_RE,
   DATE_TYPE_ABSOLUTE,
   DATE_TYPE_NOW,
   DATE_TYPE_RELATIVE,
@@ -159,15 +160,22 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   const trimmed = normalizeDigits(text.trim());
   if (!trimmed) return buildInvalidRange(text);
 
-  const { presets = [], delimiter, dateFormat, roundRelativeTime, locale } = options ?? {};
+  const {
+    presets = [],
+    delimiter,
+    inputDateFormats = [],
+    roundRelativeTime,
+    locale,
+  } = options ?? {};
   const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
-  const formats = dateFormat ? [dateFormat, ...ABSOLUTE_FORMATS] : ABSOLUTE_FORMATS;
+  const formats = [...inputDateFormats, ...ABSOLUTE_FORMATS];
 
   // (1) Preset label match
   const preset = matchPreset(trimmed, presets);
   if (preset) {
-    const roundedStart = applyStartBoundRounding(preset.start, roundRelativeTime);
-    return buildRange(text, roundedStart, preset.end, formats, true);
+    const roundedStart = applyRelativeRounding(preset.start, roundRelativeTime);
+    const roundedEnd = applyRelativeRounding(preset.end, roundRelativeTime);
+    return buildRange(text, roundedStart, roundedEnd, formats, true);
   }
 
   // (2) Named range ("today", "yesterday", "this week", ...) or alias ("td", "yd", "tmr")
@@ -181,8 +189,9 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   // (3) Natural duration ("last 7 minutes", "next 3 days")
   const duration = matchNaturalDuration(trimmed, compiled);
   if (duration) {
-    const roundedStart = applyStartBoundRounding(duration.start, roundRelativeTime);
-    return buildRange(text, roundedStart, duration.end, formats, true);
+    const roundedStart = applyRelativeRounding(duration.start, roundRelativeTime);
+    const roundedEnd = applyRelativeRounding(duration.end, roundRelativeTime);
+    return buildRange(text, roundedStart, roundedEnd, formats, true);
   }
 
   // (4) Try splitting on delimiters (extra + locale grammar + universal dash).
@@ -205,8 +214,9 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
         formats
       );
       if (startDateString && endDateString) {
-        const roundedStart = applyStartBoundRounding(startDateString, roundRelativeTime);
-        return buildRange(text, roundedStart, endDateString, formats, false);
+        const roundedStart = applyRelativeRounding(startDateString, roundRelativeTime);
+        const roundedEnd = applyRelativeRounding(endDateString, roundRelativeTime);
+        return buildRange(text, roundedStart, roundedEnd, formats, false);
       }
     }
   }
@@ -216,9 +226,10 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   if (!dateString) return buildInvalidRange(text);
 
   if (dateString.startsWith('now+')) {
-    return buildRange(text, 'now', dateString, formats, false);
+    const roundedEnd = applyRelativeRounding(dateString, roundRelativeTime);
+    return buildRange(text, 'now', roundedEnd, formats, false);
   }
-  const roundedStart = applyStartBoundRounding(dateString, roundRelativeTime);
+  const roundedStart = applyRelativeRounding(dateString, roundRelativeTime);
   return buildRange(text, roundedStart, 'now', formats, false);
 }
 
@@ -252,41 +263,53 @@ function dateStringToOffset(dateString: DateString): DateOffset | null {
 }
 
 /**
- * Applies or strips the rounding suffix on a relative datemath `start` string.
+ * Applies the rounding suffix on a relative datemath bound (`start` or `end`)
+ * when `roundRelativeTime` is `true`.
  *
  * - `true` — keeps existing rounding; when absent, appends `/{roundUnit}`
- *   inferred from the offset unit via {@link ROUND_UNIT_MAP}.
- * - `false` — removes any trailing rounding suffix.
- * - `undefined` — returns the string unchanged.
+ *   inferred from the bound's own offset unit via {@link ROUND_UNIT_MAP}.
+ * - `false` / `undefined` — returns the string unchanged (preserves any
+ *   rounding the user or a preset provided).
  *
  * Bare `'now'` and non-relative strings are always returned as-is.
  */
-function applyStartBoundRounding(
-  start: DateString,
+function applyRelativeRounding(
+  bound: DateString,
   roundRelativeTime: boolean | undefined
 ): DateString {
-  if (roundRelativeTime === undefined) return start;
-  if (start === 'now' || !start.includes('now')) return start;
+  if (!roundRelativeTime) return bound;
+  if (bound === 'now' || !bound.includes('now')) return bound;
 
-  const offset = dateStringToOffset(start);
-  if (!offset) return start;
-
-  if (roundRelativeTime === false) {
-    return start.replace(/\/[smhdwMy]$/, '');
-  }
-
-  if (offset.roundTo) return start;
+  const offset = dateStringToOffset(bound);
+  if (!offset) return bound;
+  if (offset.roundTo) return bound;
 
   const roundUnit = ROUND_UNIT_MAP[offset.unit];
-  if (!roundUnit) return start;
+  if (!roundUnit) return bound;
 
-  return `${start}/${roundUnit}`;
+  return `${bound}/${roundUnit}`;
+}
+
+/**
+ * Parses chained Elasticsearch date math (e.g. `now/y+3M`, `-1y/y+3M`).
+ */
+function parseChainedDateMath(text: string): DateString | null {
+  const match = text.match(CHAINED_DATE_MATH_RE);
+  if (!match) return null;
+
+  const [, nowPrefix, ops] = match;
+  // A leading rounding with no `now` (`/d`) is not a valid standalone expression.
+  if (!nowPrefix && ops.startsWith('/')) return null;
+
+  const expression = `now${ops}`;
+  const parsed = dateMath.parse(expression);
+  return parsed?.isValid() ? expression : null;
 }
 
 /**
  * Converts a single text fragment into a {@link DateString}.
  * Tries (in order): "now", shorthand, natural instant, unix timestamp,
- * absolute formats, and finally dateMath/ISO fallback.
+ * chained/rounding-only date math, absolute formats, and dateMath/ISO fallback.
  */
 function instantToDateString(
   text: string,
@@ -319,9 +342,9 @@ function instantToDateString(
   const unixDate = unixTimestampToDate(trimmed);
   if (unixDate) return unixDate.toISOString();
 
-  // DateMath with rounding only (e.g. "now/d", "now/w") — preserve as-is.
-  // These aren't caught by the shorthand regex which expects a count.
-  if (/^now\/[smhdwMy]$/.test(trimmed)) return trimmed;
+  // Before the vocabulary guard: unit letters in these expressions are also grammar words.
+  const chained = parseChainedDateMath(trimmed);
+  if (chained) return chained;
 
   // Natural-language vocabulary (a unit word, direction word, or instant
   // marker) that reached this point is a failed PHRASE, not an absolute

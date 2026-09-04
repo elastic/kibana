@@ -78,7 +78,7 @@ export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({ rawR
   const trigger = (
     <EuiButtonEmpty
       iconType="clock"
-      size="s"
+      size="xs"
       color="text"
       onClick={togglePopover}
       aria-label={labels.triggerAriaLabel}
@@ -125,7 +125,7 @@ export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({ rawR
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              iconType="editorCodeBlock"
+              iconType="code"
               size="s"
               color="text"
               onClick={openJsonFlyout}

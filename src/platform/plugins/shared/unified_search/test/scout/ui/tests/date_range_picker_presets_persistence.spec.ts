@@ -58,4 +58,35 @@ spaceTest.describe('Date range picker presets persistence', { tag: testData.SQM_
       await expect(datePicker.getDateRangePreset(presetLabel)).toBeHidden();
     });
   });
+
+  spaceTest('does not offer deletion of quick ranges', async ({ page, pageObjects }) => {
+    const quickRangeLabel = 'Last 15 minutes';
+    const { datePicker, discover } = pageObjects;
+
+    await spaceTest.step('a quick range has no delete action', async () => {
+      await datePicker.openDateRangePickerPresetsPanel();
+      const quickRange = datePicker.getDateRangePreset(quickRangeLabel);
+      await expect(quickRange).toBeVisible();
+      await quickRange.hover();
+      await expect(datePicker.getDateRangePresetDeleteButton(quickRangeLabel)).toBeHidden();
+      await datePicker.closeDateRangePickerPresetsPanel();
+    });
+
+    await spaceTest.step('saving a preset leaves the quick range locked', async () => {
+      await datePicker.setTextRange('last 123 days');
+      await datePicker.saveCurrentRangeAsPreset();
+      await datePicker.openDateRangePickerPresetsPanel();
+      await expect(datePicker.getDateRangePresetDeleteButton('Last 123 days')).toBeAttached();
+      await expect(datePicker.getDateRangePresetDeleteButton(quickRangeLabel)).toBeHidden();
+      await datePicker.closeDateRangePickerPresetsPanel();
+    });
+
+    await spaceTest.step('reload and verify the quick range is still there', async () => {
+      await page.reload();
+      await discover.waitUntilSearchingHasFinished();
+      await datePicker.openDateRangePickerPresetsPanel();
+      await expect(datePicker.getDateRangePreset(quickRangeLabel)).toBeVisible();
+      await expect(datePicker.getDateRangePresetDeleteButton(quickRangeLabel)).toBeHidden();
+    });
+  });
 });

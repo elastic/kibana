@@ -12,6 +12,7 @@ import {
   useFieldNameValidation,
   collectFieldNames,
   createDuplicateFieldMarkers,
+  createInvalidNameMarkers,
 } from './use_field_name_validation';
 
 jest.mock('@kbn/monaco', () => ({
@@ -116,6 +117,70 @@ describe('createDuplicateFieldMarkers', () => {
     const markers = createDuplicateFieldMarkers(fieldInfos);
 
     expect(markers).toHaveLength(0);
+  });
+});
+
+describe('createInvalidNameMarkers', () => {
+  const invalidFieldInfo = {
+    name: 'legacy-field',
+    startLineNumber: 3,
+    startColumn: 11,
+    endLineNumber: 3,
+    endColumn: 25,
+  };
+  const rawFields = [{ name: 'legacy-field', control: 'INPUT_TEXT', type: 'keyword' }];
+
+  it('creates a marker for a field name that fails the authoring charset', () => {
+    const markers = createInvalidNameMarkers([invalidFieldInfo], rawFields);
+
+    expect(markers).toHaveLength(1);
+    expect(markers[0]).toMatchObject({
+      severity: 8,
+      message: expect.stringContaining('legacy-field'),
+      source: 'field-name-validation',
+    });
+  });
+
+  it('does not create a marker for a grandfathered field name', () => {
+    const markers = createInvalidNameMarkers(
+      [invalidFieldInfo],
+      rawFields,
+      new Set(['legacy-field'])
+    );
+
+    expect(markers).toHaveLength(0);
+  });
+
+  it('still flags an invalid name that is NOT in the grandfathered set', () => {
+    const markers = createInvalidNameMarkers(
+      [invalidFieldInfo],
+      rawFields,
+      new Set(['some-other-field'])
+    );
+
+    expect(markers).toHaveLength(1);
+  });
+
+  it('flags an underscore twin of a grandfathered hyphenated name', () => {
+    const twinInfo = { ...invalidFieldInfo, name: 'legacy_field' };
+    const twinRawFields = [{ name: 'legacy_field', control: 'INPUT_TEXT', type: 'keyword' }];
+
+    const markers = createInvalidNameMarkers([twinInfo], twinRawFields, new Set(['legacy-field']));
+
+    expect(markers).toHaveLength(1);
+    expect(markers[0].message).toContain('conflicts with the existing field "legacy-field"');
+  });
+
+  it('uses the length message, not the charset message, for an over-long clean name', () => {
+    const longName = 'a'.repeat(300);
+    const longInfo = { ...invalidFieldInfo, name: longName };
+    const longRawFields = [{ name: longName, control: 'INPUT_TEXT', type: 'keyword' }];
+
+    const markers = createInvalidNameMarkers([longInfo], longRawFields);
+
+    expect(markers).toHaveLength(1);
+    expect(markers[0].message).toContain('too long');
+    expect(markers[0].message).not.toContain('must contain only letters');
   });
 });
 
@@ -271,5 +336,65 @@ fields:
     jest.runAllTimers();
 
     expect(mockSetModelMarkers).toHaveBeenCalledWith(mockModel, 'field-name-validation', []);
+  });
+
+  describe('authoring-charset grandfathering (existingDefinition)', () => {
+    const yamlWithLegacyField = `name: Test Template
+fields:
+  - name: legacy-field
+    control: INPUT_TEXT
+    type: keyword`;
+
+    it('flags an invalid field name with no existingDefinition', () => {
+      renderHook(() => useFieldNameValidation(mockEditor, yamlWithLegacyField));
+
+      jest.runAllTimers();
+
+      const markers = mockSetModelMarkers.mock.calls[0][2];
+      expect(markers).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ message: expect.stringContaining('legacy-field') }),
+        ])
+      );
+    });
+
+    it('does not flag an untouched field name already present in existingDefinition', () => {
+      renderHook(() =>
+        useFieldNameValidation(mockEditor, yamlWithLegacyField, yamlWithLegacyField)
+      );
+
+      jest.runAllTimers();
+
+      expect(mockSetModelMarkers).toHaveBeenCalledWith(mockModel, 'field-name-validation', []);
+    });
+
+    it('still flags a brand-new invalid field name even with an existingDefinition', () => {
+      const yamlWithBrandNewField = `name: Test Template
+fields:
+  - name: legacy-field
+    control: INPUT_TEXT
+    type: keyword
+  - name: brand-new field
+    control: INPUT_TEXT
+    type: keyword`;
+
+      renderHook(() =>
+        useFieldNameValidation(mockEditor, yamlWithBrandNewField, yamlWithLegacyField)
+      );
+
+      jest.runAllTimers();
+
+      const markers = mockSetModelMarkers.mock.calls[0][2];
+      expect(markers).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ message: expect.stringContaining('brand-new field') }),
+        ])
+      );
+      expect(markers).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ message: expect.stringContaining('"legacy-field"') }),
+        ])
+      );
+    });
   });
 });

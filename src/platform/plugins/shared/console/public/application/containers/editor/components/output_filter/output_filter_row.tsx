@@ -179,7 +179,7 @@ export const OutputFilterRow = () => {
           <EuiButton
             size="s"
             color="primary"
-            iconType="returnKey"
+            iconType="return"
             iconSide="left"
             onClick={handleApply}
             isDisabled={isInvalid}

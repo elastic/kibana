@@ -12,16 +12,19 @@ import {
   EuiBottomBar,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCode,
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiOverlayMask,
+  EuiPanel,
   EuiSpacer,
   EuiSteps,
+  EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
@@ -80,6 +83,7 @@ import {
 
 import {
   computeDefaultVarGroupSelections,
+  getHiddenVarGroupOptionsForPolicyTemplate,
   type VarGroupSelection,
 } from '../services/var_group_helpers';
 import { applyNamespaceCustomizationChange } from '../services/apply_namespace_customization';
@@ -95,6 +99,7 @@ import { SetupTechnologySelector } from '../../../../../../services/setup_techno
 import {
   AddIntegrationFlyoutConfigureHeader,
   CreatePackagePolicySinglePageLayout,
+  PackageDocumentationModal,
   PostInstallAddAgentModal,
 } from './components';
 import { useDevToolsRequest, useOnSubmit } from './hooks';
@@ -148,6 +153,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
+  const [isDocModalOpen, setIsDocModalOpen] = useState<boolean>(false);
   /*
    * if there is no extension - will remain undefined
    * if there is an extension and it is loaded - will be set to true, otherwise false
@@ -269,12 +275,23 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const { enableVarGroups } = ExperimentalFeaturesService.get();
   const varGroups =
     enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  // Options unsupported by the policy template the page is scoped to (e.g. opened
+  // from the integrations browse page) are hidden from selectors and defaults
+  const hiddenVarGroupOptions = useMemo(
+    () =>
+      getHiddenVarGroupOptionsForPolicyTemplate(
+        packageInfo,
+        integrationToEnable,
+        isAgentlessSelected
+      ),
+    [packageInfo, integrationToEnable, isAgentlessSelected]
+  );
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(varGroups, isAgentlessSelected);
-  }, [packagePolicy.var_group_selections, varGroups, isAgentlessSelected]);
+    return computeDefaultVarGroupSelections(varGroups, isAgentlessSelected, hiddenVarGroupOptions);
+  }, [packagePolicy.var_group_selections, varGroups, isAgentlessSelected, hiddenVarGroupOptions]);
 
   const updateNewAgentPolicy = useCallback(
     (updatedFields: Partial<NewAgentPolicy>) => {
@@ -346,7 +363,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         selectedIlmPolicy,
         packageInfo,
         notifications,
-        packageInfo.title ?? packageInfo.name
+        packageInfo.title ?? packageInfo.name,
+        wasEnabled
       );
     })();
   }, [savedPackagePolicy, packageInfo, installedNamespaceCustomizationEnabledFor, notifications]);
@@ -544,6 +562,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const { getAgentlessStatusForPackage } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
   const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
+  const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
 
   const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
     return !replaceDefineStepView && enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
@@ -630,10 +649,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onIlmPolicyChange={(ilmPolicy) => {
               ilmPolicyRef.current = ilmPolicy;
             }}
+            deploymentSelector={
+              !useCheckableCardsForSetupTechnologySelector ? setupTechnologySelector : undefined
+            }
+            hideInVarGroupOptions={hiddenVarGroupOptions}
           />
-
-          {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
-          {!useCheckableCardsForSetupTechnologySelector && setupTechnologySelector}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (
@@ -685,6 +705,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       isAgentlessSelected,
       handleExtensionViewOnChange,
       varGroupSelections,
+      hiddenVarGroupOptions,
       setupTechnologySelector,
       useCheckableCardsForSetupTechnologySelector,
       createDatasetTemplates,
@@ -695,6 +716,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const steps: EuiStepProps[] = [
     ...(addIntegrationFlyoutProps?.selectIntegrationStep
       ? [addIntegrationFlyoutProps?.selectIntegrationStep]
+      : []),
+    ...(useCheckableCardsForSetupTechnologySelector && setupTechnologySelector
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.fleet.createPackagePolicy.stepSelectSetupTechnologyTitle',
+              {
+                defaultMessage: 'Deployment',
+              }
+            ),
+            children: setupTechnologySelector,
+            headingElement: 'h2',
+          },
+        ]
       : []),
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
@@ -717,20 +752,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       headingElement: 'h2',
       status: !pkgName ? 'disabled' : undefined,
     },
-    ...(useCheckableCardsForSetupTechnologySelector && setupTechnologySelector
-      ? [
-          {
-            title: i18n.translate(
-              'xpack.fleet.createPackagePolicy.stepSelectSetupTechnologyTitle',
-              {
-                defaultMessage: 'Deployment',
-              }
-            ),
-            children: setupTechnologySelector,
-            headingElement: 'h2',
-          },
-        ]
-      : []),
     ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS && !addIntegrationFlyoutProps
       ? [
           {
@@ -763,6 +784,52 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const children = (
     <>
+      {enableIntegrationTileClickToAdd && packageInfo?.readme && (
+        <>
+          <EuiPanel hasBorder paddingSize="m" data-test-subj="packageDocumentationCallout">
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="document" size="l" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.documentationCallout.title"
+                      defaultMessage="New to this integration?"
+                    />
+                  </strong>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.documentationCallout.description"
+                      defaultMessage="See what data it collects and how to configure it."
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  onClick={() => setIsDocModalOpen(true)}
+                  data-test-subj="packageDocumentationButton"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.documentationCallout.buttonLabel"
+                    defaultMessage="View documentation"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {isDocModalOpen && packageInfo && (
+        <PackageDocumentationModal
+          packageInfo={packageInfo}
+          onClose={() => setIsDocModalOpen(false)}
+        />
+      )}
       {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
         <>
           <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
@@ -777,33 +844,32 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : null}
       {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={false}
             size="m"
-            color="warning"
-            iconType="warning"
             title={
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.fipsCalloutTitle"
                 defaultMessage="This integration is not FIPS compatible"
               />
             }
-          >
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.fipsCalloutDescription"
-              defaultMessage="The selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration could interfere with the agents' ability to ingest data correctly. For more information, see the {guideLink}."
-              values={{
-                guideLink: (
-                  <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
-                    <FormattedMessage
-                      id="xpack.fleet.agentEnrollmentCallout.fipsMessage.guideLink"
-                      defaultMessage="Guide"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.fipsCalloutDescription"
+                defaultMessage="The selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration could interfere with the agents' ability to ingest data correctly. For more information, see the {guideLink}."
+                values={{
+                  guideLink: (
+                    <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
+                      <FormattedMessage
+                        id="xpack.fleet.agentEnrollmentCallout.fipsMessage.guideLink"
+                        defaultMessage="Guide"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          />
 
           <EuiSpacer size="m" />
         </>
@@ -818,33 +884,33 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
       {showSecretsDisabledCallout && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             size="m"
-            color="warning"
             title={
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
                 defaultMessage="Policy secrets are disabled"
               />
             }
-          >
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
-              defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
-              values={{
-                policySecretsLink: (
-                  <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
-                      defaultMessage="policy secrets"
-                    />
-                  </EuiLink>
-                ),
-                minimumSecretsVersion: <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>,
-              }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
+                defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
+                values={{
+                  policySecretsLink: (
+                    <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
+                        defaultMessage="policy secrets"
+                      />
+                    </EuiLink>
+                  ),
+                  minimumSecretsVersion: <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>,
+                }}
+              />
+            }
+          />
 
           <EuiSpacer size="m" />
         </>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-security';
+import { INTERNAL_API_HEADERS, tags } from '@kbn/scout-security';
 
 const LEADS_BASE = 'internal/entity_analytics/leads';
 
@@ -14,6 +14,7 @@ const LEADS_BASE = 'internal/entity_analytics/leads';
  */
 export const LEAD_GENERATION_ROUTES = {
   GET_LEADS: LEADS_BASE,
+  GET_CHANGES: `${LEADS_BASE}/changes`,
   GENERATE: `${LEADS_BASE}/generate`,
   STATUS: `${LEADS_BASE}/status`,
   DISMISS: (id: string) => `${LEADS_BASE}/${id}/_dismiss`,
@@ -28,9 +29,8 @@ export const LEAD_GENERATION_ROUTES = {
  */
 export const INTERNAL_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'Kibana',
   'Content-Type': 'application/json;charset=UTF-8',
-  'elastic-api-version': '1',
+  ...INTERNAL_API_HEADERS,
 } as const;
 
 /**

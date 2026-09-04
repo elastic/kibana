@@ -9,33 +9,58 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiCallOutProps } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
+import {
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+  KbnDangerCallout,
+  type KbnCalloutProps,
+} from '@kbn/ui-callout';
 
-export interface DeleteManagedAssetsCalloutProps extends EuiCallOutProps {
+export type DeleteManagedAssetsCalloutColor = 'primary' | 'success' | 'warning' | 'danger';
+
+const COLOR_TO_CALLOUT_MAP = {
+  primary: KbnInfoCallout,
+  success: KbnSuccessCallout,
+  warning: KbnWarningCallout,
+  danger: KbnDangerCallout,
+} as const;
+
+export interface DeleteManagedAssetsCalloutProps extends Omit<KbnCalloutProps, 'title'> {
   assetName: string;
   overrideBody?: string;
+  title?: KbnCalloutProps['title'];
+  color?: DeleteManagedAssetsCalloutColor;
 }
 
 export const DeleteManagedAssetsCallout = ({
   assetName,
   overrideBody,
+  title,
+  color = 'warning',
   ...overrideCalloutProps
 }: DeleteManagedAssetsCalloutProps) => {
+  const defaultTitle = i18n.translate('management.deleteManagedAssetsCallout.title', {
+    defaultMessage: 'Managed {assetName} will be re-created',
+    values: { assetName },
+  });
+
+  const Component = COLOR_TO_CALLOUT_MAP[color];
+
   return (
-    <EuiCallOut
-      color="warning"
-      iconType="warning"
+    <Component
       data-test-subj="deleteManagedAssetsCallout"
+      title={title ?? defaultTitle}
+      text={
+        <p>
+          {overrideBody ??
+            i18n.translate('management.deleteManagedAssetsCallout.body', {
+              defaultMessage: `Elasticsearch automatically re-creates any missing managed {assetName}. If you delete managed {assetName}, the deletion appears as successful, but the {assetName} are immediately re-created and reappear.`,
+              values: { assetName },
+            })}
+        </p>
+      }
       {...overrideCalloutProps}
-    >
-      <p>
-        {overrideBody ??
-          i18n.translate('management.deleteManagedAssetsCallout.body', {
-            defaultMessage: `Elasticsearch automatically re-creates any missing managed {assetName}. If you delete managed {assetName}, the deletion appears as successful, but the {assetName} are immediately re-created and reappear.`,
-            values: { assetName },
-          })}
-      </p>
-    </EuiCallOut>
+    />
   );
 };

@@ -129,15 +129,17 @@ export const registerAnomalySummaryRoutes = ({
           }
 
           const core = await context.core;
+          const esClient = core.elasticsearch.client.asCurrentUser;
           const soClient = core.savedObjects.client;
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
-          const entityExists = await checkEntityExists({
+          const entityRecord = await checkEntityExists({
             crudClient: entityStoreCrudClient,
+            esClient,
             entityId,
             entityType,
           });
-          if (!entityExists) {
+          if (!entityRecord) {
             return siemResponse.error({
               statusCode: 404,
               body: `Entity "${entityId}" not found`,
@@ -165,6 +167,7 @@ export const registerAnomalySummaryRoutes = ({
           const overview = await getEntityAnomalyOverview({
             entityId,
             entityType,
+            entityRecord,
             fromMs: from,
             toMs: to,
             scoreRanges,
@@ -249,12 +252,13 @@ export const registerAnomalySummaryRoutes = ({
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
 
-          const entityExists = await checkEntityExists({
+          const entityRecord = await checkEntityExists({
             crudClient: entityStoreCrudClient,
+            esClient,
             entityId,
             entityType,
           });
-          if (!entityExists) {
+          if (!entityRecord) {
             return siemResponse.error({
               statusCode: 404,
               body: `Entity "${entityId}" not found`,
@@ -278,6 +282,7 @@ export const registerAnomalySummaryRoutes = ({
           const { anomalies, total } = await getEntityAnomalies({
             entityId,
             entityType,
+            entityRecord,
             esClient,
             fromMs: from,
             toMs: to,

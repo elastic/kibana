@@ -43,18 +43,18 @@ describe('useCalculateEntityRiskScore', () => {
       wrapper: TestProviders,
     });
 
-    await act(async () => {
+    act(() => {
       result.current.calculateEntityRiskScore();
-
-      await waitFor(() =>
-        expect(mockCalculateEntityRiskScoreV2).toHaveBeenCalledWith(
-          expect.objectContaining({
-            identifier_type: identifierType,
-            identifier,
-          })
-        )
-      );
     });
+
+    await waitFor(() =>
+      expect(mockCalculateEntityRiskScoreV2).toHaveBeenCalledWith(
+        expect.objectContaining({
+          identifier_type: identifierType,
+          identifier,
+        })
+      )
+    );
   });
 
   it('displays a toast error when the API returns an error', async () => {
@@ -63,11 +63,11 @@ describe('useCalculateEntityRiskScore', () => {
       wrapper: TestProviders,
     });
 
-    await act(async () => {
+    act(() => {
       result.current.calculateEntityRiskScore();
-
-      await waitFor(() => expect(mockAddError).toHaveBeenCalled());
     });
+
+    await waitFor(() => expect(mockAddError).toHaveBeenCalled());
   });
 
   it('forwards entityId to the V2 API call', async () => {
@@ -76,18 +76,18 @@ describe('useCalculateEntityRiskScore', () => {
       wrapper: TestProviders,
     });
 
-    await act(async () => {
+    act(() => {
       result.current.calculateEntityRiskScore();
-
-      await waitFor(() =>
-        expect(mockCalculateEntityRiskScoreV2).toHaveBeenCalledWith(
-          expect.objectContaining({
-            identifier_type: identifierType,
-            identifier,
-            entity_id: entityId,
-          })
-        )
-      );
     });
+
+    await waitFor(() =>
+      expect(mockCalculateEntityRiskScoreV2).toHaveBeenCalledWith(
+        expect.objectContaining({
+          identifier_type: identifierType,
+          identifier,
+          entity_id: entityId,
+        })
+      )
+    );
   });
 });

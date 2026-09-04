@@ -6,6 +6,8 @@
  */
 
 export { Streams, streamDefinitionSchema } from './src/models/streams';
+export type * as StreamsV2 from './src/v2';
+export * as StreamsV2Examples from './src/v2/__examples__';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export {
@@ -80,8 +82,11 @@ export {
   extractBucketColumnName,
   extractBucketIntervalMs,
   extractBucketTargetField,
+  extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findOverBroadMatchPredicates,
+  renderOverBroadMatchError,
   getFromSources,
   getStatsQueryHints,
   hasStatsCommand,
@@ -91,7 +96,6 @@ export {
   hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
-  stripMetadata,
 } from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
@@ -212,10 +216,6 @@ export {
 } from './src/models/processing_simulation';
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
-
-export { TaskStatus, type TaskResult } from './src/tasks/types';
-
-export type { GenerateDescriptionResult } from './src/api/description_generation';
 
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';

@@ -49,6 +49,10 @@ export MERGE_QUEUE_TARGET_BRANCH
 BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-${BUILDKITE_BRANCH:-}}"
 export BUILDKITE_BRANCH_MERGE_QUEUE
 
+if [[ "$MERGE_QUEUE_TARGET_BRANCH" ]]; then
+  set_merge_queue_git_info
+fi
+
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
@@ -69,8 +73,6 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 
 export FORCE_COLOR=1
 export TEST_BROWSER_HEADLESS=1
-
-export KBN_DISALLOW_CODE_GEN_FROM_STRINGS=true
 
 export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.01

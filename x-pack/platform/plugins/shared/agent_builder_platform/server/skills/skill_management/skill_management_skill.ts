@@ -6,6 +6,7 @@
  */
 
 import dedent from 'dedent';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { createListSkillsTool } from './list_skills';
 import { createListToolsTool } from './list_tools';
@@ -42,7 +43,7 @@ Use this skill when:
 
 Do **not** use this skill when:
 - The user only wants a one-off answer (just answer it).
-- The user wants to author a tool, plugin, or agent (different entity types, not yet supported in chat).
+- The user wants to author a tool, plugin, or agent. Those are different entity types, and a skill is never an acceptable stand-in for one. They are managed over the Agent Builder HTTP API: use \`${internalTools.discoverApis}\` / \`${internalTools.describeApi}\` / \`${internalTools.executeApi}\` when those tools are available, and otherwise point the user at the Agent Builder management UI.
 - The user is asking about a built-in (readonly) skill — those cannot be loaded or edited via chat.
 
 ## Pick a Flow First

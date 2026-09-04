@@ -17,7 +17,6 @@ import {
   getQueryOccurrences,
   fetchQueryOccurrencesFromAlerts,
 } from './fetch_query_occurrences_from_alerts';
-import { ALERTS_READER_V2 } from './alerting/alerts_reader';
 
 const makeQueryLink = (overrides: Partial<QueryLink> & { id?: string } = {}): QueryLink => {
   const id = overrides.id ?? 'q1';
@@ -82,14 +81,6 @@ const TO = new Date('2026-01-01T00:05:00.000Z'); // 5 minutes => 6 buckets at 1m
 const BUCKET = '1m';
 const SPACE_ID = 'default';
 
-const defaultV2Params = {
-  from: FROM,
-  to: TO,
-  bucketSize: BUCKET,
-  spaceId: SPACE_ID,
-  alertsReader: ALERTS_READER_V2,
-};
-
 describe('fetchQueryOccurrencesFromAlerts', () => {
   it('returns an empty response and skips ES|QL when there are no query links', async () => {
     const { kiClient, esClient, esql } = createMocks([]);
@@ -101,6 +92,91 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     expect(result).toEqual({ queries: [], aggregated_occurrences: [] });
     expect(esql).not.toHaveBeenCalled();
+  });
+
+  it('filters query links by rule UUID and returns the UUID with each series', async () => {
+    const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
+    const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
+    const { kiClient, esClient, esql } = createMocks([linkA, linkB]);
+
+    esql.mockResolvedValueOnce(
+      makeStatsResponse([{ rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 }])
+    );
+
+    const result = await fetchQueryOccurrencesFromAlerts(
+      {
+        from: FROM,
+        to: TO,
+        bucketSize: BUCKET,
+        ruleUuids: ['rule-a'],
+        spaceId: SPACE_ID,
+      },
+      { kiClient, esClient }
+    );
+
+    expect(result.queries).toHaveLength(1);
+    expect(result.queries[0]).toEqual(expect.objectContaining({ id: 'qa', rule_uuid: 'rule-a' }));
+    const calledWith = esql.mock.calls[0][1] as { query: string };
+    expect(calledWith.query).toContain('rule-a');
+    expect(calledWith.query).not.toContain('rule-b');
+  });
+
+  it('carries expires_at from the link so the durability indicator reflects real expiry', async () => {
+    const expiring = makeQueryLink({
+      id: 'qa',
+      rule_id: 'rule-a',
+      expires_at: '2099-01-01T00:00:00.000Z',
+    });
+    const durable = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
+    const { kiClient, esClient, esql } = createMocks([expiring, durable]);
+
+    esql.mockResolvedValueOnce(makeStatsResponse([]));
+
+    const result = await fetchQueryOccurrencesFromAlerts(
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
+      { kiClient, esClient }
+    );
+
+    const seriesA = result.queries.find((e) => e.id === 'qa');
+    const seriesB = result.queries.find((e) => e.id === 'qb');
+    expect(seriesA?.expires_at).toBe('2099-01-01T00:00:00.000Z');
+    expect(seriesB?.expires_at).toBeUndefined();
+  });
+
+  it('synthesizes a rule-scoped series when no query link matches the requested rule UUIDs', async () => {
+    const { kiClient, esClient, esql } = createMocks([
+      makeQueryLink({ id: 'qa', rule_id: 'rule-a' }),
+    ]);
+
+    esql.mockResolvedValueOnce(
+      makeStatsResponse([{ rule_id: 'missing-rule', bucket: '2026-01-01T00:00:00.000Z', count: 4 }])
+    );
+
+    const result = await fetchQueryOccurrencesFromAlerts(
+      {
+        from: FROM,
+        to: TO,
+        bucketSize: BUCKET,
+        ruleUuids: ['missing-rule'],
+        spaceId: SPACE_ID,
+      },
+      { kiClient, esClient }
+    );
+
+    expect(result.queries).toHaveLength(1);
+    expect(result.queries[0]).toEqual(
+      expect.objectContaining({
+        id: 'rule:missing-rule',
+        rule_uuid: 'missing-rule',
+      })
+    );
+    expect(result.queries[0].occurrences[0]).toEqual({
+      date: '2026-01-01T00:00:00.000Z',
+      count: 4,
+    });
+    const calledWith = esql.mock.calls[0][1] as { query: string };
+    expect(calledWith.query).toContain('missing-rule');
+    expect(calledWith.query).not.toContain('rule-a');
   });
 
   it('groups ES|QL rows into per-rule occurrences with gap filling', async () => {
@@ -121,14 +197,18 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       { kiClient, esClient }
     );
 
-    const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa')!;
-    const ruleB = result.queries.find((e) => e.id === 'qb')!;
+    const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa');
+    const ruleB = result.queries.find((e) => e.id === 'qb');
 
+    expect(ruleA).toBeDefined();
+    expect(ruleB).toBeDefined();
     // 6 buckets at 1m across [00:00, 00:05] inclusive
-    expect(ruleA.occurrences).toHaveLength(6);
-    expect(ruleA.occurrences.map((o) => o.count)).toEqual([2, 0, 1, 0, 0, 0]);
-    expect(ruleB.occurrences).toHaveLength(6);
-    expect(ruleB.occurrences.map((o) => o.count)).toEqual([0, 0, 0, 0, 3, 0]);
+    expect(ruleA?.rule_uuid).toBe('rule-a');
+    expect(ruleB?.rule_uuid).toBe('rule-b');
+    expect(ruleA?.occurrences).toHaveLength(6);
+    expect(ruleA?.occurrences.map((o) => o.count)).toEqual([2, 0, 1, 0, 0, 0]);
+    expect(ruleB?.occurrences).toHaveLength(6);
+    expect(ruleB?.occurrences.map((o) => o.count)).toEqual([0, 0, 0, 0, 3, 0]);
   });
 
   it('emits an empty occurrences array (not a zero-filled series) for rules absent from the result', async () => {
@@ -328,6 +408,27 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     expect(calledWith.query).not.toMatch(/BUCKET\([^)]*1m\)/);
   });
 
+  it('clamps a sub-minute bucket size up to 1m, grid and query together', async () => {
+    const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
+    const { kiClient, esClient, esql } = createMocks([link]);
+
+    esql.mockResolvedValueOnce(
+      makeStatsResponse([{ rule_id: 'rule-a', bucket: '2026-01-01T00:01:00.000Z', count: 5 }])
+    );
+
+    // Rules only emit closed-minute points, so a 30s grid would leave every
+    // other bucket zero-filled and render steady activity as a comb.
+    const queryOccurrences = await getQueryOccurrences(
+      { from: FROM, to: TO, bucketSize: '30s', spaceId: SPACE_ID },
+      { kiClient, esClient }
+    );
+
+    const calledWith = esql.mock.calls[0][1] as { query: string };
+    expect(calledWith.query).toContain('BUCKET(source_minute, 1 minutes)');
+    expect(calledWith.query).not.toContain('seconds');
+    expect(queryOccurrences.aggregatedOccurrences.map((b) => b.count)).toEqual([0, 5, 0, 0, 0, 0]);
+  });
+
   it('appends an explicit LIMIT (rules × buckets) to the rendered query', async () => {
     const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
@@ -405,66 +506,144 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     expect(result.aggregatedOccurrences).toEqual([]);
   });
 
-  describe('v2 rule-events read path', () => {
-    it('groups ES|QL rows into per-rule occurrences with gap filling (v2)', async () => {
-      const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-      const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
-      const { kiClient, esClient, esql } = createMocks([linkA, linkB]);
+  it('filters on source bucket and widens the write-time @timestamp prune by MAX_WRITE_DELAY', async () => {
+    const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
+    const { kiClient, esClient, esql } = createMocks([link]);
+
+    esql.mockResolvedValueOnce(makeStatsResponse([]));
+
+    await fetchQueryOccurrencesFromAlerts(
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
+      { kiClient, esClient }
+    );
+
+    const calledWith = esql.mock.calls[0][1] as {
+      query: string;
+      filter?: {
+        bool?: {
+          filter?: Array<{ range?: { '@timestamp'?: { gte?: string; lte?: string } } }>;
+        };
+      };
+    };
+    // Source-bucket window (not write-time) must be in the ES|QL body.
+    expect(calledWith.query).toContain(
+      `bucket >= TO_DATETIME("${FROM.toISOString()}") AND bucket <= TO_DATETIME("${TO.toISOString()}")`
+    );
+    // Write-time prune stays as an index skip hint; lte is widened by MAX_WRITE_DELAY (7m).
+    const timestampRange = calledWith.filter?.bool?.filter?.find(
+      (clause) => clause.range?.['@timestamp']
+    )?.range?.['@timestamp'];
+    expect(timestampRange?.gte).toBe(FROM.toISOString());
+    expect(timestampRange?.lte).toBe(new Date(TO.getTime() + 7 * 60_000).toISOString());
+  });
+
+  describe('write-horizon clamp', () => {
+    // A closed source minute is written up to MAX_WRITE_DELAY (7m) later, so the
+    // newest minutes of a `now`-anchored range have no rows yet and must not be
+    // zero-filled as "no matches".
+    const NOW = new Date('2026-01-01T01:00:00.000Z');
+    const HORIZON_ISO = '2026-01-01T00:53:00.000Z';
+
+    beforeEach(() => {
+      jest.spyOn(Date, 'now').mockReturnValue(NOW.getTime());
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('ends the timeline at the write horizon instead of zero-filling up to now', async () => {
+      const { esClient, esql } = createMocks();
 
       esql.mockResolvedValueOnce(
-        makeStatsResponse([
-          { rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
-          { rule_id: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
-          { rule_id: 'rule-b', bucket: '2026-01-01T00:04:00.000Z', count: 3 },
-        ])
+        makeStatsResponse([{ rule_id: 'rule-a', bucket: '2026-01-01T00:50:00.000Z', count: 4 }])
       );
 
-      const result = await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
-        kiClient,
-        esClient,
-      });
-
-      const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa')!;
-      const ruleB = result.queries.find((e) => e.id === 'qb')!;
-
-      expect(ruleA.occurrences).toHaveLength(6);
-      expect(ruleA.occurrences.map((o) => o.count)).toEqual([2, 0, 1, 0, 0, 0]);
-      expect(ruleB.occurrences).toHaveLength(6);
-      expect(ruleB.occurrences.map((o) => o.count)).toEqual([0, 0, 0, 0, 3, 0]);
-    });
-
-    it('returns an empty response when the v2 rule-events index is missing', async () => {
-      const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-      const { kiClient, esClient, esql } = createMocks([link]);
-
-      esql.mockRejectedValueOnce(
-        makeEsError(400, 'verification_exception', 'Unknown index [.rule-events]')
+      const result = await computeOccurrences(
+        {
+          ruleIds: ['rule-a'],
+          from: new Date('2026-01-01T00:50:00.000Z'),
+          to: NOW,
+          bucketSize: '1m',
+          spaceId: SPACE_ID,
+        },
+        { esClient }
       );
 
-      const result = await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
-        kiClient,
-        esClient,
-      });
-
-      expect(result.queries).toHaveLength(1);
-      expect(result.queries[0].occurrences).toEqual([]);
-      expect(result.aggregated_occurrences).toEqual([]);
+      // 10 requested minutes minus the 7 that cannot be written yet: [00:50, 00:53].
+      expect(result.timeline.map((b) => b.date)).toEqual([
+        '2026-01-01T00:50:00.000Z',
+        '2026-01-01T00:51:00.000Z',
+        '2026-01-01T00:52:00.000Z',
+        HORIZON_ISO,
+      ]);
+      expect(result.aggregatedOccurrences.map((b) => b.count)).toEqual([4, 0, 0, 0]);
     });
 
-    it('queries .rule-events with COUNT_DISTINCT(group_hash)', async () => {
-      const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-      const { kiClient, esClient, esql } = createMocks([link]);
+    it('derives the source-bucket range and the write-time prune from the clamped end', async () => {
+      const { esClient, esql } = createMocks();
 
       esql.mockResolvedValueOnce(makeStatsResponse([]));
 
-      await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
-        kiClient,
-        esClient,
-      });
+      await computeOccurrences(
+        {
+          ruleIds: ['rule-a'],
+          from: new Date('2026-01-01T00:50:00.000Z'),
+          to: NOW,
+          bucketSize: '1m',
+          spaceId: SPACE_ID,
+        },
+        { esClient }
+      );
 
-      const calledWith = esql.mock.calls[0][1] as { query: string };
-      expect(calledWith.query).toContain('.rule-events');
-      expect(calledWith.query).toContain('COUNT_DISTINCT');
+      const calledWith = esql.mock.calls[0][1] as {
+        query: string;
+        filter?: {
+          bool?: {
+            filter?: Array<{ range?: { '@timestamp'?: { lte?: string } } }>;
+          };
+        };
+      };
+      expect(calledWith.query).toContain(`bucket <= TO_DATETIME("${HORIZON_ISO}")`);
+      // Clamped end widened by MAX_WRITE_DELAY lands back on `now`; leaving the
+      // prune on the caller's `to` would keep it 7m wider than the ES|QL range.
+      const timestampRange = calledWith.filter?.bool?.filter?.find(
+        (clause) => clause.range?.['@timestamp']
+      )?.range?.['@timestamp'];
+      expect(timestampRange?.lte).toBe(NOW.toISOString());
+    });
+
+    it('returns no data without querying when the whole range is inside the horizon', async () => {
+      const { esClient, esql } = createMocks();
+
+      const result = await computeOccurrences(
+        {
+          ruleIds: ['rule-a'],
+          from: new Date('2026-01-01T00:56:00.000Z'),
+          to: NOW,
+          bucketSize: '1m',
+          spaceId: SPACE_ID,
+        },
+        { esClient }
+      );
+
+      expect(esql).not.toHaveBeenCalled();
+      expect(result.timeline).toEqual([]);
+      expect(result.aggregatedOccurrences).toEqual([]);
+    });
+
+    it('leaves a range that already ends before the horizon untouched', async () => {
+      const { esClient, esql } = createMocks();
+
+      esql.mockResolvedValueOnce(makeStatsResponse([]));
+
+      const result = await computeOccurrences(
+        { ruleIds: ['rule-a'], from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
+        { esClient }
+      );
+
+      expect(result.timeline).toHaveLength(6);
+      expect(result.timeline[result.timeline.length - 1].date).toBe(TO.toISOString());
     });
   });
 });

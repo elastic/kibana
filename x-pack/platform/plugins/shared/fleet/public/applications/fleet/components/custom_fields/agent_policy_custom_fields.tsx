@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import styled from '@emotion/styled';
-import { EuiDescribedFormGroup, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { NewAgentPolicy, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../types';
@@ -78,7 +79,7 @@ export const AgentPolicyCustomFields: React.FunctionComponent<Props> = ({
           {unsupportedInputs.length > 0 ? (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount
                 title={
                   <FormattedMessage
@@ -86,11 +87,8 @@ export const AgentPolicyCustomFields: React.FunctionComponent<Props> = ({
                     defaultMessage="Unsupported inputs"
                   />
                 }
-                color="warning"
-                iconType="warning"
                 size="s"
-              >
-                <p>
+                text={
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyForm.globalDataTagUnsupportedInputMessage"
                     defaultMessage="Tagging data collected from {inputCount, plural, one {input {inputs} is} other {inputs {inputs} are}} not supported."
@@ -99,8 +97,8 @@ export const AgentPolicyCustomFields: React.FunctionComponent<Props> = ({
                       inputs: <strong>{unsupportedInputs.join(', ')}</strong>,
                     }}
                   />
-                </p>
-              </EuiCallOut>
+                }
+              />
             </>
           ) : null}
         </>

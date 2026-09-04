@@ -14,7 +14,7 @@ const sharedConfig = getSharedConfig();
 
 describe('getNodeSwcConfig', () => {
   describe('default (development) configuration', () => {
-    const config = getNodeSwcConfig();
+    const config = getNodeSwcConfig('/repo/example.ts');
 
     it('uses inline source maps', () => {
       expect(config.sourceMaps).toBe('inline');
@@ -30,7 +30,7 @@ describe('getNodeSwcConfig', () => {
   });
 
   describe('production configuration', () => {
-    const config = getNodeSwcConfig({ production: true });
+    const config = getNodeSwcConfig('/repo/example.ts', { production: true });
 
     it('disables source maps', () => {
       expect(config.sourceMaps).toBe(false);
@@ -45,55 +45,84 @@ describe('getNodeSwcConfig', () => {
     });
   });
 
-  describe('invariant fields (same in dev and production)', () => {
-    const devConfig = getNodeSwcConfig();
-    const prodConfig = getNodeSwcConfig({ production: true });
-
-    it('uses TypeScript parser with TSX and decorators', () => {
-      for (const config of [devConfig, prodConfig]) {
-        expect(config.jsc.parser).toEqual({
-          syntax: 'typescript',
-          tsx: true,
+  describe('parser selection by extension', () => {
+    it('uses the ecmascript parser with JSX for JavaScript files', () => {
+      for (const ext of ['js', 'mjs', 'jsx']) {
+        const config = getNodeSwcConfig(`/repo/example.${ext}`);
+        expect(config.jsc?.parser).toEqual({
+          syntax: 'ecmascript',
+          jsx: true,
           decorators: true,
         });
       }
     });
 
-    it('targets es2022 for Node.js builds', () => {
-      expect(devConfig.jsc.target).toBe('es2022');
-      expect(prodConfig.jsc.target).toBe('es2022');
+    it('uses the TypeScript parser without TSX for .ts files', () => {
+      const config = getNodeSwcConfig('/repo/example.ts');
+      expect(config.jsc?.parser).toEqual({
+        syntax: 'typescript',
+        tsx: false,
+        decorators: true,
+      });
     });
 
-    it('keeps class names', () => {
-      expect(devConfig.jsc.keepClassNames).toBe(true);
-      expect(prodConfig.jsc.keepClassNames).toBe(true);
-    });
-
-    it('uses external helpers', () => {
-      expect(devConfig.jsc.externalHelpers).toBe(true);
-      expect(prodConfig.jsc.externalHelpers).toBe(true);
-    });
-
-    it('outputs CommonJS modules', () => {
-      expect(devConfig.module).toEqual({ type: 'commonjs', ignoreDynamic: true });
-      expect(prodConfig.module).toEqual({ type: 'commonjs', ignoreDynamic: true });
-    });
-
-    it('enables decorator metadata', () => {
-      expect(devConfig.jsc.transform.decoratorMetadata).toBe(true);
-      expect(prodConfig.jsc.transform.decoratorMetadata).toBe(true);
-    });
-
-    it('does not include a React transform', () => {
-      expect(devConfig.jsc.transform).not.toHaveProperty('react');
-      expect(prodConfig.jsc.transform).not.toHaveProperty('react');
+    it('enables TSX parsing for .tsx files', () => {
+      const config = getNodeSwcConfig('/repo/example.tsx');
+      expect(config.jsc?.parser).toEqual({
+        syntax: 'typescript',
+        tsx: true,
+        decorators: true,
+      });
     });
   });
 
-  describe('shared config delegation', () => {
-    it('delegates legacyDecorator from shared typescript config', () => {
-      const config = getNodeSwcConfig();
-      expect(config.jsc.transform.legacyDecorator).toBe(sharedConfig.typescript.decoratorsLegacy);
+  describe('invariant fields (same in dev and production)', () => {
+    const devConfig = getNodeSwcConfig('/repo/example.ts');
+    const prodConfig = getNodeSwcConfig('/repo/example.ts', { production: true });
+
+    it('sets the filename and disables config file discovery', () => {
+      for (const config of [devConfig, prodConfig]) {
+        expect(config.filename).toBe('/repo/example.ts');
+        expect(config.swcrc).toBe(false);
+        expect(config.configFile).toBe(false);
+      }
+    });
+
+    it('targets es2022 for Node.js builds', () => {
+      expect(devConfig.jsc?.target).toBe('es2022');
+      expect(prodConfig.jsc?.target).toBe('es2022');
+    });
+
+    it('keeps class names', () => {
+      expect(devConfig.jsc?.keepClassNames).toBe(true);
+      expect(prodConfig.jsc?.keepClassNames).toBe(true);
+    });
+
+    it('uses external helpers', () => {
+      expect(devConfig.jsc?.externalHelpers).toBe(true);
+      expect(prodConfig.jsc?.externalHelpers).toBe(true);
+    });
+
+    it('outputs CommonJS modules', () => {
+      expect(devConfig.module).toEqual({ type: 'commonjs' });
+      expect(prodConfig.module).toEqual({ type: 'commonjs' });
+    });
+
+    it('enables decorator metadata', () => {
+      expect(devConfig.jsc?.transform?.decoratorMetadata).toBe(true);
+      expect(prodConfig.jsc?.transform?.decoratorMetadata).toBe(true);
+    });
+
+    it('does not include a React transform', () => {
+      expect(devConfig.jsc?.transform).not.toHaveProperty('react');
+      expect(prodConfig.jsc?.transform).not.toHaveProperty('react');
+    });
+  });
+
+  describe('shared config sync', () => {
+    it('matches the hardcoded legacyDecorator against the shared typescript config', () => {
+      const config = getNodeSwcConfig('/repo/example.ts');
+      expect(config.jsc?.transform?.legacyDecorator).toBe(sharedConfig.typescript.decoratorsLegacy);
     });
   });
 });

@@ -266,7 +266,7 @@ const ActiveSkillsStatus: React.FC<{ activeSkillsCount: number; totalSkills: num
   const { createAgentBuilderUrl } = useNavigation();
   const isZeroSkills = activeSkillsCount === 0;
   const statusColor = isZeroSkills ? 'warning' : 'success';
-  const iconType = isZeroSkills ? 'alert' : 'checkCircleFill';
+  const iconType = isZeroSkills ? 'warning' : 'checkCircleFill';
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">

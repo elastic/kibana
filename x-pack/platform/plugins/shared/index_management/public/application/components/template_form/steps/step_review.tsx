@@ -17,10 +17,9 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiText,
-  EuiCallOut,
-  EuiLink,
   EuiCodeBlock,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataStreamOptions } from '../../../../../common/types/data_streams';
 import { indexModeLabels } from '../../../lib/index_mode_labels';
@@ -431,7 +430,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
 
         {hasWildCardIndexPattern ? (
           <Fragment>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -439,24 +438,27 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                   defaultMessage="This template uses a wildcard (*) as an index pattern."
                 />
               }
-              color="warning"
-              iconType="question"
               data-test-subj="indexPatternsWarning"
-            >
-              <p data-test-subj="indexPatternsWarningDescription">
-                <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningDescription"
-                  defaultMessage="All new indices that you create will use this template."
-                />{' '}
-                {/* Edit link navigates back to step 1 (logistics) */}
-                <EuiLink onClick={navigateToStep.bind(null, 'logistics')}>
+              text={
+                <p data-test-subj="indexPatternsWarningDescription">
                   <FormattedMessage
-                    id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningLinkText"
-                    defaultMessage="Edit index patterns."
+                    id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningDescription"
+                    defaultMessage="All new indices that you create will use this template."
                   />
-                </EuiLink>
-              </p>
-            </EuiCallOut>
+                </p>
+              }
+              actionProps={{
+                primary: {
+                  onClick: navigateToStep.bind(null, 'logistics'),
+                  children: (
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningLinkText"
+                      defaultMessage="Edit index patterns."
+                    />
+                  ),
+                },
+              }}
+            />
             <EuiSpacer size="m" />
           </Fragment>
         ) : null}

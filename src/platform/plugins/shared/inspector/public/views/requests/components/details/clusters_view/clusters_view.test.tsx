@@ -49,6 +49,20 @@ describe('shouldShow', () => {
     } as unknown as Request;
     expect(ClustersView.shouldShow(request)).toBe(false);
   });
+
+  test('is false if isCpsMultiProject is true', () => {
+    const request = {
+      response: {
+        json: {
+          rawResponse: {
+            _shards: {},
+            _clusters: {},
+          },
+        },
+      },
+    } as unknown as Request;
+    expect(ClustersView.shouldShow(request, true)).toBe(false);
+  });
 });
 
 describe('render', () => {

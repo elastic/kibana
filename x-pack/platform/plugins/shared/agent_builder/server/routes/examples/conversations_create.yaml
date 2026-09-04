@@ -1,0 +1,73 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createConversationRequestExample:
+          description: "Example request for creating a private shared conversation with a custom title and two members"
+          value:
+            title: My new conversation
+            access_control:
+              access_mode: private
+              entries:
+                - type: user
+                  id: u_abc123_uid
+                  role: member
+                - type: user
+                  id: u_def456_uid
+                  role: member
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          createConversationResponseExample:
+            description: "Example response returning the newly created conversation"
+            value:
+              id: bcc176c5-38f6-40be-be0c-898e34fa1480
+              agent_id: elastic-ai-agent
+              user:
+                username: elastic
+              title: My new conversation
+              permissions:
+                rename: true
+                delete: true
+              access_control:
+                access_mode: private
+                entries:
+                  - type: user
+                    id: u_abc123_uid
+                    role: member
+                    added_at: "2026-08-14T10:00:00.000Z"
+                  - type: user
+                    id: u_def456_uid
+                    role: member
+                    added_at: "2026-08-14T10:00:00.000Z"
+              created_at: "2026-08-14T10:00:00.000Z"
+              updated_at: "2026-08-14T10:00:00.000Z"
+              rounds: []
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "${KIBANA_URL}/api/agent_builder/conversations" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "title": "My new conversation",
+        "access_control": {
+          "access_mode": "private",
+          "entries": [{ "type": "user", "id": "u_abc123_uid", "role": "member" }]
+        }
+      }'
+- lang: Console
+  source: |
+    POST kbn://api/agent_builder/conversations
+    {
+      "title": "My new conversation",
+      "access_control": {
+        "access_mode": "private",
+        "entries": [{ "type": "user", "id": "u_abc123_uid", "role": "member" }]
+      }
+    }

@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DeleteManagedAssetsCalloutProps } from './src/callout';
+export type {
+  DeleteManagedAssetsCalloutProps,
+  DeleteManagedAssetsCalloutColor,
+} from './src/callout';
 export { DeleteManagedAssetsCallout } from './src/callout';

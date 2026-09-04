@@ -10,6 +10,7 @@ import { EuiCallOut, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/e
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import { SERVICE_NAME } from '@kbn/apm-types';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
@@ -20,7 +21,7 @@ import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getDateRange } from '../../context/url_params_context/helpers';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
-import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../hooks/use_fetcher';
 import { useLicenseContext } from '../../context/license/use_license_context';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { EmptyPrompt } from '../../components/app/service_map/empty_prompt';
@@ -34,7 +35,6 @@ import {
   CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
   CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
 } from '../../components/app/service_map/contextual_map/constants';
-import { SERVICE_FLYOUT_SOURCES } from '../../components/shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../components/shared/service_flyout/types';
 import { ServiceMapSloFlyoutProvider } from '../../components/shared/service_map/service_map_slo_flyout_context';
 import { LicensePrompt } from '../../components/shared/license_prompt';
@@ -54,9 +54,16 @@ export interface ServiceMapEmbeddableProps {
   environment?: Environment;
   kuery?: string;
   serviceName?: string;
+  /**
+   * Multi-service context highlight from panel state (`highlighted_service_names`).
+   * When unset, falls back to highlighting `serviceName` alone.
+   */
+  highlightedServiceNames?: string[];
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
+  /** Dashboard reporting waits on this so PDF export does not snapshot the loading spinner. */
+  onRendered?: (isRendered: boolean) => void;
   badgesRangeFrom?: string;
   badgesRangeTo?: string;
   badgesKuery?: string;
@@ -151,9 +158,11 @@ export function ServiceMapEmbeddable({
   environment = ENVIRONMENT_ALL.value,
   kuery = '',
   serviceName,
+  highlightedServiceNames: highlightedServiceNamesProp,
   serviceGroupId,
   core,
   onBlockingError,
+  onRendered,
   badgesRangeFrom,
   badgesRangeTo,
   badgesKuery,
@@ -327,13 +336,12 @@ export function ServiceMapEmbeddable({
     };
   }, [viewFilters, badgesStatus]);
 
-  const flyoutOptionsForGraph = useMemo<ServiceFlyoutOptions>(
-    () => ({
-      source: SERVICE_FLYOUT_SOURCES.dashboardEmbeddable,
-      ...flyoutOptions,
-    }),
-    [flyoutOptions]
-  );
+  const highlightedServiceNames = useMemo(() => {
+    if (highlightedServiceNamesProp && highlightedServiceNamesProp.length > 0) {
+      return highlightedServiceNamesProp;
+    }
+    return serviceName ? [serviceName] : undefined;
+  }, [highlightedServiceNamesProp, serviceName]);
 
   const badgeDependentFiltersActive =
     (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
@@ -341,6 +349,30 @@ export function ServiceMapEmbeddable({
     (viewFilters?.anomalySeverityFilter?.length ?? 0) > 0;
   const showBadgesFailedWarning =
     badgeDependentFiltersActive && badgesStatus === FETCH_STATUS.FAILURE;
+
+  useEffect(() => {
+    if (!onRendered) {
+      return;
+    }
+
+    if (!license) {
+      onRendered(false);
+      return;
+    }
+
+    if (!hasValidLicense || !isServiceMapEnabled) {
+      onRendered(true);
+      return;
+    }
+
+    // Match the spinner: topology still pending, or badges still loading over a populated map.
+    if (isPending(status) || badgesStatus === FETCH_STATUS.LOADING) {
+      onRendered(false);
+      return;
+    }
+
+    onRendered(true);
+  }, [onRendered, license, hasValidLicense, isServiceMapEnabled, status, badgesStatus]);
 
   if (!license) {
     return (
@@ -426,9 +458,16 @@ export function ServiceMapEmbeddable({
     rangeFrom,
     rangeTo,
     environment,
+    kuery,
     serviceName,
     serviceGroupId,
     filterPills,
+    viewFilters,
+    mapOrientation,
+    controlSelections:
+      highlightedServiceNamesProp && highlightedServiceNamesProp.length > 0
+        ? { [SERVICE_NAME]: highlightedServiceNamesProp }
+        : undefined,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
@@ -474,7 +513,7 @@ export function ServiceMapEmbeddable({
             onCollapse={onCollapse}
             onBaseMaxHopsChange={setBaseMaxHops}
             onMaxVisibleNodesChange={setMaxVisibleNodes}
-            highlightedServiceName={serviceName}
+            highlightedServiceNames={highlightedServiceNames}
             environment={environment}
             kuery={kuery}
             start={start}
@@ -484,7 +523,7 @@ export function ServiceMapEmbeddable({
             alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
             clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
             showContextControls={!hideContextControls}
-            flyoutOptions={flyoutOptionsForGraph}
+            flyoutOptions={flyoutOptions}
           />
         ) : (
           <ServiceMapGraph
@@ -492,7 +531,7 @@ export function ServiceMapEmbeddable({
             nodes={isLoading ? [] : nodesForGraph}
             edges={isLoading ? [] : data.edges}
             serviceName={serviceName}
-            highlightedServiceName={serviceName}
+            highlightedServiceNames={highlightedServiceNames}
             environment={environment}
             kuery={kuery}
             start={start}
@@ -508,7 +547,7 @@ export function ServiceMapEmbeddable({
             onMapOrientationChange={onMapOrientationChange}
             viewFilters={viewFiltersForGraph}
             onViewFiltersChange={onViewFiltersChange}
-            flyoutOptions={flyoutOptionsForGraph}
+            flyoutOptions={flyoutOptions}
           />
         )}
       </div>

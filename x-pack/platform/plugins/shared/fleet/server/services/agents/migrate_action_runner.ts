@@ -47,12 +47,15 @@ export async function partitionAgentsForMigration(
 
   const agentPolicies = await getAgentPolicyForAgents(soClient, agents);
   const protectedAgentPolicies = agentPolicies.filter((agentPolicy) => agentPolicy?.is_protected);
+  const protectedPolicyIdSet = new Set(protectedAgentPolicies.map((policy) => policy.id));
 
   const agentsToAction: Agent[] = [];
   agents.forEach((agent: Agent) => {
     if (
-      agent.policy_id &&
-      protectedAgentPolicies.map((policy) => policy.id).includes(agent.policy_id)
+      agent.policy_base_id &&
+      // policy_base_id is always the base policy id, so agents on a version-specific variant
+      // (`my-policy#9.2`) are correctly blocked when `my-policy` is protected.
+      protectedPolicyIdSet.has(agent.policy_base_id)
     ) {
       errors[agent.id] = new FleetError(
         `Agent ${agent.id} cannot be migrated because it is protected.`

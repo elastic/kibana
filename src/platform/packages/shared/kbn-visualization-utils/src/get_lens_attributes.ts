@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Suggestion } from './types';
 
 const LENS_ITEM_LATEST_VERSION = 2 as const;
@@ -21,7 +22,7 @@ interface LensAttributesFromSuggestion {
   state: {
     visualization: {};
     datasourceStates: Record<string, unknown>;
-    query: Query | AggregateQuery;
+    query?: Query;
     filters: Filter[];
     adHocDataViews?: Record<string, DataViewSpec>;
   };
@@ -63,7 +64,9 @@ export const getLensAttributesFromSuggestion = ({
     state: {
       datasourceStates,
       filters,
-      query,
+      // ES|QL queries live exclusively on the text-based datasource layers;
+      // the top-level slot only carries a chart-scoped KQL/Lucene filter.
+      ...(isOfAggregateQueryType(query) ? {} : { query }),
       visualization,
       ...(dataView &&
         dataView.id &&

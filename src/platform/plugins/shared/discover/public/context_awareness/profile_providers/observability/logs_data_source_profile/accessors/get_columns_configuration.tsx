@@ -11,7 +11,7 @@ import React from 'react';
 import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UnifiedDataTableSummaryColumnHeader } from '@kbn/unified-data-table';
+import { UnifiedDataTableSourceColumnHeader } from '@kbn/unified-data-table';
 import type { DataSourceProfileProvider } from '../../../..';
 
 export const getColumnsConfiguration: DataSourceProfileProvider['profile']['getColumnsConfiguration'] =
@@ -50,7 +50,7 @@ export const DataTableSummaryColumnHeaderLogsContext = ({
   );
 
   return (
-    <UnifiedDataTableSummaryColumnHeader
+    <UnifiedDataTableSourceColumnHeader
       columnDisplayName={columnDisplayName}
       headerRowHeight={headerRowHeight}
       tooltipTitle={tooltipTitle}

@@ -97,7 +97,7 @@ export function KnowledgeBaseTab() {
               data-test-subj="pluginsColumnsButton"
               onClick={() => setSelectedCategory(category)}
               aria-label={label}
-              iconType={isSelected ? 'minimize' : 'expand'}
+              iconType={isSelected ? 'minimize' : 'maximize'}
             />
           </EuiToolTip>
         );

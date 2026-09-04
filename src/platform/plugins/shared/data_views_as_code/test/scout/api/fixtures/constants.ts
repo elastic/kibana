@@ -18,7 +18,7 @@ export const COMMON_HEADERS = {
   [ELASTIC_HTTP_VERSION_HEADER]: '1',
 };
 
-export const BASE_PATH = '/api/data_views';
+export const BASE_PATH = '/api/data_views/v2';
 
 export const ID_OVER_MAX_LENGTH = 'x'.repeat(1759);
 

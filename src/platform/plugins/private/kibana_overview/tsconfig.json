@@ -11,6 +11,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/scout",
     "@kbn/navigation-plugin",
     "@kbn/home-plugin",

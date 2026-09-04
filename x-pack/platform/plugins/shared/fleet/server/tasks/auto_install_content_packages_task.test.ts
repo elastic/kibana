@@ -345,6 +345,62 @@ describe('AutoInstallContentPackagesTask', () => {
 
         expect(result).toEqual(['system.cpu']);
       });
+
+      it('should log at INFO level on the first run', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect((mockTask as any).logger.info).toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+        expect((mockTask as any).logger.debug).not.toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+      });
+
+      it('should log at DEBUG level on subsequent runs when dataset count is unchanged', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+        jest.clearAllMocks();
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect((mockTask as any).logger.debug).toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+        expect((mockTask as any).logger.info).not.toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+      });
+
+      it('should log at INFO level on subsequent runs when dataset count changes', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+        jest.clearAllMocks();
+
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+          'logs-system.memory-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect((mockTask as any).logger.info).toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 2 datasets with data'
+        );
+        expect((mockTask as any).logger.debug).not.toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 2 datasets with data'
+        );
+      });
     });
   });
 });

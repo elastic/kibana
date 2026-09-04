@@ -1,8 +1,7 @@
 {
-  "sha1": "e801ccb40115e272ff9cb74f9a7a14151bb82c73",
+  "sha1": "df6cc257ec6c21198e0eca7ee194ce2757b63d4c",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/global.setup.ts",
-        "line": 19,
+        "line": 15,
         "column": 1
       }
     },
@@ -25,11 +24,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/01_home.spec.ts",
-        "line": 30,
+        "line": 27,
         "column": 7
       }
     },
@@ -39,12 +40,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/01_home.spec.ts",
-        "line": 47,
-        "column": 7
+        "line": 34,
+        "column": 11
       }
     },
     {
@@ -53,12 +56,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/01_home.spec.ts",
-        "line": 66,
-        "column": 7
+        "line": 51,
+        "column": 20
       }
     },
     {
@@ -67,12 +72,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 32,
-        "column": 9
+        "line": 34,
+        "column": 16
       }
     },
     {
@@ -81,12 +88,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 32,
-        "column": 9
+        "line": 34,
+        "column": 16
       }
     },
     {
@@ -95,12 +104,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 32,
-        "column": 9
+        "line": 34,
+        "column": 16
       }
     },
     {
@@ -109,12 +120,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 40,
+        "column": 32
       }
     },
     {
@@ -123,12 +136,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 40,
+        "column": 32
       }
     },
     {
@@ -137,12 +152,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 40,
+        "column": 32
       }
     },
     {
@@ -151,12 +168,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/03_no_data_screen.spec.ts",
-        "line": 49,
-        "column": 7
+        "line": 46,
+        "column": 28
       }
     },
     {
@@ -165,11 +184,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/03_no_data_screen.spec.ts",
-        "line": 59,
+        "line": 50,
         "column": 7
       }
     },
@@ -186,7 +207,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
         "line": 17,
-        "column": 9
+        "column": 10
       }
     },
     {
@@ -201,8 +222,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
-        "line": 27,
-        "column": 9
+        "line": 21,
+        "column": 25
       }
     },
     {
@@ -217,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 33,
+        "column": 13
       }
     },
     {
@@ -233,8 +254,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
-        "line": 65,
-        "column": 9
+        "line": 47,
+        "column": 10
       }
     },
     {
@@ -249,8 +270,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
-        "line": 90,
-        "column": 9
+        "line": 65,
+        "column": 10
       }
     },
     {
@@ -265,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/05_resource_loading.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -279,8 +300,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 13,
-        "column": 7
+        "line": 12,
+        "column": 81
       }
     },
     {
@@ -293,8 +314,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 16,
+        "column": 9
       }
     },
     {
@@ -307,8 +328,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 33,
-        "column": 7
+        "line": 23,
+        "column": 8
       }
     }
   ]

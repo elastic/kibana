@@ -58,7 +58,9 @@ const buildProps = (overrides?: Partial<ContextSwitcherProps>): ContextSwitcherP
 describe('ContextSwitcher', () => {
   it('renders the trigger button with the active space name', () => {
     render(<ContextSwitcher {...buildProps()} />);
-    expect(screen.getByTestId('contextSwitcherTriggerButton')).toBeInTheDocument();
+    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
+    expect(trigger).toBeInTheDocument();
+    expect(trigger).toHaveAttribute('data-space-name', 'Default');
     expect(screen.getByText('Default')).toBeInTheDocument();
   });
 
@@ -101,9 +103,49 @@ describe('ContextSwitcher', () => {
     await waitForEuiPopoverOpen();
     expect(trigger).toHaveAttribute('aria-pressed', 'true');
     await user.click(screen.getByTestId('space-obs'));
-    expect(onSelect).toHaveBeenCalledWith('obs');
+    expect(onSelect).toHaveBeenCalledWith('obs', expect.any(Object));
     await waitForEuiPopoverClose();
     expect(trigger).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('keeps popover open for cmd/ctrl click', async () => {
+    const user = userEvent.setup();
+    const onSelect = jest.fn();
+    const props = buildProps();
+    props.spaces.onSelect = onSelect;
+
+    render(<ContextSwitcher {...props} />);
+
+    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
+    await user.click(trigger);
+    await waitForEuiPopoverOpen();
+
+    await user.keyboard('{Meta>}');
+    await user.click(screen.getByTestId('space-obs'));
+    await user.keyboard('{/Meta}');
+
+    expect(onSelect).toHaveBeenCalledWith('obs', expect.objectContaining({ metaKey: true }));
+    expect(trigger).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('keeps popover open for shift click', async () => {
+    const user = userEvent.setup();
+    const onSelect = jest.fn();
+    const props = buildProps();
+    props.spaces.onSelect = onSelect;
+
+    render(<ContextSwitcher {...props} />);
+
+    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
+    await user.click(trigger);
+    await waitForEuiPopoverOpen();
+
+    await user.keyboard('{Shift>}');
+    await user.click(screen.getByTestId('space-obs'));
+    await user.keyboard('{/Shift}');
+
+    expect(onSelect).toHaveBeenCalledWith('obs', expect.objectContaining({ shiftKey: true }));
+    expect(trigger).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('displays environment label when environmentContext is provided with single space', () => {
@@ -124,6 +166,7 @@ describe('ContextSwitcher', () => {
 
     const trigger = screen.getByTestId('contextSwitcherTriggerButton');
     expect(trigger).toHaveTextContent('My Awesome Project: Default');
+    expect(trigger).toHaveAttribute('data-space-name', 'Default');
   });
 
   it('shows two-step navigation when environmentContext is present', async () => {

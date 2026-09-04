@@ -87,4 +87,71 @@ describe('ApplicationConnectionsAPIClient', () => {
       { body: JSON.stringify({ reason: 'admin_revoke' }) }
     );
   });
+
+  it('bulkDeleteConnections() POSTs snake_case targets to the bulk delete URL', async () => {
+    const httpMock = httpServiceMock.createStartContract();
+    httpMock.post.mockResolvedValue({ results: [] });
+
+    const client = new ApplicationConnectionsAPIClient(httpMock);
+
+    await client.bulkDeleteConnections([
+      { clientId: 'client-1', connectionId: 'conn-1' },
+      { clientId: 'client-2', connectionId: 'conn-2' },
+    ]);
+
+    expect(httpMock.post).toHaveBeenCalledTimes(1);
+    expect(httpMock.post).toHaveBeenCalledWith(
+      '/internal/security/oauth/connections/_bulk_delete',
+      {
+        body: JSON.stringify({
+          connections: [
+            { client_id: 'client-1', connection_id: 'conn-1' },
+            { client_id: 'client-2', connection_id: 'conn-2' },
+          ],
+        }),
+      }
+    );
+  });
+
+  it('bulkDeleteConnections() maps the snake_case results to camelCase', async () => {
+    const httpMock = httpServiceMock.createStartContract();
+    httpMock.post.mockResolvedValue({
+      results: [
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'deleted' },
+        {
+          client_id: 'client-2',
+          connection_id: 'conn-2',
+          status: 'error',
+          status_code: 404,
+          message: 'not found',
+        },
+      ],
+    });
+
+    const client = new ApplicationConnectionsAPIClient(httpMock);
+
+    await expect(
+      client.bulkDeleteConnections([
+        { clientId: 'client-1', connectionId: 'conn-1' },
+        { clientId: 'client-2', connectionId: 'conn-2' },
+      ])
+    ).resolves.toEqual({
+      results: [
+        {
+          clientId: 'client-1',
+          connectionId: 'conn-1',
+          status: 'deleted',
+          statusCode: undefined,
+          message: undefined,
+        },
+        {
+          clientId: 'client-2',
+          connectionId: 'conn-2',
+          status: 'error',
+          statusCode: 404,
+          message: 'not found',
+        },
+      ],
+    });
+  });
 });

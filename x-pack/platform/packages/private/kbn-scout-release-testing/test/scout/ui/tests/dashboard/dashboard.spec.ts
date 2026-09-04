@@ -53,7 +53,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
 
     await test.step('add Vega panel', async () => {
       await pageObjects.dashboard.addNewPanel('Vega');
-      await pageObjects.dashboard.clickVisualizeSaveAndReturn();
+      await page.testSubj.locator('vegaEditorFlyoutSaveButton').click();
       await pageObjects.dashboard.expectPanelCount(3);
     });
 
@@ -62,7 +62,10 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await expect(heading).toHaveText('Editing ' + dashboardName);
   });
 
-  test('should edit existing dashboard and add map and Vega panels', async ({ pageObjects }) => {
+  test('should edit existing dashboard and add map and Vega panels', async ({
+    page,
+    pageObjects,
+  }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
@@ -78,7 +81,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
 
     await test.step('add a Vega panel', async () => {
       await pageObjects.dashboard.addNewPanel('Vega');
-      await pageObjects.dashboard.clickVisualizeSaveAndReturn();
+      await page.testSubj.locator('vegaEditorFlyoutSaveButton').click();
       await pageObjects.dashboard.expectPanelCount(14);
     });
 

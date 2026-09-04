@@ -1,0 +1,203 @@
+{
+  "sha1": "4294f06fad2d7741f4162017d7f313a19d3b1e27",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b2f88e728ecbc5f-6b1093d7d0c4ec0",
+      "title": "Ingest ES data for Background Search UI tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/global.setup.ts",
+        "line": 14,
+        "column": 1
+      }
+    },
+    {
+      "id": "b931f7cf03c34ae-dcd6a27dcb558e4",
+      "title": "Discover classic mode background search stores a running search and surfaces it in the background search flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_classic_background_search.spec.ts",
+        "line": 46,
+        "column": 45
+      }
+    },
+    {
+      "id": "31200a6fd2b3ce9-6cf6a3e8ebe1e92",
+      "title": "Discover ES|QL mode background search stores a running search and surfaces it in the background search flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_esql_background_search.spec.ts",
+        "line": 40,
+        "column": 15
+      }
+    },
+    {
+      "id": "dc376d98e98b71b-65cfdcf6e75ca90",
+      "title": "Discover background search privilege gating saves and restores a background search with the full Discover privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_privilege_gating.spec.ts",
+        "line": 77,
+        "column": 66
+      }
+    },
+    {
+      "id": "dc376d98e98b71b-44f13880d21db0c",
+      "title": "Discover background search privilege gating does not offer background search with read-only Discover privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_privilege_gating.spec.ts",
+        "line": 94,
+        "column": 59
+      }
+    },
+    {
+      "id": "5c2238971dfbf21-358c59c357ccba7",
+      "title": "Discover background search restore navigating to surrounding documents drops the background search entrypoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_session_restore.spec.ts",
+        "line": 40,
+        "column": 13
+      }
+    },
+    {
+      "id": "5c2238971dfbf21-29f5f0049aedd12",
+      "title": "Discover background search restore restoring a background search does not start any new searches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_session_restore.spec.ts",
+        "line": 53,
+        "column": 5
+      }
+    },
+    {
+      "id": "bb4beffc619ade8-11317a21e291bb3",
+      "title": "Discover search session state assigns a new search session id to each search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_session_state.spec.ts",
+        "line": 35,
+        "column": 23
+      }
+    },
+    {
+      "id": "bb4beffc619ade8-7304a823b03e6f1",
+      "title": "Discover search session state picks the search session id up from the URL and restores it with the back button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_session_state.spec.ts",
+        "line": 41,
+        "column": 22
+      }
+    },
+    {
+      "id": "bb4beffc619ade8-6c8936b47ede2ec",
+      "title": "Discover search session state offers the background search entrypoint in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_session_state.spec.ts",
+        "line": 72,
+        "column": 9
+      }
+    },
+    {
+      "id": "baeabc44cf93b13-81d99b8b27eff6a",
+      "title": "Discover background search restore into tabs restores a background search stored from a classic search into a new tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_tabs_restore.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "baeabc44cf93b13-a53e9dd31792599",
+      "title": "Discover background search restore into tabs restores a background search stored from an ES|QL search and does not re-run it on tab switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_tabs_restore.spec.ts",
+        "line": 79,
+        "column": 56
+      }
+    },
+    {
+      "id": "baeabc44cf93b13-cb4cd32e690a01f",
+      "title": "Discover background search restore into tabs restoring a background search does not re-run the query in an unrelated tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_tabs_restore.spec.ts",
+        "line": 112,
+        "column": 29
+      }
+    },
+    {
+      "id": "5944d889a4ad5f6-f85bf0f7f7673d1",
+      "title": "Discover tabs storing a background search stores a background search from a newly created tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_tabs_session.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "5944d889a4ad5f6-ffd373ac0a4bb34",
+      "title": "Discover tabs storing a background search stores a background search after switching back to an earlier tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_tabs_session.spec.ts",
+        "line": 47,
+        "column": 15
+      }
+    }
+  ]
+}

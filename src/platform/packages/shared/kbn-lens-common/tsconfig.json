@@ -7,6 +7,7 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/lens-test-helpers",
     "@kbn/lens-formula-docs",
     "@kbn/navigation-plugin",
     "@kbn/expression-xy-plugin",
@@ -44,7 +45,6 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/presentation-util-plugin",
     "@kbn/serverless",
     "@kbn/spaces-plugin",
     "@kbn/unified-search-plugin",
@@ -54,6 +54,9 @@
     "@kbn/cps",
     "@kbn/kql",
     "@kbn/control-group-renderer",
-    "@kbn/palettes"
+    "@kbn/palettes",
+    "@kbn/esql-language",
+    "@kbn/calculate-auto",
+    "@kbn/core-lifecycle-browser-mocks"
   ]
 }

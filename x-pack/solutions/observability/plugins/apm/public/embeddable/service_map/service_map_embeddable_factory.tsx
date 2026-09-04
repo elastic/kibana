@@ -14,6 +14,7 @@ import type {
   CanExpandPanels,
   HasEditCapabilities,
   PublishesBlockingError,
+  PublishesRendered,
   PublishesUnifiedSearch,
   ViewMode,
 } from '@kbn/presentation-publishing';
@@ -56,6 +57,7 @@ const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   environment: ENVIRONMENT_ALL.value,
   kuery: undefined,
   service_name: undefined,
+  highlighted_service_names: undefined,
   service_group_id: undefined,
   map_orientation: 'horizontal',
   sync_with_dashboard_filters: false,
@@ -69,6 +71,7 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   environment: 'referenceEquality',
   kuery: 'referenceEquality',
   service_name: 'referenceEquality',
+  highlighted_service_names: 'deepEquality',
   service_group_id: 'referenceEquality',
   map_orientation: 'referenceEquality',
   sync_with_dashboard_filters: 'referenceEquality',
@@ -82,6 +85,7 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
   HasEditCapabilities &
   PublishesBlockingError &
+  PublishesRendered &
   PublishesUnifiedSearch & {
     setTimeRange: (timeRange: TimeRange | undefined) => void;
     canEditUnifiedSearch: () => boolean;
@@ -145,6 +149,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           environment: state.environment,
           kuery: state.kuery,
           service_name: state.service_name,
+          highlighted_service_names: state.highlighted_service_names,
           service_group_id: state.service_group_id,
           map_orientation: state.map_orientation,
           sync_with_dashboard_filters: state.sync_with_dashboard_filters,
@@ -163,6 +168,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         buildFiltersFromState(state.service_name, state.environment)
       );
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+      const rendered$ = new BehaviorSubject<boolean>(false);
 
       const stateApi = initializeStateApi<ServiceMapEmbeddableState>({
         parentApi,
@@ -194,6 +200,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         ...timeRangeManager.api,
         ...stateApi,
         blockingError$,
+        rendered$,
         filters$,
         query$,
         canEditUnifiedSearch: () => true,
@@ -219,6 +226,9 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                 }
                 customStateManager.api.setKuery(newState.kuery);
                 customStateManager.api.setServiceName(newState.service_name);
+                customStateManager.api.setHighlightedServiceNames(
+                  newState.highlighted_service_names
+                );
                 customStateManager.api.setMapOrientation(newState.map_orientation);
                 customStateManager.api.setSyncWithDashboardFilters(
                   newState.sync_with_dashboard_filters
@@ -280,6 +290,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             environment,
             kuery,
             serviceName,
+            highlightedServiceNames,
             serviceGroupId,
             mapOrientation,
             syncWithDashboardFilters,
@@ -291,6 +302,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             customStateManager.api.environment$,
             customStateManager.api.kuery$,
             customStateManager.api.serviceName$,
+            customStateManager.api.highlightedServiceNames$,
             customStateManager.api.serviceGroupId$,
             customStateManager.api.mapOrientation$,
             customStateManager.api.syncWithDashboardFilters$,
@@ -340,6 +352,10 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             );
           }, []);
 
+          const onRendered = useCallback((isRendered: boolean) => {
+            rendered$.next(isRendered);
+          }, []);
+
           const fetchContext = useFetchContext(api);
           const effectiveTimeRange = fetchContext.timeRange;
           if (!effectiveTimeRange) {
@@ -376,9 +392,11 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   environment={environment}
                   kuery={kuery}
                   serviceName={serviceName ?? undefined}
+                  highlightedServiceNames={highlightedServiceNames ?? undefined}
                   serviceGroupId={serviceGroupId ?? undefined}
                   core={deps.coreStart}
                   onBlockingError={(error) => blockingError$.next(error)}
+                  onRendered={onRendered}
                   mapOrientation={mapOrientation ?? 'horizontal'}
                   onMapOrientationChange={customStateManager.api.setMapOrientation}
                   parentFilters={parentFilters}

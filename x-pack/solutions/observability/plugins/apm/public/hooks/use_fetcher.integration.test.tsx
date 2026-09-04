@@ -48,7 +48,7 @@ describe('when simulating race condition', () => {
   });
 
   it('should render initially render loading state', async () => {
-    expect(renderSpy).lastCalledWith({
+    expect(renderSpy).toHaveBeenLastCalledWith({
       data: undefined,
       error: undefined,
       status: 'loading',
@@ -60,7 +60,7 @@ describe('when simulating race condition', () => {
 
     await waitFor(() => {});
 
-    expect(renderSpy).lastCalledWith({
+    expect(renderSpy).toHaveBeenLastCalledWith({
       data: 'Hello from Peter',
       error: undefined,
       status: 'success',
@@ -71,7 +71,7 @@ describe('when simulating race condition', () => {
     jest.advanceTimersByTime(600);
     await waitFor(() => {});
 
-    expect(renderSpy).lastCalledWith({
+    expect(renderSpy).toHaveBeenLastCalledWith({
       data: 'Hello from Peter',
       error: undefined,
       status: 'success',

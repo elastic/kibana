@@ -6,7 +6,9 @@
  */
 
 export {
+  UPLOAD_SAMPLES_MAX_LINE_LENGTH,
   UPLOAD_SAMPLES_MAX_LINES,
+  UPLOAD_SAMPLES_MAX_REQUEST_BYTES,
   normalizeLogSamplesFromFileContent,
   normalizeLogLinesForUpload,
 } from './upload_samples_limits';

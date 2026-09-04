@@ -6,6 +6,7 @@
  */
 
 import type {
+  ApplicationStart,
   CoreSetup,
   CoreStart,
   OverlayRef,
@@ -17,7 +18,6 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchBar } from './components/search_bar';
 import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
 import type { SearchProps } from './components/types';
@@ -59,15 +59,38 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
     };
 
     let activeModalRef: OverlayRef | null = null;
+    let closingPromise: Promise<void> | null = null;
 
-    const closeModal = () => {
-      activeModalRef?.close();
+    const closeModal = (): Promise<void> => {
+      if (closingPromise) {
+        return closingPromise;
+      }
+
+      const ref = activeModalRef;
       activeModalRef = null;
+      if (!ref) {
+        return Promise.resolve();
+      }
+
+      // Share the in-flight close so navigate-from-search can await the same unmount
+      // even if onResultSelect already started closing the overlay.
+      closingPromise = ref.close().finally(() => {
+        closingPromise = null;
+      });
+      return closingPromise;
+    };
+
+    // Close the search overlay and wait for ModalService cleanup before navigating.
+    // Otherwise leave-confirm (openConfirm) replaces the search modal mid-click and
+    // the confirm buttons become inert (single-slot overlays modal host).
+    const navigateFromSearchModal: ApplicationStart['navigateToUrl'] = async (url, options) => {
+      await closeModal();
+      return application.navigateToUrl(url, options);
     };
 
     const toggleSearchModal = () => {
-      if (activeModalRef) {
-        closeModal();
+      if (activeModalRef || closingPromise) {
+        void closeModal();
         return;
       }
 
@@ -75,9 +98,8 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
         toMountPoint(
           <SearchModal
             {...searchProps}
-            onClose={() => {
-              closeModal();
-            }}
+            navigateToUrl={navigateFromSearchModal}
+            onClose={closeModal}
           />,
           core
         ),
@@ -92,15 +114,8 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
       });
     };
 
-    if (core.chrome.next.isEnabled) {
-      core.chrome.next.globalSearch.set({
-        onClick: toggleSearchModal,
-      });
-    }
-
-    core.chrome.navControls.registerCenter({
-      order: 1000,
-      content: <SearchBar {...searchProps} chromeStyle$={core.chrome.getChromeStyle$()} />,
+    core.chrome.next.globalSearch.set({
+      onClick: toggleSearchModal,
     });
 
     return {};

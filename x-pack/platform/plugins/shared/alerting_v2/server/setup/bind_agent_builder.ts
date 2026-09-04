@@ -6,22 +6,28 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { Logger, OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
+import { OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
+import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
-import { SchemaTranslationError } from '../agent_builder/skills/schema_to_skill_docs';
 import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sml_type';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
+import { EpisodesClient } from '../lib/episodes_client';
+import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import { RulesClient } from '../lib/rules_client';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../lib/services/logger_service/logger_service';
 import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 
@@ -51,21 +57,33 @@ function getAgentBuilder(container: Container): AgentBuilderSetup | undefined {
  */
 export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
   bind(AttachmentTypeToken).toResolvedValue(
-    (logger, injection) =>
+    (loggerService: LoggerServiceContract, injection) =>
       createRuleAttachmentType({
-        logger,
+        logger: loggerService.forSubsystem('agentBuilder'),
         getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
       }) as AttachmentTypeDefinition,
-    [Logger, CoreStart('injection')]
+    [LoggerServiceToken, CoreStart('injection')]
   );
   bind(AttachmentTypeToken).toResolvedValue(
-    (logger, injection) =>
+    (loggerService: LoggerServiceContract, injection) =>
       createActionPolicyAttachmentType({
-        logger,
+        logger: loggerService.forSubsystem('agentBuilder'),
         getActionPolicyClient: (context) =>
           resolveRequestScoped(injection, context.request, ActionPolicyClient),
       }) as AttachmentTypeDefinition,
-    [Logger, CoreStart('injection')]
+    [LoggerServiceToken, CoreStart('injection')]
+  );
+  bind(AttachmentTypeToken).toResolvedValue(
+    (loggerService: LoggerServiceContract, injection) =>
+      createEpisodeAttachmentType({
+        logger: loggerService.forSubsystem('agentBuilder'),
+        getEpisodesClient: (context) =>
+          resolveRequestScoped(injection, context.request, EpisodesClient),
+        getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
+      }) as AttachmentTypeDefinition,
+    [LoggerServiceToken, CoreStart('injection')]
   );
 
   bind(OnSetup).toConstantValue((container) => {
@@ -117,7 +135,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     );
   });
 
-  bind(OnStart).toConstantValue(async (container) => {
+  bind(OnStart).toConstantValue((container) => {
     const agentBuilder = getAgentBuilder(container);
     if (!agentBuilder) {
       return;
@@ -128,23 +146,11 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     }
 
     const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
-    try {
-      registerSkills(agentBuilder, {
-        getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
-        getAvailableConnectors: (sid, req) =>
-          workflowsManagementApi.getAvailableConnectors(sid, req),
-      });
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      if (e instanceof SchemaTranslationError) {
-        container
-          .get(Logger)
-          .warn(`Rule management skill registered with empty schema docs: ${message}`);
-      } else {
-        container.get(Logger).warn(`Failed to register rule management skill: ${message}`);
-      }
-    }
-
-    container.get(Logger).debug('Rule management skill and attachments registered');
+    const agentBuilderLogger = container.get(LoggerServiceToken).forSubsystem('agentBuilder');
+    registerSkills(agentBuilder, {
+      logger: agentBuilderLogger,
+      getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
+      getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
+    });
   });
 }

@@ -12,13 +12,13 @@ import useObservable from 'react-use/lib/useObservable';
 import { discoverTopNavMenuContext } from './discover_topnav_menu';
 
 /**
- * Hook to access the top nav menu items from context.
- * This provides a shared way to get the menu items in both
- * TabsView and SingleTabView scenarios.
+ * Hook to access the top nav menu items and share action from context.
+ * This provides a shared way to get them in both TabsView and SingleTabView scenarios.
  */
 export const useTopNavMenuItems = () => {
-  const { topNavMenu$ } = useContext(discoverTopNavMenuContext);
+  const { topNavMenu$, topNavShare$ } = useContext(discoverTopNavMenuContext);
   const topNavMenuItems = useObservable(topNavMenu$, topNavMenu$.getValue());
+  const shareAction = useObservable(topNavShare$, topNavShare$.getValue());
 
-  return topNavMenuItems;
+  return { topNavMenuItems, shareAction };
 };

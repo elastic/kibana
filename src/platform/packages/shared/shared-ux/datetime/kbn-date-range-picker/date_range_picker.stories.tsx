@@ -26,7 +26,7 @@ const meta: Meta<DateRangePickerProps> = {
     onChange: action('onChange'),
     onInputChange: action('onInputChange'),
     onSettingsChange: action('onSettingsChange'),
-    settings: { roundRelativeTime: true, timePrecision: 's' },
+    settings: { roundRelativeTime: false, timePrecision: 's' },
   },
   argTypes: {
     locale: {
@@ -118,7 +118,8 @@ export const Presets: Story = {
     presets: [
       { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
       { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
-      { start: 'now/d', end: 'now/d', label: 'Today' },
+      { start: 'now/d', end: 'now/d', label: 'Today', isEditable: false },
+      { start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date', isEditable: false },
     ],
     timeZone: 'Europe/Amsterdam',
     onPresetSave: action('onPresetSave'),
@@ -132,7 +133,7 @@ export const AutoRefresh: Story = {
   args: {
     defaultValue: 'last 15 minutes',
     settings: {
-      roundRelativeTime: true,
+      roundRelativeTime: false,
       timePrecision: 's',
       autoRefresh: {
         isEnabled: true,
@@ -192,7 +193,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
       onPresetSave?.(option);
       setPresets((prev) => {
         const deduped = prev.filter((p) => timeRangeKey(p) !== timeRangeKey(option));
-        return [...deduped, option];
+        return [option, ...deduped];
       });
     },
     [onPresetSave]

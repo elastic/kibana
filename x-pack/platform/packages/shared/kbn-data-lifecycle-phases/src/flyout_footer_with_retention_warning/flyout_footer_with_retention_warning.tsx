@@ -9,13 +9,12 @@ import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
-  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getFlyoutFooterWithRetentionWarningStyles } from './styles';
 import { getIlmPolicySummaryStats } from '../edit_data_lifecycle_flyout/ilm_policy_summary_stats';
 import type { IlmPolicyForFlyout } from '../edit_data_lifecycle_flyout/types';
@@ -91,16 +90,15 @@ export const FlyoutFooterWithRetentionWarning = ({
   return (
     <EuiFlyoutFooter>
       {showWarning && (
-        <EuiCallOut
-          title={footerStrings.downsamplingNotAppliedTitle}
-          color="primary"
-          size="s"
-          announceOnMount
-          css={styles.callout}
-          data-test-subj="flyoutFooter-downsamplingNotAppliedCallout"
-        >
-          <EuiText size="s">{warningBody}</EuiText>
-        </EuiCallOut>
+        <div css={styles.callout}>
+          <KbnInfoCallout
+            title={footerStrings.downsamplingNotAppliedTitle}
+            text={warningBody}
+            size="s"
+            announceOnMount
+            data-test-subj="flyoutFooter-downsamplingNotAppliedCallout"
+          />
+        </div>
       )}
 
       <EuiFlexGroup

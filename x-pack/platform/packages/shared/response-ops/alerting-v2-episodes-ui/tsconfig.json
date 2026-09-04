@@ -7,7 +7,9 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/alerting-v2-common-queries",
     "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-utils",
     "@kbn/datemath",
     "@kbn/core",
     "@kbn/core-application-browser",
@@ -31,6 +33,7 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/react-kibana-mount",
     "@kbn/react-query",
+    "@kbn/router-utils",
     "@kbn/response-ops-alert-snooze",
     "@kbn/data-plugin",
     "@kbn/discover-utils",
@@ -51,6 +54,7 @@
     "@kbn/lens-plugin",
     "@kbn/charts-plugin",
     "@kbn/core-ui-settings-browser",
-    "@kbn/unified-doc-viewer-plugin"
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/ui-callout"
   ]
 }

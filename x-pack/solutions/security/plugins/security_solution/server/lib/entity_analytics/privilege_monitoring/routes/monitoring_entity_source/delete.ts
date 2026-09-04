@@ -22,7 +22,8 @@ import { withMinimumLicense } from '../../../utils/with_minimum_license';
 export const deleteMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  config: EntityAnalyticsRoutesDeps['config']
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .delete({
@@ -42,6 +43,17 @@ export const deleteMonitoringEntitySourceRoute = (
             params: DeleteEntitySourceRequestParams,
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);

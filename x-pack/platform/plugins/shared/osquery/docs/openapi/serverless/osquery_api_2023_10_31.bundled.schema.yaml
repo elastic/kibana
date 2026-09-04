@@ -1704,7 +1704,7 @@ components:
           metadata:
             execution_context:
               name: osquery
-              url: /app/osquery/live_queries/new
+              url: /app/osquery/new
           queries:
             - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
               agents:
@@ -3076,6 +3076,15 @@ components:
           $ref: '#/components/schemas/ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/QueryId'
+        interval:
+          description: >
+            Interval for this query, in seconds. Overrides the pack's `interval`
+            when this query also has `schedule_type: interval`. If you send
+            `interval` without `schedule_type: interval`, Kibana removes it when
+            saving, and the query uses the pack's `interval` instead. Ignored
+            when the pack's `schedule_type` is `rrule`.
+          nullable: true
+          type: integer
         platform:
           $ref: '#/components/schemas/PlatformOrUndefined'
         query:
@@ -3361,7 +3370,8 @@ components:
       type: object
       properties:
         agentCount:
-          description: The number of agents targeted by the query.
+          description: For live queries, the number of agents targeted by the query. For
+            scheduled rows, the number of distinct agents that responded.
           type: integer
         errorCount:
           description: The number of agent responses with errors.

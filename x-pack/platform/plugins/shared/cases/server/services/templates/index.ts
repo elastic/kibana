@@ -25,12 +25,25 @@ import type {
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { isRefField } from '../../../common/types/domain/template/fields';
+import {
+  buildStrictFieldsArraySchema,
+  collectExistingFieldNames,
+} from '../../../common/types/domain/template/strict_fields';
+import { getYamlDefaultAsString, normalizeFieldDefinitionName } from '../../../common/utils';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
-import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_TEMPLATE_SAVED_OBJECT,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
+  MAX_FIELDS_PER_TEMPLATE,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
+  MAX_TEMPLATES_PER_OWNER,
+} from '../../../common/constants';
 import type {
   TemplatesFindRequest,
   TemplatesFindResponse,
 } from '../../../common/types/api/template/v1';
+
+const textEncoder = new TextEncoder();
 
 export class TemplatesService {
   constructor(
@@ -361,10 +374,17 @@ export class TemplatesService {
       );
     }
 
+    this.assertFieldNamesAreAuthorable(parsedDefinition.fields);
+    this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
+    this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
+    this.assertDefinitionLengthWithinLimit(normalizedDefinition);
+
     await this.assertTemplateNameIsUnique({
       name: templateName,
       owner: input.owner,
     });
+
+    await this.assertOwnerTemplateCountWithinLimit(input.owner);
 
     const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
 
@@ -418,11 +438,23 @@ export class TemplatesService {
       );
     }
 
+    this.assertFieldNamesAreAuthorable(
+      parsedDefinition.fields,
+      this.getExistingFieldNames(currentTemplate.attributes.definition)
+    );
+    this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
+    this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
+    this.assertDefinitionLengthWithinLimit(normalizedDefinition);
+
     await this.assertTemplateNameIsUnique({
       name: templateName,
       owner: input.owner,
       excludeTemplateId: currentTemplate.attributes.templateId,
     });
+
+    if (input.owner !== currentTemplate.attributes.owner) {
+      await this.assertOwnerTemplateCountWithinLimit(input.owner);
+    }
 
     const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
 
@@ -509,7 +541,16 @@ export class TemplatesService {
     return [...new Set(authors)].sort();
   }
 
-  async incrementUsageStats(templateId: string): Promise<void> {
+  /**
+   * Adds `caseCount` uses to a template's running tally, defaulting to a single use.
+   *
+   * The tally counts uses, not distinct cases: a case that loses this template and gets it again
+   * adds a second use. It is cumulative and never decreases, so clearing a template from a case, or
+   * deleting the case, leaves it untouched. It is also a read-then-write rather than an atomic
+   * increment, so concurrent callers can overwrite each other. Treat it as an approximate
+   * popularity signal, not an exact count.
+   */
+  async incrementUsageStats(templateId: string, caseCount: number = 1): Promise<void> {
     const template = await this._getTemplate(templateId);
 
     if (!template) {
@@ -522,7 +563,7 @@ export class TemplatesService {
           id: template.id,
           type: CASE_TEMPLATE_SAVED_OBJECT,
           attributes: {
-            usageCount: (template.attributes.usageCount ?? 0) + 1,
+            usageCount: (template.attributes.usageCount ?? 0) + caseCount,
             lastUsedAt: new Date().toISOString(),
           },
         },
@@ -580,6 +621,280 @@ export class TemplatesService {
     }
 
     return this.dependencies.getFieldDefinitionsForOwner(owner);
+  }
+
+  /**
+   * Write-preflight used by the public routes' `dry_run` mode: resolves the identity name the way
+   * `createTemplate`/`updateTemplate` do and asserts it is unique for the owner — without writing
+   * anything. Throws the same Boom errors (400 missing name / resource-limit, 409 conflict) the
+   * real write would, so a `{ valid: true }` dry_run is a reliable predictor of a successful write.
+   *
+   * Parses through the zod schema (not a raw `parseYaml` cast) for the same reason `createTemplate`
+   * /`updateTemplate` do: field-level defaults must be resolved identically so the default-value
+   * size check below sees what the real write would persist. Safe to re-parse here — the route
+   * layer already ran the input through `ParsedTemplateDefinitionSchema` (via
+   * `validateTemplateDefinition` for create, `validateTemplateStructure` for update) before
+   * calling into this preflight; the authoring-charset check for update is enforced here, not at
+   * the route, because only this method's caller has the existing template to grandfather names
+   * against (see `existingDefinition`).
+   *
+   * `excludeTemplateId` is passed for the update preflight (it excludes the template being edited
+   * from the uniqueness check); its presence also marks this as an update. `currentOwner` — the
+   * template's owner before this write — is passed alongside it so an owner-changing update can be
+   * detected. The per-owner count cap is asserted on the target owner whenever this is a create, or
+   * an update that changes owner, matching which cap each real write path enforces.
+   *
+   * `existingDefinition` — the update preflight's current stored definition — grandfathers field
+   * names that predate the authoring-charset rule, mirroring `updateTemplate`. Omitted on create.
+   */
+  async validateWriteInput(
+    input: Pick<CreateTemplateInput, 'name' | 'owner' | 'definition'>,
+    {
+      excludeTemplateId,
+      currentOwner,
+      existingDefinition,
+    }: { excludeTemplateId?: string; currentOwner?: string; existingDefinition?: string } = {}
+  ): Promise<void> {
+    const normalizedDefinition = trimFieldDefaults(input.definition);
+    const parsedDefinition = ParsedTemplateDefinitionSchema.parse(parseYaml(normalizedDefinition));
+    const templateName = input.name ?? parsedDefinition.name;
+    if (!templateName) {
+      throw Boom.badRequest(
+        'A template name is required: provide `name` or a case-default title in the definition.'
+      );
+    }
+
+    // Keep dry_run faithful to the real write: mirror the same resource-limit assertions each write
+    // path runs (including the SO `definition` maxLength, which otherwise only surfaces on apply).
+    this.assertFieldNamesAreAuthorable(
+      parsedDefinition.fields,
+      existingDefinition !== undefined ? this.getExistingFieldNames(existingDefinition) : undefined
+    );
+    this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
+    this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
+    this.assertDefinitionLengthWithinLimit(normalizedDefinition);
+
+    await this.assertTemplateNameIsUnique({
+      name: templateName,
+      owner: input.owner,
+      excludeTemplateId,
+    });
+
+    const isCreate = excludeTemplateId === undefined;
+    if (isCreate || (currentOwner !== undefined && input.owner !== currentOwner)) {
+      await this.assertOwnerTemplateCountWithinLimit(input.owner);
+    }
+  }
+
+  /**
+   * Mirrors the saved-object `definition` maxLength so create/update/`dry_run` reject oversized
+   * YAML with an actionable 400 before the SO layer. Measured after `trimFieldDefaults` — the same
+   * string that would be persisted.
+   */
+  private assertDefinitionLengthWithinLimit(definition: string): void {
+    if (definition.length > MAX_TEMPLATE_DEFINITION_LENGTH) {
+      throw Boom.badRequest(
+        `Template definition exceeds the maximum length of ${MAX_TEMPLATE_DEFINITION_LENGTH} characters.`
+      );
+    }
+  }
+
+  /**
+   * Rejects field names whose derived `<name>_as_<type>` storage key falls outside the authoring
+   * charset (`AUTHORABLE_SNAKE_KEY`), unless the name is in `grandfatheredNames`. Enforced on
+   * every write path — create, update, and the `dry_run` preflight — but never on read, so a
+   * template stored before this rule still loads. Runs after the lenient
+   * `ParsedTemplateDefinitionSchema` parse so the message names the offending field instead of
+   * surfacing as a generic schema failure.
+   *
+   * `grandfatheredNames` is omitted on create (nothing to grandfather) and set on update to the
+   * names already present in the template's currently-stored definition (see
+   * `getExistingFieldNames`), so editing a template that predates this rule doesn't lock it —
+   * only a genuinely new or renamed invalid name is rejected.
+   */
+  private assertFieldNamesAreAuthorable(
+    fields: ParsedTemplate['definition']['fields'],
+    grandfatheredNames?: ReadonlySet<string>
+  ): void {
+    const result = buildStrictFieldsArraySchema(grandfatheredNames).safeParse(fields);
+    if (!result.success) {
+      throw Boom.badRequest(
+        result.error.issues[0]?.message ?? 'One or more field names are invalid.'
+      );
+    }
+  }
+
+  /**
+   * Best-effort: the field names/aliases already present in a template's currently-stored
+   * `definition`, for grandfathering on update (see `assertFieldNamesAreAuthorable`). Falls back
+   * to an empty set (no grandfathering — fully strict) if the stored YAML fails to parse against
+   * the lenient schema; that can only make the check MORE restrictive, never let a genuinely new
+   * invalid name through unnoticed.
+   */
+  private getExistingFieldNames(definition: string): ReadonlySet<string> {
+    try {
+      const parsed = ParsedTemplateDefinitionSchema.parse(parseYaml(definition));
+      return collectExistingFieldNames(parsed.fields);
+    } catch {
+      return new Set();
+    }
+  }
+
+  /**
+   * Caps the number of fields a single template definition may declare. Enforced on every write
+   * path (create, update, and their `dry_run` preflight) but never on read — a template stored
+   * before this cap existed still loads. Bounds the flattened extended-field key space one template
+   * can introduce per case.
+   */
+  private assertFieldCountWithinLimit(fieldCount: number): void {
+    if (fieldCount > MAX_FIELDS_PER_TEMPLATE) {
+      throw Boom.badRequest(
+        `A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`
+      );
+    }
+  }
+
+  /**
+   * Limits defaults stored in a newly written template definition. Value-bearing
+   * fields are later coerced into a case's `extended_fields`, so measure the
+   * same UTF-8 representation that will be persisted on the case.
+   */
+  private assertTemplateDefaultValuesWithinLimit(
+    fields: ParsedTemplate['definition']['fields']
+  ): void {
+    for (const field of fields) {
+      const metadata = field.metadata;
+      if (
+        metadata !== undefined &&
+        'default' in metadata &&
+        metadata.default !== undefined &&
+        metadata.default !== null
+      ) {
+        const value = getYamlDefaultAsString(metadata.default);
+        if (textEncoder.encode(value).byteLength > MAX_EXTENDED_FIELD_VALUE_BYTES) {
+          const fieldName = isRefField(field) ? field.name ?? field.$ref : field.name;
+          throw Boom.badRequest(
+            `Template field "${fieldName}" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * Caps the number of distinct, non-deleted templates an owner may have in a space. Counts by
+   * `isLatest` version (one per live template) so version history doesn't inflate the total. New
+   * templates only — existing owners already over the cap are never forced to delete.
+   *
+   * NOTE: like `assertTemplateNameIsUnique`, this is a best-effort read-then-write check, not an
+   * atomic constraint. Two concurrent creates at count `limit - 1` can both pass and persist,
+   * overshooting by one. Accepted trade-off: template creation is a low-frequency administrative
+   * action and `refresh: true` writes keep the read current, so the overshoot is bounded and small.
+   */
+  private async assertOwnerTemplateCountWithinLimit(owner: string): Promise<void> {
+    const escapedOwner = escapeKuery(owner);
+    const soType = CASE_TEMPLATE_SAVED_OBJECT;
+    const { total } = await this.dependencies.unsecuredSavedObjectsClient.find<Template>({
+      type: soType,
+      namespaces: [this.dependencies.namespace],
+      page: 1,
+      perPage: 0,
+      fields: ['owner', 'isLatest', 'deletedAt'],
+      filter: fromKueryExpression(
+        `${soType}.attributes.owner: "${escapedOwner}" AND ` +
+          `${soType}.attributes.isLatest: true AND NOT ${soType}.attributes.deletedAt: *`
+      ),
+    });
+
+    if (total >= MAX_TEMPLATES_PER_OWNER) {
+      throw Boom.badRequest(
+        `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
+      );
+    }
+  }
+
+  /**
+   * Returns the names of active (non-deleted, latest-version) templates for the given owner
+   * that contain a `$ref: <fieldName>` reference in their YAML definition.
+   *
+   * Used by the field-definitions client to block deleting a library field that is still
+   * referenced by at least one template.
+   */
+  async getActiveTemplatesReferencingField(
+    owner: string,
+    fieldName: string
+  ): Promise<Array<{ name: string }>> {
+    interface SearchResult {
+      hits: {
+        hits: SavedObjectsRawDoc[];
+        total: { value: number };
+      };
+    }
+
+    const escapedOwner = escapeKuery(owner);
+    const SO = CASE_TEMPLATE_SAVED_OBJECT;
+
+    // Push the $ref lookup down to ES: only fetch candidate templates whose
+    // `definition` text contains the token sequence `ref <fieldName>` (the
+    // standard analyzer strips `$` and `:`, leaving adjacent tokens).
+    // match_phrase requires the tokens to be adjacent and in order, so this
+    // is a tight pre-filter that virtually eliminates false positives.
+    // The exact YAML parse below is the correctness gate — it handles any
+    // residual analyzer edge-cases and alias-overridden ref fields.
+    const filters = [
+      toElasticsearchQuery(fromKueryExpression(`${SO}.owner: "${escapedOwner}"`)),
+      toElasticsearchQuery(fromKueryExpression(`${SO}.isLatest: true`)),
+      toElasticsearchQuery(fromKueryExpression(`NOT ${SO}.deletedAt: *`)),
+    ];
+
+    const findResult = (await this.dependencies.unsecuredSavedObjectsClient.search({
+      type: SO,
+      namespaces: [this.dependencies.namespace],
+      from: 0,
+      size: 10000,
+      query: {
+        bool: {
+          filter: filters,
+          must: [
+            {
+              match_phrase: {
+                [`${SO}.definition`]: `$ref: ${fieldName}`,
+              },
+            },
+          ],
+        },
+      },
+    })) as SearchResult;
+
+    const referencing: Array<{ name: string }> = [];
+
+    for (const hit of findResult.hits.hits) {
+      const so = this.dependencies.savedObjectsSerializer.rawToSavedObject<Template>(hit);
+      try {
+        const parsed = parseYaml(so.attributes.definition ?? '');
+        const fields: unknown[] = Array.isArray(parsed?.fields) ? parsed.fields : [];
+        // Case-insensitive, matching resolveTemplateFields: a template referencing
+        // "CF_Text" still resolves a definition named "cf_text", so it must also
+        // block that definition's deletion.
+        const normalizedFieldName = normalizeFieldDefinitionName(fieldName);
+        const hasRef = fields.some(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            '$ref' in f &&
+            typeof (f as Record<string, unknown>).$ref === 'string' &&
+            normalizeFieldDefinitionName((f as Record<string, unknown>).$ref as string) ===
+              normalizedFieldName
+        );
+        if (hasRef) {
+          referencing.push({ name: so.attributes.name });
+        }
+      } catch {
+        // Unparseable YAML — skip; do not block the delete for a corrupt template
+      }
+    }
+
+    return referencing;
   }
 
   /**

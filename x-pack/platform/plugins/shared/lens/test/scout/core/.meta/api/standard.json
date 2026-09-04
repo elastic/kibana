@@ -1,0 +1,520 @@
+{
+  "sha1": "0d234712e18d97d1e5a81fb0f0dec08e6aa21986",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b80703b0fc233d1-3c7d9567f5c8810",
+      "title": "Lens metric trendline query execution executes trendline query: TS query with TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-cccf62caabcc97c",
+      "title": "Lens metric trendline query execution executes trendline query: TS query with aliased TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-fc9ae43952b6c4b",
+      "title": "Lens metric trendline query execution executes trendline query: regular source query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-df2cdc1fa035c7f",
+      "title": "Lens metric trendline query execution executes trendline query: raw query without STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-467aaecf2168fdc",
+      "title": "Lens metric trendline query execution executes trendline query: raw query with breakdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-5cc418dd40cce85",
+      "title": "Lens metric trendline query execution executes trendline query: TS query without TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-562b5975034b388",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with existing TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-c12c99724ae8ab8",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with aliased TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-a7d36af14df7b22",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with KEEP after STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-e42364b43999199",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with aliased BUCKET and KEEP after STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-8ba1c3fda8eb989",
+      "title": "Lens metric trendline query execution executes trendline query: TS query with renamed TBUCKET column",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-ea44c069c7660cd",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with renamed BUCKET column and KEEP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-4c82fb96ddb437a",
+      "title": "Lens metric trendline query execution executes trendline query: raw query with multiple metric fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-f2731ed3a973dff",
+      "title": "Lens metric trendline query execution executes trendline query: raw query without metric fields falls back to COUNT(*)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-01477fd8fe1bd72",
+      "title": "Lens metric trendline query execution executes trendline query: query with an existing BUCKET on the time field is unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-369063de0748786",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with KEEP before STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-139cf639c1b782b",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with TBUCKET renamed via assignment form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-aff6334ea31699c",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with aliased BUCKET through chained RENAMEs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "9a20063fc72c8c5-e466439a83cf853",
+      "title": "lens visualizations - create should create a lens visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/create.spec.ts",
+        "line": 18,
+        "column": 25
+      }
+    },
+    {
+      "id": "9a20063fc72c8c5-b0986660b08c016",
+      "title": "lens visualizations - create validation - returns 400 when body is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/create.spec.ts",
+        "line": 30,
+        "column": 16
+      }
+    },
+    {
+      "id": "92c8d8a526e6912-9fc3938ad30c7e7",
+      "title": "lens visualizations - delete should delete an existing lens visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/delete.spec.ts",
+        "line": 20,
+        "column": 25
+      }
+    },
+    {
+      "id": "92c8d8a526e6912-79203200d6ccdc2",
+      "title": "lens visualizations - delete should return 404 when deleting a non-existent visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/delete.spec.ts",
+        "line": 28,
+        "column": 84
+      }
+    },
+    {
+      "id": "0b749b8b94ee42c-9f3b7350a14f660",
+      "title": "lens visualizations - get should get a lens visualization by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/get.spec.ts",
+        "line": 20,
+        "column": 25
+      }
+    },
+    {
+      "id": "0b749b8b94ee42c-293fcf0165795a9",
+      "title": "lens visualizations - get should return 404 for a non-existent lens visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/get.spec.ts",
+        "line": 29,
+        "column": 22
+      }
+    },
+    {
+      "id": "c0e60106c7a0cca-06babd174c255d6",
+      "title": "lens visualizations - search should return the list of lens visualizations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/search.spec.ts",
+        "line": 18,
+        "column": 25
+      }
+    },
+    {
+      "id": "c0e60106c7a0cca-c116711b522fb04",
+      "title": "lens visualizations - search should filter visualizations by title and description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/search.spec.ts",
+        "line": 27,
+        "column": 22
+      }
+    },
+    {
+      "id": "c0e60106c7a0cca-8e4434eefd0f350",
+      "title": "lens visualizations - search validation - returns 400 for unknown query params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/search.spec.ts",
+        "line": 39,
+        "column": 77
+      }
+    },
+    {
+      "id": "93b93d439d2c363-32e2e96ec866d6f",
+      "title": "lens visualizations - update should update an existing lens visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
+        "line": 27,
+        "column": 25
+      }
+    },
+    {
+      "id": "93b93d439d2c363-a79cfe11de0f753",
+      "title": "lens visualizations - update should upsert when no visualization exists for the id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
+        "line": 39,
+        "column": 16
+      }
+    },
+    {
+      "id": "93b93d439d2c363-75d3dc22a6747df",
+      "title": "lens visualizations - update validation - returns 400 for an invalid id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
+        "line": 55,
+        "column": 22
+      }
+    },
+    {
+      "id": "93b93d439d2c363-2fa89c8a94db732",
+      "title": "lens visualizations - update validation - returns 400 when body is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
+        "line": 69,
+        "column": 11
+      }
+    }
+  ]
+}

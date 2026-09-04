@@ -20,8 +20,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/ui-chrome-layout'
-  - '@kbn/ui-chrome-layout-utils'
-  - '@kbn/ui-chrome-layout-constants'
 tags:
   - shared-browser
   - package

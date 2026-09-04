@@ -56,6 +56,7 @@ const DEFAULT_DISABLED_ACTIONS = [
   'alertRule',
   'ACTION_OPEN_IN_DISCOVER',
   ACTION_EXPLORE_IN_DISCOVER_TAB,
+  'ACTION_FILTERS_NOTIFICATION',
 ];
 
 const chartContainerCss = css`

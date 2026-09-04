@@ -7,12 +7,23 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { type ScoutPage, EuiFieldTextWrapper } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export class AbstractPageObject {
   constructor(public readonly page: ScoutPage) {}
 }
+
+const commonPrefix = (values: string[]) => {
+  const [first, ...rest] = values;
+  let end = first.length;
+  for (const value of rest) {
+    while (end > 0 && !value.startsWith(first.slice(0, end))) {
+      end--;
+    }
+  }
+  return first.slice(0, end);
+};
 
 export class IndexManagement extends AbstractPageObject {
   async goto() {
@@ -77,10 +88,36 @@ export class IndexManagement extends AbstractPageObject {
     await expect(this.page.testSubj.locator('indexDetailsContent')).toBeVisible();
   }
 
+  // Selects the index row checkbox and opens its "manage index" context menu.
+  async manageIndex(indexName: string) {
+    const checkbox = this.page.locator(`input[id="checkboxSelectIndex-${indexName}"]`);
+    if (!(await checkbox.isChecked())) {
+      await checkbox.click();
+    }
+    await this.page.testSubj.locator('indexActionsContextMenuButton').click();
+    await expect(this.page.testSubj.locator('indexContextMenu')).toBeVisible();
+  }
+
+  async changeManageIndexTab(
+    manageIndexTab:
+      | 'showOverviewIndexMenuButton'
+      | 'showSettingsIndexMenuButton'
+      | 'showMappingsIndexMenuButton'
+  ) {
+    await this.page.testSubj.locator(manageIndexTab).click();
+  }
+
+  async deleteIndexFromContextMenu() {
+    await this.page.testSubj.locator('deleteIndexMenuButton').click();
+  }
+
+  async confirmDeleteIndexModal() {
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+  }
+
   async navigateToIndexManagementTab(
     tab: 'indices' | 'data_streams' | 'templates' | 'component_templates' | 'enrich_policies'
   ) {
-    await this.goto();
     const tabMap = {
       indices: 'indicesTab',
       data_streams: 'data_streamsTab',
@@ -88,11 +125,109 @@ export class IndexManagement extends AbstractPageObject {
       component_templates: 'component_templatesTab',
       enrich_policies: 'enrich_policiesTab',
     };
-    await this.page.testSubj.locator(tabMap[tab]).click();
+    // A freshly created custom role can take a moment to apply, giving a 403 and no tabs.
+    await expect(async () => {
+      await this.page.gotoApp(`management/data/index_management/${tab}`);
+      await expect(this.page.testSubj.locator(tabMap[tab])).toBeVisible({ timeout: 10_000 });
+    }).toPass({ timeout: 60_000 });
   }
 
   async clickNextButton() {
     await this.page.testSubj.locator('nextButton').click();
+  }
+
+  private async fillSearchBox(searchBox: Locator, value: string) {
+    await expect(async () => {
+      await searchBox.fill(value);
+      await expect(searchBox).toHaveValue(value);
+    }).toPass({ timeout: 30_000 });
+  }
+
+  private async filterDataStreams(name: string) {
+    await this.fillSearchBox(this.page.testSubj.locator('dataStreamSearch'), name);
+    const rowLinks = this.page.testSubj.locator('nameLink');
+    await expect(rowLinks.filter({ hasNotText: name })).toHaveCount(0);
+    await expect(rowLinks.filter({ hasText: name })).not.toHaveCount(0);
+  }
+
+  async clickTemplateDetailsLink(name: string) {
+    await this.fillSearchBox(
+      this.page.getByRole('searchbox', { name: /results lower in the page/ }),
+      name
+    );
+
+    const link = this.page.testSubj
+      .locator('templateDetailsLink')
+      .and(this.page.getByRole('button', { name, exact: true }));
+    await expect(link).toBeVisible();
+    await expect(async () => {
+      await link.click();
+      await expect(this.page.testSubj.locator('templateDetails')).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 60_000 });
+  }
+
+  // Open a data stream's details flyout by exact name. Serverless projects ship their own data
+  // streams, so filter the list down first; the same re-render race applies as above.
+  async clickDataStreamNameLink(name: string) {
+    await this.filterDataStreams(name);
+    const link = this.page.testSubj
+      .locator('nameLink')
+      .and(this.page.getByRole('button', { name, exact: true }));
+    await expect(async () => {
+      await link.click();
+      await expect(this.page.testSubj.locator('dataStreamDetailPanel')).toBeVisible({
+        timeout: 5_000,
+      });
+    }).toPass({ timeout: 60_000 });
+  }
+
+  async openDataStreamLifecycleFlyout(name: string) {
+    await this.clickDataStreamNameLink(name);
+    await this.page.testSubj.locator('manageDataStreamButton').click();
+    await this.page.testSubj.locator('editDataLifecycleButton').click();
+    await expect(this.page.testSubj.locator('editDataLifecycleFlyoutApplyButton')).toBeVisible();
+  }
+
+  async applyDataStreamLifecycleChange() {
+    await this.page.testSubj.locator('editDataLifecycleFlyoutApplyButton').click();
+    await expect(this.page.testSubj.locator('editDataLifecycleFlyoutApplyButton')).toBeHidden({
+      timeout: 30_000,
+    });
+    await this.page.components.toast().closeAll();
+  }
+
+  async stopInheritingDataStreamLifecycle() {
+    await this.page.testSubj.locator('dataLifecycleInheritCheckbox').uncheck();
+  }
+
+  async openBulkEditDataRetention(dataStreamNames: string[]) {
+    await this.filterDataStreams(commonPrefix(dataStreamNames));
+    for (const name of dataStreamNames) {
+      await this.page.testSubj.locator(`checkboxSelectRow-${name}`).check();
+    }
+    await this.page.testSubj.locator('dataStreamActionsPopoverButton').click();
+    await this.page.testSubj.locator('bulkEditDataRetentionButton').click();
+  }
+
+  private enrichPolicyRow(name: string) {
+    return this.page.getByRole('row', { name: new RegExp(`\\b${name}\\b`) });
+  }
+
+  async clickEnrichPolicy(name: string) {
+    await this.page.testSubj
+      .locator('enrichPolicyDetailsLink')
+      .and(this.page.getByRole('link', { name, exact: true }))
+      .click();
+  }
+
+  async executeEnrichPolicy(name: string) {
+    await this.enrichPolicyRow(name).getByTestId('executePolicyButton').click();
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+  }
+
+  async deleteEnrichPolicy(name: string) {
+    await this.enrichPolicyRow(name).getByTestId('deletePolicyButton').click();
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
   }
 
   async changeMappingsEditorTab(tab: 'fields' | 'advancedOptions' | 'templates') {
@@ -110,29 +245,38 @@ export class IndexManagement extends AbstractPageObject {
       await expect(this.page.testSubj.locator('indexDetailsContent')).toBeVisible();
       await expect(this.page.testSubj.locator('appHeaderBack')).toBeVisible();
     },
+
+    changeTab: async (
+      tab: 'indexDetailsTab-mappings' | 'indexDetailsTab-overview' | 'indexDetailsTab-settings'
+    ) => {
+      await this.page.testSubj.locator(tab).click();
+    },
+
+    mappingsAddFieldButton: () => this.page.testSubj.locator('indexDetailsMappingsAddField'),
+
+    editSettingsSwitch: () => this.page.testSubj.locator('indexDetailsSettingsEditModeSwitch'),
   };
 
   indexTemplateWizard = {
-    completeStepOne: async () => {
-      const nameField = new EuiFieldTextWrapper(this.page, { dataTestSubj: 'nameField' });
-      await nameField.fill('test-index-template');
+    // `nameField` and `indexPatternsField` carry the test subject on their EuiFormRow wrapper, so
+    // the inner input is driven via a native locator.
+    open: async (name: string, indexPattern: string) => {
+      await this.page.testSubj.locator('createTemplateButton').click();
+      await this.page.testSubj.locator('nameField').locator('input').fill(name);
+      await this.page.testSubj.locator('indexPatternsField').locator('input').fill(indexPattern);
+    },
 
-      const indexPatternsField = new EuiFieldTextWrapper(this.page, {
-        dataTestSubj: 'indexPatternsField',
-      });
-      await indexPatternsField.fill('test-index-pattern');
+    completeStepOne: async () => {
+      await this.page.testSubj.locator('nameField').locator('input').fill('test-index-template');
+      await this.page.testSubj
+        .locator('indexPatternsField')
+        .locator('input')
+        .fill('test-index-pattern');
 
       await this.clickNextButton();
     },
   };
 
-  /**
-   * Reads the Stack Management sidebar section composition. Uses the stable `data-test-subj`
-   * attributes set by `managementSidebarNav` (`item.id` is forwarded as `data-test-subj` on
-   * every EuiSideNav item). Returns the visible sections and the link IDs nested within each.
-   *
-   * Call this after navigating to `/app/management` and waiting for the sidebar to appear.
-   */
   async readSidebarSections(): Promise<Array<{ sectionId: string; sectionLinks: string[] }>> {
     // Evaluate in-page to avoid the `nth()` Playwright anti-pattern; reads the full section
     // + link structure in one call to the DOM.

@@ -43,7 +43,6 @@ export interface CreateRuleFormProps {
   filteredRuleTypes?: string[];
   shouldUseRuleProducer?: boolean;
   canShowConsumerSelection?: boolean;
-  showMustacheAutocompleteSwitch?: boolean;
   isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
@@ -51,6 +50,8 @@ export interface CreateRuleFormProps {
   initialValues?: Partial<RuleFormData>;
   initialMetadata?: RuleTypeMetaData;
   focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
+  /** The id of the rule template this rule is being created from, when known. Telemetry only. */
+  templateId?: string;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -64,13 +65,13 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     filteredRuleTypes = [],
     shouldUseRuleProducer = false,
     canShowConsumerSelection = true,
-    showMustacheAutocompleteSwitch = false,
     isFlyout,
     onCancel,
     onSubmit,
     onChangeMetaData,
     initialMetadata,
     initialValues = {},
+    templateId,
   } = props;
 
   const { http, docLinks, notifications, ruleTypeRegistry, fieldsMetadata, ...deps } = plugins;
@@ -137,10 +138,11 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
           artifacts: newFormData.artifacts,
+          templateId,
         },
       });
     },
-    [mutate]
+    [mutate, templateId]
   );
 
   if (isInitialLoading) {
@@ -205,7 +207,6 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         validConsumers,
         flappingSettings,
         canShowConsumerSelection,
-        showMustacheAutocompleteSwitch,
         multiConsumerSelection: getInitialMultiConsumer({
           multiConsumerSelection,
           validConsumers,

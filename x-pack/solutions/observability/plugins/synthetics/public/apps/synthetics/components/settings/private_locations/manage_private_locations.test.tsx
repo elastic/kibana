@@ -26,6 +26,7 @@ describe('<ManagePrivateLocations />', () => {
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
     jest.spyOn(permissionsHooks, 'useFleetPermissions').mockReturnValue({
       canReadAgentPolicies: true,
+      canReadAgents: true,
       canSaveIntegrations: false,
       canCreateAgentPolicies: false,
     });
@@ -153,7 +154,7 @@ describe('<ManagePrivateLocations />', () => {
         deleteLoading: false,
         createLoading: false,
       });
-      const { getByText, getByRole, findByText } = render(
+      const { getByText, getByRole, findByText, queryByTestId } = render(
         <QueryClientProvider client={queryClient}>
           <ManagePrivateLocations />
         </QueryClientProvider>,
@@ -171,6 +172,7 @@ describe('<ManagePrivateLocations />', () => {
         }
       );
       expect(getByText(privateLocationName)).toBeInTheDocument();
+      expect(queryByTestId('syntheticsScalableLocationBadge')).not.toBeInTheDocument();
       const button = getByRole('button', { name: 'Create location' });
 
       if (canSave) {
@@ -184,4 +186,57 @@ describe('<ManagePrivateLocations />', () => {
       }
     }
   );
+
+  it('shows a Scalable badge for a sharded private location', () => {
+    jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+      canSave: true,
+      canManagePrivateLocations: true,
+    } as SyntheticsSettingsContextValues);
+
+    jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
+      loading: false,
+      onCreateLocationAPI: jest.fn(),
+      onEditLocationAPI: jest.fn(),
+      privateLocations: [
+        {
+          label: 'Scalable location',
+          id: 'loc-sharded',
+          agentPolicyId: 'policy-sharded',
+          isServiceManaged: false,
+          isAgentSharding: true,
+        },
+      ],
+      onDeleteLocationAPI: jest.fn(),
+      deleteLoading: false,
+      createLoading: false,
+    });
+
+    const { getByText, getByTestId } = render(
+      <QueryClientProvider client={queryClient}>
+        <ManagePrivateLocations />
+      </QueryClientProvider>,
+      {
+        state: {
+          agentPolicies: {
+            data: [
+              {
+                id: 'policy-sharded',
+                name: 'Sharded policy',
+                agents: 0,
+                status: 'active',
+              },
+            ],
+            loading: false,
+            error: null,
+          },
+          privateLocations: {
+            isPrivateLocationFlyoutVisible: false,
+          },
+        },
+      }
+    );
+
+    expect(getByText('Scalable location')).toBeInTheDocument();
+    expect(getByTestId('syntheticsScalableLocationBadge')).toHaveTextContent('Scalable');
+  });
 });

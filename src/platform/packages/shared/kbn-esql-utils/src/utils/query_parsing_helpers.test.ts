@@ -10,16 +10,17 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/code-editor';
 import type { ESQLColumn } from '@elastic/esql/types';
 import { Parser, walk } from '@elastic/esql';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, VariableNamePrefix, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getRemoteClustersFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
   prettifyQuery,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
+  getESQLQueryVariables,
   mapVariableToColumn,
   getValuesFromQueryField,
   fixESQLQueryWithVariables,
@@ -126,32 +127,32 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('getTimeFieldFromESQLQuery', () => {
+  describe('parseTimeFieldFromESQLQuery', () => {
     it('should return undefined if there are no time params', () => {
-      expect(getTimeFieldFromESQLQuery('from a | eval b = 1')).toBeUndefined();
+      expect(parseTimeFieldFromESQLQuery('from a | eval b = 1')).toBeUndefined();
     });
 
     it('should return the time field if there is at least one time param', () => {
-      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?_tstart')).toBe(
+      expect(parseTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?_tstart')).toBe(
         'time'
       );
     });
 
     it('should return undefined if there is one named param but is not ?_tstart or ?_tend', () => {
       expect(
-        getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
+        parseTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
       ).toBeUndefined();
     });
 
     it('should return undefined if there is one named param but is used without a time field', () => {
       expect(
-        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?_tstart)')
+        parseTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?_tstart)')
       ).toBeUndefined();
     });
 
     it('should return the time field if there is at least one time param in the bucket function', () => {
       expect(
-        getTimeFieldFromESQLQuery(
+        parseTimeFieldFromESQLQuery(
           'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?_tstart, ?_tend)'
         )
       ).toBe('event.timefield');
@@ -159,7 +160,7 @@ describe('esql query helpers', () => {
 
     it('should return the time field if the column is casted', () => {
       expect(
-        getTimeFieldFromESQLQuery(
+        parseTimeFieldFromESQLQuery(
           'from a | WHERE date_nanos::date >= ?_tstart AND date_nanos::date <= ?_tend'
         )
       ).toBe('date_nanos');
@@ -167,14 +168,14 @@ describe('esql query helpers', () => {
 
     it('should return @timestamp for PromQL if there is at least one time param', () => {
       expect(
-        getTimeFieldFromESQLQuery(
+        parseTimeFieldFromESQLQuery(
           'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
         )
       ).toBe('@timestamp');
     });
 
     it('should return @timestamp for PromQL if there is no time param', () => {
-      expect(getTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBe('@timestamp');
+      expect(parseTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBe('@timestamp');
     });
   });
 
@@ -1314,6 +1315,56 @@ describe('esql query helpers', () => {
 
     it('should return false when query does not contain METRICS_INFO or TS_INFO', () => {
       expect(hasTimeseriesInfoCommand('FROM index | STATS count()')).toBe(false);
+    });
+  });
+
+  describe('getESQLQueryVariables', () => {
+    it('returns all variable names without the prefix when no prefix is given', () => {
+      expect(getESQLQueryVariables('FROM a | STATS COUNT(*) BY ??field | WHERE os == ?os')).toEqual(
+        ['field', 'os']
+      );
+    });
+
+    it('returns Identifier (??) variable names without the prefix', () => {
+      expect(
+        getESQLQueryVariables('FROM a | STATS COUNT(*) BY ??field', VariableNamePrefix.IDENTIFIER)
+      ).toEqual(['field']);
+      expect(
+        getESQLQueryVariables('FROM a | KEEP ??field, ??field2', VariableNamePrefix.IDENTIFIER)
+      ).toEqual(['field', 'field2']);
+    });
+
+    it('excludes Value (?) variables when filtering by IDENTIFIER prefix', () => {
+      expect(
+        getESQLQueryVariables('FROM a | WHERE os == ?os', VariableNamePrefix.IDENTIFIER)
+      ).toEqual([]);
+      expect(
+        getESQLQueryVariables(
+          'FROM a | STATS COUNT(*) BY ??field | WHERE os == ?os',
+          VariableNamePrefix.IDENTIFIER
+        )
+      ).toEqual(['field']);
+    });
+
+    it('does not treat a backtick-quoted column named `??x` as a variable', () => {
+      expect(
+        getESQLQueryVariables('FROM a | EVAL `??x` = 1', VariableNamePrefix.IDENTIFIER)
+      ).toEqual([]);
+      expect(
+        getESQLQueryVariables('FROM a | STATS COUNT(`??x`)', VariableNamePrefix.IDENTIFIER)
+      ).toEqual([]);
+    });
+
+    it('with VALUE prefix excludes Identifier (??) variables', () => {
+      expect(
+        getESQLQueryVariables('FROM a | STATS COUNT(*) BY ??field', VariableNamePrefix.VALUE)
+      ).toEqual([]);
+      expect(
+        getESQLQueryVariables(
+          'FROM a | STATS COUNT(*) BY ??field | WHERE os == ?os',
+          VariableNamePrefix.VALUE
+        )
+      ).toEqual(['os']);
     });
   });
 });

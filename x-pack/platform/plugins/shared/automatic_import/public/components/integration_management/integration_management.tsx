@@ -7,9 +7,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { SuppressChromeBackButton } from '@kbn/app-header';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
@@ -30,6 +32,11 @@ import {
   useKibana,
 } from '../../common';
 import { normalizeTitleName } from '../../common/lib/helper_functions';
+import {
+  readReturnParams,
+  getCreateBackLinkLabel,
+  shouldShowCreateBackLink,
+} from '../../common/read_return_params';
 import { useTelemetry } from '../telemetry_context';
 import { LicensePaywallCard } from '../license_paywall/license_paywall_card';
 import { AutomaticImportTelemetryEventType } from '../../../common/telemetry/types';
@@ -45,8 +52,10 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   navigateToManage,
 }) => {
   const { integrationId } = useParams<{ integrationId?: string }>();
-  const { state: locationState } = useLocation<{ isNew?: boolean }>();
+  const { state: locationState, search } = useLocation<{ isNew?: boolean }>();
   const isNewlyCreated = locationState?.isNew === true;
+  const { application } = useKibana().services;
+  const returnParams = useMemo(() => readReturnParams(search), [search]);
   const { integration } = useGetIntegrationById(integrationId);
   const { deleteIntegrationMutation } = useDeleteIntegration();
   const { submit, isFormModified } = useIntegrationForm();
@@ -65,12 +74,28 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
 
   const performCancelNavigation = useCallback(() => {
     reportCancelButtonClicked({ integrationId });
+    if (returnParams) {
+      application.navigateToApp(returnParams.returnAppId, { path: returnParams.returnPath });
+      return;
+    }
     if (window.history.length > 1) {
       window.history.back();
     } else {
       navigateToManage();
     }
-  }, [integrationId, navigateToManage, reportCancelButtonClicked]);
+  }, [application, integrationId, navigateToManage, reportCancelButtonClicked, returnParams]);
+
+  const showCreateBackLink = shouldShowCreateBackLink({
+    returnParams,
+    integrationId,
+  });
+
+  const handleCreateBackLink = useCallback(() => {
+    if (!returnParams) {
+      return;
+    }
+    application.navigateToApp(returnParams.returnAppId, { path: returnParams.returnPath });
+  }, [application, returnParams]);
 
   const handleCancel = useCallback(() => {
     if (shouldOfferIntegrationDelete) {
@@ -117,7 +142,29 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   return (
     <>
       <KibanaPageTemplate restrictWidth={PAGE_RESTRICT_WIDTH}>
-        <KibanaPageTemplate.Header pageTitle={pageTitle} />
+        <KibanaPageTemplate.Header
+          pageTitle={
+            <>
+              {showCreateBackLink && returnParams ? (
+                <>
+                  <SuppressChromeBackButton />
+                  <span css={{ display: 'block' }}>
+                    <EuiButtonEmpty
+                      iconType="chevronSingleLeft"
+                      size="xs"
+                      flush="left"
+                      onClick={handleCreateBackLink}
+                      data-test-subj="automaticImportCreateBackLink"
+                    >
+                      {getCreateBackLinkLabel()}
+                    </EuiButtonEmpty>
+                  </span>
+                </>
+              ) : null}
+              {pageTitle}
+            </>
+          }
+        />
         <KibanaPageTemplate.Section>
           <ConnectorSelector />
           <ManagementContents onDataStreamReanalyzeSuccess={handleDataStreamReanalyzeSuccess} />

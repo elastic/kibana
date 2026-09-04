@@ -119,9 +119,9 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | | `failure` | User is not authorized to snooze a rule. |
 | `rule_unsnooze` | `unknown` | User is unsnoozing a rule. |
 | | `failure` | User is not authorized to unsnooze a rule. |
-| `rule_alert_acknowledge` {applies_to}`stack: ga 9.4+` | `unknown` | User is acknowledging an alert (updating workflow status). |
+| `alert_acknowledge` {applies_to}`stack: ga 9.4+` | `unknown` | User is acknowledging an alert (updating workflow status). |
 | | `failure` | User is not authorized to acknowledge an alert. |
-| `rule_alert_unacknowledge` {applies_to}`stack: ga 9.4+` | `success` | User has unacknowledged an alert (reverted workflow status to open). |
+| `alert_unacknowledge` {applies_to}`stack: ga 9.4+` | `success` | User has unacknowledged an alert (reverted workflow status to open). |
 | | `failure` | User is not authorized to unacknowledge an alert. |
 | `case_update` | `unknown` | User is updating a case. |
 | | `failure` | User is not authorized to update a case. |
@@ -338,6 +338,8 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 | --- | --- |
 | `user.id` | Unique identifier of the user across sessions (See [user profiles](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles.md)). |
 | `user.name` | Login name of the user.<br>Example: `jdoe` |
+| `user.email` | Email address of the user at the time of the event, when provided by the identity source. |
+| `user.full_name` | Full name of the user at the time of the event, when provided by the identity source. |
 | `user.roles[]` | Set of user roles at the time of the event.<br>Example: `[kibana_admin, reporting_user]` |
 
 

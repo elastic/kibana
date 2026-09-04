@@ -24,11 +24,12 @@ const App = () => {
   const layoutConfig = {
     headerHeight: 48,
     navigationWidth: 200,
+    appearance: 'framed' as const,
   };
 
   return (
     <EuiProvider colorMode="light">
-      <GridLayoutGlobalStyles chromeStyle="project" />
+      <GridLayoutGlobalStyles appearance="framed" />
       <ChromeLayoutConfigProvider value={layoutConfig}>
         <ChromeLayout
           header={

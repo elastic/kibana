@@ -1,0 +1,1328 @@
+{
+  "sha1": "216491581a96a291d649038dae07473db73ecea4",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b4fd14deb67aab7-d0d2a3e90867799",
+      "title": "Dataset quality - degraded docs chart preview returns proper timeSeries data for degraded fields when querying a single dataStream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/chart_preview.spec.ts",
+        "line": 91,
+        "column": 39
+      }
+    },
+    {
+      "id": "b4fd14deb67aab7-72bed1ccfa6a980",
+      "title": "Dataset quality - degraded docs chart preview returns proper timeSeries data when querying at a specific interval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/chart_preview.spec.ts",
+        "line": 123,
+        "column": 11
+      }
+    },
+    {
+      "id": "b4fd14deb67aab7-fa9de9a37f9fefb",
+      "title": "Dataset quality - degraded docs chart preview returns proper timeSeries data grouped using multiple keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/chart_preview.spec.ts",
+        "line": 151,
+        "column": 84
+      }
+    },
+    {
+      "id": "b4fd14deb67aab7-4d985b3398e7c70",
+      "title": "Dataset quality - degraded docs chart preview returns maximum 5 timeseries but totalGroups indicates that there were more",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/chart_preview.spec.ts",
+        "line": 215,
+        "column": 22
+      }
+    },
+    {
+      "id": "b4fd14deb67aab7-4b17cde99a413fe",
+      "title": "Dataset quality - degraded docs chart preview returns empty when dataStream does not exist or does not have data reported",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/chart_preview.spec.ts",
+        "line": 218,
+        "column": 27
+      }
+    },
+    {
+      "id": "2f93aeded4c75af-bedd52706d6daa3",
+      "title": "Dataset quality - check and load integration returns integration as false for a regular data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/check_and_load_integration.spec.ts",
+        "line": 76,
+        "column": 42
+      }
+    },
+    {
+      "id": "2f93aeded4c75af-a2c6e31226c4337",
+      "title": "Dataset quality - check and load integration returns integration as true for the nginx data stream as the integration is installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/check_and_load_integration.spec.ts",
+        "line": 89,
+        "column": 25
+      }
+    },
+    {
+      "id": "2f93aeded4c75af-3095319b3e3137f",
+      "title": "Dataset quality - check and load integration returns integration as false but assets as available for the apm app data stream as it is preinstalled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/check_and_load_integration.spec.ts",
+        "line": 105,
+        "column": 26
+      }
+    },
+    {
+      "id": "ed5aa71216a5984-c3866a593f6c170",
+      "title": "Dataset quality - data stream details returns lastActivity as undefined when the user cannot monitor the data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_details.spec.ts",
+        "line": 58,
+        "column": 85
+      }
+    },
+    {
+      "id": "ed5aa71216a5984-ce2b85549f28250",
+      "title": "Dataset quality - data stream details returns an error when dataStream param is blank",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_details.spec.ts",
+        "line": 69,
+        "column": 53
+      }
+    },
+    {
+      "id": "ed5aa71216a5984-b49edd39fcdce64",
+      "title": "Dataset quality - data stream details returns an empty-data details payload when matching data stream is not available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_details.spec.ts",
+        "line": 80,
+        "column": 99
+      }
+    },
+    {
+      "id": "ed5aa71216a5984-1b48fa81735dcf8",
+      "title": "Dataset quality - data stream details returns service.name and host.name correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_details.spec.ts",
+        "line": 95,
+        "column": 15
+      }
+    },
+    {
+      "id": "ed5aa71216a5984-ba6cf939054c798",
+      "title": "Dataset quality - data stream details returns sizeBytes for a user that can monitor the data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_details.spec.ts",
+        "line": 114,
+        "column": 79
+      }
+    },
+    {
+      "id": "6651febd73fc418-7a362e22809b3e8",
+      "title": "Dataset quality - data stream rollover acknowledges a rollover of the data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_rollover.spec.ts",
+        "line": 44,
+        "column": 31
+      }
+    },
+    {
+      "id": "14fd1d46c490700-5b49c116b663fd9",
+      "title": "Dataset quality - createdOn of a data stream on stateful returns the creation date of the earliest backing index, before and after a rollover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings_created_on.spec.ts",
+        "line": 39,
+        "column": 69
+      }
+    },
+    {
+      "id": "46ddfbf98eb7e40-0ac5e1bb6be9c29",
+      "title": "Dataset quality - data stream settings returns only the privileges when no matching data stream exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings.spec.ts",
+        "line": 71,
+        "column": 13
+      }
+    },
+    {
+      "id": "46ddfbf98eb7e40-917f3c6cb6e8452",
+      "title": "Dataset quality - data stream settings returns the index template, the last backing index and the privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings.spec.ts",
+        "line": 76,
+        "column": 7
+      }
+    },
+    {
+      "id": "46ddfbf98eb7e40-55aaaa7447fcd93",
+      "title": "Dataset quality - data stream settings reflects a rollover in the last backing index name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings.spec.ts",
+        "line": 91,
+        "column": 6
+      }
+    },
+    {
+      "id": "46ddfbf98eb7e40-de896bb0acdc79a",
+      "title": "Dataset quality - data stream settings returns the settings of a data stream paired with an installed integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings.spec.ts",
+        "line": 105,
+        "column": 16
+      }
+    },
+    {
+      "id": "46ddfbf98eb7e40-856e636cc174958",
+      "title": "Dataset quality - data stream settings reflects a rollover of the integration data stream in the last backing index name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings.spec.ts",
+        "line": 119,
+        "column": 25
+      }
+    },
+    {
+      "id": "7db3eea936099f6-f6bd4c7112e07cf",
+      "title": "Dataset quality - data stream total docs with closed data streams returns stats correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_total_docs_closed_data_streams.spec.ts",
+        "line": 67,
+        "column": 39
+      }
+    },
+    {
+      "id": "7db3eea936099f6-15f2bd723b091fd",
+      "title": "Dataset quality - data stream total docs with closed data streams returns stats correctly when some of the backing indices are closed and others are open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_total_docs_closed_data_streams.spec.ts",
+        "line": 77,
+        "column": 18
+      }
+    },
+    {
+      "id": "41ec8497fea4c2f-eeed2ebfa34cf75",
+      "title": "Dataset quality - data stream total docs returns number of documents per data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_total_docs.spec.ts",
+        "line": 74,
+        "column": 13
+      }
+    },
+    {
+      "id": "41ec8497fea4c2f-95c744639ee5d41",
+      "title": "Dataset quality - data stream total docs returns empty when all documents are outside the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_total_docs.spec.ts",
+        "line": 91,
+        "column": 9
+      }
+    },
+    {
+      "id": "41ec8497fea4c2f-2e4bf3983db39c1",
+      "title": "Dataset quality - data stream total docs returns a 403 when the user does not have sufficient privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_total_docs.spec.ts",
+        "line": 100,
+        "column": 26
+      }
+    },
+    {
+      "id": "aebcfefdf6db9aa-7813fd7696b91be",
+      "title": "Dataset quality - failure store retention of a data stream on serverless omits the defaultRetentionPeriod for a disabled failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store_retention_serverless.spec.ts",
+        "line": 68,
+        "column": 13
+      }
+    },
+    {
+      "id": "9e8a178ddda861c-494636f38b43f54",
+      "title": "Dataset quality - failure store retention of a data stream on stateful returns the cluster level defaultRetentionPeriod for a disabled failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store_retention_stateful.spec.ts",
+        "line": 68,
+        "column": 13
+      }
+    },
+    {
+      "id": "969ffef479830d1-a4afaa1e6fe61b9",
+      "title": "Dataset quality - failure store of a data stream reports the hasFailureStore flag per data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store.spec.ts",
+        "line": 97,
+        "column": 18
+      }
+    },
+    {
+      "id": "969ffef479830d1-f5236d057a218e4",
+      "title": "Dataset quality - failure store of a data stream returns the customRetentionPeriod configured on the failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store.spec.ts",
+        "line": 112,
+        "column": 26
+      }
+    },
+    {
+      "id": "969ffef479830d1-f6d5a20a2c904b1",
+      "title": "Dataset quality - failure store of a data stream returns the defaultRetentionPeriod when the failure store has no custom retention",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store.spec.ts",
+        "line": 130,
+        "column": 42
+      }
+    },
+    {
+      "id": "969ffef479830d1-66ed6bcdd4b04ab",
+      "title": "Dataset quality - failure store of a data stream omits the defaultRetentionPeriod for a disabled failure store when the user cannot read it at cluster level",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store.spec.ts",
+        "line": 147,
+        "column": 7
+      }
+    },
+    {
+      "id": "7989e5d940a7140-5e4eac1cad05eb8",
+      "title": "Dataset quality - degraded docs with closed data streams returns stats correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_docs_closed_data_streams.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "7989e5d940a7140-a85db10df77bed4",
+      "title": "Dataset quality - degraded docs with closed data streams returns stats correctly when some of the backing indices are closed and others are open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_docs_closed_data_streams.spec.ts",
+        "line": 86,
+        "column": 14
+      }
+    },
+    {
+      "id": "3298248b4f92814-0761c646beffacc",
+      "title": "Dataset quality - degraded docs across data stream namespaces returns counts and list of datasets correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_docs_namespaces.spec.ts",
+        "line": 110,
+        "column": 7
+      }
+    },
+    {
+      "id": "40794d46b5a0772-621c35d1db9a8a6",
+      "title": "Dataset quality - degraded docs without log documents returns stats correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_docs_no_documents.spec.ts",
+        "line": 33,
+        "column": 15
+      }
+    },
+    {
+      "id": "5baad39834996c3-504b976c3541be7",
+      "title": "Dataset quality - degraded docs returns stats correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_docs.spec.ts",
+        "line": 74,
+        "column": 75
+      }
+    },
+    {
+      "id": "61188f28dc60908-fb50d197b9832ed",
+      "title": "Dataset quality - degraded field analyze returns default limits and reports isFieldLimitIssue as false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_field_analyze.spec.ts",
+        "line": 97,
+        "column": 37
+      }
+    },
+    {
+      "id": "61188f28dc60908-ac94e446805c76a",
+      "title": "Dataset quality - degraded field analyze returns updated limits and reports isFieldLimitIssue as true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_field_analyze.spec.ts",
+        "line": 117,
+        "column": 16
+      }
+    },
+    {
+      "id": "2449b0ebd1c1553-fe45fc2d4716b78",
+      "title": "Dataset quality - degraded field values per field returns no values when provided field has no degraded values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_field_values.spec.ts",
+        "line": 58,
+        "column": 13
+      }
+    },
+    {
+      "id": "2449b0ebd1c1553-310c628c2734c3b",
+      "title": "Dataset quality - degraded field values per field returns values when provided field has degraded values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_field_values.spec.ts",
+        "line": 70,
+        "column": 27
+      }
+    },
+    {
+      "id": "6928c74ebcf7e7f-7ccb3e5d6471591",
+      "title": "Dataset quality - degraded fields per data stream returns no results when dataStream does not have any degraded fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_fields.spec.ts",
+        "line": 82,
+        "column": 13
+      }
+    },
+    {
+      "id": "6928c74ebcf7e7f-8b4fc4aa56c585a",
+      "title": "Dataset quality - degraded fields per data stream returns results when dataStream does have degraded fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_fields.spec.ts",
+        "line": 92,
+        "column": 25
+      }
+    },
+    {
+      "id": "6928c74ebcf7e7f-15cf2273bfbe335",
+      "title": "Dataset quality - degraded fields per data stream returns proper timeSeries data for degraded fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_fields.spec.ts",
+        "line": 107,
+        "column": 20
+      }
+    },
+    {
+      "id": "6928c74ebcf7e7f-a8f6592f54c60d9",
+      "title": "Dataset quality - degraded fields per data stream returns the backing index where the ignored field was last seen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_fields.spec.ts",
+        "line": 145,
+        "column": 29
+      }
+    },
+    {
+      "id": "7712cb93092e905-576b2b5ff34ed0c",
+      "title": "Dataset quality - failed docs in a closed failure store index skips failed documents held in a closed index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_closed_index.spec.ts",
+        "line": 114,
+        "column": 13
+      }
+    },
+    {
+      "id": "5f83e330377b7c3-d05a66c443ea290",
+      "title": "Dataset quality - failed docs errors of a data stream returns no errors while every document passes the ingest pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_errors.spec.ts",
+        "line": 79,
+        "column": 13
+      }
+    },
+    {
+      "id": "5f83e330377b7c3-32e6ff46a389184",
+      "title": "Dataset quality - failed docs errors of a data stream returns the ingest pipeline error that sent the document to the failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_errors.spec.ts",
+        "line": 92,
+        "column": 71
+      }
+    },
+    {
+      "id": "5765ee58bf8619f-e9acd0a69a19b79",
+      "title": "Dataset quality - failed docs after a failure store rollover counts only the documents in the open index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_rollover.spec.ts",
+        "line": 117,
+        "column": 85
+      }
+    },
+    {
+      "id": "ea146967fdd4fbf-067a8b4c18e5acd",
+      "title": "Dataset quality - failed docs timeseries of a data stream returns an empty timeseries while every document passes the ingest pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_stats.spec.ts",
+        "line": 81,
+        "column": 46
+      }
+    },
+    {
+      "id": "ea146967fdd4fbf-98a28220b5e2bd9",
+      "title": "Dataset quality - failed docs timeseries of a data stream returns the count, the last occurrence and the timeseries of the failed documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_stats.spec.ts",
+        "line": 96,
+        "column": 10
+      }
+    },
+    {
+      "id": "a492142332b8096-cd544d7a694fd4d",
+      "title": "Dataset quality - failed docs per data stream returns an empty list while no document has been ingested",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs.spec.ts",
+        "line": 89,
+        "column": 13
+      }
+    },
+    {
+      "id": "a492142332b8096-3dac809df534ae7",
+      "title": "Dataset quality - failed docs per data stream reports the failed documents of the only data stream that has them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs.spec.ts",
+        "line": 96,
+        "column": 99
+      }
+    },
+    {
+      "id": "ce560764270d7a4-0db593bccc5eca4",
+      "title": "Dataset quality - integration dashboards returns a non-empty body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integration_dashboards.spec.ts",
+        "line": 59,
+        "column": 13
+      }
+    },
+    {
+      "id": "ce560764270d7a4-7be51bfd8099f8e",
+      "title": "Dataset quality - integration dashboards returns the dashboards of an installed integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integration_dashboards.spec.ts",
+        "line": 70,
+        "column": 74
+      }
+    },
+    {
+      "id": "ce560764270d7a4-0ac78f74c61782a",
+      "title": "Dataset quality - integration dashboards returns a list of dashboards in the correct format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integration_dashboards.spec.ts",
+        "line": 91,
+        "column": 9
+      }
+    },
+    {
+      "id": "ce560764270d7a4-d8104f51a970e9e",
+      "title": "Dataset quality - integration dashboards returns an empty array for an integration without dashboards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integration_dashboards.spec.ts",
+        "line": 106,
+        "column": 26
+      }
+    },
+    {
+      "id": "ce560764270d7a4-11e4b876439306f",
+      "title": "Dataset quality - integration dashboards returns an empty array for an invalid integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integration_dashboards.spec.ts",
+        "line": 119,
+        "column": 16
+      }
+    },
+    {
+      "id": "4225cd414b86a53-64ef56d9460e222",
+      "title": "Dataset quality - integrations returns all installed integrations and their datasets map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integrations.spec.ts",
+        "line": 80,
+        "column": 61
+      }
+    },
+    {
+      "id": "4225cd414b86a53-82fe9c5a7e0a139",
+      "title": "Dataset quality - integrations returns custom integrations and their datasets map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integrations.spec.ts",
+        "line": 105,
+        "column": 17
+      }
+    },
+    {
+      "id": "cfe81c554bf439c-32774e539744db5",
+      "title": "Dataset quality - data stream stats of a categorized data stream reports the integration that owns the data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_categorized.spec.ts",
+        "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "707f589a7687e92-a55eba2c4c08cc3",
+      "title": "Dataset quality - data stream stats across data stream types returns the stats of every requested data stream type",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_multiple_types.spec.ts",
+        "line": 79,
+        "column": 13
+      }
+    },
+    {
+      "id": "4cb30c3ccba4fc4-af9b7fbc51a50fc",
+      "title": "Dataset quality - data stream stats privileges for an elevated user returns every privilege for an elevated user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_admin.spec.ts",
+        "line": 43,
+        "column": 28
+      }
+    },
+    {
+      "id": "f7a122413de69a3-8a8d042fc0c43a2",
+      "title": "Dataset quality - data stream stats for a user with monitor privileges lists the data streams the user may monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_monitor.spec.ts",
+        "line": 45,
+        "column": 28
+      }
+    },
+    {
+      "id": "f7a122413de69a3-0f165bb17fa51ea",
+      "title": "Dataset quality - data stream stats for a user with monitor privileges reports a last activity for each monitored data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_monitor.spec.ts",
+        "line": 63,
+        "column": 27
+      }
+    },
+    {
+      "id": "f7a122413de69a3-fbfa6a379e5f1a5",
+      "title": "Dataset quality - data stream stats for a user with monitor privileges reports a non-zero size for a monitored data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_monitor.spec.ts",
+        "line": 77,
+        "column": 27
+      }
+    },
+    {
+      "id": "c24e46f083cb921-c94ad30e3ca80cc",
+      "title": "Dataset quality - data stream stats for a user without index access reports no privileges and no stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_no_access.spec.ts",
+        "line": 44,
+        "column": 28
+      }
+    },
+    {
+      "id": "eb42bf45b23f287-9122d0ae22d5ce0",
+      "title": "Dataset quality - data stream stats for a read-only user reports read but not monitor privileges, and no stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_read_only.spec.ts",
+        "line": 44,
+        "column": 28
+      }
+    },
+    {
+      "id": "156fd73b1ecee9d-658bad091e561e1",
+      "title": "Dataset quality - data stream stats returns the stats of a data stream without an integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats.spec.ts",
+        "line": 50,
+        "column": 45
+      }
+    },
+    {
+      "id": "156fd73b1ecee9d-f05e4decbfb3cf5",
+      "title": "Dataset quality - data stream stats does not return the creation date by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats.spec.ts",
+        "line": 74,
+        "column": 75
+      }
+    },
+    {
+      "id": "156fd73b1ecee9d-a68ec1cbbc501f6",
+      "title": "Dataset quality - data stream stats returns the creation date when it is requested",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats.spec.ts",
+        "line": 87,
+        "column": 27
+      }
+    },
+    {
+      "id": "156fd73b1ecee9d-03e639d1c0dce7a",
+      "title": "Dataset quality - data stream stats accepts types and datasetQuery in the same query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats.spec.ts",
+        "line": 97,
+        "column": 18
+      }
+    },
+    {
+      "id": "1dc26ce5729a894-764ad3197a87f0a",
+      "title": "Dataset quality - types privileges returns no privileges with a single type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
+        "line": 42,
+        "column": 5
+      }
+    },
+    {
+      "id": "1dc26ce5729a894-fcfe668b6b3d68e",
+      "title": "Dataset quality - types privileges returns no privileges with multiple types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
+        "line": 54,
+        "column": 74
+      }
+    },
+    {
+      "id": "1dc26ce5729a894-22848601b3cca4a",
+      "title": "Dataset quality - types privileges returns full privileges with a single type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
+        "line": 65,
+        "column": 5
+      }
+    },
+    {
+      "id": "1dc26ce5729a894-cbe98b9c71b9baf",
+      "title": "Dataset quality - types privileges returns full privileges with multiple types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
+        "line": 74,
+        "column": 7
+      }
+    },
+    {
+      "id": "1dc26ce5729a894-5c054d590d77893",
+      "title": "Dataset quality - types privileges returns full privileges with all types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
+        "line": 88,
+        "column": 12
+      }
+    },
+    {
+      "id": "1dc26ce5729a894-a1215da7a825fff",
+      "title": "Dataset quality - types privileges returns the expected response structure",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
+        "line": 106,
+        "column": 12
+      }
+    },
+    {
+      "id": "f959e70452876de-cfc105565ae3d32",
+      "title": "Dataset quality - update failure store lifecycle of a data stream on stateful turns the failure store lifecycle on when enabling the failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_failure_store_lifecycle_stateful.spec.ts",
+        "line": 45,
+        "column": 45
+      }
+    },
+    {
+      "id": "82f3ec984053f62-87f01e64e680d26",
+      "title": "Dataset quality - update failure store of a data stream enables the failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_failure_store.spec.ts",
+        "line": 43,
+        "column": 45
+      }
+    },
+    {
+      "id": "82f3ec984053f62-2334bdc7970f208",
+      "title": "Dataset quality - update failure store of a data stream disables the failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_failure_store.spec.ts",
+        "line": 52,
+        "column": 62
+      }
+    },
+    {
+      "id": "82f3ec984053f62-e888ea0c9deab52",
+      "title": "Dataset quality - update failure store of a data stream enables the failure store with a custom retention period",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_failure_store.spec.ts",
+        "line": 64,
+        "column": 7
+      }
+    },
+    {
+      "id": "a78a648614b0a02-b46e90d567c4b8e",
+      "title": "Dataset quality - update field limit handles failure gracefully when an invalid data stream is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_field_limit.spec.ts",
+        "line": 68,
+        "column": 11
+      }
+    },
+    {
+      "id": "a78a648614b0a02-d7e90ba1255c9a7",
+      "title": "Dataset quality - update field limit updates the last backing index and the custom component template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_field_limit.spec.ts",
+        "line": 87,
+        "column": 34
+      }
+    }
+  ]
+}

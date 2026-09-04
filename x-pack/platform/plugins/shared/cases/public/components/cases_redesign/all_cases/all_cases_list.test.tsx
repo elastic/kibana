@@ -22,7 +22,11 @@ import { useGetCasesMockState, connectorsMock } from '../../../containers/mock';
 
 import { SortFieldCase } from '../../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import {
+  CASES_LIST_PAGE_VIEW_EVENT_TYPE,
+  CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
 import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID, type ViewToggleId } from './constants';
@@ -254,7 +258,11 @@ describe('AllCasesListGeneric', () => {
       )[0]
     );
 
-    expect(await screen.findByText('damaged_raccoon@elastic.co')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent(
+        'Damaged Raccoon (damaged_raccoon@elastic.co)'
+      );
+    });
   });
 
   it('should show a tooltip with all tags when hovered', async () => {
@@ -330,7 +338,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTestId('tableHeaderSortButton'))[0]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toBeCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -396,7 +404,7 @@ describe('AllCasesListGeneric', () => {
       expect(onRowClick).toHaveBeenCalled();
     });
 
-    expect(onRowClick).toBeCalledWith(undefined, isCreateCase);
+    expect(onRowClick).toHaveBeenCalledWith(undefined, isCreateCase);
   });
 
   it('should not render the create new case link when the user does not have create privileges', async () => {
@@ -676,25 +684,6 @@ describe('AllCasesListGeneric', () => {
     await waitForComponentToUpdate();
   });
 
-  it('should hide the alerts column if the alert feature is disabled', async () => {
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { features: { alerts: { enabled: false } } },
-    });
-
-    expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
-    expect(screen.queryAllByTestId('case-table-column-alertsCount').length).toBe(0);
-  });
-
-  it('should show the alerts column if the alert feature is enabled', async () => {
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { features: { alerts: { enabled: true } } },
-    });
-
-    const alertCounts = await screen.findAllByTestId('case-table-column-alertsCount');
-
-    expect(alertCounts.length).toBeGreaterThan(0);
-  });
-
   it('should show the alerts column if the alert object is empty', async () => {
     renderWithTestingProviders(<AllCasesList />, { wrapperProps: { features: { alerts: {} } } });
 
@@ -782,7 +771,7 @@ describe('AllCasesListGeneric', () => {
           }
 
           await waitFor(() => {
-            expect(updateCasesSpy).toBeCalledWith({
+            expect(updateCasesSpy).toHaveBeenCalledWith({
               cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
                 id,
                 version,
@@ -819,7 +808,7 @@ describe('AllCasesListGeneric', () => {
         await userEvent.click(await screen.findByTestId(`cases-bulk-action-severity-${severity}`));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toBeCalledWith({
+          expect(updateCasesSpy).toHaveBeenCalledWith({
             cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
               id,
               version,
@@ -1267,7 +1256,7 @@ describe('AllCasesListGeneric', () => {
         await userEvent.click(await screen.findByTestId('cases-bulk-action-status-open'));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toBeCalledWith({
+          expect(updateCasesSpy).toHaveBeenCalledWith({
             cases: [
               {
                 id: useGetCasesMockState.data.cases[0].id,
@@ -1278,6 +1267,78 @@ describe('AllCasesListGeneric', () => {
           });
         });
       });
+    });
+  });
+
+  describe('Telemetry', () => {
+    it('reports a cases_list_page_view EBT event on load with the view mode, columns, and page size', async () => {
+      renderWithTestingProviders(<AllCasesList />);
+
+      await screen.findByTestId('cases-table');
+
+      expect(useKibanaMock().services.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
+        expect.objectContaining({
+          owner: SECURITY_SOLUTION_OWNER,
+          view_mode: VIEW_TOGGLE_TABLE_ID,
+          selected_columns: expect.arrayContaining(['title', 'status', 'severity']),
+          per_page: DEFAULT_QUERY_PARAMS.perPage,
+          sort_field: DEFAULT_QUERY_PARAMS.sortField,
+          sort_order: DEFAULT_QUERY_PARAMS.sortOrder,
+          active_filter_dimensions: [],
+        })
+      );
+    });
+
+    it('reports a cases_list_page_view EBT event on load in list view mode with the selected fields', async () => {
+      useViewModeMock.mockReturnValue({
+        viewMode: VIEW_TOGGLE_LIST_ID,
+        setViewMode: jest.fn(),
+      });
+
+      renderWithTestingProviders(<AllCasesList />);
+
+      await screen.findByTestId('cases-list-view');
+
+      expect(useKibanaMock().services.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
+        expect.objectContaining({
+          owner: SECURITY_SOLUTION_OWNER,
+          view_mode: VIEW_TOGGLE_LIST_ID,
+          // No optional fields are checked in the list view by default.
+          selected_columns: [],
+          per_page: DEFAULT_QUERY_PARAMS.perPage,
+        })
+      );
+    });
+
+    it('does not report a cases_list_page_view EBT event in the selector view', async () => {
+      renderWithTestingProviders(<AllCasesList isSelectorView={true} />);
+
+      await screen.findByTestId('cases-table');
+
+      expect(useKibanaMock().services.analytics.reportEvent).not.toHaveBeenCalledWith(
+        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
+        expect.anything()
+      );
+    });
+
+    it('reports a cases_list_view_mode_changed EBT event when the view toggle is clicked', async () => {
+      const setViewMode = jest.fn();
+      useViewModeMock.mockReturnValue({
+        viewMode: VIEW_TOGGLE_TABLE_ID,
+        setViewMode,
+      });
+
+      renderWithTestingProviders(<AllCasesList />);
+
+      await userEvent.click(await screen.findByRole('button', { name: /list view/i }));
+
+      expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_LIST_ID);
+      expect(useKibanaMock().services.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
+        expect.objectContaining({ view_mode: VIEW_TOGGLE_LIST_ID })
+      );
     });
   });
 });

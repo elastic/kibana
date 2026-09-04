@@ -1,8 +1,7 @@
 {
   "sha1": "3ec42fded9f2299ae5d153f4710fa29b9fad624b",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -16,8 +15,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/live_query_details.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 22,
+        "column": 26
       }
     },
     {
@@ -31,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/live_query_details.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 37,
+        "column": 18
       }
     },
     {
@@ -46,8 +45,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_admin.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 30,
+        "column": 28
       }
     },
     {
@@ -60,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_editor.spec.ts",
-        "line": 30,
-        "column": 12
+        "line": 25,
+        "column": 28
       }
     },
     {
@@ -74,8 +73,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_editor.spec.ts",
-        "line": 52,
-        "column": 12
+        "line": 45,
+        "column": 9
       }
     },
     {
@@ -88,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_editor.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 78,
+        "column": 14
       }
     },
     {
@@ -102,8 +101,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_editor.spec.ts",
-        "line": 127,
-        "column": 12
+        "line": 117,
+        "column": 18
       }
     },
     {
@@ -116,8 +115,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_editor.spec.ts",
-        "line": 154,
-        "column": 12
+        "line": 140,
+        "column": 53
       }
     },
     {
@@ -131,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_policy_validation.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 86,
+        "column": 29
       }
     },
     {
@@ -146,8 +145,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_policy_validation.spec.ts",
-        "line": 112,
-        "column": 12
+        "line": 105,
+        "column": 23
       }
     },
     {
@@ -161,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_policy_validation.spec.ts",
-        "line": 124,
-        "column": 12
+        "line": 116,
+        "column": 71
       }
     },
     {
@@ -172,19 +171,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_viewer.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 27,
+        "column": 49
       }
     },
     {
@@ -194,19 +187,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_viewer.spec.ts",
-        "line": 41,
-        "column": 12
+        "line": 35,
+        "column": 23
       }
     },
     {
@@ -216,19 +203,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_viewer.spec.ts",
-        "line": 50,
-        "column": 12
+        "line": 43,
+        "column": 18
       }
     },
     {
@@ -238,19 +219,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_viewer.spec.ts",
-        "line": 59,
-        "column": 12
+        "line": 52,
+        "column": 23
       }
     },
     {
@@ -264,8 +239,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_alert_test.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -279,8 +254,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_alert_test.spec.ts",
-        "line": 66,
-        "column": 12
+        "line": 56,
+        "column": 79
       }
     },
     {
@@ -293,8 +268,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_reader.spec.ts",
-        "line": 22,
-        "column": 12
+        "line": 19,
+        "column": 27
       }
     },
     {
@@ -307,8 +282,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_reader.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 26,
+        "column": 23
       }
     },
     {
@@ -321,8 +296,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_reader.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 34,
+        "column": 83
       }
     },
     {
@@ -335,8 +310,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_t1_analyst.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 37,
+        "column": 13
       }
     },
     {
@@ -349,8 +324,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_t1_analyst.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 46,
+        "column": 15
       }
     },
     {
@@ -363,8 +338,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_t1_analyst.spec.ts",
-        "line": 65,
-        "column": 12
+        "line": 55,
+        "column": 78
       }
     },
     {
@@ -377,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_t1_analyst.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 63,
+        "column": 7
       }
     },
     {
@@ -391,8 +366,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_t2_analyst.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 37,
+        "column": 13
       }
     },
     {
@@ -405,8 +380,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_t2_analyst.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 46,
+        "column": 15
       }
     },
     {
@@ -419,8 +394,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_t2_analyst.spec.ts",
-        "line": 65,
-        "column": 12
+        "line": 55,
+        "column": 78
       }
     },
     {
@@ -433,8 +408,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_t2_analyst.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 63,
+        "column": 7
       }
     },
     {
@@ -444,19 +419,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 59,
-        "column": 12
+        "line": 54,
+        "column": 28
       }
     },
     {
@@ -466,19 +435,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 97,
-        "column": 12
+        "line": 92,
+        "column": 14
       }
     },
     {
@@ -488,19 +451,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 129,
-        "column": 12
+        "line": 124,
+        "column": 68
       }
     },
     {
@@ -510,19 +467,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 163,
+        "column": 15
       }
     },
     {
@@ -532,19 +483,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 208,
-        "column": 12
+        "line": 202,
+        "column": 8
       }
     },
     {
@@ -554,19 +499,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 240,
-        "column": 12
+        "line": 234,
+        "column": 23
       }
     },
     {
@@ -580,8 +519,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_admin.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 26,
+        "column": 26
       }
     },
     {
@@ -595,8 +534,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_admin.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 37,
+        "column": 14
       }
     },
     {
@@ -609,8 +548,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_editor.spec.ts",
-        "line": 30,
-        "column": 12
+        "line": 25,
+        "column": 26
       }
     },
     {
@@ -623,8 +562,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_editor.spec.ts",
-        "line": 57,
-        "column": 12
+        "line": 50,
+        "column": 8
       }
     },
     {
@@ -637,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_editor.spec.ts",
-        "line": 95,
-        "column": 12
+        "line": 85,
+        "column": 85
       }
     },
     {
@@ -651,8 +590,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_editor.spec.ts",
-        "line": 125,
-        "column": 12
+        "line": 112,
+        "column": 14
       }
     },
     {
@@ -665,8 +604,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_editor.spec.ts",
-        "line": 136,
-        "column": 12
+        "line": 125,
+        "column": 13
       }
     },
     {
@@ -679,8 +618,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_editor.spec.ts",
-        "line": 148,
-        "column": 12
+        "line": 137,
+        "column": 24
       }
     },
     {
@@ -693,8 +632,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_editor.spec.ts",
-        "line": 159,
-        "column": 12
+        "line": 142,
+        "column": 25
       }
     },
     {
@@ -704,19 +643,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_viewer.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 30,
+        "column": 49
       }
     },
     {
@@ -726,19 +659,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_viewer.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 40,
+        "column": 25
       }
     },
     {
@@ -748,19 +675,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_viewer.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 49,
+        "column": 18
       }
     },
     {
@@ -770,19 +691,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_viewer.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 60,
+        "column": 53
       }
     },
     {
@@ -795,8 +710,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/search_strategy.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 72,
+        "column": 10
       }
     },
     {
@@ -809,8 +724,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/search_strategy.spec.ts",
-        "line": 95,
-        "column": 12
+        "line": 98,
+        "column": 14
       }
     },
     {
@@ -823,8 +738,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/search_strategy.spec.ts",
-        "line": 110,
-        "column": 12
+        "line": 111,
+        "column": 24
       }
     },
     {
@@ -837,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/tier_gating_complete.spec.ts",
-        "line": 65,
-        "column": 12
+        "line": 59,
+        "column": 20
       }
     },
     {
@@ -851,8 +766,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/tier_gating_essentials.spec.ts",
-        "line": 53,
-        "column": 12
+        "line": 47,
+        "column": 20
       }
     }
   ]

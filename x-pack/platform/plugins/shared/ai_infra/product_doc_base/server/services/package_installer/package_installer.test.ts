@@ -202,7 +202,7 @@ describe('PackageInstaller', () => {
             service_settings: {},
           },
         })
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       expect(productDocClient.setInstallationSuccessful).not.toHaveBeenCalled();
 
@@ -454,6 +454,11 @@ describe('PackageInstaller', () => {
       expect(ensureDefaultElserDeployedMock).toHaveBeenCalledTimes(1);
 
       expect(fetchSecurityLabsVersionsMock).toHaveBeenCalledTimes(1);
+      expect(fetchSecurityLabsVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        artifactRepositoryProxyUrl: undefined,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
       expect(downloadToDiskMock).toHaveBeenCalledWith(
         `${artifactRepositoryUrl}/${artifactName}`,
         `${artifactsFolder}/${artifactName}`,
@@ -513,7 +518,7 @@ describe('PackageInstaller', () => {
 
       await expect(
         packageInstaller.installSecurityLabs({ inferenceId: defaultInferenceEndpoints.ELSER })
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       expect(productDocClient.setSecurityLabsInstallationFailed).toHaveBeenCalledWith({
         version: VERSION_NEW,

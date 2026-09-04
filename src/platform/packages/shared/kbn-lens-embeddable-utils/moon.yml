@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-data-views-schema'
+  - '@kbn/as-code-data-views-transforms'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/data-views-plugin'
   - '@kbn/event-annotation-common'
@@ -27,7 +28,8 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/core-saved-objects-common'
   - '@kbn/esql-utils'
-  - '@kbn/config-schema'
+  - '@kbn/esql-types'
+  - '@kbn/zod'
   - '@kbn/coloring'
   - '@kbn/content-management-utils'
   - '@kbn/lens-common'
@@ -36,6 +38,8 @@ dependsOn:
   - '@kbn/transpose-utils'
   - '@kbn/palettes'
   - '@kbn/crypto-browser'
+  - '@kbn/zod-helpers'
+  - '@kbn/std'
 tags:
   - shared-common
   - package

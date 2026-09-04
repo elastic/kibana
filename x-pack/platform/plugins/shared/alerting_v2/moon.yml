@@ -17,6 +17,7 @@ project:
   owner: '@elastic/rna-project-team'
   sourceRoot: x-pack/platform/plugins/shared/alerting_v2
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/task-manager-plugin'
   - '@kbn/features-plugin'
@@ -80,9 +81,12 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/scout'
   - '@kbn/object-utils'
+  - '@kbn/alerting-v2-browser-shared'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-common-queries'
   - '@kbn/alerting-v2-utils'
   - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/response-ops-alert-snooze'
   - '@kbn/kibana-react-plugin'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/shared-ux-link-redirect-app'
@@ -128,8 +132,20 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/alerts-ui-shared'
   - '@kbn/es-types'
+  - '@kbn/announcement-banner'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/change-history'
+  - '@kbn/change-history-ui'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
+  - '@kbn/es'
+  - '@kbn/test-es-server'
+  - '@kbn/security-authorization-core'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/core-test-helpers-model-versions'
+  - '@kbn/content-list-common'
 tags:
   - plugin
   - prod

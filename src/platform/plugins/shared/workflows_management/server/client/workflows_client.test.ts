@@ -22,6 +22,8 @@ const createMockWorkflowsService = (
     hasAtLeast?: boolean;
     emitEvent?: jest.Mock;
     getManagedWorkflowStatus?: jest.Mock;
+    getInstalledManagedWorkflowState?: jest.Mock;
+    listInstalledManagedWorkflowStates?: jest.Mock;
   } = {}
 ) => {
   const emitEvent = overrides.emitEvent ?? jest.fn().mockResolvedValue(undefined);
@@ -53,6 +55,10 @@ const createMockWorkflowsService = (
       },
     }),
     getManagedWorkflowStatus,
+    getInstalledManagedWorkflowState:
+      overrides.getInstalledManagedWorkflowState ?? jest.fn().mockResolvedValue(null),
+    listInstalledManagedWorkflowStates:
+      overrides.listInstalledManagedWorkflowStates ?? jest.fn().mockResolvedValue([]),
   } as unknown as WorkflowsService;
 };
 
@@ -191,5 +197,31 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
       client.getWorkflowStatus(EXAMPLE_MANAGED_WORKFLOW_ID, { spaceId: 'default' })
     ).rejects.toThrow('Workflows is not available in this environment');
     expect(getManagedWorkflowStatus).not.toHaveBeenCalled();
+  });
+
+  it('should delegate owner-scoped managed workflow state reads when available', async () => {
+    const getInstalledManagedWorkflowState = jest.fn().mockResolvedValue({
+      workflowId: 'workflow-1',
+    });
+    const listInstalledManagedWorkflowStates = jest
+      .fn()
+      .mockResolvedValue([{ workflowId: 'workflow-1' }]);
+    const service = createMockWorkflowsService({
+      getInstalledManagedWorkflowState,
+      listInstalledManagedWorkflowStates,
+    });
+    const config = { available: true } as WorkflowsManagementConfig;
+    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+
+    const client = await provider('testPlugin');
+    await client.getInstalledWorkflowState('workflow-1', 'space-a');
+    await client.listInstalledWorkflowStates();
+
+    expect(getInstalledManagedWorkflowState).toHaveBeenCalledWith(
+      'workflow-1',
+      'space-a',
+      'testPlugin'
+    );
+    expect(listInstalledManagedWorkflowStates).toHaveBeenCalledWith('testPlugin');
   });
 });

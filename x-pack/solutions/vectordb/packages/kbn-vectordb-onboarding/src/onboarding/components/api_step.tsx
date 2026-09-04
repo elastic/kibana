@@ -20,6 +20,8 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -27,18 +29,25 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { useKibana } from '../../services';
-import { DEFAULT_LANGUAGE, LANGUAGES, type Language, type SnippetSet } from './languages';
-import { fillPlaceholders } from './snippets';
+import { LANGUAGES } from '../constants/languages';
+import { fillPlaceholders } from '../utils/fill_placeholders';
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
-import type { DocsPanelProps, OnboardingPill, VectorPath, WizardStep } from '../types';
+import { useSelectedLanguage } from '../../hooks/use_selected_language';
+import type { DocsPanelProps, OnboardingPill, SnippetSet, VectorPath, WizardStep } from '../types';
 import { OnboardingDocPanel } from './onboarding_doc_panel';
 import { OnboardingPills } from './onboarding_pills';
 
 const SNIPPET_OVERFLOW_HEIGHT = 420;
 
-interface ApiStepProps {
+export interface ApiStepTab {
+  id: string;
+  label: string;
   snippets: SnippetSet;
   consoleRequest: string;
+}
+
+interface ApiStepProps {
+  tabs: ApiStepTab[];
   consoleComment: string;
   docsPanel: DocsPanelProps[];
   pills: OnboardingPill[];
@@ -46,21 +55,17 @@ interface ApiStepProps {
   path: VectorPath;
 }
 
-export const ApiStep = ({
-  snippets,
-  consoleRequest,
-  consoleComment,
-  docsPanel,
-  pills,
-  step,
-  path,
-}: ApiStepProps) => {
+export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: ApiStepProps) => {
   const {
-    services: { application, share, console: consolePlugin },
+    services: { application, share, console: consolePlugin, cloud },
   } = useKibana();
   const { elasticsearchUrl, apiKey } = useOnboardingCredentials();
-  const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
+  const [language, setLanguage] = useSelectedLanguage();
   const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
+  const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+
+  const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
+  const { snippets, consoleRequest, label: exampleType } = selectedTab;
 
   const selectedLanguage = LANGUAGES.find((l) => l.id === language);
   const syntax = selectedLanguage?.syntax ?? 'python';
@@ -71,6 +76,9 @@ export const ApiStep = ({
   );
 
   const telemetryPrefix = `vectordbOnboarding-${step}-${path}`;
+
+  const isInTrial = cloud?.isInTrial() ?? false;
+  const visiblePills = isInTrial ? pills : pills.filter(({ trialOnly }) => !trialOnly);
 
   const languageMenuItems = LANGUAGES.map((lang) => (
     <EuiContextMenuItem
@@ -91,19 +99,27 @@ export const ApiStep = ({
     </EuiContextMenuItem>
   ));
 
+  const commentWithExampleType =
+    tabs.length > 1
+      ? i18n.translate('vectordbOnboarding.apiStep.consoleCommentWithExampleType', {
+          defaultMessage: '{consoleComment} ({exampleType})',
+          values: { consoleComment, exampleType },
+        })
+      : consoleComment;
+
   const requestWithComment = `
 # ===============================================
-# 🚀 ${consoleComment}
+# 🚀 ${commentWithExampleType}
 # ===============================================
 \n${consoleRequest}`;
 
   return (
     <>
       <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
-        {pills.length > 0 && (
+        {visiblePills.length > 0 && (
           <>
-            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
-              <OnboardingPills pills={pills} telemetryPrefix={telemetryPrefix} />
+            <EuiPanel paddingSize="s" color="transparent">
+              <OnboardingPills pills={visiblePills} telemetryPrefix={telemetryPrefix} />
             </EuiPanel>
             <EuiSpacer size="s" />
           </>
@@ -111,17 +127,34 @@ export const ApiStep = ({
         <EuiPanel paddingSize="none" hasBorder={false} hasShadow={true} color="plain">
           <EuiPanel paddingSize="s" hasShadow={false} color="transparent">
             <EuiFlexGroup
-              justifyContent="flexEnd"
+              justifyContent="spaceBetween"
               alignItems="center"
               gutterSize="s"
               responsive={false}
             >
+              <EuiFlexItem grow={true}>
+                {tabs.length > 1 && (
+                  <EuiTabs size="s" bottomBorder={false}>
+                    {tabs.map((tab) => (
+                      <EuiTab
+                        key={tab.id}
+                        isSelected={tab.id === selectedTab.id}
+                        onClick={() => setSelectedTabId(tab.id)}
+                        data-test-subj={`vectordbWizardSnippetTab-${tab.id}`}
+                        data-telemetry-id={`${telemetryPrefix}-selectTab-${tab.id}`}
+                      >
+                        {tab.label}
+                      </EuiTab>
+                    ))}
+                  </EuiTabs>
+                )}
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={
                     <EuiButtonEmpty
                       size="s"
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       color="text"
                       iconSide="right"
                       onClick={() => setIsLanguagePopoverOpen(!isLanguagePopoverOpen)}
@@ -183,6 +216,7 @@ export const ApiStep = ({
             fontSize="m"
             paddingSize="m"
             overflowHeight={SNIPPET_OVERFLOW_HEIGHT}
+            whiteSpace="pre-wrap"
             transparentBackground
             data-test-subj="vectordbWizardSnippet"
           >
@@ -190,7 +224,7 @@ export const ApiStep = ({
           </EuiCodeBlock>
         </EuiPanel>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="xs" hasBorder={false} hasShadow={false} color="transparent">
+        <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
           <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon color="subdued" size="m" type="bulb" aria-hidden={true} />

@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
   EuiBasicTable,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCheckbox,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
-  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPopover,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -32,17 +26,14 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  BULK_FILTER_MAX_RESOURCES,
-  getRootEsqlQuery,
-  type RuleKind,
-} from '@kbn/alerting-v2-schemas';
+import { getRootEsqlQuery, type RuleKind } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
 import { RuleActionsMenu } from './rule_actions_menu';
+import { RulesBulkActions } from './rules_bulk_actions';
 
 const labelsContainerStyle = css`
   display: flex;
@@ -77,6 +68,7 @@ export interface RulesListTableProps {
   totalItemCount: number;
   page: number;
   perPage: number;
+  pageSizeOptions?: number[];
   search: string;
   hasActiveFilters: boolean;
   sortField?: RulesListTableSortField;
@@ -100,6 +92,7 @@ export interface RulesListTableProps {
   onBulkEnable: () => void;
   onBulkDisable: () => void;
   onBulkDelete: () => void;
+  onBulkUpdateApiKey: () => void;
 
   /** Row action callbacks */
   onNavigateToDetails: (rule: RuleApiResponse) => void;
@@ -109,6 +102,10 @@ export interface RulesListTableProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
+  onUpdateApiKey: (rule: RuleApiResponse) => void;
+  onRun: (rule: RuleApiResponse) => void;
+  /** When provided, adds View change history to each row actions menu. */
+  onViewChangeHistory?: (rule: RuleApiResponse) => void;
   /** Id of the rule whose enabled state is currently being toggled, if any. */
   togglingRuleId?: string;
   /** True while a bulk enable/disable mutation is in flight, so individual switches don't race it. */
@@ -118,11 +115,14 @@ export interface RulesListTableProps {
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
 }
 
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 export const RulesListTable: React.FC<RulesListTableProps> = ({
   items,
   totalItemCount,
   page,
   perPage,
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   search,
   hasActiveFilters,
   sortField,
@@ -140,6 +140,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onBulkUpdateApiKey,
   onNavigateToDetails,
   onExpand,
   onQuickEdit,
@@ -147,6 +148,9 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  onUpdateApiKey,
+  onRun,
+  onViewChangeHistory,
   togglingRuleId,
   isBulkTogglingEnabled,
   onTableChange,
@@ -164,32 +168,17 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     [euiTheme.breakpoint.m]
   );
 
-  const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
-
-  const handleBulkEnable = () => {
-    setIsBulkActionsOpen(false);
-    onBulkEnable();
-  };
-
-  const handleBulkDisable = () => {
-    setIsBulkActionsOpen(false);
-    onBulkDisable();
-  };
-
-  const handleBulkDelete = () => {
-    setIsBulkActionsOpen(false);
-    onBulkDelete();
-  };
-
   const pagination = {
     pageIndex: page - 1,
     pageSize: perPage,
     totalItemCount,
-    pageSizeOptions: [10, 20, 50],
+    pageSizeOptions,
   };
 
-  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
-    () => [
+  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(() => {
+    const showActionsColumn = canWrite || onViewChangeHistory;
+
+    return [
       ...(canWrite
         ? ([
             {
@@ -231,7 +220,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             disableScreenReaderOutput
           >
             <EuiButtonIcon
-              iconType="expand"
+              iconType="maximize"
               color="text"
               onClick={() => onExpand(rule)}
               aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
@@ -331,7 +320,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       {
         field: 'kind',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.kind" defaultMessage="Outcome" />
         ),
         width: '10%',
         sortable: true,
@@ -387,7 +376,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           );
         },
       },
-      ...(canWrite
+      ...(showActionsColumn
         ? ([
             {
               name: (
@@ -405,30 +394,39 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                   responsive={false}
                   justifyContent="flexEnd"
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                        defaultMessage: 'Quick edit rule',
-                      })}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="pencil"
-                        color="text"
-                        onClick={() => onQuickEdit(rule)}
-                        aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                          defaultMessage: 'Quick edit rule',
+                  {canWrite ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                          defaultMessage: 'Edit rule',
                         })}
-                        data-test-subj={`quickEditRule-${rule.id}`}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="pencil"
+                          color="text"
+                          onClick={() => onQuickEdit(rule)}
+                          aria-label={i18n.translate(
+                            'xpack.alertingV2.rulesList.action.quickEdit',
+                            {
+                              defaultMessage: 'Edit rule',
+                            }
+                          )}
+                          data-test-subj={`quickEditRule-${rule.id}`}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  ) : null}
                   <EuiFlexItem grow={false}>
                     <RuleActionsMenu
                       rule={rule}
+                      canWrite={canWrite}
                       onEdit={onEdit}
                       onClone={onClone}
                       onDelete={onDelete}
+                      onUpdateApiKey={onUpdateApiKey}
+                      onRun={onRun}
+                      onViewChangeHistory={onViewChangeHistory}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -436,24 +434,26 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             },
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),
-    ],
-    [
-      canWrite,
-      isPageSelected,
-      isRowSelected,
-      onSelectPage,
-      onSelectRow,
-      onNavigateToDetails,
-      onExpand,
-      onQuickEdit,
-      onEdit,
-      onClone,
-      onDelete,
-      onToggleEnabled,
-      togglingRuleId,
-      isBulkTogglingEnabled,
-    ]
-  );
+    ];
+  }, [
+    canWrite,
+    isPageSelected,
+    isRowSelected,
+    onSelectPage,
+    onSelectRow,
+    onNavigateToDetails,
+    onExpand,
+    onQuickEdit,
+    onEdit,
+    onClone,
+    onDelete,
+    onToggleEnabled,
+    onUpdateApiKey,
+    onRun,
+    onViewChangeHistory,
+    togglingRuleId,
+    isBulkTogglingEnabled,
+  ]);
 
   const noItemsMessage =
     search || hasActiveFilters
@@ -492,132 +492,18 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             />
           </EuiText>
         </EuiFlexItem>
-        {canWrite && selectedCount > 0 ? (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                button={
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="arrowDown"
-                    iconSide="right"
-                    onClick={() => setIsBulkActionsOpen((open) => !open)}
-                    data-test-subj="bulkActionsButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.selectedCount"
-                      defaultMessage="{count} Selected"
-                      values={{ count: selectedCount }}
-                    />
-                  </EuiButtonEmpty>
-                }
-                isOpen={isBulkActionsOpen}
-                closePopover={() => setIsBulkActionsOpen(false)}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-                aria-label={i18n.translate('xpack.alertingV2.rulesList.bulkAction.menu', {
-                  defaultMessage: 'Bulk actions',
-                })}
-              >
-                <EuiContextMenuPanel
-                  items={[
-                    <EuiContextMenuItem
-                      key="enable"
-                      icon={<EuiIcon type="checkCircle" size="m" aria-hidden={true} />}
-                      onClick={handleBulkEnable}
-                      data-test-subj="bulkEnableRules"
-                    >
-                      {i18n.translate('xpack.alertingV2.rulesList.bulkAction.enable', {
-                        defaultMessage: 'Enable',
-                      })}
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      key="disable"
-                      icon={<EuiIcon type="crossInCircle" size="m" aria-hidden={true} />}
-                      onClick={handleBulkDisable}
-                      data-test-subj="bulkDisableRules"
-                    >
-                      {i18n.translate('xpack.alertingV2.rulesList.bulkAction.disable', {
-                        defaultMessage: 'Disable',
-                      })}
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      key="delete"
-                      icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
-                      onClick={handleBulkDelete}
-                      data-test-subj="bulkDeleteRules"
-                    >
-                      {i18n.translate('xpack.alertingV2.rulesList.bulkAction.delete', {
-                        defaultMessage: 'Delete',
-                      })}
-                    </EuiContextMenuItem>,
-                  ]}
-                />
-              </EuiPopover>
-            </EuiFlexItem>
-            {!isAllSelected ? (
-              // Above the cap, bulk-by-query rejects the whole request
-              // (all-or-nothing), so cross-page "select all" is disabled rather
-              // than hidden — a help tip explains why and how to proceed.
-              // Explicit per-page/row selection stays available regardless.
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      size="xs"
-                      iconType="pagesSelect"
-                      onClick={onSelectAll}
-                      isDisabled={totalItemCount > BULK_FILTER_MAX_RESOURCES}
-                      data-test-subj="selectAllRulesButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.alertingV2.rulesList.selectAll"
-                        defaultMessage="Select all {total} {total, plural, one {rule} other {rules}}"
-                        values={{ total: totalItemCount }}
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  {totalItemCount > BULK_FILTER_MAX_RESOURCES ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        type="question"
-                        color="subdued"
-                        position="top"
-                        anchorProps={{ 'data-test-subj': 'bulkSelectAllLimitTooltip' }}
-                        aria-label={i18n.translate(
-                          'xpack.alertingV2.rulesList.bulkSelectAllLimitAriaLabel',
-                          { defaultMessage: 'Why is Select all disabled?' }
-                        )}
-                        content={
-                          <span data-test-subj="bulkSelectAllLimitDisclosure">
-                            <FormattedMessage
-                              id="xpack.alertingV2.rulesList.bulkSelectAllLimitDisclosure"
-                              defaultMessage="Select all is available only when {maxRules, number} or fewer rules match. Narrow your filter to select every matching rule."
-                              values={{ maxRules: BULK_FILTER_MAX_RESOURCES }}
-                            />
-                          </span>
-                        }
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                iconType="cross"
-                color="danger"
-                onClick={onClearSelection}
-                data-test-subj="clearSelectionButton"
-              >
-                <FormattedMessage
-                  id="xpack.alertingV2.rulesList.clearSelection"
-                  defaultMessage="Clear selection"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </>
+        {canWrite ? (
+          <RulesBulkActions
+            selectedCount={selectedCount}
+            totalItemCount={totalItemCount}
+            isAllSelected={isAllSelected}
+            onSelectAll={onSelectAll}
+            onClearSelection={onClearSelection}
+            onBulkEnable={onBulkEnable}
+            onBulkDisable={onBulkDisable}
+            onBulkUpdateApiKey={onBulkUpdateApiKey}
+            onBulkDelete={onBulkDelete}
+          />
         ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="s" />

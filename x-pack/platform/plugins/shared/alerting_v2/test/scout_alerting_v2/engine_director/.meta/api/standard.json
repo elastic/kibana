@@ -1,0 +1,316 @@
+{
+  "sha1": "fc671965b4086daca23bdd70e20d71a3236da36b",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e747878cbda0163-d8099f4a61f66f4",
+      "title": "Director skips director processing for signal rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 39,
+        "column": 16
+      }
+    },
+    {
+      "id": "e747878cbda0163-1d5c4dc707dc069",
+      "title": "Director rewrites event type to \"alert\" and populates episode id/status on every processed event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 72,
+        "column": 11
+      }
+    },
+    {
+      "id": "e747878cbda0163-f352403dec812f5",
+      "title": "Director preserves the same episode id across pending -> active -> recovering -> inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 122,
+        "column": 9
+      }
+    },
+    {
+      "id": "e747878cbda0163-ebbfa9920a93e05",
+      "title": "Director generates a new episode id when a previously inactive group breaches again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 189,
+        "column": 75
+      }
+    },
+    {
+      "id": "e747878cbda0163-748690c3b1e4282",
+      "title": "Director holds an episode active across engine recoveries when the last lifecycle action is activate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 270,
+        "column": 31
+      }
+    },
+    {
+      "id": "e747878cbda0163-ed7e911db6c2aaa",
+      "title": "Director uses the basic strategy when state_transition is omitted (no status_count is ever set)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 392,
+        "column": 13
+      }
+    },
+    {
+      "id": "e747878cbda0163-bea8cefa97f2b1d",
+      "title": "Director increments status_count across consecutive pending executions and resets it on transition to active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 449,
+        "column": 9
+      }
+    },
+    {
+      "id": "e747878cbda0163-31b01d236180dbf",
+      "title": "Director starts a new pending lifecycle at status_count 1 after the previous lifecycle reached inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 502,
+        "column": 28
+      }
+    },
+    {
+      "id": "e747878cbda0163-da864b8974dd136",
+      "title": "Director does not write status_count on inactive episode events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 583,
+        "column": 26
+      }
+    },
+    {
+      "id": "e747878cbda0163-9a9ef6a5fa308a9",
+      "title": "Director keeps episode in recovering until recovering_count threshold is met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 641,
+        "column": 22
+      }
+    },
+    {
+      "id": "e747878cbda0163-03be7bd31066395",
+      "title": "Director recovering_count: 0 skips the recovering status and goes straight to inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 695,
+        "column": 69
+      }
+    },
+    {
+      "id": "e747878cbda0163-8411a599b7698cc",
+      "title": "Director pending_count: 0 skips the pending status and goes straight to active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 750,
+        "column": 9
+      }
+    },
+    {
+      "id": "e747878cbda0163-daec988cd8d7088",
+      "title": "Director transitions recovering -> active when the group breaches again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 795,
+        "column": 18
+      }
+    },
+    {
+      "id": "e747878cbda0163-51c8bb98d9b6b96",
+      "title": "Director transitions pending -> inactive when a group recovers before the pending threshold is met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 891,
+        "column": 13
+      }
+    },
+    {
+      "id": "e747878cbda0163-69b44437dd98841",
+      "title": "Director tracks episode id and status_count independently per group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 963,
+        "column": 25
+      }
+    },
+    {
+      "id": "e747878cbda0163-d675ba276f0a73c",
+      "title": "Director transitions pending -> active via pending_timeframe even when pending_count is unreachable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 1075,
+        "column": 26
+      }
+    },
+    {
+      "id": "e747878cbda0163-2460e798459b606",
+      "title": "Director transitions recovering -> inactive via recovering_timeframe when recovering_operator is OR",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 1129,
+        "column": 49
+      }
+    },
+    {
+      "id": "e747878cbda0163-7182c84cbe7c68a",
+      "title": "Director keeps the latest episode in recovering when only recovering_timeframe is met under recovering_operator AND",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 1191,
+        "column": 24
+      }
+    },
+    {
+      "id": "e747878cbda0163-5c5ce4414752b37",
+      "title": "Director keeps the latest episode in pending when only pending_timeframe is met under pending_operator AND",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 1267,
+        "column": 11
+      }
+    },
+    {
+      "id": "e747878cbda0163-7faf6350097a4dc",
+      "title": "Director transitions pending -> active under pending_operator AND when both count and timeframe are met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 1337,
+        "column": 22
+      }
+    },
+    {
+      "id": "e747878cbda0163-9085e2d8ed11df7",
+      "title": "Director no_data_strategy 'last_known_status' preserves the prior episode status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 1403,
+        "column": 28
+      }
+    },
+    {
+      "id": "e747878cbda0163-f90e3171bd2118a",
+      "title": "Director no_data_strategy 'recover' resolves the episode to inactive via a no_data event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_director/api/tests/director.spec.ts",
+        "line": 1462,
+        "column": 9
+      }
+    }
+  ]
+}

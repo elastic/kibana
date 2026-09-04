@@ -14,7 +14,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ReactNode } from 'react';
 import type {
-  AppHeaderConfig,
+  ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
   GlobalSearchConfig,
@@ -38,7 +38,8 @@ const createStartContractMock = () => {
   const nextGlobalSearchState$ = new BehaviorSubject<GlobalSearchConfig | undefined>(undefined);
   const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
   const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
-  const nextAppHeaderState$ = new BehaviorSubject<AppHeaderConfig | undefined>(undefined);
+  const nextProjectPickerState$ = new BehaviorSubject<ReactNode>(null);
+  const nextAppHeaderState$ = new BehaviorSubject<ChromeAppHeaderConfig | undefined>(undefined);
   const inlineAppHeaderState$ = new BehaviorSubject(false);
   let appHeaderRegistrationId = 0;
 
@@ -63,6 +64,11 @@ const createStartContractMock = () => {
       legacyActionMenu$: new BehaviorSubject<MountPoint | undefined>(
         undefined
       ) as unknown as DeeplyMockedKeys<Observable<MountPoint | undefined>>,
+      capabilities: lazyObject({
+        navLinks: {},
+        management: {},
+        catalogue: {},
+      }),
     }),
     sidebar: lazyObject(sidebar),
     navLinks: lazyObject({
@@ -79,16 +85,6 @@ const createStartContractMock = () => {
     docTitle: lazyObject({
       change: jest.fn(),
       reset: jest.fn(),
-    }),
-    navControls: lazyObject({
-      registerLeft: jest.fn(),
-      registerCenter: jest.fn(),
-      registerRight: jest.fn(),
-      getLeft$: jest.fn().mockReturnValue(new BehaviorSubject([])),
-      getCenter$: jest.fn().mockReturnValue(new BehaviorSubject([])),
-      getRight$: jest.fn().mockReturnValue(new BehaviorSubject([])),
-      setHelpMenuLinks: jest.fn(),
-      getHelpMenuLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     }),
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
@@ -141,7 +137,6 @@ const createStartContractMock = () => {
       registerCustomizeNavigationHandler: jest.fn(),
     }),
     next: lazyObject({
-      isEnabled: false,
       aiButton: lazyObject({
         get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
         register: jest.fn().mockReturnValue(() => {}),
@@ -164,13 +159,19 @@ const createStartContractMock = () => {
           nextContextSwitcherState$.next(content ?? null);
         }),
       }),
+      projectPicker: lazyObject({
+        get$: jest.fn().mockReturnValue(nextProjectPickerState$),
+        set: jest.fn((content?: ReactNode) => {
+          nextProjectPickerState$.next(content ?? null);
+        }),
+      }),
       inlineAppHeader: lazyObject({
         get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
         set: jest.fn((value: boolean) => inlineAppHeaderState$.next(value)),
       }),
       appHeader: lazyObject({
         get$: jest.fn().mockReturnValue(nextAppHeaderState$),
-        set: jest.fn((config: AppHeaderConfig) => {
+        set: jest.fn((config: ChromeAppHeaderConfig) => {
           const registrationId = ++appHeaderRegistrationId;
           nextAppHeaderState$.next(config);
           return () => {

@@ -8,7 +8,7 @@
 import { either } from 'fp-ts/Either';
 import * as t from 'io-ts';
 
-import { ALL_VALUE, SLO_GROUPINGS_PREFIX } from '../constants';
+import { ALL_VALUE, SLO_GROUPINGS_PREFIX, SLO_STATUS } from '../constants';
 
 const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
 
@@ -35,13 +35,6 @@ const errorBudgetSchema = t.type({
   remaining: t.number,
   isEstimated: t.boolean,
 });
-
-const SLO_STATUS = {
-  NO_DATA: 'NO_DATA',
-  HEALTHY: 'HEALTHY',
-  DEGRADING: 'DEGRADING',
-  VIOLATED: 'VIOLATED',
-} as const;
 
 const statusSchema = t.union([
   t.literal(SLO_STATUS.NO_DATA),

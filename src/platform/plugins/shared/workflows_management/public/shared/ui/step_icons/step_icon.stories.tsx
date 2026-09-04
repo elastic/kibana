@@ -11,12 +11,11 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import { type ConnectorSpec, connectorsSpecs } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
@@ -34,11 +33,16 @@ import {
   registerInternalStepDefinitions,
   registerInternalTriggerDefinitions,
 } from '@kbn/workflows-extensions/public';
+import { z } from '@kbn/zod/v4';
 import { StepIcon } from './step_icon';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import { triggerSchemas } from '../../../trigger_schemas';
+import { TriggerIcon } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 
+// Covers StepIcon and TriggerIcon together: the workflow list renders both side by
+// side, and a regression in either shows up as a plugs glyph in the same column.
 export default {
-  title: 'StepIcon',
+  title: 'Workflows Icons/Catalog',
   decorators: [kibanaReactDecorator],
 };
 
@@ -59,14 +63,36 @@ interface LoadedExtensions {
   triggerDefs: PublicTriggerDefinition[];
 }
 
-// Only the internal defs shipped by `@kbn/workflows-extensions`. Runtime-registered
-// defs from other plugins (cases, agent_builder, …) are intentionally absent — the
-// Catalog story calls that out.
+// Cases registers these five at runtime. Its plugin is in x-pack and this one is
+// platform, so the story can't import the definitions — but it can import the same
+// EUI glyph they carry, so what renders here matches what Kibana renders.
+const CASES_TRIGGER_FIXTURES: PublicTriggerDefinition[] = [
+  ['cases.caseCreated', 'Case created'],
+  ['cases.caseUpdated', 'Case updated'],
+  ['cases.caseStatusUpdated', 'Case status updated'],
+  ['cases.attachmentsAdded', 'Attachments added'],
+  ['cases.commentsAdded', 'Comments added'],
+].map(([id, title]) => ({
+  id,
+  title,
+  description: title,
+  eventSchema: z.object({}),
+  stability: 'tech_preview',
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/briefcase').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+}));
+
 const loadExtensions = async (): Promise<LoadedExtensions> => {
   const stepRegistry = new PublicStepRegistry(nullLogger);
   const triggerRegistry = new PublicTriggerRegistry();
   registerInternalStepDefinitions(stepRegistry);
   registerInternalTriggerDefinitions(triggerRegistry);
+  for (const fixture of CASES_TRIGGER_FIXTURES) {
+    triggerRegistry.register(fixture);
+  }
   await Promise.all([stepRegistry.whenReady(), triggerRegistry.whenReady()]);
   return { stepDefs: stepRegistry.getAll(), triggerDefs: triggerRegistry.getAll() };
 };
@@ -103,24 +129,26 @@ const buildSpecActionTypeRegistry = () => {
 
 // Nested KibanaContextProvider shadows the outer decorator's empty mocks, so
 // `useKibana()` inside StepIcon reads the seeded extensions + action type registry.
+// TriggerIcon resolves through the `triggerSchemas` singleton rather than context,
+// so that needs seeding too or every custom trigger falls back to bolt.
 const SeededKibanaProvider: React.FC<{
   extensions: LoadedExtensions;
   children: React.ReactNode;
-}> = ({ extensions, children }) => (
-  <KibanaContextProvider
-    services={
-      {
-        triggersActionsUi: {
-          actionTypeRegistry: buildSpecActionTypeRegistry(),
-          ruleTypeRegistry: new TypeRegistry(),
-        },
-        workflowsExtensions: buildWorkflowsExtensionsFromRegistry(extensions),
-      } as unknown as Parameters<typeof KibanaContextProvider>[0]['services']
-    }
-  >
-    {children}
-  </KibanaContextProvider>
-);
+}> = ({ extensions, children }) => {
+  const services = useMemo(() => {
+    const workflowsExtensions = buildWorkflowsExtensionsFromRegistry(extensions);
+    triggerSchemas.initialize(workflowsExtensions);
+    return {
+      triggersActionsUi: {
+        actionTypeRegistry: buildSpecActionTypeRegistry(),
+        ruleTypeRegistry: new TypeRegistry(),
+      },
+      workflowsExtensions,
+    } as unknown as Parameters<typeof KibanaContextProvider>[0]['services'];
+  }, [extensions]);
+
+  return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
+};
 
 const useRealExtensions = () => {
   const [extensions, setExtensions] = useState<LoadedExtensions | null>(null);
@@ -151,7 +179,7 @@ const baseTypeFor = (id: string): string => {
   if (id.startsWith('elasticsearch.')) return 'elasticsearch';
   if (id.startsWith('kibana.')) return 'kibana';
   if (id.startsWith('slack_api')) return 'slack';
-  return id.includes('.') ? id.split('.')[0] : id;
+  return id.split('.')[0];
 };
 
 const SectionHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
@@ -173,7 +201,7 @@ interface IconRow {
   secondary?: string;
 }
 
-const IconRowGrid = ({ rows, columns = 3 }: { rows: IconRow[]; columns?: 1 | 2 | 3 | 4 }) => (
+const IconRowGrid = ({ rows, columns = 4 }: { rows: IconRow[]; columns?: 1 | 2 | 3 | 4 }) => (
   <EuiFlexGrid columns={columns} gutterSize="m">
     {rows.map(({ icon, primary, secondary }) => (
       <EuiFlexItem key={primary} grow={false}>
@@ -181,7 +209,7 @@ const IconRowGrid = ({ rows, columns = 3 }: { rows: IconRow[]; columns?: 1 | 2 |
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s">
-              <pre style={{ margin: 0, padding: 0 }}>{primary}</pre>
+              <span style={{ fontFamily: 'monospace' }}>{primary}</span>
             </EuiText>
             {secondary && (
               <EuiText size="xs" color="subdued">
@@ -198,33 +226,6 @@ const IconRowGrid = ({ rows, columns = 3 }: { rows: IconRow[]; columns?: 1 | 2 |
 const stepIconOf = (type: string) => (
   <StepIcon stepType={type} executionStatus={undefined} title={type} />
 );
-
-// Mirrors `TriggerIcon` in worflows_triggers_list.tsx.
-const BUILT_IN_TRIGGER_ICONS: Record<string, string> = {
-  manual: 'play',
-  alert: 'warning',
-  scheduled: 'clock',
-};
-
-const TriggerIconFromRegistry = ({
-  type,
-  triggerDefs,
-}: {
-  type: string;
-  triggerDefs: PublicTriggerDefinition[];
-}) => {
-  const hardcoded = BUILT_IN_TRIGGER_ICONS[type];
-  if (hardcoded) return <EuiIcon type={hardcoded} size="m" title={type} />;
-  const def = triggerDefs.find((d) => d.id === type);
-  if (def?.icon) {
-    return (
-      <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-        <EuiIcon type={def.icon} size="m" title={type} />
-      </Suspense>
-    );
-  }
-  return <EuiIcon type="bolt" size="m" title={type} />;
-};
 
 const BUILT_IN_TRIGGER_TYPES = ['manual', 'alert', 'scheduled'];
 
@@ -256,14 +257,14 @@ const CatalogBody = ({ extensions }: { extensions: LoadedExtensions }) => {
 
   const triggerRows: IconRow[] = [
     ...BUILT_IN_TRIGGER_TYPES.map((type) => ({
-      icon: <TriggerIconFromRegistry type={type} triggerDefs={triggerDefs} />,
+      icon: <TriggerIcon triggerType={type} />,
       primary: type,
       secondary: 'built-in',
     })),
     ...triggerDefs.map((def) => ({
-      icon: <TriggerIconFromRegistry type={def.id} triggerDefs={triggerDefs} />,
+      icon: <TriggerIcon triggerType={def.id} />,
       primary: def.id,
-      secondary: `custom (${def.title ?? def.id})`,
+      secondary: def.title,
     })),
   ];
 
@@ -287,8 +288,8 @@ const CatalogBody = ({ extensions }: { extensions: LoadedExtensions }) => {
       const base = baseTypeFor(id.startsWith('.') ? id.slice(1) : id);
       return {
         icon: stepIconOf(base),
-        primary: spec.metadata.displayName,
-        secondary: `${id} → base: ${base}`,
+        primary: base,
+        secondary: spec.metadata.displayName,
       };
     });
 
@@ -296,27 +297,27 @@ const CatalogBody = ({ extensions }: { extensions: LoadedExtensions }) => {
     <EuiFlexGroup direction="column" gutterSize="l">
       <SectionHeader
         title={`Triggers (${BUILT_IN_TRIGGER_TYPES.length} built-in + ${triggerDefs.length} custom)`}
-        subtitle="Raw `type` values users write in the workflow YAML. Custom triggers come from @kbn/workflows-extensions — additional ones may be registered by other plugins at runtime."
+        subtitle="Rendered by TriggerIcon. cases.* are local fixtures — see CASES_TRIGGER_FIXTURES."
       />
-      <IconRowGrid rows={triggerRows} columns={2} />
+      <IconRowGrid rows={triggerRows} columns={3} />
 
       <SectionHeader
         title="Built-in step types"
-        subtitle="Types handled by getStepIconType / HardcodedIcons — no extension lookup needed."
+        subtitle="Resolved by getStepIconType / HardcodedIcons, no extension lookup."
       />
       <IconRowGrid rows={builtInRows} columns={3} />
 
       <SectionHeader
         title={`Extension step definitions (${extensionRows.length} from @kbn/workflows-extensions)`}
-        subtitle="Only the defs this package ships (data.*, ai.*). cases.* and ai.agent are registered by the Cases / Agent Builder plugins at runtime and appear in real Kibana but not here."
+        subtitle="Only the defs that package ships. cases.* and ai.agent are registered at runtime by Cases / Agent Builder."
       />
       <IconRowGrid rows={extensionRows} columns={3} />
 
       <SectionHeader
         title={`Connector specs (${connectorRows.length} from @kbn/connector-specs)`}
-        subtitle="Rendered as the workflow list table shows them (bare base type, e.g. `aws_lambda` for `.aws_lambda`)."
+        subtitle="Bare base types, as the workflow list shows them (`aws_lambda` for `.aws_lambda`)."
       />
-      <IconRowGrid rows={connectorRows} columns={2} />
+      <IconRowGrid rows={connectorRows} columns={3} />
     </EuiFlexGroup>
   );
 };
@@ -331,31 +332,26 @@ export const Catalog = () => {
   );
 };
 
+// `expected` is what the row must render; a plugs glyph anywhere but the last two
+// means the resolution chain regressed.
 const baseTypeCases: Array<{ baseType: string; expected: string }> = [
-  { baseType: 'ai', expected: 'productAgent (robot — BASE_TYPE_AGGREGATE_ICONS)' },
-  { baseType: 'workflow', expected: 'workflow.execute glyph (BASE_TYPE_AGGREGATE_ICONS)' },
-  { baseType: 'data', expected: 'database (via data.map family inheritance)' },
-  {
-    baseType: 'cases',
-    expected:
-      'plugs in Storybook (cases.* is registered by the Cases plugin at runtime only; in Kibana it resolves to briefcase)',
-  },
-  { baseType: 'aws_lambda', expected: 'AWS Lambda logo (via .aws_lambda actionTypeRegistry)' },
-  { baseType: 'slack', expected: 'logoSlack (hardcoded)' },
-  { baseType: 'elasticsearch', expected: 'logoElasticsearch (hardcoded prefix match)' },
-  { baseType: 'kibana', expected: 'logoKibana (hardcoded prefix match)' },
-  {
-    baseType: 'virustotal',
-    expected: 'VirusTotal logo (via .virustotal actionTypeRegistry + ConnectorIconsMap)',
-  },
-  { baseType: 'some_unknown_type', expected: 'plugs (legitimate unknown fallback)' },
+  { baseType: 'ai', expected: 'productAgent' },
+  { baseType: 'workflow', expected: 'workflow.execute glyph' },
+  { baseType: 'data', expected: 'database' },
+  { baseType: 'aws_lambda', expected: 'AWS Lambda logo' },
+  { baseType: 'slack', expected: 'logoSlack' },
+  { baseType: 'elasticsearch', expected: 'logoElasticsearch' },
+  { baseType: 'kibana', expected: 'logoKibana' },
+  { baseType: 'virustotal', expected: 'VirusTotal logo' },
+  { baseType: 'cases', expected: 'plugs here, briefcase in Kibana (registered at runtime)' },
+  { baseType: 'some_unknown_type', expected: 'plugs' },
 ];
 
 const BaseTypeAggregationBody = () => (
   <EuiFlexGroup direction="column" gutterSize="l">
     <SectionHeader
       title="Base type aggregation (workflow list rows)"
-      subtitle="StepIcon receives bare base types after the list deduplicates `ai.summarize` + `ai.agent` → `ai`, `workflow.execute` + `workflow.output` → `workflow`, etc. Each row names the icon the aggregation must produce — if a row goes plugs (except `some_unknown_type`), the resolution chain has regressed."
+      subtitle="The list collapses `ai.summarize` + `ai.agent` → `ai`, `workflow.execute` + `workflow.output` → `workflow`, then hands StepIcon the bare base type."
     />
     <IconRowGrid
       rows={baseTypeCases.map(({ baseType, expected }) => ({

@@ -48,6 +48,8 @@ export class AssetDetailsPage {
     this.dashboardsTab = createLazyPageObject(DashboardsTab, this.page, this.kbnUrl);
 
     this.openAsPageButton = this.page.getByTestId('infraAssetDetailsOpenAsPageButton');
-    this.returnButton = this.page.getByTestId('infraAssetDetailsReturnButton');
+    this.returnButton = this.page
+      .getByTestId('infraAssetDetailsReturnButton')
+      .or(this.page.getByTestId('appHeaderBack'));
   }
 }

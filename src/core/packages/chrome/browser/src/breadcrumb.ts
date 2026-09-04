@@ -21,12 +21,8 @@ export interface ChromeBreadcrumb extends EuiBreadcrumb {
 }
 
 /**
- * @example
- * Append a React element next to the breadcrumbs (recommended):
- * ```tsx
- * chrome.setBreadcrumbsAppendExtension({ content: <MyBadge />, order: 10 });
- * ```
- *
+ * @deprecated Use the typed `favorite`, `badges`, or `metadata` props on `AppHeader` from
+ * `@kbn/app-header`.
  * @public
  */
 export interface ChromeBreadcrumbsAppendExtension {
@@ -43,6 +39,10 @@ export interface ChromeSetBreadcrumbsParams {
   /**
    * Declare the breadcrumbs for the project/solution type navigation in stateful.
    * Those breadcrumbs correspond to the serverless breadcrumbs declaration.
+   *
+   * @deprecated Project breadcrumb overrides are not rendered in Chrome Next and remain only for
+   * compatibility fallback back navigation. Declare hierarchy in the project navigation tree and
+   * pass explicit `back` configuration to `AppHeader`.
    */
   project?: {
     /**

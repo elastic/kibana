@@ -214,7 +214,6 @@ describe('AzureReusableConnectorForm', () => {
         cloudProvider: 'azure',
         accountType: undefined,
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
 
@@ -225,7 +224,6 @@ describe('AzureReusableConnectorForm', () => {
         cloudProvider: 'azure',
         accountType: 'single-account',
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
 
@@ -238,7 +236,6 @@ describe('AzureReusableConnectorForm', () => {
         cloudProvider: 'azure',
         accountType: 'organization-account',
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
 

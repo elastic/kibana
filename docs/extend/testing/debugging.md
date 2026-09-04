@@ -9,7 +9,7 @@ This page lists the fastest ways to debug Scout tests locally and in CI.
 ## Local runs [scout-debugging-local]
 
 - If your tests use the `log` fixture, messages are printed in local console output.
-- For more verbose output, set `SCOUT_LOG_LEVEL=debug`.
+- For more verbose output, set `SCOUT_LOG_LEVEL=debug`. See [Logging](./logging.md) for the full picture, including how to inspect Kibana/ES/browser/UIAM logs for serverless projects in MKI.
 
 ### Open the HTML report [open-the-scout-report]
 

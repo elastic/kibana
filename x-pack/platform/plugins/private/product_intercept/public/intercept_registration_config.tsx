@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Intercept } from '@kbn/intercepts-plugin/public';
 import type { PromptTelemetry } from './telemetry';
@@ -108,37 +115,78 @@ export const productInterceptRegistrationConfig = ({
 
   const completionInterceptStep = {
     id: 'completion',
-    title: i18n.translate('productIntercept.prompter.step.completion.title', {
-      defaultMessage: 'Thanks for the feedback!',
-    }),
-    content: ({ responseMap }) => {
-      // pass along user response as params on the survey url
+    title: (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
+        <EuiFlexItem grow={false} component="span">
+          <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden />
+        </EuiFlexItem>
+        <EuiFlexItem component="span">
+          <FormattedMessage
+            id="productIntercept.prompter.step.completion.title"
+            defaultMessage="Thanks for the feedback!"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    content: ({
+      onValue,
+      responseMap,
+    }: {
+      onValue: (v: unknown) => void;
+      responseMap: Record<string, unknown>;
+    }) => {
+      const href = new URL(surveyUrl.toString());
       Object.entries(responseMap).forEach(([key, value]) => {
         if (key === satisfactionInterceptStep.id || key === easeInterceptStep.id) {
-          surveyUrl.searchParams.set(key, String(value));
+          href.searchParams.set(key, String(value));
         }
       });
 
       return (
-        <EuiText size="s" key="productInterceptPrompterCompletionContent">
-          <FormattedMessage
-            id="productIntercept.prompter.step.completion.content"
-            defaultMessage="If you'd like to participate in future research to help improve {productOffering}, <link>click here</link>."
-            values={{
-              productOffering,
-              link: (chunks) => (
-                <EuiLink
-                  external
-                  target="_blank"
-                  href={surveyUrl.toString()}
-                  data-test-subj="productInterceptSurveyLink"
-                >
-                  {chunks}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="empty" size="m" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="productIntercept.prompter.step.completion.body"
+                    defaultMessage="Want to help shape the future of Elastic? Sign up to join our research panel!"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="success"
+                      iconType="external"
+                      iconSide="right"
+                      href={href.toString()}
+                      target="_blank"
+                      data-test-subj="productInterceptSurveyLink"
+                    >
+                      <FormattedMessage
+                        id="productIntercept.prompter.step.completion.participateButton"
+                        defaultMessage="Participate"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty color="success" onClick={() => onValue(null)}>
+                      <FormattedMessage
+                        id="productIntercept.prompter.step.completion.maybeLaterButton"
+                        defaultMessage="Maybe later"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     },
   } satisfies Extract<Intercept['steps'][number], { id: 'completion' }>;

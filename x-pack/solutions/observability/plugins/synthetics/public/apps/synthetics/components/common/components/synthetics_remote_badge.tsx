@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { RemoteMonitorInfo } from '../../../../../../common/runtime_types';
+import { getRemoteBadgeLabel } from '../../../utils/remote/remote_origin_copy';
 
 export function SyntheticsRemoteBadge({ remote }: { remote?: RemoteMonitorInfo }) {
   if (!remote) {
@@ -18,15 +18,14 @@ export function SyntheticsRemoteBadge({ remote }: { remote?: RemoteMonitorInfo }
   return (
     <EuiToolTip content={remote.kibanaUrl || undefined} title={remote.remoteName}>
       <EuiBadge
+        tabIndex={0}
         color="default"
         data-test-subj="syntheticsRemoteBadge"
         onMouseDown={(e: React.MouseEvent) => {
           e.stopPropagation();
         }}
       >
-        {i18n.translate('xpack.synthetics.remoteBadge.label', {
-          defaultMessage: 'Remote',
-        })}
+        {getRemoteBadgeLabel()}
       </EuiBadge>
     </EuiToolTip>
   );

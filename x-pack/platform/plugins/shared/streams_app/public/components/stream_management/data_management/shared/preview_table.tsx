@@ -18,6 +18,7 @@ import {
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
   EuiToolTip,
   euiScreenReaderOnly,
   useEuiTheme,
@@ -81,7 +82,7 @@ function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
             values: { rowIndex: rowIndex + 1 },
           }
         )}
-        iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
+        iconType={selectedRowIndex === rowIndex ? 'minimize' : 'maximize'}
         color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
       />
     </EuiToolTip>
@@ -331,7 +332,16 @@ export function PreviewTable({
       {
         id: 'selection',
         width: 36,
-        headerCellRender: () => null,
+        headerCellRender: () => (
+          <EuiScreenReaderOnly>
+            <span>
+              {i18n.translate(
+                'xpack.streams.resultPanel.euiDataGrid.preview.rowSelectionColumnHeader',
+                { defaultMessage: 'Row selection' }
+              )}
+            </span>
+          </EuiScreenReaderOnly>
+        ),
         rowCellRender: ({ rowIndex, setCellProps }) => (
           <RowSelectionCell
             rowIndex={rowIndex}
@@ -514,6 +524,7 @@ export function PreviewTable({
 
   return (
     <EuiDataGrid
+      data-test-subj="streamsAppPreviewDataGrid"
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
         defaultMessage: 'Preview',
       })}

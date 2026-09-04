@@ -94,6 +94,13 @@ export function createGetApmCorrelationsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getApmCorrelationsSchema> = {
     id: OBSERVABILITY_GET_APM_CORRELATIONS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get APM Correlations',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Analyzes APM transaction correlations to identify which dimensions are most associated with slow, failed, or throughput-anomalous transactions, or which infrastructure entities host slow transactions.
 
 This is a "unified correlations" style tool intended to support investigations where you already have a scoped set of transactions and want to find what stands out within them.

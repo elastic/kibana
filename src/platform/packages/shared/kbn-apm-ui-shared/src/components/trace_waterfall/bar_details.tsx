@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../utils';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import { ColdStartBadge, SpanLinksBadge, SyncBadge } from './badges';
+import { ColdStartBadge, SpanLinksBadge, SyncBadge, TokenUsageBadges } from './badges';
 import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
@@ -150,6 +150,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             {asDuration(item.duration)}
           </EuiBadge>
         </EuiFlexItem>
+        <TokenUsageBadges inputTokens={item.inputTokens} outputTokens={item.outputTokens} />
         {item.status && itemStatusIsFailureOrError && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
@@ -217,7 +218,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 'aria-label': ORPHAN_TITLE,
               }}
               color={theme.euiTheme.colors.danger}
-              type="unlink"
+              type="linkSlash"
               title={ORPHAN_TITLE}
               content={ORPHAN_CONTENT}
             />

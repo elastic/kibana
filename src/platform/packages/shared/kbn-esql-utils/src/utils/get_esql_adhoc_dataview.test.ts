@@ -94,6 +94,22 @@ describe('getESQLAdHocDataview', () => {
 
       expect(result.id).toBe('explicit-id');
     });
+
+    it('should generate different IDs for different project routing', async () => {
+      const query = uniqueQuery();
+      const originResult = await getESQLAdHocDataview({
+        dataViewsService,
+        query,
+        projectRouting: '_alias:_origin',
+      });
+      const allProjectsResult = await getESQLAdHocDataview({
+        dataViewsService,
+        query,
+        projectRouting: '_alias:*',
+      });
+
+      expect(originResult.id).not.toBe(allProjectsResult.id);
+    });
   });
 
   describe('DataView spec', () => {
@@ -106,6 +122,22 @@ describe('getESQLAdHocDataview', () => {
       expect(dataViewsService.create).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'my_index',
+          type: ESQL_TYPE,
+        }),
+        false
+      );
+    });
+
+    it('should ignore coordinator lookup join targets when extracting the index pattern', async () => {
+      await getESQLAdHocDataview({
+        dataViewsService,
+        query:
+          'FROM "my_remote_cluster:customer_orders" | LOOKUP JOIN _coordinator:customer_profiles_lookup ON customer_id',
+      });
+
+      expect(dataViewsService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'my_remote_cluster:customer_orders',
           type: ESQL_TYPE,
         }),
         false
@@ -161,6 +193,22 @@ describe('getESQLAdHocDataview', () => {
       );
     });
 
+    it('should forward effective project routing to the time field route', async () => {
+      const http = createMockHttp('@timestamp');
+      const query = uniqueQuery();
+
+      await getESQLAdHocDataview({
+        dataViewsService,
+        query,
+        http,
+        projectRouting: '_alias:*',
+      });
+
+      expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
+        body: JSON.stringify({ query, projectRouting: '_alias:*' }),
+      });
+    });
+
     it('should leave timeFieldName undefined when no http is provided', async () => {
       await getESQLAdHocDataview({
         dataViewsService,
@@ -208,6 +256,26 @@ describe('getESQLAdHocDataview', () => {
 
       await getESQLAdHocDataview({ dataViewsService, query: uniqueQuery('a'), http });
       await getESQLAdHocDataview({ dataViewsService, query: uniqueQuery('b'), http });
+
+      expect(http.post).toHaveBeenCalledTimes(2);
+    });
+
+    it('should make separate HTTP calls for different project routing', async () => {
+      const http = createMockHttp('@timestamp');
+      const query = uniqueQuery();
+
+      await getESQLAdHocDataview({
+        dataViewsService,
+        query,
+        http,
+        projectRouting: '_alias:_origin',
+      });
+      await getESQLAdHocDataview({
+        dataViewsService,
+        query,
+        http,
+        projectRouting: '_alias:*',
+      });
 
       expect(http.post).toHaveBeenCalledTimes(2);
     });

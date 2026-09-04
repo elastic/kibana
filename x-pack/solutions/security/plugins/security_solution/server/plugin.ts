@@ -7,7 +7,13 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger, LogMeta } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  Logger,
+  LogMeta,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -16,7 +22,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
-import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
@@ -102,6 +108,7 @@ import {
   securityRuleTypeFieldMap,
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 import type { CreateSecurityRuleTypeWrapperProps } from './lib/detection_engine/rule_types/types';
+import { calculateRulesAuthz } from './lib/detection_engine/rule_management/authz';
 
 import { RequestContextFactory } from './request_context_factory';
 
@@ -168,6 +175,10 @@ import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
 import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/alert_analysis_workflow/install';
+import { SecuritySolutionEventBus } from './events/event_bus';
+import { registerSecurityWorkflowTriggers } from './workflows/triggers';
+import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { forwardCasesAlertStatusToSecuritySolution } from './workflows/triggers/cases_alert_status_bridge';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -207,6 +218,11 @@ export class Plugin implements ISecuritySolutionPlugin {
   private usageCollection?: UsageCollectionSetup;
 
   private isServerless: boolean;
+  private securityEventBus?: SecuritySolutionEventBus;
+
+  /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
+  private defendCpsEnabled = false;
+  private platformCpsEnabled = false;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -276,6 +292,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       logger,
       experimentalFeatures,
+      this.productFeaturesService,
       plugins.ml,
       {
         config: this.config,
@@ -321,6 +338,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
+    this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
+    this.defendCpsEnabled =
+      this.platformCpsEnabled && experimentalFeatures.defendCrossProjectSearch;
+
     initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
       encryptedSavedObjects: plugins.encryptedSavedObjects,
@@ -348,6 +369,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
         entityAnalyticsConfig: config.entityAnalytics,
+        experimentalFeatures,
         telemetry: core.analytics,
       });
       if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
@@ -523,7 +545,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
     registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
-    plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
+    plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();
@@ -563,6 +585,19 @@ export class Plugin implements ISecuritySolutionPlugin {
       secondaryAlias: undefined,
     });
 
+    const osquery = plugins.osquery;
+    const getOsqueryResponseActionsAuthzChecker: CreateSecurityRuleTypeWrapperProps['getOsqueryResponseActionsAuthzChecker'] =
+      osquery
+        ? (request) => (actionParams) =>
+            osquery?.checkResponseActionAuthz(request, actionParams) ?? Promise.resolve()
+        : undefined;
+
+    // Resolves the acting user's detection-rules authorization for a request.
+    const getRulesAuthz: CreateSecurityRuleTypeWrapperProps['getRulesAuthz'] = async (request) => {
+      const [coreStart] = await core.getStartServices();
+      return calculateRulesAuthz({ coreStart, request });
+    };
+
     const securityRuleTypeOptions = {
       lists: plugins.lists,
       docLinks: core.docLinks,
@@ -589,6 +624,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         const [, startPlugins] = await core.getStartServices();
         return startPlugins.entityStore;
       },
+      getRulesAuthz,
+      getOsqueryResponseActionsAuthzChecker,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -624,6 +661,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
     };
 
+    this.securityEventBus = plugins.workflowsExtensions
+      ? new SecuritySolutionEventBus()
+      : undefined;
+
     // TODO We need to get the endpoint routes inside of initRoutes
     const enableDataGeneratorRoutes =
       pluginContext.env.mode.dev || plugins.cloud.isElasticStaffOwned === true;
@@ -645,7 +686,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      this.platformCpsEnabled,
+      this.securityEventBus
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -811,6 +854,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions);
+      registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 
@@ -850,6 +894,21 @@ export class Plugin implements ISecuritySolutionPlugin {
       void installSecurityAlertAnalysisWorkflowAndMarkReady({
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
+      });
+    }
+
+    if (this.securityEventBus && plugins.workflowsExtensions) {
+      registerSecurityWorkflowEventBridge(
+        this.securityEventBus,
+        plugins.workflowsExtensions,
+        logger
+      );
+    }
+
+    if (this.securityEventBus && plugins.cases) {
+      const securityEventBus = this.securityEventBus;
+      plugins.cases.getCasesEventBus().onAlertStatusChanged(({ request, payload }) => {
+        forwardCasesAlertStatusToSecuritySolution(securityEventBus, logger, request, payload);
       });
     }
 
@@ -925,6 +984,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       esClient: core.elasticsearch.client.asInternalUser,
+      clusterClient: core.elasticsearch.client,
+      dataStart: plugins.data,
+      cpsEnabled: this.defendCpsEnabled,
       productFeaturesService,
       savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,
@@ -1077,11 +1139,17 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (registerIngestCallback) {
       registerIngestCallback(
         'packagePolicyCreate',
-        async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
+        async (
+          packagePolicy: NewPackagePolicy,
+          _soClient: SavedObjectsClientContract,
+          esClient: ElasticsearchClient,
+          context?: RequestHandlerContext
+        ) => {
           await getCriblPackagePolicyPostCreateOrUpdateCallback(
-            core.elasticsearch.client.asInternalUser,
             packagePolicy,
-            this.logger
+            this.logger,
+            context,
+            esClient
           );
           return packagePolicy;
         }
@@ -1089,11 +1157,17 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       registerIngestCallback(
         'packagePolicyUpdate',
-        async (packagePolicy: UpdatePackagePolicy): Promise<UpdatePackagePolicy> => {
+        async (
+          packagePolicy: UpdatePackagePolicyWithId,
+          _soClient: SavedObjectsClientContract,
+          esClient: ElasticsearchClient,
+          context?: RequestHandlerContext
+        ) => {
           await getCriblPackagePolicyPostCreateOrUpdateCallback(
-            core.elasticsearch.client.asInternalUser,
             packagePolicy,
-            this.logger
+            this.logger,
+            context,
+            esClient
           );
           return packagePolicy;
         }
@@ -1151,5 +1225,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();
+    this.securityEventBus?.removeAllListeners();
   }
 }

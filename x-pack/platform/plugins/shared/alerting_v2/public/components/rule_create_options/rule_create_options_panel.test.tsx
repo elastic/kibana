@@ -38,7 +38,7 @@ describe('RuleCreateOptionsPanel', () => {
     ).toBeInTheDocument();
   });
 
-  it('calls onCreateEsqlRule when the "Create ES|QL rule" card is clicked', () => {
+  it('calls onCreateEsqlRule when the "ES|QL rule" card is clicked', () => {
     renderPanel();
 
     fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
@@ -46,7 +46,7 @@ describe('RuleCreateOptionsPanel', () => {
     expect(onCreateEsqlRule).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onCreateWithAgent when the "Create with AI Agent" card is clicked', () => {
+  it('calls onCreateWithAgent when the "With AI Agent" card is clicked', () => {
     renderPanel();
 
     fireEvent.click(screen.getByTestId('createWithAgentCard'));
@@ -131,7 +131,7 @@ describe('RuleCreateOptionsPanel', () => {
     const agentCard = screen.getByTestId('createWithAgentCard');
     expect(agentCard).toHaveAttribute('aria-disabled', 'true');
 
-    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+    fireEvent.click(screen.getByRole('button', { name: /with ai agent/i }));
     expect(onCreateWithAgent).not.toHaveBeenCalled();
 
     fireEvent.mouseOver(agentCard);

@@ -9,16 +9,30 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
 import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
-import type { ConnectorSpec } from '@kbn/connector-specs';
-import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
+import type {
+  ActionContext,
+  BuildContext,
+  ConnectorNetworkSettings,
+  ConnectorSpec,
+} from '@kbn/connector-specs';
+import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
+import { LeasePool } from '../lease_pool';
+import { createConnectorNetworkSettings } from './create_connector_network_settings';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 describe('generateExecutorFunction', () => {
   const connectorId = 'test-connector-id';
 
   let logger: MockedLogger;
   let mockGetAxiosInstanceWithAuth: jest.MockedFunction<GetAxiosInstanceWithAuthFn>;
+  let mockGetCredential: jest.MockedFunction<GetCredentialFn>;
+  let mockCredential: { getAuthHeaders: jest.Mock };
   let mockAxiosInstance: object;
   let mockHandler: jest.Mock;
+  let fakeLeasePool: LeasePool<unknown>;
+  let mockNetwork: ConnectorNetworkSettings;
 
   const makeExecOptions = (params: Record<string, unknown>) =>
     ({
@@ -32,6 +46,7 @@ describe('generateExecutorFunction', () => {
       signal: undefined,
       authMode: undefined,
       profileUid: undefined,
+      connectorVersion: 'WzEsMV0=',
       // satisfies the type but unused by the function under test
       services: {} as never,
       configurationUtilities: {} as never,
@@ -43,23 +58,43 @@ describe('generateExecutorFunction', () => {
     logger = loggingSystemMock.createLogger();
     mockAxiosInstance = { get: jest.fn() };
     mockGetAxiosInstanceWithAuth = jest.fn().mockResolvedValue(mockAxiosInstance);
+    mockCredential = {
+      getAuthHeaders: jest.fn().mockResolvedValue({ Authorization: 'Bearer secret' }),
+    };
+    mockGetCredential = jest.fn().mockReturnValue(mockCredential);
     mockHandler = jest.fn().mockResolvedValue({ result: 'ok' });
+    fakeLeasePool = new LeasePool<unknown>();
+    mockNetwork = {
+      ensureUriAllowed: jest.fn(),
+      ensureHostnameAllowed: jest.fn(),
+      getSslSettings: jest.fn(),
+      getProxySettings: jest.fn(),
+      getCustomHostSettings: jest.fn(),
+      getResponseSettings: jest.fn(),
+    };
   });
 
   const makeActions = (handler: jest.Mock = mockHandler): ConnectorSpec['actions'] => ({
     testAction: {
       isTool: true,
+      scope: 'read',
       input: {} as never,
       handler,
     },
   });
 
+  const makeExecutor = (handler: jest.Mock = mockHandler) =>
+    generateExecutorFunction({
+      actions: makeActions(handler),
+      getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      getCredential: mockGetCredential,
+      getClientLeasePool: () => fakeLeasePool,
+      networkSettings: mockNetwork,
+    });
+
   describe('successful execution', () => {
     it('returns status ok with handler result as data', async () => {
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       const result = await executor(
         makeExecOptions({ subAction: 'testAction', subActionParams: { foo: 'bar' } })
@@ -69,10 +104,7 @@ describe('generateExecutorFunction', () => {
     });
 
     it('passes subActionParams to the handler', async () => {
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       const subActionParams = { message: 'hello', count: 3 };
       await executor(makeExecOptions({ subAction: 'testAction', subActionParams }));
@@ -80,20 +112,23 @@ describe('generateExecutorFunction', () => {
       expect(mockHandler).toHaveBeenCalledWith(expect.anything(), subActionParams);
     });
 
-    it('passes config, secrets, and axios instance in the handler context', async () => {
+    it('passes config, secrets, axios instance, and getClient in the handler context', async () => {
       const config = { url: 'https://example.com' };
       const secrets = { token: 'secret' };
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
       await executor({ ...opts, config, secrets });
 
       expect(mockHandler).toHaveBeenCalledWith(
-        { log: logger, client: mockAxiosInstance, config, secrets },
+        expect.objectContaining({
+          log: logger,
+          client: mockAxiosInstance,
+          config,
+          secrets,
+          getClient: expect.any(Function),
+        }),
         {}
       );
     });
@@ -101,10 +136,7 @@ describe('generateExecutorFunction', () => {
     it('returns empty object as data when handler returns null', async () => {
       mockHandler.mockResolvedValue(null);
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       const result = await executor(
         makeExecOptions({ subAction: 'testAction', subActionParams: {} })
@@ -116,10 +148,7 @@ describe('generateExecutorFunction', () => {
     it('returns empty object as data when handler returns undefined', async () => {
       mockHandler.mockResolvedValue(undefined);
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       const result = await executor(
         makeExecOptions({ subAction: 'testAction', subActionParams: {} })
@@ -135,10 +164,7 @@ describe('generateExecutorFunction', () => {
       const authMode = 'basic' as never;
       const profileUid = 'profile-123';
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       await executor({
         ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
@@ -161,10 +187,7 @@ describe('generateExecutorFunction', () => {
     });
 
     it('passes fetchOptions max_content_length to getAxiosInstanceWithAuth', async () => {
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       await executor(
         makeExecOptions({
@@ -182,12 +205,779 @@ describe('generateExecutorFunction', () => {
     });
   });
 
-  describe('unrecognized subAction', () => {
-    it('throws and logs an error for an unknown subAction', async () => {
+  describe('ctx.getClient - build receives networkSettings from generateExecutorFunction', () => {
+    it('passes networkSettings to clientType.build', async () => {
+      const fakeClient = { id: 'x' };
+      const buildSpy = jest.fn().mockResolvedValue(fakeClient);
+      const fakeClientType = {
+        id: 'typed',
+        build: buildSpy,
+        terminate: jest.fn(),
+      };
+
+      const executor = generateExecutorFunction({
+        actions: {
+          testAction: {
+            isTool: true,
+            scope: 'read',
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
+              return {};
+            }),
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        clientTypes: { typed: fakeClientType },
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(buildSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ networkSettings: mockNetwork })
+      );
+      expect(buildSpy.mock.calls[0][0]).not.toHaveProperty('axiosInstance');
+    });
+
+    it('passes credential to clientType.build from getCredential', async () => {
+      const fakeClient = { id: 'x' };
+      const buildSpy = jest.fn().mockResolvedValue(fakeClient);
+      const fakeClientType = {
+        id: 'typed',
+        build: buildSpy,
+        terminate: jest.fn(),
+      };
+
+      const executor = generateExecutorFunction({
+        actions: {
+          testAction: {
+            isTool: true,
+            scope: 'read',
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
+              return {};
+            }),
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        clientTypes: { typed: fakeClientType },
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockGetCredential).toHaveBeenCalledWith({
+        connectorId,
+        secrets: { token: 'secret' },
+        connectorTokenClient: undefined,
+        authMode: undefined,
+        profileUid: undefined,
+      });
+      expect(buildSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credential: mockCredential,
+        })
+      );
+
+      const buildContext = buildSpy.mock.calls[0][0] as { credential: typeof mockCredential };
+      await buildContext.credential.getAuthHeaders();
+      expect(mockCredential.getAuthHeaders).toHaveBeenCalled();
+    });
+  });
+
+  describe('ctx.getClient — lease receives clientType.terminate as 3rd arg', () => {
+    it('passes a clientType termination callback to pool.lease', async () => {
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      const fakeClient = { id: 'x' };
+      const fakeClientType = {
+        id: 'typed',
+        build: jest.fn().mockResolvedValue(fakeClient),
+        terminate: terminateSpy,
+      };
+
+      const leaseSpy = jest.spyOn(fakeLeasePool, 'lease');
+
+      const executor = generateExecutorFunction({
+        actions: {
+          testAction: {
+            isTool: true,
+            scope: 'read',
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
+              return {};
+            }),
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        clientTypes: { typed: fakeClientType },
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(leaseSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Function),
+        expect.any(Function)
+      );
+    });
+
+    it('calls terminate with the client type instance as its receiver', async () => {
+      const fakeClient = { id: 'x' };
+      class StatefulClientType {
+        public readonly id = 'mcp';
+        public readonly terminated: unknown[] = [];
+
+        public async build(): Promise<unknown> {
+          return fakeClient;
+        }
+
+        public async terminate(client: unknown): Promise<void> {
+          this.terminated.push(client);
+        }
+      }
+      const fakeClientType = new StatefulClientType();
+
+      const executor = generateExecutorFunction({
+        actions: {
+          testAction: {
+            isTool: true,
+            scope: 'read',
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('mcp');
+              return {};
+            }),
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+      await fakeLeasePool.evict(connectorId);
+
+      expect(fakeClientType.terminated).toEqual([fakeClient]);
+    });
+  });
+
+  describe('ctx.getClient (pooled client access)', () => {
+    type GetClient = (id: string) => Promise<unknown>;
+
+    it('builds client once for N sequential requests (reuse)', async () => {
+      let buildCount = 0;
+      const fakeClient = { id: 'fake-client' };
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn(async () => {
+          buildCount++;
+          return fakeClient;
+        }),
+        terminate: jest.fn(),
+      };
+
+      const capturedGetClients: GetClient[] = [];
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        capturedGetClients.push(ctx.getClient as unknown as GetClient);
+        return {};
+      });
+
+      const pool = new LeasePool<unknown>();
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { fake: fakeClientType },
+      });
+
+      // 3 sequential calls with same connectorId
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      // Request the client through each captured getClient
+      await Promise.all(capturedGetClients.map((getClient) => getClient('fake')));
+
+      expect(buildCount).toBe(1);
+      expect(mockGetCredential).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not build when no client is requested (untouched → no build)', async () => {
+      let buildCount = 0;
+      const fakeClientType = {
+        id: 'unused',
+        build: jest.fn(async () => {
+          buildCount++;
+          return {};
+        }),
+        terminate: jest.fn(),
+      };
+
+      const pool = new LeasePool<unknown>();
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { unused: fakeClientType },
       });
+
+      // Call executor but handler never calls ctx.getClient
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(buildCount).toBe(0);
+      expect(mockGetCredential).not.toHaveBeenCalled();
+    });
+
+    it('surfaces a build rejection from getClient as a thrown FRAMEWORK-tagged error', async () => {
+      const fakeClientType = {
+        id: 'failing',
+        build: jest.fn(async () => {
+          throw new Error('build exploded');
+        }),
+        terminate: jest.fn(),
+      };
+
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('failing'); // triggers build
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { failing: fakeClientType },
+      });
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.FRAMEWORK);
+    });
+
+    it('returns a non-retryable USER error when clientType.isUserError returns true', async () => {
+      const buildError = new Error('config.serverUrl is required');
+      const fakeClientType = {
+        id: 'typed',
+        build: jest.fn().mockRejectedValue(buildError),
+        terminate: jest.fn().mockResolvedValue(undefined),
+        isUserError: jest.fn().mockReturnValue(true),
+      };
+
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('typed');
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { typed: fakeClientType },
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toMatchObject({
+        status: 'error',
+        message: 'config.serverUrl is required',
+        retry: false,
+        errorSource: TaskErrorSource.USER,
+      });
+    });
+
+    it('returns an MCP 401 connect failure as a non-retryable USER error', async () => {
+      const mcpError = Object.assign(
+        new Error('Unauthorized error: Error POSTing to endpoint: Unauthorized'),
+        { httpStatus: 401 }
+      );
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn().mockRejectedValue(mcpError),
+        terminate: jest.fn().mockResolvedValue(undefined),
+        isUserError: (err: unknown) => {
+          const e = err as { httpStatus?: number };
+          return (
+            typeof e?.httpStatus === 'number' && (e.httpStatus === 401 || e.httpStatus === 403)
+          );
+        },
+      };
+
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('mcp');
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toMatchObject({
+        status: 'error',
+        message: 'Unauthorized error: Error POSTing to endpoint: Unauthorized',
+        retry: false,
+        errorSource: TaskErrorSource.USER,
+      });
+    });
+
+    it('MCP 500 connect failure surfaces with FRAMEWORK tag', async () => {
+      const mcpError = Object.assign(new Error('Streamable HTTP error: Internal Server Error'), {
+        httpStatus: 500,
+      });
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn().mockRejectedValue(mcpError),
+        terminate: jest.fn().mockResolvedValue(undefined),
+        isUserError: (err: unknown) => {
+          const e = err as { httpStatus?: number };
+          return (
+            typeof e?.httpStatus === 'number' && (e.httpStatus === 401 || e.httpStatus === 403)
+          );
+        },
+      };
+
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('mcp');
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.FRAMEWORK);
+    });
+
+    it('returns an allowlist (SSRF) denial as a non-retryable USER error', async () => {
+      // Real network seam over a config that denies every host, i.e. the connector's
+      // serverUrl is no longer on xpack.actions.allowedHosts (tightened after save).
+      const denyingConfigUtils = {
+        ensureUriAllowed: (uri: string) => {
+          throw new Error(
+            `target url "${uri}" is not added to the Kibana config xpack.actions.allowedHosts`
+          );
+        },
+        ensureHostnameAllowed: (host: string) => {
+          throw new Error(
+            `target hostname "${host}" is not added to the Kibana config xpack.actions.allowedHosts`
+          );
+        },
+      } as unknown as ActionsConfigurationUtilities;
+      const network = createConnectorNetworkSettings(denyingConfigUtils);
+
+      const fakeClientType = {
+        id: 'mcp',
+        // build runs the allowlist check at connect time, like mcpClientType does.
+        build: jest.fn(async (ctx: BuildContext) => {
+          ctx.networkSettings.ensureUriAllowed('http://denied.example');
+          return {};
+        }),
+        terminate: jest.fn().mockResolvedValue(undefined),
+        // No client-level isUserError on purpose: an allowlist denial must be
+        // classified by the framework seam, not by each client string-matching a message.
+      };
+
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('mcp');
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: network,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toMatchObject({
+        status: 'error',
+        retry: false,
+        errorSource: TaskErrorSource.USER,
+      });
+    });
+
+    it('classifies an unwrapped client connection error as a framework error', async () => {
+      const connectionError = new Error('client connection failed');
+      const fakeClientType = {
+        id: 'wrapped',
+        build: jest.fn().mockRejectedValue(connectionError),
+        terminate: jest.fn().mockResolvedValue(undefined),
+      };
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('wrapped');
+        return {};
+      });
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { wrapped: fakeClientType },
+      });
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((error) => error);
+
+      expect(thrown).toMatchObject({ message: 'client connection failed' });
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.FRAMEWORK);
+    });
+
+    it('returns {status:error} for an untagged handler error — no getClient involved (regression)', async () => {
+      mockHandler.mockRejectedValue(new Error('direct handler failure'));
+
+      const result = await makeExecutor()(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'direct handler failure',
+        actionId: connectorId,
+      });
+    });
+
+    it('surfaces a request for an unknown client type id as an error result', async () => {
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('nope');
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: {},
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toMatchObject({
+        status: 'error',
+        message: '[Action][ExternalService] Unknown client type nope.',
+      });
+    });
+
+    it('distinct connectorIds → distinct pool entries (isolation)', async () => {
+      let buildCount = 0;
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn(async () => {
+          buildCount++;
+          return { buildNumber: buildCount };
+        }),
+        terminate: jest.fn(),
+      };
+
+      const pool = new LeasePool<unknown>();
+      const capturedGetClients: GetClient[] = [];
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        capturedGetClients.push(ctx.getClient as unknown as GetClient);
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { fake: fakeClientType },
+      });
+
+      const makeOptsFor = (id: string) =>
+        ({
+          ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
+          actionId: id,
+        } as Parameters<typeof executor>[0]);
+
+      await executor(makeOptsFor('connector-1'));
+      await executor(makeOptsFor('connector-2'));
+
+      const [c1, c2] = await Promise.all(capturedGetClients.map((getClient) => getClient('fake')));
+
+      expect(buildCount).toBe(2);
+      expect(c1).not.toBe(c2);
+    });
+
+    it.each([
+      ['connector revisions', { connectorVersion: 'version-a' }, { connectorVersion: 'version-b' }],
+      [
+        'auth profiles',
+        {
+          secrets: { authType: 'oauth_authorization_code' },
+          authMode: 'per-user' as const,
+          profileUid: 'user-a',
+        },
+        {
+          secrets: { authType: 'oauth_authorization_code' },
+          authMode: 'per-user' as const,
+          profileUid: 'user-b',
+        },
+      ],
+    ])('does not reuse clients across different %s', async (_identityPart, first, second) => {
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn().mockResolvedValue({}),
+        terminate: jest.fn(),
+      };
+      const capturedGetClients: GetClient[] = [];
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        capturedGetClients.push(ctx.getClient as unknown as GetClient);
+        return {};
+      });
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { fake: fakeClientType },
+      });
+
+      await executor({
+        ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
+        ...first,
+      });
+      await executor({
+        ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
+        ...second,
+      });
+      await Promise.all(capturedGetClients.map((getClient) => getClient('fake')));
+
+      expect(fakeClientType.build).toHaveBeenCalledTimes(2);
+    });
+
+    it('reuses clients for the same connector identity accessed from different spaces', async () => {
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn().mockResolvedValue({}),
+        terminate: jest.fn(),
+      };
+      const capturedGetClients: GetClient[] = [];
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        capturedGetClients.push(ctx.getClient as unknown as GetClient);
+        return {};
+      });
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { fake: fakeClientType },
+      });
+
+      // Execute the same connector from two different spaces — no spaceId in identity so the
+      // pool entry should be reused.
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+      await Promise.all(capturedGetClients.map((getClient) => getClient('fake')));
+
+      expect(fakeClientType.build).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not build a per-user client without a profile UID', async () => {
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn().mockResolvedValue({}),
+        terminate: jest.fn(),
+      };
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('fake');
+        return {};
+      });
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        clientTypes: { fake: fakeClientType },
+      });
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
+        secrets: { authType: 'oauth_authorization_code' },
+        authMode: 'per-user',
+      });
+
+      expect(result).toMatchObject({
+        status: 'error',
+        retry: false,
+        errorSource: TaskErrorSource.USER,
+      });
+      expect(fakeClientType.build).not.toHaveBeenCalled();
+    });
+
+    it('refuses to lease when a per-user auth type resolves to a shared identity', async () => {
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn().mockResolvedValue({}),
+        terminate: jest.fn(),
+      };
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('fake');
+        return {};
+      });
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        clientTypes: { fake: fakeClientType },
+      });
+
+      // `authMode` is inferred once at connector-creation time, so it can be stale or absent while
+      // the auth type in `secrets` is per-user. Leasing under a shared identity would serve one
+      // user's warm client, and its captured credential accessor, to every other user.
+      await expect(
+        executor({
+          ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
+          secrets: { authType: 'oauth_authorization_code' },
+          authMode: undefined,
+          profileUid: 'user-a',
+        })
+      ).rejects.toThrow(/is per-user but connector "test-connector-id" resolved to "shared"/);
+      expect(fakeClientType.build).not.toHaveBeenCalled();
+    });
+
+    it('shares one client when a shared auth type carries a stray per-user authMode', async () => {
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn().mockResolvedValue({}),
+        terminate: jest.fn(),
+      };
+      const capturedGetClients: GetClient[] = [];
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        capturedGetClients.push(ctx.getClient as unknown as GetClient);
+        return {};
+      });
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { fake: fakeClientType },
+      });
+
+      // The auth type is shared, so one credential serves every user and reuse is correct even
+      // though the executions carry different profile UIDs.
+      await executor({
+        ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
+        secrets: { authType: 'bearer' },
+        authMode: 'per-user',
+        profileUid: 'user-a',
+      });
+      await executor({
+        ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
+        secrets: { authType: 'bearer' },
+        authMode: 'per-user',
+        profileUid: 'user-b',
+      });
+      await Promise.all(capturedGetClients.map((getClient) => getClient('fake')));
+
+      expect(fakeClientType.build).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws a framework error when connectorVersion is missing', async () => {
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn().mockResolvedValue({}),
+        terminate: jest.fn(),
+      };
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('fake');
+        return {};
+      });
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        clientTypes: { fake: fakeClientType },
+      });
+
+      await expect(
+        executor({
+          ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
+          connectorVersion: undefined,
+        })
+      ).rejects.toThrow('Missing saved-object version');
+      expect(fakeClientType.build).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('unrecognized subAction', () => {
+    it('throws and logs an error for an unknown subAction', async () => {
+      const executor = makeExecutor();
 
       await expect(
         executor(makeExecOptions({ subAction: 'unknownAction', subActionParams: {} }))
@@ -199,10 +989,7 @@ describe('generateExecutorFunction', () => {
     });
 
     it('does not call the handler when subAction is not registered', async () => {
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       await expect(
         executor(makeExecOptions({ subAction: 'notRegistered', subActionParams: {} }))
@@ -216,10 +1003,7 @@ describe('generateExecutorFunction', () => {
     it('returns status error with the error message when handler throws an Error', async () => {
       mockHandler.mockRejectedValue(new Error('handler failed'));
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       const result = await executor(
         makeExecOptions({ subAction: 'testAction', subActionParams: {} })
@@ -239,10 +1023,7 @@ describe('generateExecutorFunction', () => {
       error.response = { headers: { 'content-length': '10485760' } };
       mockHandler.mockRejectedValue(error);
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       const result = await executor(
         makeExecOptions({ subAction: 'testAction', subActionParams: {} })
@@ -267,12 +1048,16 @@ describe('generateExecutorFunction', () => {
         actions: {
           testAction: {
             isTool: true,
+            scope: 'read' as const,
             input: {} as never,
             responseSizeHeader: 'x-resource-size',
             handler: mockHandler,
           },
         },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const result = await executor(
@@ -298,10 +1083,7 @@ describe('generateExecutorFunction', () => {
       });
       mockHandler.mockRejectedValue(error);
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       const result = await executor(
         makeExecOptions({ subAction: 'testAction', subActionParams: {} })
@@ -321,10 +1103,7 @@ describe('generateExecutorFunction', () => {
     it('logs the error message when the handler throws', async () => {
       mockHandler.mockRejectedValue(new Error('handler failed'));
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
 
@@ -334,10 +1113,7 @@ describe('generateExecutorFunction', () => {
     it('returns status error with stringified value when handler throws a non-Error', async () => {
       mockHandler.mockRejectedValue('string error');
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       const result = await executor(
         makeExecOptions({ subAction: 'testAction', subActionParams: {} })
@@ -353,14 +1129,37 @@ describe('generateExecutorFunction', () => {
     it('does not throw when handler fails — returns error result instead', async () => {
       mockHandler.mockRejectedValue(new Error('boom'));
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       await expect(
         executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }))
       ).resolves.toMatchObject({ status: 'error' });
+    });
+
+    it('returns status error with the allowedHosts message and no retry when ctx.client rejects with a policy error', async () => {
+      const policyMessage =
+        'target url "https://denied.example.com/api" is not added to the Kibana config xpack.actions.allowedHosts';
+      const policyError = new Error(policyMessage);
+
+      const denyingClient = { get: jest.fn().mockRejectedValue(policyError) };
+      mockGetAxiosInstanceWithAuth.mockResolvedValue(denyingClient as never);
+
+      mockHandler.mockImplementation(async (ctx: { client: typeof denyingClient }) => {
+        return ctx.client.get('https://denied.example.com/api');
+      });
+
+      const executor = makeExecutor();
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: policyMessage,
+        actionId: connectorId,
+      });
+      expect(result).not.toHaveProperty('retry');
     });
   });
 
@@ -370,6 +1169,7 @@ describe('generateExecutorFunction', () => {
       const actions: ConnectorSpec['actions'] = {
         [TEST_CONNECTOR_SUB_ACTION]: {
           isTool: false,
+          scope: 'read',
           input: {} as never,
           handler: testHandler,
         },
@@ -378,6 +1178,9 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions,
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const result = await executor(
@@ -396,6 +1199,7 @@ describe('generateExecutorFunction', () => {
       const actions: ConnectorSpec['actions'] = {
         [TEST_CONNECTOR_SUB_ACTION]: {
           isTool: false,
+          scope: 'read',
           input: {} as never,
           handler: testHandler,
         },
@@ -404,6 +1208,9 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions,
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const result = await executor(
@@ -424,13 +1231,16 @@ describe('generateExecutorFunction', () => {
       const handler2 = jest.fn().mockResolvedValue({ from: 'action2' });
 
       const actions: ConnectorSpec['actions'] = {
-        action1: { isTool: true, input: {} as never, handler: handler1 },
-        action2: { isTool: true, input: {} as never, handler: handler2 },
+        action1: { isTool: true, scope: 'read', input: {} as never, handler: handler1 },
+        action2: { isTool: true, scope: 'read', input: {} as never, handler: handler2 },
       };
 
       const executor = generateExecutorFunction({
         actions,
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const result1 = await executor(

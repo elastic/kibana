@@ -7,73 +7,137 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
+import type { Logger } from '@kbn/core/server';
+import type {
+  Severity,
+  SignificantEventInvestigation,
+  SignificantEventStatus,
+  TriggerFeedback,
+} from '@kbn/significant-events-schema';
 import type { EventClient } from './event_client';
+import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+
+interface SignificantEventFieldChanges {
+  status?: SignificantEventStatus;
+  severity?: Severity;
+  summary?: string;
+}
+
+export type SignificantEventTriggerFeedback = ReadonlyArray<TriggerFeedback>;
+
+/**
+ * Narrow a requested field patch to only the attributes that actually differ from the current
+ * version, so proposing the current value is a no-op and never writes a redundant version.
+ */
+const pickChangedFields = (
+  current: SignificantEventFieldChanges,
+  fields: SignificantEventFieldChanges
+): SignificantEventFieldChanges => {
+  const changed: SignificantEventFieldChanges = {};
+  if (fields.status !== undefined && fields.status !== current.status) {
+    changed.status = fields.status;
+  }
+  if (fields.severity !== undefined && fields.severity !== current.severity) {
+    changed.severity = fields.severity;
+  }
+  if (fields.summary !== undefined && fields.summary !== current.summary) {
+    changed.summary = fields.summary;
+  }
+  return changed;
+};
+
+const fieldsFromTriggerFeedback = (
+  current: SignificantEventFieldChanges,
+  triggerFeedback: SignificantEventTriggerFeedback | undefined,
+  eventId: string,
+  logger?: Logger
+): SignificantEventFieldChanges => {
+  const fields: SignificantEventFieldChanges = {};
+  const counts = new Map<TriggerFeedback['field'], number>();
+  for (const feedback of triggerFeedback ?? []) {
+    counts.set(feedback.field, (counts.get(feedback.field) ?? 0) + 1);
+  }
+
+  for (const feedback of triggerFeedback ?? []) {
+    // Multiple proposals for one field are ambiguous; ignore that field rather than choosing
+    // based on array order.
+    if (counts.get(feedback.field) !== 1) {
+      logger?.warn(
+        `Ignoring ambiguous trigger feedback for significant event "${eventId}" field "${feedback.field}"`
+      );
+      continue;
+    }
+
+    const currentValue = current[feedback.field];
+    if (currentValue !== feedback.from) {
+      logger?.warn(
+        `Ignoring stale trigger feedback for significant event "${eventId}" field "${feedback.field}"`
+      );
+      continue;
+    }
+    switch (feedback.field) {
+      case 'status':
+        fields.status = feedback.to;
+        break;
+      case 'severity':
+        fields.severity = feedback.to;
+        break;
+      case 'summary':
+        fields.summary = feedback.to;
+        break;
+    }
+  }
+  return fields;
+};
 
 export const attachInvestigationToEvent = async ({
   eventClient,
-  eventUuid,
+  eventId,
   investigation,
+  triggerFeedback,
+  logger,
 }: {
   eventClient: EventClient;
-  eventUuid: string;
+  eventId: string;
   investigation: SignificantEventInvestigation;
+  triggerFeedback?: SignificantEventTriggerFeedback;
+  logger?: Logger;
 }): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
-  const { hits } = await eventClient.findByEventUuid(eventUuid);
-  const referenced = hits[hits.length - 1];
+  const { hits } = await eventClient.findByEventId(eventId);
+  const latest = hits[hits.length - 1];
 
-  if (!referenced) {
-    return { event_uuid: eventUuid, updated: 0, ignored: 1 };
+  if (!latest) {
+    return { event_uuid: eventId, updated: 0, ignored: 1 };
   }
 
-  /**
-   * event_uuid is unique per append-only version; event_id is the stable lineage key.
-   * Resolve the true latest version for this event so pending and terminal attaches build a
-   * single chain rather than branching as siblings off the same frozen caller-supplied version.
-   * (The workflow passes the frozen inputs.context.event_uuid to both its pending and terminal
-   * steps, so without this re-resolution both writes would branch off the same old version.)
-   */
-  const { hits: lineageHits } = await eventClient.findByEventId(referenced.event_id);
-  const latest = lineageHits[lineageHits.length - 1] ?? referenced;
-
   const existing = latest.investigations ?? [];
-  const now = new Date().toISOString();
 
-  /**
-   * cancel-in-progress (keyed on event_id, max 1) guarantees only one run per event is ever
-   * active, so any *other* entry still without a `completed_at` belongs to a superseded/cancelled
-   * run that will never reach its terminal step. Stamp `completed_at` so it stops driving the
-   * "Running" UI state (hasRunningInvestigation) and the flyout's 5s poll loop. There's no status
-   * to resolve here — the workflow execution document is the source of truth for what actually
-   * happened to that run.
-   */
-  const reconciled = existing.map((entry) =>
-    entry.workflow_execution_id !== investigation.workflow_execution_id &&
-    entry.completed_at == null
-      ? { ...entry, completed_at: now }
-      : entry
-  );
-
-  // Replace-by-workflow_execution_id: callers always send the full investigation object.
-  const existingIdx = reconciled.findIndex(
+  // Replace-by-workflow_execution_id: completion events are safe to redeliver.
+  const existingIdx = existing.findIndex(
     (i) => i.workflow_execution_id === investigation.workflow_execution_id
   );
 
   let investigations: SignificantEventInvestigation[];
   if (existingIdx !== -1) {
-    investigations = reconciled.map((entry, idx) => (idx === existingIdx ? investigation : entry));
-  } else if (reconciled.length < 100) {
-    investigations = [...reconciled, investigation];
+    investigations = existing.map((entry, idx) => (idx === existingIdx ? investigation : entry));
+  } else if (existing.length < 100) {
+    investigations = [...existing, investigation];
   } else {
-    // At the schema-enforced 100-entry cap; still write any reconciliation changes but
-    // cannot append a new entry without exceeding investigations.max(100).
-    investigations = reconciled;
+    // At the schema-enforced 100-entry cap, do not exceed investigations.max(100).
+    investigations = existing;
   }
 
-  if (isEqual(investigations, existing)) {
-    return { event_uuid: eventUuid, updated: 0, ignored: 1 };
+  const changedFields = pickChangedFields(
+    latest,
+    fieldsFromTriggerFeedback(latest, triggerFeedback, eventId, logger)
+  );
+
+  // No-op only when neither the investigation list nor any reassessed field actually changed.
+  if (isEqual(investigations, existing) && Object.keys(changedFields).length === 0) {
+    return { event_uuid: latest.event_uuid, updated: 0, ignored: 1 };
   }
 
+  const now = new Date().toISOString();
   const nextEventUuid = uuidv4();
   const updatedEvent = {
     ...latest,
@@ -81,9 +145,17 @@ export const attachInvestigationToEvent = async ({
     event_uuid: nextEventUuid,
     previous_event_uuid: latest.event_uuid,
     investigations,
+    workflow_execution_id: investigation.workflow_execution_id,
+    ...changedFields,
   };
 
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
+
+  emitSignificantEventWriteTriggers({
+    eventClient,
+    significantEvent: updatedEvent,
+    priorSignificantEvent: latest,
+  });
 
   return { event_uuid: nextEventUuid, updated: 1, ignored: 0 };
 };

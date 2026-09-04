@@ -10,7 +10,7 @@
 import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 
-import globby from 'globby';
+import { globby } from 'globby';
 
 export async function getBundledNotices(packageDirectory) {
   const pattern = resolve(packageDirectory, '*{LICENSE,NOTICE}*');

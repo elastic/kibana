@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
+import type {
+  ApplicationStart,
+  FeatureFlagsStart,
+  HttpStart,
+  IUiSettingsClient,
+  NotificationsStart,
+} from '@kbn/core/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -21,6 +27,8 @@ export interface RuleFormServices {
   dataViews: DataViewsPublicPluginStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  uiSettings: IUiSettingsClient;
+  featureFlags: FeatureFlagsStart;
   lens: LensPublicStart;
   uiActions?: UiActionsStart;
   dashboard?: DashboardStart;

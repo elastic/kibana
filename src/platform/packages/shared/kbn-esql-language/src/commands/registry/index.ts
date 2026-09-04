@@ -43,6 +43,7 @@ import { setCommand } from './set';
 import { mmrCommand } from './mmr';
 import { metricsInfoCommand } from './metrics_info';
 import { tsInfoCommand } from './ts_info';
+import { highlightCommand } from './highlight';
 
 const esqlCommandRegistry = new CommandRegistry();
 
@@ -81,6 +82,7 @@ const baseCommands = [
   mmrCommand,
   metricsInfoCommand,
   tsInfoCommand,
+  highlightCommand,
 ];
 
 baseCommands.forEach((command) => {

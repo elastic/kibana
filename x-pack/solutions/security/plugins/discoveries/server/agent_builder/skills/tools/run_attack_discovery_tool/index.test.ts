@@ -7,6 +7,7 @@
 
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -60,25 +61,12 @@ const buildToolDeps = () => ({
 });
 
 const buildContext = (overrides: Partial<ToolHandlerContext> = {}): ToolHandlerContext => ({
-  attachments: {} as never,
-  callContext: { callSource: 'agent', toolCallId: 'test-tool-call-id', toolId: 'test-tool-id' },
+  ...agentBuilderMocks.tools.createHandlerContext(),
   esClient: elasticsearchClientMock.createScopedClusterClient(),
-  events: {} as never,
-  experimentalFeatures: {} as never,
   logger: loggingSystemMock.createLogger(),
   modelProvider: { getDefaultModel: mockGetDefaultModel } as never,
-  prompts: {} as never,
   request: FAKE_REQUEST,
-  resultStore: {} as never,
-  runContext: { runId: 'test-run-id', stack: [] },
-  runner: {} as never,
-  savedObjectsClient: {} as never,
-  skills: {} as never,
-  skillsStore: {} as never,
   spaceId: 'default',
-  stateManager: {} as never,
-  toolManager: {} as never,
-  toolProvider: {} as never,
   ...overrides,
 });
 

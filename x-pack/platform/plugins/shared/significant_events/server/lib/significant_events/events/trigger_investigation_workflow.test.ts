@@ -6,18 +6,10 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
+import { InvestigationUnavailableError } from '@kbn/nightshift-investigations-plugin/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { installInvestigationAgent } from '../../../memory_and_investigation/lib/investigation/install_investigation_agent';
 import { triggerInvestigationWorkflow } from './trigger_investigation_workflow';
-
-jest.mock(
-  '../../../memory_and_investigation/lib/investigation/install_investigation_agent',
-  () => ({ installInvestigationAgent: jest.fn() })
-);
-
-const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
-  typeof installInvestigationAgent
->;
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -32,33 +24,19 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
   ...overrides,
 });
 
-const createWorkflowsManagement = ({
-  workflowExists = true,
-  executionId = 'exec-abc',
-}: {
-  workflowExists?: boolean;
-  executionId?: string;
-} = {}) => ({
-  management: {
-    getWorkflow: jest
-      .fn()
-      .mockResolvedValue(
-        workflowExists
-          ? { id: 'system-significant-events-investigation', definition: 'yaml: ...' }
-          : null
-      ),
-    runWorkflow: jest.fn().mockResolvedValue(executionId),
-  },
-});
+const createNightshiftInvestigations = (
+  executionId = 'exec-abc'
+): NightshiftInvestigationsServerStart => {
+  const start = jest.fn().mockResolvedValue({ investigation_id: executionId });
+  return {
+    getInvestigationsClient: jest.fn().mockReturnValue({ start }),
+  } as unknown as NightshiftInvestigationsServerStart;
+};
 
-const createSpaces = (spaceId = 'default') => ({
-  spacesService: {
-    getSpaceId: jest.fn().mockReturnValue(spaceId),
-  },
-});
+const getStartMock = (nightshiftInvestigations: NightshiftInvestigationsServerStart) =>
+  (nightshiftInvestigations.getInvestigationsClient as jest.Mock).mock.results[0].value.start;
 
 const createRequest = () => ({} as KibanaRequest);
-const createAgentBuilder = () => ({} as never);
 const createLogger = () =>
   ({
     debug: jest.fn(),
@@ -68,33 +46,19 @@ const createLogger = () =>
   } as unknown as Logger);
 
 describe('triggerInvestigationWorkflow', () => {
-  beforeEach(() => {
-    installInvestigationAgentMock.mockResolvedValue();
-  });
-
-  it('returns the execution id when the workflow starts successfully', async () => {
+  it('returns the execution id when the investigation starts successfully', async () => {
     const event = createEvent();
-    const workflowsManagement = createWorkflowsManagement();
-    const spaces = createSpaces();
+    const nightshiftInvestigations = createNightshiftInvestigations();
 
     const result = await triggerInvestigationWorkflow({
-      workflowsManagement: workflowsManagement as never,
-      agentBuilder: createAgentBuilder(),
-      spaces: spaces as never,
+      nightshiftInvestigations,
       request: createRequest(),
       logger: createLogger(),
       event,
     });
 
     expect(result).toBe('exec-abc');
-    expect(installInvestigationAgentMock).toHaveBeenCalledWith({
-      agentBuilder: expect.anything(),
-      spaceId: 'default',
-    });
-    expect(workflowsManagement.management.runWorkflow).toHaveBeenCalledTimes(1);
-    expect(installInvestigationAgentMock.mock.invocationCallOrder[0]).toBeLessThan(
-      workflowsManagement.management.runWorkflow.mock.invocationCallOrder[0]
-    );
+    expect(nightshiftInvestigations.getInvestigationsClient).toHaveBeenCalledTimes(1);
   });
 
   it('builds the message from event title and summary', async () => {
@@ -102,61 +66,73 @@ describe('triggerInvestigationWorkflow', () => {
       title: 'High error rate',
       summary: 'Error rate spiked.',
     });
-    const workflowsManagement = createWorkflowsManagement();
+    const nightshiftInvestigations = createNightshiftInvestigations();
 
     await triggerInvestigationWorkflow({
-      workflowsManagement: workflowsManagement as never,
-      agentBuilder: createAgentBuilder(),
-      spaces: createSpaces() as never,
+      nightshiftInvestigations,
       request: createRequest(),
       logger: createLogger(),
       event,
     });
 
-    const [, , inputs] = workflowsManagement.management.runWorkflow.mock.calls[0];
-    expect(inputs.message).toBe('High error rate\n\nError rate spiked.');
+    const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
+    expect(request.message).toBe('High error rate\n\nError rate spiked.');
   });
 
   it('uses event_id as the concurrency_key', async () => {
     const event = createEvent({ event_id: 'my-slug' });
-    const workflowsManagement = createWorkflowsManagement();
+    const nightshiftInvestigations = createNightshiftInvestigations();
 
     await triggerInvestigationWorkflow({
-      workflowsManagement: workflowsManagement as never,
-      agentBuilder: createAgentBuilder(),
-      spaces: createSpaces() as never,
+      nightshiftInvestigations,
       request: createRequest(),
       logger: createLogger(),
       event,
     });
 
-    const [, , inputs] = workflowsManagement.management.runWorkflow.mock.calls[0];
-    expect(inputs.concurrency_key).toBe('my-slug');
+    const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
+    expect(request.concurrency_key).toBe('my-slug');
   });
 
-  it('includes event_uuid in the context so the workflow can attach investigations', async () => {
-    const event = createEvent({ event_uuid: 'event-42' });
-    const workflowsManagement = createWorkflowsManagement();
+  it('sets subject.id to event_id and includes event_uuid in the context', async () => {
+    const event = createEvent({ event_uuid: 'event-42', event_id: 'my-stable-id' });
+    const nightshiftInvestigations = createNightshiftInvestigations();
 
     await triggerInvestigationWorkflow({
-      workflowsManagement: workflowsManagement as never,
-      agentBuilder: createAgentBuilder(),
-      spaces: createSpaces() as never,
+      nightshiftInvestigations,
       request: createRequest(),
       logger: createLogger(),
       event,
     });
 
-    const [, , inputs] = workflowsManagement.management.runWorkflow.mock.calls[0];
-    expect(inputs.context.event_uuid).toBe('event-42');
-    expect(inputs.context.source).toBe('significant_event');
+    const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
+    expect(request.subject).toEqual({
+      type: 'significant_event',
+      id: 'my-stable-id',
+      summary: 'P99 latency climbed above 2s.',
+    });
+    expect(request.trigger_type).toBe('manual');
+    expect(request.context.event_uuid).toBe('event-42');
   });
 
-  it('returns undefined when workflowsManagement is not available', async () => {
+  it('passes the event stream_names through', async () => {
+    const event = createEvent({ stream_names: ['logs.checkout'] });
+    const nightshiftInvestigations = createNightshiftInvestigations();
+
+    await triggerInvestigationWorkflow({
+      nightshiftInvestigations,
+      request: createRequest(),
+      logger: createLogger(),
+      event,
+    });
+
+    const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
+    expect(request.stream_names).toEqual(['logs.checkout']);
+  });
+
+  it('returns undefined when nightshiftInvestigations is not available', async () => {
     const result = await triggerInvestigationWorkflow({
-      workflowsManagement: undefined,
-      agentBuilder: createAgentBuilder(),
-      spaces: createSpaces() as never,
+      nightshiftInvestigations: undefined,
       request: createRequest(),
       logger: createLogger(),
       event: createEvent(),
@@ -165,36 +141,43 @@ describe('triggerInvestigationWorkflow', () => {
     expect(result).toBeUndefined();
   });
 
-  it('returns undefined when the managed workflow is not installed', async () => {
-    const workflowsManagement = createWorkflowsManagement({ workflowExists: false });
+  it('returns undefined and logs a warning when client.start() throws InvestigationUnavailableError', async () => {
+    const start = jest
+      .fn()
+      .mockRejectedValue(
+        new InvestigationUnavailableError('Investigations are not configured in this space')
+      );
+    const nightshiftInvestigations = {
+      getInvestigationsClient: jest.fn().mockReturnValue({ start }),
+    } as unknown as NightshiftInvestigationsServerStart;
+    const logger = createLogger();
 
     const result = await triggerInvestigationWorkflow({
-      workflowsManagement: workflowsManagement as never,
-      agentBuilder: createAgentBuilder(),
-      spaces: createSpaces() as never,
+      nightshiftInvestigations,
       request: createRequest(),
-      logger: createLogger(),
+      logger,
       event: createEvent(),
     });
 
     expect(result).toBeUndefined();
-    expect(workflowsManagement.management.runWorkflow).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Investigation trigger failed')
+    );
   });
 
-  it('uses DEFAULT_SPACE_ID when spaces plugin is not available', async () => {
-    const event = createEvent();
-    const workflowsManagement = createWorkflowsManagement();
+  it('rethrows unexpected errors from client.start()', async () => {
+    const start = jest.fn().mockRejectedValue(new Error('Elasticsearch connection refused'));
+    const nightshiftInvestigations = {
+      getInvestigationsClient: jest.fn().mockReturnValue({ start }),
+    } as unknown as NightshiftInvestigationsServerStart;
 
-    await triggerInvestigationWorkflow({
-      workflowsManagement: workflowsManagement as never,
-      agentBuilder: createAgentBuilder(),
-      spaces: undefined,
-      request: createRequest(),
-      logger: createLogger(),
-      event,
-    });
-
-    const [, spaceId] = workflowsManagement.management.runWorkflow.mock.calls[0];
-    expect(spaceId).toBe('default');
+    await expect(
+      triggerInvestigationWorkflow({
+        nightshiftInvestigations,
+        request: createRequest(),
+        logger: createLogger(),
+        event: createEvent(),
+      })
+    ).rejects.toThrow('Elasticsearch connection refused');
   });
 });

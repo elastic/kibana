@@ -9,7 +9,8 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepStatus } from '@elastic/eui';
-import { EuiText, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnSuccessCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useStartServices } from '../../hooks';
 import type { Agent, RegistryPolicyTemplate } from '../../types';
@@ -71,13 +72,11 @@ export const AgentlessStepConfirmData = ({
   if (overallState === 'success') {
     return (
       <>
-        <EuiCallOut
+        <KbnSuccessCallout
           announceOnMount
-          color="success"
           title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.successText', {
             defaultMessage: 'Incoming data received from managed integration',
           })}
-          iconType="check"
         />
         <EuiSpacer size="m" />
         <NextSteps policyTemplates={policyTemplates} />
@@ -86,13 +85,11 @@ export const AgentlessStepConfirmData = ({
   } else if (overallState === 'failure') {
     return (
       <>
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
-          color="danger"
           title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.failureText', {
             defaultMessage: 'No incoming data received from managed integration',
           })}
-          iconType="warning"
         />
         <EuiSpacer size="m" />
         <EuiText>

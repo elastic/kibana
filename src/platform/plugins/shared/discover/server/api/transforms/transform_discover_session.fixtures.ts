@@ -38,7 +38,7 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
         usesAdHocDataView: true,
         kibanaSavedObjectMeta: {
           searchSourceJSON:
-            '{"query":{"language":"kuery","query":""},"index":{"id":"6972ccae5b7ff51c24c1129b58e8dc6d56649983d2bb717806063e2da57e0c20","title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp","sourceFilters":[],"type":"esql","fieldFormats":{},"runtimeFieldMap":{},"allowNoIndex":false,"name":"logs*,-logstash*,filebeat-*","allowHidden":false,"managed":false},"filter":[]}',
+            '{"query":{"language":"kuery","query":""},"index":{"id":"6972ccae5b7ff51c24c1129b58e8dc6d56649983d2bb717806063e2da57e0c20","title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp","sourceFilters":[],"fieldFormats":{},"runtimeFieldMap":{},"allowNoIndex":false,"name":"logs*,-logstash*,filebeat-*","allowHidden":false,"managed":false},"filter":[]}',
         },
         viewMode: VIEW_MODE.DOCUMENT_LEVEL,
         hideAggregatedPreview: false,
@@ -164,9 +164,6 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
                 },
               },
               filters: [],
-              query: {
-                esql: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value\n| STATS results = COUNT(*) BY `transaction.id`, timestamp = BUCKET(@timestamp, 30 minute) | sort `transaction.id` asc',
-              },
               visualization: {
                 legend: {
                   isVisible: true,
@@ -256,6 +253,7 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
 export const discoverSessionApiData: DiscoverSessionApiData = {
   title: 'all_props',
   description: 'A Discover Session with as many props as I can get.',
+  tags: [],
   tabs: [
     {
       id: 'fe157f5f-1ad8-47c9-9cb0-f9fff059aa48',
@@ -290,6 +288,8 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
         type: 'data_view_spec',
         index_pattern: 'logs*,-logstash*,filebeat-*',
         time_field: '@timestamp',
+        allow_hidden_indices: false,
+        name: 'logs*,-logstash*,filebeat-*',
       },
       view_mode: VIEW_MODE.DOCUMENT_LEVEL,
       hide_chart: false,
@@ -297,7 +297,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
       chart_interval: 'h',
-      time_restore: true,
       time_range: {
         from: 'now/d',
         to: 'now/d',
@@ -331,7 +330,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
       chart_interval: 'h',
-      time_restore: true,
       time_range: {
         from: 'now/d',
         to: 'now/d',
@@ -405,9 +403,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
               },
             },
             filters: [],
-            query: {
-              esql: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value\n| STATS results = COUNT(*) BY `transaction.id`, timestamp = BUCKET(@timestamp, 30 minute) | sort `transaction.id` asc',
-            },
             visualization: {
               legend: {
                 isVisible: true,

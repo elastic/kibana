@@ -101,7 +101,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'POST /api/agent_builder/agents defaults access-control mode to public with created_by',
+      'POST /api/agent_builder/agents defaults access-control mode to private with created_by',
       async ({ asAdmin }) => {
         const agentId = `access-control-default-agent-${Date.now()}`;
         const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
@@ -111,7 +111,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         expect(response.body).toMatchObject({
           id: agentId,
-          access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
         });
         expect(response.body.created_by).toBeDefined();
         expect(typeof response.body.created_by.username).toBe('string');
@@ -198,6 +198,8 @@ apiTest.describe(
         name: updates.name,
         description: updates.description,
       });
+      expect(response.body.updated_by).toBeDefined();
+      expect(typeof response.body.updated_by.username).toBe('string');
     });
 
     apiTest('PUT /api/agent_builder/agents/:id updates configuration', async ({ asAdmin }) => {

@@ -10,6 +10,7 @@
 import React from 'react';
 import { ToolbarSelector } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { i18n } from '@kbn/i18n';
 import type { Dimension, ParsedMetricItem } from '../../types';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../common/constants';
 import { useDimensionsSelector } from './hooks/use_dimensions_selector';
@@ -63,6 +64,9 @@ export const DimensionsSelector = ({
       searchable
       buttonLabel={buttonLabel}
       buttonTooltipContent={buttonTooltipContent}
+      popoverTitle={i18n.translate('metricsExperience.dimensionsSelector.popoverTitle', {
+        defaultMessage: 'Select dimensions',
+      })}
       popoverContentBelowSearch={popoverContentBelowSearch}
       optionMatcher={comboBoxFieldOptionMatcher}
       options={options}

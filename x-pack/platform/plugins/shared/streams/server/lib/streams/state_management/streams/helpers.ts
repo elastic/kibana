@@ -42,8 +42,13 @@ export function computeChange({
 export function classicIngestHasEsLevelChanges(
   ingest: Streams.ClassicStream.UpsertRequest['stream']['ingest']
 ) {
+  const processingItemCount =
+    'processors' in ingest.processing
+      ? ingest.processing.processors.length
+      : ingest.processing.steps.length;
+
   return (
-    (ingest.processing?.steps?.length ?? 0) > 0 ||
+    processingItemCount > 0 ||
     !isInheritLifecycle(ingest.lifecycle) ||
     Object.keys(ingest.settings ?? {}).length > 0 ||
     !isInheritFailureStore(ingest.failure_store) ||

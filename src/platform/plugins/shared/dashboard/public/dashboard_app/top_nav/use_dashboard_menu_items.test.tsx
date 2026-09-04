@@ -14,7 +14,7 @@ import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 import { dashboardContextWrapper } from '../../mocks';
-import { coreServices, shareService } from '../../services/kibana_services';
+import { coreServices, dataService, shareService } from '../../services/kibana_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
 import { BehaviorSubject } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
@@ -39,8 +39,6 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            isLabsShown: false,
-            setIsLabsShown: jest.fn(),
             maybeRedirect: jest.fn(),
           }),
         {
@@ -67,8 +65,6 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            isLabsShown: false,
-            setIsLabsShown: jest.fn(),
             maybeRedirect: jest.fn(),
           }),
         {
@@ -108,8 +104,6 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            isLabsShown: false,
-            setIsLabsShown: jest.fn(),
             maybeRedirect: jest.fn(),
           }),
         {
@@ -170,8 +164,6 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            isLabsShown: false,
-            setIsLabsShown: jest.fn(),
             maybeRedirect: jest.fn(),
           }),
         {
@@ -199,6 +191,96 @@ describe('useDashboardMenuItems', () => {
     });
   });
 
+  describe('Background search', () => {
+    const setBackgroundSearchAvailability = ({
+      storeSearchSession,
+      isBackgroundSearchEnabled,
+    }: {
+      storeSearchSession: boolean;
+      isBackgroundSearchEnabled: boolean;
+    }) => {
+      (coreServices.application.capabilities as any).dashboard_v2 = {
+        ...coreServices.application.capabilities.dashboard_v2,
+        storeSearchSession,
+      };
+      (dataService.search as any).isBackgroundSearchEnabled = isBackgroundSearchEnabled;
+    };
+
+    const renderMenuItems = () =>
+      renderHook(() => useDashboardMenuItems({ maybeRedirect: jest.fn() }), {
+        wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
+      });
+
+    test('offers the background search item in both view and edit mode when enabled', () => {
+      setBackgroundSearchAvailability({
+        storeSearchSession: true,
+        isBackgroundSearchEnabled: true,
+      });
+
+      const { result } = renderMenuItems();
+
+      expect(result.current.viewModeTopNavConfig.items!.map(({ id }) => id)).toContain(
+        'backgroundSearch'
+      );
+      expect(result.current.editModeTopNavConfig.items!.map(({ id }) => id)).toContain(
+        'backgroundSearch'
+      );
+    });
+
+    test('hides the background search item without the storeSearchSession capability', () => {
+      setBackgroundSearchAvailability({
+        storeSearchSession: false,
+        isBackgroundSearchEnabled: true,
+      });
+
+      const { result } = renderMenuItems();
+
+      expect(result.current.viewModeTopNavConfig.items!.map(({ id }) => id)).not.toContain(
+        'backgroundSearch'
+      );
+      expect(result.current.editModeTopNavConfig.items!.map(({ id }) => id)).not.toContain(
+        'backgroundSearch'
+      );
+    });
+
+    test('hides the background search item when the feature is disabled', () => {
+      setBackgroundSearchAvailability({
+        storeSearchSession: true,
+        isBackgroundSearchEnabled: false,
+      });
+
+      const { result } = renderMenuItems();
+
+      expect(result.current.viewModeTopNavConfig.items!.map(({ id }) => id)).not.toContain(
+        'backgroundSearch'
+      );
+      expect(result.current.editModeTopNavConfig.items!.map(({ id }) => id)).not.toContain(
+        'backgroundSearch'
+      );
+    });
+
+    test('opens the background search flyout when the item is run', () => {
+      setBackgroundSearchAvailability({
+        storeSearchSession: true,
+        isBackgroundSearchEnabled: true,
+      });
+
+      const { result } = renderMenuItems();
+
+      const backgroundSearchItem = result.current.viewModeTopNavConfig.items!.find(
+        ({ id }) => id === 'backgroundSearch'
+      );
+      expect(backgroundSearchItem).toBeDefined();
+      backgroundSearchItem!.run?.();
+
+      expect(dataService.search.showSearchSessionsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          trackingProps: { openedFrom: 'background search button' },
+        })
+      );
+    });
+  });
+
   describe('run switchToViewMode', () => {
     describe('dashboard does not have unsaved changes', () => {
       test('should switch to view mode', () => {
@@ -207,8 +289,6 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              isLabsShown: false,
-              setIsLabsShown: jest.fn(),
               maybeRedirect: jest.fn(),
             }),
           {
@@ -248,8 +328,6 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              isLabsShown: false,
-              setIsLabsShown: jest.fn(),
               maybeRedirect: jest.fn(),
             }),
           {
@@ -276,8 +354,6 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              isLabsShown: false,
-              setIsLabsShown: jest.fn(),
               maybeRedirect: jest.fn(),
             }),
           {

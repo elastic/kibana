@@ -14,8 +14,10 @@ import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_t
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { Resolver } from '../../../../resolver/view';
+import { withDocumentIndex } from '../../../shared/utils/non_local_index';
 import { ANALYZER_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
@@ -44,11 +46,17 @@ export const AnalyzerGraph = memo(
   ({ hit, renderCellActions, onAlertUpdated }: AnalyzerGraphProps) => {
     const { euiTheme } = useEuiTheme();
     const eventId = hit.raw._id ?? '';
+    const databaseDocumentTimestamp = useMemo(() => {
+      const value = hit.flattened?.['@timestamp'];
+      const ms = value ? Date.parse(String(value)) : NaN;
+      return Number.isFinite(ms) ? ms : undefined;
+    }, [hit]);
 
     const { from, to, shouldUpdate } = useTimelineDataFilters(false);
     const filters = useMemo(() => ({ from, to }), [from, to]);
 
-    const selectedPatterns = useSelectedPatterns(PageScope.analyzer);
+    const { dataView } = useDataView(PageScope.analyzer);
+    const selectedPatterns = useSelectedPatterns(dataView);
 
     if (!eventId) {
       return null;
@@ -73,8 +81,9 @@ export const AnalyzerGraph = memo(
           <div data-test-subj={ANALYZER_GRAPH_TEST_ID}>
             <Resolver
               databaseDocumentID={eventId}
+              databaseDocumentTimestamp={databaseDocumentTimestamp}
               resolverComponentInstanceID={RESOLVER_COMPONENT_INSTANCE_ID}
-              indices={selectedPatterns}
+              indices={withDocumentIndex(selectedPatterns, hit.raw._index)}
               shouldUpdate={shouldUpdate}
               filters={filters}
               renderCellActions={renderCellActions}

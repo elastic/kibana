@@ -8,13 +8,15 @@
  */
 
 import { type Container, ContainerModule } from 'inversify';
-import { inject, injectable } from 'inversify';
-import { OnSetup } from '@kbn/core-di';
+import { inject, injectable, optional } from 'inversify';
+import { createToken, OnSetup } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { CoreSetup as TCoreSetup } from '@kbn/core-lifecycle-server';
 import { loadHttp } from './http';
+
+const AsyncValue = createToken<string>('AsyncValue');
 
 @injectable()
 class TestRoute {
@@ -28,16 +30,29 @@ class TestRoute {
     },
   } as const;
   static validate = {};
+  // Getter mirrors DI plugins (e.g. alerting_v2) that expose route options via
+  // a static getter rather than an own enumerable property.
+  public static get options() {
+    return { access: 'public' as const, tags: ['oas-tag:test'] };
+  }
 
   constructor(
     @inject(Request) public readonly request: unknown,
-    @inject(Response) public readonly response: KibanaResponseFactory
+    @inject(Response) public readonly response: KibanaResponseFactory,
+    @inject(AsyncValue) @optional() public readonly value?: string
   ) {}
 
   handle() {
-    return this.response.ok();
+    return this.response.ok(this.value == null ? undefined : { body: this.value });
   }
 }
+
+const expectedRouteConfig = {
+  path: TestRoute.path,
+  validate: TestRoute.validate,
+  security: TestRoute.security,
+  options: { access: 'public', tags: ['oas-tag:test'] },
+};
 
 describe('http', () => {
   let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
@@ -79,7 +94,7 @@ describe('http', () => {
     container.bind(Route).toConstantValue(TestRoute);
     setup();
 
-    expect(router.post).toHaveBeenCalledWith(TestRoute, expect.any(Function));
+    expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, expect.any(Function));
   });
 
   it('should not register a route if there are no corresponding bindings ', () => {
@@ -93,7 +108,7 @@ describe('http', () => {
     setup();
 
     const handleSpy = jest.spyOn(TestRoute.prototype, 'handle');
-    expect(router.post).toHaveBeenCalledWith(TestRoute, expect.any(Function));
+    expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, expect.any(Function));
     const [, handler] = router.post.mock.lastCall!;
     const request = {} as unknown as KibanaRequest;
     const response = {
@@ -112,6 +127,21 @@ describe('http', () => {
     expect(unbindAllSpy).toHaveBeenCalled();
   });
 
+  it('should handle a request with an asynchronously bound dependency', async () => {
+    container.bind(AsyncValue).toResolvedValue(async () => 'resolved-value');
+    setup();
+
+    const [, handler] = router.post.mock.lastCall!;
+    const response = {
+      ok: jest.fn(() => 'something'),
+    } as unknown as jest.Mocked<KibanaResponseFactory>;
+
+    await expect(handler({} as any, {} as unknown as KibanaRequest, response)).resolves.toBe(
+      'something'
+    );
+    expect(response.ok).toHaveBeenCalledWith({ body: 'resolved-value' });
+  });
+
   it('should wrap a route handler to handle legacy errors', () => {
     const wrapper = jest.fn();
     router.handleLegacyErrors.mockReturnValue(wrapper);
@@ -120,6 +150,6 @@ describe('http', () => {
     setup();
     TestRoute.handleLegacyErrors = false;
 
-    expect(router.post).toHaveBeenCalledWith(TestRoute, wrapper);
+    expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, wrapper);
   });
 });

@@ -51,44 +51,36 @@ function parseVaultConfig() {
   }
 }
 
-/**
- * Maps a LiteLLM connector id (e.g. litellm-llm-gateway-gpt-4o) to a LiteLLM model group name.
- */
-function connectorIdToLitellmModel(connectorId) {
-  const stripped = String(connectorId).replace(/^litellm-/, '');
-  const prefix = 'llm-gateway-';
-  if (stripped.startsWith(prefix)) {
-    return `llm-gateway/${stripped.slice(prefix.length)}`;
-  }
-  return stripped;
-}
+// CI notify triage uses this OpenRouter model.
+const TRIAGE_OPENROUTER_MODEL = 'google/gemini-3.7-flash';
 
 /**
- * Build a minimal LiteLLM connector from vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
+ * Build the CI-notification triage connector from vault/env OpenRouter credentials.
  */
-function buildLitellmConnectorFromVault(modelConnectorId) {
+function buildOpenrouterConnectorFromVault() {
   const config = parseVaultConfig();
-  const litellm = config?.litellm;
-  const baseUrl =
-    process.env.LITELLM_BASE_URL ||
-    (litellm && typeof litellm === 'object' && typeof litellm.baseUrl === 'string'
-      ? litellm.baseUrl
-      : '');
+  const openrouter = config?.openrouter;
+  const baseUrl = (
+    process.env.OPENROUTER_BASE_URL ||
+    (openrouter && typeof openrouter === 'object' && typeof openrouter.baseUrl === 'string'
+      ? openrouter.baseUrl
+      : '')
+  ).replace(/\/+$/, '');
   const apiKey =
-    process.env.LITELLM_VIRTUAL_KEY ||
-    (litellm && typeof litellm === 'object' && typeof litellm.virtualKey === 'string'
-      ? litellm.virtualKey
+    process.env.OPENROUTER_API_KEY ||
+    (openrouter && typeof openrouter === 'object' && typeof openrouter.apiKey === 'string'
+      ? openrouter.apiKey
       : '');
   if (!baseUrl || !apiKey) {
     throw new Error(
-      'LiteLLM credentials are missing (set LITELLM_BASE_URL/LITELLM_VIRTUAL_KEY or KBN_EVALS_CONFIG_B64)'
+      'OpenRouter credentials are missing (set OPENROUTER_BASE_URL/OPENROUTER_API_KEY or KBN_EVALS_CONFIG_B64)'
     );
   }
 
   return {
     config: {
-      apiUrl: `${baseUrl.replace(/\/$/, '')}/v1/chat/completions`,
-      defaultModel: connectorIdToLitellmModel(modelConnectorId),
+      apiUrl: `${baseUrl}/chat/completions`,
+      defaultModel: TRIAGE_OPENROUTER_MODEL,
     },
     secrets: { apiKey },
   };
@@ -97,6 +89,6 @@ function buildLitellmConnectorFromVault(modelConnectorId) {
 module.exports = {
   parseMaybeBase64Json,
   parseVaultConfig,
-  connectorIdToLitellmModel,
-  buildLitellmConnectorFromVault,
+  TRIAGE_OPENROUTER_MODEL,
+  buildOpenrouterConnectorFromVault,
 };

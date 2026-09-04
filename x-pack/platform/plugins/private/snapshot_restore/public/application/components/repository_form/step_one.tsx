@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCard,
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -24,6 +23,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { Error } from '@kbn/es-ui-shared-plugin/public';
 import { SectionError } from '@kbn/es-ui-shared-plugin/public';
@@ -199,7 +199,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
 
     if (!repositoryTypes.length) {
       return (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           title={
             <FormattedMessage
@@ -207,17 +207,17 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               defaultMessage="No repository types available"
             />
           }
-          color="warning"
           data-test-subj="noRepositoryTypesError"
-        >
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.noRepositoryTypesErrorMessage"
-            defaultMessage="You can install plugins to enable different repository types. {docLink}"
-            values={{
-              docLink: snapshotRepoDocLink,
-            }}
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.noRepositoryTypesErrorMessage"
+              defaultMessage="You can install plugins to enable different repository types. {docLink}"
+              values={{
+                docLink: snapshotRepoDocLink,
+              }}
+            />
+          }
+        />
       );
     }
 
@@ -365,7 +365,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     }
     return (
       <Fragment>
-        <EuiCallOut
+        <KbnDangerCallout
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.validationErrorTitle"
@@ -373,7 +373,6 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             />
           }
           role="alert"
-          color="danger"
           data-test-subj="repositoryFormError"
         />
         <EuiSpacer size="m" />

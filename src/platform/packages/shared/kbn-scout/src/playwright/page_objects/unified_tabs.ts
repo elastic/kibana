@@ -97,6 +97,11 @@ export class UnifiedTabs {
     return this.getTabs().and(this.page.locator('[aria-selected="true"]'));
   }
 
+  /** Currently selected tab button. */
+  getActiveTab(): Locator {
+    return this.activeTabLocator;
+  }
+
   /**
    * Navigates to a tab by its visible label text and waits for it to become active.
    */
@@ -223,10 +228,12 @@ export class UnifiedTabs {
   }
 
   private async closeTabsBarMenu() {
-    await this.page.keyboard.press('Escape');
-    await this.page.testSubj
-      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBarMenuPanel)
-      .waitFor({ state: 'hidden' });
+    // Press Escape on the panel itself so focus is inside the popover's focus
+    // trap (which owns the Escape-to-close handler) when the key fires. A bare
+    // page-level keypress misses when focus has drifted off the panel.
+    const panel = this.page.testSubj.locator(UNIFIED_TABS_TEST_SUBJ.tabsBarMenuPanel);
+    await panel.press('Escape');
+    await panel.waitFor({ state: 'hidden' });
   }
 
   private getRecentlyClosedTabs(): Locator {

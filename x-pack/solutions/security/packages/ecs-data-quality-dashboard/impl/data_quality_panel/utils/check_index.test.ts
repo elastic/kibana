@@ -160,23 +160,23 @@ describe('checkIndex', () => {
     });
 
     test('it invokes `onStart`', () => {
-      expect(onStart).toBeCalled();
+      expect(onStart).toHaveBeenCalled();
     });
 
     test('it invokes `onLoadMappingsStart`', () => {
-      expect(onLoadMappingsStart).toBeCalled();
+      expect(onLoadMappingsStart).toHaveBeenCalled();
     });
 
     test('it invokes `onLoadMappingsSuccess` with mappings response', () => {
-      expect(onLoadMappingsSuccess).toBeCalledWith(mockMappingsResponse);
+      expect(onLoadMappingsSuccess).toHaveBeenCalledWith(mockMappingsResponse);
     });
 
     test('it invokes `onLoadUnallowedValuesStart`', () => {
-      expect(onLoadUnallowedValuesStart).toBeCalled();
+      expect(onLoadUnallowedValuesStart).toHaveBeenCalled();
     });
 
     test('it invokes `onLoadUnallowedValuesSuccess` with unallowed value search results', () => {
-      expect(onLoadUnallowedValuesSuccess).toBeCalledWith(mockUnallowedValuesResponse);
+      expect(onLoadUnallowedValuesSuccess).toHaveBeenCalledWith(mockUnallowedValuesResponse);
     });
 
     test('it invokes `onSuccess` with the expected arguments', () => {
@@ -197,7 +197,7 @@ describe('checkIndex', () => {
         mappingsProperties,
         unallowedValues,
       });
-      expect(onSuccess).toBeCalledWith({
+      expect(onSuccess).toHaveBeenCalledWith({
         partitionedFieldMetadata,
         mappingsProperties,
         unallowedValues,
@@ -205,7 +205,7 @@ describe('checkIndex', () => {
     });
 
     test('it does NOT invoke `onError`', () => {
-      expect(onError).not.toBeCalled();
+      expect(onError).not.toHaveBeenCalled();
     });
 
     test('it invokes the lifecycle hooks in the expected order', () => {
@@ -251,11 +251,11 @@ describe('checkIndex', () => {
       });
 
       test('it invokes `onError` with mappings error', () => {
-        expect(onError).toBeCalledWith(new Error(error));
+        expect(onError).toHaveBeenCalledWith(new Error(error));
       });
 
       test('it does NOT invoke `onSuccess`', () => {
-        expect(onSuccess).not.toBeCalled();
+        expect(onSuccess).not.toHaveBeenCalled();
       });
 
       test('it invokes the lifecycle hooks in the expected order', () => {
@@ -295,11 +295,11 @@ describe('checkIndex', () => {
       });
 
       test('it invokes `onError` with unallowed values error', () => {
-        expect(onError).toBeCalledWith(new Error(error));
+        expect(onError).toHaveBeenCalledWith(new Error(error));
       });
 
       test('it does NOT invoke `onSuccess`', () => {
-        expect(onSuccess).not.toBeCalled();
+        expect(onSuccess).not.toHaveBeenCalled();
       });
 
       test('it invokes the lifecycle hooks in the expected order', () => {
@@ -338,7 +338,7 @@ describe('checkIndex', () => {
         pattern,
       });
 
-      expect(onCheckCompleted).not.toBeCalled();
+      expect(onCheckCompleted).not.toHaveBeenCalled();
     });
   });
 
@@ -460,7 +460,7 @@ describe('checkIndex', () => {
         pattern,
       });
 
-      expect(onCheckCompleted).not.toBeCalled();
+      expect(onCheckCompleted).not.toHaveBeenCalled();
     });
   });
 });

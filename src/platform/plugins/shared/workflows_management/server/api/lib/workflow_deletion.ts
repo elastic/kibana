@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import { buildWorkflowFilters } from '@kbn/workflows/server';
+import type {
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
 
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { partitionBulkResults } from './bulk_response_helpers';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
 import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../../tasks/workflow_task_scheduler';
@@ -97,7 +100,8 @@ const restoreDisabledWorkflows = async (
 const purgeWorkflowRelatedData = async (
   workflowIds: string[],
   spaceId: string,
-  esClient: ElasticsearchClient,
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient,
+  stepExecutionsDataClient: StepExecutionsDataClient,
   logger: Logger
 ): Promise<void> => {
   if (workflowIds.length === 0) {
@@ -110,33 +114,25 @@ const purgeWorkflowRelatedData = async (
     },
   };
 
+  const deleteByQueryRequest = {
+    query,
+    refresh: true,
+    conflicts: 'proceed',
+  } as const;
+
   const deleteOps = [
-    esClient
-      .deleteByQuery({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        query,
-        refresh: true,
-        conflicts: 'proceed',
-      })
-      .catch((error) => {
-        logger.warn(
-          `Failed to purge executions for workflows [${workflowIds.join(', ')}]: ${error.message}`
-        );
-      }),
-    esClient
-      .deleteByQuery({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-        query,
-        refresh: true,
-        conflicts: 'proceed',
-      })
-      .catch((error) => {
-        logger.warn(
-          `Failed to purge step executions for workflows [${workflowIds.join(', ')}]: ${
-            error.message
-          }`
-        );
-      }),
+    workflowExecutionsDataClient.deleteByQuery(deleteByQueryRequest).catch((error) => {
+      logger.warn(
+        `Failed to purge executions for workflows [${workflowIds.join(', ')}]: ${error.message}`
+      );
+    }),
+    stepExecutionsDataClient.deleteByQuery(deleteByQueryRequest).catch((error) => {
+      logger.warn(
+        `Failed to purge step executions for workflows [${workflowIds.join(', ')}]: ${
+          error.message
+        }`
+      );
+    }),
   ];
 
   await Promise.allSettled(deleteOps);
@@ -149,7 +145,8 @@ const hardDeleteWorkflows = async (
   spaceId: string,
   failures: Array<{ id: string; error: string }>,
   deps: {
-    esClient: ElasticsearchClient;
+    workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+    stepExecutionsDataClient: StepExecutionsDataClient;
     taskScheduler: WorkflowTaskScheduler | null;
     logger: Logger;
     getWorkflowExecutions: (
@@ -158,7 +155,13 @@ const hardDeleteWorkflows = async (
     ) => Promise<WorkflowExecutionListDto>;
   }
 ): Promise<DeleteWorkflowsResponse> => {
-  const { esClient, taskScheduler, logger, getWorkflowExecutions } = deps;
+  const {
+    workflowExecutionsDataClient,
+    stepExecutionsDataClient,
+    taskScheduler,
+    logger,
+    getWorkflowExecutions,
+  } = deps;
   const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
 
   const disabledIds = await disableWorkflowsForDeletion(hits, client);
@@ -202,7 +205,13 @@ const hardDeleteWorkflows = async (
   }
 
   await unscheduleWorkflowTasks(successfulIds, taskScheduler);
-  await purgeWorkflowRelatedData(successfulIds, spaceId, esClient, logger);
+  await purgeWorkflowRelatedData(
+    successfulIds,
+    spaceId,
+    workflowExecutionsDataClient,
+    stepExecutionsDataClient,
+    logger
+  );
 
   return {
     total: ids.length,
@@ -279,7 +288,8 @@ export const deleteWorkflows = async (params: {
   spaceId: string;
   force: boolean;
   storage: WorkflowStorage;
-  esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
   getWorkflowExecutions: (
@@ -287,8 +297,17 @@ export const deleteWorkflows = async (params: {
     sp: string
   ) => Promise<WorkflowExecutionListDto>;
 }): Promise<DeleteWorkflowsResponse> => {
-  const { ids, spaceId, force, storage, esClient, taskScheduler, logger, getWorkflowExecutions } =
-    params;
+  const {
+    ids,
+    spaceId,
+    force,
+    storage,
+    workflowExecutionsDataClient,
+    stepExecutionsDataClient,
+    taskScheduler,
+    logger,
+    getWorkflowExecutions,
+  } = params;
   const failures: Array<{ id: string; error: string }> = [];
   const client = storage.getClient();
 
@@ -306,7 +325,8 @@ export const deleteWorkflows = async (params: {
 
   if (force) {
     return hardDeleteWorkflows(ids, hits, client, spaceId, failures, {
-      esClient,
+      workflowExecutionsDataClient,
+      stepExecutionsDataClient,
       taskScheduler,
       logger,
       getWorkflowExecutions,

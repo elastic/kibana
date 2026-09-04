@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { asSpaceId } from '@kbn/core-spaces-common';
+
 import { RuleExecutionPipeline } from './execution_pipeline';
 import type { RulePipelineState, RuleExecutionStep } from './types';
 import type { RuleExecutionMiddleware } from './middleware';
@@ -25,7 +27,6 @@ import { RULE_EXECUTION_COUNTERS } from './metrics/counters';
 describe('RuleExecutionPipeline', () => {
   describe('execute', () => {
     it('executes all steps in order when all continue', async () => {
-      const { loggerService } = createLoggerService();
       const executionOrder: string[] = [];
 
       const step1 = createMockStep('step1', (input) =>
@@ -50,7 +51,6 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [step1, step2, step3],
         [],
         createMetricCollectorFactory(),
@@ -66,7 +66,6 @@ describe('RuleExecutionPipeline', () => {
     });
 
     it('stops execution when a step returns halt', async () => {
-      const { loggerService } = createLoggerService();
       const executionOrder: string[] = [];
 
       const step1 = createMockStep('step1', (input) =>
@@ -91,7 +90,6 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [step1, step2, step3],
         [],
         createMetricCollectorFactory(),
@@ -107,7 +105,6 @@ describe('RuleExecutionPipeline', () => {
     });
 
     it('accumulates state across steps correctly', async () => {
-      const { loggerService } = createLoggerService();
       const statesReceived: RulePipelineState[] = [];
 
       const step1 = createMockStep('step1', (input) =>
@@ -132,7 +129,6 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [step1, step2, step3],
         [],
         createMetricCollectorFactory(),
@@ -159,7 +155,6 @@ describe('RuleExecutionPipeline', () => {
     });
 
     it('propagates errors from steps', async () => {
-      const { loggerService } = createLoggerService();
       const error = new Error('Step failed');
 
       const step1 = createMockStep('step1', (input) =>
@@ -173,7 +168,6 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [step1, step2],
         [],
         createMetricCollectorFactory(),
@@ -185,9 +179,7 @@ describe('RuleExecutionPipeline', () => {
     });
 
     it('returns empty completed result when no steps', async () => {
-      const { loggerService } = createLoggerService();
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [],
         [],
         createMetricCollectorFactory(),
@@ -203,7 +195,6 @@ describe('RuleExecutionPipeline', () => {
     });
 
     it('executes middleware chain around each step', async () => {
-      const { loggerService } = createLoggerService();
       const executionOrder: string[] = [];
 
       const middleware1: RuleExecutionMiddleware = {
@@ -242,7 +233,6 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [step1],
         [middleware1, middleware2],
         createMetricCollectorFactory(),
@@ -262,8 +252,6 @@ describe('RuleExecutionPipeline', () => {
     });
 
     it('creates ExecutionContext and attaches it to pipeline state', async () => {
-      const { loggerService } = createLoggerService();
-
       const step = createMockStep('step1', (input) =>
         pipeStream(input, (state) => {
           expect(state.input.executionContext).toBeDefined();
@@ -276,7 +264,6 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [step],
         [],
         createMetricCollectorFactory(),
@@ -291,7 +278,6 @@ describe('RuleExecutionPipeline', () => {
     });
 
     it('uses the abort signal from pipeline input for the execution context', async () => {
-      const { loggerService } = createLoggerService();
       const abortController = new AbortController();
 
       const step = createMockStep('step1', (input) =>
@@ -302,7 +288,6 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [step],
         [],
         createMetricCollectorFactory(),
@@ -314,7 +299,6 @@ describe('RuleExecutionPipeline', () => {
     });
 
     it('middleware can intercept errors', async () => {
-      const { loggerService } = createLoggerService();
       const errorHandlerCalled = jest.fn();
 
       const errorMiddleware: RuleExecutionMiddleware = {
@@ -339,7 +323,6 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [step1],
         [errorMiddleware],
         createMetricCollectorFactory(),
@@ -378,10 +361,7 @@ describe('RuleExecutionPipeline', () => {
     ) => new MetricsMiddleware([new EmittedCountersRecorder()], loggerService);
 
     it('returns a metrics snapshot on the pipeline result', async () => {
-      const { loggerService } = createLoggerService();
-
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [],
         [],
         createMetricCollectorFactory({ startedAt }),
@@ -411,7 +391,6 @@ describe('RuleExecutionPipeline', () => {
       });
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [step1, step2],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
@@ -441,7 +420,6 @@ describe('RuleExecutionPipeline', () => {
       });
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [ruleStep, storeStep],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
@@ -450,7 +428,7 @@ describe('RuleExecutionPipeline', () => {
 
       const input = createRuleExecutionPipelineInput({
         ruleId: 'rule-42',
-        spaceId: 'space-1',
+        spaceId: asSpaceId('space-1'),
         executionUuid: executionId,
       });
       await pipeline.execute(input);
@@ -462,7 +440,7 @@ describe('RuleExecutionPipeline', () => {
         ruleEventsGenerated: 7,
         rule: {
           ruleId: 'rule-42',
-          spaceId: 'space-1',
+          spaceId: asSpaceId('space-1'),
           kind: 'signal',
           tags: ['security', 'siem'],
         },
@@ -476,7 +454,6 @@ describe('RuleExecutionPipeline', () => {
       const ruleStep = createRuleStep(createRuleResponse({ kind: 'alert' }));
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [ruleStep],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
@@ -498,7 +475,6 @@ describe('RuleExecutionPipeline', () => {
       const eventPublisher = createMockRuleExecutorEventPublisher();
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
@@ -521,7 +497,6 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [step],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
@@ -547,7 +522,6 @@ describe('RuleExecutionPipeline', () => {
       const ruleStep = createRuleStep(createRuleResponse({ kind: 'alert' }));
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [ruleStep],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
@@ -569,7 +543,6 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(
-        loggerService,
         [ruleStep, step2],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),

@@ -14,6 +14,11 @@ import { useCreateTemplate } from './use_create_template';
 import { useUpdateTemplate } from './use_update_template';
 import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
+import {
+  useTemplateCreatedEBT,
+  useTemplateDeletedEBT,
+  useTemplateUpdatedEBT,
+} from '../../../analytics/templates';
 import * as i18n from '../translations';
 
 interface UseTemplatesActionsProps {
@@ -23,8 +28,19 @@ interface UseTemplatesActionsProps {
 export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProps = {}) => {
   const { navigateToCasesEditTemplate } = useCasesEditTemplateNavigation();
   const { showSuccessToast } = useCasesToast();
+
+  const reportTemplateCreated = useTemplateCreatedEBT();
+  const reportTemplateUpdated = useTemplateUpdatedEBT();
+  const reportTemplateDeleted = useTemplateDeletedEBT();
+
   const { mutate: bulkDeleteTemplates, isLoading: isDeleting } = useBulkDeleteTemplates({
-    onSuccess: onDeleteSuccess,
+    onSuccess: () => {
+      // React Query awaits this hook-level callback whatever happens to the caller, but it runs a
+      // per-call callback only while the caller still has listeners. Report here so that navigating
+      // away mid-flight cannot drop the event. This hook instance always deletes one row.
+      reportTemplateDeleted({ entryPoint: 'templates_list', deleteScope: 'single' });
+      onDeleteSuccess?.();
+    },
   });
 
   const { mutate: cloneTemplate, isLoading: isCloning } = useCreateTemplate({
@@ -67,12 +83,15 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
         },
         {
           onSuccess: () => {
+            // A clone is a create with a copied payload, so it reports the create event with a
+            // distinct creation mode rather than an event of its own.
+            reportTemplateCreated({ entryPoint: 'templates_list', creationMode: 'clone' });
             showSuccessToast(i18n.SUCCESS_CLONING_TEMPLATE(template.name));
           },
         }
       );
     },
-    [cloneTemplate, showSuccessToast]
+    [cloneTemplate, showSuccessToast, reportTemplateCreated]
   );
 
   const handleExport = useCallback(
@@ -106,12 +125,13 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
         },
         {
           onSuccess: () => {
+            reportTemplateUpdated({ entryPoint: 'templates_list' });
             showSuccessToast(i18n.SUCCESS_UPDATING_TEMPLATE);
           },
         }
       );
     },
-    [updateTemplate, showSuccessToast]
+    [updateTemplate, showSuccessToast, reportTemplateUpdated]
   );
 
   return {

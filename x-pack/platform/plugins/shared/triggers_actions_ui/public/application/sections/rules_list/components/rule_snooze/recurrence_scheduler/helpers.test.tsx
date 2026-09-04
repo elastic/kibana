@@ -12,6 +12,7 @@ import {
   generateNthByweekday,
   getInitialByweekday,
   getWeekdayInfo,
+  isCustomRecurrenceFrequency,
   recurrenceSummary,
   rRuleWeekdayToWeekdayName,
 } from './helpers';
@@ -151,6 +152,16 @@ describe('Recurrence scheduler helper', () => {
           interval: 1,
         })
       ).toEqual('every month');
+    });
+
+    test('should give a detailed msg with monthly bymonthday', () => {
+      expect(
+        recurrenceSummary({
+          freq: RRuleFrequency.MONTHLY,
+          interval: 1,
+          bymonthday: [15],
+        })
+      ).toEqual('every month on day 15');
     });
   });
 
@@ -297,6 +308,66 @@ describe('Recurrence scheduler helper', () => {
         freq: 0,
         interval: 2,
       });
+    });
+  });
+
+  describe('isCustomRecurrenceFrequency', () => {
+    test('monthly + bymonthday is custom', () => {
+      expect(
+        isCustomRecurrenceFrequency({
+          freq: RRuleFrequency.MONTHLY,
+          interval: 1,
+          bymonthday: [15],
+        })
+      ).toBe(true);
+    });
+
+    test('monthly + nth byweekday is not custom', () => {
+      expect(
+        isCustomRecurrenceFrequency({
+          freq: RRuleFrequency.MONTHLY,
+          interval: 1,
+          byweekday: ['+4TU'],
+        })
+      ).toBe(false);
+    });
+
+    test('weekly single weekday is not custom', () => {
+      expect(
+        isCustomRecurrenceFrequency({
+          freq: RRuleFrequency.WEEKLY,
+          interval: 1,
+          byweekday: ['TU'],
+        })
+      ).toBe(false);
+    });
+
+    test('daily interval 1 is not custom', () => {
+      expect(
+        isCustomRecurrenceFrequency({
+          freq: RRuleFrequency.DAILY,
+          interval: 1,
+        })
+      ).toBe(false);
+    });
+
+    test('weekly multi-weekday is custom', () => {
+      expect(
+        isCustomRecurrenceFrequency({
+          freq: RRuleFrequency.WEEKLY,
+          interval: 1,
+          byweekday: ['MO', 'WE'],
+        })
+      ).toBe(true);
+    });
+
+    test('interval greater than 1 is custom', () => {
+      expect(
+        isCustomRecurrenceFrequency({
+          freq: RRuleFrequency.DAILY,
+          interval: 2,
+        })
+      ).toBe(true);
     });
   });
 });

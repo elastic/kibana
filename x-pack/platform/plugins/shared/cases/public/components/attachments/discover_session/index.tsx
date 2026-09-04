@@ -44,14 +44,13 @@ const DiscoverSessionAttachmentsTab = createSavedObjectAttachmentsTab({
 export const getDiscoverSessionAttachmentType = () =>
   defineAttachment({
     id: DISCOVER_SESSION_ATTACHMENT_TYPE,
-    icon: 'discoverApp',
-    displayName: i18n.DISCOVER_SESSIONS,
+    getIcon: () => 'discoverApp',
+    getLabel: () => i18n.DISCOVER_SESSIONS,
     schema: DiscoverSessionAttachmentPayloadSchema,
-    getAttachmentViewObject: (props) => ({
+    getCreationActivity: (props) => ({
       event: <DiscoverSessionEvent {...props} />,
-      timelineAvatar: 'discoverApp',
       hideDefaultActions: false,
     }),
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_DISCOVER_SESSION }),
-    getAttachmentTabViewObject: () => ({ children: DiscoverSessionAttachmentsTab }),
+    getRemovalActivity: () => ({ event: i18n.REMOVED_DISCOVER_SESSION }),
+    getAttachmentList: () => ({ children: DiscoverSessionAttachmentsTab }),
   });

@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { HuntingLead } from './types';
-import { renderTextWithEntities } from './shared_lead_components';
+import { renderTextWithEntity } from './shared_lead_components';
 import { THREAT_HUNTING_LEADS_SCOPE_ID } from './utils';
 
 interface LeadCardProps {
@@ -19,15 +19,15 @@ interface LeadCardProps {
 export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
   const renderedByline = useMemo(
-    () => renderTextWithEntities(lead.byline, lead.entities, THREAT_HUNTING_LEADS_SCOPE_ID),
-    [lead.byline, lead.entities]
+    () => renderTextWithEntity(lead.byline, lead.entity, THREAT_HUNTING_LEADS_SCOPE_ID),
+    [lead.byline, lead.entity]
   );
 
   return (
     <EuiCard
       title={
         <EuiToolTip content={lead.title} anchorClassName="eui-textTruncate" display="block">
-          <span>{lead.title}</span>
+          <span tabIndex={0}>{lead.title}</span>
         </EuiToolTip>
       }
       titleElement="h5"
@@ -50,7 +50,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
             css={{
               overflowWrap: 'anywhere',
               display: '-webkit-box',
-              WebkitLineClamp: 3,
+              WebkitLineClamp: 4,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
             }}

@@ -3,6 +3,9 @@
 **If you're looking for available extension point definitions, they're located in the `Profile` interface
 in [`types.ts`](types.ts).**
 
+**If you're designing a new profile, see [`PRINCIPLES.md`](PRINCIPLES.md) for the principles that keep
+Discover feeling like Discover across profiles.**
+
 ## Summary
 
 The Discover context awareness framework allows Discover's UI and functionality to adapt to the surrounding context of
@@ -307,20 +310,21 @@ definition is exposed by the active data source profile context. Main Discover a
 `ProfileStateType.Persistent` and `ProfileStateType.Url` fields in local tab storage; `ProfileStateType.Ui` fields are
 runtime-only and are restored from defaults.
 
-Define a `ProfileStateDefinition<TState>` near the profile provider that uses it:
+Define serializable profile state under [`common/context_awareness/profile_state_definitions`](../../common/context_awareness/profile_state_definitions)
+so the same definition can be used by browser and server locators:
 
 ```ts
 /**
- * profile_providers/common/example_data_source_profile/profile_state.ts
+ * common/context_awareness/profile_state_definitions/example_profile_state.ts
  */
 
-import type { ProfileStateDefinition, ProfileStateRegistry } from '../../profile_state';
 import type { EuiPanelProps } from '@elastic/eui';
 import type { RowControlProps } from '@kbn/discover-utils';
-import { ProfileStateType } from '../../profile_state';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { ProfileStateType, type ProfileStateDefinition } from '../profile_state';
 
 // Define the state shape shared across profiles and extension point implementations
-interface ExampleProfileState {
+interface ExampleProfileState extends SerializableRecord {
   timestampColor: string;
   rowControlColor: NonNullable<RowControlProps['color']>;
   boxColor: NonNullable<EuiPanelProps['color']>;
@@ -340,16 +344,11 @@ const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileState> = {
     boxColor: 'transparent',
   },
 };
-
-export const registerExampleProfileStateDefinitions = (registry: ProfileStateRegistry) => {
-  // Register the profile state definition to the shared registry
-  registry.registerDefinition(EXAMPLE_PROFILE_STATE_DEF);
-};
 ```
 
-Register the definition from [`register_profile_state_definitions.ts`](./profile_providers/register_profile_state_definitions.ts)
-before using it in profile code. The `key` must be unique, the `descriptor` describes the intended lifetime of each
-field, and `defaultState` is returned until state has been written.
+Register the definition once in [`create_profile_state_registry.ts`](../../common/context_awareness/create_profile_state_registry.ts).
+The `key` must be unique, the `descriptor` describes the intended lifetime of each field, and `defaultState` is
+returned until state has been written.
 
 To opt into URL sync, return the definition from the active data source profile context:
 
@@ -362,7 +361,30 @@ resolve: () => ({
 });
 ```
 
-Main Discover stores URL-backed fields in the `_p` URL parameter so they survive refreshes, browser history, and shared links. State is written for the active data source profile, and shared links can carry URL-backed state for a registered profile that becomes active when the link opens. Removing `_p` resets the active profile's URL-backed fields to their definition defaults.
+Main Discover stores URL-backed fields in the `_p` URL parameter so they survive refreshes and browser history.
+Shared links restore supported `Url` and `Persistent` state for the active data source profile. `Ui` state is not
+included in shared links.
+
+#### Saving profile state with Discover sessions
+
+Saved-session state is separate from the field lifetimes in `ProfileStateType`. To persist profile state with a saved
+Discover session, the data source profile must return a `tabType`, and that tab type must have a saved-state transform
+registered in the shared profile state registry:
+
+```ts
+resolve: () => ({
+  isMatch: true,
+  context: {
+    tabType: DiscoverTabType.Metrics,
+    profileState: METRICS_STATE_DEF,
+  },
+});
+```
+
+The transform owns the complete saved payload for its tab type and explicitly selects which profile state fields are
+saved. A field can therefore participate in URL or local-tab persistence without being saved to the session, and vice
+versa. See the [developer guide](./DEV_DOCS.md#adding-a-saved-tab-type) for the schema, transform, and registration
+steps.
 
 Use `toolkit.getStateAdapter()` inside extension point implementations to read, observe, and update the state:
 

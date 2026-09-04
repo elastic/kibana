@@ -6,9 +6,12 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import { ErrorHandlingMiddleware } from './error_handling_middleware';
 import { createRuleExecutionMiddlewareContext } from './test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
 
 describe('ErrorHandlingMiddleware', () => {
@@ -42,11 +45,56 @@ describe('ErrorHandlingMiddleware', () => {
         throw error;
       })()
     );
-    const context = createRuleExecutionMiddlewareContext();
+    const context = createRuleExecutionMiddlewareContext({ name: 'fetch_rule' });
 
     await expect(
       collectStreamResults(middleware.execute(context, next, createPipelineStream()))
     ).rejects.toThrow('Step failed');
-    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      'Step failed',
+      expect.objectContaining({
+        labels: {
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          step: 'fetch_rule',
+        },
+      })
+    );
+  });
+
+  it('overrides the message for ES|QL user errors so the query fragment is not logged', async () => {
+    const error = new errors.ResponseError({
+      statusCode: 400,
+      body: {
+        error: {
+          type: 'verification_exception',
+          reason: 'Found 1 problem\nline 1:1: Unknown column [secret_field]',
+        },
+      },
+    } as DiagnosticResult);
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        throw error;
+      })()
+    );
+    const context = createRuleExecutionMiddlewareContext({ name: 'execute_rule_query' });
+
+    await expect(
+      collectStreamResults(middleware.execute(context, next, createPipelineStream()))
+    ).rejects.toBe(error);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Rule query failed to parse or verify',
+      expect.objectContaining({
+        labels: {
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          step: 'execute_rule_query',
+        },
+        error: expect.objectContaining({
+          message: 'Rule query failed to parse or verify',
+        }),
+      })
+    );
+    const loggedMessage = (logger.error as jest.Mock).mock.calls[0][0] as string;
+    expect(loggedMessage).not.toContain('secret_field');
   });
 });

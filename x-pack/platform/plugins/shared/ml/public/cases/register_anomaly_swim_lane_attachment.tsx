@@ -18,21 +18,21 @@ export function registerAnomalySwimLaneCasesAttachment(
   cases: CasesPublicSetup,
   pluginStart: MlStartDependencies
 ) {
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
-      icon: PLUGIN_ICON,
-      displayName: i18n.translate('xpack.ml.cases.anomalySwimLane.displayName', {
-        defaultMessage: 'Anomaly swim lanes',
-      }),
-      getAttachmentViewObject: () => ({
+      getIcon: () => PLUGIN_ICON,
+      getLabel: () =>
+        i18n.translate('xpack.ml.cases.anomalySwimLane.displayName', {
+          defaultMessage: 'Anomaly swim lanes',
+        }),
+      getCreationActivity: () => ({
         event: (
           <FormattedMessage
             id="xpack.ml.cases.anomalySwimLane.embeddableAddedEvent"
             defaultMessage="added an anomaly swim lane"
           />
         ),
-        timelineAvatar: PLUGIN_ICON,
         children: React.lazy(async () => {
           const { initComponent } = await import('./anomaly_swim_lane_attachment');
           return {

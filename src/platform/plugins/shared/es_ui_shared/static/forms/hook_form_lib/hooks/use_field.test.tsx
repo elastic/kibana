@@ -158,7 +158,7 @@ describe('useField() hook', () => {
         await validatePromise;
       });
 
-      expect(validatorFn).toBeCalledTimes(0);
+      expect(validatorFn).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -192,7 +192,7 @@ describe('useField() hook', () => {
       );
 
       const { rerender } = render(<TestForm showField1={true} showField2={true} />);
-      expect(field2ValidatorFn).toBeCalledTimes(0);
+      expect(field2ValidatorFn).toHaveBeenCalledTimes(0);
 
       rerender(<TestForm showField1={false} showField2={true} />);
 
@@ -200,7 +200,7 @@ describe('useField() hook', () => {
         await jest.runAllTimersAsync();
       });
 
-      expect(field2ValidatorFn).toBeCalledTimes(1);
+      expect(field2ValidatorFn).toHaveBeenCalledTimes(1);
     });
   });
 });

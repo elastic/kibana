@@ -10,13 +10,24 @@ import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-comm
 import type { z } from '@kbn/zod/v4';
 import type { ResolvePanelContent } from './panels';
 import type { PanelFailure } from '../utils';
+import type { PanelAuthoringNote } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
+
+export type ResolveCustomContentTemplate = (params: {
+  prompt: string;
+  esqlQuery?: string;
+  existingTemplate?: string;
+  /** True when the panel already has an ES|QL query that is not changing, so the resolver can skip re-sampling. */
+  hasExistingQuery?: boolean;
+}) => Promise<string>;
 
 export interface OperationExecutionContext {
   logger: Logger;
   failures: PanelFailure[];
+  panelAuthoringNotes: PanelAuthoringNote[];
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   resolvePanelContent?: ResolvePanelContent;
+  resolveCustomContentTemplate?: ResolveCustomContentTemplate;
 }
 
 export interface OperationHandlerParams<TOperation> {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Attributes } from '@opentelemetry/api';
+
 import type { LayoutConfigType } from '../layout';
 
 /**
@@ -100,44 +102,65 @@ export interface OtelAppenderConfig {
    * as `service.name`. Because Kibana expands dotted YAML keys into nested
    * objects, wrap dotted attribute names in `[brackets]`:
    * `"[service.name]": my-kibana`
+   *
+   * These attributes are merged into the resource; when {@link OtelAppenderConfig.includeResources}
+   * narrows the resource, they supply the values for the included keys (e.g. `service.name`).
    */
   attributes?: Record<string, string>;
+  /**
+   * Allowlist of resource-attribute keys to include in the OTLP resource. Defaults to `['*']`
+   * (include every auto-detected and configured attribute — the standard OTel resource).
+   *
+   * When set to an explicit list (anything not containing `'*'`), the resource is filtered to
+   * only those keys. Filtering is applied to the fully-resolved resource (auto-detected host/OS/
+   * process/env attributes plus {@link OtelAppenderConfig.attributes}), so
+   * `['service.name', 'service.type']` ships a deliberately minimal resource with the
+   * cloud/k8s/process/host fields excluded.
+   *
+   * An explicit allowlist fully governs the resource: a listed key is kept even if
+   * {@link OtelAppenderPluginConfig.dropResourceAttributes} also names it.
+   * `dropResourceAttributes` only shapes the resource in the default `['*']` case.
+   */
+  includeResources?: string[];
+  /**
+   * Resource-attribute keys to also emit as per-record log attributes. Each value is captured once
+   * (at appender construction) from the resolved resource — before {@link OtelAppenderConfig.includeResources}
+   * narrows it — and added to every log record's attributes. Use when a value that arrives as a
+   * resource attribute (e.g. `project.id`, promoted from an APM global label) belongs per-record;
+   * pair with `includeResources` to keep it out of the resource and only on records. Only
+   * synchronously-resolved values are promoted; async-detected ones (e.g. `host.id`) are skipped.
+   */
+  promoteResourceAttributes?: string[];
   /**
    * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
    */
   ssl?: OtelAppenderTlsConfig;
+}
+
+/**
+ * Maps a log record's fully-flattened per-record OTel attributes (including promoted resource
+ * attributes and, for pattern layout, flattened `log.meta`) to the attributes to emit.
+ *
+ * @public
+ */
+export type OtelAttributesTransform = (attributes: Attributes) => Attributes;
+
+/**
+ * Plugin-only extension of {@link OtelAppenderConfig}: options that cannot be expressed
+ * in YAML, accepted exclusively through {@link LoggingServiceSetup.configure}.
+ *
+ * @public
+ */
+export interface OtelAppenderPluginConfig extends OtelAppenderConfig {
   /**
-   * Optional map of source attribute paths to target attribute path(s) applied after meta fields are
-   * flattened into OTel attributes. Use this to rename or fan-out fields without changing the
-   * upstream `AuditEvent` / `LogRecord` shape.
-   *
-   * - Single target: `{ 'kibana.space_id': 'kibana.space.id' }` — rename in place.
-   * - Multiple targets: `{ 'client.ip': ['source.address', 'source.ip'] }` — copy value to all
-   *   listed keys and remove the original.
-   *
-   * Keys absent from the log record are silently skipped. With JSON layout, meta-sourced keys
-   * (e.g. `kibana.*`, `client.ip`) are part of the structured body and not repeated as individual
-   * attributes, so renames targeting those fields have no effect under that layout.
+   * Applied to the flattened attributes just before emit. Use for output-shaping too specific
+   * to belong in serializable config (e.g. audit log field mappings).
    */
-  fieldRenames?: Record<string, string | string[]>;
+  transformAttributes?: OtelAttributesTransform;
   /**
-   * Optional list of attribute keys to remove from the OTLP output. Applied to both log record
-   * attributes and resource attributes. Keys absent from the output are silently skipped.
-   * Injected programmatically (e.g. by the audit service to satisfy Serverless field exclusions).
+   * Resource-attribute keys removed at appender construction, only when
+   * {@link OtelAppenderConfig.includeResources} is the default `['*']` (an explicit allowlist
+   * takes precedence). Async-detected values (e.g. `host.id`) are preserved unless dropped here.
    */
-  fieldDrops?: string[];
-  /**
-   * Optional default attribute values written only when the key is not already present in the log
-   * record attributes. Applied after `fieldRenames` and `fieldDrops`. Use to fill in fields that are
-   * absent from some event types (e.g. `event.type` on authentication events).
-   * Values may be a string or an array of strings.
-   */
-  fieldDefaults?: Record<string, string | string[]>;
-  /**
-   * Optional list of attribute keys whose string values should be uppercased at emit time.
-   * Applied after all other field transforms. Use for fields where OTel semantic conventions
-   * require uppercase but the upstream event carries lowercase (e.g. `http.request.method`).
-   * Non-string values and absent keys are silently skipped.
-   */
-  fieldUppercase?: string[];
+  dropResourceAttributes?: string[];
 }

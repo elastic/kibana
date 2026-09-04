@@ -14,6 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 
+import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { defineRoutes } from './api/routes';
 import { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
@@ -30,6 +31,7 @@ import {
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -55,6 +57,8 @@ export class WorkflowsPlugin
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
   private workflowsService: WorkflowsService | null = null;
+  private audit: WorkflowManagementAuditLog | null = null;
+  private unregisterHitlLifecycleAuditor: (() => void) | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -77,7 +81,7 @@ export class WorkflowsPlugin
     const workflowsService = new WorkflowsService(core, plugins, this.logger, this.kibanaVersion);
     this.workflowsService = workflowsService;
 
-    const api = new WorkflowsManagementApi(workflowsService, this.config.available);
+    const api = new WorkflowsManagementApi(workflowsService, this.config.available, this.logger);
     this.api = api;
 
     if (plugins.actions) {
@@ -86,6 +90,14 @@ export class WorkflowsPlugin
       if (plugins.alerting) {
         plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
       }
+
+      registerConnectorEventTriggers({
+        inboundEventsEnabled: plugins.actions
+          .getActionsConfigurationUtilities()
+          .isInboundEventsEnabled(),
+        registerTriggerDefinition: (definition) =>
+          plugins.workflowsExtensions.registerTriggerDefinition(definition),
+      });
     }
 
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
@@ -99,6 +111,8 @@ export class WorkflowsPlugin
 
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
     const audit = new WorkflowManagementAuditLog({ service: workflowsService });
+    this.audit = audit;
+    api.setAuditLog(audit);
 
     defineRoutes({
       router,
@@ -113,7 +127,7 @@ export class WorkflowsPlugin
     if (plugins.inbox) {
       this.logger.debug('Workflows Management: registering inbox provider');
       plugins.inbox.registerActionProvider(
-        createWorkflowsInboxProvider({ api, logger: this.logger, audit })
+        createWorkflowsInboxProvider({ api, logger: this.logger })
       );
     }
 
@@ -124,6 +138,7 @@ export class WorkflowsPlugin
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.debug('Workflows Management: Start');
+    this.workflowsService?.setStopping(false);
 
     stepSchemas.initialize(plugins.workflowsExtensions);
 
@@ -133,6 +148,34 @@ export class WorkflowsPlugin
         config: this.config,
         api: this.api,
         logger: this.logger,
+      });
+    }
+
+    if (this.audit) {
+      const audit = this.audit;
+      this.unregisterHitlLifecycleAuditor = registerHitlLifecycleAuditor((event) => {
+        switch (event.type) {
+          case 'waiting':
+            audit.logHitlWaiting(undefined, {
+              executionId: event.executionId,
+              stepExecutionId: event.stepExecutionId,
+              stepType: event.stepType,
+            });
+            break;
+          case 'timed_out':
+            audit.logHitlTimedOut(undefined, {
+              executionId: event.executionId,
+              stepExecutionId: event.stepExecutionId,
+              stepType: event.stepType,
+            });
+            break;
+          case 'canceled':
+            audit.logExecutionCanceled(undefined, {
+              executionId: event.executionId,
+              channel: 'system',
+            });
+            break;
+        }
       });
     }
 
@@ -163,6 +206,9 @@ export class WorkflowsPlugin
   }
 
   public stop() {
+    this.unregisterHitlLifecycleAuditor?.();
+    this.unregisterHitlLifecycleAuditor = null;
+    this.workflowsService?.setStopping(true);
     this.availabilityUpdater?.stop();
   }
 }

@@ -9,12 +9,13 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { estypes } from '@elastic/elasticsearch';
+import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
 } from '@kbn/agent-builder-sml-plugin/server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { CustomRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
@@ -39,7 +40,6 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,
@@ -56,12 +56,7 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
-import {
-  parseWorkflowYamlToJSON,
-  parseYamlToJSONWithoutValidation,
-  stringifyWorkflowDefinition,
-  WorkflowValidationError,
-} from '@kbn/workflows-yaml';
+import { parseYamlToJSONWithoutValidation, WorkflowValidationError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import {
   type ExternalResumeFormPageParams,
@@ -74,18 +69,19 @@ import {
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type {
   SearchExecutionsViewParams,
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
-import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 import { formatWorkflowDiagnostic } from '../../common/lib/format_workflow_diagnostic';
-import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
 import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
@@ -169,8 +165,24 @@ export interface GetStepExecutionParams {
 export interface SearchStepExecutionsParams {
   workflowId: string;
   stepId?: string;
+  /**
+   * When set, only step executions of this type, e.g. `ai.agent`. A step id can be shared by more
+   * than one document — the engine's step-level timeout wrapper reuses it — so this narrows a
+   * search to the one that carries the step's own result.
+   */
+  stepType?: string;
+  /**
+   * When set, restricts the search to step executions belonging to these workflow runs. An empty
+   * array matches nothing. Keep it to a page of ids — it becomes a single ES `terms` clause.
+   */
+  workflowExecutionIds?: string[];
   includeInput?: boolean;
   includeOutput?: boolean;
+  /**
+   * When set, only these `_source` paths are returned, and `includeInput`/`includeOutput` are
+   * ignored. For reading a few fields off runs whose `output` can be megabytes.
+   */
+  sourceIncludes?: string[];
   page?: number;
   size?: number;
   /** Datemath lower bound for filtering by startedAt. */
@@ -198,6 +210,31 @@ export interface BulkScheduleWorkflowItem {
   inputs: Record<string, unknown>;
   triggeredBy: string;
   metadata?: WorkflowExecutionEventDispatchMetadata;
+}
+
+export type AlertPreprocessingContext = Pick<
+  CustomRequestHandlerContext<{ alerting: AlertingApiRequestHandlerContext }>,
+  'core' | 'alerting'
+>;
+
+export interface RunWorkflowWithAlertPreprocessingParams {
+  workflow: WorkflowExecutionEngineModel;
+  spaceId: string;
+  inputs: Record<string, unknown>;
+  request: KibanaRequest;
+  preprocessingContext: AlertPreprocessingContext;
+  metadata?: Record<string, unknown>;
+  /**
+   * Fields to merge into `event` *after* alert preprocessing. Use this to inject
+   * server-owned values (e.g. `caseIds`) that alert preprocessing would otherwise
+   * overwrite, because `preprocessAlertInputs` replaces the whole `event` object with
+   * the expanded alert-event shape.
+   */
+  eventOverrides?: Record<string, unknown>;
+}
+
+export interface RunWorkflowWithAlertPreprocessingResult {
+  workflowExecutionId: string;
 }
 
 const DEFAULT_EXECUTE_WORKFLOW_COMPLETION_TIMEOUT_SEC = 120;
@@ -257,11 +294,17 @@ const isExecuteInlineWorkflowParams = (
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
   private smlLogger: Logger | null = null;
+  private audit: WorkflowManagementAuditLog | null = null;
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    public readonly isWorkflowsAvailable: boolean
+    public readonly isWorkflowsAvailable: boolean,
+    private readonly logger: Logger
   ) {}
+
+  public setAuditLog(audit: WorkflowManagementAuditLog): void {
+    this.audit = audit;
+  }
 
   private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
     return this.workflowsService.getWorkflowsExecutionEngine();
@@ -279,7 +322,7 @@ export class WorkflowsManagementApi {
     this.smlIndexAttachment({
       request,
       originId,
-      attachmentType: WORKFLOW_SML_TYPE,
+      attachmentType: WORKFLOW_KI_TYPE,
       action,
     }).catch((error) => {
       this.smlLogger?.warn(
@@ -358,13 +401,7 @@ export class WorkflowsManagementApi {
       options
     );
     for (const created of result.created) {
-      const historyAction =
-        result.historyActionsById[created.id] ?? WorkflowChangeHistoryAction.workflowCreate;
-      this.notifySml(
-        created.id,
-        historyAction === WorkflowChangeHistoryAction.workflowUpdate ? 'update' : 'create',
-        request
-      );
+      this.notifySml(created.id, 'create', request);
     }
     return result;
   }
@@ -374,32 +411,23 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    // Parse and update the YAML to change the name
-    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
-      { loose: false },
-      spaceId,
-      request
-    );
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema, {
-      connectorParamsSchemaResolver,
-    });
-    if (parsedYaml.error) {
-      throw parsedYaml.error;
-    }
+    // Rewrite only the `name` field directly in the YAML text so that cloning
+    // works even when the source workflow's YAML is schema-invalid. Strictly
+    // parsing/validating here would reject invalid-but-editable workflows.
+    const cloneName = `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+      defaultMessage: 'Copy',
+    })}`;
+    const clonedYaml = updateWorkflowYamlFields(workflow.yaml, { name: cloneName });
 
-    const updatedYaml = {
-      ...parsedYaml.data,
-      name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
-        defaultMessage: 'Copy',
-      })}`,
-    };
-
-    // Convert back to YAML string using proper YAML stringification
-    const clonedYaml = stringifyWorkflowDefinition(updatedYaml as unknown as WorkflowYaml);
+    // `updateWorkflowYamlFields` cannot inject a `name` key when the YAML root is not a
+    // mapping (a scalar or sequence), so it returns the YAML unchanged in that case. Pass
+    // `cloneName` as an explicit fallback so the clone is still named "<name> Copy" instead
+    // of collapsing to "Untitled workflow".
     const result = await this.workflowsService.createWorkflow(
       { yaml: clonedYaml },
       spaceId,
-      request
+      request,
+      { nameFallback: cloneName }
     );
     this.notifySml(result.id, 'create', request);
     return result;
@@ -510,6 +538,56 @@ export class WorkflowsManagementApi {
       request
     );
     return executeResponse.workflowExecutionId;
+  }
+
+  /**
+   * Preprocesses alert inputs and starts a workflow without waiting for its execution document.
+   *
+   * When `eventOverrides` is supplied, its keys are merged into `event` *after* preprocessing.
+   * This is needed because `preprocessAlertInputs` replaces the whole `event` object with the
+   * expanded alert-event shape, so any caller-owned event fields must be re-applied afterwards.
+   */
+  public async runWorkflowWithAlertPreprocessing({
+    workflow,
+    spaceId,
+    inputs,
+    request,
+    preprocessingContext,
+    metadata,
+    eventOverrides,
+  }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
+    const processedInputs = await preprocessAlertInputs(
+      inputs,
+      preprocessingContext,
+      spaceId,
+      this.logger
+    );
+
+    const finalInputs =
+      eventOverrides != null
+        ? {
+            ...processedInputs,
+            event: {
+              ...(typeof processedInputs.event === 'object' &&
+              processedInputs.event !== null &&
+              !Array.isArray(processedInputs.event)
+                ? (processedInputs.event as Record<string, unknown>)
+                : {}),
+              ...eventOverrides,
+            },
+          }
+        : processedInputs;
+
+    const workflowExecutionId = await this.runWorkflow(
+      workflow,
+      spaceId,
+      finalInputs,
+      request,
+      undefined,
+      metadata
+    );
+
+    return { workflowExecutionId };
   }
 
   public async executeWorkflow(params: ExecuteWorkflowParams): Promise<ExecuteWorkflowResult> {
@@ -797,7 +875,7 @@ export class WorkflowsManagementApi {
   public async searchExecutionsView(
     params: SearchExecutionsViewParams,
     spaceId: string
-  ): Promise<estypes.SearchResponse<unknown>> {
+  ): Promise<WorkflowExecutionListDto> {
     return this.workflowsService.searchExecutionsView(params, spaceId);
   }
 
@@ -884,27 +962,53 @@ export class WorkflowsManagementApi {
   public async cancelWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { channel?: string }
   ): Promise<void> {
-    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
+    const channel = options?.channel;
+    try {
+      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+      await workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
+      this.audit?.logExecutionCanceled(request, { executionId: workflowExecutionId, channel });
+    } catch (error) {
+      this.audit?.logExecutionCanceled(request, {
+        executionId: workflowExecutionId,
+        channel,
+        error,
+      });
+      throw error;
+    }
   }
 
   public async cancelAllActiveWorkflowExecutions(
     workflowId: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { channel?: string }
   ): Promise<void> {
+    const channel = options?.channel;
     const workflow = await this.getWorkflow(workflowId, spaceId);
     if (!workflow) {
       throw new WorkflowNotFoundError(workflowId);
     }
-    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
-      spaceId,
-      workflowId,
-      schedulingRequest: request,
-    });
+    try {
+      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+      await workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
+        spaceId,
+        workflowId,
+        schedulingRequest: request,
+        onCancelled: (executionId) => {
+          this.audit?.logExecutionCanceled(request, { executionId, channel });
+        },
+      });
+    } catch (error) {
+      this.audit?.logExecutionCanceled(request, {
+        workflowId,
+        channel,
+        error,
+      });
+      throw error;
+    }
   }
 
   /**
@@ -918,28 +1022,45 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { channel?: string; stepExecutionId?: string }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
-    const stepExecutionId =
-      options?.stepExecutionId ??
-      (await this.workflowsService.getWaitingStepExecutionId(executionId, spaceId));
+    const channel = options?.channel;
+    try {
+      const stepExecutionId =
+        options?.stepExecutionId ??
+        (await this.workflowsService.getWaitingStepExecutionId(executionId, spaceId));
 
-    if (stepExecutionId) {
-      const claimed = await this.workflowsService.markStepAsResponded(
-        stepExecutionId,
-        request,
-        options?.channel ?? 'inbox',
-        spaceId
-      );
-      if (!claimed) {
-        throw new WorkflowExecutionInvalidStatusError(
-          executionId,
-          'already responded to or no longer waiting for input',
-          'waiting_for_input'
+      if (stepExecutionId) {
+        const claimed = await this.workflowsService.markStepAsResponded(
+          stepExecutionId,
+          request,
+          channel,
+          spaceId
         );
+        if (!claimed) {
+          throw new WorkflowExecutionInvalidStatusError(
+            executionId,
+            'already responded to or no longer waiting for input',
+            'waiting_for_input'
+          );
+        }
       }
-    }
 
-    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
+      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+      const result = await workflowsExecutionEngine.resumeWorkflowExecution(
+        executionId,
+        spaceId,
+        input,
+        request
+      );
+      this.audit?.logExecutionResumed(request, {
+        executionId,
+        resumedBy: result.resumedBy,
+        channel,
+      });
+      return result;
+    } catch (error) {
+      this.audit?.logExecutionResumed(request, { executionId, channel, error });
+      throw error;
+    }
   }
 
   /** Cross-workflow listing of active `waitForInput` step executions. */
@@ -951,15 +1072,53 @@ export class WorkflowsManagementApi {
   }
 
   public async resumeWorkflowExecutionExternallyViaGet(
-    params: ExternalResumeViaGetParams
+    params: ExternalResumeViaGetParams & { request: KibanaRequest }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
-    return resumeWorkflowExecutionExternallyViaGet(this.workflowsService, params);
+    const { request, ...resumeParams } = params;
+    try {
+      const result = await resumeWorkflowExecutionExternallyViaGet(
+        this.workflowsService,
+        resumeParams
+      );
+      this.audit?.logExecutionResumed(request, {
+        executionId: resumeParams.executionId,
+        resumedBy: result.resumedBy,
+        channel: 'external',
+      });
+      return result;
+    } catch (error) {
+      this.audit?.logExecutionResumed(request, {
+        executionId: resumeParams.executionId,
+        channel: 'external',
+        error,
+      });
+      throw error;
+    }
   }
 
   public async resumeWorkflowExecutionExternallyWithInput(
-    params: ExternalResumeWorkflowExecutionWithInputParams
+    params: ExternalResumeWorkflowExecutionWithInputParams & { request: KibanaRequest }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
-    return resumeWorkflowExecutionExternallyWithInput(this.workflowsService, params);
+    const { request, ...resumeParams } = params;
+    try {
+      const result = await resumeWorkflowExecutionExternallyWithInput(
+        this.workflowsService,
+        resumeParams
+      );
+      this.audit?.logExecutionResumed(request, {
+        executionId: resumeParams.executionId,
+        resumedBy: result.resumedBy,
+        channel: 'external',
+      });
+      return result;
+    } catch (error) {
+      this.audit?.logExecutionResumed(request, {
+        executionId: resumeParams.executionId,
+        channel: 'external',
+        error,
+      });
+      throw error;
+    }
   }
 
   public async getExternalResumeFormPage(params: ExternalResumeFormPageParams): Promise<string> {
@@ -990,7 +1149,7 @@ export class WorkflowsManagementApi {
   public async markStepAsResponded(
     stepExecutionId: string,
     request: KibanaRequest,
-    channel: string,
+    channel: string | undefined,
     spaceId: string
   ): Promise<boolean> {
     return this.workflowsService.markStepAsResponded(stepExecutionId, request, channel, spaceId);

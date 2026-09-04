@@ -57,7 +57,9 @@ describe('WorkflowsPlugin', () => {
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let setupDeps: {
+    actions: { isInboundEventsEnabled: boolean };
     triggersActionsUi: { actionTypeRegistry: { register: jest.Mock } };
+    workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createSetup>;
   };
   let startDeps: {
     workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createStart>;
@@ -71,7 +73,9 @@ describe('WorkflowsPlugin', () => {
     coreStart = coreMock.createStart();
     coreSetup.plugins.onStart.mockReturnValue(Promise.resolve({ found: false }));
     setupDeps = {
+      actions: { isInboundEventsEnabled: false },
       triggersActionsUi: { actionTypeRegistry: { register: jest.fn() } },
+      workflowsExtensions: workflowsExtensionsMock.createSetup(),
     };
     startDeps = {
       workflowsExtensions: workflowsExtensionsMock.createStart(),
@@ -107,12 +111,35 @@ describe('WorkflowsPlugin', () => {
           // Library is registered by default at bootstrap; the executions link is gated by the
           // global uiSetting (off by default). Both are refined reactively at start().
           deepLinks: [
-            expect.objectContaining({ id: 'workflows', path: '/' }),
+            expect.objectContaining({ id: 'list', path: '/' }),
             expect.objectContaining({ id: 'library', path: '/library' }),
           ],
         })
       );
       expect(result).toEqual({});
+    });
+
+    it('does not register inboundWebhook.received when inbound events are disabled', () => {
+      coreSetup.uiSettings.get.mockReturnValue(true);
+
+      plugin.setup(coreSetup, setupDeps as any);
+
+      expect(setupDeps.workflowsExtensions.registerTriggerDefinition).not.toHaveBeenCalled();
+    });
+
+    it('registers inboundWebhook.received when inbound events are enabled', () => {
+      coreSetup.uiSettings.get.mockReturnValue(true);
+      setupDeps.actions.isInboundEventsEnabled = true;
+
+      plugin.setup(coreSetup, setupDeps as any);
+
+      expect(setupDeps.workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'inboundWebhook.received',
+          stability: 'tech_preview',
+          requiresConnectorId: true,
+        })
+      );
     });
   });
 

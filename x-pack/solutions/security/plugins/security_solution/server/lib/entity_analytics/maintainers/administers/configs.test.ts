@@ -58,7 +58,7 @@ describe('ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   it.each(ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS)(
     '$id: indexPattern points to the entity index (not a log index)',
     (config) => {
-      expect(config.indexPattern('myns')).toContain('.entities.v2.latest.security_myns');
+      expect(config.indexPattern('myns')).toBe('entities-latest-myns');
       expect(config.indexPattern('default')).not.toContain('myns');
     }
   );

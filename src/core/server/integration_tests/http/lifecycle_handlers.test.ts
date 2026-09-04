@@ -14,6 +14,10 @@ import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
 import type { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
+import {
+  createProvenanceTelemetryPostAuthHandler,
+  PROVENANCE_TELEMETRY_COUNTER_TYPE,
+} from '@kbn/core-http-server-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { schema } from '@kbn/config-schema';
@@ -266,6 +270,144 @@ describe('core lifecycle handlers', () => {
           await getSupertest(method.toLowerCase(), xsrfDisabledTestPath).expect(200, 'ok');
         });
       });
+    });
+  });
+
+  describe('provenance telemetry post-auth handler (dry-run)', () => {
+    const testPath = '/provenance/test/route';
+    const publicTestPath = '/provenance/test/route_public';
+    const browserUserAgent =
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36';
+    const incrementCounter = jest.fn();
+
+    beforeEach(async () => {
+      await server?.stop();
+      incrementCounter.mockReset();
+      const configService = createConfigService(testConfig);
+      server = createInternalHttpService({ configService });
+      await server.preboot({
+        context: contextServiceMock.createPrebootContract(),
+        docLinks: docLinksServiceMock.createSetupContract(),
+      });
+      const serverSetup = await server.setup(setupDeps);
+      router = serverSetup.createRouter('/');
+      innerServer = serverSetup.server;
+
+      serverSetup.registerOnPostAuth(
+        createProvenanceTelemetryPostAuthHandler(
+          () => ({ xsrf: testConfig.server!.xsrf as any }),
+          incrementCounter
+        )
+      );
+
+      router.post(
+        { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => res.ok({ body: 'ok' })
+      );
+      router.post(
+        {
+          path: allowlistedTestPath,
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+        },
+        (context, req, res) => res.ok({ body: 'ok' })
+      );
+      router.get(
+        { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => res.ok({ body: 'ok' })
+      );
+      router.post(
+        {
+          path: publicTestPath,
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+          options: { access: 'public' },
+        },
+        (context, req, res) => res.ok({ body: 'ok' })
+      );
+
+      await server.start();
+    });
+
+    it('counts a state-changing request without altering the response', async () => {
+      await supertest(innerServer.listener)
+        .post(testPath)
+        .set(xsrfHeader, 'anything')
+        .set('user-agent', 'curl/8.1.2')
+        .expect(200, 'ok');
+
+      const counterNames = incrementCounter.mock.calls.map(([params]) => params.counterName);
+      expect(counterNames).toEqual([
+        'sec_fetch_site:absent',
+        'sec_fetch_mode:absent',
+        'origin:absent',
+        'user_agent:non_browser',
+        'provenance_decision:would_allow',
+        'method:post',
+        'route_access:internal',
+      ]);
+      expect(incrementCounter).toHaveBeenCalledWith(
+        expect.objectContaining({ counterType: PROVENANCE_TELEMETRY_COUNTER_TYPE })
+      );
+    });
+
+    it('never blocks a request that would be rejected under the proposed provenance model', async () => {
+      await supertest(innerServer.listener)
+        .post(testPath)
+        .set(xsrfHeader, 'anything')
+        .set('sec-fetch-site', 'cross-site')
+        .expect(200, 'ok');
+
+      const counterNames = incrementCounter.mock.calls.map(([params]) => params.counterName);
+      expect(counterNames).toContain('provenance_decision:would_block');
+    });
+
+    it('does not count allowlisted paths', async () => {
+      await supertest(innerServer.listener).post(allowlistedTestPath).expect(200, 'ok');
+      expect(incrementCounter).not.toHaveBeenCalled();
+    });
+
+    it('does not count safe methods', async () => {
+      await supertest(innerServer.listener).get(testPath).expect(200, 'ok');
+      expect(incrementCounter).not.toHaveBeenCalled();
+    });
+
+    it('flags the gap for a browser user agent missing provenance headers', async () => {
+      await supertest(innerServer.listener)
+        .post(testPath)
+        .set(xsrfHeader, 'anything')
+        .set('user-agent', browserUserAgent)
+        .expect(200, 'ok');
+
+      const counterNames = incrementCounter.mock.calls.map(([params]) => params.counterName);
+      expect(counterNames).toEqual(
+        expect.arrayContaining([
+          'sec_fetch_mode:absent',
+          'user_agent:browser',
+          'gap:browser_missing_provenance',
+        ])
+      );
+    });
+
+    it('buckets a present Sec-Fetch-Mode value', async () => {
+      await supertest(innerServer.listener)
+        .post(testPath)
+        .set(xsrfHeader, 'anything')
+        .set('sec-fetch-mode', 'cors')
+        .expect(200, 'ok');
+
+      const counterNames = incrementCounter.mock.calls.map(([params]) => params.counterName);
+      expect(counterNames).toContain('sec_fetch_mode:cors');
+    });
+
+    it('records public route access', async () => {
+      await supertest(innerServer.listener)
+        .post(publicTestPath)
+        .set(xsrfHeader, 'anything')
+        .expect(200, 'ok');
+
+      const counterNames = incrementCounter.mock.calls.map(([params]) => params.counterName);
+      expect(counterNames).toContain('route_access:public');
     });
   });
 

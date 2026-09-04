@@ -25,6 +25,7 @@ import styled from '@emotion/styled';
 import type { ActionStatus } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
 
+import { isScheduledAction } from './agent_activity_helper';
 import { formattedTime, inProgressDescription, inProgressTitle } from './helpers';
 
 import { ViewAgentsButton } from './view_agents_button';
@@ -57,15 +58,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
     }
   }, [action, abortUpgrade]);
 
-  const isScheduled = useMemo(() => {
-    if (!action.startTime) {
-      return false;
-    }
-    const now = Date.now();
-    const startDate = new Date(action.startTime).getTime();
-
-    return startDate > now;
-  }, [action]);
+  const isScheduled = useMemo(() => isScheduledAction(action), [action]);
 
   const showCancelButton = useMemo(() => {
     return isScheduled || action.hasRolloutPeriod;

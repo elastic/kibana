@@ -19,7 +19,7 @@ export const createSignificantEventsMemorySkill = (options: MemoryToolsOptions) 
     description,
     content,
     getInlineTools: () =>
-      createMemoryTools(options).map(({ tags, id, ...rest }) => ({
+      createMemoryTools(options).map(({ id, ...rest }) => ({
         ...rest,
         id: id.replaceAll('.', '_'),
       })),

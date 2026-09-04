@@ -1,26 +1,9 @@
 {
-  "sha1": "e801ccb40115e272ff9cb74f9a7a14151bb82c73",
+  "sha1": "df6cc257ec6c21198e0eca7ee194ce2757b63d4c",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "b24d1ecdbd533dc-9b4248bf82e44c0",
-      "title": "Clean up APM data after UI parallel tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 14,
-        "column": 1
-      }
-    },
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -33,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 30,
+        "line": 6,
         "column": 1
       }
     },
@@ -47,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
-        "line": 87,
-        "column": 7
+        "line": 78,
+        "column": 40
       }
     },
     {
@@ -61,8 +44,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
-        "line": 93,
-        "column": 7
+        "line": 80,
+        "column": 13
       }
     },
     {
@@ -75,8 +58,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 87,
-        "column": 7
+        "line": 82,
+        "column": 43
       }
     },
     {
@@ -89,8 +72,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 93,
-        "column": 7
+        "line": 82,
+        "column": 66
       }
     },
     {
@@ -103,8 +86,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 99,
-        "column": 7
+        "line": 85,
+        "column": 5
       }
     },
     {
@@ -117,8 +100,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 105,
-        "column": 7
+        "line": 90,
+        "column": 5
       }
     },
     {
@@ -131,8 +114,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 111,
-        "column": 7
+        "line": 96,
+        "column": 5
       }
     },
     {
@@ -145,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 117,
-        "column": 7
+        "line": 102,
+        "column": 5
       }
     },
     {
@@ -161,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 88,
+        "column": 23
       }
     },
     {
@@ -175,8 +158,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 140,
-        "column": 7
+        "line": 119,
+        "column": 15
       }
     },
     {
@@ -189,8 +172,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 146,
-        "column": 7
+        "line": 125,
+        "column": 13
       }
     },
     {
@@ -205,8 +188,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/correlations/correlations.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 24,
+        "column": 26
       }
     },
     {
@@ -221,8 +204,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/correlations/correlations.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 37,
+        "column": 11
       }
     },
     {
@@ -237,8 +220,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 19,
+        "column": 25
       }
     },
     {
@@ -253,8 +236,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
-        "line": 31,
-        "column": 9
+        "line": 23,
+        "column": 62
       }
     },
     {
@@ -269,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
-        "line": 42,
-        "column": 9
+        "line": 29,
+        "column": 7
       }
     },
     {
@@ -285,8 +268,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 16,
+        "column": 80
       }
     },
     {
@@ -301,8 +284,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 23,
+        "column": 15
       }
     },
     {
@@ -317,8 +300,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 40,
+        "column": 20
       }
     },
     {
@@ -333,7 +316,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 71,
+        "line": 48,
         "column": 9
       }
     },
@@ -349,8 +332,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 61,
+        "column": 15
       }
     },
     {
@@ -365,8 +348,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 71,
+        "column": 10
       }
     },
     {
@@ -381,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 19,
+        "column": 25
       }
     },
     {
@@ -397,8 +380,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 44,
-        "column": 9
+        "line": 32,
+        "column": 15
       }
     },
     {
@@ -413,8 +396,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 44,
+        "column": 62
       }
     },
     {
@@ -429,8 +412,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 76,
-        "column": 9
+        "line": 59,
+        "column": 20
       }
     },
     {
@@ -445,8 +428,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -461,8 +444,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
-        "line": 40,
-        "column": 9
+        "line": 28,
+        "column": 13
       }
     },
     {
@@ -477,8 +460,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
-        "line": 63,
-        "column": 9
+        "line": 45,
+        "column": 13
       }
     },
     {
@@ -493,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
-        "line": 83,
-        "column": 9
+        "line": 64,
+        "column": 11
       }
     },
     {
@@ -509,8 +492,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 19,
+        "column": 48
       }
     },
     {
@@ -525,8 +508,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 33,
+        "column": 15
       }
     },
     {
@@ -541,8 +524,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
-        "line": 60,
-        "column": 9
+        "line": 46,
+        "column": 62
       }
     },
     {
@@ -557,8 +540,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 61,
+        "column": 11
       }
     },
     {
@@ -567,12 +550,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 22,
-        "column": 36
+        "line": 25,
+        "column": 38
       }
     },
     {
@@ -581,12 +566,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 35,
-        "column": 36
+        "line": 34,
+        "column": 7
       }
     },
     {
@@ -595,12 +582,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 47,
-        "column": 36
+        "line": 42,
+        "column": 13
       }
     },
     {
@@ -609,12 +598,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 80,
-        "column": 20
+        "line": 66,
+        "column": 9
       }
     },
     {
@@ -623,12 +614,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 92,
-        "column": 20
+        "line": 75,
+        "column": 15
       }
     },
     {
@@ -637,12 +630,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 105,
-        "column": 36
+        "line": 86,
+        "column": 13
       }
     },
     {
@@ -657,8 +652,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -673,8 +668,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 41,
-        "column": 9
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -689,8 +684,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 79,
+        "column": 12
       }
     },
     {
@@ -705,8 +700,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 142,
-        "column": 9
+        "line": 117,
+        "column": 15
       }
     },
     {
@@ -721,8 +716,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 160,
-        "column": 9
+        "line": 127,
+        "column": 93
       }
     },
     {
@@ -737,8 +732,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 181,
-        "column": 9
+        "line": 142,
+        "column": 20
       }
     },
     {
@@ -747,12 +742,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_rules.spec.ts",
-        "line": 20,
-        "column": 7
+        "line": 17,
+        "column": 86
       }
     },
     {
@@ -761,12 +758,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 35,
-        "column": 7
+        "line": 60,
+        "column": 20
       }
     },
     {
@@ -775,12 +774,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 45,
-        "column": 7
+        "line": 63,
+        "column": 13
       }
     },
     {
@@ -789,12 +790,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 55,
-        "column": 7
+        "line": 70,
+        "column": 10
       }
     },
     {
@@ -803,12 +806,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 69,
-        "column": 7
+        "line": 76,
+        "column": 13
       }
     },
     {
@@ -821,8 +826,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 33,
+        "column": 23
       }
     },
     {
@@ -835,8 +840,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
-        "line": 49,
-        "column": 7
+        "line": 39,
+        "column": 5
       }
     },
     {
@@ -849,8 +854,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 42,
+        "column": 56
       }
     },
     {
@@ -863,8 +868,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 47,
+        "column": 16
       }
     },
     {
@@ -879,8 +884,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -895,8 +900,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 32,
+        "column": 17
       }
     },
     {
@@ -911,8 +916,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 41,
+        "column": 11
       }
     },
     {
@@ -927,8 +932,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 54,
+        "column": 10
       }
     },
     {
@@ -944,7 +949,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/mobile/mobile_most_used_charts.spec.ts",
         "line": 32,
-        "column": 9
+        "column": 10
       }
     },
     {
@@ -959,8 +964,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/mobile/mobile_most_used_charts.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -975,8 +980,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/mobile/mobile_transaction_details.spec.ts",
-        "line": 31,
-        "column": 9
+        "line": 21,
+        "column": 13
       }
     },
     {
@@ -991,8 +996,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/mobile/mobile_transactions.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 28,
+        "column": 7
       }
     },
     {
@@ -1008,7 +1013,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1024,7 +1029,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1040,7 +1045,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1056,7 +1061,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1072,7 +1077,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1088,7 +1093,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1104,7 +1109,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1120,7 +1125,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1136,7 +1141,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1152,7 +1157,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1168,7 +1173,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1184,7 +1189,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
         "line": 35,
-        "column": 13
+        "column": 52
       }
     },
     {
@@ -1199,8 +1204,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/not_found.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -1209,12 +1214,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
-        "line": 32,
-        "column": 7
+        "line": 51,
+        "column": 11
       }
     },
     {
@@ -1223,12 +1230,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 57,
+        "column": 42
       }
     },
     {
@@ -1237,12 +1246,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 75,
+        "column": 20
       }
     },
     {
@@ -1251,12 +1262,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
-        "line": 84,
-        "column": 7
+        "line": 82,
+        "column": 13
       }
     },
     {
@@ -1265,12 +1278,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
-        "line": 110,
-        "column": 7
+        "line": 96,
+        "column": 18
       }
     },
     {
@@ -1283,8 +1298,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/tutorial.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 55,
+        "column": 60
       }
     },
     {
@@ -1297,8 +1312,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/tutorial.spec.ts",
-        "line": 54,
-        "column": 7
+        "line": 61,
+        "column": 5
       }
     },
     {
@@ -1313,8 +1328,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 73,
-        "column": 9
+        "line": 68,
+        "column": 26
       }
     },
     {
@@ -1329,8 +1344,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 95,
-        "column": 9
+        "line": 83,
+        "column": 15
       }
     },
     {
@@ -1345,8 +1360,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_groups/service_groups.spec.ts",
-        "line": 28,
-        "column": 9
+        "line": 19,
+        "column": 89
       }
     },
     {
@@ -1361,8 +1376,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 24,
-        "column": 9
+        "line": 18,
+        "column": 13
       }
     },
     {
@@ -1377,8 +1392,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 40,
+        "column": 15
       }
     },
     {
@@ -1393,7 +1408,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 57,
+        "line": 46,
         "column": 9
       }
     },
@@ -1409,8 +1424,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 70,
-        "column": 9
+        "line": 59,
+        "column": 29
       }
     },
     {
@@ -1425,7 +1440,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 79,
+        "line": 65,
         "column": 9
       }
     },
@@ -1441,8 +1456,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 27,
-        "column": 9
+        "line": 21,
+        "column": 13
       }
     },
     {
@@ -1457,8 +1472,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 44,
-        "column": 9
+        "line": 37,
+        "column": 17
       }
     },
     {
@@ -1473,8 +1488,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 94,
-        "column": 9
+        "line": 79,
+        "column": 15
       }
     },
     {
@@ -1487,8 +1502,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_alert_badge.spec.ts",
-        "line": 143,
-        "column": 7
+        "line": 133,
+        "column": 9
       }
     },
     {
@@ -1501,8 +1516,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_alert_badge.spec.ts",
-        "line": 149,
-        "column": 7
+        "line": 137,
+        "column": 15
       }
     },
     {
@@ -1517,8 +1532,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 40,
-        "column": 9
+        "line": 34,
+        "column": 7
       }
     },
     {
@@ -1533,8 +1548,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 71,
-        "column": 9
+        "line": 60,
+        "column": 15
       }
     },
     {
@@ -1549,8 +1564,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 98,
-        "column": 9
+        "line": 80,
+        "column": 14
       }
     },
     {
@@ -1565,7 +1580,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 110,
+        "line": 95,
         "column": 9
       }
     },
@@ -1581,13 +1596,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 122,
-        "column": 9
+        "line": 103,
+        "column": 13
       }
     },
     {
-      "id": "6a80f754a8758b3-b3c53cac9ad403b",
-      "title": "Service map - nodes, edges and popovers navigates to Discover (traces)",
+      "id": "6a80f754a8758b3-e0bd84c24095102",
+      "title": "Service map - nodes, edges and popovers navigates to Discover (traces) from flyout footer actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1597,13 +1612,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 136,
-        "column": 9
+        "line": 111,
+        "column": 13
       }
     },
     {
-      "id": "6a80f754a8758b3-f4d15e4df57ceca",
-      "title": "Service map - nodes, edges and popovers navigates to Discover (logs)",
+      "id": "6a80f754a8758b3-02d98c7a0ea5036",
+      "title": "Service map - nodes, edges and popovers navigates to Discover (logs) from flyout footer actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1613,13 +1628,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 153,
-        "column": 9
+        "line": 123,
+        "column": 20
       }
     },
     {
-      "id": "6a80f754a8758b3-de729fac031b3c6",
-      "title": "Service map - nodes, edges and popovers navigates to Service Details (alerts) and page loads",
+      "id": "6a80f754a8758b3-be54d3b49115fd0",
+      "title": "Service map - nodes, edges and popovers navigates to Observability Alerts from flyout footer actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1629,13 +1644,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 132,
+        "column": 14
       }
     },
     {
-      "id": "6a80f754a8758b3-f61f62040135513",
-      "title": "Service map - nodes, edges and popovers navigates to SLOs and page loads",
+      "id": "6a80f754a8758b3-aced03aeab6c955",
+      "title": "Service map - nodes, edges and popovers navigates to SLOs from flyout footer actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1645,8 +1660,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 185,
-        "column": 9
+        "line": 138,
+        "column": 67
       }
     },
     {
@@ -1661,8 +1676,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 202,
-        "column": 9
+        "line": 149,
+        "column": 22
       }
     },
     {
@@ -1677,8 +1692,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 218,
-        "column": 9
+        "line": 155,
+        "column": 65
       }
     },
     {
@@ -1693,8 +1708,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 58,
-        "column": 9
+        "line": 43,
+        "column": 23
       }
     },
     {
@@ -1709,8 +1724,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 256,
-        "column": 9
+        "line": 236,
+        "column": 16
       }
     },
     {
@@ -1725,13 +1740,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
-      "id": "431bbf1927933f1-9d4b191090eb231",
-      "title": "Service map shows a detailed service map",
+      "id": "431bbf1927933f1-84486d1480fb64c",
+      "title": "Service map navigates from the contextual map to the global map with service context",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1741,8 +1756,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 33,
-        "column": 9
+        "line": 25,
+        "column": 13
       }
     },
     {
@@ -1757,8 +1772,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 37,
+        "column": 15
       }
     },
     {
@@ -1773,8 +1788,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 47,
+        "column": 25
       }
     },
     {
@@ -1789,8 +1804,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/alerts_tab.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 23,
+        "column": 22
       }
     },
     {
@@ -1805,7 +1820,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/alerts_tab.spec.ts",
-        "line": 38,
+        "line": 35,
         "column": 9
       }
     },
@@ -1821,8 +1836,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/alerts_tab.spec.ts",
-        "line": 71,
-        "column": 9
+        "line": 60,
+        "column": 15
       }
     },
     {
@@ -1837,8 +1852,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 20,
+        "column": 25
       }
     },
     {
@@ -1853,7 +1868,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
-        "line": 54,
+        "line": 43,
         "column": 9
       }
     },
@@ -1869,8 +1884,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1885,8 +1900,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1901,8 +1916,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1917,8 +1932,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1933,8 +1948,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1949,8 +1964,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1965,8 +1980,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1981,8 +1996,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1997,8 +2012,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -2013,8 +2028,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -2029,8 +2044,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -2045,8 +2060,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -2061,8 +2076,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -2077,8 +2092,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -2093,8 +2108,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -2109,8 +2124,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -2125,8 +2140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -2141,8 +2156,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 23,
+        "column": 25
       }
     },
     {
@@ -2157,8 +2172,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
-        "line": 84,
-        "column": 9
+        "line": 70,
+        "column": 26
       }
     },
     {
@@ -2173,8 +2188,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
-        "line": 133,
-        "column": 9
+        "line": 112,
+        "column": 26
       }
     },
     {
@@ -2189,8 +2204,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
-        "line": 31,
-        "column": 9
+        "line": 28,
+        "column": 25
       }
     },
     {
@@ -2205,7 +2220,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
-        "line": 72,
+        "line": 59,
         "column": 9
       }
     },
@@ -2221,8 +2236,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
-        "line": 112,
-        "column": 9
+        "line": 96,
+        "column": 15
       }
     },
     {
@@ -2237,8 +2252,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/mobile_service_overview_contextual_service_map.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -2253,8 +2268,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_aws_lambda.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -2269,8 +2284,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_azure_functions.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -2285,8 +2300,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_components.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -2301,8 +2316,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_components.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 69,
+        "column": 17
       }
     },
     {
@@ -2317,8 +2332,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_contextual_service_map.spec.ts",
-        "line": 25,
-        "column": 9
+        "line": 22,
+        "column": 25
       }
     },
     {
@@ -2333,8 +2348,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_contextual_service_map.spec.ts",
-        "line": 59,
-        "column": 9
+        "line": 48,
+        "column": 26
       }
     },
     {
@@ -2349,8 +2364,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -2365,8 +2380,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 49,
+        "column": 15
       }
     },
     {
@@ -2381,8 +2396,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 61,
+        "column": 13
       }
     },
     {
@@ -2397,8 +2412,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
-        "line": 94,
-        "column": 9
+        "line": 78,
+        "column": 13
       }
     },
     {
@@ -2413,8 +2428,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
-        "line": 113,
-        "column": 9
+        "line": 90,
+        "column": 99
       }
     },
     {
@@ -2429,8 +2444,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -2445,8 +2460,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 42,
-        "column": 9
+        "line": 34,
+        "column": 20
       }
     },
     {
@@ -2461,8 +2476,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 65,
-        "column": 9
+        "line": 54,
+        "column": 15
       }
     },
     {
@@ -2477,8 +2492,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 91,
-        "column": 9
+        "line": 76,
+        "column": 58
       }
     },
     {
@@ -2493,8 +2508,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 114,
-        "column": 9
+        "line": 93,
+        "column": 22
       }
     },
     {
@@ -2509,8 +2524,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 142,
-        "column": 9
+        "line": 116,
+        "column": 20
       }
     },
     {
@@ -2525,8 +2540,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 169,
-        "column": 9
+        "line": 142,
+        "column": 10
       }
     },
     {
@@ -2541,8 +2556,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 192,
-        "column": 9
+        "line": 156,
+        "column": 20
       }
     },
     {
@@ -2557,8 +2572,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 239,
-        "column": 9
+        "line": 194,
+        "column": 20
       }
     },
     {
@@ -2573,8 +2588,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -2589,7 +2604,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 51,
+        "line": 41,
         "column": 9
       }
     },
@@ -2605,7 +2620,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 75,
+        "line": 58,
         "column": 9
       }
     },
@@ -2621,8 +2636,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 96,
-        "column": 9
+        "line": 77,
+        "column": 22
       }
     },
     {
@@ -2637,8 +2652,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 116,
-        "column": 9
+        "line": 96,
+        "column": 61
       }
     },
     {
@@ -2653,7 +2668,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 133,
+        "line": 109,
         "column": 9
       }
     },
@@ -2669,8 +2684,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -2685,8 +2700,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 44,
-        "column": 9
+        "line": 32,
+        "column": 15
       }
     },
     {
@@ -2701,8 +2716,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 67,
-        "column": 9
+        "line": 48,
+        "column": 13
       }
     },
     {
@@ -2717,8 +2732,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 90,
-        "column": 9
+        "line": 68,
+        "column": 20
       }
     },
     {
@@ -2733,8 +2748,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 116,
-        "column": 9
+        "line": 90,
+        "column": 10
       }
     },
     {
@@ -2749,8 +2764,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -2765,8 +2780,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 34,
+        "column": 15
       }
     },
     {
@@ -2781,8 +2796,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
-        "line": 66,
-        "column": 9
+        "line": 49,
+        "column": 11
       }
     },
     {
@@ -2797,8 +2812,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
-        "line": 91,
-        "column": 9
+        "line": 68,
+        "column": 20
       }
     },
     {
@@ -2813,8 +2828,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -2829,8 +2844,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 49,
+        "column": 15
       }
     },
     {
@@ -2845,8 +2860,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 61,
+        "column": 13
       }
     },
     {
@@ -2861,8 +2876,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 104,
-        "column": 9
+        "line": 80,
+        "column": 20
       }
     },
     {
@@ -2877,7 +2892,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 124,
+        "line": 101,
         "column": 9
       }
     },
@@ -2893,8 +2908,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 143,
-        "column": 9
+        "line": 114,
+        "column": 13
       }
     },
     {
@@ -2909,8 +2924,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 19,
+        "column": 25
       }
     },
     {
@@ -2925,8 +2940,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 41,
+        "column": 13
       }
     },
     {
@@ -2941,8 +2956,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 67,
-        "column": 9
+        "line": 52,
+        "column": 13
       }
     },
     {
@@ -2957,7 +2972,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 106,
+        "line": 83,
         "column": 9
       }
     },
@@ -2973,8 +2988,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 134,
-        "column": 9
+        "line": 108,
+        "column": 11
       }
     },
     {
@@ -2989,8 +3004,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 156,
-        "column": 9
+        "line": 125,
+        "column": 15
       }
     },
     {
@@ -3005,8 +3020,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/time_comparison.spec.ts",
-        "line": 24,
-        "column": 9
+        "line": 21,
+        "column": 25
       }
     },
     {
@@ -3021,7 +3036,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/time_comparison.spec.ts",
-        "line": 41,
+        "line": 32,
         "column": 9
       }
     },
@@ -3037,8 +3052,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/time_comparison.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 43,
+        "column": 22
       }
     },
     {
@@ -3047,12 +3062,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 13,
-        "column": 7
+        "line": 18,
+        "column": 10
       }
     },
     {
@@ -3061,12 +3078,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 27,
-        "column": 7
+        "line": 28,
+        "column": 15
       }
     },
     {
@@ -3075,12 +3094,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 40,
+        "column": 13
       }
     },
     {
@@ -3089,12 +3110,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 61,
-        "column": 7
+        "line": 49,
+        "column": 20
       }
     },
     {
@@ -3110,7 +3133,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_keys.spec.ts",
         "line": 17,
-        "column": 9
+        "column": 10
       }
     },
     {
@@ -3125,8 +3148,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_keys.spec.ts",
-        "line": 27,
-        "column": 9
+        "line": 20,
+        "column": 7
       }
     },
     {
@@ -3141,8 +3164,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 41,
-        "column": 9
+        "line": 34,
+        "column": 66
       }
     },
     {
@@ -3157,8 +3180,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 51,
-        "column": 9
+        "line": 38,
+        "column": 26
       }
     },
     {
@@ -3173,8 +3196,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 75,
-        "column": 9
+        "line": 53,
+        "column": 62
       }
     },
     {
@@ -3189,8 +3212,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 45,
+        "column": 40
       }
     },
     {
@@ -3205,8 +3228,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
-        "line": 68,
-        "column": 9
+        "line": 55,
+        "column": 39
       }
     },
     {
@@ -3222,7 +3245,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/general_settings.spec.ts",
         "line": 16,
-        "column": 9
+        "column": 10
       }
     },
     {
@@ -3237,8 +3260,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/general_settings.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 23,
+        "column": 26
       }
     },
     {
@@ -3251,8 +3274,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 21,
+        "column": 21
       }
     },
     {
@@ -3265,8 +3288,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
-        "line": 40,
-        "column": 7
+        "line": 27,
+        "column": 33
       }
     },
     {
@@ -3279,8 +3302,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
-        "line": 17,
-        "column": 7
+        "line": 13,
+        "column": 8
       }
     },
     {
@@ -3293,8 +3316,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 15,
+        "column": 5
       }
     },
     {
@@ -3307,8 +3330,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
-        "line": 38,
-        "column": 7
+        "line": 19,
+        "column": 32
       }
     },
     {
@@ -3321,8 +3344,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_functionality.spec.ts",
-        "line": 25,
-        "column": 7
+        "line": 20,
+        "column": 28
       }
     },
     {
@@ -3337,8 +3360,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_permissions.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -3353,8 +3376,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 31,
-        "column": 9
+        "line": 28,
+        "column": 25
       }
     },
     {
@@ -3369,8 +3392,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 77,
-        "column": 9
+        "line": 68,
+        "column": 15
       }
     },
     {
@@ -3385,8 +3408,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 114,
-        "column": 9
+        "line": 99,
+        "column": 17
       }
     },
     {
@@ -3401,8 +3424,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 151,
-        "column": 9
+        "line": 134,
+        "column": 24
       }
     },
     {
@@ -3417,8 +3440,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 186,
-        "column": 9
+        "line": 163,
+        "column": 48
       }
     },
     {
@@ -3433,8 +3456,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
-        "line": 25,
-        "column": 9
+        "line": 22,
+        "column": 25
       }
     },
     {
@@ -3449,8 +3472,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 40,
+        "column": 13
       }
     },
     {
@@ -3465,8 +3488,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -3481,8 +3504,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 89,
-        "column": 9
+        "line": 71,
+        "column": 15
       }
     },
     {
@@ -3497,8 +3520,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 101,
-        "column": 9
+        "line": 79,
+        "column": 15
       }
     },
     {
@@ -3513,8 +3536,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 20,
+        "column": 26
       }
     },
     {
@@ -3529,8 +3552,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 48,
-        "column": 9
+        "line": 33,
+        "column": 15
       }
     },
     {
@@ -3545,7 +3568,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 71,
+        "line": 54,
         "column": 9
       }
     },
@@ -3561,8 +3584,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 93,
-        "column": 9
+        "line": 71,
+        "column": 45
       }
     },
     {
@@ -3577,8 +3600,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transactions_overview/transactions_overview.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -3593,8 +3616,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transactions_overview/transactions_overview.spec.ts",
-        "line": 35,
-        "column": 9
+        "line": 32,
+        "column": 24
+      }
+    },
+    {
+      "id": "b24d1ecdbd533dc-9b4248bf82e44c0",
+      "title": "Clean up APM data after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 6,
+        "column": 1
       }
     }
   ]

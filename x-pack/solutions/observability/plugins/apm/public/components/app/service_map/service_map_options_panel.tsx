@@ -231,7 +231,7 @@ export function ServiceMapOptionsPanel({
         label: i18n.translate('xpack.apm.serviceMap.controls.layoutHorizontal', {
           defaultMessage: 'Horizontal',
         }),
-        iconType: 'arrowRight',
+        iconType: 'chevronSingleRight',
         'data-test-subj': 'serviceMapLayoutHorizontal',
       },
       {
@@ -239,7 +239,7 @@ export function ServiceMapOptionsPanel({
         label: i18n.translate('xpack.apm.serviceMap.controls.layoutVertical', {
           defaultMessage: 'Vertical',
         }),
-        iconType: 'arrowDown',
+        iconType: 'chevronSingleDown',
         'data-test-subj': 'serviceMapLayoutVertical',
       },
     ],

@@ -6,7 +6,6 @@
  */
 
 import type {
-  AgentCapabilities,
   Conversation,
   ConversationRound,
   ConverseInput,
@@ -25,6 +24,7 @@ export interface RunAgentParams {
    * The next message in this conversation that the agent should respond to.
    */
   nextInput: ConverseInput;
+  roundId?: string;
   /**
    * Current conversation.
    */
@@ -43,10 +43,6 @@ export interface RunAgentParams {
    * Configuration of the agent to run
    */
   agentConfiguration: AgentConfiguration;
-  /**
-   * Capabilities to enable. if not specified will use the default capabilities.
-   */
-  capabilities?: AgentCapabilities;
   /**
    * In case of nested calls (e.g calling from a tool), allows to define the runId.
    */

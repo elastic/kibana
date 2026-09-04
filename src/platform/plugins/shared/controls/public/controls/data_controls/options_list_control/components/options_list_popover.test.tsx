@@ -15,12 +15,13 @@ import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/contro
 import type { OptionsListDisplaySettings, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import type { RenderResult } from '@testing-library/react';
-import { render as rtlRender, waitFor, within } from '@testing-library/react';
+import { act, render as rtlRender, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { coreServices, dataViewsService } from '../../../../services/kibana_services';
+import { OptionsListStrings } from '../options_list_strings';
 import { getMockedFinalizeApi } from '../../../mocks/control_mocks';
 import type { OptionsListComponentApi } from '../../../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
@@ -74,7 +75,7 @@ describe('Options list popover', () => {
       parentApi: {},
     });
     await waitFor(() => {
-      expect(mockFetch).toBeCalled();
+      expect(mockFetch).toHaveBeenCalled();
     });
     mockFetch.mockClear(); // resets so that we wait for fetch again on the next call
 
@@ -169,11 +170,11 @@ describe('Options list popover', () => {
 
     const existsOption = popover.getByTestId('optionsList-control-selection-exists');
     await userEvent.click(existsOption);
-    expect(contextMock.componentApi.makeSelection).toBeCalledWith('exists-option', false);
+    expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith('exists-option', false);
 
     let woofOption = popover.getByTestId('optionsList-control-selection-woof');
     await userEvent.click(woofOption);
-    expect(contextMock.componentApi.makeSelection).toBeCalledWith('woof', false);
+    expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith('woof', false);
 
     // simulate `makeSelection`
     contextMock.componentApi.setSelectedOptions(['woof']);
@@ -181,7 +182,7 @@ describe('Options list popover', () => {
     await clickShowOnlySelections(popover);
     woofOption = popover.getByTestId('optionsList-control-selection-woof');
     await userEvent.click(woofOption);
-    expect(contextMock.componentApi.makeSelection).toBeCalledWith('woof', true);
+    expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith('woof', true);
   });
 
   test('renders a selectable "(blank)" option', async () => {
@@ -532,6 +533,58 @@ describe('Options list popover', () => {
         displaySettings: { hide_sort: true },
         testSubject: 'optionsListControl__sortingOptionsButton',
       });
+    });
+  });
+
+  describe('partial results', () => {
+    const partialResultsTitle = OptionsListStrings.popover.getPartialResultsTitle();
+
+    test('does not show partial indicator when results are complete', () => {
+      const contextMock = getOptionsListContextMock();
+      // isPartial$ defaults to false
+      const popover = mountComponent(contextMock);
+      expect(popover.queryByText(partialResultsTitle)).toBeNull();
+    });
+
+    test('shows partial indicator when results are partial', async () => {
+      const contextMock = getOptionsListContextMock();
+      const popover = mountComponent(contextMock);
+
+      act(() => {
+        (contextMock.componentApi.isPartial$ as unknown as BehaviorSubject<boolean>).next(true);
+      });
+
+      await waitFor(() => {
+        expect(popover.getByText(partialResultsTitle)).toBeInTheDocument();
+      });
+    });
+
+    test('hides partial indicator when results become complete', async () => {
+      const contextMock = getOptionsListContextMock();
+      const isPartial$ = contextMock.componentApi.isPartial$ as unknown as BehaviorSubject<boolean>;
+      isPartial$.next(true);
+      const popover = mountComponent(contextMock);
+
+      expect(popover.getByText(partialResultsTitle)).toBeInTheDocument();
+
+      act(() => {
+        isPartial$.next(false);
+      });
+
+      await waitFor(() => {
+        expect(popover.queryByText(partialResultsTitle)).toBeNull();
+      });
+    });
+
+    test('passes view mode to partial results tooltip', () => {
+      const getTooltipSpy = jest.spyOn(OptionsListStrings.popover, 'getPartialResultsTooltip');
+      const contextMock = getOptionsListContextMock();
+      (contextMock.componentApi.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('view');
+      (contextMock.componentApi.isPartial$ as unknown as BehaviorSubject<boolean>).next(true);
+      mountComponent(contextMock);
+
+      expect(getTooltipSpy).toHaveBeenCalledWith('view');
+      getTooltipSpy.mockRestore();
     });
   });
 });

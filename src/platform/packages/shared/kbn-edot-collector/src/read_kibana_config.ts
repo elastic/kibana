@@ -9,7 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { pickBy, identity } from 'lodash';
 import { resolve } from 'path';
 
@@ -33,10 +33,7 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
 
   let configValues = {};
   if (fs.existsSync(configPathToUse)) {
-    const config = (yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
-      string,
-      any
-    >;
+    const config = (parse(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<string, any>;
     configValues = config.elasticsearch || {};
   } else {
     log.warning(

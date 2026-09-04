@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 
@@ -26,6 +27,7 @@ describe('RuleExecutorTaskRunner', () => {
   let runner: RuleExecutorTaskRunner;
   let pipeline: jest.Mocked<RuleExecutionPipelineContract>;
   let signal: AbortSignal;
+  let mockLoggerService: ReturnType<typeof createLoggerService>;
 
   const executionUuid = 'execution-uuid';
 
@@ -40,7 +42,7 @@ describe('RuleExecutorTaskRunner', () => {
 
   beforeEach(() => {
     pipeline = { execute: jest.fn() };
-    const mockLoggerService = createLoggerService();
+    mockLoggerService = createLoggerService();
     runner = new RuleExecutorTaskRunner(pipeline, mockLoggerService.loggerService);
     signal = new AbortController().signal;
   });
@@ -55,12 +57,25 @@ describe('RuleExecutorTaskRunner', () => {
 
       await runner.run({ taskInstance, signal, executionUuid });
 
-      expect(pipeline.execute).toHaveBeenCalledWith({
-        ruleId: 'rule-1',
-        spaceId: 'default',
-        scheduledAt: taskInstance.scheduledAt?.toISOString(),
-        abortSignal: signal,
-        executionUuid,
+      expect(pipeline.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleId: 'rule-1',
+          spaceId: asSpaceId('default'),
+          scheduledAt: taskInstance.scheduledAt?.toISOString(),
+          abortSignal: signal,
+          executionUuid,
+        })
+      );
+      const executeArg = pipeline.execute.mock.calls[0][0];
+      expect(executeArg.logger).toBeDefined();
+      executeArg.logger.debug({ message: 'probe' });
+      expect(mockLoggerService.mockLogger.debug).toHaveBeenCalledWith('probe', {
+        labels: {
+          rule_id: 'rule-1',
+          space_id: 'default',
+          task_id: 'task-1',
+          execution_id: executionUuid,
+        },
       });
     });
 

@@ -17,12 +17,15 @@ project:
   owner: '@elastic/kibana-presentation'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_dashboards
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-visualizations-server'
   - '@kbn/agent-builder-visualizations-common'
+  - '@kbn/custom-content-common'
+  - '@kbn/custom-content-server'
   - '@kbn/agent-builder-server'
   - '@kbn/controls-constants'
   - '@kbn/dashboard-plugin'
@@ -45,8 +48,13 @@ dependsOn:
   - '@kbn/as-code-shared-transforms'
   - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
-  - '@kbn/esql-utils'
   - '@kbn/presentation-publishing'
+  - '@kbn/scout'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/ftr-llm-proxy'
+  - '@kbn/ui-callout'
+  - '@kbn/files-plugin'
+  - '@kbn/react-kibana-mount'
 tags:
   - plugin
   - prod
@@ -58,6 +66,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

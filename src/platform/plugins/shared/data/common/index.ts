@@ -530,6 +530,7 @@ export {
   getQueryStringCharCount,
   getQueryStringLineCount,
 } from './search';
+export { convertIntervalToEsInterval } from './search/aggs/buckets/lib/time_buckets/calc_es_interval';
 export type {
   TimeRangeBounds,
   TimeRange,

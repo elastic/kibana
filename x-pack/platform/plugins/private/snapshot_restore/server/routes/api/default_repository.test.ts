@@ -73,7 +73,7 @@ describe('[Snapshot and Restore API Routes] Default repository', () => {
     it('should throw if ES error', async () => {
       getSettingsFn.mockRejectedValue(new Error('boom'));
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError('boom');
+      await expect(router.runRequest(mockRequest)).rejects.toThrow('boom');
     });
   });
 

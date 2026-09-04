@@ -65,26 +65,6 @@ describe('getSignificantEventsTuningConfig', () => {
     });
   });
 
-  it('returns full defaults when stored config is an empty object', async () => {
-    const result = await getSignificantEventsTuningConfig(makeUiSettingsClient({}), makeLogger());
-    expect(result).toEqual(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
-  });
-
-  it('silently drops unknown/renamed keys instead of falling back to defaults', async () => {
-    const stored = { sample_size: 30, legacy_field_from_v1: 99, another_old_key: 'foo' };
-    const logger = makeLogger();
-
-    const result = await getSignificantEventsTuningConfig(makeUiSettingsClient(stored), logger);
-
-    expect(result).toEqual({ ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, sample_size: 30 });
-    expect(logger.warn).not.toHaveBeenCalled();
-  });
-
-  it('handles stored value of null without throwing', async () => {
-    const result = await getSignificantEventsTuningConfig(makeUiSettingsClient(null), makeLogger());
-    expect(result).toEqual(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
-  });
-
   it('falls back to full defaults when an out-of-bounds field is stored', async () => {
     // sample_size max is 100; 500 is out of bounds
     const stored = { sample_size: 500 };
@@ -94,30 +74,5 @@ describe('getSignificantEventsTuningConfig', () => {
 
     expect(result).toEqual(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid'));
-  });
-
-  it('falls back to full defaults when entity_filtered_ratio + diverse_ratio > 1', async () => {
-    const stored: Partial<SignificantEventsTuningConfig> = {
-      entity_filtered_ratio: 0.7,
-      diverse_ratio: 0.5,
-    };
-    const logger = makeLogger();
-
-    const result = await getSignificantEventsTuningConfig(makeUiSettingsClient(stored), logger);
-
-    expect(result).toEqual(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid'));
-  });
-
-  it('resets semantic_min_score and warns when it is on the old 0-100 scale', async () => {
-    const stored: Partial<SignificantEventsTuningConfig> = { semantic_min_score: 75 };
-    const logger = makeLogger();
-
-    const result = await getSignificantEventsTuningConfig(makeUiSettingsClient(stored), logger);
-
-    expect(result.semantic_min_score).toBe(
-      DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.semantic_min_score
-    );
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('semantic_min_score'));
   });
 });

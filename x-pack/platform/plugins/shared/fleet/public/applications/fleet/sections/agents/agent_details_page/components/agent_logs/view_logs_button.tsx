@@ -49,7 +49,6 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
     const defaultEndTime = getFormattedRange(now);
 
     return logsLocator?.getRedirectUrl({
-      time: endTime ? endTime : defaultEndTime,
       timeRange: {
         from: getTimeRangeStartFromTime(startTime ? startTime : defaultStartTime),
         to: getTimeRangeEndFromTime(endTime ? endTime : defaultEndTime),

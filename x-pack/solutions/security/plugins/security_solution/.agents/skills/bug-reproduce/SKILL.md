@@ -58,7 +58,7 @@ feature flags). Boot takes 5+ minutes and can warm up while analysis runs:
 
 ```bash
 pkill -f 'node.*scripts/scout' 2>/dev/null; pkill -f 'org.elasticsearch' 2>/dev/null
-node scripts/scout.js start-server --arch stateful --domain classic &
+node scripts/scout start-server --arch stateful --domain classic &
 ```
 
 Feature flags won't be known until the ticket is parsed. If `server_args` turn out to be
@@ -187,7 +187,7 @@ xpack.securitySolution.enableExperimental:
   - featureFlag1
 feature_flags.overrides.some.flag: true
 EOF
-node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet bug_fixer &
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet bug_fixer &
 TIMEOUT=60; COUNT=0
 until curl -s -u elastic:changeme http://localhost:5620/api/status \
   | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do

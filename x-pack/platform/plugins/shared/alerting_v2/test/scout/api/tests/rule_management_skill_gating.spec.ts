@@ -14,20 +14,24 @@ const SKILLS_API = '/api/agent_builder/skills';
 const GLOBAL_SETTINGS_API = '/api/kibana/global_settings';
 const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
 const RULE_MANAGEMENT_SKILL_ID = 'rule-management';
+const ACTION_POLICY_MANAGEMENT_SKILL_ID = 'action-policy-management';
+const ALERTING_V2_SKILL_IDS = [RULE_MANAGEMENT_SKILL_ID, ACTION_POLICY_MANAGEMENT_SKILL_ID];
 
 const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => skill.id);
 
-// The alerting V2 `rule-management` skill is a built-in Agent Builder skill that
-// is gated behind BOTH the agent builder experimental-features advanced setting
-// AND the `alerting:v2:enabled` advanced setting. Both must be enabled for the
-// skill to be listed, so this suite exercises each gate independently as well as
-// the combined case.
-//
-// This is the canonical gating suite because the generic Scout config leaves
-// `alerting:v2:enabled` unpinned, so it can be flipped on and off at runtime.
-// The dedicated `scout_alerting_v2` config forces the feature on and therefore
-// cannot cover the disabled cases.
-apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', () => {
+/*
+ * Alerting V2 Agent Builder skills (`rule-management` and
+ * `action-policy-management`) are gated behind BOTH the agent builder
+ * experimental-features advanced setting AND the `alerting:v2:enabled`
+ * advanced setting. Both must be enabled for the skills to be listed, so this
+ * suite exercises each gate independently as well as the combined case.
+ *
+ * This is the canonical gating suite because the generic Scout config leaves
+ * `alerting:v2:enabled` unpinned, so it can be flipped on and off at runtime.
+ * The dedicated `scout_alerting_v2` config forces the feature on and therefore
+ * cannot cover the disabled cases.
+ */
+apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   // Reset both gates after every test. `.unset()` / DELETE are safe no-ops when
   // no user value is set, so we can reset unconditionally — this also guards
   // against a partial write where an update reaches the server but a later
@@ -42,7 +46,7 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
   });
 
   apiTest(
-    'does not list the rule-management skill when neither gate is enabled',
+    'does not list the alerting V2 skills when neither gate is enabled',
     { tag: tags.deploymentAgnostic },
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
@@ -57,12 +61,14 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
       // Anchor against a positive signal so a regressed/empty skills endpoint
       // can't make this negative assertion pass vacuously.
       expect(response.body.results.length).toBeGreaterThan(0);
-      expect(getSkillIds(response.body.results)).not.toContain(RULE_MANAGEMENT_SKILL_ID);
+      for (const skillId of ALERTING_V2_SKILL_IDS) {
+        expect(getSkillIds(response.body.results)).not.toContain(skillId);
+      }
     }
   );
 
   apiTest(
-    'does not list the rule-management skill when only experimental features are enabled',
+    'does not list the alerting V2 skills when only experimental features are enabled',
     { tag: tags.deploymentAgnostic },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
@@ -78,15 +84,18 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
       expect(response).toHaveStatusCode(200);
       expect(Array.isArray(response.body.results)).toBe(true);
       expect(response.body.results.length).toBeGreaterThan(0);
-      expect(getSkillIds(response.body.results)).not.toContain(RULE_MANAGEMENT_SKILL_ID);
+      for (const skillId of ALERTING_V2_SKILL_IDS) {
+        expect(getSkillIds(response.body.results)).not.toContain(skillId);
+      }
     }
   );
 
   // Toggling `alerting:v2:enabled` on requires the Alerting V2 plugin, which only
   // ships enabled on stateful; on serverless the plugin is disabled.
+  // Constantly fails on ECH: https://github.com/elastic/kibana/issues/283926
   apiTest(
-    'does not list the rule-management skill when only alerting:v2:enabled is on',
-    { tag: tags.stateful.classic },
+    'does not list the alerting V2 skills when only alerting:v2:enabled is on',
+    { tag: '@local-stateful-classic' },
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
       const headers = { ...COMMON_HEADERS, ...apiKeyHeader };
@@ -101,12 +110,14 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
       expect(response).toHaveStatusCode(200);
       expect(Array.isArray(response.body.results)).toBe(true);
       expect(response.body.results.length).toBeGreaterThan(0);
-      expect(getSkillIds(response.body.results)).not.toContain(RULE_MANAGEMENT_SKILL_ID);
+      for (const skillId of ALERTING_V2_SKILL_IDS) {
+        expect(getSkillIds(response.body.results)).not.toContain(skillId);
+      }
     }
   );
 
   apiTest(
-    'lists the rule-management skill once both gates are enabled',
+    'lists the alerting V2 skills once both gates are enabled',
     { tag: tags.stateful.classic },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
@@ -125,7 +136,9 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
       const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
       expect(response).toHaveStatusCode(200);
       expect(Array.isArray(response.body.results)).toBe(true);
-      expect(getSkillIds(response.body.results)).toContain(RULE_MANAGEMENT_SKILL_ID);
+      for (const skillId of ALERTING_V2_SKILL_IDS) {
+        expect(getSkillIds(response.body.results)).toContain(skillId);
+      }
     }
   );
 });

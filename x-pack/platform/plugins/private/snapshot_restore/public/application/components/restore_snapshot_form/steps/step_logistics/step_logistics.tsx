@@ -21,9 +21,9 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
-  EuiCallOut,
   EuiComboBox,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EuiSelectableOption } from '@elastic/eui';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../common/constants';
@@ -389,6 +389,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     </EuiSelectable>
                   ) : (
                     <EuiComboBox
+                      data-test-subj="restoreIndexPatternsComboBox"
                       options={comboBoxOptions}
                       renderOption={({ value }) => {
                         return value?.isDataStream ? (
@@ -710,11 +711,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         {snapshotIncludeFeatureStates?.length === 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               size="s"
-              iconType="question"
-              color="warning"
               data-test-subj="noFeatureStatesCallout"
               title={i18n.translate(
                 'xpack.snapshotRestore.restoreForm.stepLogistics.noFeatureStates',

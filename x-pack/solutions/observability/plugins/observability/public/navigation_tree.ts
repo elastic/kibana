@@ -14,7 +14,10 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
+import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { Location } from 'history';
+import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -23,7 +26,6 @@ const title = i18n.translate(
     defaultMessage: 'Observability',
   }
 );
-const icon = 'logoObservability';
 
 /**
  * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
@@ -45,12 +47,14 @@ function isEditingFromDashboard(
 
 function createNavTree({
   coreStart,
+  significantEventsAvailable,
   streamsAvailable,
   showAiAssistant,
   isCloudEnabled,
   ingestHubAvailable,
 }: {
   coreStart: CoreStart;
+  significantEventsAvailable: boolean;
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
@@ -58,11 +62,20 @@ function createNavTree({
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
+      ...(significantEventsAvailable
+        ? [
+            {
+              link: 'nightshift' as const,
+              icon: NightshiftNavigationIcon,
+            },
+          ]
+        : []),
       {
         link: 'observability-overview',
-        title,
-        icon,
-        renderAs: 'home',
+        title: i18n.translate('xpack.observability.obltNav.overview', {
+          defaultMessage: 'Overview',
+        }),
+        icon: 'home',
       },
       {
         title: i18n.translate('xpack.observability.obltNav.discover', {
@@ -77,6 +90,10 @@ function createNavTree({
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
+      },
+      {
+        link: EVALS_APP_ID,
+        icon: 'flask',
       },
       ...getWorkflowsNavPanel(coreStart),
       {
@@ -97,7 +114,7 @@ function createNavTree({
       },
       {
         link: 'slo',
-        icon: 'visGauge',
+        icon: 'chartGauge',
       },
       ...(streamsAvailable
         ? [
@@ -278,6 +295,10 @@ function createNavTree({
             },
           ]),
       {
+        icon: 'sparkles',
+        link: 'context_engine' as const,
+      },
+      {
         id: 'machine_learning-landing',
         title: i18n.translate('xpack.observability.obltNav.machineLearning', {
           defaultMessage: 'Machine Learning',
@@ -420,7 +441,7 @@ function createNavTree({
             title: i18n.translate('xpack.observability.obltNav.ingestHub', {
               defaultMessage: 'Ingest Hub',
             }),
-            icon: 'launch',
+            icon: 'rocket',
             children: [
               {
                 link: 'ingestHub' as const,
@@ -439,7 +460,7 @@ function createNavTree({
               defaultMessage: 'Add data',
             }),
             link: 'observabilityOnboarding' as const,
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             children: [
               {
                 link: 'onboarding' as const,
@@ -625,7 +646,6 @@ function createNavTree({
             }),
             children: [
               { link: 'management:genAiSettings' },
-              { link: 'management:evals' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },
@@ -703,23 +723,31 @@ function createNavTree({
 export const createDefinition = (
   coreStart: CoreStart,
   pluginsStart: ObservabilityPublicPluginsStart
-): AddSolutionNavigationArg => ({
-  id: 'oblt',
-  title,
-  icon: 'logoObservability',
-  navigationTree$: combineLatest([
-    pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
-    coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
-    pluginsStart.ingestHub?.navigationAvailable$ || of(false),
-  ]).pipe(
-    map(([{ status }, chatExperience, ingestHubAvailable]) =>
-      createNavTree({
-        coreStart,
-        streamsAvailable: status === 'enabled',
-        showAiAssistant: chatExperience !== AIChatExperience.Agent,
-        isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
-        ingestHubAvailable,
-      })
-    )
-  ),
-});
+): AddSolutionNavigationArg => {
+  const significantEventsAvailable = coreStart.featureFlags.getBooleanValue(
+    STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+    false
+  );
+
+  return {
+    id: 'oblt',
+    title,
+    icon: 'logoObservability',
+    navigationTree$: combineLatest([
+      pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
+      coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
+      pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+    ]).pipe(
+      map(([{ status }, chatExperience, ingestHubAvailable]) =>
+        createNavTree({
+          coreStart,
+          significantEventsAvailable,
+          streamsAvailable: status === 'enabled',
+          showAiAssistant: chatExperience !== AIChatExperience.Agent,
+          isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+          ingestHubAvailable,
+        })
+      )
+    ),
+  };
+};

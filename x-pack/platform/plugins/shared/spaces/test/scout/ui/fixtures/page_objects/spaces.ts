@@ -20,10 +20,8 @@ export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
 export class SpacesPage {
   constructor(private readonly page: ScoutPage) {}
 
-  // ---- generic header / selector ----
-
   async isProjectHeaderVisible() {
-    return await this.page.testSubj.isVisible('kibanaProjectHeader');
+    return await this.page.testSubj.locator('chromeNextGlobalHeader').isVisible();
   }
 
   async navigateToHome() {
@@ -42,11 +40,30 @@ export class SpacesPage {
   }
 
   spacesSelectorLocator() {
-    return this.page.testSubj.locator('spacesNavSelector');
+    return this.page.testSubj
+      .locator('contextSwitcherTriggerButton')
+      .or(this.page.testSubj.locator('spacesNavSelector'));
   }
 
   async openSpacesSelector() {
-    await this.page.testSubj.click('spacesNavSelector');
+    const contextTrigger = this.page.testSubj.locator('contextSwitcherTriggerButton');
+    const classicTrigger = this.page.testSubj.locator('spacesNavSelector');
+    await contextTrigger.or(classicTrigger).waitFor({ state: 'visible' });
+
+    if (await contextTrigger.isVisible()) {
+      await contextTrigger.click();
+      await this.page.testSubj.locator('contextSwitcherPopoverPanel').waitFor({ state: 'visible' });
+      const spacesRow = this.page.testSubj.locator('contextSwitcherSpacesRow');
+      const spacesList = this.page.locator('#contextSwitcherSpacesList');
+      await spacesRow.or(spacesList).waitFor({ state: 'visible' });
+      if (await spacesRow.isVisible()) {
+        await spacesRow.click();
+      }
+      await spacesList.waitFor({ state: 'visible' });
+    } else {
+      await classicTrigger.click();
+      await this.page.testSubj.locator('spaceMenuPopoverPanel').waitFor({ state: 'visible' });
+    }
   }
 
   async isManageButtonVisible() {
@@ -57,9 +74,17 @@ export class SpacesPage {
     await this.page.testSubj.locator('manageSpaces').waitFor({ state: 'visible' });
   }
 
-  /** Reads the `title` attribute of the header space selector (current space name). */
   async getCurrentSpaceTitle() {
-    return await this.spacesSelectorLocator().getAttribute('title');
+    const contextTrigger = this.page.testSubj.locator('contextSwitcherTriggerButton');
+    const classicTrigger = this.page.testSubj.locator('spacesNavSelector');
+    await contextTrigger.or(classicTrigger).waitFor({ state: 'visible' });
+
+    if (await contextTrigger.isVisible()) {
+      return (await contextTrigger.getAttribute('data-space-name'))?.trim() ?? null;
+    }
+
+    // Classic nav exposes the space name only via `title`.
+    return (await classicTrigger.getAttribute('title'))?.trim() ?? null;
   }
 
   getCurrentUrl() {
@@ -173,8 +198,121 @@ export class SpacesPage {
     await this.viewPageLocator().waitFor({ state: 'visible' });
   }
 
+  async gotoCreateSpace() {
+    await this.page.gotoApp('management/kibana/spaces/create');
+    await this.createPageLocator().waitFor({ state: 'visible' });
+  }
+
   async clickCreateSpace() {
     await this.page.testSubj.click('createSpace');
+  }
+
+  /** Cross-project search default scope section on create/edit space pages. */
+  cpsDefaultScopePanelLocator() {
+    return this.page.testSubj.locator('cpsDefaultScopePanel');
+  }
+
+  /** The picker's project list (one row per origin/linked project, each with its own include/exclude switch). */
+  projectPickerListLocator() {
+    return this.page.testSubj.locator('projectPickerList');
+  }
+
+  projectPickerListItemLocator() {
+    return this.page.testSubj.locator('projectPickerListItem');
+  }
+
+  /** The row for the space's own (origin) project — identified by its "This Project" badge, not by id. */
+  originProjectListItemLocator() {
+    return this.projectPickerListItemLocator().filter({
+      has: this.page.testSubj.locator('projectPickerListItemOriginBadge'),
+    });
+  }
+
+  /** The origin project row's include/exclude switch. */
+  originProjectSwitchLocator() {
+    return this.originProjectListItemLocator().locator(
+      '[data-test-subj^="projectPickerListItemSwitch-"]'
+    );
+  }
+
+  originProjectContextMenuButtonLocator() {
+    return this.originProjectListItemLocator().locator(
+      '[data-test-subj^="projectPickerListItemContextMenu-"]'
+    );
+  }
+
+  /** Footer action that includes every currently visible project; disabled once all are already included. */
+  includeAllVisibleButtonLocator() {
+    return this.page.testSubj.locator('projectPickerIncludeAllVisibleBtn');
+  }
+
+  /** Container listing the active project-tag filter badges; only rendered while filters exist. */
+  projectTagFilterDisplayLocator() {
+    return this.page.testSubj.locator('projectPickerFilterDisplayContainer');
+  }
+
+  /** The remove ("x") icon buttons on the project-tag filter badges. */
+  projectTagFilterRemoveButtonLocator() {
+    return this.projectTagFilterDisplayLocator().locator(
+      '[data-test-subj^="filterBadgeCloseButton-"]'
+    );
+  }
+
+  projectPickerListLoadingIndicatorLocator() {
+    return this.page.testSubj.locator('projectPickerListLoadingIndicator');
+  }
+
+  /**
+   * Clears any active project-tag filter by removing each filter badge; a no-op when no filter
+   * is active. Needed because a space configured with the legacy `_alias:_origin`/`_alias:*`
+   * routing strings decodes as a stray project-tag filter (the picker's codec only understands
+   * `_id`-based selection), not an excluded-project override, so
+   * `includeAllVisibleButtonLocator` alone can't undo it. The space config view renders the
+   * picker without its header (and thus without the "Clear project tag filters" global action),
+   * so filters are removed badge-by-badge via each badge's remove icon.
+   */
+  async clearProjectTagFilters() {
+    // Each removal kicks off a filter-proposal refetch that temporarily makes the remaining
+    // badges non-interactive, so wait out the loading indicator between clicks.
+    await this.projectPickerListLoadingIndicatorLocator().waitFor({ state: 'hidden' });
+    const removeButtons = await this.projectTagFilterRemoveButtonLocator().all();
+    // Click in reverse DOM order so earlier badges keep their index as later ones are removed.
+    for (const removeButton of removeButtons.reverse()) {
+      await removeButton.click();
+      await this.projectPickerListLoadingIndicatorLocator().waitFor({ state: 'hidden' });
+    }
+  }
+
+  /** Waits until the CPS panel and its project list have loaded. */
+  async waitForProjectRoutingPicker() {
+    await this.cpsDefaultScopePanelLocator().waitFor({ state: 'visible' });
+    await this.projectPickerListLocator().waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Includes every visible project (the "all projects" routing outcome): clears any active
+   * project-tag filter first, then ensures every remaining visible project is included.
+   * No-op if already all-included with no filter.
+   */
+  async selectAllProjectsRouting() {
+    await this.clearProjectTagFilters();
+    const includeAllButton = this.includeAllVisibleButtonLocator();
+    if (await includeAllButton.isEnabled()) {
+      await includeAllButton.click();
+    }
+  }
+
+  /** Excludes every project except the origin project (the "origin-only" routing outcome). */
+  async selectOriginProjectRouting() {
+    await this.originProjectContextMenuButtonLocator().click();
+    await this.page.testSubj.locator('projectPickerIncludeOnlyThisProjectMenuItem').click();
+  }
+
+  /**
+   * CPS chrome nav project-picker button (visible when CPS is enabled and projects are linked).
+   */
+  cpsProjectPickerButtonLocator() {
+    return this.page.testSubj.locator('cps-project-picker-button');
   }
 
   async setSpaceName(name: string) {
@@ -240,6 +378,16 @@ export class SpacesPage {
     return this.page.testSubj.locator('space-edit-page-user-impact-warning');
   }
 
+  /** Confirm modal shown by `useUnsavedChangesPrompt` when leaving a dirty form. */
+  navigationBlockConfirmModalLocator() {
+    return this.page.testSubj.locator('navigationBlockConfirmModal');
+  }
+
+  /** Clicks the Kibana logo in the header, navigating away from the spaces app. */
+  async clickLogo() {
+    await this.page.testSubj.click('logo');
+  }
+
   // ---- delete-space confirm modal (edit page) ----
 
   async clickDeleteSpaceOnEditPage() {
@@ -275,7 +423,9 @@ export class SpacesPage {
   // ---- header spaces navigation menu ----
 
   spacesMenuPanelLocator() {
-    return this.page.testSubj.locator('spaceMenuPopoverPanel');
+    return this.page.testSubj
+      .locator('contextSwitcherPopoverPanel')
+      .or(this.page.testSubj.locator('spaceMenuPopoverPanel'));
   }
 
   async openSpacesNav() {
@@ -284,11 +434,16 @@ export class SpacesPage {
   }
 
   async switchToSpaceFromNav(spaceId: string) {
-    await this.page.testSubj.click(`${spaceId}-selectableSpaceItem`);
+    await this.page.testSubj
+      .locator(`space-${spaceId}`)
+      .or(this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`))
+      .click();
   }
 
   navSearchInputLocator() {
-    return this.page.testSubj.locator('spacesMenuSearchInput');
+    return this.page.testSubj
+      .locator('contextSwitcherSpacesSearchInput')
+      .or(this.page.testSubj.locator('spacesMenuSearchInput'));
   }
 
   async isNavSearchInputVisible() {
@@ -296,11 +451,9 @@ export class SpacesPage {
   }
 
   async searchSpacesInNav(searchText: string) {
-    const input = this.navSearchInputLocator();
-    await input.fill(searchText);
+    await this.navSearchInputLocator().fill(searchText);
   }
 
-  /** Counts the selectable space options currently shown in the nav popover. */
   async getNavSpaceResultCount() {
     return await this.spacesMenuPanelLocator().locator('li[role="option"]').count();
   }

@@ -6,7 +6,8 @@
  */
 import React from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface FetchFailedCalloutProps {
@@ -20,9 +21,7 @@ export const FetchFailedCallout: React.FunctionComponent<FetchFailedCalloutProps
 }) => {
   return (
     <>
-      <EuiCallOut
-        color="danger"
-        iconType="warning"
+      <KbnDangerCallout
         data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'dataStreamMigrationFailedCallout'}
         title={
           hasFetchFailed ? (
@@ -37,9 +36,8 @@ export const FetchFailedCallout: React.FunctionComponent<FetchFailedCalloutProps
             />
           )
         }
-      >
-        {errorMessage}
-      </EuiCallOut>
+        text={errorMessage}
+      />
       <EuiSpacer />
     </>
   );

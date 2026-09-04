@@ -40,6 +40,13 @@ User: "Show me my latest alerts"
 You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
 Tool result: [{ type: "index", name: '.alerts' }]
 `,
+    annotations: {
+      title: 'Explore Indices',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: indexExplorerSchema,
     handler: async (
       { query: nlQuery, indexPattern = '*', limit = 1 },

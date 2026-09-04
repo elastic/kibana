@@ -12,6 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { executionFlowLoop } from './execution_flow_loop';
 import { flushState, persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
+import { emitHitlLifecycle } from '../step/wait_for_input_step/hitl_lifecycle_auditor';
 import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
 
 const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager aborted the task';
@@ -35,13 +36,17 @@ const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager a
  * - Workflow fails due to an error (ExecutionStatus.FAILED)
  * - Workflow is cancelled (ExecutionStatus.CANCELLED)
  * - Any other non-RUNNING status is reached
+ * - The execution cursor's `stop()` is called while the workflow remains RUNNING
  */
 export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
+  const { workflowExecutionCursor, workflowRuntime } = params;
   // Create an abort controller to signal the persistence loop to exit immediately
   // when execution completes (instead of waiting for the next 500ms flush cycle)
   const persistenceAbortController = new AbortController();
 
   const onTaskAbort = () => {
+    const wasWaitingForInput =
+      workflowRuntime.getWorkflowExecution().status === ExecutionStatus.WAITING_FOR_INPUT;
     if (isWorkflowTaskManagerAbortSignal(params.signal)) {
       params.workflowExecutionState.updateWorkflowExecution({
         cancelRequested: true,
@@ -50,6 +55,12 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
         cancellationReason: TASK_MANAGER_ABORT_CANCELLATION_REASON,
         cancelledBy: 'system',
       });
+      if (wasWaitingForInput) {
+        emitHitlLifecycle({
+          type: 'canceled',
+          executionId: workflowRuntime.getWorkflowExecution().id,
+        });
+      }
       persistenceAbortController.abort();
       return;
     }
@@ -60,8 +71,15 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
       cancellationReason: 'Task aborted',
       status: ExecutionStatus.CANCELLED,
     });
+    if (wasWaitingForInput) {
+      emitHitlLifecycle({
+        type: 'canceled',
+        executionId: workflowRuntime.getWorkflowExecution().id,
+      });
+    }
     // Also abort persistence loop when task is aborted
     persistenceAbortController.abort();
+    workflowExecutionCursor.stop();
   };
 
   params.signal.addEventListener('abort', onTaskAbort, { once: true });
@@ -70,6 +88,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   }
 
   try {
+    workflowExecutionCursor.start();
     // Run execution and persistence loops in parallel
     // When execution finishes, signal persistence loop to exit immediately
     await Promise.all([
@@ -80,9 +99,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
       persistenceLoop(params, persistenceAbortController.signal),
     ]);
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(
-      error instanceof Error ? error : new Error(String(error))
-    );
+    workflowExecutionCursor.captureError(error);
   } finally {
     const finalFlushSpan = apm.startSpan('final flush state', 'workflow', 'persistence');
     await flushState(params, {
@@ -93,7 +110,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
 
   // Final save to ensure workflow state is persisted after execution loop
   const finalSaveSpan = apm.startSpan('final save state', 'workflow', 'persistence');
-  await params.workflowRuntime.saveState();
+  await workflowRuntime.saveState();
   finalSaveSpan?.end();
 
   // Flush the final state (including terminal status) to Elasticsearch

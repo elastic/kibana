@@ -62,7 +62,7 @@ describe('Bulk upgrade task', () => {
         request: {} as KibanaRequest,
       });
 
-      expect(installPackage).toBeCalled();
+      expect(installPackage).toHaveBeenCalled();
 
       expect(res).toEqual([{ name: 'test_valid', success: true }]);
     });
@@ -83,7 +83,7 @@ describe('Bulk upgrade task', () => {
         request: {} as KibanaRequest,
       });
 
-      expect(installPackage).toBeCalledTimes(4);
+      expect(installPackage).toHaveBeenCalledTimes(4);
       expect(res).toEqual([
         { name: 'test_valid_1', success: true },
         {
@@ -114,8 +114,8 @@ describe('Bulk upgrade task', () => {
 
       expect(res).toEqual([{ name: 'test_valid', success: true }]);
 
-      expect(installPackage).toBeCalled();
-      expect(packagePolicyService.bulkUpgrade).toBeCalled();
+      expect(installPackage).toHaveBeenCalled();
+      expect(packagePolicyService.bulkUpgrade).toHaveBeenCalled();
     });
 
     it('should not continue to upgrade packages when task is cancelled', async () => {
@@ -138,7 +138,7 @@ describe('Bulk upgrade task', () => {
         })
       ).rejects.toThrow(/Task was aborted/);
 
-      expect(installPackage).toBeCalledTimes(0);
+      expect(installPackage).toHaveBeenCalledTimes(0);
     });
   });
 });

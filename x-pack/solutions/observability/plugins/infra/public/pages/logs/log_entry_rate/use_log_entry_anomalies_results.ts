@@ -6,7 +6,6 @@
  */
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
-import useMount from 'react-use/lib/useMount';
 import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import type { IdFormatByJobType } from '../../../../common/http_api/latest';
 import { useTrackedPromise, CanceledPromiseError } from '../../../hooks/use_tracked_promise';
@@ -145,6 +144,7 @@ export const useLogEntryAnomaliesResults = ({
   defaultPaginationOptions,
   onGetLogEntryAnomaliesDatasetsError,
   filteredDatasets,
+  jobIds,
 }: {
   endTime: number;
   startTime: number;
@@ -154,6 +154,7 @@ export const useLogEntryAnomaliesResults = ({
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetLogEntryAnomaliesDatasetsError?: (error: Error) => void;
   filteredDatasets?: string[];
+  jobIds: string[];
 }) => {
   const initStateReducer = (stateDefaults: ReducerStateDefaults): ReducerState => {
     return {
@@ -204,6 +205,11 @@ export const useLogEntryAnomaliesResults = ({
           },
           services.http.fetch
         );
+      },
+      onReject: (error) => {
+        if (!(error instanceof CanceledPromiseError)) {
+          setLogEntryAnomalies([]);
+        }
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
         const { paginationCursor } = reducerState;
@@ -325,7 +331,7 @@ export const useLogEntryAnomaliesResults = ({
         }
       },
     },
-    [endTime, logViewReference, idFormats, startTime]
+    [endTime, logViewReference, idFormats, startTime, jobIds]
   );
 
   const isLoadingDatasets = useMemo(
@@ -338,9 +344,9 @@ export const useLogEntryAnomaliesResults = ({
     [getLogEntryAnomaliesDatasetsRequest.state]
   );
 
-  useMount(() => {
+  useEffect(() => {
     getLogEntryAnomaliesDatasets();
-  });
+  }, [getLogEntryAnomaliesDatasets]);
 
   return {
     logEntryAnomalies,
@@ -348,6 +354,7 @@ export const useLogEntryAnomaliesResults = ({
     isLoadingLogEntryAnomalies,
     isLoadingDatasets,
     hasFailedLoadingDatasets,
+    getLogEntryAnomaliesDatasets,
     datasets: logEntryAnomaliesDatasets,
     hasFailedLoadingLogEntryAnomalies,
     changeSortOptions,

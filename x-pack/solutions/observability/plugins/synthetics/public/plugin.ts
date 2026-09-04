@@ -57,7 +57,6 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -69,6 +68,12 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { getSyntheticsProjectPickerAccess } from './cps_app_access';
+import {
+  OBSERVABILITY_SYNTHETICS_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_SYNTHETICS_CPS_ENABLED_FEATURE_FLAG,
+} from '../common/cps_feature_flag';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -124,13 +129,13 @@ export interface ClientPluginsStart {
   licenseManagement?: LicenseManagementUIPluginSetup;
   licensing: LicensingPluginStart;
   slo?: SLOPublicStart;
-  presentationUtil: PresentationUtilPluginStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   settings: SettingsStart;
   agentBuilder?: AgentBuilderPluginStart;
+  cps?: CPSPluginStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {
@@ -235,6 +240,18 @@ export class SyntheticsPlugin
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
+
+    if (
+      coreStart.featureFlags.getBooleanValue(
+        OBSERVABILITY_SYNTHETICS_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_SYNTHETICS_CPS_ENABLED_DEFAULT
+      )
+    ) {
+      pluginsStart.cps?.cpsManager?.registerAppAccess(
+        'synthetics',
+        getSyntheticsProjectPickerAccess
+      );
+    }
 
     registerSyntheticsUiActions(coreStart, pluginsStart);
 

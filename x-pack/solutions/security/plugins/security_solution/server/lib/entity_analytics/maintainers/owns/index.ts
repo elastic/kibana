@@ -14,8 +14,9 @@ import { buildOwnsConfigs } from './configs';
 export const ownsMaintainer: RegisterEntityMaintainerConfig = {
   id: 'owns',
   description:
-    'Resolves owns (user → host device) relationships from raw_identifiers on entity documents ' +
-    '(Okta: user → enrolled device via owns.raw_identifiers.host.id)',
+    'Resolves owns (user → host device) relationships. ' +
+    'Okta: from raw_identifiers on entity documents (owns.raw_identifiers.host.id). ' +
+    'Entra ID: from device log documents, inverting registered_owners into user-keyed edges.',
   interval: '1d',
   timeout: '1h',
   initialState: {},
@@ -52,6 +53,7 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: buildOwnsConfigs(lastProcessedTimestamp),
+      maintainerName: 'owns',
       signal,
       telemetryCollector: collector,
     });
@@ -65,10 +67,10 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
         proposed: result.totalRecords,
         applied: result.totalWritten,
         droppedNotInStore: result.totalNotFound,
+        targetIdsNotInStore: result.totalTargetIdsNotInStore,
         failed: result.totalWriteErrors,
         metadataDocsApplied: result.totalMetadataDocsApplied,
-        // TODO: investigate whether to extend the telemetry funnel schema with a new field for
-        // droppedTargets (result.totalDroppedTargets) or map it to an existing field before wiring.
+        metadataDocsFailed: result.totalMetadataDocsFailed,
       },
       sources: collector.sources,
       ...(Object.keys(collector.relationshipTypeApplied).length > 0 && {
@@ -80,7 +82,7 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `[owns] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[owns] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended, ${result.totalMetadataDocsFailed} metadata docs failed`
     );
 
     // Do not advance the watermark if the run was aborted — the next run should

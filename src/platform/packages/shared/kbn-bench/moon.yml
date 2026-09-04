@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/bench'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/observability-ui'
+  defaultOwner: '@elastic/kibana-core'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/bench'
   description: Moon project for @kbn/bench
   channel: ''
-  owner: '@elastic/observability-ui'
+  owner: '@elastic/kibana-core'
   sourceRoot: src/platform/packages/shared/kbn-bench
 dependsOn:
   - '@kbn/repo-info'

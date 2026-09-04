@@ -80,7 +80,7 @@ export async function generateIngestPipeline(
           },
         },
       },
-      ...(isWiredStream
+      ...(isWiredStream && 'steps' in definition.ingest.processing
         ? (
             await transpileIngestPipeline(
               definition.ingest.processing,
@@ -114,13 +114,19 @@ export async function generateClassicIngestPipelineBody(
   definition: Streams.ingest.all.Definition,
   esClient: ElasticsearchClient
 ): Promise<Partial<IngestPutPipelineRequest>> {
-  const transpiledIngestPipeline = await transpileIngestPipeline(
-    definition.ingest.processing,
-    undefined,
-    createStreamlangResolverOptions(esClient)
-  );
+  const pipelineProcessors =
+    'processors' in definition.ingest.processing
+      ? definition.ingest.processing.processors
+      : (
+          await transpileIngestPipeline(
+            definition.ingest.processing,
+            undefined,
+            createStreamlangResolverOptions(esClient)
+          )
+        ).processors;
+
   return {
-    processors: transpiledIngestPipeline.processors,
+    processors: pipelineProcessors,
     _meta: {
       description: `Stream-managed pipeline for the ${definition.name} stream`,
       managed: true,

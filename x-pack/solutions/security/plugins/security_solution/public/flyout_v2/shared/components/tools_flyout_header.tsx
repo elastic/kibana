@@ -8,9 +8,9 @@
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { ToolsFlyoutTitle } from './tools_flyout_title';
-import { TOOLS_FLYOUT_HEADER_TEST_ID } from './test_ids';
+import { TOOLS_FLYOUT_HEADER_TEST_ID, TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID } from './test_ids';
 
 export interface ToolsFlyoutHeaderProps {
   /**
@@ -47,7 +47,8 @@ export interface ToolsFlyoutHeaderProps {
  */
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
   ({ title, onTitleClick, label, iconType, badge, timestamp }) => {
-    const showSourceContext = !!onTitleClick && !!label && !!iconType;
+    const { euiTheme } = useEuiTheme();
+    const showSourceContext = !!label && !!iconType;
 
     return (
       <EuiFlexGroup
@@ -55,19 +56,34 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
         alignItems="center"
         gutterSize="m"
         responsive={false}
+        css={{ flexWrap: 'nowrap', paddingRight: 0 }}
         data-test-subj={TOOLS_FLYOUT_HEADER_TEST_ID}
       >
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
+        <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+          <EuiTitle size="xs" css={{ whiteSpace: 'nowrap' }}>
             <h4>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>
         {showSourceContext && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="flexEnd" direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
-                  <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={true}
+            css={{ marginInlineStart: 'auto', maxWidth: '100%', minWidth: 0 }}
+          >
+            <EuiFlexGroup
+              alignItems="flexEnd"
+              direction="column"
+              gutterSize="none"
+              css={{ minWidth: 0 }}
+            >
+              <EuiFlexItem css={{ maxWidth: '100%', minWidth: 0 }}>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="xs"
+                  responsive={false}
+                  wrap={false}
+                  css={{ maxWidth: '100%', minWidth: 0 }}
+                >
+                  <EuiFlexItem css={{ minWidth: euiTheme.base * 8 }}>
                     <ToolsFlyoutTitle
                       onTitleClick={onTitleClick}
                       label={label}
@@ -77,7 +93,30 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
                   {badge && <EuiFlexItem grow={false}>{badge}</EuiFlexItem>}
                 </EuiFlexGroup>
               </EuiFlexItem>
-              {timestamp && <EuiFlexItem>{timestamp}</EuiFlexItem>}
+              {timestamp && (
+                <EuiFlexItem css={{ maxWidth: '100%', minWidth: 0 }}>
+                  <EuiToolTip content={timestamp}>
+                    <div
+                      css={{
+                        maxWidth: '100%',
+                        overflow: 'hidden',
+                        textAlign: 'right',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        '& > *': {
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        },
+                      }}
+                      data-test-subj={TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID}
+                      tabIndex={0}
+                    >
+                      {timestamp}
+                    </div>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         )}

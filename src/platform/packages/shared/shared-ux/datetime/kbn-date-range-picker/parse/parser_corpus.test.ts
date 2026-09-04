@@ -55,7 +55,7 @@ type CheckedFields = Pick<
 interface CorpusRow {
   /** What the user types into the input. */
   input: string;
-  /** Options passed to the parser (presets, delimiter, roundRelativeTime, dateFormat). */
+  /** Options passed to the parser (presets, delimiter, roundRelativeTime, inputDateFormats). */
   options?: TimeRangeTransformOptions;
   /** Why this row exists / what behaviour it documents. */
   note: string;
@@ -305,6 +305,50 @@ describe('parser corpus: textToTimeRange (English)', () => {
           startOffset: null,
         },
       },
+      {
+        input: 'now/y+3M',
+        note: 'rounding then offset (chained date math); validity is calendar-dependent (Apr 1 vs now)',
+        expected: {
+          start: 'now/y+3M',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          startOffset: null,
+        },
+      },
+      {
+        input: 'now-3M/y+3M',
+        note: 'offset, rounding, then further offset',
+        expected: {
+          start: 'now-3M/y+3M',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          startOffset: null,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '-1y/y+3M to now/y+3M',
+        note: 'fiscal-year style range: chained math on both bounds',
+        expected: {
+          start: 'now-1y/y+3M',
+          end: 'now/y+3M',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+          startOffset: null,
+          endOffset: null,
+          isInvalid: false,
+        },
+      },
+      {
+        input: 'now-1d/d+8h+50m',
+        note: 'longer chained expression (offset + round + offsets)',
+        expected: {
+          start: 'now-1d/d+8h+50m',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          startOffset: null,
+          isInvalid: false,
+        },
+      },
     ]);
   });
 
@@ -436,20 +480,37 @@ describe('parser corpus: textToTimeRange (English)', () => {
       {
         input: 'last 7 minutes',
         options: { roundRelativeTime: true },
-        note: 'true infers rounding from the offset unit (m → /m)',
-        expected: { start: 'now-7m/m', end: 'now', startOffset: offset(-7, 'm', 'm') },
+        note: 'true infers rounding one unit finer than the offset unit (m → /s)',
+        expected: { start: 'now-7m/s', end: 'now', startOffset: offset(-7, 'm', 's') },
       },
       {
         input: 'last 7 days',
         options: { roundRelativeTime: true },
-        note: 'day-and-above rounds to /d',
-        expected: { start: 'now-7d/d', end: 'now', startOffset: offset(-7, 'd', 'd') },
+        note: 'days round to /h; week-and-above rounds to /d',
+        expected: { start: 'now-7d/h', end: 'now', startOffset: offset(-7, 'd', 'h') },
+      },
+      {
+        input: 'now-7d/d to now-1d/d',
+        options: { roundRelativeTime: true },
+        note: 'true rounds both bounds, each by its own offset unit (existing rounding kept)',
+        expected: {
+          start: 'now-7d/d',
+          end: 'now-1d/d',
+          startOffset: offset(-7, 'd', 'd'),
+          endOffset: offset(-1, 'd', 'd'),
+        },
       },
       {
         input: 'now-7d/d',
         options: { roundRelativeTime: false },
-        note: 'false strips an existing rounding suffix from the start bound',
-        expected: { start: 'now-7d', end: 'now', startOffset: offset(-7, 'd') },
+        note: 'false preserves an existing rounding suffix',
+        expected: { start: 'now-7d/d', end: 'now', startOffset: offset(-7, 'd', 'd') },
+      },
+      {
+        input: 'now/y+3M',
+        options: { roundRelativeTime: true },
+        note: 'chained date math is left unchanged (no extra inferred rounding)',
+        expected: { start: 'now/y+3M', end: 'now', startOffset: null },
       },
     ]);
   });
@@ -506,6 +567,14 @@ describe('parser corpus: textToTimeRange (English)', () => {
           isInvalid: true,
         },
       },
+      {
+        input: '/d',
+        note: 'leading slash is not a valid datemath start',
+        expected: {
+          isInvalid: true,
+          start: '',
+        },
+      },
     ]);
   });
 });
@@ -533,8 +602,8 @@ describe('parser corpus: prettifyValue (English)', () => {
     runPrettify([
       {
         input: 'now-7d/d to now',
-        note: 'past range ending at now → start shorthand, rounding stripped from start',
-        expected: '-7d',
+        note: 'past range ending at now → start shorthand, rounding preserved',
+        expected: '-7d/d',
       },
       {
         input: 'now to now+1d',
@@ -543,8 +612,8 @@ describe('parser corpus: prettifyValue (English)', () => {
       },
       {
         input: 'now-30d/d to now-7d/d',
-        note: 'two offsets → start strips rounding, end keeps it',
-        expected: '-30d to -7d/d',
+        note: 'two offsets → both keep their rounding',
+        expected: '-30d/d to -7d/d',
       },
       {
         input: 'now-7d',
@@ -575,6 +644,16 @@ describe('parser corpus: prettifyValue (English)', () => {
         input: '-7d to Jan 5, 2026',
         note: 'relative start, non-ISO absolute end (only ISO ends get reformatted)',
         expected: '-7d to Jan 5, 2026',
+      },
+      {
+        input: 'now/y+3M to now',
+        note: 'chained date math is not collapsed',
+        expected: 'now/y+3M to now',
+      },
+      {
+        input: '-1y/y+3M to now/y+3M',
+        note: 'chained date math range is not prettified',
+        expected: '-1y/y+3M to now/y+3M',
       },
     ]);
   });

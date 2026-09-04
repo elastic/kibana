@@ -14,6 +14,7 @@ import type {
   ServicesStartDeps,
   ServiceSetupDeps,
 } from './types';
+import type { ConversationEventBus } from '../workflows/triggers/conversation_event_bus';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
@@ -32,7 +33,9 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
-import { CallbackDeliveryService } from './execution/callback_delivery_service';
+import { CallbackDeliveryService } from './execution/callback';
+import { createSpaceSettingsService } from './space_settings';
+import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -45,6 +48,7 @@ interface ServiceInstances {
   metering: MeteringService;
   consumption: ConsumptionService;
   callbackDelivery: CallbackDeliveryService;
+  conversationTemplates: ConversationTemplatesService;
 }
 
 export class ServiceManager {
@@ -79,6 +83,7 @@ export class ServiceManager {
       }),
       consumption: createConsumptionService(),
       callbackDelivery: new CallbackDeliveryService({ actions }),
+      conversationTemplates: new ConversationTemplatesService(),
     };
 
     const skillsSetup = this.services.skills.setup();
@@ -96,6 +101,7 @@ export class ServiceManager {
       skills: skillsSetup,
       plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
+      conversationTemplates: this.services.conversationTemplates.setup(),
     };
 
     return this.internalSetup;
@@ -106,6 +112,7 @@ export class ServiceManager {
     security,
     spaces,
     elasticsearch,
+    http,
     inference,
     uiSettings,
     savedObjects,
@@ -116,7 +123,8 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
-  }: ServicesStartDeps): InternalStartServices {
+    conversationEventBus,
+  }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
     }
@@ -138,6 +146,8 @@ export class ServiceManager {
       }
       return executionService;
     };
+
+    const conversationTemplatesStart = this.services.conversationTemplates.start();
 
     const attachments = this.services.attachments.start({
       spaces,
@@ -186,10 +196,20 @@ export class ServiceManager {
       trackingService,
     });
 
+    const conversations = new ConversationServiceImpl({
+      logger: logger.get('conversations'),
+      security,
+      elasticsearch,
+      spaces,
+      agents,
+      eventBus: conversationEventBus,
+    });
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
+      http,
       uiSettings,
       savedObjects,
       inference,
@@ -197,6 +217,7 @@ export class ServiceManager {
       actions,
       toolsService: tools,
       agentsService: agents,
+      conversationService: conversations,
       attachmentsService: attachments,
       renderersService: renderers,
       skillServiceStart: skillsServiceStart,
@@ -206,16 +227,9 @@ export class ServiceManager {
       hooks,
       getExecutionService,
       searchInferenceEndpoints,
+      conversationTemplates: conversationTemplatesStart,
     });
     runner = runnerFactory.getRunner();
-
-    const conversations = new ConversationServiceImpl({
-      logger: logger.get('conversations'),
-      security,
-      elasticsearch,
-      spaces,
-      agents,
-    });
 
     const workspaces = createWorkspaceService({
       logger: logger.get('workspaces'),
@@ -266,6 +280,8 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
+    const spaceSettings = createSpaceSettingsService({ savedObjects });
+
     this.internalStart = {
       tools,
       agents,
@@ -287,6 +303,8 @@ export class ServiceManager {
       consumption,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      spaceSettings,
+      conversationTemplates: conversationTemplatesStart,
     };
 
     return this.internalStart;

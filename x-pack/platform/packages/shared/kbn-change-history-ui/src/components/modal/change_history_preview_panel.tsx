@@ -155,7 +155,7 @@ export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
       <PreviewPanelState testSubj="changeHistoryPreviewError">
         <EuiFlexItem grow={false}>
           <EuiEmptyPrompt
-            iconType="alert"
+            iconType="warning"
             title={<h3>{i18n.PREVIEW_ERROR}</h3>}
             body={
               errorMessage ? (

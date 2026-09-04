@@ -20,6 +20,7 @@ import {
   shutdownInferenceTracerProvider,
   EXECUTION_ID_BAGGAGE_KEY,
   EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
+  EVALUATOR_NAME_BAGGAGE_KEY,
 } from '@kbn/inference-tracing';
 import {
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
@@ -29,6 +30,7 @@ import {
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import type { TracingPrivacySettings } from './agent_builder_span_processor';
@@ -57,6 +59,7 @@ const createCachedTracingSettings = async (
     includeSystemPrompt: false,
     includeRealNames: false,
     includeRealIds: false,
+    includeUserData: false,
   };
 
   const refresh = async () => {
@@ -72,6 +75,7 @@ const createCachedTracingSettings = async (
         includeSystemPrompt,
         includeRealNames,
         includeRealIds,
+        includeUserData,
       ] = await Promise.all([
         client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
@@ -80,6 +84,7 @@ const createCachedTracingSettings = async (
         client.get<boolean>(AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID),
       ]);
       settings = {
         enabled,
@@ -89,6 +94,7 @@ const createCachedTracingSettings = async (
         includeSystemPrompt,
         includeRealNames,
         includeRealIds,
+        includeUserData,
       };
     } catch (error) {
       logger.error(`Failed to fetch tracing settings: ${error.message}`);
@@ -144,6 +150,7 @@ export const registerTracingExporter = async ({
     new EvalSpanProcessor([
       { baggageKey: EXECUTION_ID_BAGGAGE_KEY },
       { baggageKey: EVAL_EXPERIMENT_ID_BAGGAGE_KEY },
+      { baggageKey: EVALUATOR_NAME_BAGGAGE_KEY, attributeKey: 'evaluator.name' },
       { baggageKey: SPACE_ID_BAGGAGE_KEY, attributeKey: DATA_STREAM_NAMESPACE_ATTR },
     ])
   );

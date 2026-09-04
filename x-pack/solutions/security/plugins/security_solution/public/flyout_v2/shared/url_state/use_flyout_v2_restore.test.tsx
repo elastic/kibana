@@ -20,6 +20,8 @@ import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
+import { markFlyoutV2UrlWrite } from './flyout_v2_url_write_guard';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -143,6 +145,266 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
   });
 
+  it('opens a flyout when flyoutV2 appears via same-app history navigation', () => {
+    const { history } = renderRestore('/');
+
+    act(() => {
+      history.push(
+        buildUrl([
+          {
+            kind: 'host',
+            hostName: 'web-01',
+            entityId: 'host:web-01',
+            scopeId: 'agent-builder-entity-card',
+            origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+          },
+        ])
+      );
+    });
+
+    expect(mockFlyoutApi.openHostFlyout).not.toHaveBeenCalled();
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledWith({
+      hostName: 'web-01',
+      entityId: 'host:web-01',
+      scopeId: 'agent-builder-entity-card',
+      origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+    });
+  });
+
+  it('forwards the navigation origin to a restored entity tool and its child', () => {
+    const { history } = renderRestore('/');
+
+    act(() => {
+      history.push(
+        buildUrl([
+          {
+            kind: 'entityGraphView',
+            entityId: 'host:web-01',
+            scopeId: 'agent-builder-entity-card',
+            entityName: 'web-01',
+            entityType: 'host',
+            origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+          },
+          {
+            kind: 'host',
+            hostName: 'web-01',
+            entityId: 'host:web-01',
+            scopeId: 'agent-builder-entity-card',
+            origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+          },
+        ])
+      );
+    });
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT })
+    );
+    expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT })
+    );
+  });
+
+  it('opens an entityResolution chain via same-app history navigation', () => {
+    const { history } = renderRestore('/');
+
+    act(() => {
+      history.push(
+        buildUrl([
+          {
+            kind: 'entityResolution',
+            entityId: 'user:florence',
+            entityType: 'user',
+            entityName: 'florence',
+            scopeId: 'entity-analytics-home-table',
+          },
+          {
+            kind: 'user',
+            userName: 'florence',
+            entityId: 'user:florence',
+            scopeId: 'entity-analytics-home-table',
+          },
+        ])
+      );
+    });
+
+    expect(mockFlyoutApi.openEntityResolution).not.toHaveBeenCalled();
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openEntityResolution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityId: 'user:florence',
+        entityType: 'user',
+        entityName: 'florence',
+        scopeId: 'entity-analytics-home-table',
+      })
+    );
+    expect(mockFlyoutApi.openUserFlyoutAsChild).toHaveBeenCalledWith({
+      userName: 'florence',
+      entityId: 'user:florence',
+      scopeId: 'entity-analytics-home-table',
+    });
+  });
+
+  it('does not reopen when the URL writer marks its own history.replace', () => {
+    const { history } = renderRestore('/');
+
+    act(() => {
+      markFlyoutV2UrlWrite(FLYOUT_V2_URL_PARAM);
+      history.replace(
+        buildUrl([
+          {
+            kind: 'host',
+            hostName: 'writer-host',
+            entityId: 'host:writer-host',
+          },
+        ])
+      );
+    });
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openHostFlyout).not.toHaveBeenCalled();
+  });
+
+  it('allows reopening the same flyoutV2 chain after the writer clears the param', () => {
+    const descriptors: FlyoutV2UrlParamValue = [
+      { kind: 'host', hostName: 'web-01', entityId: 'host:web-01' },
+    ];
+    const { history } = renderRestore('/');
+
+    act(() => {
+      history.push(buildUrl(descriptors));
+    });
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
+
+    // Simulate interactive close: writer clears flyoutV2 (marked self-write).
+    act(() => {
+      markFlyoutV2UrlWrite(FLYOUT_V2_URL_PARAM);
+      history.replace('/');
+    });
+
+    act(() => {
+      history.push(buildUrl(descriptors));
+    });
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not double-open the same chain from history after mount restore', () => {
+    const descriptors: FlyoutV2UrlParamValue = [
+      { kind: 'host', hostName: 'web-01', entityId: 'host:web-01' },
+    ];
+    const { history } = renderRestore(buildUrl(descriptors));
+
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
+
+    // Simulate a writer rewrite of the same logical chain (no write-guard mark):
+    // dedupe by descriptor content should still suppress a second open.
+    act(() => {
+      history.replace(
+        buildUrl([
+          {
+            kind: 'host',
+            hostName: 'web-01',
+            entityId: 'host:web-01',
+            origin: FLYOUT_ORIGIN.URL_RESTORE,
+          },
+        ])
+      );
+    });
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not open a doc-fetch stack from history while the initial URL open is still loading', () => {
+    // Unrelated history.replace (e.g. global query sync) can preserve flyoutV2 while useEsDocSearch
+    // is still in flight. Opening from history with empty context would hit the document fallback
+    // for NEEDS_DOC_HIT kinds; the initial URL path must wait for the hit and open the real tool.
+    const stack: FlyoutV2UrlParamValue = [
+      {
+        kind: 'documentCorrelations',
+        documentId: 'doc-1',
+        indexName: '.internal.alerts-security.alerts-default-000001',
+        scopeId: '',
+      },
+      {
+        kind: 'document',
+        documentId: 'doc-1',
+        indexName: '.internal.alerts-security.alerts-default-000001',
+      },
+    ];
+    loadingHit();
+    const { history, rerender } = renderRestore(buildUrl(stack));
+
+    act(() => {
+      // Unrelated URL write that keeps the same flyoutV2 (e.g. useSyncGlobalQueryString).
+      history.replace(`${buildUrl(stack)}&timerange=(global:(linkTo:!(),timerange:()))`);
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndexAsChild).not.toHaveBeenCalled();
+    expect(mockFlyoutApi.openDocumentCorrelations).not.toHaveBeenCalled();
+
+    withHit(docSearchHit);
+    rerender();
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openDocumentCorrelations).toHaveBeenCalledTimes(1);
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndexAsChild).toHaveBeenCalledTimes(1);
+    // No empty-context document fallback for the tool entry.
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+  });
+
+  it('reopens when history navigates to a different flyoutV2 chain', () => {
+    const { history } = renderRestore(
+      buildUrl([{ kind: 'host', hostName: 'web-01', entityId: 'host:web-01' }])
+    );
+
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      history.push(buildUrl([{ kind: 'user', userName: 'alice', entityId: 'user:alice' }]));
+    });
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openUserFlyout).toHaveBeenCalledWith({
+      userName: 'alice',
+      entityId: 'user:alice',
+    });
+  });
+
   // -----------------------------------------------------------------------
   // Single-main descriptors (no fetch required)
   // -----------------------------------------------------------------------
@@ -156,6 +418,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
       documentId: 'doc-1',
       indexName: 'logs-*',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
     });
   });
 
@@ -169,6 +432,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
       documentId: 'doc-1',
       indexName: '.siem-signals-*',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
     });
   });
 
@@ -180,6 +444,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openAttackFlyout).toHaveBeenCalledWith({
       attackId: 'atk-1',
       indexName: '.alerts-*',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
     });
   });
 
@@ -203,12 +468,37 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     );
   });
 
+  it('attributes a restored generic entity flyout to URL restoration', () => {
+    renderRestore(
+      buildUrl([
+        {
+          kind: 'genericEntity',
+          entityId: 'entity-1',
+          scopeId: 'scope-1',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+      ])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openGenericEntityFlyout).toHaveBeenCalledWith({
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
+    });
+  });
+
   it('opens a rule flyout', () => {
     renderRestore(buildUrl([{ kind: 'rule', ruleId: 'rule-1' }]));
     act(() => {
       jest.runAllTimers();
     });
-    expect(mockFlyoutApi.openRuleFlyout).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+    expect(mockFlyoutApi.openRuleFlyout).toHaveBeenCalledWith({
+      ruleId: 'rule-1',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
+    });
   });
 
   it('opens a network flyout', () => {
@@ -219,6 +509,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openNetworkFlyout).toHaveBeenCalledWith({
       ip: '1.2.3.4',
       flowTarget: 'source',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
     });
   });
 
@@ -232,6 +523,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openMisconfigurationFinding).toHaveBeenCalledWith({
       resourceId: 'res-1',
       ruleId: 'csp-1',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
     });
   });
 
@@ -260,6 +552,31 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     });
     expect(mockFlyoutApi.openEntityRiskInputs).toHaveBeenCalledWith(
       expect.objectContaining({ entityType: 'host', entityName: 'h' })
+    );
+  });
+
+  it('opens entityRiskInputs with the resolution subTab when present on the descriptor', () => {
+    renderRestore(
+      buildUrl([
+        {
+          kind: 'entityRiskInputs',
+          entityType: 'user',
+          entityName: 'alice',
+          entityId: 'user:alice',
+          subTab: 'resolution',
+        },
+      ])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openEntityRiskInputs).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityType: 'user',
+        entityName: 'alice',
+        entityId: 'user:alice',
+        subTab: 'resolution',
+      })
     );
   });
 
@@ -391,6 +708,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
       documentId: 'doc-1',
       indexName: 'logs-*',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
     });
   });
 
@@ -470,7 +788,6 @@ describe('useFlyoutV2RestoreFromUrl', () => {
           documentId: 'doc-1',
           indexName: 'i',
           scopeId: 's',
-          isRulePreview: false,
         },
       ])
     );
@@ -481,7 +798,6 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       expect.objectContaining({
         hit: expect.objectContaining({ id: 'doc-1' }),
         scopeId: 's',
-        isRulePreview: false,
         onShowAlert: expect.any(Function),
       })
     );
@@ -533,6 +849,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
       documentId: 'doc-1',
       indexName: 'i',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
     });
   });
 
@@ -590,6 +907,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openAttackFlyout).toHaveBeenCalledWith({
       attackId: 'atk-1',
       indexName: '.alerts-*',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
     });
   });
 
@@ -801,6 +1119,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
       documentId: 'doc-1',
       indexName: 'i',
+      origin: FLYOUT_ORIGIN.URL_RESTORE,
     });
   });
 
@@ -833,6 +1152,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
         documentId: 'tl-doc-1',
         indexName: 'i',
+        origin: FLYOUT_ORIGIN.URL_RESTORE,
       });
     });
 
@@ -921,7 +1241,10 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       });
 
       // Only the Timeline flyout (rule) should have been opened.
-      expect(mockFlyoutApi.openRuleFlyout).toHaveBeenCalledWith({ ruleId: 'r-tl' });
+      expect(mockFlyoutApi.openRuleFlyout).toHaveBeenCalledWith({
+        ruleId: 'r-tl',
+        origin: FLYOUT_ORIGIN.URL_RESTORE,
+      });
       // openHostFlyout and other page-context openers should not have been called.
       expect(mockFlyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });

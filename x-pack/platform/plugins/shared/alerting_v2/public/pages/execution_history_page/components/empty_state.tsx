@@ -35,7 +35,7 @@ export const PoliciesEmptyState = () => (
 export const FilteredEmptyState = () => (
   <EuiEmptyPrompt
     data-test-subj="executionHistoryFilteredEmptyPrompt"
-    iconType="search"
+    iconType="magnify"
     title={
       <h2>
         <FormattedMessage

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { RareJobCreator } from '../../../../../common/job_creator';
@@ -34,7 +34,7 @@ export const DetectorDescription: FC<Props> = ({ detectorType }) => {
   }
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.calloutTitle',
         {
@@ -45,7 +45,7 @@ export const DetectorDescription: FC<Props> = ({ detectorType }) => {
       <ul>
         <li>{description}</li>
       </ul>
-    </EuiCallOut>
+    </KbnInfoCallout>
   );
 };
 

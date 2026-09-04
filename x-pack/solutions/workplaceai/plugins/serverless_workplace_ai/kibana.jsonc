@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/serverless-workplace-ai",
   "owner": [
-    "@elastic/search-kibana",
+    "@elastic/search-ml-ux",
     "@elastic/workchat-eng"
    ],
   "group": "workplaceai",
@@ -19,6 +19,7 @@
     ],
     "requiredPlugins": [
       "serverless",
+      "navigation",
       "agentBuilder",
       "workflowsManagement"
     ],

@@ -117,10 +117,14 @@ export default ({ getService }: FtrProviderContext) => {
         user: { name: 'alice' },
         entity: { id: userEuid('alice'), type: 'user' },
       });
-      await utils.addUsersToSourceIndex(['alice'], sourceIndexName);
 
       // Simulate a source that has no API key stored
       await utils.clearEntitySourceApiKey(entitySourceId);
+
+      // Add the user only after the key is cleared, so the fire-and-forget background
+      // sync triggered at source creation (which still holds the valid key) cannot
+      // populate the watchlist index and race this assertion.
+      await utils.addUsersToSourceIndex(['alice'], sourceIndexName);
 
       await utils.syncWatchlist(watchlistId);
 
@@ -138,10 +142,14 @@ export default ({ getService }: FtrProviderContext) => {
         user: { name: 'alice' },
         entity: { id: userEuid('alice'), type: 'user' },
       });
-      await utils.addUsersToSourceIndex(['alice'], sourceIndexName);
 
       // Simulate a source that has no API key stored
       await utils.clearEntitySourceApiKey(entitySourceId);
+
+      // Add the user only after the key is cleared, so the fire-and-forget background
+      // sync triggered at source creation (which still holds the valid key) cannot
+      // populate the watchlist index and race this assertion.
+      await utils.addUsersToSourceIndex(['alice'], sourceIndexName);
 
       await utils.syncWatchlist(watchlistId);
       expect(await utils.queryWatchlistIndex(watchlistId)).toHaveLength(0);

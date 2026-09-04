@@ -72,7 +72,9 @@ export async function validateJob(
           timeField,
           job.datafeed_config.query,
           job.datafeed_config.runtime_mappings,
-          getIndicesOptions(job.datafeed_config)
+          getIndicesOptions(job.datafeed_config),
+          false,
+          job.datafeed_config.project_routing
         );
       }
 

@@ -338,6 +338,22 @@ steps:
       );
     });
 
+    it('updates a block scalar without corrupting the following field', () => {
+      const yaml = `name: Test
+description: >
+  Original description
+enabled: true
+steps: []`;
+      const result = updateYamlField(yaml, 'description', 'New description');
+
+      expect(parse(result)).toEqual({
+        name: 'Test',
+        description: 'New description',
+        enabled: true,
+        steps: [],
+      });
+    });
+
     it('preserves a trailing newline', () => {
       const yaml = `name: Test
 enabled: true

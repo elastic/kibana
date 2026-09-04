@@ -52,8 +52,8 @@ export function withKbnClientApiKeyAuth(kbnClient: KbnClient, apiKey: string): K
 export function getEvaluationsKbnClient({
   kbnClient,
   log,
-  evaluationsKbnUrl = process.env.EVALUATIONS_KBN_URL,
-  evaluationsKbnApiKey = process.env.EVALUATIONS_KBN_API_KEY,
+  evaluationsKbnUrl = process.env.EVAL_KBN_URL,
+  evaluationsKbnApiKey = process.env.EVAL_KBN_API_KEY,
   createKbnClient = ({ log: logger, url }) => new TestKbnClient({ log: logger, url }),
 }: GetEvaluationsKbnClientParams): KbnClient {
   if (!evaluationsKbnUrl) {

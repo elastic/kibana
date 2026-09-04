@@ -104,6 +104,13 @@ export function createGetAnomalyDetectionJobsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getAnomalyDetectionJobsSchema> = {
     id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Anomaly Detection Jobs',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Retrieves Machine Learning anomaly detection jobs and their top anomaly records.
 
 When to use:

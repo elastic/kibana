@@ -153,3 +153,23 @@ describe('getSchemaAtPath: real life examples', () => {
     expectZodSchemaEqual(atPathResult.schema as z.ZodType, z.number());
   });
 });
+
+describe('getSchemaAtPath: prototype-chain keys', () => {
+  const schema = z.object({ a: z.string() });
+
+  it.each(['__proto__', 'constructor', 'toString', 'hasOwnProperty'])(
+    'does not resolve %s to an Object.prototype member',
+    (segment) => {
+      expect(getSchemaAtPath(schema, segment).schema).toBeNull();
+      expect(getSchemaAtPath(schema, `a.${segment}`).schema).toBeNull();
+    }
+  );
+
+  it('resolves __proto__ when it is a real own key of the shape', () => {
+    const shape = Object.create(null) as Record<string, z.ZodType>;
+    shape.__proto__ = z.number();
+    const result = getSchemaAtPath(z.object(shape), '__proto__');
+    expect(result.schema).not.toBeNull();
+    expectZodSchemaEqual(result.schema as z.ZodType, z.number());
+  });
+});

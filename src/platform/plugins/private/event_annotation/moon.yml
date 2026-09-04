@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/saved-objects-tagging-plugin'
-  - '@kbn/presentation-util-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/visualization-ui-components'
   - '@kbn/i18n-react'

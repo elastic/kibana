@@ -24,7 +24,7 @@ import type {
   ElasticsearchClientConfig,
   AsScopedOptions,
 } from '@kbn/core-elasticsearch-server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isExternalUiamCredential } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
@@ -207,8 +207,10 @@ export class ClusterClient implements ICustomClusterClient {
 
   private getScopedHeaders(request: ScopeableRequest): Headers {
     let scopedHeaders: Headers;
+    let requestHeaders: Headers | undefined;
+    let isExternalCredential = false;
     if (isRealRequest(request)) {
-      const requestHeaders = ensureRawRequest(request).headers ?? {};
+      requestHeaders = ensureRawRequest(request).headers ?? {};
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
       const authHeaders = this.authHeaders?.get(request) ?? {};
 
@@ -218,28 +220,37 @@ export class ClusterClient implements ICustomClusterClient {
         ...authHeaders,
       };
     } else {
+      // Fake requests carrying a user-created (external) UIAM API key are marked by their
+      // builder: UIAM rejects external keys presented with client authentication, so the shared
+      // secret must not be attached to them. The marker is bound to the request object rather than
+      // its headers, so it cannot reach Elasticsearch or be supplied by an inbound request.
+      isExternalCredential = isKibanaRequest(request) && isExternalUiamCredential(request);
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
+    }
 
-      // If we're creating scoped headers for a fake request, we need to check if we're in UIAM mode
-      // and if the credentials in the headers are UIAM credentials. If so, we need to add the shared
-      // secret to the headers, so that ES can forward it to UIAM service for validation.
-      if (this.security?.uiam) {
-        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest({
-          headers: scopedHeaders,
-        });
-        if (authorizationHeader && isUiamCredential(authorizationHeader)) {
-          scopedHeaders = {
-            ...scopedHeaders,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.security.uiam.sharedSecret,
-          };
-        }
-      }
+    // The effective credential is whatever ends up in `scopedHeaders`: for real requests the auth
+    // provider's post-authentication headers override the one that came in on the wire. If the
+    // credential is an internal UIAM credential, it might require client authentication.
+    let clientAuthentication: string | undefined | null;
+    if (this.security?.uiam) {
+      const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
+      clientAuthentication =
+        credential &&
+        this.security.uiam.getElasticsearchClientAuthentication(
+          requestHeaders
+            ? { credentialSource: 'inbound', credential, requestHeaders }
+            : {
+                credentialSource: isExternalCredential ? 'external' : 'internal',
+                credential,
+              }
+        );
     }
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       ...scopedHeaders,
+      ...(clientAuthentication ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication } : {}),
     };
   }
 
@@ -253,15 +264,25 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
+    // If the credential is an internal UIAM credential, it might require client authentication.
+    // Use `internal` regardless of the request shape: unlike `getScopedHeaders`, this never reads a
+    // credential off the wire. For a real request it takes the auth provider's post-authentication
+    // headers (Kibana already vouched for that credential), and for a fake one the credential was
+    // minted by Kibana itself, so neither needs an attestation to be trusted. The exception is a
+    // fake request explicitly marked as carrying a user-created (external) UIAM credential, which
+    // UIAM rejects when presented with client authentication.
+    const isExternalCredential =
+      !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
+    const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication({
+      credentialSource: isExternalCredential ? 'external' : 'internal',
+      credential: authorizationHeader,
+    });
+
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       [ES_SECONDARY_AUTH_HEADER]: authorizationHeader.toString(),
-      // If the credentials in the authorization header are UIAM credentials, we need to pass the
-      // shared secret to ES as well, so that ES can forward it to UIAM service for validation.
-      ...(this.security?.uiam && isUiamCredential(authorizationHeader)
-        ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: this.security.uiam.sharedSecret }
-        : {}),
+      ...(clientAuthentication ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication } : {}),
     };
   }
 }

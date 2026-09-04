@@ -59,12 +59,11 @@ describe('createEventToolHandler', () => {
     expect(result).toEqual({ event_uuid: 'event-1', acknowledged: true });
   });
 
-  it('does not include event_id — synthetic slug path always used', async () => {
+  it('passes a generated event_id so chat create is always-write snapshot', async () => {
     await createEventToolHandler({ eventClient: {} as never, eventInput: baseInput });
 
     const delegatedInput = (eventsWriteHandler as jest.Mock).mock.calls[0][0].input;
-    expect(delegatedInput).not.toHaveProperty('event_id');
-    expect(delegatedInput).not.toHaveProperty('discovery_id');
+    expect(delegatedInput.event_id).toEqual(expect.any(String));
     expect(delegatedInput).not.toHaveProperty('assessment_note');
     expect(delegatedInput).not.toHaveProperty('signals');
     expect(delegatedInput).not.toHaveProperty('workflow_execution_id');

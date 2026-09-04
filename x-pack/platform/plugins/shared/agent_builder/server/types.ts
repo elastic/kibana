@@ -20,7 +20,10 @@ import type {
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
@@ -32,6 +35,7 @@ import type {
   AgentBuilderSmlPluginSetup,
   AgentBuilderSmlPluginStart,
 } from '@kbn/agent-builder-sml-plugin/server';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
 
 export type {
   AgentBuilderPluginSetup,
@@ -48,7 +52,7 @@ export type {
   PluginsSetup,
   PluginsStart,
   RuntimeStart,
-  ReadOnlyConversationClient,
+  ConversationPublicClient,
   ConversationsStart,
 } from '@kbn/agent-builder-server';
 
@@ -66,6 +70,7 @@ export interface AgentBuilderSetupDependencies {
   home: HomeServerPluginSetup;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
   agentBuilderSml: AgentBuilderSmlPluginSetup;
+  files: FilesSetup;
 }
 
 export interface AgentBuilderStartDependencies {
@@ -79,4 +84,6 @@ export interface AgentBuilderStartDependencies {
   security?: SecurityPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   agentBuilderSml: AgentBuilderSmlPluginStart;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  files: FilesStart;
 }

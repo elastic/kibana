@@ -454,7 +454,8 @@ export function MachineLearningCommonUIProvider({
 
     /** Set value for OptionListWithFieldStats component */
     async setOptionsListWithFieldStatsValue(selector: string, value: string) {
-      await testSubjects.click(selector);
+      // Keep room below the trigger so the downward-opening options popover isn't rendered off the viewport bottom.
+      await testSubjects.click(selector, undefined, { bottomOffset: 400 });
       await testSubjects.existOrFail('optionsListControlAvailableOptions');
 
       await retry.tryForTime(1000, async () => {
@@ -474,6 +475,11 @@ export function MachineLearningCommonUIProvider({
 
         await testSubjects.setValue('optionsListFilterInput', value);
         await testSubjects.click(`optionsListControlSelection-${value}`);
+      });
+      // Close the popover so its panel can't overlay subsequent controls (e.g. the wizard "Next" button).
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.missingOrFail('optionsListControlAvailableOptions', { timeout: 1000 });
       });
     },
 

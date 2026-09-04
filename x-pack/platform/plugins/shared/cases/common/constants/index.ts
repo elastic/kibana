@@ -12,6 +12,7 @@ export * from './files';
 export * from './application';
 export * from './observables';
 export * from './attachments';
+export * from './workflow';
 
 /**
  * Cases connector limits.
@@ -119,6 +120,8 @@ export const INTERNAL_CASE_OBSERVABLES_PATCH_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
+export const INTERNAL_CASE_WORKFLOW_RUN_URL =
+  `${CASES_INTERNAL_URL}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
@@ -205,25 +208,130 @@ export const MAX_CASE_ID_LENGTH = 512 as const; // ES `_id` upper bound; connect
 export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
 export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
 export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
+export const MAX_TEMPLATE_DEFINITION_LENGTH = 30000 as const;
 export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
+/**
+ * Caps on the templates-v2 / extended-fields system, enforced on new writes only (existing data is
+ * never retroactively rejected). These bound what the public mutative template API can create so
+ * automation cannot grow the number of templates, per-template fields, or field values without
+ * limit. Enforced in the templates service write path (create/update and their `dry_run`
+ * preflight), which both the public routes and the internal editor routes call through — so one
+ * gate covers every mutative entry point. Deliberately NOT applied on the shared read schema, which
+ * also validates already-stored definitions.
+ *
+ * NOTE: version *history* is intentionally uncapped. `templateVersion` is monotonic and each update
+ * persists a new version SO, but pruning old snapshots is a separate garbage-collection concern
+ * tracked as a follow-up rather than a per-write limit that would reject legitimate edits.
+ */
+export const MAX_TEMPLATES_PER_OWNER = 200 as const;
+export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
+/**
+ * Backstop on the UTF-8 byte size of a single stored extended-field value. ES `flattened` fields
+ * have no key-count limit and subfields don't count toward `index.mapping.total_fields.limit`, but
+ * Lucene rejects a keyword term over 32,766 bytes and the SO write then fails opaquely. Measure the
+ * UTF-8 byte length (not `string.length`, which counts UTF-16 code units and can undercount
+ * non-ASCII input) so this maps directly onto Lucene's limit.
+ */
+export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
+
+/**
+ * Single source of truth for the allowed character sets in templates-v2 extended-field keys.
+ *
+ * The key stored for a field is `${name}_as_${type}` (see `getFieldSnakeKey` in
+ * `common/utils/template_fields.ts`). Because this key is interpolated verbatim into Painless
+ * string literals (search-time scripts and data-view runtime fields), the set of safe characters
+ * must exclude anything that could break Painless source or push the compiled script over
+ * Elasticsearch's 65,535-byte bytecode limit.
+ *
+ * Two guards, deliberately not independent:
+ *
+ *   AUTHORABLE_SNAKE_KEY  — what a user may newly create (strict).
+ *   SAFE_SNAKE_KEY        — what we are willing to read back / publish (lenient superset).
+ *
+ * The lenient guard exists because keys already in the index may contain characters that
+ * predate the strict rule (e.g. hyphens written by the v1→v2 migration task). We must be
+ * able to read and surface those fields without breaking anything, even though we now refuse
+ * to create new ones with the same shape.
+ *
+ * **NEVER add a character to AUTHORABLE_SNAKE_KEY without also ensuring it is in
+ * SAFE_SNAKE_KEY** — the containment is validated by the unit tests in
+ * `common/constants/snake_key_guards.test.ts`. The deliberate delta between the two
+ * (READ_TOLERATED_KEY_CHARS) is the only place to add characters that apply to reads only.
+ */
+
+/** The base character class — written down once. Both regexes are derived from this string. */
+const AUTHORABLE_KEY_CHARS = 'A-Za-z0-9_';
+
+/**
+ * Characters permitted in keys already in the index but NOT in newly-authored names.
+ * Hyphens are here because the v1→v2 migration wrote UUID field names (hex + hyphens) and
+ * some hand-authored hyphenated names already exist; on the authoring path a hyphen is
+ * refused because it camel-folds identically to `_` and reads as KQL negation.
+ * Anything added here widens reads only — by construction it cannot widen authoring.
+ */
+const READ_TOLERATED_KEY_CHARS = '-';
+
+/**
+ * Authoring guard — what a user may newly create.
+ * Must stay a strict subset of SAFE_SNAKE_KEY; enforced by unit tests.
+ */
+export const AUTHORABLE_SNAKE_KEY = new RegExp(`^[${AUTHORABLE_KEY_CHARS}]+$`);
+
+/**
+ * Read / storage guard — what we will accept when reading back keys from the index and
+ * interpolating them into Painless literals. A superset of AUTHORABLE_SNAKE_KEY by
+ * construction (shares AUTHORABLE_KEY_CHARS, adds READ_TOLERATED_KEY_CHARS).
+ */
+export const SAFE_SNAKE_KEY = new RegExp(`^[${AUTHORABLE_KEY_CHARS}${READ_TOLERATED_KEY_CHARS}]+$`);
+
+/**
+ * The longest `type` literal that any inline field can carry (the second half of the
+ * `${name}_as_${type}` key). Used when validating `$ref` aliases that have no locally-known
+ * type — checking against this value guarantees the derived key fits MAX_SNAKE_KEY_LENGTH
+ * regardless of which type the referenced field uses.
+ *
+ * A unit test ("LONGEST_STORAGE_TYPE is the longest type literal in the field schemas")
+ * in `strict_fields.test.ts` compares this against `ALL_TEMPLATE_TYPE_SUFFIXES` from the
+ * server analytics module. If a longer type literal is added to the field schemas that test
+ * will fail, prompting an update here.
+ */
+export const LONGEST_STORAGE_TYPE = 'unsigned_long' as const;
+
+/**
+ * Maximum length of a full `${name}_as_${type}` extended-field storage key.
+ * Shared by the friendly-name generator (which reserves room for the longest
+ * type suffix) and the analytics runtime-field guard so a generated name can
+ * never produce a key the analytics layer rejects.
+ */
+export const MAX_SNAKE_KEY_LENGTH = 256 as const;
+/**
+ * Bounds for `extendedFieldFilters` on find/search and All Cases URL state.
+ * Field Library values can legitimately occupy the full template/value payload, and each of the
+ * 200 fields can contribute both values of a TOGGLE filter.
+ */
+export const MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH = MAX_EXTENDED_FIELD_VALUE_BYTES;
+export const MAX_EXTENDED_FIELD_FILTERS = MAX_FIELD_DEFINITIONS_PER_OWNER * 2;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
+
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
 export const MAX_USER_ACTION_AUTHOR_LENGTH = 256 as const;
+export const MAX_ACTION_SOURCE_TYPE_LENGTH = 1024 as const;
+export const MAX_ACTION_SOURCE_ID_LENGTH = 512 as const;
+export const MAX_ACTION_SOURCE_NAME_LENGTH = 256 as const;
+export const MAX_ACTION_SOURCE_RUN_ID_LENGTH = 512 as const;
+export const MAX_USER_ACTION_TYPE_LENGTH = 50 as const;
 
 /**
  * Cases features
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
+  alerts: { read: true, all: true },
   metrics: [],
-  observables: { enabled: true, autoExtract: false },
-  events: { enabled: false },
-  templates: { enabled: false },
 });
 
 /**
@@ -296,6 +404,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const LOCAL_STORAGE_KEYS = {
   casesTableColumns: 'cases.list.tableColumns',
   casesListFields: 'cases.list.fields',
+  casesGlobalFieldColumns: 'cases.list.globalFieldColumns',
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesViewMode: 'cases.list.viewMode',
   casesTableState: 'cases.list.state',
@@ -307,12 +416,14 @@ export const LOCAL_STORAGE_KEYS = {
   attachmentFilters: 'cases.attachments.filters',
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
+  caseViewSidebarWidth: 'cases.caseView.sidebarWidth',
   caseViewSidebarAccordions: 'cases.caseView.sidebarAccordions',
   // Guided-tour / "what's new" banner state. Keys are version-scoped so a future refresh can
   // re-trigger the banner/tour by bumping the suffix.
   casesListBannerDismissed: 'cases.list.banner.dismissed.v1',
   caseDetailsTourSeen: 'cases.caseView.tour.seen.v1',
   templateEditorTourSeen: 'cases.templates.editor.tour.seen.v1',
+  templatesListInfoPanelDismissed: 'cases.templates.list.infoPanel.dismissed.v1',
   showLegacyCustomFields: 'cases.showLegacyCustomFields',
 };
 
@@ -379,9 +490,61 @@ export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
 export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
   'case_view_attachments_sub_tab_clicked' as const;
 
+export const CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE = 'cases_list_view_mode_changed' as const;
+
+export const CASES_LIST_PAGE_VIEW_EVENT_TYPE = 'cases_list_page_view' as const;
+
+export const CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE =
+  'case_view_attachment_accordion_opened' as const;
+
+export const CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE =
+  'case_view_attach_button_clicked' as const;
+
+export const CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE =
+  'case_view_attach_menu_item_clicked' as const;
+
+export const CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE =
+  'case_markdown_editor_plugin_clicked' as const;
+
+/**
+ * Template management events. Each one reports a single confirmed user action on the template
+ * management pages — not a count of templates written. A bulk delete reports one event whatever the
+ * number of removed templates, and the YAML import flow reports nothing. Use the server-side
+ * template counters for write totals; they count every caller.
+ */
+export const CASES_TEMPLATE_CREATED_EVENT_TYPE = 'cases_template_created' as const;
+
+export const CASES_TEMPLATE_UPDATED_EVENT_TYPE = 'cases_template_updated' as const;
+
+export const CASES_TEMPLATE_DELETED_EVENT_TYPE = 'cases_template_deleted' as const;
+
+/**
+ * Cases list view toggle. Defined in `common` (rather than the redesign UI package) so that
+ * non-UI consumers, such as the analytics/EBT layer, can depend on it without reaching into a
+ * specific UI feature's implementation.
+ */
+export const VIEW_TOGGLE_LIST_ID = 'list' as const;
+export const VIEW_TOGGLE_TABLE_ID = 'table' as const;
+
+export type ViewToggleId = typeof VIEW_TOGGLE_LIST_ID | typeof VIEW_TOGGLE_TABLE_ID;
+
+/**
+ * Template apply events. Each one reports a single confirmed user action that puts a template on a
+ * case, or takes it off again — never a count of cases. The public API, the workflow callers, and
+ * the alerting rule's cases system action all apply templates with no browser in the path, so none
+ * of them appear here. Use the server-side counters for totals; they count every caller.
+ */
+export const CASES_TEMPLATE_APPLIED_ON_CREATE_EVENT_TYPE =
+  'cases_template_applied_on_create' as const;
+
+export const CASES_TEMPLATE_APPLIED_EVENT_TYPE = 'cases_template_applied' as const;
+
+export const CASES_TEMPLATE_CLEARED_EVENT_TYPE = 'cases_template_cleared' as const;
+
 /**
  * Exporting this to make it easier to track the usage across the codebase
  * via lsp references.
  */
 export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;
 export const CASE_EXTENDED_FIELDS_LABELS = 'extended_fields_labels' as const;
+export const CASE_EXTENDED_FIELDS_CONTROLS = 'extended_fields_controls' as const;

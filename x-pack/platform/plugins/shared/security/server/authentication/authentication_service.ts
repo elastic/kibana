@@ -393,6 +393,9 @@ export class AuthenticationService {
     uiam,
     userActivity,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
+    const getCurrentUser = (request: KibanaRequest) =>
+      http.auth.get<AuthenticatedUser>(request).state ?? null;
+
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
@@ -408,6 +411,7 @@ export class AuthenticationService {
           logger: this.logger.get('api-key-uiam'),
           license: this.license,
           uiam,
+          getCurrentUser,
         })
       : null;
 
@@ -429,9 +433,6 @@ export class AuthenticationService {
 
       return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
     };
-
-    const getCurrentUser = (request: KibanaRequest) =>
-      http.auth.get<AuthenticatedUser>(request).state ?? null;
 
     this.session = session;
     const authenticator = (this.authenticator = new Authenticator({
@@ -472,6 +473,8 @@ export class AuthenticationService {
               grant: uiamAPIKeys.grant.bind(uiamAPIKeys),
               invalidate: uiamAPIKeys.invalidate.bind(uiamAPIKeys),
               convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
+              getInternalCallerAttestationHeaders:
+                uiamAPIKeys.getInternalCallerAttestationHeaders.bind(uiamAPIKeys),
             }
           : null,
       },
@@ -482,9 +485,11 @@ export class AuthenticationService {
             listClients: uiamOAuth.listClients.bind(uiamOAuth),
             updateClient: uiamOAuth.updateClient.bind(uiamOAuth),
             revokeClient: uiamOAuth.revokeClient.bind(uiamOAuth),
+            deleteClient: uiamOAuth.deleteClient.bind(uiamOAuth),
             listConnections: uiamOAuth.listConnections.bind(uiamOAuth),
             updateConnection: uiamOAuth.updateConnection.bind(uiamOAuth),
             revokeConnection: uiamOAuth.revokeConnection.bind(uiamOAuth),
+            deleteConnection: uiamOAuth.deleteConnection.bind(uiamOAuth),
             resolveUsers: uiamOAuth.resolveUsers.bind(uiamOAuth),
           }
         : null,

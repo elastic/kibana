@@ -139,11 +139,12 @@ evaluate.describe(
   'Workflow editing via natural language',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('inserts a new step', async ({ evaluateEditDataset }) => {
+    evaluate('core editing cases', async ({ evaluateEditDataset }) => {
       await evaluateEditDataset({
         dataset: {
-          name: 'workflow-editing: insert-step',
-          description: 'Evaluate the ability to insert new steps into an existing workflow',
+          name: 'workflow-editing: core',
+          description:
+            'Core editing cases: insert step, modify step, delete step, modify property, multi-step edits',
           examples: [
             {
               input: {
@@ -182,17 +183,6 @@ evaluate.describe(
               },
               metadata: { category: 'insert-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('modifies an existing step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing: modify-step',
-          description: 'Evaluate the ability to modify existing workflow steps',
-          examples: [
             {
               input: {
                 instruction: 'Switch fetch_data to POST and add a body with a test query',
@@ -210,17 +200,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('deletes a step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing: delete-step',
-          description: 'Evaluate the ability to delete steps from a workflow',
-          examples: [
             {
               input: {
                 instruction: 'Remove the log_end step from the workflow.',
@@ -240,17 +219,6 @@ evaluate.describe(
               },
               metadata: { category: 'delete-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('modifies a top-level property', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing: modify-property',
-          description: 'Evaluate the ability to modify top-level workflow properties',
-          examples: [
             {
               input: {
                 instruction:
@@ -272,18 +240,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-property' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('performs multi-step edits', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing: multi-step-edits',
-          description:
-            'Evaluate the ability to perform multiple edits in a single conversation turn',
-          examples: [
             {
               input: {
                 instruction:
@@ -351,11 +307,12 @@ evaluate.describe(
   'Elasticsearch workflow editing via natural language',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('modifies an Elasticsearch step', async ({ evaluateEditDataset }) => {
+    evaluate('ES editing cases', async ({ evaluateEditDataset }) => {
       await evaluateEditDataset({
         dataset: {
-          name: 'workflow-editing-es: modify-step',
-          description: 'Evaluate the ability to modify Elasticsearch-specific workflow steps',
+          name: 'workflow-editing-es: core',
+          description:
+            'Elasticsearch editing cases: modify step, insert ES|QL step, multi-step edits',
           examples: [
             {
               input: {
@@ -374,17 +331,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-es-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('inserts an Elasticsearch step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-es: insert-step',
-          description: 'Evaluate the ability to insert Elasticsearch-specific steps',
-          examples: [
             {
               input: {
                 instruction:
@@ -406,18 +352,6 @@ evaluate.describe(
               },
               metadata: { category: 'insert-es-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('performs multi-step ES edits', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-es: multi-step-edits',
-          description:
-            'Evaluate the ability to perform multiple Elasticsearch-related edits at once',
-          examples: [
             {
               input: {
                 instruction:
@@ -466,11 +400,12 @@ evaluate.describe(
   'Cases workflow editing via natural language',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('modifies a cases step', async ({ evaluateEditDataset }) => {
+    evaluate('cases editing cases', async ({ evaluateEditDataset }) => {
       await evaluateEditDataset({
         dataset: {
-          name: 'workflow-editing-cases: modify-step',
-          description: 'Evaluate the ability to modify cases workflow steps',
+          name: 'workflow-editing-cases: core',
+          description:
+            'Cases editing cases: modify case step, insert comment step, multi-step edits',
           examples: [
             {
               input: {
@@ -488,17 +423,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-cases-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('inserts a cases step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-cases: insert-step',
-          description: 'Evaluate the ability to insert cases-specific steps',
-          examples: [
             {
               input: {
                 instruction:
@@ -520,17 +444,6 @@ evaluate.describe(
               },
               metadata: { category: 'insert-cases-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('performs multi-step cases edits', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-cases: multi-step-edits',
-          description: 'Evaluate the ability to perform multiple cases-related edits at once',
-          examples: [
             {
               input: {
                 instruction:
@@ -592,11 +505,12 @@ evaluate.describe(
   'Connector workflow editing via natural language',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('modifies a connector step', async ({ evaluateEditDataset }) => {
+    evaluate('connector editing cases', async ({ evaluateEditDataset }) => {
       await evaluateEditDataset({
         dataset: {
-          name: 'workflow-editing-connector: modify-step',
-          description: 'Evaluate the ability to modify connector workflow steps',
+          name: 'workflow-editing-connector: core',
+          description:
+            'Connector editing cases: modify Slack message, insert email step, replace connector',
           examples: [
             {
               input: {
@@ -614,17 +528,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-connector-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('inserts a connector step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-connector: insert-step',
-          description: 'Evaluate the ability to insert connector steps',
-          examples: [
             {
               input: {
                 instruction:
@@ -647,17 +550,6 @@ evaluate.describe(
               },
               metadata: { category: 'insert-connector-step' },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('replaces a connector step', async ({ evaluateEditDataset }) => {
-      await evaluateEditDataset({
-        dataset: {
-          name: 'workflow-editing-connector: replace-step',
-          description: 'Evaluate the ability to replace one connector step with another',
-          examples: [
             {
               input: {
                 instruction:

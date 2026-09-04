@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
-import type { KIFeatureExtractionEvaluator } from '../types';
+import type { KIFeatureExtractionDocument, KIFeatureExtractionEvaluator } from '../types';
 import { getFeaturesFromOutput } from '../types';
 import { isEvidenceGrounded } from './is_evidence_grounded';
 
@@ -27,6 +26,7 @@ import { isEvidenceGrounded } from './is_evidence_grounded';
 export const evidenceGroundingEvaluator = {
   name: 'evidence_grounding',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ input, output }) => {
     const features = getFeaturesFromOutput(output);
 
@@ -34,9 +34,7 @@ export const evidenceGroundingEvaluator = {
       output != null && !Array.isArray(output)
         ? (output as unknown as Record<string, unknown>)
         : undefined;
-    const taskDocs = taskOutput?.sample_documents as
-      | Array<SearchHit<Record<string, unknown>>>
-      | undefined;
+    const taskDocs = taskOutput?.sample_documents as KIFeatureExtractionDocument[] | undefined;
 
     const rawDocs = taskDocs ?? input.sample_documents ?? [];
     if (rawDocs.length === 0) {
@@ -45,7 +43,7 @@ export const evidenceGroundingEvaluator = {
 
     const docsById = new Map<string, Record<string, unknown>>();
 
-    const resolveDoc = (hit: SearchHit<Record<string, unknown>>): Record<string, unknown> => {
+    const resolveDoc = (hit: KIFeatureExtractionDocument): Record<string, unknown> => {
       const id = typeof hit._id === 'string' ? hit._id : undefined;
       const resolved = {
         ...((hit.fields as Record<string, unknown>) ?? {}),
@@ -134,7 +132,7 @@ export const evidenceGroundingEvaluator = {
           ? `${allIssues.slice(0, 5).join('; ')}`
           : `All ${totalEvidence} evidence strings are grounded` +
             (totalDocIds > 0 ? ` and all ${totalDocIds} doc IDs are valid` : ''),
-      details: {
+      metadata: {
         totalEvidence,
         groundedEvidence,
         ungroundedItems,

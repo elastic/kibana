@@ -11,6 +11,10 @@ import type { BuiltinToolDefinition, ToolHandlerStandardReturn } from '@kbn/agen
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { z } from '@kbn/zod/v4';
 import type { ExperimentalFeatures } from '../../../common';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../common/constants';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
   createToolAvailabilityContext,
@@ -26,10 +30,6 @@ import {
 } from './create_detection_rule_tool';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import {
-  SECURITY_RULE_ATTACHMENT_ID,
-  SecurityAgentBuilderAttachments,
-} from '../../../common/constants';
 
 jest.mock('../../lib/detection_engine/ai_rule_creation/agent', () => ({
   getBuildAgent: jest.fn(),
@@ -734,6 +734,43 @@ describe('createDetectionRuleTool', () => {
       });
     });
 
+    it('returns a structured rejection when the graph rejects rule creation', async () => {
+      mockIterativeAgent.invoke.mockResolvedValue({
+        rule: {},
+        errors: [],
+        rejectionReason: {
+          code: 'INVALID_OUTPUT',
+          message: 'The assembled rule failed schema validation',
+          details: 'severity: Invalid enum value',
+        },
+        rejectionMessage:
+          'I built a rule but it failed validation: severity: Invalid enum value. Please retry or rephrase.',
+      });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        modelProvider: mockModelProvider,
+        events: mockEvents,
+      });
+
+      const result = await tool.handler({ user_query: userQuery }, context);
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              success: false,
+              rejected: true,
+              rejectionCode: 'INVALID_OUTPUT',
+              message:
+                'I built a rule but it failed validation: severity: Invalid enum value. Please retry or rephrase.',
+            },
+          },
+        ],
+      });
+      expect(context.attachments.add).not.toHaveBeenCalled();
+    });
+
     it('returns error when graph creates rule with errors', async () => {
       const mockErrors = ['Error 1', 'Error 2'];
       mockIterativeAgent.invoke.mockResolvedValue({ rule: null, errors: mockErrors });
@@ -751,8 +788,7 @@ describe('createDetectionRuleTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to create detection rule: ${mockErrors.join('; ')}`,
-              errors: mockErrors,
+              message: 'Failed to create detection rule. Please try again or refine your request.',
             },
           },
         ],
@@ -776,8 +812,7 @@ describe('createDetectionRuleTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to create detection rule: ${mockError.message}`,
-              error: mockError.toString(),
+              message: 'Failed to create detection rule. Please try again or refine your request.',
             },
           },
         ],

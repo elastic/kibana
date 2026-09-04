@@ -8,7 +8,7 @@
  */
 
 import type { ESQLMap, ESQLSingleAstItem } from '@elastic/esql/types';
-import { isList, isMap } from '@elastic/esql';
+import { isList, isMap, isStringLiteral } from '@elastic/esql';
 import type { ESQLMessage, SupportedDataType } from '../../..';
 import { UnmappedFieldsStrategy, type ESQLColumnData } from '../../../registry/types';
 import { getExpressionType } from '../expressions';
@@ -19,6 +19,33 @@ import { getMapEntryByStringKeyFromAst, parseMapParams } from '../maps';
 // whereas the expression type in the AST is 'function_named_parameters'.
 export const TypeMap: Record<SupportedDataType, string> = {
   function_named_parameters: 'map_param',
+};
+
+/**
+ * Returns the first literal in `value` that is not in `allowed`, or undefined when all are.
+ * A parameter may hold a single literal or a list of them (e.g. USER_AGENT's `properties`).
+ *
+ * Matching is case-insensitive: Elasticsearch is case-insensitive for most enumerated options,
+ * so comparing loosely avoids flagging queries the server would accept.
+ */
+const findValueOutsideAllowedSet = (
+  value: ESQLSingleAstItem,
+  allowed: string[]
+): string | undefined => {
+  const items = isList(value) ? value.values : [value];
+  const allowedLowercase = allowed.map((entry) => entry.toLowerCase());
+
+  for (const item of items) {
+    if (!isStringLiteral(item)) {
+      continue;
+    }
+
+    if (!allowedLowercase.includes(item.valueUnquoted.toLowerCase())) {
+      return item.valueUnquoted;
+    }
+  }
+
+  return undefined;
 };
 
 export function validateMap(
@@ -43,7 +70,7 @@ export function validateMap(
       }
 
       const paramValueType = getExpressionType(param.value);
-      const { type, rawType } = mapParamsDefinition[paramKey];
+      const { type, rawType, values } = mapParamsDefinition[paramKey];
       if (param.incomplete === false && !(rawType === paramValueType)) {
         return getMessageFromId({
           messageId: 'invalidMapParameterValueType',
@@ -54,6 +81,22 @@ export function validateMap(
           },
           locations: param.value.location,
         });
+      }
+
+      if (param.incomplete === false && values.length > 0) {
+        const invalidValue = findValueOutsideAllowedSet(param.value, values);
+
+        if (invalidValue) {
+          return getMessageFromId({
+            messageId: 'invalidMapParameterValue',
+            values: {
+              paramName: paramKey,
+              value: invalidValue,
+              allowedValues: values.join(', '),
+            },
+            locations: param.value.location,
+          });
+        }
       }
     }
   }

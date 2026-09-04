@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { Locations } from '../../../../common/runtime_types';
 import { MonitorTypeEnum, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
@@ -41,6 +42,10 @@ describe('tcp normalizers', () => {
         agentPolicyId: 'germany',
       },
     ];
+    const maintenanceWindows = [
+      { id: 'mw-1', title: 'First maintenance window' },
+      { id: 'mw-2', title: 'Second maintenance window' },
+    ] as unknown as MaintenanceWindow[];
     const monitors = [
       {
         locations: ['us_central'],
@@ -99,6 +104,7 @@ describe('tcp normalizers', () => {
         projectId,
         namespace: 'test-space',
         version: '8.5.0',
+        maintenanceWindows,
       });
       expect(actual).toEqual([
         {
@@ -308,6 +314,7 @@ describe('tcp normalizers', () => {
         projectId,
         namespace: 'test-space',
         version: '8.5.0',
+        maintenanceWindows,
       });
       expect(actual).toEqual([
         {

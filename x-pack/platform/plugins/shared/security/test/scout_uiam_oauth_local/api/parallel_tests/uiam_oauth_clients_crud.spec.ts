@@ -7,7 +7,6 @@
 
 import { parse as parseCookie } from 'tough-cookie';
 
-import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { createSAMLResponse } from '@kbn/mock-idp-utils';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -22,11 +21,7 @@ apiTest.describe(
   () => {
     let authHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiClient, kbnClient, config: { organizationId, projectType } }) => {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
-      });
-
+    apiTest.beforeAll(async ({ apiClient, config: { organizationId, projectType } }) => {
       const samlResponse = await createSAMLResponse({
         username: '1234567890',
         email: 'elastic_admin@elastic.co',
@@ -46,12 +41,8 @@ apiTest.describe(
       authHeaders = { ...COMMON_UNSAFE_HEADERS, Cookie: cookie };
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
-    });
-
     apiTest(
-      'creates, reads, lists, patches (incl. redirect_uris), and revokes a client',
+      'creates, reads, lists, patches (incl. redirect_uris), and deletes a client',
       async ({ apiClient }) => {
         const clientName = `scout-crud-${Date.now()}`;
         const initialRedirectUri = 'https://example.com/callback';
@@ -122,14 +113,28 @@ apiTest.describe(
             expect(patchedUris).toContain(initialRedirectUri);
             expect(patchedUris).toContain(secondRedirectUri);
           });
+
+          await apiTest.step('delete client', async () => {
+            const deleteResponse = await apiClient.delete(
+              `${CLIENTS_BASE}/${encodeURIComponent(clientId!)}`,
+              { headers: authHeaders }
+            );
+            expect(deleteResponse.statusCode).toBe(204);
+
+            const getResponse = await apiClient.get(
+              `${CLIENTS_BASE}/${encodeURIComponent(clientId!)}`,
+              { headers: authHeaders, responseType: 'json' }
+            );
+            expect(getResponse.statusCode).toBe(404);
+
+            clientId = undefined;
+          });
         } finally {
-          // Best-effort cleanup (only if the client was successfully created above).
+          // Best-effort cleanup for a client that was created but not reached by the delete step.
           // eslint-disable-next-line playwright/no-conditional-in-test
           if (clientId) {
-            await apiClient.post(`${CLIENTS_BASE}/${encodeURIComponent(clientId)}/_revoke`, {
+            await apiClient.delete(`${CLIENTS_BASE}/${encodeURIComponent(clientId)}`, {
               headers: authHeaders,
-              responseType: 'json',
-              body: { reason: 'scout cleanup' },
             });
           }
         }

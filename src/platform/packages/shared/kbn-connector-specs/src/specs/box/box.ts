@@ -74,7 +74,7 @@ export const Box: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -123,6 +123,7 @@ export const Box: ConnectorSpec = {
   actions: {
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve details about the currently authenticated Box user, including name, email, and account type. Use this to confirm authentication is working and to identify which Box account is connected.',
       input: WhoAmIInputSchema,
@@ -133,6 +134,7 @@ export const Box: ConnectorSpec = {
 
     searchFilesKeyword: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for files in Box by keyword. Box searches across file and folder names, document content, descriptions, and metadata. Returns file IDs, names, and paths. Use this as the primary way to locate files before reading their content or details.',
       input: SearchFilesKeywordInputSchema,
@@ -148,6 +150,7 @@ export const Box: ConnectorSpec = {
 
     searchFoldersByName: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for folders in Box by name. Returns folder IDs, names, and parent paths. Use this to locate a specific folder before browsing its contents with listFolderContent.',
       input: SearchFoldersByNameInputSchema,
@@ -161,6 +164,7 @@ export const Box: ConnectorSpec = {
 
     listFolderContent: {
       isTool: true,
+      scope: 'read',
       description:
         'List files and subfolders inside a specific Box folder. Use folder ID "0" for the root folder. Use folder IDs from searchFoldersByName results to browse specific directories.',
       input: ListFolderContentInputSchema,
@@ -174,6 +178,7 @@ export const Box: ConnectorSpec = {
 
     getFileContent: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the text content of a file stored in Box. Works with documents, spreadsheets, PDFs, and other text-extractable formats. Use file IDs from searchFilesKeyword or listFolderContent results. WARNING: For large files, this may return a very large payload. Only call this when you need the actual document content; use getFileDetails first to check file size if needed.',
       input: GetFileContentInputSchema,
@@ -186,6 +191,7 @@ export const Box: ConnectorSpec = {
 
     getFileDetails: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed metadata for a specific Box file, including size, owner, modification date, permissions, shared link status, and version info. Use this to inspect a file before downloading its content, or to check sharing and access settings.',
       input: GetFileDetailsInputSchema,
@@ -198,6 +204,7 @@ export const Box: ConnectorSpec = {
 
     getFolderDetails: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed metadata for a specific Box folder, including owner, modification date, permissions, collaboration settings, and shared link status.',
       input: GetFolderDetailsInputSchema,
@@ -210,6 +217,7 @@ export const Box: ConnectorSpec = {
 
     listRecentItems: {
       isTool: true,
+      scope: 'read',
       description:
         'List files and folders recently accessed or modified by the authenticated user in Box. Returns item IDs, names, types, and interaction timestamps. Use this to surface recently active content without needing a search query.',
       input: ListRecentItemsInputSchema,
@@ -222,6 +230,7 @@ export const Box: ConnectorSpec = {
 
     getComments: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve all comments posted on a specific Box file. Returns comment text, author details, and timestamps. Use this to understand discussion or review feedback on a document.',
       input: GetCommentsInputSchema,
@@ -234,6 +243,7 @@ export const Box: ConnectorSpec = {
 
     searchByMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for Box files and folders using metadata template fields and a structured query expression (e.g. `amount >= 100 AND currency = "USD"`). Returns items whose metadata matches the query. Use this when you need to filter content by structured attributes rather than keyword text. Use callTool with list_metadata_templates to discover available template keys and field names.',
       input: SearchByMetadataInputSchema,
@@ -250,6 +260,7 @@ export const Box: ConnectorSpec = {
 
     aiQaSingleFile: {
       isTool: true,
+      scope: 'read',
       description:
         'Ask Box AI a question about a single file. Box AI reads the file and returns an answer with citations. Use this for targeted questions like "What is the contract renewal date?" or "Summarize the executive summary". Files must have fewer than 1 MB of extracted text. For questions spanning multiple files, use aiQaMultiFile instead.',
       input: AiQaSingleFileInputSchema,
@@ -263,6 +274,7 @@ export const Box: ConnectorSpec = {
 
     aiQaMultiFile: {
       isTool: true,
+      scope: 'read',
       description:
         'Ask Box AI a question across multiple files simultaneously. Box AI reads all specified files and returns a unified answer with citations. Use this for cross-document analysis such as "Compare the Q1 and Q2 budget reports" or "Which of these contracts has the earliest expiration date?".',
       input: AiQaMultiFileInputSchema,
@@ -276,6 +288,7 @@ export const Box: ConnectorSpec = {
 
     aiQaHub: {
       isTool: true,
+      scope: 'read',
       description:
         'Ask Box AI a question about the contents of a Box Hub. Box AI searches across all items in the hub and returns an answer with citations. Use this to query a curated collection of content organized around a topic or project. Use listHubs to discover available hubs.',
       input: AiQaHubInputSchema,
@@ -289,6 +302,7 @@ export const Box: ConnectorSpec = {
 
     aiExtractFreeform: {
       isTool: true,
+      scope: 'read',
       description:
         'Extract metadata from a Box file using a natural-language prompt. Box AI reads the file and returns structured key-value pairs matching the described fields. Use this when you need to pull specific data points from documents — for example, "Extract the vendor name, invoice date, and total amount" from an invoice. Files must have fewer than 1 MB of extracted text.',
       input: AiExtractFreeformInputSchema,
@@ -302,6 +316,7 @@ export const Box: ConnectorSpec = {
 
     aiExtractStructuredFromMetadataTemplate: {
       isTool: true,
+      scope: 'read',
       description:
         'Extract structured metadata from a Box file using an existing enterprise metadata template. Box AI reads the file and fills in the template fields automatically. Use this when a metadata template has already been defined in Box for a document type (e.g. contracts, invoices). Use callTool with list_metadata_templates to discover available templates.',
       input: AiExtractStructuredFromMetadataTemplateInputSchema,
@@ -316,6 +331,7 @@ export const Box: ConnectorSpec = {
 
     listHubs: {
       isTool: true,
+      scope: 'read',
       description:
         'List all Box Hubs accessible to the authenticated user. Returns hub IDs, titles, and descriptions. Use hub IDs with aiQaHub or getHubItems to query or browse hub contents.',
       input: ListHubsInputSchema,
@@ -326,6 +342,7 @@ export const Box: ConnectorSpec = {
 
     getHubDetails: {
       isTool: true,
+      scope: 'read',
       description:
         'Get metadata and details for a specific Box Hub, including title, description, and configuration. Use listHubs to discover hub IDs.',
       input: GetHubDetailsInputSchema,
@@ -338,6 +355,7 @@ export const Box: ConnectorSpec = {
 
     getHubItems: {
       isTool: true,
+      scope: 'read',
       description:
         'List files and folders associated with a specific Box Hub. Returns item IDs and names that you can then read with getFileContent or query with aiQaSingleFile. Use listHubs to discover hub IDs.',
       input: GetHubItemsInputSchema,
@@ -350,6 +368,7 @@ export const Box: ConnectorSpec = {
 
     listTools: {
       isTool: true,
+      scope: 'read',
       description:
         'List all tools available on the Box MCP server. Use this to discover available capabilities or to find write/admin tools not exposed as named actions.',
       input: ListToolsInputSchema,
@@ -363,6 +382,7 @@ export const Box: ConnectorSpec = {
 
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Call any tool on the Box MCP server directly by name. Use this as an escape hatch for tools not yet exposed as named actions (e.g. write operations like upload_file, create_folder, or create_collaboration). Use listTools first to discover available tool names and their arguments.',
       input: CallToolInputSchema,
@@ -379,13 +399,11 @@ export const Box: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       return withMcpClient(ctx, async (mcp) => {
-        const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to Box MCP server. ${tools.length} tools available.`,
-        };
+        await mcp.listTools();
+        return {};
       });
     },
+    enabled: true,
   },
 
   skill: [

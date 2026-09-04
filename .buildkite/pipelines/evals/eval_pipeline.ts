@@ -10,8 +10,17 @@
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
 
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
+
+// Consumed by `run_suite.sh` (via jq) rather than here, but declared so this type describes the
+// whole file. Each shard becomes its own fanout step running the spec files it lists, resolved
+// relative to the suite root.
+export interface EvalsSuiteShard {
+  id: string;
+  specFiles: string[];
+}
 
 export interface EvalsSuiteMetadataEntry {
   id: string;
@@ -21,6 +30,8 @@ export interface EvalsSuiteMetadataEntry {
   serverConfigSet?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
+  shards?: EvalsSuiteShard[];
+  stepTimeoutInMinutes?: number;
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
@@ -105,6 +116,13 @@ const DEFAULT_WEEKLY_EIS_MODELS: string[] = [
 const WEEKLY_EIS_MODELS_ALIAS = 'weekly-eis-models';
 
 /**
+ * `evals:skip-<suite-id>` drops a suite even when its `evals:<suite-id>` label is present. Needed
+ * because `.github/paths-labeller.yml` auto-applies `evals:smoke-tests` and re-adds it on every
+ * push, so removing that label by hand doesn't stick.
+ */
+const EVALS_SKIP_LABEL_PREFIX = 'evals:skip-';
+
+/**
  * Model-group aliases: one `models:<alias>` label expands to several model groups for the fanout.
  * `weekly-eis-models` is handled separately (resolved per-suite; see above).
  */
@@ -116,14 +134,28 @@ function normalizeEvaluationConnectorId(raw: string): string {
     return `eis-${normalizeBuildkiteKey(raw.slice('eis/'.length))}`;
   }
 
-  // `models:judge:<modelGroup>` (e.g. `llm-gateway/gpt-5.2`) — judge value is a model group.
-  if (raw.includes('/')) {
-    return `litellm-${normalizeBuildkiteKey(raw)}`;
+  // `models:judge:openrouter/<provider>-<model>` (e.g. `openrouter/openai-gpt-5.4`).
+  if (raw.startsWith('openrouter/')) {
+    return `openrouter-${normalizeBuildkiteKey(raw.slice('openrouter/'.length))}`;
   }
 
-  // Already a connector id (e.g. `litellm-*` / `eis-*`).
+  // Native OpenRouter id (`openai/gpt-5.4`)
+  if (raw.includes('/')) {
+    return `openrouter-${normalizeBuildkiteKey(raw)}`;
+  }
+
+  // Already a connector id (e.g. `openrouter-*` / `eis-*`).
   return raw;
 }
+
+/**
+ * Boot disk for eval agents. Eval steps bootstrap the workspace, unpack the Kibana distributable
+ * and run a local ES + Kibana; on the image default ES ends up under its merge disk watermark and
+ * stops merging segments. These steps spell out their own agent block, so the repo-wide default
+ * has to be requested explicitly. `eval_agent_disk_size.test.ts` pins the copies in
+ * `steps/evals/run_suite.sh` and `llm_evals.yml`, which cannot import it, to this value.
+ */
+const EVAL_AGENT_DISK_SIZE_GB = DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb;
 
 /**
  * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);
@@ -164,7 +196,7 @@ function buildEvalsYaml({
           ? `          EVAL_MODEL_GROUPS: ${toBuildkiteYamlString(suiteModelGroups.join(','))}`
           : null;
       const evaluationConnectorIdEnv = evaluationConnectorId
-        ? `          EVALUATION_CONNECTOR_ID: ${toBuildkiteYamlString(evaluationConnectorId)}`
+        ? `          EVAL_CONNECTOR_ID: ${toBuildkiteYamlString(evaluationConnectorId)}`
         : null;
       const includeEisModels =
         hasEisJudge || suiteModelGroups.some((group) => group.startsWith('eis/'));
@@ -193,6 +225,7 @@ function buildEvalsYaml({
         `          imageProject: elastic-images-prod`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
+        `          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`,
         ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,
@@ -230,21 +263,35 @@ interface EvalSelection {
 function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const parsedLabels = parseGithubPrLabels(githubPrLabels);
 
+  const skippedSuiteIds = new Set(
+    parsedLabels
+      .filter((label) => label.startsWith(EVALS_SKIP_LABEL_PREFIX))
+      .map((label) => label.slice(EVALS_SKIP_LABEL_PREFIX.length).trim())
+      .filter(Boolean)
+  );
+
   // Most PRs carry no eval labels; bail before reading suite metadata so we don't spawn a
   // `git ls-tree` per suite on every kibana-pull-request pipeline generation.
-  if (!parsedLabels.some((label) => label.startsWith('evals:') || label.startsWith('models:'))) {
+  const hasSelectionLabel = parsedLabels.some(
+    (label) =>
+      (label.startsWith('evals:') && !label.startsWith(EVALS_SKIP_LABEL_PREFIX)) ||
+      label.startsWith('models:')
+  );
+  if (!hasSelectionLabel) {
     return null;
   }
 
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
   const runAllEvals = parsedLabels.includes('evals:all');
-  const selectedEvalSuites = runAllEvals
-    ? evalSuites
-    : evalSuites.filter((suite) => {
-        const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-        return labels.some((label) => parsedLabels.includes(label));
-      });
+  const selectedEvalSuites = (
+    runAllEvals
+      ? evalSuites
+      : evalSuites.filter((suite) => {
+          const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
+          return labels.some((label) => parsedLabels.includes(label));
+        })
+  ).filter((suite) => !skippedSuiteIds.has(suite.id));
   // Model filtering (models:* labels): none => skip (explicit selection required);
   // `models:<group>` => run those groups; aliases (e.g. `models:weekly-eis-models`) expand.
   const rawEvaluationConnectorId = parsedLabels

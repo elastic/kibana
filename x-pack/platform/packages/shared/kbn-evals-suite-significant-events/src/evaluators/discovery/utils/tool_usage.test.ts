@@ -84,7 +84,7 @@ describe('getToolCallCount', () => {
 });
 
 describe('summarizePersistenceCalls', () => {
-  const persistenceToolId = platformSignificantEventsTools.discoveryWrite;
+  const persistenceToolId = platformSignificantEventsTools.eventsWrite;
 
   it('accepts one persistence call', () => {
     expect(
@@ -92,7 +92,7 @@ describe('summarizePersistenceCalls', () => {
         [{ type: 'tool_call', tool_id: persistenceToolId, tool_call_id: 'write-1' }],
         persistenceToolId
       )
-    ).toEqual({ count: 1, valid: true, retriedPartialFailure: false });
+    ).toEqual({ count: 1, valid: true, retriedPartialFailure: false, retriedSchemaFailure: false });
   });
 
   it('accepts exactly one retry after an item-level bulk error', () => {
@@ -114,7 +114,7 @@ describe('summarizePersistenceCalls', () => {
         ],
         persistenceToolId
       )
-    ).toEqual({ count: 2, valid: true, retriedPartialFailure: true });
+    ).toEqual({ count: 2, valid: true, retriedPartialFailure: true, retriedSchemaFailure: false });
   });
 
   it('rejects repeated calls without a partial bulk failure', () => {
@@ -126,7 +126,35 @@ describe('summarizePersistenceCalls', () => {
         ],
         persistenceToolId
       )
-    ).toEqual({ count: 2, valid: false, retriedPartialFailure: false });
+    ).toEqual({
+      count: 2,
+      valid: false,
+      retriedPartialFailure: false,
+      retriedSchemaFailure: false,
+    });
+  });
+
+  it('accepts exactly one retry after a schema or tool error', () => {
+    expect(
+      summarizePersistenceCalls(
+        [
+          {
+            type: 'tool_call',
+            tool_id: persistenceToolId,
+            tool_call_id: 'write-1',
+            params: {},
+            results: [{ type: 'error', data: { message: 'Pass items as a non-empty array' } }],
+          },
+          {
+            type: 'tool_call',
+            tool_id: persistenceToolId,
+            tool_call_id: 'write-2',
+            params: { items: [{ event_id: 'event-1' }] },
+          },
+        ],
+        persistenceToolId
+      )
+    ).toEqual({ count: 2, valid: true, retriedPartialFailure: false, retriedSchemaFailure: true });
   });
 
   it('rejects a retry that resubmits more than the failed items', () => {
@@ -148,7 +176,12 @@ describe('summarizePersistenceCalls', () => {
         ],
         persistenceToolId
       )
-    ).toEqual({ count: 2, valid: false, retriedPartialFailure: false });
+    ).toEqual({
+      count: 2,
+      valid: false,
+      retriedPartialFailure: false,
+      retriedSchemaFailure: false,
+    });
   });
 });
 
