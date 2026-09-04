@@ -33,6 +33,7 @@ const NO_TIME_FIELD_QUERY = 'FROM logs-* | LIMIT 10';
  */
 const TIMESTAMP_ONLY_INDEX = 'test-compose-discover-timestamp-only';
 const TIMESTAMP_ONLY_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier | WHERE count > 100`;
+const YAML_ONLY_STANDALONE_RULE_NAME = 'scout-compose-discover-yaml-only-standalone';
 /**
  * STATS with no WHERE — heuristic cannot isolate an alert condition, so Apply
  * commits alert + standalone (no_alert_condition).
@@ -392,6 +393,90 @@ test.describe(
             timeout: 30_000,
           })
           .toBe('timestamp');
+      });
+    });
+
+    test('edit flow: alert + standalone opens YAML-only', async ({ pageObjects, apiServices }) => {
+      let ruleId: string;
+
+      await test.step('seed an alert + standalone rule via API', async () => {
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            kind: 'alert',
+            query: {
+              format: 'standalone',
+              breach: { query: TIMESTAMP_ONLY_QUERY },
+            },
+            time_field: 'timestamp',
+            grouping: { fields: ['Carrier'] },
+            metadata: { name: YAML_ONLY_STANDALONE_RULE_NAME },
+          })
+        );
+        ruleId = rule.id;
+      });
+
+      await test.step('refresh the rules list and open the edit flyout', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+      });
+
+      await test.step('YAML save is the only submit path', async () => {
+        await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeVisible();
+        await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
+        await expect(pageObjects.composeDiscover.nextButton).toBeHidden();
+      });
+    });
+
+    test('edit flow (YAML-only): removing all tags in the editor persists', async ({
+      pageObjects,
+      apiServices,
+    }) => {
+      let ruleId: string;
+
+      await test.step('seed an alert + standalone rule with tags (opens YAML-only)', async () => {
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            kind: 'alert',
+            query: {
+              format: 'standalone',
+              breach: { query: TIMESTAMP_ONLY_QUERY },
+            },
+            time_field: 'timestamp',
+            metadata: { name: 'scout-yaml-clear-tags', tags: ['prod', 'infra'] },
+          })
+        );
+        ruleId = rule.id;
+        expect(rule.metadata.tags).toStrictEqual(['prod', 'infra']);
+      });
+
+      await test.step('open the edit flyout in YAML-only mode', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeVisible();
+      });
+
+      await test.step('remove the tags block from the YAML buffer', async () => {
+        const yaml = await pageObjects.composeDiscover.getYamlEditorValue();
+        expect(yaml).toContain('tags:');
+        // `tags` is serialized last under `metadata` as a block sequence; drop the
+        // `tags:` line and its indented `- item` lines. The next key is top-level.
+        const withoutTags = yaml.replace(/\n[ \t]*tags:[^\n]*(\n[ \t]+-[^\n]*)*/, '');
+        expect(withoutTags).not.toContain('tags:');
+        await pageObjects.composeDiscover.setYamlEditorValue(withoutTags);
+      });
+
+      await test.step('save via YAML and verify the rule has no tags', async () => {
+        await pageObjects.composeDiscover.clickYamlSubmit();
+        await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+        await expect
+          .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).metadata.tags, {
+            timeout: 30_000,
+          })
+          .toBeUndefined();
       });
     });
 

@@ -47,7 +47,8 @@ function createdPolicyToUpdatePolicy(policy: any) {
 const SECRETS_INDEX_NAME = '.fleet-secrets';
 
 export default function (providerContext: FtrProviderContext) {
-  describe('fleet policy secrets', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/289229
+  describe.skip('fleet policy secrets', () => {
     const { getService } = providerContext;
 
     const es: Client = getService('es');

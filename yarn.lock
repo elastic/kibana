@@ -28390,10 +28390,10 @@ pirates@4.0.7, pirates@^4.0.4, pirates@^4.0.6:
   resolved "https://registry.yarnpkg.com/pirates/-/pirates-4.0.7.tgz#643b4a18c4257c8a65104b73f3049ce9a0a15e22"
   integrity sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==
 
-piscina@5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/piscina/-/piscina-5.2.0.tgz#3a9a568ab9e3a0556b5c94522ba305962de13e3b"
-  integrity sha512-DszUCKeVN/5G5QKo6jAVHL8fmKnkJvQ0ACiVgY7YGCq3TUB2oznAOayvZPIAdEThvhczkXR+qm3IHsNXpFCYfA==
+piscina@5.3.1:
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/piscina/-/piscina-5.3.1.tgz#43b1673bd9733968d94190e5b69284dc0a5861f3"
+  integrity sha512-LYbVUyHb5CzavqNgs64Uv+gHkrCdEt73kfPazdsJnndDSJiaEDIzMUIAHbtV3plzaoBUphZfXZCQKF01LHMgXw==
   optionalDependencies:
     "@napi-rs/nice" "^1.0.4"
 
