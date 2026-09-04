@@ -196,7 +196,7 @@ export const AlertTimelineSection: React.FC = () => {
         {!isLoading && isError && (
           <EuiEmptyPrompt
             color="danger"
-            icon={<EuiIcon type="warning" size="l" />}
+            icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
             titleSize="xs"
             paddingSize="m"
             data-test-subj="alertTimelineSectionError"
@@ -220,7 +220,7 @@ export const AlertTimelineSection: React.FC = () => {
 
         {!isLoading && !isError && timelineData.rows.length === 0 && (
           <EuiEmptyPrompt
-            icon={<EuiIcon type="bell" size="l" />}
+            icon={<EuiIcon type="bell" size="l" aria-hidden={true} />}
             titleSize="xs"
             paddingSize="m"
             data-test-subj="alertTimelineSectionEmpty"

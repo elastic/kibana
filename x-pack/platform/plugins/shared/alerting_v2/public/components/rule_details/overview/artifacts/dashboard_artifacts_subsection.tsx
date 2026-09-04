@@ -372,7 +372,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
         {dashboard && !isLoading && isError ? (
           <EuiEmptyPrompt
             color="danger"
-            icon={<EuiIcon type="warning" size="l" />}
+            icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
             titleSize="xs"
             paddingSize="m"
             data-test-subj="ruleDashboardArtifactsError"
@@ -395,7 +395,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
 
         {dashboard && !isLoading && !isError && !hasDashboardArtifacts ? (
           <EuiEmptyPrompt
-            icon={<EuiIcon type="productDashboard" size="l" />}
+            icon={<EuiIcon type="productDashboard" size="l" aria-hidden={true} />}
             titleSize="xs"
             paddingSize="m"
             data-test-subj="ruleDashboardArtifactsEmpty"

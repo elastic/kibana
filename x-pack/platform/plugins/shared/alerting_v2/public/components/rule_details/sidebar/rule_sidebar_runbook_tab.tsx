@@ -18,7 +18,7 @@ export const RuleSidebarRunbookTab: React.FC = () => {
   if (!runbook) {
     return (
       <EuiEmptyPrompt
-        icon={<EuiIcon type="documentation" size="l" />}
+        icon={<EuiIcon type="documentation" size="l" aria-hidden={true} />}
         titleSize="xs"
         paddingSize="m"
         title={

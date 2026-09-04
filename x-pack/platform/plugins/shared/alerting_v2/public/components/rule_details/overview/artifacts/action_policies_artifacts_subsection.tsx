@@ -148,7 +148,7 @@ export const ActionPoliciesArtifactsSubsection: React.FC = () => {
           <EuiSpacer size="m" />
           <EuiEmptyPrompt
             color="danger"
-            icon={<EuiIcon type="warning" size="l" />}
+            icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
             titleSize="xs"
             paddingSize="m"
             data-test-subj="ruleActionPoliciesArtifactsError"

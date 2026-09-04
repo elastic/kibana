@@ -179,7 +179,7 @@ export const SignalRuleOverview: React.FC = () => {
       return (
         <EuiEmptyPrompt
           color="danger"
-          icon={<EuiIcon type="warning" size="l" />}
+          icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
           titleSize="xs"
           paddingSize="m"
           data-test-subj="signalOverviewError"
@@ -204,7 +204,7 @@ export const SignalRuleOverview: React.FC = () => {
     if (buckets.length === 0) {
       return (
         <EuiEmptyPrompt
-          icon={<EuiIcon type="chartBarVerticalStack" size="l" />}
+          icon={<EuiIcon type="chartBarVerticalStack" size="l" aria-hidden={true} />}
           titleSize="xs"
           paddingSize="m"
           data-test-subj="signalOverviewEmpty"
