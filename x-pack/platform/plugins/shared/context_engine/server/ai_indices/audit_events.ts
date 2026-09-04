@@ -16,6 +16,7 @@ export enum AiIndexAuditAction {
   LIST = 'ai_index_list',
   DELETE = 'ai_index_delete',
   QUERY = 'ai_index_query',
+  DESCRIBE = 'ai_index_describe',
 }
 
 type VerbsTuple = [string, string, string];
@@ -28,6 +29,7 @@ const eventVerbs: Record<AiIndexAuditAction, VerbsTuple> = {
   ai_index_list: ['access', 'accessing', 'accessed'],
   ai_index_delete: ['delete', 'deleting', 'deleted'],
   ai_index_query: ['query', 'querying', 'queried'],
+  ai_index_describe: ['describe', 'describing', 'described'],
 };
 
 const eventTypes: Record<AiIndexAuditAction, string> = {
@@ -38,6 +40,7 @@ const eventTypes: Record<AiIndexAuditAction, string> = {
   ai_index_list: 'access',
   ai_index_delete: 'deletion',
   ai_index_query: 'access',
+  ai_index_describe: 'access',
 };
 
 export interface AiIndexAuditEventParams {

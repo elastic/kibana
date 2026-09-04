@@ -8,15 +8,25 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/core-security-server';
 import type {
+  DescribeAiIndexResponse,
   QueryAiIndicesRequest,
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
+import { describeAiIndex } from './describe';
+import { AiIndexNotFoundError } from './errors';
 import { queryAiIndices } from './query';
+import type { AiIndexService } from './service';
+
+/** Result, not thrown error: cross-plugin consumers need no `instanceof`. */
+export type DescribeAiIndexResult =
+  | { status: 'ok'; result: DescribeAiIndexResponse }
+  | { status: 'not_found'; id: string };
 
 /** Caller-scoped AI-index reads. One instance per request; shared by HTTP routes and agent tools. */
 export interface AiIndexReadServiceApi {
   query(request: QueryAiIndicesRequest): Promise<QueryAiIndicesResponse>;
+  describe(id: string): Promise<DescribeAiIndexResult>;
 }
 
 export class AiIndexReadService implements AiIndexReadServiceApi {
@@ -25,6 +35,7 @@ export class AiIndexReadService implements AiIndexReadServiceApi {
       esClient: ElasticsearchClient;
       spaceId: string;
       auditLogger: AuditLogger;
+      aiIndexService: Pick<AiIndexService, 'get'>;
     }
   ) {}
 
@@ -36,6 +47,22 @@ export class AiIndexReadService implements AiIndexReadServiceApi {
       return response;
     } catch (error) {
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.QUERY, error }));
+      throw error;
+    }
+  }
+
+  async describe(id: string): Promise<DescribeAiIndexResult> {
+    const { esClient, auditLogger, aiIndexService } = this.deps;
+    try {
+      const aiIndex = await aiIndexService.get(id);
+      const result = await describeAiIndex({ esClient, aiIndex });
+      auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DESCRIBE, id }));
+      return { status: 'ok', result };
+    } catch (error) {
+      auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DESCRIBE, id, error }));
+      if (error instanceof AiIndexNotFoundError) {
+        return { status: 'not_found', id };
+      }
       throw error;
     }
   }
