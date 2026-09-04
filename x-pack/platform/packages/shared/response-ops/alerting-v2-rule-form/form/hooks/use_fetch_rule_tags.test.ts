@@ -58,17 +58,29 @@ describe('useFetchRuleTags', () => {
     expect(result.current.data).toEqual(['production']);
   });
 
-  it('treats an empty search string as an omitted query param', async () => {
+  it('treats empty and whitespace-only search as an omitted query param', async () => {
     http.get.mockResolvedValue({ tags: ['cpu'] });
 
-    const { result } = renderHook(() => useFetchRuleTags({ http, search: '' }), {
-      wrapper: createQueryClientWrapper(),
+    const wrapper = createQueryClientWrapper();
+    const { result: omitted } = renderHook(() => useFetchRuleTags({ http }), { wrapper });
+
+    await waitFor(() => {
+      expect(omitted.current.data).toEqual(['cpu']);
+    });
+
+    const { result: empty } = renderHook(() => useFetchRuleTags({ http, search: '' }), {
+      wrapper,
+    });
+    const { result: whitespace } = renderHook(() => useFetchRuleTags({ http, search: '   ' }), {
+      wrapper,
     });
 
     await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
+      expect(empty.current.data).toEqual(['cpu']);
+      expect(whitespace.current.data).toEqual(['cpu']);
     });
 
+    expect(http.get).toHaveBeenCalledTimes(1);
     expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
       query: { search: undefined },
     });

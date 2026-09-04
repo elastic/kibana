@@ -14,12 +14,14 @@ import { ruleFormKeys } from './query_key_factory';
 const TAGS_STALE_TIME = 30 * 1000;
 
 export const useFetchRuleTags = ({ http, search }: { http: HttpStart; search?: string }) => {
+  const normalizedSearch = search?.trim() || undefined;
+
   return useQuery<string[], Error>({
-    queryKey: ruleFormKeys.tags(search),
+    queryKey: ruleFormKeys.tags(normalizedSearch),
     queryFn: async () => {
       const { tags } = await http.get<RuleTagsResponse>(`${ALERTING_V2_RULE_API_PATH}/tags`, {
         query: {
-          search: search || undefined,
+          search: normalizedSearch,
         },
       });
       return tags;
