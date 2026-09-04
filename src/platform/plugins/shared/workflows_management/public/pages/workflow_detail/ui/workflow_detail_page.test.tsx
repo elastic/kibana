@@ -119,7 +119,7 @@ jest.mock('../../../features/workflow_execution_detail_old', () => ({
     <div data-test-subj="workflow-execution-detail">{executionId}</div>
   ),
 }));
-jest.mock('../../../features/workflow_execution_list/ui/workflow_execution_list_stateful', () => ({
+jest.mock('../../../features/workflow_execution_list_old', () => ({
   WorkflowExecutionList: ({ workflowId }: { workflowId: string }) => (
     <div data-test-subj="workflow-execution-list">{workflowId}</div>
   ),

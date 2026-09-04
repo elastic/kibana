@@ -46,7 +46,7 @@ import { WorkflowChangeHistoryProvider } from '../../../features/change_history'
 import { WorkflowExecutionFlyout } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail_old';
 import { WorkflowExecutionListFlyout } from '../../../features/workflow_execution_list/ui/workflow_execution_list_flyout';
-import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
+import { WorkflowExecutionList } from '../../../features/workflow_execution_list_old';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
 import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_executions_view_enabled';
 import { useKibana } from '../../../hooks/use_kibana';
