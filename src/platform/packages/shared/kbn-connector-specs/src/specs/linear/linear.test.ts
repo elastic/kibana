@@ -912,6 +912,29 @@ describe('Linear', () => {
       expect(result).toEqual(issue);
     });
 
+    it('forwards a non-null cycleId when updating an issue', async () => {
+      const issue = {
+        id: 'issue-1',
+        identifier: 'ENG-42',
+        title: 'Investigate',
+        cycle: { id: 'cycle-2', name: 'Cycle 43', number: 43 },
+      };
+      mockClient.post.mockResolvedValue({
+        data: { data: { issueUpdate: { success: true, issue } } },
+      });
+
+      const result = await getAction('updateIssue').handler(mockContext, {
+        id: 'ENG-42',
+        cycleId: 'cycle-2',
+      });
+
+      expectRequest(QUERIES.updateIssue, {
+        id: 'ENG-42',
+        input: { cycleId: 'cycle-2' },
+      });
+      expect(result).toEqual(issue);
+    });
+
     it('updates only fields that are present and preserves nullable clears and empty arrays', async () => {
       const issue = {
         id: 'issue-1',
