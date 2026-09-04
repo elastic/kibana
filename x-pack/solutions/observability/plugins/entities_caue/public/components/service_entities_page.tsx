@@ -353,7 +353,7 @@ export const ServiceEntitiesPage = ({ data, http, share }: Props) => {
     <EuiPageTemplate>
       <EuiPageTemplate.Header
         pageTitle={i18n.translate('xpack.entitiesCaue.pageTitle', {
-          defaultMessage: 'Service Entities',
+          defaultMessage: 'Service Entities 222',
         })}
         rightSideItems={[toggleButton, refreshButton]}
         tabs={tabs}
