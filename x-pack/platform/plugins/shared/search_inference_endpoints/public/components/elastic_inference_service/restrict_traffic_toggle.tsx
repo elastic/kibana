@@ -34,12 +34,11 @@ export const RestrictTrafficToggle: React.FC<RestrictTrafficToggleProps> = ({
       <FormattedMessage
         id="xpack.searchInferenceEndpoints.manageRegions.restrictTrafficHelpOn"
         defaultMessage="Limits inference traffic to the selected locations."
-        values={{ b: (chunks) => <strong>{chunks}</strong> }}
       />
     </EuiText>
   );
 
-  const switchElement = (
+  return (
     <EuiFormRow helpText={isRestricted ? helpText : undefined} fullWidth>
       <EuiSwitch
         id={toggleId}
@@ -54,6 +53,4 @@ export const RestrictTrafficToggle: React.FC<RestrictTrafficToggleProps> = ({
       />
     </EuiFormRow>
   );
-
-  return switchElement;
 };

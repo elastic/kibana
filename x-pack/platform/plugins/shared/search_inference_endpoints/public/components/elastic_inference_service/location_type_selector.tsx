@@ -39,20 +39,14 @@ export const LocationTypeSelector: React.FC<LocationTypeSelectorProps> = ({
   isDisabled,
   onChange,
 }) => {
-  const { hint } =
+  const hint =
     activeTab === 'geo'
-      ? {
-          hint: i18n.translate(
-            'xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.geo',
-            { defaultMessage: 'Allows all current and future available regions within the zone.' }
-          ),
-        }
-      : {
-          hint: i18n.translate(
-            'xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.regions',
-            { defaultMessage: 'Only allows the selected regions.' }
-          ),
-        };
+      ? i18n.translate('xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.geo', {
+          defaultMessage: 'Allows all current and future available regions within the zone.',
+        })
+      : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.regions', {
+          defaultMessage: 'Only allows the selected regions.',
+        });
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
