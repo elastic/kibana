@@ -71,6 +71,8 @@ dependsOn:
   - '@kbn/security-solution-features'
   - '@kbn/core-spaces-common'
   - '@kbn/entity-store'
+  - '@kbn/security-mitre-attack-common'
+  - '@kbn/security-mitre-attack-server'
 tags:
   - functional-tests
   - package
