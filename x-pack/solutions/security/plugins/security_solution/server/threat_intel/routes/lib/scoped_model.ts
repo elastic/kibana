@@ -22,25 +22,37 @@ const resolveConnectorId = async ({
   uiSettingsClient,
   inference,
   request,
+  logger,
 }: {
   uiSettingsClient: IUiSettingsClient;
   inference: InferenceServerStart;
   request: KibanaRequest;
+  logger: Logger;
 }): Promise<string | undefined> => {
   try {
     const defaultSetting = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
     if (defaultSetting && defaultSetting !== NO_DEFAULT_CONNECTOR) {
       return defaultSetting;
     }
-  } catch {
-    // UI setting may not be registered; fall through to the inference default.
+  } catch (err) {
+    // The setting may not be registered, but a serialization or permission
+    // failure lands here too and would otherwise be invisible.
+    logger.warn(
+      `[ti:inference] reading ${GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR} failed — ` +
+        `falling through to the inference default. ${(err as Error).message}`
+    );
   }
 
   try {
     const connector = await inference.getDefaultConnector(request);
     return connector?.connectorId;
-  } catch {
-    // No connectors available.
+  } catch (err) {
+    // Commonly just "no connectors configured", so debug rather than warn.
+    logger.debug(
+      `[ti:inference] inference.getDefaultConnector found no usable connector. ${
+        (err as Error).message
+      }`
+    );
   }
 
   return undefined;
@@ -212,7 +224,7 @@ export const resolveScopedModel = async ({
   //    installed it is the single source of truth for this feature's model, and
   //    falling back past it would defeat `ignoreGlobalDefault`.
   if (!searchInferenceEndpoints) {
-    const fallbackId = await resolveConnectorId({ inference, request, uiSettingsClient });
+    const fallbackId = await resolveConnectorId({ inference, request, uiSettingsClient, logger });
     if (fallbackId) {
       const model = await tryBuildScoped(inference, request, fallbackId, 'genAi-default', logger);
       if (model) return { ok: true, model };

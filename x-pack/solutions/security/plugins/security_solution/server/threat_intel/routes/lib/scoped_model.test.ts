@@ -121,6 +121,29 @@ describe('resolveScopedModel', () => {
     );
   });
 
+  it('logs a warning when reading the default-connector UI setting fails', async () => {
+    // A `uiSettingsClient.get` failure (setting not registered, serialization,
+    // permission fault) used to fall through silently. It must surface a warn so
+    // a misconfiguration is diagnosable rather than looking like "no connector".
+    const inference = createInference();
+    const uiSettingsClient = {
+      get: jest.fn().mockRejectedValue(new Error('ui settings unavailable')),
+    } as unknown as IUiSettingsClient;
+
+    await resolveScopedModel({
+      inference,
+      searchInferenceEndpoints: undefined,
+      request,
+      uiSettingsClient,
+      featureId: FEATURE_ID,
+      logger,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR)
+    );
+  });
+
   it('reports no_connector when the feature endpoint cannot be built', async () => {
     const inference = createInference();
     inference.getChatModel.mockRejectedValue(new Error('endpoint missing on this deployment'));

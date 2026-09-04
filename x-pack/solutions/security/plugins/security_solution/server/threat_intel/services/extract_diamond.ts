@@ -274,6 +274,16 @@ const countNonNone = (output: DiamondLlmOutput): number =>
 const NONE_VERTEX: DiamondVertexResult = { signal: 'NONE', summary: '' };
 
 /**
+ * The `{ raw, parsed }` shape LangChain returns from
+ * `withStructuredOutput(..., { includeRaw: true })`. At module scope so the
+ * per-vertex fallback below can reference the same type and tests/tooling can see it.
+ */
+interface RawResult<T> {
+  raw: { response_metadata: Record<string, unknown> };
+  parsed: T;
+}
+
+/**
  * Extract Diamond Model fields from a threat report using a single heavy LLM
  * call. On context-overflow or parse failure, falls back to four individual
  * per-vertex calls on the same model (`per_vertex_fallback`). Per-vertex
@@ -294,11 +304,6 @@ export const extractDiamond = async (
     (model.connector.config?.model as string | undefined) ??
     (model.connector.config?.providerConfig as { model_id?: string } | undefined)?.model_id;
   const extractedAt = new Date().toISOString();
-
-  interface RawResult<T> {
-    raw: { response_metadata: Record<string, unknown> };
-    parsed: T;
-  }
 
   // Single heavy call — the normal path.
   try {
