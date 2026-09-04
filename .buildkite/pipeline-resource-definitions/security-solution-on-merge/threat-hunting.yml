@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-security-solution-on-merge
-  description: 'Runs the Security Solution Cypress test suites after changes merge'
+  name: bk-kibana-security-solution-on-merge-threat-hunting
+  description: 'Runs the Security Solution Threat Hunting (Explore, Investigations, AI Assistant) Cypress test suites after changes merge'
   links:
-    - url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge'
+    - url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge-threat-hunting'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -15,12 +15,12 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / security solution / on merge
-      description: 'Runs the Security Solution Cypress test suites after changes merge'
+      name: kibana / security solution / on merge / threat hunting
+      description: 'Runs the Security Solution Threat Hunting (Explore, Investigations, AI Assistant) Cypress test suites after changes merge'
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#sdh-security-team'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false' # temporary: reducing noise in #sdh-security-team
+        SLACK_NOTIFICATIONS_CHANNEL: '#security-threat-hunting'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
@@ -28,11 +28,11 @@ spec:
       branch_configuration: main 9.5 9.4 8.19
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/security_solution_on_merge.yml
+      pipeline_file: .buildkite/pipelines/security_solution_on_merge/threat_hunting.yml
       initial_step_plugins:
         - sparse-checkout#v1.6.0:
             paths:
-              - .buildkite/pipelines/security_solution_on_merge.yml
+              - .buildkite/pipelines/security_solution_on_merge/threat_hunting.yml
             cleanup_sparse_state: true
       skip_intermediate_builds: false
       provider_settings:
