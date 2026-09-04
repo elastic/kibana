@@ -22,29 +22,6 @@ const labels = {
   }),
 };
 
-const formatDisplayTime = (startedAt: string): string => {
-  const m = moment(startedAt);
-  const now = moment();
-
-  if (m.isSame(now, 'day')) {
-    return m.format('LT');
-  }
-  if (m.isSame(moment().subtract(1, 'day'), 'day')) {
-    return i18n.translate('xpack.agentBuilder.roundAuthor.yesterdayTime', {
-      defaultMessage: 'Yesterday, {time}',
-      values: { time: m.format('LT') },
-    });
-  }
-  if (m.isSame(now, 'year')) {
-    return m.format('MMM D, LT');
-  }
-  return m.format('MMM D, YYYY, LT');
-};
-
-const formatTooltipTime = (startedAt: string): string => {
-  return moment(startedAt).format('LLL');
-};
-
 const RoundAuthorName: React.FC<{ name?: string }> = ({ name }) => <strong>{name}</strong>;
 
 const roundAuthorDetailItemStyles = ({ euiTheme }: UseEuiTheme) => css`
@@ -104,12 +81,13 @@ const RoundOrigin: React.FC<{ origin: ConversationRoundOrigin }> = ({ origin }) 
 
 const RoundTime: React.FC<{ startedAt: string }> = ({ startedAt }) => {
   const euiThemeContext = useEuiTheme();
-  const displayTime = formatDisplayTime(startedAt);
-  const fullTime = formatTooltipTime(startedAt);
+  const m = moment(startedAt).locale(i18n.getLocale());
+  const displayTime = m.format('LT');
+  const fullDateTime = m.format('LLL');
 
   return (
-    <EuiToolTip content={fullTime}>
-      <span css={roundAuthorDetailItemStyles(euiThemeContext)} aria-label={fullTime} tabIndex={0}>
+    <EuiToolTip content={fullDateTime}>
+      <span css={roundAuthorDetailItemStyles(euiThemeContext)} tabIndex={0}>
         {displayTime}
       </span>
     </EuiToolTip>

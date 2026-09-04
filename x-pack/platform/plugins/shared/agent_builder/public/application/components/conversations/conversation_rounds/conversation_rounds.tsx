@@ -8,8 +8,10 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import React from 'react';
 import { useConversation, useConversationRounds } from '../../../hooks/use_conversation';
+import { ConversationDateDivider } from './conversation_date_divider';
 import { RoundLayout } from './round_layout';
 
 const CONVERSATION_ROUNDS_ID = 'agentBuilderConversationRoundsContainer';
@@ -43,23 +45,28 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
     >
       {conversationRounds.map((round, index) => {
         const isCurrentRound = index === conversationRounds.length - 1;
+        const prev = conversationRounds[index - 1];
+        const showDivider =
+          index === 0 || !moment(round.started_at).isSame(moment(prev.started_at), 'day');
 
         return (
-          <EuiFlexItem
-            key={index}
-            grow={false}
-            css={index === anchoredRoundIndex ? anchorStyles : undefined}
-            data-test-subj="agentBuilderRoundWrapper"
-          >
-            <RoundLayout
-              isCurrentRound={isCurrentRound}
-              rawRound={round}
-              conversationId={conversation?.id}
-              conversationAttachments={conversation?.attachments}
-              allRounds={conversationRounds}
-              roundIndex={index}
-            />
-          </EuiFlexItem>
+          <React.Fragment key={index}>
+            {showDivider && <ConversationDateDivider date={round.started_at} />}
+            <EuiFlexItem
+              grow={false}
+              css={index === anchoredRoundIndex ? anchorStyles : undefined}
+              data-test-subj="agentBuilderRoundWrapper"
+            >
+              <RoundLayout
+                isCurrentRound={isCurrentRound}
+                rawRound={round}
+                conversationId={conversation?.id}
+                conversationAttachments={conversation?.attachments}
+                allRounds={conversationRounds}
+                roundIndex={index}
+              />
+            </EuiFlexItem>
+          </React.Fragment>
         );
       })}
     </EuiFlexGroup>
