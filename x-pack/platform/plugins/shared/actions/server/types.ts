@@ -326,6 +326,11 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   params: Record<string, any>;
   apiKey?: string;
   /**
+   * Id of the UIAM API key in `apiKey`. Unencrypted and mapped so the alerting API key
+   * invalidation task can see this pending execution still needs the key.
+   */
+  uiamApiKeyId?: string;
+  /**
    * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
    * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,
    * which UIAM rejects for external keys.
