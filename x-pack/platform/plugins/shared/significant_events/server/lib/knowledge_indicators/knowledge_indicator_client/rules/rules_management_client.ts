@@ -28,6 +28,9 @@ export interface IRulesManagementClient {
   /** Best-effort bulk delete: missing rules (404) are ignored; other failures are reported. */
   bulkDeleteRules(ids: string[]): Promise<void>;
 
+  /** Returns the subset of IDs that still resolve to live rules. */
+  findExistingRuleIds(ids: string[]): Promise<string[]>;
+
   findOwnedRuleIds(streamName: string): Promise<string[]>;
 
   /**
