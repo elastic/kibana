@@ -149,7 +149,7 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
       const { dashboard, lens } = pageObjects;
 
       await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-      await lens.layers.createLayer('annotations');
+      await lens.layers.createLayer('annotations', undefined, { annotationsAddDirectly: true });
       expect(await lens.layers.getLayerCount()).toBe(2);
       await lens.layers.ensureLayerTabIsActive(1);
       await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
@@ -174,6 +174,145 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
       await applyLensInlineEditorAndWaitClosed({ lens });
       await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
       expect(await lens.layers.getLayerCount()).toBe(3);
+      await cancelLensInlineEditorAndWaitClosed({ lens });
+
+      // Persistence: annotation + reference line layers survive a dashboard save and full reload.
+      await dashboard.saveChangesToExistingDashboard();
+      await expect(page.testSubj.locator('dashboardQuickSaveMenuItem')).toBeEnabled();
+
+      await page.reload();
+      await dashboard.waitForRenderComplete();
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+      await expect(page.testSubj.locator('xyVisAnnotationIcon')).toBeVisible();
+
+      await dashboard.ensureEditMode();
+      await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+      expect(await lens.layers.getLayerCount()).toBe(3);
+      await lens.layers.ensureLayerTabIsActive(1);
+      await expect(lens.dimensions.getDimensionTriggersLocator(ANNOTATIONS_DIMENSION)).toHaveText(
+        'Event'
+      );
+      await lens.layers.activateLayerTab(2);
+      expect(await lens.dimensions.getDimensionTriggerText(REFERENCE_LINE_DIMENSION)).toMatch(
+        /^Static value: /
+      );
+      await cancelLensInlineEditorAndWaitClosed({ lens });
+    }
+  );
+
+  spaceTest(
+    'hides data-view-dependent controls on annotation and reference line layers',
+    async ({ page, pageObjects }) => {
+      const { lens } = pageObjects;
+
+      await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+
+      // The annotations menu item adds the layer directly: ES|QL charts hide the
+      // "Load from library" option, so no annotation-method submenu appears.
+      await lens.layers.createLayer('annotations', undefined, { annotationsAddDirectly: true });
+      await expect(page.testSubj.locator('lnsAnnotationLayer_new')).toHaveCount(0);
+      await expect(page.testSubj.locator('lnsAnnotationLayer_addFromLibrary')).toHaveCount(0);
+
+      await lens.layers.ensureLayerTabIsActive(1);
+      // No data view switcher and no layer settings (ignore global filters) on the annotation layer.
+      await expect(page.testSubj.locator('lns_layerIndexPatternLabel')).toHaveCount(0);
+      await expect(page.testSubj.locator('lnsLayerSettings')).toHaveCount(0);
+
+      // The annotation editor is manual-only: no placement type switch (no "Custom query").
+      await lens.dimensions.openDimensionEditor(
+        `${ANNOTATIONS_DIMENSION} > lns-dimensionTrigger`,
+        1
+      );
+      await expect(page.testSubj.locator('lns-xyAnnotation-placementType')).toHaveCount(0);
+      await expect(page.testSubj.locator('lns-xyAnnotation-time')).toBeVisible();
+      await lens.closeDimensionEditor();
+
+      await lens.layers.activateLayerTab(0);
+      await lens.layers.createLayer('referenceLine');
+      await lens.layers.ensureLayerTabIsActive(2);
+      // No data view switcher on the reference line layer.
+      await expect(page.testSubj.locator('lns_layerIndexPatternLabel')).toHaveCount(0);
+
+      // The reference line dimension editor is static-value-only: no
+      // Static value / Quick function / Formula tabs and no field selector.
+      await lens.dimensions.openDimensionEditor(
+        `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
+        2
+      );
+      await expect(page.testSubj.locator('lens-dimensionTabs')).toHaveCount(0);
+      await expect(page.testSubj.locator('indexPattern-dimension-field')).toHaveCount(0);
+      await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toBeVisible();
+      await lens.closeDimensionEditor();
+
+      await cancelLensInlineEditorAndWaitClosed({ lens });
+    }
+  );
+
+  spaceTest(
+    'edits, styles and duplicates annotations and reference lines',
+    async ({ page, pageObjects }) => {
+      const { dashboard, lens } = pageObjects;
+
+      await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+
+      await lens.layers.createLayer('annotations', undefined, { annotationsAddDirectly: true });
+      await lens.layers.ensureLayerTabIsActive(1);
+
+      // Edit the manual annotation: rename it and show its name as text label.
+      await lens.dimensions.openDimensionEditor(
+        `${ANNOTATIONS_DIMENSION} > lns-dimensionTrigger`,
+        1
+      );
+      await lens.workspace.setInputValue('name-input', 'Deploy marker');
+      await lens.style.setAnnotationTextVisibility('name');
+      await lens.closeDimensionEditor();
+
+      await expect(lens.dimensions.getDimensionTriggersLocator(ANNOTATIONS_DIMENSION)).toHaveText(
+        'Deploy marker'
+      );
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+      await expect(page.testSubj.locator('xyVisAnnotationIcon')).toBeVisible();
+      await expect(page.testSubj.locator('xyVisAnnotationText')).toBeVisible();
+
+      // Duplicating copies the exact same static date, so both annotations land on the
+      // same point and render as one grouped icon.
+      await lens.dragDrop.dragDimensionToDimension({
+        from: `${ANNOTATIONS_DIMENSION} > lns-dimensionTrigger`,
+        to: `${ANNOTATIONS_DIMENSION} > lns-empty-dimension`,
+      });
+      await expect(lens.dimensions.getDimensionTriggersLocator(ANNOTATIONS_DIMENSION)).toHaveCount(
+        2
+      );
+      await expect(page.testSubj.locator('xyVisGroupedAnnotationIcon')).toHaveCount(1);
+
+      // Reference line: set a custom static value and a below-fill style.
+      await lens.layers.activateLayerTab(0);
+      await lens.layers.createLayer('referenceLine');
+      await lens.layers.ensureLayerTabIsActive(2);
+
+      await lens.dimensions.openDimensionEditor(
+        `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
+        2
+      );
+      await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '1000');
+      await lens.style.setReferenceLineFillBelow();
+      await lens.closeDimensionEditor();
+
+      await expect(
+        lens.dimensions.getDimensionTriggersLocator(REFERENCE_LINE_DIMENSION)
+      ).toHaveText('Static value: 1000');
+
+      // Duplicating a reference line carries its value and style.
+      await lens.dragDrop.dragDimensionToDimension({
+        from: `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
+        to: `${REFERENCE_LINE_DIMENSION} > lns-empty-dimension`,
+      });
+      await expect(
+        lens.dimensions.getDimensionTriggersLocator(REFERENCE_LINE_DIMENSION)
+      ).toHaveCount(2);
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+
+      await cancelLensInlineEditorAndWaitClosed({ lens });
     }
   );
 
