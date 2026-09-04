@@ -197,8 +197,7 @@ export const EditCustomContentFlyout = ({
         <EuiText size="s" color="subdued">
           <p>
             {i18n.translate('xpack.customContent.editFlyout.description', {
-              defaultMessage:
-                'Present your data with HTML, CSS and Liquid templating, optionally driven by an ES|QL query.',
+              defaultMessage: 'Present your data with HTML, optionally driven by an ES|QL query.',
             })}{' '}
             <EuiLink
               href={getServices().core.docLinks.links.visualize.customPanels}
