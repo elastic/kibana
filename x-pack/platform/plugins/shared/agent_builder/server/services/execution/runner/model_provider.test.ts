@@ -183,7 +183,7 @@ describe('createModelProvider', () => {
       await provider.getDefaultModel();
 
       expect(resolveSelectedConnectorIdMock).toHaveBeenCalledTimes(1);
-      expect(deps.inference.getChatModel).toHaveBeenCalledTimes(2);
+      expect(deps.inference.getChatModel).toHaveBeenCalledTimes(1);
     });
 
     it('forwards the explicit defaultConnectorId option', async () => {

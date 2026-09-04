@@ -10,7 +10,7 @@
     "server/**/*",
     "typings/**/*",
     "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "test/scout*/**/*"
   ],
   "kbn_references": [
     "@kbn/rule-data-utils",
@@ -164,7 +164,9 @@
     "@kbn/core-spaces-common",
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu-components",
-    "@kbn/global-search-plugin"
+    "@kbn/global-search-plugin",
+    "@kbn/nightshift-investigations-plugin",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }

@@ -6,7 +6,12 @@
  */
 
 import type { HTTPFields } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import {
+  ConfigKey,
+  HTTPMethod,
+  Mode,
+  ResponseBodyIndexPolicy,
+} from '../../../../common/runtime_types';
 import { tlsFormatters } from './tls_formatters';
 
 import type { Formatter } from './common_formatters';
@@ -15,18 +20,24 @@ import {
   stringToJsonFormatter,
   arrayToJsonFormatter,
   objectToJsonFormatter,
+  omitDefaultFormatter,
+  omitFieldFormatter,
 } from './formatting_utils';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 
+// These defaults match Heartbeat's own defaults (heartbeat/monitors/active/http/config.go),
+// so omitting them from the policy leaves monitor behavior unchanged (elastic/kibana#241818).
 export const httpFormatters: HTTPFormatMap = {
   ...commonFormatters,
   ...tlsFormatters,
-  [ConfigKey.MAX_REDIRECTS]: null,
-  [ConfigKey.REQUEST_METHOD_CHECK]: null,
-  [ConfigKey.RESPONSE_BODY_INDEX]: null,
+  [ConfigKey.MAX_REDIRECTS]: omitDefaultFormatter('0'),
+  [ConfigKey.REQUEST_METHOD_CHECK]: omitDefaultFormatter(HTTPMethod.GET),
+  [ConfigKey.RESPONSE_BODY_INDEX]: omitDefaultFormatter(ResponseBodyIndexPolicy.ON_ERROR),
+  [ConfigKey.MODE]: omitDefaultFormatter(Mode.ANY),
   [ConfigKey.RESPONSE_HEADERS_INDEX]: null,
-  [ConfigKey.METADATA]: objectToJsonFormatter,
+  // __ui is UI-only metadata that Heartbeat ignores; drop it from the policy.
+  [ConfigKey.METADATA]: omitFieldFormatter,
   [ConfigKey.URLS]: stringToJsonFormatter,
   [ConfigKey.USERNAME]: stringToJsonFormatter,
   [ConfigKey.PASSWORD]: stringToJsonFormatter,
@@ -44,7 +55,8 @@ export const httpFormatters: HTTPFormatMap = {
       ? JSON.stringify(fields[ConfigKey.REQUEST_BODY_CHECK]?.value)
       : null,
   [ConfigKey.RESPONSE_BODY_MAX_BYTES]: null,
-  [ConfigKey.MODE]: null,
+  // ipv4/ipv6 default to true; a `{{#if}}` guard can't distinguish an explicit
+  // `false` from an omitted value, so they are intentionally still emitted.
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
 };

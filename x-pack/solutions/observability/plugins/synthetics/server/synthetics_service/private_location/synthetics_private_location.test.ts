@@ -1114,8 +1114,14 @@ describe('SyntheticsPrivateLocation', () => {
       const listByAgentPolicy = jest
         .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
         .mockResolvedValueOnce([
-          { id: 'm1-loc-1', condition: agentIdCondition('agent-a'), spaceIds: ['default'] },
-          { id: 'm2-loc-1', spaceIds: ['default'] },
+          {
+            id: 'm1-loc-1',
+            condition: agentIdCondition('agent-a'),
+            spaceIds: ['default'],
+            version: 'WzAsMV0=',
+            revision: 1,
+          },
+          { id: 'm2-loc-1', spaceIds: ['default'], version: 'WzAsMV0=', revision: 1 },
         ] as never)
         .mockResolvedValueOnce([]);
       const bulkUpdateInSpace = jest
@@ -1129,7 +1135,14 @@ describe('SyntheticsPrivateLocation', () => {
       expect(listByAgentPolicy).toHaveBeenCalledWith({ agentPolicyId: 'ap-2' });
       expect(bulkUpdateInSpace).toHaveBeenCalledWith({
         spaceId: 'default',
-        policiesToUpdate: [expect.objectContaining({ id: 'm1-loc-1', condition: null })],
+        policiesToUpdate: [
+          expect.objectContaining({
+            update: expect.objectContaining({
+              id: 'm1-loc-1',
+              attributes: expect.objectContaining({ condition: null }),
+            }),
+          }),
+        ],
       });
       expect(result.cleared).toBe(1);
       expect(result.failed).toBe(0);
@@ -1176,8 +1189,7 @@ describe('SyntheticsPrivateLocation', () => {
       vars: {
         __ui: {
           type: 'yaml',
-          value:
-            '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":true}',
+          value: null,
         },
         config_id: {
           type: 'text',
@@ -1225,7 +1237,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         screenshots: {
           type: 'text',
-          value: 'on',
+          value: null,
         },
         'service.name': {
           type: 'text',

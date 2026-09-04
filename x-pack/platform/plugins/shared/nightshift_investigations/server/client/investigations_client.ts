@@ -7,15 +7,10 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { z } from '@kbn/zod/v4';
-import type { InvestigationState } from '@kbn/significant-events-schema';
-import { investigationStateSchema } from '@kbn/significant-events-schema';
-import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { INVESTIGATE_STEP_ID, severitySchema, type Severity } from '@kbn/significant-events-schema';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
   AlertInvestigationContext,
@@ -23,10 +18,12 @@ import type {
   InvestigationContext,
   InvestigationStatus,
   InvestigationSubject,
+  InvestigationSubjectType,
   InvestigationTriggerType,
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
+  UpdateInvestigationRequest,
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
@@ -34,68 +31,25 @@ import {
   alertInvestigationContextSchema,
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   freeFormContextSchema,
+  INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
 } from '../../common';
+import type {
+  InvestigationAttributes,
+  InvestigationPatch,
+  InvestigationRecord,
+  InvestigationRepository,
+  ProjectedInvestigationRecord,
+} from '../storage';
+import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
-import { InvalidInvestigationContextError, InvestigationNotFoundError } from './errors';
-import { InvestigationUnavailableError } from './investigation_unavailable_error';
-export {
-  InvalidInvestigationContextError,
+import {
+  InvestigationConflictError,
   InvestigationNotFoundError,
+  InvalidInvestigationContextError,
+  InvestigationSubjectMissingError,
   InvestigationUnavailableError,
-};
-
-const SORT_FIELD_MAP: Record<
-  NonNullable<ListInvestigationsRequest['sort_field']>,
-  'createdAt' | 'finishedAt'
-> = {
-  created_at: 'createdAt',
-  finished_at: 'finishedAt',
-};
-
-/**
- * Step-execution documents fetched per listed investigation. The search filters on the `ai.agent`
- * step type, so the engine's step-level timeout wrapper — which shares the `investigate` step id —
- * is excluded server-side and only the agent's own attempts count against this. One attempt is the
- * norm, so this leaves headroom for a retry. Runs past the budget lose their severity in the list,
- * which {@link getSeverities} logs.
- */
-const STEP_EXECUTIONS_PER_INVESTIGATION = 2;
-
-/**
- * `_source` paths the severity lookup reads. Deliberately narrow: an `investigate` step's full
- * output holds the summary, every hypothesis with its evidence, and the recommendations, which
- * runs to megabytes per document and is not worth transferring to read one enum. `startedAt`
- * orders retries.
- */
-const SEVERITY_SOURCE_INCLUDES = [
-  'workflowRunId',
-  'startedAt',
-  'output.structured_output.severity',
-];
-
-/** `stepType` of the step execution that carries the agent's structured output. */
-const AI_AGENT_STEP_TYPE = 'ai.agent';
-
-function toExecutionStatuses(status: InvestigationStatus): ExecutionStatus[] {
-  switch (status) {
-    case 'pending':
-      return [ExecutionStatus.PENDING, ExecutionStatus.QUEUED];
-    case 'running':
-      return [
-        ExecutionStatus.RUNNING,
-        ExecutionStatus.WAITING,
-        ExecutionStatus.WAITING_FOR_INPUT,
-        ExecutionStatus.WAITING_FOR_CHILD,
-      ];
-    case 'completed':
-      return [ExecutionStatus.COMPLETED];
-    case 'failed':
-      return [ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT];
-    case 'cancelled':
-      return [ExecutionStatus.CANCELLED, ExecutionStatus.SKIPPED];
-  }
-}
+} from './errors';
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === 'object' && !Array.isArray(v);
@@ -105,111 +59,158 @@ function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
 }
 
-function asSeverity(v: unknown, logger: Logger): Severity | undefined {
-  if (v === undefined) return undefined;
-  const parsed = severitySchema.safeParse(v);
-  if (parsed.success) return parsed.data;
-  logger.warn(
-    `Investigation reported an unrecognized severity ${JSON.stringify(v)}, dropping it: ` +
-      z.prettifyError(parsed.error)
-  );
-  return undefined;
-}
-
-/**
- * The workflow engine wraps an `ai.agent` step's schema output in a `structured_output` envelope,
- * so the investigation's fields live at `output.structured_output.*` rather than on `output`.
- */
-function toStructuredOutput(output: unknown): Record<string, unknown> | undefined {
-  if (!isPlainObject(output)) return undefined;
-  const structured = output.structured_output;
-  return isPlainObject(structured) ? structured : undefined;
-}
-
-interface InvestigateStepExecution {
-  stepId?: string;
-  stepType?: string;
-  startedAt?: string;
-  output?: unknown;
-}
-
-/**
- * Structured output of the newest `investigate` attempt among these step executions, or undefined
- * when none produced one.
- *
- * The single rule both `get()` and `list()` resolve investigation results with, so the two
- * endpoints cannot disagree about a run. A run writes several documents under the `investigate`
- * step id — the step-level timeout wrapper shares it, retries add more — and only the `ai.agent`
- * attempt carries the agent's output. `startedAt` decides between attempts rather than array
- * order, which differs between the engine's mget and search read paths. A document that omits
- * `stepId` or `stepType` is kept rather than skipped, so a payload without them still resolves.
- */
-function latestInvestigateOutput(
-  stepExecutions: InvestigateStepExecution[] | undefined
-): Record<string, unknown> | undefined {
-  let latest: { startedAt?: string; structured: Record<string, unknown> } | undefined;
-
-  for (const step of stepExecutions ?? []) {
-    if (step.stepId !== undefined && step.stepId !== INVESTIGATE_STEP_ID) continue;
-    if (step.stepType !== undefined && step.stepType !== AI_AGENT_STEP_TYPE) continue;
-
-    const structured = toStructuredOutput(step.output);
-    if (!structured) continue;
-
-    if (!latest || (step.startedAt ?? '') >= (latest.startedAt ?? '')) {
-      latest = { startedAt: step.startedAt, structured };
-    }
-  }
-
-  return latest?.structured;
-}
-
-function toInvestigationStatus(status: ExecutionStatus, logger: Logger): InvestigationStatus {
-  switch (status) {
-    case ExecutionStatus.PENDING:
-    case ExecutionStatus.QUEUED:
-      return 'pending';
-    case ExecutionStatus.RUNNING:
-    case ExecutionStatus.WAITING:
-    case ExecutionStatus.WAITING_FOR_INPUT:
-    case ExecutionStatus.WAITING_FOR_CHILD:
-      return 'running';
-    case ExecutionStatus.COMPLETED:
-      return 'completed';
-    case ExecutionStatus.FAILED:
-    case ExecutionStatus.TIMED_OUT:
-      return 'failed';
-    case ExecutionStatus.CANCELLED:
-    case ExecutionStatus.SKIPPED:
-      return 'cancelled';
-    default: {
-      // TypeScript will error here if a new ExecutionStatus value is added without a case above.
-      const _exhaustiveCheck: never = status;
-      logger.warn(
-        `Unknown workflow ExecutionStatus "${_exhaustiveCheck}" for investigation, treating as running`
-      );
-      return 'running';
-    }
-  }
-}
-
 function isTerminalStatus(status: InvestigationStatus): boolean {
   return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
+/** Used when persist omitted `error`. */
+const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
+
+const SUPERSEDED_STATUSES = [
+  'pending',
+  'running',
+] as const satisfies ReadonlyArray<InvestigationStatus>;
+
+const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
+  typeof value === 'string' && INVESTIGATION_SUBJECT_TYPES.some((type) => type === value);
+
+const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
+  typeof value === 'string' && INVESTIGATION_TRIGGER_TYPES.some((type) => type === value);
+
+interface ExecutionInvestigationMetadata {
+  subject?: InvestigationSubject;
+  triggerType: InvestigationTriggerType;
+  concurrencyKey?: string;
+}
+/**
+ * Context fields each subject type's id may arrive under, in precedence order. A significant event
+ * has two spellings because discovery's `workflow.executeAsync` sends `event_id` while `start()`
+ * sends `significant_event_id`; both must resolve to the same subject. The `satisfies` clause is
+ * what makes a newly added {@link InvestigationSubjectType} a compile error rather than a run that
+ * silently recovers no subject.
+ */
+const SUBJECT_ID_FIELDS = {
+  significant_event: ['event_id', 'significant_event_id'],
+  alert: ['alert_id'],
+} as const satisfies Record<InvestigationSubjectType, readonly string[]>;
+
+const toSubject = ({
+  subjectType,
+  subjectId,
+  subjectSummary,
+}: {
+  subjectType: InvestigationSubjectType;
+  subjectId: string;
+  subjectSummary?: string;
+}): InvestigationSubject => {
+  if (subjectSummary) {
+    return { type: subjectType, id: subjectId, summary: subjectSummary };
+  }
+  return { type: subjectType, id: subjectId };
+};
+
+/**
+ * Stored attributes each {@link ListInvestigationItem} property needs from `find`. A new list
+ * property is a compile error until it is mapped here; `investigation_id` is the SO id and needs
+ * none. Flattened values are what `list()` passes as `fields`.
+ */
+const LIST_INVESTIGATION_ITEM_FIELDS = {
+  investigation_id: [],
+  status: ['status'],
+  created_at: ['created_at'],
+  started_at: ['started_at'],
+  completed_at: ['completed_at'],
+  severity: ['severity'],
+  concurrency_key: ['concurrency_key'],
+  executed_by: ['executed_by'],
+  subject: ['subject_type', 'subject_id', 'subject_summary'],
+} as const satisfies Record<
+  keyof ListInvestigationItem,
+  readonly (keyof InvestigationAttributes)[]
+>;
+
+const LIST_INVESTIGATION_ATTRIBUTE_FIELDS = Object.values(LIST_INVESTIGATION_ITEM_FIELDS).flat();
+
+type ListInvestigationRecord = ProjectedInvestigationRecord<
+  (typeof LIST_INVESTIGATION_ITEM_FIELDS)[keyof ListInvestigationItem][number]
+>;
+
+const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
+  investigation_id: record.id,
+  status: record.status,
+  created_at: record.created_at,
+  started_at: record.started_at,
+  completed_at: record.completed_at,
+  severity: record.severity,
+  concurrency_key: record.concurrency_key,
+  executed_by: record.executed_by,
+  subject: toSubject({
+    subjectType: record.subject_type,
+    subjectId: record.subject_id,
+    subjectSummary: record.subject_summary,
+  }),
+});
+
+const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
+  ...toListInvestigationItem(record),
+  trigger_type: record.trigger_type,
+  error: record.error,
+  summary: record.summary,
+  conclusion: record.conclusion,
+  hypotheses: record.hypotheses,
+  recommendations: record.recommendations,
+  blind_spots: record.blind_spots,
+  trigger_feedback: record.trigger_feedback,
+  conversation_id: record.conversation_id,
+  impact: record.impact,
+});
+
+const parseExecutionInvestigationMetadata = (
+  executionContext: Record<string, unknown> | undefined
+): ExecutionInvestigationMetadata => {
+  const inputs =
+    isPlainObject(executionContext) && isPlainObject(executionContext.inputs)
+      ? executionContext.inputs
+      : undefined;
+  const rawConcurrencyKey = inputs?.concurrency_key;
+  const concurrencyKey = typeof rawConcurrencyKey === 'string' ? rawConcurrencyKey : undefined;
+
+  return {
+    subject: recoverSubjectFromInput(inputs),
+    triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+    concurrencyKey,
+  };
+};
+
+const toSubjectFields = (
+  subject: InvestigationSubject
+): Pick<InvestigationAttributes, 'subject_type' | 'subject_id' | 'subject_summary'> => ({
+  subject_type: subject.type,
+  subject_id: subject.id,
+  ...(subject.summary ? { subject_summary: subject.summary } : {}),
+});
+
+/**
+ * The investigation subject an execution's inputs describe, summary included, or undefined when
+ * they describe none. Shared by `ensureOrCreate()` and the write path so they cannot disagree
+ * about what a run is investigating.
+ */
 function recoverSubjectFromInput(
   input: Record<string, unknown> | undefined
 ): InvestigationSubject | undefined {
   const ctx = input?.context;
   if (!isPlainObject(ctx)) return undefined;
-  if (ctx.source === 'significant_event') {
-    const id = asString(ctx.event_id) ?? asString(ctx.significant_event_id);
-    return id ? { type: 'significant_event', id } : undefined;
+
+  const source = ctx.source;
+  if (!isSubjectType(source)) return undefined;
+
+  for (const field of SUBJECT_ID_FIELDS[source]) {
+    const subjectId = asString(ctx[field]);
+    if (subjectId) {
+      return toSubject({ subjectType: source, subjectId, subjectSummary: asString(ctx.summary) });
+    }
   }
-  if (ctx.source === 'alert') {
-    const id = asString(ctx.alert_id);
-    return id ? { type: 'alert', id } : undefined;
-  }
+
   return undefined;
 }
 
@@ -218,10 +219,7 @@ function recoverTriggerTypeFromInput(
 ): InvestigationTriggerType | undefined {
   const ctx = input?.context;
   if (!isPlainObject(ctx)) return undefined;
-  const valid: readonly string[] = INVESTIGATION_TRIGGER_TYPES;
-  return valid.includes(String(ctx.trigger_type))
-    ? (ctx.trigger_type as InvestigationTriggerType)
-    : undefined;
+  return isTriggerType(ctx.trigger_type) ? ctx.trigger_type : undefined;
 }
 
 export interface NightshiftInvestigationsClientDeps {
@@ -235,6 +233,8 @@ export interface NightshiftInvestigationsClientDeps {
    */
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
+  investigationRepository: InvestigationRepository;
+  isAvailable: () => Promise<boolean>;
 }
 
 export class NightshiftInvestigationsClient {
@@ -244,6 +244,8 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
+  private readonly investigationRepository: InvestigationRepository;
+  private readonly isAvailable: () => Promise<boolean>;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -252,6 +254,8 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
+    this.investigationRepository = deps.investigationRepository;
+    this.isAvailable = deps.isAvailable;
   }
 
   private getSpaceId(): string {
@@ -309,6 +313,9 @@ export class NightshiftInvestigationsClient {
     if (!this.agentBuilder) {
       throw new InvestigationUnavailableError('agentBuilder is not available');
     }
+    if (!(await this.isAvailable())) {
+      throw new InvestigationUnavailableError('Investigations are not available');
+    }
 
     const prepared = this.prepareAgentInput(subject, message, context);
 
@@ -358,219 +365,310 @@ export class NightshiftInvestigationsClient {
       `Started investigation for ${subject.type}/${subject.id}, execution_id=${executionId}`
     );
 
+    await this.create({
+      investigationId: executionId,
+      subject,
+      triggerType: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+      concurrencyKey: concurrency_key,
+    }).catch((error) => {
+      this.logger.warn(
+        `Failed to eagerly persist investigation "${executionId}", deferring to the workflow's ensure step: ${error.message}`
+      );
+    });
+
     return { investigation_id: executionId };
   }
 
-  async get(investigationId: string): Promise<GetInvestigationResponse> {
+  /**
+   * Creates a new investigation record as `pending`. Called from start() so the id is readable
+   * immediately. The workflow's persist_investigation_started step later transitions the record
+   * to `running` via ensureOrCreate().
+   */
+  async create({
+    investigationId,
+    subject,
+    triggerType,
+    concurrencyKey,
+  }: {
+    investigationId: string;
+    subject: InvestigationSubject;
+    triggerType: InvestigationTriggerType;
+    concurrencyKey?: string;
+  }): Promise<void> {
+    if (concurrencyKey) {
+      await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
+    }
+
+    await this.createIgnoringConflict({
+      id: investigationId,
+      attributes: {
+        status: 'pending',
+        ...toSubjectFields(subject),
+        trigger_type: triggerType,
+        concurrency_key: concurrencyKey,
+        created_at: new Date().toISOString(),
+      },
+    });
+  }
+
+  /**
+   * Ensures the investigation record exists and is running. Called by the workflow's
+   * persist_investigation_started step. If a pending record exists (created by start()), transitions
+   * it to running. If no record exists (workflow triggered without start()), creates one as running
+   * from the execution document. Already-running records are left untouched. A settled record
+   * (completed, failed, or cancelled) throws so the persist step fails the run rather than
+   * continuing through the agent.
+   *
+   * Both write paths read the execution document, so `started_at` and `executed_by` mean the same
+   * thing however the record came to exist: `start()` cannot know the id the engine assigns to the
+   * run's executor, and stamping the transition with the wall clock would date the record to when
+   * the persist step happened to run rather than to when the run began.
+   */
+  async ensureOrCreate(investigationId: string): Promise<void> {
+    const existing = await this.investigationRepository.get(investigationId);
+    if (existing && isTerminalStatus(existing.status)) {
+      throw InvestigationConflictError.settled(investigationId, existing.status);
+    }
+    if (existing && existing.status !== 'pending') {
+      return;
+    }
+
     if (!this.workflowsManagement) {
-      throw new Error('workflowsManagement is not available');
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
     }
 
     const spaceId = this.getSpaceId();
     const execution = await this.workflowsManagement.management.getWorkflowExecution(
       investigationId,
       spaceId,
-      { includeOutput: true }
+      { includeOutput: false }
     );
 
-    if (!execution) {
+    const belongsToInvestigationWorkflow =
+      execution?.workflowId === SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID ||
+      execution?.originManagedWorkflowId === SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
+    if (!execution || !belongsToInvestigationWorkflow) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    if (execution.workflowId !== SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID) {
-      throw new InvestigationNotFoundError(investigationId);
+    const startedAt = execution.startedAt ?? new Date().toISOString();
+
+    if (existing) {
+      await this.transitionPendingToRunning({
+        investigationId,
+        version: existing.version,
+        startedAt,
+        executedBy: execution.executedBy,
+      });
+      return;
     }
 
-    const status = toInvestigationStatus(execution.status, this.logger);
-    const isTerminal = isTerminalStatus(status);
+    const { subject, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
+      execution.context
+    );
 
-    // runWorkflow stores inputs at context.inputs in the execution document.
-    const executionInputs = execution.context?.inputs;
-    const rawInput = isPlainObject(executionInputs) ? executionInputs : undefined;
+    if (!subject) {
+      throw new InvestigationSubjectMissingError(investigationId);
+    }
 
-    // Step-level output is populated when includeOutput: true.
-    const structuredOutput = latestInvestigateOutput(execution.stepExecutions);
+    if (concurrencyKey) {
+      await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
+    }
 
-    const subject = recoverSubjectFromInput(rawInput);
-    const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
-    const rawContext = isPlainObject(rawInput?.context) ? rawInput.context : undefined;
-    const subjectSummary = asString(rawContext?.summary);
+    await this.createIgnoringConflict({
+      id: investigationId,
+      attributes: {
+        status: 'running',
+        ...toSubjectFields(subject),
+        trigger_type: triggerType,
+        concurrency_key: concurrencyKey,
+        executed_by: execution.executedBy,
+        created_at: startedAt,
+        started_at: startedAt,
+      },
+    });
+  }
 
-    return {
-      investigation_id: investigationId,
-      subject: subject && subjectSummary ? { ...subject, summary: subjectSummary } : subject,
-      trigger_type: recoveredTriggerType,
-      status,
-      started_at: execution.startedAt,
-      completed_at: isTerminal ? execution.finishedAt : undefined,
-      conclusion:
-        status === 'completed'
-          ? asString(structuredOutput?.conclusion) ?? asString(structuredOutput?.summary)
-          : undefined,
-      severity:
-        status === 'completed' ? asSeverity(structuredOutput?.severity, this.logger) : undefined,
-      result: status === 'completed' ? this.toResult(investigationId, structuredOutput) : undefined,
-      error: (() => {
-        if (status !== 'failed') return undefined;
-        if (execution.error?.message) {
-          this.logger.warn(`Investigation "${investigationId}" failed: ${execution.error.message}`);
-        }
-        return 'Investigation failed';
-      })(),
-    };
+  private async transitionPendingToRunning({
+    investigationId,
+    version,
+    startedAt,
+    executedBy,
+  }: {
+    investigationId: string;
+    version?: string;
+    startedAt: string;
+    executedBy?: string;
+  }): Promise<void> {
+    try {
+      await this.investigationRepository.update({
+        id: investigationId,
+        patch: { status: 'running', started_at: startedAt, executed_by: executedBy },
+        version,
+      });
+    } catch (error) {
+      if (error instanceof InvestigationStaleWriteError) {
+        return;
+      }
+      throw error;
+    }
+  }
+
+  private async createIgnoringConflict({
+    id,
+    attributes,
+  }: {
+    id: string;
+    attributes: InvestigationAttributes;
+  }): Promise<void> {
+    try {
+      await this.investigationRepository.create({ id, attributes });
+    } catch (error) {
+      if (error instanceof InvestigationAlreadyExistsError) {
+        return;
+      }
+      throw error;
+    }
   }
 
   /**
-   * The agent's full output, validated against the schema it was generated from.
+   * Cancels the in-flight investigation that `investigationId` supersedes, if there is one.
    *
-   * `investigationStateSchema` is not a description of this payload written after the fact: the
-   * workflow's `investigate` step declares its output schema from it, and the progress-report tool
-   * streams the same shape while the run is live. Validating here means a caller reading a
-   * finished investigation and one following a live stream can use a single renderer.
-   *
-   * Output that fails the schema is dropped rather than returned half-parsed, and logged so the
-   * mismatch is visible. `conclusion` is populated separately from the raw payload, so the caller
-   * still gets the narrative and loses only the structure around it.
+   * `investigationId` is excluded rather than assumed absent: both callers run while the workflow's
+   * `_ensure` step may be creating the very same record, so without the guard the newest match can
+   * be the incoming investigation itself — cancelling a record whose execution is alive and which
+   * nothing superseded. Two results are fetched because the excluded record can occupy the first.
    */
-  private toResult(
-    investigationId: string,
-    rawOutput: Record<string, unknown> | undefined
-  ): InvestigationState | undefined {
-    if (!rawOutput) return undefined;
+  private async cancelSupersededInvestigation({
+    concurrencyKey,
+    investigationId,
+  }: {
+    concurrencyKey: string;
+    investigationId: string;
+  }): Promise<void> {
+    const { results } = await this.investigationRepository.find({
+      concurrencyKey,
+      statuses: [...SUPERSEDED_STATUSES],
+      sortField: 'created_at',
+      sortOrder: 'desc',
+      perPage: 2,
+    });
+    const superseded = results.find(({ id }) => id !== investigationId);
 
-    const parsed = investigationStateSchema.safeParse(rawOutput);
-    if (!parsed.success) {
-      this.logger.warn(
-        `Investigation "${investigationId}" produced output that does not match ` +
-          `investigationStateSchema: ${z.prettifyError(parsed.error)}`
-      );
-      return undefined;
+    if (!superseded) {
+      return;
     }
 
-    return parsed.data;
+    try {
+      await this.investigationRepository.update({
+        id: superseded.id,
+        patch: {
+          status: 'cancelled',
+          completed_at: new Date().toISOString(),
+        },
+        version: superseded.version,
+      });
+    } catch (error) {
+      if (error instanceof InvestigationStaleWriteError) {
+        this.logger.warn(
+          `Skipped cancelling superseded investigation "${superseded.id}": it was concurrently modified`
+        );
+        return;
+      }
+      throw error;
+    }
+  }
+
+  async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
+    const existing = await this.investigationRepository.get(investigationId);
+    if (!existing) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+
+    const { status, error, ...output } = state;
+
+    if (isTerminalStatus(existing.status)) {
+      if (status === existing.status) {
+        return;
+      }
+      throw InvestigationConflictError.settled(investigationId, existing.status);
+    }
+
+    if (status === 'failed' && error) {
+      this.logger.warn(`Investigation "${investigationId}" failed: ${error}`);
+    }
+
+    const patch: InvestigationPatch = {
+      status,
+      ...(isTerminalStatus(status) && { completed_at: new Date().toISOString() }),
+      ...(status === 'failed' && { error: error ?? FALLBACK_INVESTIGATION_ERROR }),
+      ...output,
+    };
+
+    try {
+      await this.investigationRepository.update({
+        id: investigationId,
+        patch,
+        version: existing.version,
+      });
+    } catch (err) {
+      if (err instanceof InvestigationStaleWriteError) {
+        throw InvestigationConflictError.concurrentlyModified(investigationId);
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Returns the stored investigation. `running` is not checked against the workflow engine, so it
+   * can linger after edge cases where no persist step ran: user cancel, cancel-in-progress that
+   * ensureOrCreate() did not see, timeout, or a worker dying mid-run. Complete/fail still go
+   * through PATCH; a superseded run is cancelled in ensureOrCreate().
+   */
+  async get(investigationId: string): Promise<GetInvestigationResponse> {
+    const record = await this.investigationRepository.get(investigationId);
+
+    if (!record) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+
+    return toInvestigationResponse(record);
   }
 
   async list({
     statuses,
+    created_after,
+    created_before,
     started_after,
     started_before,
-    finished_after,
-    finished_before,
+    completed_after,
+    completed_before,
     sort_field,
     sort_order,
     page = 1,
     size = 20,
   }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
-    if (!this.workflowsManagement) {
-      throw new Error('workflowsManagement is not available');
-    }
+    const result = await this.investigationRepository.find({
+      statuses,
+      createdAfter: created_after,
+      createdBefore: created_before,
+      startedAfter: started_after,
+      startedBefore: started_before,
+      completedAfter: completed_after,
+      completedBefore: completed_before,
+      sortField: sort_field,
+      sortOrder: sort_order,
+      page,
+      perPage: size,
+      fields: [...LIST_INVESTIGATION_ATTRIBUTE_FIELDS],
+    });
 
-    const spaceId = this.getSpaceId();
-    const executionStatuses = statuses?.flatMap(toExecutionStatuses);
-
-    const result = await this.workflowsManagement.management.getWorkflowExecutions(
-      {
-        workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-        omitStepRuns: true,
-        ...(executionStatuses?.length ? { statuses: executionStatuses } : {}),
-        startedAfter: started_after,
-        startedBefore: started_before,
-        finishedAfter: finished_after,
-        finishedBefore: finished_before,
-        sortField: sort_field != null ? SORT_FIELD_MAP[sort_field] : 'createdAt',
-        sortOrder: sort_order,
-        page,
-        size,
-      },
-      spaceId
-    );
-
-    const executions = result.results.map((execution) => ({
-      execution,
-      status: toInvestigationStatus(execution.status, this.logger),
-    }));
-
-    const severityById = await this.getSeverities(
-      executions
-        .filter(({ status }) => status === 'completed')
-        .map(({ execution }) => execution.id),
-      spaceId
-    );
-
-    const results: ListInvestigationItem[] = executions.map(({ execution, status }) => ({
-      investigation_id: execution.id,
-      status,
-      started_at: execution.startedAt,
-      completed_at: isTerminalStatus(status) ? execution.finishedAt : undefined,
-      severity: severityById.get(execution.id),
-      concurrency_key: execution.concurrencyGroupKey,
-      executed_by: execution.executedBy,
-    }));
-
-    return { results, page: result.page, size: result.size, total: result.total };
-  }
-
-  /**
-   * Severity by investigation id for a page of listed investigations. The execution list carries
-   * no step output — `WorkflowExecutionListItemDto` omits `stepExecutions`, and the execution
-   * document's `context` only ever holds the run inputs — so it takes one extra search over the
-   * `investigate` step executions of exactly these runs, whatever the page size. An investigation
-   * id is the workflow execution id, which the step documents carry as `workflowRunId`.
-   *
-   * Severity is supplementary to a list of investigations, so a failing lookup degrades to no
-   * severities rather than failing the list.
-   */
-  private async getSeverities(
-    investigationIds: string[],
-    spaceId: string
-  ): Promise<Map<string, Severity>> {
-    const severityById = new Map<string, Severity>();
-    if (!this.workflowsManagement || investigationIds.length === 0) {
-      return severityById;
-    }
-
-    const size = investigationIds.length * STEP_EXECUTIONS_PER_INVESTIGATION;
-
-    try {
-      const { results, total } = await this.workflowsManagement.management.searchStepExecutions(
-        {
-          workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-          stepId: INVESTIGATE_STEP_ID,
-          stepType: AI_AGENT_STEP_TYPE,
-          workflowExecutionIds: investigationIds,
-          sourceIncludes: SEVERITY_SOURCE_INCLUDES,
-          size,
-        },
-        spaceId
-      );
-
-      if (total > results.length) {
-        this.logger.warn(
-          `Severity lookup for ${investigationIds.length} investigations read ${results.length} of ${total} matching step executions; the oldest ones on this page report no severity`
-        );
-      }
-
-      const stepsByInvestigation = new Map<string, InvestigateStepExecution[]>();
-      for (const step of results) {
-        const steps = stepsByInvestigation.get(step.workflowRunId) ?? [];
-        steps.push(step);
-        stepsByInvestigation.set(step.workflowRunId, steps);
-      }
-
-      for (const [investigationId, steps] of stepsByInvestigation) {
-        const severity = asSeverity(latestInvestigateOutput(steps)?.severity, this.logger);
-        if (severity) {
-          severityById.set(investigationId, severity);
-        }
-      }
-    } catch (error) {
-      this.logger.warn(
-        `Could not resolve investigation severities, listing without them: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
-
-    return severityById;
+    // Stored `running` is not reconciled with the engine — same edge cases as get().
+    return {
+      results: result.results.map((record) => toListInvestigationItem(record)),
+      page: result.page,
+      size: result.size,
+      total: result.total,
+    };
   }
 }
