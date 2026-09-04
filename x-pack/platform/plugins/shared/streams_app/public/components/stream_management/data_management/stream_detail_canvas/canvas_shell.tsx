@@ -14,7 +14,6 @@ import {
   ReactFlow,
   ReactFlowProvider,
   SelectionMode,
-  type CoordinateExtent,
   type Edge,
   type EdgeTypes,
   type Node,
@@ -26,19 +25,12 @@ import {
   type OnNodesChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import {
-  FIT_VIEW_PADDING,
-  GRID_SIZE,
-  MAX_ZOOM,
-  MIN_ZOOM,
-  NODE_HEIGHT_ESTIMATE,
-  NODE_WIDTH_ESTIMATE,
-  PAN_MARGIN,
-  SNAP_SIZE,
-} from './canvas_constants';
+import { FIT_VIEW_PADDING, GRID_SIZE, MAX_ZOOM, MIN_ZOOM, SNAP_SIZE } from './canvas_constants';
 import { CanvasMinimap } from './canvas_minimap';
 import { CanvasZoomControls } from './canvas_zoom_controls';
 import { canvasEdgeTypes, canvasNodeTypes } from './registry';
+import { getTranslateExtent } from './translate_extent';
+import { CanvasVisualExtent } from './canvas_visual_extent';
 
 // Lines are purely visual connectors that animate on hover — they can't be
 // selected or clicked. Module-level so the object/function identity stays stable
@@ -71,37 +63,6 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
     border-color: ${euiTheme.colors.borderBaseProminent};
   }
 `;
-
-/**
- * Bounds panning to the graph's footprint plus a comfortable margin so people
- * can move a little past the content but never drift into infinite empty space.
- * Uses each node's measured DOM size when React Flow has it, falling back to a
- * rough estimate on the first render.
- */
-const getTranslateExtent = (nodes: Node[]): CoordinateExtent | undefined => {
-  if (nodes.length === 0) {
-    return undefined;
-  }
-
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-
-  for (const node of nodes) {
-    const width = node.measured?.width ?? NODE_WIDTH_ESTIMATE;
-    const height = node.measured?.height ?? NODE_HEIGHT_ESTIMATE;
-    minX = Math.min(minX, node.position.x);
-    minY = Math.min(minY, node.position.y);
-    maxX = Math.max(maxX, node.position.x + width);
-    maxY = Math.max(maxY, node.position.y + height);
-  }
-
-  return [
-    [minX - PAN_MARGIN, minY - PAN_MARGIN],
-    [maxX + PAN_MARGIN, maxY + PAN_MARGIN],
-  ];
-};
 
 interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   nodes: NodeType[];
@@ -163,7 +124,13 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
 }: CanvasShellProps<NodeType, EdgeType>) {
   const { euiTheme } = useEuiTheme();
 
-  const translateExtent = useMemo(() => getTranslateExtent(nodes), [nodes]);
+  // We only want to update this potentially when the amounts of nodes change,
+  // not when the node themselves change position. If we are creating nodes close
+  // to the edge of the coordinate extent, this should prompt the memo to recalc
+  // to a bigger extent. Removing nodes from close to the edge should help shrink
+  // the extent further down.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const translateExtent = useMemo(() => getTranslateExtent(nodes), [nodes.length]);
 
   // Tabbing focuses a node's DOM wrapper. Mirror that focus into React Flow's
   // selection so the focused node shows the standard selection styling without an
@@ -234,6 +201,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           minZoom={MIN_ZOOM}
           maxZoom={MAX_ZOOM}
           translateExtent={translateExtent}
+          nodeExtent={translateExtent}
           panOnScroll
           zoomOnScroll={false}
           zoomOnPinch
@@ -247,6 +215,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           <Background gap={GRID_SIZE} color={euiTheme.colors.borderBasePlain} />
           <CanvasZoomControls />
           <CanvasMinimap />
+          <CanvasVisualExtent coords={translateExtent} />
         </ReactFlow>
         {children}
       </EuiPanel>
