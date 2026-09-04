@@ -87,7 +87,7 @@ import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
 import { validateSignalFilter } from '../ai_indices/signal_filter';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
-import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
+import { AiIndexAuditAction, aiIndexAuditEvent } from '../ai_indices/audit_events';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
