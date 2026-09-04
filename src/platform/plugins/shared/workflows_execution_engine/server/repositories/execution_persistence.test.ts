@@ -60,6 +60,25 @@ describe('InMemoryExecutionPersistence', () => {
     ).resolves.toEqual(expect.objectContaining({ status: ExecutionStatus.PENDING }));
   });
 
+  it('does not overwrite identity fields via updateWorkflowExecution', async () => {
+    const persistence = new InMemoryExecutionPersistence(execution);
+    await persistence.updateWorkflowExecution({
+      id: 'hijacked-id',
+      spaceId: 'hijacked-space',
+      status: ExecutionStatus.RUNNING,
+    });
+
+    await expect(
+      persistence.getWorkflowExecutionById(execution.id, execution.spaceId)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        id: execution.id,
+        spaceId: execution.spaceId,
+        status: ExecutionStatus.RUNNING,
+      })
+    );
+  });
+
   it('does not share state between execution-scoped instances', async () => {
     const first = new InMemoryExecutionPersistence(execution);
     const secondExecution = { ...execution, id: 'execution-2' };

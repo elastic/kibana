@@ -55,7 +55,9 @@ export class InMemoryExecutionPersistence
     workflowExecution: Partial<EsWorkflowExecution>,
     _options?: { refresh?: boolean | 'wait_for' }
   ): Promise<void> {
-    this.execution = { ...this.execution, ...workflowExecution };
+    // Strip identity fields — they locate the document and must not be mutated.
+    const { id: _id, spaceId: _spaceId, ...update } = workflowExecution;
+    this.execution = { ...this.execution, ...update };
   }
   public async getStepExecutionsByIds(ids: string[]): Promise<EsWorkflowStepExecution[]> {
     return ids.flatMap((id) => {
