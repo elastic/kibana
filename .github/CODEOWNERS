@@ -2029,13 +2029,10 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/performance/utils/metrics_experience_setup.ts @elastic/obs-signals-metrics-team
  # streams-ui
 /x-pack/solutions/observability/test/serverless/functional/configs/config.* @elastic/streams-ui
-/x-pack/solutions/observability/test/functional/page_objects/dataset_quality.ts @elastic/kibana-management
 /x-pack/solutions/observability/test/serverless/functional/configs/index* @elastic/streams-ui
 /x-pack/solutions/observability/test/functional/services/infra_source_configuration_form.ts @elastic/obs-signals-metrics-team
 /src/platform/test/functional/services/selectable.ts @elastic/streams-ui
 /x-pack/solutions/observability/test/serverless/api_integration/configs/index.feature_flags.ts @elastic/streams-ui
-/x-pack/solutions/observability/test/functional/apps/dataset_quality @elastic/kibana-management
-/x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality @elastic/kibana-management
 /x-pack/solutions/observability/plugins/observability/public/pages/landing @elastic/streams-ui
 
 # Observability-ui
