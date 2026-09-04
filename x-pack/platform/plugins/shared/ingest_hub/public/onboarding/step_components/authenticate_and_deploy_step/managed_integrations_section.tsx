@@ -226,7 +226,6 @@ export function ManagedIntegrationsSection({
                 <LazyAwsIdentityFederationSetup
                   cloud={cloud}
                   iacTemplateUrl={iacTemplateUrl}
-                  packageName="aws"
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={setConnectorId}
                 />
