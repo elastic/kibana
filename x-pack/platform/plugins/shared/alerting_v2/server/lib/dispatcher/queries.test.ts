@@ -333,6 +333,23 @@ describe('chunkInClauseLiterals', () => {
 
     expect(seen.size).toBe(literals.length);
   });
+
+  it('honors a custom budget smaller than the default', () => {
+    const literalSize = 100;
+    const literals = Array.from({ length: 100 }, (_, i) => `${i}`.padStart(literalSize, '0'));
+    const budget = 1_000;
+
+    const chunks = chunkInClauseLiterals(literals, budget);
+
+    expect(chunks.length).toBeGreaterThan(chunkInClauseLiterals(literals).length);
+    for (const chunk of chunks) {
+      const chunkBytes = chunk.reduce((sum, lit) => sum + lit.length + PER_LITERAL_OVERHEAD, 0);
+      // A single literal may exceed the budget (own chunk); multi-literal chunks must stay within.
+      if (chunk.length > 1) {
+        expect(chunkBytes).toBeLessThanOrEqual(budget);
+      }
+    }
+  });
 });
 
 describe('getAlertEpisodeSuppressionsQueries', () => {
@@ -597,6 +614,94 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
 
     expect(requests[0].query).toContain('space-a::pagerduty::hash-pd');
     expect(requests[0].query).toContain('space-b::pagerduty::hash-pd');
+  });
+
+  it('pushes a group_hash + rule_id pre-filter before the CONCAT for internal episodes', () => {
+    const episodes = [
+      createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1', episode_id: 'ep-1' }),
+      createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2', episode_id: 'ep-2' }),
+    ];
+
+    const { query } = getAlertEpisodeSuppressionsQueries(episodes)[0];
+
+    expect(query).toContain('group_hash IN ("hash-1", "hash-2")');
+    expect(query).toContain('rule_id IN ("rule-1", "rule-2")');
+    // Internal-only episodes need no external branch.
+    expect(query).not.toContain('space_id IN (');
+    expect(query).not.toContain('source IN (');
+  });
+
+  it('places the raw-field pre-filter before the subject EVAL so it can push down', () => {
+    const { query } = getAlertEpisodeSuppressionsQueries([createAlertEpisode()])[0];
+
+    expect(query.indexOf('group_hash IN (')).toBeLessThan(query.indexOf('subject = CASE('));
+  });
+
+  it('uses a space_id + source pre-filter branch for external episodes (never filters on a null rule_id)', () => {
+    const episodes = [
+      createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-a',
+        group_hash: 'hash-pd',
+      }),
+    ];
+
+    const { query } = getAlertEpisodeSuppressionsQueries(episodes)[0];
+
+    expect(query).toContain('group_hash IN ("hash-pd")');
+    expect(query).toContain('space_id IN ("space-a")');
+    expect(query).toContain('source IN ("pagerduty")');
+    // External episodes have a null rule_id, so a rule_id filter would drop them entirely.
+    expect(query).not.toContain('rule_id IN (');
+  });
+
+  it('combines internal and external branches with OR, distributing group_hash into each', () => {
+    const episodes = [
+      createAlertEpisode({ source: 'internal', rule_id: 'rule-1', group_hash: 'hash-1' }),
+      createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-a',
+        group_hash: 'hash-pd',
+        episode_id: 'ep-2',
+      }),
+    ];
+
+    const { query } = getAlertEpisodeSuppressionsQueries(episodes)[0];
+
+    expect(query).toContain('rule_id IN ("rule-1")');
+    expect(query).toContain('space_id IN ("space-a")');
+    expect(query).toContain('source IN ("pagerduty")');
+    // group_hash is repeated in the external branch (after OR) so precedence keeps it applied to
+    // external docs even though the builder strips grouping parentheses.
+    expect(query).toContain('OR (group_hash IN ("hash-1", "hash-pd"))');
+    // Two group_hash IN clauses: one per branch.
+    expect(query.match(/group_hash IN \(/g)).toHaveLength(2);
+  });
+
+  it('derives each chunk pre-filter from only that chunk pair keys and stays under the ES|QL limit', () => {
+    // pair key length = 2 * 5_000 + 2 ('::') per literal; with the 300 KB suppressions budget and
+    // the added pre-filter this spans multiple chunks.
+    const longSegment = 'p'.repeat(5_000);
+    const episodes = Array.from({ length: 200 }, (_, i) =>
+      createAlertEpisode({
+        rule_id: `${longSegment}-r${i}`,
+        group_hash: `${longSegment}-g${i}`,
+        episode_id: `ep-${i}`,
+      })
+    );
+
+    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(request.query).toContain('WHERE ');
+      expect(request.query).toContain('group_hash IN (');
+      expect(request.query.length).toBeLessThan(1_000_000);
+    }
+    // The first chunk must not carry the last episode's rule_id (per-chunk scoping).
+    expect(requests[0].query).not.toContain(`${longSegment}-r199`);
   });
 });
 

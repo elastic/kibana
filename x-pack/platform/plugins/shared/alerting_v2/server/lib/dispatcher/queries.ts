@@ -87,12 +87,19 @@ const SUBJECT_EVAL = esql.exp`subject = CASE(source IS NULL OR source == "intern
 // query body and escape overhead.
 export const ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES = 600_000;
 
+// The pre-filter roughly doubles a chunk's literal bytes, so this pair budget is smaller than the
+// default to keep `pairs + pre-filter + static body` under the 1 MB ES|QL statement cap.
+export const SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES = 300_000;
+
 // `"<value>", ` = 2 quotes + comma + space (4 bytes) + 2 escape-margin bytes per literal.
 const PER_LITERAL_OVERHEAD_BYTES = 6;
 
 // Exported for unit-testing chunk boundaries. An oversized single literal gets its own chunk;
 // at ≤150-byte keys (UUID/hash) this is unreachable in practice.
-export const chunkInClauseLiterals = (literals: readonly string[]): string[][] => {
+export const chunkInClauseLiterals = (
+  literals: readonly string[],
+  budgetBytes: number = ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES
+): string[][] => {
   if (literals.length === 0) return [];
 
   const chunks: string[][] = [];
@@ -101,7 +108,7 @@ export const chunkInClauseLiterals = (literals: readonly string[]): string[][] =
 
   for (const literal of literals) {
     const cost = literal.length + PER_LITERAL_OVERHEAD_BYTES;
-    if (current.length > 0 && currentSize + cost > ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES) {
+    if (current.length > 0 && currentSize + cost > budgetBytes) {
       chunks.push(current);
       current = [];
       currentSize = 0;
@@ -112,6 +119,47 @@ export const chunkInClauseLiterals = (literals: readonly string[]): string[][] =
 
   if (current.length > 0) chunks.push(current);
   return chunks;
+};
+
+// External episodes have a null rule_id, so they're keyed by space_id + source instead.
+type PairComponents =
+  | { kind: 'internal'; groupHash: string; ruleId: string }
+  | { kind: 'external'; groupHash: string; spaceId: string; source: string };
+
+const toUniqueString = (values: readonly string[]) =>
+  [...new Set(values)].map((value) => esql.str(value));
+
+// Narrows the scan to indexed columns so ES can push the filter down instead of scanning the whole
+// data stream. group_hash is repeated per branch, not factored out (`group_hash AND (a OR b)`):
+// the builder strips the parens, so AND precedence would drop group_hash from the second branch.
+const buildSuppressionsPreFilter = (
+  chunk: readonly string[],
+  componentsByPairKey: ReadonlyMap<string, PairComponents>
+) => {
+  const components = chunk.flatMap((key) => {
+    const entry = componentsByPairKey.get(key);
+    return entry ? [entry] : [];
+  });
+
+  const ruleIds = toUniqueString(
+    components.flatMap((c) => (c.kind === 'internal' ? [c.ruleId] : []))
+  );
+  const spaceIds = toUniqueString(
+    components.flatMap((c) => (c.kind === 'external' ? [c.spaceId] : []))
+  );
+  const sources = toUniqueString(
+    components.flatMap((c) => (c.kind === 'external' ? [c.source] : []))
+  );
+
+  const groupHash = esql.exp`group_hash IN (${toUniqueString(components.map((c) => c.groupHash))})`;
+  const internal = ruleIds.length ? esql.exp`${groupHash} AND rule_id IN (${ruleIds})` : undefined;
+  const external = sources.length
+    ? esql.exp`${groupHash} AND space_id IN (${spaceIds}) AND source IN (${sources})`
+    : undefined;
+
+  if (internal && external) return esql.exp`${internal} OR ${external}`;
+  // groupHash is only reached for an empty chunk; single-kind chunks return internal/external.
+  return internal ?? external ?? groupHash;
 };
 
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
@@ -135,14 +183,38 @@ export const getAlertEpisodeSuppressionsQueries = (
       return min === undefined || normalizedTimestamp < min ? normalizedTimestamp : min;
     }, undefined) ?? new Date(0).toISOString();
 
+  const componentsByPairKey = new Map<string, PairComponents>();
   const uniquePairKeys = [
-    ...new Set(alertEpisodes.map((ep) => `${episodeSubject(ep)}${PAIR_SEPARATOR}${ep.group_hash}`)),
+    ...new Set(
+      alertEpisodes.map((ep) => {
+        const subject = episodeSubject(ep);
+        const pairKey = `${subject}${PAIR_SEPARATOR}${ep.group_hash}`;
+        if (!componentsByPairKey.has(pairKey)) {
+          const isInternal = ep.source == null || ep.source === 'internal';
+          componentsByPairKey.set(
+            pairKey,
+            isInternal
+              ? { kind: 'internal', groupHash: ep.group_hash, ruleId: subject }
+              : {
+                  kind: 'external',
+                  groupHash: ep.group_hash,
+                  spaceId: ep.space_id,
+                  source: ep.source,
+                }
+          );
+        }
+        return pairKey;
+      })
+    ),
   ];
 
-  return chunkInClauseLiterals(uniquePairKeys).map((chunk) => {
-    const pairValues = chunk.map((key) => esql.str(key));
+  return chunkInClauseLiterals(uniquePairKeys, SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES).map(
+    (chunk) => {
+      const pairValues = chunk.map((key) => esql.str(key));
+      const preFilter = buildSuppressionsPreFilter(chunk, componentsByPairKey);
 
-    return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
+      return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
+        | WHERE ${preFilter}
         | EVAL ${SUBJECT_EVAL}
         | WHERE subject IS NOT NULL
         | EVAL _pair_key = CONCAT(subject, ${PAIR_SEPARATOR}, group_hash)
@@ -171,7 +243,8 @@ export const getAlertEpisodeSuppressionsQueries = (
             false
           )
         | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id`.toRequest();
-  });
+    }
+  );
 };
 
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
