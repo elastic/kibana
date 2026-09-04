@@ -258,6 +258,33 @@ describe('update()', () => {
     });
   });
 
+  describe('Kibana managed auth types', () => {
+    test('rejects switching an existing connector to a Kibana managed auth type', async () => {
+      const soResult = makeSavedObjectResult({
+        actionTypeId: '.slack2',
+        authMode: 'shared',
+        secrets: { authType: 'bearer' },
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+
+      await expect(
+        update({
+          context: mockContext,
+          id: '1',
+          action: {
+            name: 'Test Connector',
+            config: {},
+            secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .slack2.]`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('spec connector config.authType on update', () => {
     test('rejects changing per-user auth type when saved config.authType is present', async () => {
       const soResult = makeSavedObjectResult({
