@@ -253,7 +253,6 @@ enabled:
   - x-pack/platform/test/functional/apps/transform/actions/config.ts
   - x-pack/platform/test/functional/apps/transform/edit_clone/config.ts
   - x-pack/platform/test/functional/apps/transform/permissions/config.ts
-  - x-pack/platform/test/functional/apps/user_profiles/config.ts
   - x-pack/platform/test/functional/apps/visualize/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/platform/test/functional/config.ccs.ts
