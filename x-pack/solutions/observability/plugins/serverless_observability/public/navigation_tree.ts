@@ -56,14 +56,21 @@ export const createNavigationTree = ({
       ),
       {
         id: 'observability_project_nav',
-        title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.observability', {
-          defaultMessage: 'Observability',
-        }),
-        renderAs: 'home',
-        icon: 'logoObservability',
-        link: overviewAvailable
-          ? ('observability-overview' as const)
-          : ('observabilityOnboarding' as const),
+        ...(overviewAvailable
+          ? {
+              title: i18n.translate('xpack.serverlessObservability.nav.overview', {
+                defaultMessage: 'Overview',
+              }),
+              icon: 'home',
+              link: 'observability-overview' as const,
+            }
+          : {
+              title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+                defaultMessage: 'Get started',
+              }),
+              icon: 'rocket',
+              link: 'observabilityOnboarding' as const,
+            }),
       },
       {
         title: i18n.translate('xpack.serverlessObservability.nav.discover', {
