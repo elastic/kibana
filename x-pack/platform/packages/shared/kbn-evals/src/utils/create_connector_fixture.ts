@@ -102,19 +102,23 @@ export async function createConnectorFixture({
     is_preconfigured?: boolean;
   }
 
+  async function inferenceEndpointExists(inferenceId: string): Promise<boolean> {
+    const res = (await fetch({
+      path: `/internal/_inference/_exists/${encodeURIComponent(inferenceId)}`,
+      method: 'GET',
+      // versioned internal route: requests without this header are rejected
+      headers: { 'elastic-api-version': '1' },
+    })) as { isEndpointExists?: boolean };
+
+    return res?.isEndpointExists === true;
+  }
+
   async function waitForInferenceEndpoint(inferenceId: string): Promise<void> {
     const retries = process.env.KBN_EVALS_AWAIT_CCM_CONNECTORS ? 3 : 0;
 
     await pRetry(
       async () => {
-        const res = (await fetch({
-          path: `/internal/_inference/_exists/${encodeURIComponent(inferenceId)}`,
-          method: 'GET',
-          // versioned internal route: requests without this header are rejected
-          headers: { 'elastic-api-version': '1' },
-        })) as { isEndpointExists?: boolean };
-
-        if (res?.isEndpointExists !== true) {
+        if (!(await inferenceEndpointExists(inferenceId))) {
           throw new Error(`Inference endpoint [${inferenceId}] does not exist`);
         }
       },
@@ -171,6 +175,61 @@ export async function createConnectorFixture({
       `Binding EIS connector ${predefinedConnector.id} to inference endpoint ${inferenceEndpointId}`
     );
     await use({ ...predefinedConnector, id: inferenceEndpointId });
+    return;
+  }
+
+  // OpenRouter (and any other `.gen-ai`) eval LLMs are provisioned as ES inference endpoints
+  // instead of `.gen-ai` stack connectors: new `.gen-ai` connectors can no longer be created,
+  // and the inference plugin resolves inference endpoint ids passed as connector ids.
+  if (predefinedConnector.actionTypeId === '.gen-ai') {
+    const inferenceId = predefinedConnector.id;
+    const { apiUrl, defaultModel } = predefinedConnector.config;
+
+    if (typeof apiUrl !== 'string' || typeof defaultModel !== 'string') {
+      throw new Error(
+        `Connector [${predefinedConnector.id}] is a .gen-ai connector without config.apiUrl/config.defaultModel. ` +
+          `.gen-ai eval connectors are created as chat_completion inference endpoints and require both fields.`
+      );
+    }
+
+    if (!(await inferenceEndpointExists(inferenceId))) {
+      log.info(
+        `Creating inference endpoint ${inferenceId} for connector ${predefinedConnector.id}`
+      );
+      try {
+        await fetch({
+          path: '/internal/_inference/_add',
+          method: 'POST',
+          // versioned internal route: requests without this header are rejected
+          headers: { 'elastic-api-version': '1' },
+          body: JSON.stringify({
+            config: {
+              inferenceId,
+              provider: 'openai',
+              taskType: 'chat_completion',
+              providerConfig: {
+                model_id: defaultModel,
+                url: apiUrl,
+              },
+            },
+            secrets: {
+              providerSecrets: {
+                api_key: predefinedConnector.secrets?.apiKey,
+              },
+            },
+          }),
+        });
+      } catch (error) {
+        if (isAlreadyExistsConnectorError(error)) {
+          log.info(`Inference endpoint already exists, reusing: ${inferenceId}`);
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    log.info(`Binding connector ${predefinedConnector.id} to inference endpoint ${inferenceId}`);
+    await use({ ...predefinedConnector, id: inferenceId });
     return;
   }
 

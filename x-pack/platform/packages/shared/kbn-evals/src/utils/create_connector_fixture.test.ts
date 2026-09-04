@@ -56,12 +56,14 @@ describe('resolveConnectorId', () => {
 });
 
 describe('createConnectorFixture', () => {
+  // Non-LLM connector (e.g. the mock email/Slack connectors used by evals_workflows):
+  // these are the only connectors still created through the Actions API.
   const predefinedConnector: AvailableConnectorWithId = {
     id: 'my-test-connector',
     name: 'Test Connector',
-    actionTypeId: '.gen-ai',
-    config: { apiUrl: 'https://example.com' },
-    secrets: { apiKey: 'secret-key' },
+    actionTypeId: '.email',
+    config: { from: 'test@example.com' },
+    secrets: { user: 'user', password: 'pass' },
   };
 
   const expectedUuid = v5(predefinedConnector.id, v5.DNS);
@@ -559,6 +561,204 @@ describe('createConnectorFixture', () => {
 
       expect(mockFetch).not.toHaveBeenCalled();
       expect(mockUse).toHaveBeenCalledWith(eisConnector);
+    });
+  });
+
+  describe('with a .gen-ai connector (OpenRouter)', () => {
+    const openRouterConnector: AvailableConnectorWithId = {
+      id: 'openrouter-anthropic-claude-sonnet-4-6',
+      name: 'OpenRouter anthropic/claude-sonnet-4.6',
+      actionTypeId: '.gen-ai',
+      config: {
+        apiProvider: 'Other',
+        apiUrl: 'https://openrouter.ai/api/v1/chat/completions',
+        enableNativeFunctionCalling: true,
+        defaultModel: 'anthropic/claude-sonnet-4.6',
+      },
+      secrets: { apiKey: 'openrouter-key' },
+    };
+
+    const expectedAddCall = {
+      path: '/internal/_inference/_add',
+      method: 'POST',
+      headers: { 'elastic-api-version': '1' },
+      body: JSON.stringify({
+        config: {
+          inferenceId: openRouterConnector.id,
+          provider: 'openai',
+          taskType: 'chat_completion',
+          providerConfig: {
+            model_id: 'anthropic/claude-sonnet-4.6',
+            url: 'https://openrouter.ai/api/v1/chat/completions',
+          },
+        },
+        secrets: {
+          providerSecrets: { api_key: 'openrouter-key' },
+        },
+      }),
+    };
+
+    const expectNoActionsCalls = () => {
+      const actionsCalls = mockFetch.mock.calls.filter(([arg]: [{ path: string }]) =>
+        arg.path.startsWith('/api/actions')
+      );
+      expect(actionsCalls).toHaveLength(0);
+    };
+
+    it('binds to the existing inference endpoint without creating anything', async () => {
+      mockFetch.mockResolvedValueOnce({ isEndpointExists: true });
+
+      await createConnectorFixture({
+        predefinedConnector: openRouterConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith({
+        path: `/internal/_inference/_exists/${encodeURIComponent(openRouterConnector.id)}`,
+        method: 'GET',
+        headers: { 'elastic-api-version': '1' },
+      });
+
+      expectNoActionsCalls();
+      expect(mockUse).toHaveBeenCalledWith({
+        ...openRouterConnector,
+        id: openRouterConnector.id,
+      });
+    });
+
+    it('creates a chat_completion inference endpoint when missing, then binds to it', async () => {
+      mockFetch.mockResolvedValueOnce({ isEndpointExists: false }).mockResolvedValueOnce(undefined);
+
+      await createConnectorFixture({
+        predefinedConnector: openRouterConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockFetch).toHaveBeenNthCalledWith(2, expectedAddCall);
+
+      expectNoActionsCalls();
+      expect(mockUse).toHaveBeenCalledWith({
+        ...openRouterConnector,
+        id: openRouterConnector.id,
+      });
+    });
+
+    it('treats an already-exists error on create as success (parallel workers)', async () => {
+      const existsError = Object.assign(new Error('Bad Request'), {
+        status: 400,
+        response: {
+          data: {
+            statusCode: 400,
+            error: 'Bad Request',
+            message: `Inference endpoint [${openRouterConnector.id}] already exists`,
+          },
+        },
+      });
+
+      mockFetch
+        .mockResolvedValueOnce({ isEndpointExists: false })
+        .mockRejectedValueOnce(existsError);
+
+      await createConnectorFixture({
+        predefinedConnector: openRouterConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expectNoActionsCalls();
+      expect(mockUse).toHaveBeenCalledWith({
+        ...openRouterConnector,
+        id: openRouterConnector.id,
+      });
+    });
+
+    it('treats an already-exists KbnClientRequesterError on create as success', async () => {
+      const existsError = new KbnClientRequesterError(
+        `[POST http://localhost:5620/internal/_inference/_add] 400 -- ${JSON.stringify({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: `Inference endpoint [${openRouterConnector.id}] already exists`,
+        })}`,
+        { status: 400 }
+      );
+
+      mockFetch
+        .mockResolvedValueOnce({ isEndpointExists: false })
+        .mockRejectedValueOnce(existsError);
+
+      await createConnectorFixture({
+        predefinedConnector: openRouterConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expectNoActionsCalls();
+      expect(mockUse).toHaveBeenCalledWith({
+        ...openRouterConnector,
+        id: openRouterConnector.id,
+      });
+    });
+
+    it('throws other errors on create and does not bind', async () => {
+      const serverError = Object.assign(new Error('Internal Server Error'), { status: 500 });
+
+      mockFetch
+        .mockResolvedValueOnce({ isEndpointExists: false })
+        .mockRejectedValueOnce(serverError);
+
+      await expect(
+        createConnectorFixture({
+          predefinedConnector: openRouterConnector,
+          fetch: mockFetch,
+          log: mockLog,
+          use: mockUse,
+        })
+      ).rejects.toThrow('Internal Server Error');
+
+      expectNoActionsCalls();
+      expect(mockUse).not.toHaveBeenCalled();
+    });
+
+    it('throws a clear error for .gen-ai connectors without apiUrl/defaultModel', async () => {
+      const invalidConnector: AvailableConnectorWithId = {
+        ...openRouterConnector,
+        id: 'gen-ai-without-model',
+        config: { apiProvider: 'OpenAI' },
+      };
+
+      await expect(
+        createConnectorFixture({
+          predefinedConnector: invalidConnector,
+          fetch: mockFetch,
+          log: mockLog,
+          use: mockUse,
+        })
+      ).rejects.toThrow(/without config\.apiUrl\/config\.defaultModel/);
+
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockUse).not.toHaveBeenCalled();
+    });
+
+    it('is bypassed by KBN_EVALS_SKIP_CONNECTOR_SETUP (yields the connector as-is)', async () => {
+      process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
+
+      await createConnectorFixture({
+        predefinedConnector: openRouterConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockUse).toHaveBeenCalledWith(openRouterConnector);
     });
   });
 
