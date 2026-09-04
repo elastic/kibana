@@ -378,12 +378,47 @@ const processExampleBatch = (
  * still carries `example.id` and `example.dataset.id`), then each example is
  * fetched once and reused across all models that ran it.
  */
+
+/**
+ * Trace cells are keyed by `task.model.id` -- the id the *provider* reports.
+ * For aliased rows (OpenRouter, gateways) that is the upstream slug
+ * (`deepseek/deepseek-v4-pro-0813`) while the matrix row is keyed by the
+ * connector id (`openrouter-deepseek-v4-pro`), so `traceKey(row.modelId, ...)`
+ * misses every cell and the row renders "Trace unavailable" despite having a
+ * full set of traces. Mirror each aliased cell onto the row's own id. EIS rows
+ * are unaffected: their connector id and task.model.id are the same string.
+ */
+export const aliasTraceKeys = (
+  traces: MatrixTraceData,
+  modelAliases: ReadonlyMap<string, readonly string[]>
+): void => {
+  for (const [rowId, aliases] of modelAliases) {
+    for (const alias of aliases) {
+      if (alias === rowId) {
+        continue;
+      }
+      const prefix = `${alias}:`;
+      for (const [key, entry] of Object.entries(traces)) {
+        if (!key.startsWith(prefix)) {
+          continue;
+        }
+        const rowKey = traceKey(rowId, key.slice(prefix.length));
+        // Never clobber a cell the row already resolved under its own id.
+        if (traces[rowKey] === undefined) {
+          traces[rowKey] = entry;
+        }
+      }
+    }
+  }
+};
+
 export const queryMatrixTraces = async (
   evalsClient: EvalsClient,
   log: SomeDevLog,
   aggregated: AggregatedModelScores[],
   traceCache?: Record<string, EvaluationScoreDocument[]>,
-  toolCallWarnAbove: number = 0
+  toolCallWarnAbove: number = 0,
+  modelAliases: ReadonlyMap<string, readonly string[]> = new Map()
 ): Promise<MatrixTraceData> => {
   const traces: MatrixTraceData = {};
 
@@ -712,5 +747,6 @@ export const queryMatrixTraces = async (
 
   log.debug(`Matrix traces resolved ${Object.keys(traces).length} trace entries`);
   overlayRepeatedCacheTrails(traces, traceCache);
+  aliasTraceKeys(traces, modelAliases);
   return traces;
 };

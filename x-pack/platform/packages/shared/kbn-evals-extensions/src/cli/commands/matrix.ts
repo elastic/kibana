@@ -340,7 +340,12 @@ export const matrixCmd: Command<void> = {
         log,
         aggregated,
         traceCache,
-        config.toolCallWarnAbove
+        config.toolCallWarnAbove,
+        new Map(
+          config.models
+            .filter((model) => (model.matchIds ?? []).length > 0)
+            .map((model) => [model.id, model.matchIds ?? []])
+        )
       );
 
       // Traces fetched from the server come back hollow (stepCount 0) when the

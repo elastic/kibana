@@ -7,6 +7,7 @@
 
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import {
+  aliasTraceKeys,
   countRepetitions,
   exampleScoresByEvaluator,
   exampleSpreadByEvaluator,
@@ -146,6 +147,23 @@ describe('queryMatrixTraces example fetching', () => {
     debug: jest.fn(),
     warning: jest.fn(),
   };
+
+  it('applies configured model aliases to the resolved trace keys', async () => {
+    // Wiring guard: aliasTraceKeys must be called by queryMatrixTraces itself.
+    // Without the call, aliased OpenRouter rows resolve zero trace cells even
+    // though the helper is correct in isolation.
+    const client = makeClient({ filtered: true });
+    const traces = await queryMatrixTraces(
+      client as never,
+      logStub as never,
+      aggregatedFor('exec-a') as never,
+      undefined,
+      0,
+      new Map([['openrouter-model-x', ['model-x']]])
+    );
+    expect(traces['model-x:example-1']).toBeDefined();
+    expect(traces['openrouter-model-x:example-1']).toEqual(traces['model-x:example-1']);
+  });
 
   it('arms the legacy fallback when a later response reveals unfiltered scores', async () => {
     // Discriminates the latch specifically: the FIRST response is empty (proves
@@ -646,5 +664,48 @@ describe('overlayRepeatedCacheTrails', () => {
       'run-b::security-persona-matrix::gpt::workflow-authoring-a': [scored('gpt', 'load_skill', 0)],
     });
     expect(traces['gpt:workflow-authoring-a']).toBeUndefined();
+  });
+});
+
+describe('aliasTraceKeys', () => {
+  const entry = (stepCount: number) => ({ stepCount } as MatrixTraceData[string]);
+
+  it('mirrors provider-keyed cells onto the row id for aliased models', () => {
+    // Regression: OpenRouter rows are keyed by connector id
+    // (openrouter-deepseek-v4-pro) while score docs report task.model.id as the
+    // upstream slug (deepseek/deepseek-v4-pro-0813), so every cell rendered
+    // "Trace unavailable" despite a full set of traces being present.
+    const traces: MatrixTraceData = {
+      'deepseek/deepseek-v4-pro-0813:alert-analysis-a': entry(24),
+      'deepseek/deepseek-v4-pro-0813:detection-rule-edit-b': entry(11),
+    };
+    aliasTraceKeys(
+      traces,
+      new Map([['openrouter-deepseek-v4-pro', ['deepseek/deepseek-v4-pro-0813']]])
+    );
+    expect(traces['openrouter-deepseek-v4-pro:alert-analysis-a']).toEqual(entry(24));
+    expect(traces['openrouter-deepseek-v4-pro:detection-rule-edit-b']).toEqual(entry(11));
+  });
+
+  it('does not clobber a cell the row already resolved under its own id', () => {
+    const traces: MatrixTraceData = {
+      'row:alert-analysis-a': entry(5),
+      'provider/slug:alert-analysis-a': entry(99),
+    };
+    aliasTraceKeys(traces, new Map([['row', ['provider/slug']]]));
+    expect(traces['row:alert-analysis-a']).toEqual(entry(5));
+  });
+
+  it('leaves non-aliased (EIS) rows untouched', () => {
+    const traces: MatrixTraceData = { 'anthropic-claude-4.5-haiku:alert-analysis-a': entry(7) };
+    const before = { ...traces };
+    aliasTraceKeys(traces, new Map());
+    expect(traces).toEqual(before);
+  });
+
+  it('only rewrites the example suffix, not example ids containing the alias', () => {
+    const traces: MatrixTraceData = { 'provider/slug:prefix:alert-analysis': entry(3) };
+    aliasTraceKeys(traces, new Map([['row', ['provider/slug']]]));
+    expect(traces['row:prefix:alert-analysis']).toEqual(entry(3));
   });
 });
