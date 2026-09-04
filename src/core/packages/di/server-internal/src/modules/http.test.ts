@@ -9,7 +9,7 @@
 
 import { type Container } from 'inversify';
 import { inject, injectable, optional } from 'inversify';
-import { createToken, KibanaContainerModule } from '@kbn/core-di';
+import { createToken, KibanaContainerModule, Scope } from '@kbn/core-di';
 import { injectionServiceMock, setup, start } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
@@ -111,8 +111,8 @@ describe('http', () => {
     const response = {
       ok: jest.fn(() => 'something'),
     } as unknown as jest.Mocked<KibanaResponseFactory>;
-    const fork = injection.fork();
-    const unbindAllSpy = jest.spyOn(fork, 'unbindAllAsync');
+    const scope = container.get(Scope);
+    const disposeSpy = jest.spyOn(scope, 'dispose');
 
     await expect(handler({} as any, request, response)).resolves.toBe('something');
     expect(response.ok).toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe('http', () => {
 
     expect(route.request).toBe(request);
     expect(route.response).toBe(response);
-    expect(unbindAllSpy).toHaveBeenCalled();
+    expect(disposeSpy).toHaveBeenCalled();
   });
 
   it('should handle a request with an asynchronously bound dependency', async () => {

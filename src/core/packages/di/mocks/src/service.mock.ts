@@ -59,27 +59,27 @@ function createSetupContract(): jest.MockedObjectDeep<CoreDiServiceSetup> {
 function createStartContract(): jest.MockedObjectDeep<CoreDiServiceStart> {
   const root = createContainer();
   const injection = lazyObject({
-    fork: jest.fn().mockImplementation(
-      once(() => {
-        const container = createContainer({ parent: root });
-        const scope = Object.defineProperties(createContainer({ parent: container }), {
-          expose: {
-            value: jest.fn(((serviceIdentifier) =>
-              scope.bind(serviceIdentifier)) as ScopedContainer['expose']),
-          },
-          dispose: {
-            value: jest.fn(),
-          },
-        }) as jest.Mocked<ScopedContainer>;
-        container.bind(Scope).toConstantValue(scope);
-
-        return container;
-      })
-    ),
+    fork: jest.fn().mockImplementation(once(() => createContainer({ parent: root }))),
     getContainer: jest.fn().mockImplementation(() => root),
   });
 
   root.bind(InternalCoreStart('injection')).toConstantValue(injection);
+  root
+    .bind(Scope)
+    .toDynamicValue(() => {
+      const scope = Object.defineProperties(injection.fork(), {
+        expose: {
+          value: jest.fn(((serviceIdentifier) =>
+            scope.bind(serviceIdentifier)) as ScopedContainer['expose']),
+        },
+        dispose: {
+          value: jest.fn(),
+        },
+      }) as jest.Mocked<ScopedContainer>;
+
+      return scope;
+    })
+    .inSingletonScope();
 
   return injection;
 }
