@@ -201,14 +201,6 @@ const baseCreateBodyFields = {
       },
     })
   ),
-  clone_api_key: schema.maybe(
-    schema.boolean({
-      meta: {
-        description:
-          'Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.',
-      },
-    })
-  ),
 };
 
 export { createRuleParamsExamplesV1 };

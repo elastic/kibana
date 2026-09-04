@@ -299,7 +299,7 @@ describe('createRuleRoute', () => {
     });
   });
 
-  it('passes clone_api_key to the rules client as an option, not as rule data', async () => {
+  it('maps the clone API key header to a rules client option, never rule data', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -320,7 +320,8 @@ describe('createRuleRoute', () => {
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
-        body: { ...ruleToCreate, clone_api_key: true },
+        body: ruleToCreate,
+        headers: { 'x-kbn-alerting-clone-api-key': 'true' },
       },
       ['ok']
     );

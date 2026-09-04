@@ -10,6 +10,8 @@ import type { HttpSelfService } from '@kbn/core-http-server';
 import { dispatchApiRequest } from './dispatch_request';
 import type { ApiRequest } from './types';
 
+const CLONE_API_KEY_HEADER = 'x-kbn-alerting-clone-api-key';
+
 describe('dispatchApiRequest', () => {
   const fetchMock = jest.fn();
   const selfClient = {
@@ -25,7 +27,7 @@ describe('dispatchApiRequest', () => {
     fetchMock.mockReset().mockResolvedValue({ ok: true });
   });
 
-  it('passes the body through unchanged for a regular kibana call', async () => {
+  it('sends no clone header for a regular kibana call', async () => {
     await dispatch({
       method: 'POST',
       path: '/api/saved_objects/_find',
@@ -36,10 +38,11 @@ describe('dispatchApiRequest', () => {
       '/api/saved_objects/_find',
       expect.objectContaining({ body: { type: 'dashboard' } })
     );
+    expect(fetchMock.mock.calls[0][1].headers).toBeUndefined();
   });
 
   describe('alerting rule creation', () => {
-    it('injects clone_api_key so the rule does not keep the task-scoped credential', async () => {
+    it('sets the clone header so the rule does not keep the task-scoped credential', async () => {
       await dispatch({
         method: 'POST',
         path: '/api/alerting/rule',
@@ -49,7 +52,8 @@ describe('dispatchApiRequest', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/alerting/rule',
         expect.objectContaining({
-          body: { name: 'my rule', rule_type_id: '.es-query', clone_api_key: true },
+          body: { name: 'my rule', rule_type_id: '.es-query' },
+          headers: { [CLONE_API_KEY_HEADER]: 'true' },
         })
       );
     });
@@ -63,7 +67,10 @@ describe('dispatchApiRequest', () => {
 
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/alerting/rule/some-rule-id',
-        expect.objectContaining({ body: { name: 'my rule', clone_api_key: true } })
+        expect.objectContaining({
+          body: { name: 'my rule' },
+          headers: { [CLONE_API_KEY_HEADER]: 'true' },
+        })
       );
     });
 
@@ -78,6 +85,7 @@ describe('dispatchApiRequest', () => {
         '/api/alerting/rule/some-rule-id',
         expect.objectContaining({ body: { name: 'renamed' } })
       );
+      expect(fetchMock.mock.calls[0][1].headers).toBeUndefined();
     });
 
     it('does not touch deeper alerting rule sub-paths', async () => {
@@ -90,6 +98,7 @@ describe('dispatchApiRequest', () => {
         '/api/alerting/rule/some-rule-id/_update_api_key',
         expect.objectContaining({ body: undefined })
       );
+      expect(fetchMock.mock.calls[0][1].headers).toBeUndefined();
     });
   });
 });

@@ -34,7 +34,6 @@ export interface CreateRuleRequestBody<Params extends RuleParamsV1 = never> {
   flapping?: CreateBodySchema['flapping'];
   artifacts?: CreateBodySchema['artifacts'];
   template_id?: CreateBodySchema['template_id'];
-  clone_api_key?: CreateBodySchema['clone_api_key'];
 }
 
 export interface CreateRuleResponse<Params extends RuleParamsV1 = never> {

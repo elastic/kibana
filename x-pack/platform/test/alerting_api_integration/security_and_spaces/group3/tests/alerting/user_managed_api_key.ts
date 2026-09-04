@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { generateAPIKeyName } from '@kbn/alerting-plugin/server/rules_client/common';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import {
   checkAAD,
   getEventLog,
@@ -80,13 +81,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
       expect(executeEvent?.event?.outcome).to.eql('success');
     });
 
-    it('should create rule with a framework managed API key when clone_api_key is true', async () => {
+    it('should create rule with a framework managed API key when the clone API key header is set', async () => {
       const testRuleData = getTestRuleData({ name: 'test_clone_api_key1' });
       const response = await superTestWithoutAuth
         .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .set('Authorization', `ApiKey ${apiKey}`)
-        .send({ ...testRuleData, clone_api_key: true });
+        .set(ALERTING_CLONE_API_KEY_HEADER, 'true')
+        .send(testRuleData);
 
       expect(response.status).to.eql(200);
       const ruleId = response.body.id;
@@ -115,13 +117,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
       expect(executeEvent?.event?.outcome).to.eql('success');
     });
 
-    it('should keep the caller API key when clone_api_key is false', async () => {
+    it('should keep the caller API key when the clone API key header is not "true"', async () => {
       const testRuleData = getTestRuleData({ name: 'test_clone_api_key2' });
       const response = await superTestWithoutAuth
         .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .set('Authorization', `ApiKey ${apiKey}`)
-        .send({ ...testRuleData, clone_api_key: false });
+        .set(ALERTING_CLONE_API_KEY_HEADER, 'false')
+        .send(testRuleData);
 
       expect(response.status).to.eql(200);
       objectRemover.add(SuperuserAtSpace1.space.id, response.body.id, 'rule', 'alerting');

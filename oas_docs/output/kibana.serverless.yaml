@@ -90071,9 +90071,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -90220,9 +90217,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -90467,9 +90461,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -90640,9 +90631,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -93191,9 +93179,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -95083,9 +95068,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -96589,9 +96571,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -97986,9 +97965,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -102251,9 +102227,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -103586,9 +103559,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -103761,9 +103731,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -104425,9 +104392,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -104547,9 +104511,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -104669,9 +104630,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -104791,9 +104749,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -104913,9 +104868,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -105035,9 +104987,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -105157,9 +105106,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -105279,9 +105225,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -105401,9 +105344,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -105523,9 +105463,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -105645,9 +105582,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -105765,9 +105699,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -105885,9 +105816,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -106007,9 +105935,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -107421,9 +107346,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -107666,9 +107588,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -113220,9 +113139,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -115129,9 +115045,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -117759,9 +117672,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -117913,9 +117823,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -118130,9 +118037,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -118313,9 +118217,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -118471,9 +118372,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -118590,9 +118488,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string
@@ -118773,9 +118668,6 @@ components:
                   type: string
               required:
                 - blob
-        clone_api_key:
-          description: Indicates that the API key used to authenticate this request must not become the API key the rule runs with; a new key with the same privileges is created for the rule instead, and its lifecycle is managed by Kibana. Set it when the request authenticates with a key whose lifecycle the rule cannot depend on, such as a key granted to a background task. It has no effect when the request does not authenticate with an API key.
-          type: boolean
         consumer:
           description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
           type: string

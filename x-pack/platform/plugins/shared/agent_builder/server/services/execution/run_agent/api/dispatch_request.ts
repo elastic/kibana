@@ -29,10 +29,11 @@ const isAlertingRuleCreate = (method: string, path: string): boolean =>
 // The agent's requests authenticate with the API key Task Manager granted for this run-agent
 // task, which TM invalidates once the task drains. Alerting persists an API-key caller's
 // credential on created rules by default ("the user owns this key"), which for this borrowed key
-// would kill every rule from the conversation about an hour after the task completes. The
-// `clone_api_key` flag tells alerting to mint the rule its own framework-managed key instead.
-const withRuleCreateBodyOverrides = (body: unknown): unknown =>
-  isRecord(body) ? { ...body, clone_api_key: true } : body;
+// would kill every rule from the conversation about an hour after the task completes. This header
+// tells alerting to mint the rule its own framework-managed key instead. A header rather than a
+// body field keeps the directive out of the public create-rule contract. Duplicates
+// `ALERTING_CLONE_API_KEY_HEADER` from the alerting plugin, which this plugin cannot depend on.
+const CLONE_API_KEY_HEADER = 'x-kbn-alerting-clone-api-key';
 
 /**
  * Sends a prepared API request to its backend on behalf of the current user.
@@ -55,7 +56,10 @@ export const dispatchApiRequest = async ({
     return selfClient.asScoped(request).fetch(path, {
       method,
       query: toSelfFetchQuery(querystring),
-      body: isAlertingRuleCreate(method, path) ? withRuleCreateBodyOverrides(body) : body,
+      body,
+      ...(isAlertingRuleCreate(method, path)
+        ? { headers: { [CLONE_API_KEY_HEADER]: 'true' } }
+        : {}),
       access: path.startsWith('/internal') ? 'internal' : 'public',
     });
   }
