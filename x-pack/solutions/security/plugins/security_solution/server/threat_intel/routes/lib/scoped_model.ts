@@ -11,13 +11,13 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
-/**
- * Build a `ScopedModel` for an internal route handler.
- *
- * Resolves the default GenAI connector the same way as ES|QL NL search.
- */
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
+/**
+ * Resolves the default GenAI connector the same way ES|QL NL search does:
+ * the `genAi:defaultAIConnector` advanced setting first, then the inference
+ * plugin's own default.
+ */
 const resolveConnectorId = async ({
   uiSettingsClient,
   inference,

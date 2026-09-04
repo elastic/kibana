@@ -10,15 +10,10 @@ import { createDeferred } from './deferred';
 describe('createDeferred', () => {
   it('resolves the promise when resolve() is called', async () => {
     const deferred = createDeferred();
-    let settled = false;
-    deferred.promise.then(() => {
-      settled = true;
-    });
 
     deferred.resolve();
-    await deferred.promise;
 
-    expect(settled).toBe(true);
+    await expect(deferred.promise).resolves.toBeUndefined();
   });
 
   it('rejects the promise when reject() is called', async () => {

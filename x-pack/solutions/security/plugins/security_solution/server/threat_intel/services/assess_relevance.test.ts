@@ -96,7 +96,7 @@ describe('assessRelevance', () => {
     expect(bodyInPrompt.length).toBeLessThanOrEqual(30_000);
   });
 
-  it('returns extracted.gate field keys minus assessed_at', async () => {
+  it('returns every schema field', async () => {
     const { model } = buildModel();
     const result = await assessRelevance(model, logger, { text: 'APT29 report.' });
     expect(Object.keys(result).sort()).toEqual(
@@ -111,17 +111,11 @@ describe('assessRelevance', () => {
       ].sort()
     );
   });
-
-  it('returns primary_links for callers that chase original articles', async () => {
-    const { model } = buildModel(SAMPLE_OUTPUT);
-    const result = await assessRelevance(model, logger, { text: 'Pointer article.' });
-    expect(result).toHaveProperty('primary_links');
-  });
 });
 
 // `withStructuredOutput` is mocked everywhere above, so the schema's own parsing of
-// model output is never exercised by those tests. A7 requires LLM output to be bounded
-// before it is stored, and these are the assertions that fail if the bound is removed.
+// model output is never exercised by those tests. These are the assertions that fail
+// if the bound is removed.
 describe('relevanceOutputSchema bounds', () => {
   const valid = {
     is_intelligence: true,

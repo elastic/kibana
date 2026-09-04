@@ -14,10 +14,8 @@ import { MAX_URL_LENGTH } from '../../../common/threat_intel';
 const RELEVANCE_BODY_CHAR_LIMIT = 30_000;
 
 /**
- * Caps a free-text field from the model. Truncates rather than rejecting, matching
- * `enrich_taxonomy`: one over-long field should not throw away an otherwise good
- * enrichment. A7 requires LLM output to be bounded before it is stored, and nothing
- * else in the pipeline constrains how much prose a model returns.
+ * Bounds a free-text model field before it is stored. Truncates rather than
+ * rejecting, so one over-long field does not throw away a good enrichment.
  */
 const boundedText = (max: number) => z.string().transform((v) => v.slice(0, max));
 

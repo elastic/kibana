@@ -6,11 +6,8 @@
  */
 
 export { createThreatReport } from './create_threat_report';
-export type { CreateThreatReportParams, CreateThreatReportResult } from './create_threat_report';
 export { extractIocs } from './extract_iocs';
-export type { ExtractIocsResult, ExtractedIoc } from './extract_iocs';
 export { extractDiamond } from './extract_diamond';
 export { enrichTaxonomy } from './enrich_taxonomy';
 export { classifySeverity } from './classify_severity';
 export { assessRelevance } from './assess_relevance';
-export { normalizeProvenanceUrl } from './provenance_url';

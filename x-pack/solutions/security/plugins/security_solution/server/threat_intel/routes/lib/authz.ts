@@ -16,7 +16,7 @@ export const THREAT_INTEL_READ_AUTHZ = {
 };
 
 /**
- * Endpoints that mutate the corpus or spend model budget.
+ * Endpoints that ingest reports, change source configuration, or spend model budget.
  *
  * `securitySolution` alone is not enough here: Security **Read** holds it, so a
  * read-only user could otherwise add feed sources, ingest reports, and drive

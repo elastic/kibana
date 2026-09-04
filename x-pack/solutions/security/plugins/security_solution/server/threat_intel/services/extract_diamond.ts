@@ -23,15 +23,11 @@ export const DIAMOND_BODY_CHAR_LIMIT = 30_000;
 const VERTICES = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
 type DiamondVertex = (typeof VERTICES)[number];
 
-// ─── Mustard prompt — faithfully ported from mustard/prompts.yaml ────────────
+// ─── Diamond Model prompt, ported from the Colonel Mustard prompts ───────────
 //
-// Source: Colonel Mustard prompts.yaml v2, diamond_single_call / diamond_prompts.
-// Key enforcement vs. previous prompt:
-//   • "DO NOT include specific IPs, domains, hashes, or URLs in ANY vertex"
-//     → fixes infrastructure enumerating a domain list instead of characterising.
-//   • Per-vertex word budgets, abstraction rules, exclusion rules ported verbatim.
-//   • OUTPUT FORMAT instructs signal+summary only (Mustard's label/keywords
-//     dropped — they require a schema bump and would trigger per-vertex fallback).
+// Per-vertex word budgets, abstraction rules, and exclusion rules are verbatim.
+// The output format asks for signal + summary only; Mustard's label/keywords
+// would need a schema bump and would trigger the per-vertex fallback.
 
 const MUSTARD_PREAMBLE = `You are summarizing cybersecurity threat intelligence for semantic vector search and embedding. The source may be a published threat intelligence report or a pre-attribution investigation case containing endpoint telemetry, network logs, and analyst notes. Your output will be used for attribution, clustering, and retrieval — so precision, specificity, and density of named entities and technical terms are critical. Avoid filler, meta-commentary, and generic descriptions. Do not use phrases like "the article" or "the blog post" or "the case." Write in dense, specific language. Do not repeat information across sentences.
 
@@ -218,10 +214,8 @@ ${text}`;
 };
 
 /**
- * Caps a free-text field from the model. Truncates rather than rejecting, matching
- * `enrich_taxonomy`: one over-long field should not throw away an otherwise good
- * enrichment. A7 requires LLM output to be bounded before it is stored, and nothing
- * else in the pipeline constrains how much prose a model returns.
+ * Bounds a free-text model field before it is stored. Truncates rather than
+ * rejecting, so one over-long field does not throw away a good enrichment.
  */
 const boundedText = (max: number) => z.string().transform((v) => v.slice(0, max));
 

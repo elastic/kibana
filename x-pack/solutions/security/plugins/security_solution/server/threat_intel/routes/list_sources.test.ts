@@ -151,8 +151,6 @@ describe('loadSourceReportStatsByAdapterId', () => {
   });
 });
 
-// ── Credential exposure ──────────────────────────────────────────────────────
-
 describe('mapSourceHit', () => {
   it('returns the catalog URL for a known source id', () => {
     const mapped = mapSourceHit({
@@ -234,8 +232,6 @@ describe('loadSourceForMutation', () => {
     ).rejects.toThrow('boom');
   });
 });
-
-// ── Update contract: enable / disable only ────────────────────────────────────
 
 describe('update source schema — enable/disable only', () => {
   it('accepts a bare enabled toggle', () => {
