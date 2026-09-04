@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { SandboxGrpcClient } from './grpc_client';
+import type { SandboxApiClient } from './grpc_client';
 
 // Sanitize a string to a valid env-var fragment: uppercase, runs of non-alphanumeric → _, trim _.
 const sanitize = (s: string): string =>
@@ -18,12 +18,14 @@ const sanitize = (s: string): string =>
     .replace(/^_+|_+$/g, '');
 
 export async function seedSandbox({
-  client,
+  conversationId,
+  apiClient,
   request,
   getActionsClient,
   logger,
 }: {
-  client: SandboxGrpcClient;
+  conversationId: string;
+  apiClient: SandboxApiClient;
   request: KibanaRequest;
   getActionsClient: (req: KibanaRequest) => Promise<ActionsClient>;
   logger: Logger;
@@ -97,7 +99,7 @@ export async function seedSandbox({
   const envContent = envLines.join('\n');
   const mdContent = mdLines.join('\n');
 
-  await client.writeFiles([
+  await apiClient.writeFiles(conversationId, [
     { path: '/workspace/.env', content: Buffer.from(envContent, 'utf8') },
     { path: '/workspace/connectors.md', content: Buffer.from(mdContent, 'utf8') },
   ]);
