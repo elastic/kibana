@@ -15,7 +15,6 @@ import { FlyoutTemplate } from './flyout_template';
 import {
   type SharedStoryArgs,
   buildFlyoutProps,
-  buildTitleIconProps,
   usePaginationProps,
   unstructuredBlocks,
   headerZone,
@@ -23,7 +22,6 @@ import {
   footerZone,
   fillContent,
   bodyText,
-  HEADER_DESCRIPTION,
 } from './stories_helpers';
 
 type Args = SharedStoryArgs & {
@@ -42,6 +40,9 @@ const meta: Meta<Args> = {
     numTabs: 0,
     titleIcon: false,
     description: true,
+    numMetaBlocks: 0,
+    numBadges: 0,
+    numInfoBlocks: 0,
     footer: true,
     secondaryActionIcon: true,
     resizable: true,
@@ -78,6 +79,22 @@ const meta: Meta<Args> = {
     description: {
       name: 'Description',
       control: { type: 'boolean' },
+      table: { category: 'Header' },
+    },
+    numMetaBlocks: {
+      name: 'Meta blocks',
+      control: { type: 'range', min: 0, max: 4, step: 1 },
+      table: { category: 'Header' },
+    },
+    numBadges: {
+      // Max is above the overflow threshold, so the `+N more` popover is reachable.
+      name: 'Badges',
+      control: { type: 'range', min: 0, max: 8, step: 1 },
+      table: { category: 'Header' },
+    },
+    numInfoBlocks: {
+      name: 'Info blocks',
+      control: { type: 'range', min: 0, max: 10, step: 1 },
       table: { category: 'Header' },
     },
     numUnstructuredBlocks: {
@@ -241,13 +258,12 @@ const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
   const pagination = usePaginationProps(args);
   return (
     <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
-      {/* Not `headerZone`: this story owns the `collapsed` prop and a title long enough to wrap. */}
-      <FlyoutTemplate.Header
-        title="Flyout title is quite long, so that it takes up 2 lines of text and then some"
-        {...buildTitleIconProps(args)}
-        description={args.description ? HEADER_DESCRIPTION : undefined}
-        collapsed={args.headerIsCollapsed}
-      />
+      {headerZone(
+        args,
+        'Flyout title is quite long, so that it takes up 2 lines of text and then some',
+        undefined,
+        { collapsed: args.headerIsCollapsed }
+      )}
       {bodyZone(
         <>
           {unstructuredBlocks(args.numUnstructuredBlocks)}
@@ -331,12 +347,7 @@ const TabsRender = (args: Args): React.JSX.Element => {
         selectedTabId={selectedTabId}
         onTabChange={setSelectedTabId}
       >
-        <FlyoutTemplate.Header
-          title="Tabs demo"
-          {...buildTitleIconProps(args)}
-          description={args.description ? HEADER_DESCRIPTION : undefined}
-          collapsed={args.headerIsCollapsed}
-        />
+        {headerZone(args, 'Tabs demo', undefined, { collapsed: args.headerIsCollapsed })}
 
         <FlyoutTemplate.Body>
           {visibleTabs.map(({ id, label, detail }) => (

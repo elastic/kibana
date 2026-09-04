@@ -8,6 +8,16 @@
 import type { z } from '@kbn/zod/v4';
 
 /**
+ * Declarative descriptor: a top-level key in artifact `data` holds a saved-object id.
+ */
+export interface ArtifactReferenceDescriptor {
+  /** Top-level key in `data` holding the id, e.g. `dashboardId`. Must not contain `:`. */
+  field: string;
+  /** Saved-object type the id points to, e.g. `dashboard`. */
+  savedObjectType: string;
+}
+
+/**
  * Pure-data definition supplied by the owning plugin via `registerArtifactType`.
  */
 export interface ArtifactTypeDefinition {
@@ -22,6 +32,11 @@ export interface ArtifactTypeDefinition {
    * `z.unknown()`). Enforced at registration.
    */
   dataSchema: z.ZodType<Record<string, unknown>>;
+  /**
+   * Declarative reference extraction. Each descriptor names a field in `data`
+   * that holds a saved-object id and the SO type it points to.
+   */
+  references?: ArtifactReferenceDescriptor[];
 }
 
 /**
