@@ -110,7 +110,7 @@ export const RuleActionsMenu = ({
         data-test-subj={`runRule-${rule.id}`}
       >
         {i18n.translate('xpack.alertingV2.rulesList.action.run', {
-          defaultMessage: 'Run',
+          defaultMessage: 'Run rule',
         })}
       </EuiContextMenuItem>
     ) : null;
@@ -126,7 +126,7 @@ export const RuleActionsMenu = ({
       data-test-subj={`editRule-${rule.id}`}
     >
       {i18n.translate('xpack.alertingV2.rulesList.action.edit', {
-        defaultMessage: 'Edit',
+        defaultMessage: 'Edit rule',
       })}
     </EuiContextMenuItem>
   ) : null;
@@ -142,7 +142,7 @@ export const RuleActionsMenu = ({
       data-test-subj={`cloneRule-${rule.id}`}
     >
       {i18n.translate('xpack.alertingV2.rulesList.action.clone', {
-        defaultMessage: 'Clone',
+        defaultMessage: 'Clone rule',
       })}
     </EuiContextMenuItem>
   ) : null;
@@ -205,7 +205,7 @@ export const RuleActionsMenu = ({
     >
       <EuiTextColor color="danger">
         {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
-          defaultMessage: 'Delete',
+          defaultMessage: 'Delete rule',
         })}
       </EuiTextColor>
     </EuiContextMenuItem>
@@ -213,19 +213,21 @@ export const RuleActionsMenu = ({
 
   const isItem = (item: React.ReactElement | null): item is React.ReactElement => item !== null;
 
-  // Actions are separated into visual groups (read / edit-clone / run-disable-apiKey / delete);
-  // empty groups (e.g. write groups for read-only users) are dropped before rendering.
+  // Order: Run / Edit / Clone | View change history / Update API key | Delete.
+  // View details (flyout) leads the first group; Enable/Disable sits with API key.
+  // margin="xs" matches EuiContextMenu isSeparator so dividers stay visible.
   const groups = [
-    [viewDetailsItem, viewChangeHistoryItem],
-    [editItem, cloneItem],
-    [runItem, toggleEnabledItem, updateApiKeyItem],
+    [viewDetailsItem, runItem, editItem, cloneItem],
+    [viewChangeHistoryItem, toggleEnabledItem, updateApiKeyItem],
     [deleteItem],
   ]
     .map((group) => group.filter(isItem))
     .filter((group) => group.length > 0);
 
   const menuItems = groups.flatMap((group, index) =>
-    index === 0 ? group : [<EuiHorizontalRule key={`separator-${index}`} margin="none" />, ...group]
+    index === 0
+      ? group
+      : [<EuiHorizontalRule key={`separator-${index}`} margin="xs" role="separator" />, ...group]
   );
 
   if (menuItems.length === 0) {
