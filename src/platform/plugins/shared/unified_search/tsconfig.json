@@ -42,7 +42,6 @@
     "@kbn/esql-types",
     "@kbn/background-search",
     "@kbn/cps",
-    "@kbn/core-chrome-layout",
     "@kbn/css-utils",
     "@kbn/kql",
     "@kbn/date-range-picker",
