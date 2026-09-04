@@ -11,15 +11,19 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
 import { loadExecutionThunk } from './load_execution_thunk';
+import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
+import { setExecution } from '../slice';
 
 const mockGetExecution = jest.fn();
+const mockGetExecutionSteps = jest.fn();
 
 // Mock the WorkflowApi class so loadExecutionThunk uses our mock
 jest.mock('@kbn/workflows-ui', () => ({
   WorkflowApi: jest.fn().mockImplementation(() => ({
     getExecution: mockGetExecution,
+    getExecutionSteps: mockGetExecutionSteps,
   })),
 }));
 
@@ -54,6 +58,13 @@ const mockExecution: WorkflowExecutionDto = {
   yaml: 'name: Test\nsteps: []',
 };
 
+const mockStepsPage = {
+  results: mockExecution.stepExecutions,
+  total: 0,
+  page: 1,
+  size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+};
+
 describe('loadExecutionThunk', () => {
   let store: MockStore;
   let mockServices: MockServices;
@@ -63,6 +74,7 @@ describe('loadExecutionThunk', () => {
 
     store = createMockStore();
     mockServices = getMockServices(store);
+    mockGetExecutionSteps.mockResolvedValue(mockStepsPage);
   });
 
   it('should load execution successfully', async () => {
@@ -73,6 +85,11 @@ describe('loadExecutionThunk', () => {
     expect(mockGetExecution).toHaveBeenCalledWith('exec-1', {
       includeInput: false,
       includeOutput: false,
+      omitStepExecutions: true,
+    });
+    expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
+      page: 1,
+      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
     });
     expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
     expect(result.payload).toEqual(mockExecution);
@@ -97,6 +114,68 @@ describe('loadExecutionThunk', () => {
       mockExecution.yaml,
       mockExecution.workflowDefinition
     );
+  });
+
+  it('should store stepExecutionsTotal when total exceeds the returned page', async () => {
+    const pageResults = [{ id: 's1', stepId: 's1', status: ExecutionStatus.COMPLETED }];
+    mockGetExecution.mockResolvedValue(mockExecution);
+    mockGetExecutionSteps.mockResolvedValue({
+      results: pageResults,
+      total: 2,
+      page: 1,
+      size: 100,
+    });
+
+    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
+    expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
+    expect(result.payload).toMatchObject({
+      stepExecutions: pageResults,
+    });
+    expect(result.payload).not.toHaveProperty('stepExecutionsTruncatedCount');
+    expect(store.getState().detail.stepExecutionsTotal).toBe(2);
+  });
+
+  it('should set stepExecutionsTotal to the page total when the page is complete', async () => {
+    mockGetExecution.mockResolvedValue(mockExecution);
+
+    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
+    expect(result.payload).not.toHaveProperty('stepExecutionsTruncatedCount');
+    expect(store.getState().detail.stepExecutionsTotal).toBe(0);
+  });
+
+  it('should refetch the first page of steps on later polls', async () => {
+    const previousSteps = [{ id: 's1', stepId: 's1', status: ExecutionStatus.COMPLETED }];
+    store.dispatch(
+      setExecution({
+        ...mockExecution,
+        status: ExecutionStatus.RUNNING,
+        stepExecutions: previousSteps as WorkflowExecutionDto['stepExecutions'],
+      })
+    );
+    const nextSteps = [
+      ...previousSteps,
+      { id: 's2', stepId: 's2', status: ExecutionStatus.RUNNING },
+    ];
+    mockGetExecution.mockResolvedValue({ ...mockExecution, status: ExecutionStatus.RUNNING });
+    mockGetExecutionSteps.mockResolvedValue({
+      results: nextSteps,
+      total: 2,
+      page: 1,
+      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+    });
+
+    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
+    expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
+    expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
+      page: 1,
+      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+    });
+    expect(result.payload).toMatchObject({
+      stepExecutions: nextSteps,
+    });
   });
 
   it('should handle HTTP error with body message', async () => {

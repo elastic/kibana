@@ -376,6 +376,18 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('getExecutionSteps', () => {
+    it('should call GET /api/workflows/executions/{executionId}/steps', async () => {
+      const params = { page: 1, size: 100 };
+      await api.getExecutionSteps('exec-1', params);
+
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1/steps', {
+        query: params,
+        version: VERSION,
+      });
+    });
+  });
+
   describe('cancelExecution', () => {
     it('should call POST /api/workflows/executions/{executionId}/cancel', async () => {
       await api.cancelExecution('exec-1');

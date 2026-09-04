@@ -66,6 +66,7 @@ import {
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
+import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
@@ -160,6 +161,12 @@ export interface WorkflowExecutionLogsDto {
 export interface GetStepExecutionParams {
   executionId: string;
   id: string;
+}
+
+export interface GetExecutionStepExecutionsParams {
+  executionId: string;
+  page: number;
+  size: number;
 }
 
 export interface SearchStepExecutionsParams {
@@ -882,7 +889,7 @@ export class WorkflowsManagementApi {
   public async getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options?: { includeInput?: boolean; includeOutput?: boolean; omitStepExecutions?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId, options);
   }
@@ -892,6 +899,13 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<ChildWorkflowExecutionItem[]> {
     return this.workflowsService.getChildWorkflowExecutions(parentExecutionId, spaceId);
+  }
+
+  public async getExecutionStepExecutions(
+    params: GetExecutionStepExecutionsParams,
+    spaceId: string
+  ): Promise<GetExecutionStepExecutionsResult> {
+    return this.workflowsService.getExecutionStepExecutions(params, spaceId);
   }
 
   public async getWorkflowExecutionLogs(params: {

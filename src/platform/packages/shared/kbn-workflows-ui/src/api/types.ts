@@ -134,6 +134,12 @@ export interface GetWorkflowStepExecutionsParams {
 export interface GetExecutionParams {
   includeInput?: boolean;
   includeOutput?: boolean;
+  omitStepExecutions?: boolean;
+}
+
+export interface GetExecutionStepsParams {
+  page?: number;
+  size?: number;
 }
 
 export interface GetExecutionLogsParams {

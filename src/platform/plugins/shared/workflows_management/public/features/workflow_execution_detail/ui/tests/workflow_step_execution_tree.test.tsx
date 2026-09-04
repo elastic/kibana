@@ -248,6 +248,62 @@ describe('WorkflowStepExecutionTree', () => {
       expect(isInProgressStatus).toHaveBeenCalledWith(ExecutionStatus.COMPLETED);
     });
 
+    it('should display a size empty state when no steps could be loaded due to truncation', () => {
+      isInProgressStatus.mockReturnValue(false);
+
+      const execution = createMockExecution({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [],
+      });
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={execution}
+            stepExecutionsTotal={1842}
+            definition={createMockDefinition()}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId={null}
+          />
+        </TestWrapper>
+      );
+
+      expect(screen.getByTestId('workflowStepExecutionTreeTruncatedEmpty')).toBeInTheDocument();
+      expect(screen.getByText('Unable to show step executions')).toBeInTheDocument();
+      expect(screen.getByText(/1,842 step executions were not loaded/)).toBeInTheDocument();
+      expect(screen.queryByText('No step executions found')).not.toBeInTheDocument();
+      expect(screen.queryByRole('tree')).not.toBeInTheDocument();
+    });
+
+    it('should display the size empty state even when the execution is still in progress', () => {
+      isInProgressStatus.mockReturnValue(true);
+      isTerminalStatus.mockReturnValue(false);
+
+      const execution = createMockExecution({
+        status: ExecutionStatus.RUNNING,
+        stepExecutions: [],
+      });
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={execution}
+            stepExecutionsTotal={50}
+            definition={createMockDefinition({
+              steps: [{ name: 'step-1', type: 'action', with: { message: 'test' } }],
+            })}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId={null}
+          />
+        </TestWrapper>
+      );
+
+      expect(screen.getByTestId('workflowStepExecutionTreeTruncatedEmpty')).toBeInTheDocument();
+      expect(screen.queryByRole('tree')).not.toBeInTheDocument();
+    });
+
     it('should not display empty state when execution is in progress even with no step executions', () => {
       isInProgressStatus.mockReturnValue(true);
       isTerminalStatus.mockReturnValue(false);

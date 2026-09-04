@@ -11,9 +11,10 @@ import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { _setComputedExecution, setExecution } from '../slice';
+import { _setComputedExecution, setExecution, setStepExecutionsTotal } from '../slice';
 import { performComputation } from '../utils/computation';
 
 export interface LoadExecutionParams {
@@ -34,8 +35,20 @@ export const loadExecutionThunk = createAsyncThunk<
     try {
       const previousExecution = getState().detail.execution;
 
-      const response = await api.getExecution(id, { includeInput: false, includeOutput: false });
+      const [execution, stepsPage] = await Promise.all([
+        api.getExecution(id, {
+          includeInput: false,
+          includeOutput: false,
+          omitStepExecutions: true,
+        }),
+        api.getExecutionSteps(id, { page: 1, size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE }),
+      ]);
+      const response: WorkflowExecutionDto = {
+        ...execution,
+        stepExecutions: stepsPage.results.slice(0, WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE),
+      };
       dispatch(setExecution(response));
+      dispatch(setStepExecutionsTotal(stepsPage.total));
 
       if (id !== previousExecution?.id) {
         // avoid recomputing derived data if the execution is the same

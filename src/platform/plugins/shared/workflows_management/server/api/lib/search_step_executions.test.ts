@@ -117,4 +117,30 @@ describe('searchStepExecutions', () => {
       })
     );
   });
+
+  it('paginates and tracks total hits when workflowExecutionId is used with page and size', async () => {
+    mockStepDataClient.search.mockResolvedValue({
+      hits: { hits: [], total: { value: 3 } },
+    } as any);
+
+    const result = await searchStepExecutions({
+      ...baseParams,
+      stepExecutionsDataClient: mockStepDataClient,
+      logger: mockLogger,
+      workflowExecutionId: 'run-1',
+      page: 2,
+      size: 50,
+    });
+
+    expect(mockStepDataClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 50,
+        size: 50,
+        track_total_hits: true,
+      })
+    );
+    expect(result.total).toBe(3);
+    expect(result.page).toBe(2);
+    expect(result.size).toBe(50);
+  });
 });
