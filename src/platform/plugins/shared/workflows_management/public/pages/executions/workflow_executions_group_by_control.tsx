@@ -65,7 +65,7 @@ export const WorkflowExecutionsGroupByControl = React.memo<WorkflowExecutionsGro
         button={
           <EuiButtonEmpty
             size="xs"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             color="text"
             onClick={toggle}
