@@ -8198,13 +8198,12 @@ components:
         runtime_fields:
           additionalProperties:
             type: string
-          description: >-
-            Optional map of field name to runtime field type. For each entry, a
-            runtime field of the specified type is created reading its value from
-            `_source[fieldName]` and included in the query as `runtime_mappings`.
-            Use this to reference fields stored on the alert `_source` that are not
-            part of the alerts index mapping, for example, custom fields added via
-            data view runtime fields.
+          description: Optional map of field name to runtime field type. For each entry, a
+            runtime field of the specified type is created reading its value
+            from `_source[fieldName]` and included in the query as
+            `runtime_mappings`. Use this to reference fields stored on the alert
+            `_source` that are not part of the alerts index mapping, for
+            example, custom fields added via data view runtime fields.
           type: object
         status:
           $ref: '#/components/schemas/AlertStatus'
