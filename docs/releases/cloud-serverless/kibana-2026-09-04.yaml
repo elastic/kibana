@@ -9,19 +9,6 @@ hide-features:
 - data-federation
 entries:
 - file:
-    name: cps-breaking-change.yaml
-    checksum: 0aeb1e80257f0d0e047ec99a3d96a93786b7fa08
-  type: breaking-change
-  title: Predefined Serverless Security roles gain index-level read access to Elastic Defend and Osquery data
-  products:
-  - product: cloud-serverless
-    versions:
-    - 2026-09-04
-  impact: The 12 predefined Serverless Security roles now include read access to Elastic Defend and Osquery index patterns. Because predefined roles apply across all spaces, users with these roles can read this data from all spaces in Discover, regardless of space assignments. Spaces are not a data-isolation boundary for index-level access.
-  action: If you require space-level data isolation for Elastic Defend or Osquery data, replace predefined roles with custom roles scoped to specific spaces.
-  areas:
-  - Elastic Security
-- file:
     name: 287194.yaml
     checksum: fbc9d94c63219f4f4eca18d8e2c596c911ed8f02
   type: enhancement
@@ -35,19 +22,20 @@ entries:
   - https://github.com/elastic/kibana/issues/286395
 - file:
     name: 285223.yaml
-    checksum: bd59291f24ee0cfdfdccd186f51b1ae300379098
+    checksum: de9b354ed0963dee47b20bd0c27ff313013b38bd
   type: bug-fix
-  title: Persist EUID on alerts at enrichment time to accelerate risk scoring
+  title: Improve risk scoring performance by caching entity identifiers on alerts
   products:
   - product: cloud-serverless
   - product: kibana
+  description: Entity unique identifiers are now stored on alerts at enrichment time instead of being recomputed on every risk scoring aggregation, significantly reducing processing time under load.
   prs:
   - https://github.com/elastic/kibana/pull/285223
 - file:
     name: 287592.yaml
-    checksum: 87fd57d5922988b67d0eb4b8bad3c8c5916f7363
+    checksum: 8482889292d5fe961a937e4b7380a733d14b8e4a
   type: bug-fix
-  title: Fix dead isRequestTimeout guard masking transport errors as 500s
+  title: Fix transform actions returning generic 500 errors on request timeouts
   products:
   - product: cloud-serverless
   - product: kibana
@@ -60,9 +48,9 @@ entries:
   - https://github.com/elastic/kibana/issues/282974
 - file:
     name: 288124.yaml
-    checksum: a0dfa21bf3e37a074bc467d0c5ee6e0c0035b89b
+    checksum: 82450fe6f6da72c7666c146017768f88f0477045
   type: bug-fix
-  title: Fix boolean console args validation
+  title: Add validation for boolean flag arguments in Endpoint console commands
   products:
   - product: cloud-serverless
   - product: kibana
@@ -70,9 +58,9 @@ entries:
   - https://github.com/elastic/kibana/pull/288124
 - file:
     name: 287576.yaml
-    checksum: 41ade1f33d584ada470d5c7a83174426bcee97cb
+    checksum: f6f1bf9f46765e96b044407f2fc45eaa1e668593
   type: feature
-  title: Prettify floating action dashboard button
+  title: Improve floating action button appearance in dashboards
   products:
   - product: cloud-serverless
   - product: kibana
@@ -82,9 +70,9 @@ entries:
   - https://github.com/elastic/kibana/pull/287576
 - file:
     name: 286849.yaml
-    checksum: f7532cd1664803df24a44474949f5ee8669f258e
+    checksum: 5480d4cebab6ebe439cae94e9e8f09462cf93e99
   type: bug-fix
-  title: Fix zombie streams monopolizing Kibana event loop
+  title: Fix stalled background streams blocking Kibana's event loop
   products:
   - product: cloud-serverless
   - product: kibana
@@ -103,9 +91,9 @@ entries:
   - https://github.com/elastic/kibana/pull/287043
 - file:
     name: 287347.yaml
-    checksum: c835888da7f2ed9beaa541cd077e093e57496e12
+    checksum: c6818c58d2e02b44493f219a54fa29a00aa609af
   type: bug-fix
-  title: Merge `variables` from the context override in single step run
+  title: Fix workflow variables not resolving when testing a single step with historical context
   products:
   - product: cloud-serverless
   - product: kibana
@@ -139,20 +127,20 @@ entries:
   - https://github.com/elastic/kibana/pull/288163
 - file:
     name: 287633.yaml
-    checksum: 82f327ce8e495707798092e4715fb7624c7b69d9
+    checksum: 7cb476e2caed8eab7b0d4537001887ea40f3d513
   type: bug-fix
-  title: Gate Cases tools and skills from es-solution spaces
+  title: Hide Cases tools and skills from Agent Builder and MCP in Elasticsearch-only spaces
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Cases tools and skills are no longer registered in Agent Builder or the MCP Server in projects or spaces where the Cases feature is unavailable (e.g. Elasticsearch/Search solution spaces).
+  description: Cases tools and skills are no longer registered in Agent Builder or the MCP server in projects or spaces where the Cases feature is unavailable, such as Elasticsearch solution spaces.
   prs:
   - https://github.com/elastic/kibana/pull/287633
 - file:
     name: 287923.yaml
-    checksum: 4cf0a69644e6468c9d03089d95a4708928d04fc8
+    checksum: 00db849bb058d0869a84ef2b5ff30b660ae2b704
   type: bug-fix
-  title: Fix deleting a section leaves panel APIs in children$
+  title: Fix orphaned panel state after deleting a dashboard section
   products:
   - product: cloud-serverless
   - product: kibana
@@ -164,9 +152,9 @@ entries:
   - https://github.com/elastic/kibana/issues/287838
 - file:
     name: 287935.yaml
-    checksum: e179b5ad69564ed2c934def704060aa7e4988843
+    checksum: 8b68db033eea50742c51da8221836d9dd316fec3
   type: bug-fix
-  title: Limit data table cells created by `/internal/canvas/fns` route
+  title: Limit Canvas data table cell count to prevent excessive memory use
   products:
   - product: cloud-serverless
   - product: kibana
@@ -176,12 +164,13 @@ entries:
   - https://github.com/elastic/kibana/pull/287935
 - file:
     name: 287763.yaml
-    checksum: e3fc96d7c24a30efac2e71cc54e0d5ccd47814a1
+    checksum: 69af55e731455be24fd1ccc6ffdb52a21207da49
   type: enhancement
-  title: A2A - add stream mode support
+  title: Add streaming support to Agent Builder's Agent-to-Agent endpoint
   products:
   - product: cloud-serverless
   - product: kibana
+  description: The Agent Builder A2A endpoint now supports `stream` mode, enabling streaming responses for compatible A2A clients.
   areas:
   - AI and machine Learning
   prs:
@@ -190,13 +179,13 @@ entries:
   - https://github.com/elastic/kibana/issues/287702
 - file:
     name: 283350.yaml
-    checksum: 36e924151b8ba7bacc037eea114d0d75f6f27a4e
+    checksum: 245620712be7cea34db122583bbbf46f5ba9d7c9
   type: bug-fix
-  title: Enforce required global fields and workflow extended_fields
+  title: Enforce required global fields and support `extended_fields` in case APIs
   products:
   - product: cloud-serverless
   - product: kibana
-  description: With case templates enabled, API and workflow case creates enforce required global fields. Workflow and public case create/update APIs accept `extended_fields`.
+  description: With case templates enabled, the API and workflow case-creation calls now enforce required global fields. The workflow and public case create/update APIs now accept `extended_fields`.
   prs:
   - https://github.com/elastic/kibana/pull/283350
   issues:
@@ -204,12 +193,13 @@ entries:
   - '# PRIVATE: https://github.com/elastic/security-team/issues/19063'
 - file:
     name: 285139.yaml
-    checksum: 5cc2cae8a66a2e2d8606557aaa7d072c2142c69f
+    checksum: 5514f40c1c4f496fc911faba7d645cb0fc0de84a
   type: bug-fix
-  title: Guard nullable columns in graph pinned ESQL predicate
+  title: Fix 500 error in Cloud Security graph when querying with pinned nodes
   products:
   - product: cloud-serverless
   - product: kibana
+  description: Fixes a `null_pointer_exception` returned by the Cloud Security graph API when `pinnedIds` was non-empty, caused by a nullable column being passed directly into an ES|QL predicate.
   prs:
   - https://github.com/elastic/kibana/pull/285139
   issues:
@@ -217,12 +207,13 @@ entries:
   - https://github.com/elastic/kibana/issues/272474
 - file:
     name: 288199.yaml
-    checksum: dc95c96efb3a8d6ad70106b7e218e526c32d1098
+    checksum: 19e9cb3d4e12f7469995fd64ab266737d66f33f4
   type: bug-fix
-  title: Fix Entity Summary persistency
+  title: Fix Entity Analytics AI summaries failing to save in Serverless
   products:
   - product: cloud-serverless
   - product: kibana
+  description: Fixes a 500 error that prevented entity AI summaries from being persisted in Serverless environments when the metadata data stream did not exist.
   prs:
   - https://github.com/elastic/kibana/pull/288199
   issues:
@@ -276,9 +267,9 @@ entries:
   - https://github.com/elastic/kibana/pull/288107
 - file:
     name: 286860.yaml
-    checksum: 1e6e899f0754f3ffb030579b89ef4cc1513f87f6
+    checksum: 0b39e52c7a7a2683871b664d25edc3231bfa902f
   type: feature
-  title: Consolidate conversation layout attribution
+  title: Improve Agent Builder conversation layout and message attribution
   products:
   - product: cloud-serverless
   - product: kibana
@@ -290,9 +281,9 @@ entries:
   - '# PRIVATE: https://github.com/elastic/search-team/issues/15820'
 - file:
     name: 287949.yaml
-    checksum: 60d8c5a515d752e4d775a6f15c5bdcc36ca9309f
+    checksum: fcd56418b647f334852a40805c5d35dd933da3ff
   type: enhancement
-  title: Cancel async searches on browser nav
+  title: Cancel async searches when navigating away from Discover or Dashboard
   products:
   - product: cloud-serverless
   - product: kibana
@@ -339,11 +330,12 @@ entries:
   - https://github.com/elastic/kibana/issues/287985
 - file:
     name: 287713.yaml
-    checksum: 465642b1fab4f4cde678669ad3252db41f85bbed
+    checksum: 70755ca88055f58ec1f38e383813a512a70bcd39
   type: feature
-  title: Enable `memory-dump --raw` feature
+  title: Add raw memory dump support to Elastic Defend response actions
   products:
   - product: cloud-serverless
   - product: kibana
+  description: Elastic Defend hosts running Elastic Agent 9.5.2 or later can now use the `--raw` option when running memory dump response actions.
   prs:
   - https://github.com/elastic/kibana/pull/287713

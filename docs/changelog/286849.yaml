@@ -4,4 +4,4 @@ type: bug-fix
 products:
 - product: cloud-serverless
 - product: kibana
-title: Fix zombie streams monopolizing Kibana event loop
+title: Fix stalled background streams blocking Kibana's event loop

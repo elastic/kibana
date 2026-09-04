@@ -8,5 +8,5 @@ products:
 - product: kibana
 areas:
 - Search and data
-title: Fix dead isRequestTimeout guard masking transport errors as 500s
+title: Fix transform actions returning generic 500 errors on request timeouts
 description: Fixes transform actions (start, stop, delete, reset, schedule now, reauthorize) failing with a generic 500 error when the Elasticsearch request timed out or failed at the transport level; these now report per-transform error messages.

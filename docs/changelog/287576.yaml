@@ -6,4 +6,4 @@ products:
 - product: kibana
 areas:
 - Dashboards and visualizations
-title: Prettify floating action dashboard button
+title: Improve floating action button appearance in dashboards

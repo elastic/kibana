@@ -6,4 +6,4 @@ products:
 - product: kibana
 areas:
 - Dashboards and visualizations
-title: Limit data table cells created by `/internal/canvas/fns` route
+title: Limit Canvas data table cell count to prevent excessive memory use
