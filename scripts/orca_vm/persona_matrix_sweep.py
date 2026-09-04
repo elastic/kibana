@@ -251,10 +251,15 @@ PATCHED_RULE_SKILL_REMOTE = (
 # orca-eval-base-v5 image predates it, so cold-boot rspack compile (303
 # bundles) exceeds the hardcoded 180s and every VM fails before the eval
 # starts. Overlay the patched eval_stack.ts so run_model.sh's 900s timeout
-# actually applies.
+# actually applies. Sourced from THIS worktree (not scout-timeout-pr): it
+# carries the timeout fix AND the agentBuilderTracingExporters pass-through
+# (commit 13ad293e8f8a) — overlaying the older scout-timeout-pr copy silently
+# dropped the golden trace exporter arg from the boot command (observed
+# 2026-09-04: persona2 ran with no xpack.agentBuilder.tracing.exporters and
+# golden received 0 spans despite the config/key being shipped).
 PATCHED_EVAL_STACK = (
     KIBANA_MAIN.parent
-    / "kibana.worktrees/scout-timeout-pr"
+    / "kibana.worktrees/evals-ext-matrix"
     / "x-pack/platform/packages/shared/kbn-evals/src/cli/eval_stack.ts"
 )
 # Playwright per-test timeout: the suite default is 30min, sized for a
