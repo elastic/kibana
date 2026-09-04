@@ -20,6 +20,7 @@ import sharp from 'sharp';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { WebElementWrapper } from './web_element_wrapper';
 import { Browsers } from './remote/browsers';
+import { dismissOpenDialog, isBlockedByOpenDialogError } from './remote/dismiss_open_dialog';
 import {
   NETWORK_PROFILES,
   type NetworkOptions,
@@ -54,6 +55,23 @@ class BrowserService extends FtrService {
 
   public isChromium(): this is { driver: ChromiumWebDriver } {
     return this.driver instanceof ChromiumWebDriver;
+  }
+
+  /**
+   * Runs a navigation command, retrying once if it is blocked by a `beforeunload` dialog
+   * leaked by a prior spec. ChromeDriver 148+ rejects every window command in that state
+   * instead of honouring `unhandledPromptBehavior` (see #271881, #289092).
+   */
+  private async withOpenDialogRetry<T>(command: () => Promise<T>): Promise<T> {
+    try {
+      return await command();
+    } catch (error) {
+      if (!isBlockedByOpenDialogError(error)) {
+        throw error;
+      }
+      await dismissOpenDialog(this.driver, this.log);
+      return await command();
+    }
   }
 
   /**
@@ -252,9 +270,9 @@ class BrowserService extends FtrService {
         return void 0;
       });
 
-      return await this.driver.get(urlWithTime);
+      return await this.withOpenDialogRetry(() => this.driver.get(urlWithTime));
     }
-    return await this.driver.get(url);
+    return await this.withOpenDialogRetry(() => this.driver.get(url));
   }
 
   /**
@@ -425,7 +443,7 @@ class BrowserService extends FtrService {
    * @return {Promise<void>}
    */
   public async refresh() {
-    await this.driver.navigate().refresh();
+    await this.withOpenDialogRetry(() => this.driver.navigate().refresh());
   }
 
   /**
@@ -455,7 +473,7 @@ class BrowserService extends FtrService {
    * @return {Promise<void>}
    */
   public async navigateTo(url: string) {
-    await this.driver.navigate().to(url);
+    await this.withOpenDialogRetry(() => this.driver.navigate().to(url));
   }
 
   /**

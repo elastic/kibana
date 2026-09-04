@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  NoSuchAlertError,
-  NoSuchSessionError,
-  NoSuchWindowError,
-} from 'selenium-webdriver/lib/error';
+import { NoSuchSessionError, NoSuchWindowError } from 'selenium-webdriver/lib/error';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import type { BrowserConfig } from './webdriver';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
+import { dismissOpenDialog } from './dismiss_open_dialog';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
@@ -90,6 +87,15 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.beforeTestSuite.add(async () => {
+    if (lifecycle.isAborting) {
+      return;
+    }
+    // A `beforeunload` dialog leaked by the previous suite's teardown can still be open
+    // here, since `afterTestSuite` only clears it on the browser we control, not one a
+    // spec navigated away from directly (see #271881, #289092).
+    await tryWebDriverCall(async () => {
+      await dismissOpenDialog(driver, log);
+    });
     windowSizeStack.unshift(await driver.manage().window().getRect());
   });
 
@@ -107,24 +113,9 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       return;
     }
     await tryWebDriverCall(async () => {
-      // ChromeDriver 148+ throws InvalidArgumentError on any command when a
-      // beforeunload dialog is already open, even with unhandledPromptBehavior:
-      // 'accept' set (see #271881). Handle both cases:
-      //
-      // 1. Dialog is already open (triggered by a prior spec's cleanup
-      //    navigation) — dismiss it explicitly so subsequent commands can run.
-      try {
-        await driver.switchTo().alert().accept();
-      } catch (e) {
-        if (!(e instanceof NoSuchAlertError)) throw e;
-      }
-      // 2. No dialog yet but a leaked handler could fire — disarm it so the
-      //    commands below (setRect, clearBrowserStorage) can't trigger one.
-      try {
-        await driver.executeScript('window.onbeforeunload = null;');
-      } catch (_) {
-        // session may already be gone; ignore
-      }
+      // Dismiss a dialog left open by the suite's own cleanup navigation before running
+      // the WebDriver commands below (see #271881).
+      await dismissOpenDialog(driver, log);
       // global cleanup
       const { width, height } = windowSizeStack.shift()!;
       await driver.manage().window().setRect({ width, height });
