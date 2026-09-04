@@ -253,7 +253,7 @@ Ground first: make sure the target index exists and every field you reference is
           const isQueryChanging = esql !== undefined && esql !== existingEsql;
           const mergedEsql = esql ?? existingEsql;
 
-          const template = await resolveTemplate({
+          const { template, height } = await resolveTemplate({
             prompt: nlQuery,
             esqlQuery: isQueryChanging ? mergedEsql : undefined,
             existingTemplate,
@@ -263,7 +263,7 @@ Ground first: make sure the target index exists and every field you reference is
           visualizationData = {
             renderer: 'custom_content',
             query: nlQuery,
-            visualization: { template },
+            visualization: { template, height },
             ...(mergedEsql ? { esql: mergedEsql } : {}),
           };
         } else if (renderer === 'vega') {

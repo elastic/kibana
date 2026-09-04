@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { ResolvedCustomContentTemplate } from '@kbn/custom-content-server';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
 import type { ResolvePanelContent } from './panels';
@@ -19,7 +20,7 @@ export type ResolveCustomContentTemplate = (params: {
   existingTemplate?: string;
   /** True when the panel already has an ES|QL query that is not changing, so the resolver can skip re-sampling. */
   hasExistingQuery?: boolean;
-}) => Promise<string>;
+}) => Promise<ResolvedCustomContentTemplate>;
 
 export interface OperationExecutionContext {
   logger: Logger;

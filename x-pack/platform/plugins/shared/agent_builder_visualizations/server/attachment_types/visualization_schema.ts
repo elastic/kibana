@@ -10,6 +10,8 @@ import { MAX_VEGA_SPEC_LENGTH } from '@kbn/agent-builder-visualizations-common';
 import {
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
+  CUSTOM_CONTENT_MIN_HEIGHT,
+  CUSTOM_CONTENT_MAX_HEIGHT,
   CUSTOM_CONTENT_SCRIPT_PATTERN,
 } from '@kbn/custom-content-common';
 
@@ -81,6 +83,12 @@ const customContentVisualizationSchema = z.object({
         message: 'template must not contain a <script> tag',
       }),
     title: z.string().max(256).optional(),
+    height: z
+      .number()
+      .int()
+      .min(CUSTOM_CONTENT_MIN_HEIGHT)
+      .max(CUSTOM_CONTENT_MAX_HEIGHT)
+      .optional(),
   }),
   // A custom content panel with no query renders static content.
   esql: z.string().max(4096).optional(),

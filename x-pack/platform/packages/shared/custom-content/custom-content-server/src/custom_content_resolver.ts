@@ -14,6 +14,9 @@ import { appendLimitToQuery, getStartEndParams } from '@kbn/esql-utils';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
+  CUSTOM_CONTENT_DEFAULT_HEIGHT,
+  CUSTOM_CONTENT_MIN_HEIGHT,
+  CUSTOM_CONTENT_MAX_HEIGHT,
   stripMarkdownFences,
 } from '@kbn/custom-content-common';
 
@@ -30,6 +33,27 @@ const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to t
 - Illustration is the one exception. The tokens above are the panel's UI vocabulary: surfaces, text, chrome, borders and data marks. They are not for pictures. When you are drawing a thing rather than charting it — an animal, a plant, a vehicle, a scene — pick colors that are plausible for the subject itself. Do NOT color an illustration from var(--cc-vis-N) or the accent tokens: those are a data palette, and an animal or object rendered in chart colors looks wrong. Literal colors are correct here, because a depicted thing looks the same in light and dark mode. The page background, all text, and any card behind the illustration still use tokens.
 - Never re-declare \`background\` or \`color\` on \`body\`. The panel frame already sets both from the active theme, and overriding them makes the panel render dark in light mode (or the reverse) for every user.
 - Motion durations: var(--cc-motion-fast), var(--cc-motion-normal), var(--cc-motion-slow), with var(--cc-ease) for easing. No arbitrary values like 1.6s or one-off cubic-bezier curves.`;
+
+const HEIGHT_DECLARATION_GUIDANCE = `HEIGHT DECLARATION — the FIRST line of your output must be exactly:
+<!-- cc-height: N -->
+where N is the height in CSS pixels your content occupies.
+
+The panel renders in a frame of exactly this height. It cannot measure itself and the host cannot measure it, so this number is the only sizing information anyone gets. Too small and the panel scrolls; too large and the content sits above a large empty gap, which looks broken. Aim to be accurate, not generous.
+
+Add it up from the markup you actually wrote, top to bottom:
+- body padding: 32 (top and bottom together)
+- a heading row: 60
+- one row of KPI / status cards: 130 (a row, not a card — count rows as ceil(cards / columns))
+- one compact table or list row: 24, plus 30 for a header row
+- a drawn chart or diagram: whatever height you gave it
+- a paragraph of text: 24 per line you expect it to wrap to
+
+Worked example — a heading plus four status cards in a two-column grid:
+32 + 60 + (2 rows x 130) = 352, so emit \`<!-- cc-height: 352 -->\`.
+
+Size for the data you were actually given. If the schema description or prompt says there are four items, size for four rows — do NOT pad for rows that might exist later. When a LIMIT in the query caps the rows, size for that limit. Between \${CUSTOM_CONTENT_MIN_HEIGHT} and \${CUSTOM_CONTENT_MAX_HEIGHT}.
+
+Emit nothing before this comment — no markdown fence, no blank line.`;
 
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
@@ -115,6 +139,8 @@ OUTPUT RULES — follow these exactly:
 - The HTML must be fully self-contained: all CSS inline in <style> tags.
 ${SANDBOX_GUIDANCE}
 
+${HEIGHT_DECLARATION_GUIDANCE}
+
 ${colorSection()}
 
 CONTENT RULES:
@@ -135,6 +161,8 @@ OUTPUT RULES:
 - Output ONLY the HTML template. No markdown fences, no explanation.
 - All CSS inline in <style> tags.
 ${SANDBOX_GUIDANCE}
+
+${HEIGHT_DECLARATION_GUIDANCE}
 - Aggregation/grouping/sorting cannot happen in the template — it only receives \`rows\` and \`max\` as given. If the data needs grouping that isn't already reflected in \`rows\`, that has to happen upstream in the ES|QL query (STATS ... BY ...).
 - For charts use pure CSS or inline SVG.
 
@@ -150,10 +178,41 @@ CONTENT RULES:
   {% endfor %}`;
 }
 
+/**
+ * Reads and removes the `<!-- cc-height: N -->` declaration the model is asked to emit
+ * as its first line.
+ *
+ * Stripped rather than left in place so the stored template is exactly the markup the
+ * panel renders — the declaration is metadata about the template, not part of it.
+ * Missing or unparseable falls back to the default: a wrong-but-reasonable height is
+ * always better than failing a template that is otherwise fine.
+ */
+export const extractDeclaredHeight = (
+  rawTemplate: string
+): { template: string; height: number } => {
+  const match = rawTemplate.match(/^\s*<!--\s*cc-height:\s*(\d{1,5})\s*-->\s*/i);
+  if (!match) {
+    return { template: rawTemplate, height: CUSTOM_CONTENT_DEFAULT_HEIGHT };
+  }
+
+  const declared = Number.parseInt(match[1], 10);
+  const height = Number.isFinite(declared)
+    ? Math.min(CUSTOM_CONTENT_MAX_HEIGHT, Math.max(CUSTOM_CONTENT_MIN_HEIGHT, declared))
+    : CUSTOM_CONTENT_DEFAULT_HEIGHT;
+
+  return { template: rawTemplate.slice(match[0].length), height };
+};
+
 export interface CustomContentTemplateResolverDeps {
   modelProvider: ModelProvider;
   esClient: IScopedClusterClient;
   logger: Logger;
+}
+
+export interface ResolvedCustomContentTemplate {
+  template: string;
+  /** Height in CSS pixels the model estimated the content needs. Always within bounds. */
+  height: number;
 }
 
 export const createCustomContentTemplateResolver = ({
@@ -172,7 +231,7 @@ export const createCustomContentTemplateResolver = ({
     existingTemplate?: string;
     /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
     hasExistingQuery?: boolean;
-  }): Promise<string> => {
+  }): Promise<ResolvedCustomContentTemplate> => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
@@ -233,7 +292,7 @@ export const createCustomContentTemplateResolver = ({
       stream: false,
     });
 
-    const template = stripMarkdownFences(response.content);
+    const { template, height } = extractDeclaredHeight(stripMarkdownFences(response.content));
 
     if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(template)) {
       throw new Error('Generated template was rejected: contains a <script> tag.');
@@ -244,6 +303,6 @@ export const createCustomContentTemplateResolver = ({
       );
     }
 
-    return template;
+    return { template, height };
   };
 };

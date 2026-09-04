@@ -15,3 +15,18 @@ export const CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH = 1_000_000;
 export const CUSTOM_CONTENT_MAX_TEMPLATE_BYTES = 500_000;
 /** Character (code-point) cap for schema validation — set well above the byte cap so ASCII content has headroom but keep in sync with CUSTOM_CONTENT_MAX_TEMPLATE_BYTES for byte-level checks. */
 export const CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH = 510_000;
+
+/**
+ * Bounds for the height a generated template declares for itself.
+ *
+ * The panel renders in a sandboxed iframe with scripting disabled, so its content
+ * cannot report its own size and the host cannot read across the opaque origin to
+ * measure it. The generating model declares an intended height instead — a guess,
+ * but an informed one, and the only estimate available before the panel renders.
+ * Clamped because the value is model-authored.
+ */
+export const CUSTOM_CONTENT_DEFAULT_HEIGHT = 320;
+/** Matches the renderer's own iframe-container floor. A smaller value would size a host
+ * container shorter than the content box inside it, which overflows rather than shrinks. */
+export const CUSTOM_CONTENT_MIN_HEIGHT = 200;
+export const CUSTOM_CONTENT_MAX_HEIGHT = 1200;

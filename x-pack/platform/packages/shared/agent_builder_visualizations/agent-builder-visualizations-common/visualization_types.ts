@@ -44,7 +44,12 @@ export interface ChartVisualizationAttachmentData extends VisualizationAttachmen
  */
 export interface CustomContentVisualizationAttachmentData extends VisualizationAttachmentDataBase {
   renderer: 'custom_content';
-  visualization: { template: string; title?: string };
+  /**
+   * `height` is the size the generating model declared for the template. The panel
+   * cannot measure itself (no scripting in the sandbox) and the host cannot read
+   * across the opaque origin, so this estimate is the only sizing signal available.
+   */
+  visualization: { template: string; title?: string; height?: number };
   /** Optional: a custom content panel with no query renders static content. */
   esql?: string;
 }
