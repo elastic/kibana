@@ -13,6 +13,8 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
@@ -35,7 +37,15 @@ const buildRulePath = (id: string): string =>
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse, FindRulesResponse };
 
-export type { BulkByIdsParams, BulkByQueryParams, BulkByQueryResult, BulkResponse, DryRunResponse };
+export type {
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
+  BulkResponse,
+  DryRunResponse,
+};
 
 @injectable()
 export class RulesApi {
@@ -59,6 +69,12 @@ export class RulesApi {
   public async createRule(payload: CreateRuleData) {
     return this.http.post<RuleResponse>(ALERTING_V2_RULE_API_PATH, {
       body: JSON.stringify(payload),
+    });
+  }
+
+  public async bulkCreateRules(params: BulkCreateRulesParams) {
+    return this.http.post<BulkCreateRulesResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_create`, {
+      body: JSON.stringify(params),
     });
   }
 

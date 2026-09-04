@@ -36,6 +36,7 @@ export function createRulesSavedObjectServiceMock(): RulesSavedObjectServiceMock
     findByIds: jest.fn().mockResolvedValue([]),
     update: jest.fn().mockResolvedValue({ id: 'rule-id-default' }),
     bulkUpdate: jest.fn().mockResolvedValue([]),
+    bulkCreate: jest.fn().mockResolvedValue([]),
     delete: jest.fn().mockResolvedValue(undefined),
     bulkDelete: jest.fn().mockResolvedValue([]),
     find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0 }),

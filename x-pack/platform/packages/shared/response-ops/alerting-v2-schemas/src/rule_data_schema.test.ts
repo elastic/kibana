@@ -17,6 +17,8 @@ import {
   getRootEsqlQuery,
   bulkGetRulesResponseSchema,
   bulkGetRulesParamsSchema,
+  bulkCreateRulesParamsSchema,
+  bulkCreateRulesResponseSchema,
   updateRuleBodySchema,
   ruleTagsParamsSchema,
 } from './rule_data_schema';
@@ -1628,6 +1630,117 @@ describe('bulkGetRulesResponseSchema', () => {
 
   it('rejects a missing rules field', () => {
     expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
+  });
+});
+
+describe('bulkCreateRulesParamsSchema', () => {
+  const validItem = {
+    kind: 'alert',
+    metadata: { name: 'test rule' },
+    schedule: { every: '5m' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+  };
+
+  it('accepts a single item and defaults enabled to true', () => {
+    const result = bulkCreateRulesParamsSchema.parse({ rules: [validItem] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.rules[0].enabled).toBe(true);
+    expect(result.rules[0].id).toBeUndefined();
+  });
+
+  it('accepts client-supplied id and enabled: false', () => {
+    const result = bulkCreateRulesParamsSchema.parse({
+      rules: [{ ...validItem, id: 'rule-1', enabled: false }],
+    });
+    expect(result.rules[0].id).toBe('rule-1');
+    expect(result.rules[0].enabled).toBe(false);
+  });
+
+  it('accepts up to MAX_BULK_ITEMS items', () => {
+    const rules = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => ({
+      ...validItem,
+      metadata: { name: `rule-${i}` },
+    }));
+    expect(() => bulkCreateRulesParamsSchema.parse({ rules })).not.toThrow();
+  });
+
+  it('rejects an empty rules array', () => {
+    expect(() => bulkCreateRulesParamsSchema.parse({ rules: [] })).toThrow();
+  });
+
+  it('rejects more than MAX_BULK_ITEMS items', () => {
+    const rules = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({
+      ...validItem,
+      metadata: { name: `rule-${i}` },
+    }));
+    expect(() => bulkCreateRulesParamsSchema.parse({ rules })).toThrow();
+  });
+
+  it('rejects duplicate client-supplied ids', () => {
+    expect(() =>
+      bulkCreateRulesParamsSchema.parse({
+        rules: [
+          { ...validItem, id: 'same-id' },
+          { ...validItem, metadata: { name: 'other' }, id: 'same-id' },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkCreateRulesParamsSchema.parse({})).toThrow();
+  });
+
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() => bulkCreateRulesParamsSchema.parse({ rules: [validItem], foo: 'bar' })).toThrow();
+  });
+
+  it('rejects an item that fails create-rule refinements', () => {
+    expect(() =>
+      bulkCreateRulesParamsSchema.parse({
+        rules: [{ ...validItem, kind: 'signal', recovery_strategy: 'no_breach' }],
+      })
+    ).toThrow();
+  });
+});
+
+describe('bulkCreateRulesResponseSchema', () => {
+  const sampleRule = {
+    id: 'rule-1',
+    kind: 'alert' as const,
+    metadata: { name: 'r', version: 1 },
+    time_field: '@timestamp',
+    schedule: { every: '5m' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    enabled: true,
+    created_by: 'user-a',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: 'user-a',
+    updated_at: '2026-01-01T00:00:00.000Z',
+  };
+
+  it('accepts created rules and an empty errors array', () => {
+    const result = bulkCreateRulesResponseSchema.parse({ rules: [sampleRule], errors: [] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('accepts per-item errors without created rules', () => {
+    const result = bulkCreateRulesResponseSchema.parse({
+      rules: [],
+      errors: [
+        {
+          id: 'rule-1',
+          error: { code: 'RULE_ALREADY_EXISTS', message: 'already exists' },
+        },
+      ],
+    });
+    expect(result.rules).toEqual([]);
+    expect(result.errors).toHaveLength(1);
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkCreateRulesResponseSchema.parse({ errors: [] })).toThrow();
   });
 });
 

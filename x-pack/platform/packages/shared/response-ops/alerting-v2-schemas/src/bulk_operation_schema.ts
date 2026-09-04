@@ -94,7 +94,7 @@ export type BulkByQueryParams = z.input<typeof bulkByQuerySchema>;
  * issues, the conflicting version, the resource id) that clients can
  * surface without having to parse `message`.
  */
-const bulkErrorSchema = z.object({
+export const bulkErrorSchema = z.object({
   id: z.string().describe('The identifier of the resource that failed.'),
   error: errorResponseSchema.pick({ code: true, message: true, details: true }),
 });

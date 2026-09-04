@@ -13254,6 +13254,230 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/alerting/v2/rules/_bulk_create:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/_bulk_create</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+      operationId: post-alerting-v2-rules-bulk-create
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkCreateRulesRequest:
+                summary: Create two rules, one of them disabled
+                value:
+                  rules:
+                    - grouping:
+                        fields:
+                          - host.name
+                      kind: alert
+                      metadata:
+                        description: Alerts when average CPU usage exceeds a threshold.
+                        name: Host CPU high
+                        tags:
+                          - production
+                          - infra
+                      query:
+                        breach:
+                          query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
+                        format: standalone
+                      recovery_strategy: no_breach
+                      schedule:
+                        every: 1m
+                        lookback: 5m
+                      state_transition:
+                        pending_count: 1
+                        recovering_count: 1
+                      time_field: '@timestamp'
+                    - enabled: false
+                      grouping:
+                        fields:
+                          - host.name
+                      id: rule-disabled
+                      kind: alert
+                      metadata:
+                        description: Alerts when average CPU usage exceeds a threshold.
+                        name: Host CPU high (disabled)
+                        tags:
+                          - production
+                          - infra
+                      query:
+                        breach:
+                          query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
+                        format: standalone
+                      recovery_strategy: no_breach
+                      schedule:
+                        every: 1m
+                        lookback: 5m
+                      state_transition:
+                        pending_count: 1
+                        recovering_count: 1
+                      time_field: '@timestamp'
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rules_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkCreateRulesResponse:
+                  summary: Created both requested rules
+                  value:
+                    errors: []
+                    rules:
+                      - created_at: '2026-01-15T12:00:00.000Z'
+                        created_by: elastic
+                        enabled: true
+                        grouping:
+                          fields:
+                            - host.name
+                        id: rule-1
+                        kind: alert
+                        metadata:
+                          description: Alerts when average CPU usage exceeds a threshold.
+                          name: Host CPU high
+                          tags:
+                            - production
+                            - infra
+                          version: 1
+                        query:
+                          breach:
+                            query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
+                          format: standalone
+                        recovery_strategy: no_breach
+                        schedule:
+                          every: 1m
+                          lookback: 5m
+                        state_transition:
+                          pending_count: 1
+                          recovering_count: 1
+                        time_field: '@timestamp'
+                        updated_at: '2026-01-15T12:00:00.000Z'
+                        updated_by: elastic
+                        version: WzAsMV0=
+                      - created_at: '2026-01-15T12:00:00.000Z'
+                        created_by: elastic
+                        enabled: false
+                        grouping:
+                          fields:
+                            - host.name
+                        id: rule-disabled
+                        kind: alert
+                        metadata:
+                          description: Alerts when average CPU usage exceeds a threshold.
+                          name: Host CPU high (disabled)
+                          tags:
+                            - production
+                            - infra
+                          version: 1
+                        query:
+                          breach:
+                            query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
+                          format: standalone
+                        recovery_strategy: no_breach
+                        schedule:
+                          every: 1m
+                          lookback: 5m
+                        state_transition:
+                          pending_count: 1
+                          recovering_count: 1
+                        time_field: '@timestamp'
+                        updated_at: '2026-01-15T12:00:00.000Z'
+                        updated_by: elastic
+                        version: WzAsMV0=
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rules_response'
+          description: Returns the result of the bulk create operation.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidRequest:
+                  summary: Request body is missing required rules
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        rules:
+                          - Required
+                    error: Bad Request
+                    message: 'rules: Required'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Request was not authenticated
+                  value:
+                    code: UNAUTHORIZED
+                    error: Unauthorized
+                    message: Authentication required to access this API.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Caller lacks required privileges
+                  value:
+                    code: FORBIDDEN
+                    error: Forbidden
+                    message: The current user does not have the required privileges for this request.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    error: Internal Server Error
+                    message: An unexpected error occurred.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              examples:
+                alertingDisabled:
+                  summary: Alerting engine is disabled
+                  value:
+                    code: ALERTING_DISABLED
+                    error: Service Unavailable
+                    message: Alerting is disabled.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Create rules in bulk
+      tags:
+        - alerting-v2
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/alerting/v2/rules/_bulk_delete:
     post:
       description: |-
@@ -96346,6 +96570,176 @@ components:
       maxItems: 100
       minItems: 1
       type: array
+    Kibana_HTTP_APIs_alerting_bulk_create_rule_item:
+      additionalProperties: false
+      type: object
+      properties:
+        artifacts:
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
+          maxItems: 100
+          type: array
+        enabled:
+          default: true
+          description: Whether the rule is enabled after creation. Disabled rules are persisted with no executor task. Defaults to true.
+          type: boolean
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
+        id:
+          description: Client-supplied identifier. Generated when omitted.
+          maxLength: 150
+          minLength: 1
+          type: string
+        kind:
+          anyOf:
+            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
+              enum:
+                - alert
+              type: string
+            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
+              enum:
+                - signal
+              type: string
+          description: The kind of the rule.
+        metadata:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
+        no_data_strategy:
+          anyOf:
+            - description: Holds the last known episode status when no data is present.
+              enum:
+                - last_known_status
+              type: string
+            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+              enum:
+                - emit
+              type: string
+            - description: Resolves the alert episode to inactive on the first no-data run.
+              enum:
+                - recover
+              type: string
+            - description: No-data situations are ignored (default).
+              enum:
+                - none
+              type: string
+          description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        recovery_strategy:
+          anyOf:
+            - description: recovers groups that stop breaching (default).
+              enum:
+                - no_breach
+              type: string
+            - description: uses a custom recovery query to detect recovery.
+              enum:
+                - query
+              type: string
+            - description: disables recovery entirely.
+              enum:
+                - none
+              type: string
+          description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
+        schedule:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
+        state_transition:
+          additionalProperties: false
+          description: Episode state transition thresholds (alert-only).
+          nullable: true
+          type: object
+          properties:
+            pending_count:
+              description: Consecutive breaches before transitioning to active.
+              maximum: 1000
+              minimum: 0
+              type: integer
+            pending_operator:
+              description: How to combine count and timeframe for pending.
+              enum:
+                - AND
+                - OR
+              type: string
+            pending_timeframe:
+              description: Time window for pending evaluation, e.g. 5m, 15m.
+              type: string
+            recovering_count:
+              description: Consecutive recoveries before transitioning to inactive.
+              maximum: 1000
+              minimum: 0
+              type: integer
+            recovering_operator:
+              description: How to combine count and timeframe for recovering.
+              enum:
+                - AND
+                - OR
+              type: string
+            recovering_timeframe:
+              description: Time window for recovering evaluation, e.g. 5m, 15m.
+              type: string
+        time_field:
+          default: '@timestamp'
+          description: Time field used for the lookback window range filter.
+          maxLength: 128
+          minLength: 1
+          type: string
+      required:
+        - kind
+        - metadata
+        - schedule
+        - query
+    Kibana_HTTP_APIs_alerting_bulk_create_rules_request:
+      additionalProperties: false
+      type: object
+      properties:
+        rules:
+          description: Rule definitions to create. Between 1 and 100 items.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rule_item'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - rules
+    Kibana_HTTP_APIs_alerting_bulk_create_rules_response:
+      additionalProperties: false
+      type: object
+      properties:
+        errors:
+          description: Per-item errors for rules that were not created.
+          items:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    description: A stable, machine-readable error code (e.g., "RULE_NOT_FOUND", "INVALID_SCHEDULE"). Safe for clients to branch on.
+                    type: string
+                  details:
+                    additionalProperties: {}
+                    description: Optional structured context (e.g., validation field errors, conflict resource IDs).
+                    type: object
+                  message:
+                    description: A human-friendly explanation of the error. Subject to change without notice. Do not parse or rely on its content.
+                    type: string
+                required:
+                  - code
+                  - message
+              id:
+                description: The identifier of the resource that failed.
+                type: string
+            required:
+              - id
+              - error
+          type: array
+        rules:
+          description: Rules that were created successfully.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
+          type: array
+      required:
+        - rules
+        - errors
     Kibana_HTTP_APIs_alerting_bulk_dry_run_response:
       additionalProperties: false
       description: Dry-run preview returned by a by-query bulk endpoint when `force` is false.

@@ -8,6 +8,8 @@
 import {
   bulkByIdsSchema,
   bulkByQuerySchema,
+  bulkCreateRulesParamsSchema,
+  bulkCreateRulesResponseSchema,
   bulkGetRulesParamsSchema,
   bulkGetRulesResponseSchema,
   bulkResponseSchema,
@@ -23,6 +25,8 @@ import { RULE_TAGS_RESPONSE } from './get_rule_tags_oas_example';
 import { LIST_RULES_RESPONSE } from './list_rules_oas_example';
 import {
   BULK_BY_QUERY_REQUEST,
+  BULK_CREATE_RULES_REQUEST,
+  BULK_CREATE_RULES_RESPONSE,
   BULK_OPERATION_REQUEST,
   BULK_OPERATION_RESPONSE,
   CREATE_RULE_REQUEST,
@@ -66,6 +70,14 @@ describe('rule OAS example payloads', () => {
 
   it('keeps bulk-operation response example valid against bulkResponseSchema', () => {
     expect(bulkResponseSchema.safeParse(BULK_OPERATION_RESPONSE).success).toBe(true);
+  });
+
+  it('keeps bulk-create request example valid against bulkCreateRulesParamsSchema', () => {
+    expect(bulkCreateRulesParamsSchema.safeParse(BULK_CREATE_RULES_REQUEST).success).toBe(true);
+  });
+
+  it('keeps bulk-create response example valid against bulkCreateRulesResponseSchema', () => {
+    expect(bulkCreateRulesResponseSchema.safeParse(BULK_CREATE_RULES_RESPONSE).success).toBe(true);
   });
 
   it('keeps dry-run response example valid against dryRunResponseSchema', () => {
