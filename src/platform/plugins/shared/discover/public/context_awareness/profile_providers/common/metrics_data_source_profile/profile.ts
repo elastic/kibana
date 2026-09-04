@@ -10,6 +10,7 @@
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { Parser } from '@elastic/esql';
+import { DiscoverTabType } from '@kbn/discover-utils';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import { METRICS_STATE_DEF } from '../../../../../common/context_awareness';
 import type { DataSourceProfileProvider } from '../../../profiles';
@@ -44,6 +45,7 @@ export const createMetricsDataSourceProfileProvider =
           // Opts the profile into `_p` URL sync: Discover only syncs the `Url` fields of the
           // definition the active data source profile hands back here.
           profileState: METRICS_STATE_DEF,
+          tabType: DiscoverTabType.Metrics,
         },
       };
     },

@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { getRouterLinkProps } from '@kbn/router-utils';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -27,7 +28,7 @@ import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
-import { AlertEpisodeTags } from './actions/tags';
+import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
 import * as i18n from './translations';
@@ -67,7 +68,27 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
 export const EpisodeTagsCell = ({ row }: CellRendererProps) => {
   const tags = (row.flattened.last_tags as string[] | undefined) ?? [];
 
-  return <AlertEpisodeTags tags={tags} />;
+  return <TagBadges tags={tags} data-test-subj="episodeTagsCell" />;
+};
+
+export interface EpisodeRuleTagsCellProps extends CellRendererProps {
+  rulesCache: Record<string, Rule>;
+  isLoadingRules: boolean;
+}
+
+export const EpisodeRuleTagsCell = ({
+  row,
+  rulesCache,
+  isLoadingRules,
+}: EpisodeRuleTagsCellProps) => {
+  const ruleId = row.flattened['rule.id'] as string | undefined;
+  const rule = ruleId ? rulesCache[ruleId] : undefined;
+
+  if (isLoadingRules && ruleId && !rule) {
+    return <EuiSkeletonText lines={1} />;
+  }
+
+  return <TagBadges tags={rule?.metadata.tags ?? []} data-test-subj="episodeRuleTagsCell" />;
 };
 
 export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {
@@ -82,6 +103,11 @@ export interface EpisodeRuleCellProps extends CellRendererProps {
   rowHeight: number;
   /** Builds the href of the rule details page for a rule id. */
   getRuleDetailsHref: (ruleId: string) => string;
+  /**
+   * Called when the rule name is clicked, for hosts that show the rule somewhere on the page
+   * instead of navigating to it. Modified and non-left clicks still follow the link.
+   */
+  onRuleNameClick?: (ruleId: string) => void;
   /** Source data views keyed by rule id, used to format grouping values via `fieldFormats`. */
   sourceDataViewsByRule?: Map<string, DataView>;
 }
@@ -103,6 +129,7 @@ export const EpisodeRuleCell = ({
   isLoadingRules,
   rowHeight,
   getRuleDetailsHref,
+  onRuleNameClick,
   sourceDataViewsByRule,
 }: EpisodeRuleCellProps) => {
   const { euiTheme } = useEuiTheme();
@@ -211,14 +238,15 @@ export const EpisodeRuleCell = ({
   const groupingFields = rule.grouping?.fields ?? [];
   // Single line rows have no room for the query. `auto` (-1) grows to fit whatever we render.
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
+  const detailsHref = getRuleDetailsHref(ruleId);
+  // The href stays on the link either way, so opening the rule page in a new tab keeps working.
+  const nameLinkProps = onRuleNameClick
+    ? getRouterLinkProps({ href: detailsHref, onClick: () => onRuleNameClick(ruleId) })
+    : { href: detailsHref };
 
   return (
     <span data-test-subj="episodeRuleCell">
-      <EuiLink
-        href={getRuleDetailsHref(ruleId)}
-        css={nameCss}
-        data-test-subj="episodeRuleCellNameLink"
-      >
+      <EuiLink {...nameLinkProps} css={nameCss} data-test-subj="episodeRuleCellNameLink">
         {rule.metadata.name}
       </EuiLink>
       {groupingFields.length > 0 ? (

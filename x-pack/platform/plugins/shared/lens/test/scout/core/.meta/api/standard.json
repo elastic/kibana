@@ -1,5 +1,5 @@
 {
-  "sha1": "418baa4d474407427b2ff4e4517fe22a2bf61e8c",
+  "sha1": "0d234712e18d97d1e5a81fb0f0dec08e6aa21986",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -168,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -182,8 +182,78 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
-        "line": 168,
-        "column": 31
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-f2731ed3a973dff",
+      "title": "Lens metric trendline query execution executes trendline query: raw query without metric fields falls back to COUNT(*)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-01477fd8fe1bd72",
+      "title": "Lens metric trendline query execution executes trendline query: query with an existing BUCKET on the time field is unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-369063de0748786",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with KEEP before STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-139cf639c1b782b",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with TBUCKET renamed via assignment form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-aff6334ea31699c",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with aliased BUCKET through chained RENAMEs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
       }
     },
     {

@@ -655,7 +655,7 @@ describe('Route privilege/ES-operation consistency', () => {
 
     // ── WorkflowsManagementApi ──
 
-    const api = new WorkflowsManagementApi(workflowsService, true);
+    const api = new WorkflowsManagementApi(workflowsService, true, mockLogger);
 
     // ── Capturing mock router ──
 
