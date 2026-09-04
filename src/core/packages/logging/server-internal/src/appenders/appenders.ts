@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { assertNever } from '@kbn/std';
 import type { DisposableAppender } from '@kbn/logging';
-import type { PluginAppenderConfigType } from '@kbn/core-logging-server';
+import type { FileAppenderPluginConfig, PluginAppenderConfigType } from '@kbn/core-logging-server';
 
 import { Layouts } from '../layouts/layouts';
 import { ConsoleAppender } from './console/console_appender';
@@ -33,13 +33,13 @@ export const appendersSchema = schema.oneOf([
   RollingFileAppender.configSchema,
 ]);
 
-/** @internal {@link appendersSchema}, but OTel appenders use {@link OtelAppender.runtimeConfigSchema}. */
+/** @internal {@link appendersSchema}, but the file and OTel appenders use their runtime schemas. */
 export const pluginAppendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
-  FileAppender.configSchema,
+  FileAppender.runtimeConfigSchema,
   OtelAppender.runtimeConfigSchema,
   RewriteAppender.configSchema,
-  RollingFileAppender.configSchema,
+  RollingFileAppender.runtimeConfigSchema,
 ]);
 
 /** @internal */
@@ -55,8 +55,14 @@ export class Appenders {
     switch (config.type) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));
-      case 'file':
-        return new FileAppender(Layouts.create(config.layout), config.fileName);
+      case 'file': {
+        const fileConfig: FileAppenderPluginConfig = config;
+        return new FileAppender(
+          Layouts.create(fileConfig.layout),
+          fileConfig.fileName,
+          fileConfig.onWriteError
+        );
+      }
       case 'otel':
         return new OtelAppender(config);
       case 'rewrite':

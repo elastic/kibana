@@ -113,7 +113,7 @@ describe('RollingFileAppender', () => {
     expect(RollingFileContextMock).toHaveBeenCalledWith(config.fileName);
 
     expect(RollingFileManagerMock).toHaveBeenCalledTimes(1);
-    expect(RollingFileManagerMock).toHaveBeenCalledWith(context);
+    expect(RollingFileManagerMock).toHaveBeenCalledWith(context, undefined);
 
     expect(LayoutsMock.create).toHaveBeenCalledTimes(1);
     expect(LayoutsMock.create).toHaveBeenCalledWith(config.layout);
