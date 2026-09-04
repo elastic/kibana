@@ -22,7 +22,7 @@ import { getElasticsearchCaCertificate } from '../../../helpers/tls_tools';
 
 apiTest.describe(
   'Interactive setup - manual configuration flow',
-  { tag: ["@local-stateful-classic"] },
+  { tag: ['@local-stateful-classic'] },
   () => {
     let verificationCode: string;
     let elasticsearchHost: string;

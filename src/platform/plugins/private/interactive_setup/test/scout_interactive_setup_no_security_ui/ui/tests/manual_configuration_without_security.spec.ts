@@ -19,7 +19,7 @@ import { test } from '../fixtures';
 
 test.describe(
   'Interactive setup - manual configuration without security',
-  { tag: ["@local-stateful-classic"] },
+  { tag: ['@local-stateful-classic'] },
   () => {
     test('configures Kibana against a cluster with security disabled', async ({
       pageObjects,

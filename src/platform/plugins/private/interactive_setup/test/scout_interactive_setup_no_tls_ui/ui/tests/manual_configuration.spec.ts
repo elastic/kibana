@@ -20,7 +20,7 @@ import { test } from '../fixtures';
 
 test.describe(
   'Interactive setup - manual configuration without TLS',
-  { tag: ["@local-stateful-classic"] },
+  { tag: ['@local-stateful-classic'] },
   () => {
     test('configures Kibana against a cluster without TLS', async ({
       pageObjects,

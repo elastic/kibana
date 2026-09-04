@@ -21,7 +21,7 @@ import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup
 
 apiTest.describe(
   'Interactive setup - manual configuration flow without TLS',
-  { tag: ["@local-stateful-classic"] },
+  { tag: ['@local-stateful-classic'] },
   () => {
     let verificationCode: string;
     let elasticsearchHost: string;
