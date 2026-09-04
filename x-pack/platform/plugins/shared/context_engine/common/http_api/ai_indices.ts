@@ -140,7 +140,7 @@ export interface QueryAiIndicesResponse {
 
 export interface AiIndexField {
   path: string;
-  /** `conflict` when matched indices disagree. */
+  /** ES field type, or `conflict` when the target's indices map this path to different types. */
   type: string;
   searchable: boolean;
   aggregatable: boolean;
