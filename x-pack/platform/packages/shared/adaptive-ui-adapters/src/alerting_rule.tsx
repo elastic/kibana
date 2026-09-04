@@ -7,7 +7,15 @@
 
 import React from 'react';
 import type { ViewSpec } from '@kbn/adaptive-ui';
-import { Badge, CodeBlock, DescriptionList, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
+import {
+  Badge,
+  CodeBlock,
+  DescriptionList,
+  Text,
+  View,
+  toViewSpec,
+  type BadgeProps,
+} from '@kbn/adaptive-ui/jsx';
 import { getBreachEsqlQuery, type Query } from '@kbn/alerting-v2-schemas';
 
 /**
@@ -42,25 +50,25 @@ export const toAlertingRuleViewSpec = ({
   enabled,
 }: AlertingRuleData): ViewSpec => {
   const details: Array<{ title: string; description: string }> = [];
-  if (schedule?.every) details.push({ title: 'Schedule', description: `Every ${schedule.every}` });
-  if (timeField) details.push({ title: 'Time field', description: timeField });
-  if (metadata.builder_type) details.push({ title: 'Type', description: metadata.builder_type });
+  if (schedule?.every) {
+    details.push({ title: 'Schedule', description: `Every ${schedule.every}` });
+  }
+  if (timeField) {
+    details.push({ title: 'Time field', description: timeField });
+  }
+  if (metadata.builder_type) {
+    details.push({ title: 'Type', description: metadata.builder_type });
+  }
+
+  const badgeItems: NonNullable<BadgeProps['items']> = [
+    { label: enabled === false ? 'Disabled' : 'Enabled', tone: enabled === false ? 'neutral' : 'success', variant: 'fill' },
+  ];
+  if (kind) badgeItems.push({ label: kind, tone: 'primary', variant: 'hollow' });
 
   return toViewSpec(
     <View title={metadata.name} subtitle="Alerting rule">
-      <Badge
-        items={[
-          {
-            label: enabled === false ? 'Disabled' : 'Enabled',
-            tone: enabled === false ? 'neutral' : 'success',
-            variant: 'fill',
-          },
-          ...(kind ? [{ label: kind, tone: 'primary' as const, variant: 'hollow' as const }] : []),
-        ]}
-      />
-      {details.length > 0 && (
-        <DescriptionList label="Rule" layout="inline" items={details} />
-      )}
+      <Badge items={badgeItems} />
+      {details.length > 0 && <DescriptionList label="Rule" layout="inline" items={details} />}
       {query && <CodeBlock language="esql" code={getBreachEsqlQuery(query)} title="Query" />}
       {metadata.description && <Text body={metadata.description} />}
       {metadata.tags && metadata.tags.length > 0 && (

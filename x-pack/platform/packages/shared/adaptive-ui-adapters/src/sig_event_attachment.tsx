@@ -113,7 +113,7 @@ export const toSignificantEventAttachmentViewSpec = (
             rule: signal.metadata?.rule_name ?? signal.type ?? '—',
             stream: signal.stream_name ?? '—',
             verdict: {
-              type: 'badge' as const,
+              type: 'badge',
               label: signal.verdict ?? 'observed',
               tone: signal.verdict === 'confirms' ? 'warning' : 'neutral',
             },

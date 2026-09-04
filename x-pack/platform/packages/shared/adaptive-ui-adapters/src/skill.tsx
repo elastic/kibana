@@ -41,9 +41,7 @@ export const toSkillViewSpec = ({
   toViewSpec(
     <View title={name} subtitle="Skill">
       {description && <Text body={description} />}
-      {content && (
-        <CodeBlock language="markdown" code={content} title="Instructions" collapsible />
-      )}
+      {content && <CodeBlock language="markdown" code={content} title="Instructions" collapsible />}
       {toolIds && toolIds.length > 0 && (
         <Badge label="Tools" items={toolIds.map((label) => ({ label, variant: 'hollow' }))} />
       )}
