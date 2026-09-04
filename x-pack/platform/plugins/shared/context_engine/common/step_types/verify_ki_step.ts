@@ -9,12 +9,24 @@ import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import {
+  ESQL_VALID_RUNTIME_VERIFIER_ID,
+  ESQL_VALID_SYNTAX_VERIFIER_ID,
+  KI_VERIFIER_IDS,
+} from '../ki_verification';
 import { kiPartialFieldsSchema } from './ki';
 
 export const VERIFY_KI_STEP_TYPE_ID = 'context-engine.verifyKi';
 
 export const VerifyKiInputSchema = z.object({
   ki: kiPartialFieldsSchema,
+  verifiers: z
+    .array(z.enum(KI_VERIFIER_IDS))
+    .min(1)
+    .refine((ids) => new Set(ids).size === ids.length, {
+      message: 'Verifier ids must be unique.',
+    })
+    .describe('Verifier ids to run. At least one unique id is required.'),
 });
 
 export const VerifyKiOutputSchema = z.object({
@@ -48,8 +60,11 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'The {stepTypeId} step runs all applicable Context Engine verifiers against a knowledge indicator and returns a per-verifier pass/fail summary. If no verifier applies (for example, no ES|QL in `attributes.esql`), the step passes with empty results. Requires the Context Engine advanced setting.',
-      values: { stepTypeId: VERIFY_KI_STEP_TYPE_ID },
+        'Runs the verifiers listed in `verifiers` and returns a pass/fail result per verifier. At least one id is required; an unknown id fails the step. ES|QL verifiers: `{syntaxVerifierId}` validates each query locally (no cluster call); `{runtimeVerifierId}` executes each query against live data, bounded to one row. Requires the Context Engine advanced setting.',
+      values: {
+        syntaxVerifierId: ESQL_VALID_SYNTAX_VERIFIER_ID,
+        runtimeVerifierId: ESQL_VALID_RUNTIME_VERIFIER_ID,
+      },
     }),
     examples: [
       `## Verify a knowledge indicator's ES|QL
@@ -57,6 +72,9 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
 - name: verify_ki
   type: ${VERIFY_KI_STEP_TYPE_ID}
   with:
+    verifiers:
+      - ${ESQL_VALID_SYNTAX_VERIFIER_ID}
+      - ${ESQL_VALID_RUNTIME_VERIFIER_ID}
     ki:
       type: detection
       title: Failed login burst
