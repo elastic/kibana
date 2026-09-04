@@ -180,20 +180,19 @@ export class DiscoverApp {
     const title = name.endsWith('*') ? name : `${name}*`;
     const timestampCombo = this.page.components.comboBox('timestampField');
 
-    // Retry: title validation can race its debounced index lookup and get stuck
-    // invalid even after a match is found (see FTR's `settings_page.ts` for the same fix).
-    // Re-submitting also covers serverless, where the form's submission re-validation can
-    // transiently report "no matching indices" even though the matching sources panel already
-    // shows results, leaving the flyout open with its submit buttons disabled.
-    const maxAttempts = 3;
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      const isLastAttempt = attempt === maxAttempts;
-
+    // Submitting can silently no-op: the title's async validation races a separately
+    // debounced index lookup and can latch invalid even once matches exist, and the form
+    // only re-validates fields it has not already validated (#283967). Re-filling the
+    // title forces fresh validation, so the whole fill -> validate -> submit sequence has
+    // to be retried, not just the click.
+    //
+    // The sequence succeeds once the new data view is the selected one. That outcome only
+    // ever becomes true, unlike the flyout closing, which is a transition: waiting for it
+    // with a deadline made a slow close indistinguishable from a rejected submit, and
+    // retrying then drove the editor that had already closed.
+    await expect(async () => {
       await titleInput.waitFor({ state: 'visible', timeout: editorReadyTimeout });
-
-      if (attempt > 1) {
-        await titleInput.fill(''); // force a real value change to re-trigger validation
-      }
+      await titleInput.fill(''); // a real value change, so a latched validation runs again
       await titleInput.fill(title);
       // wait for async title validation to settle before continuing.
       await form
@@ -218,26 +217,14 @@ export class DiscoverApp {
         )
         .toBe(true);
 
-      if (adHoc) {
-        await this.page.testSubj.click('exploreIndexPatternButton');
-      } else {
-        await this.page.testSubj.click('saveIndexPatternButton');
-      }
+      await this.page.testSubj.click(
+        adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
+      );
 
-      const flyoutClosed = await flyout
-        .waitFor({ state: 'hidden', timeout: isLastAttempt ? 10_000 : 3_000 })
-        .then(() => true)
-        .catch(() => false);
-
-      if (flyoutClosed) {
-        break;
-      }
-      if (isLastAttempt) {
-        throw new Error(
-          `indexPatternEditorFlyout did not close after ${maxAttempts} attempts to submit "${title}"`
-        );
-      }
-    }
+      // Saving writes a saved object and refreshes the data view list, so allow well over
+      // the couple of seconds this takes when the worker is idle.
+      await expect(this.getSelectedDataView()).toHaveText(title, { timeout: 20_000 });
+    }).toPass({ timeout: 60_000, intervals: [0] });
 
     await this.waitUntilTabIsLoaded();
   }
