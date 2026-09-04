@@ -476,6 +476,8 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         this.props.onLocalFilterUpdate(localFilter);
       }
     }
+    // re-calculate visible height when switching between editors
+    this.state.resetVisibleHeight$.next();
   };
 
   private isUnknownFilterType() {
@@ -617,9 +619,10 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       );
     }
 
-    this.state.resetVisibleHeight$.next();
     this.setState({ localFilter: newFilter });
     this.props.onLocalFilterUpdate?.(newFilter);
+    // re-calculate visible height on filter changes to allow height to grow when new filters added
+    this.state.resetVisibleHeight$.next();
   };
 
   private onSubmit = () => {
