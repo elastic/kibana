@@ -56,10 +56,6 @@ jest.mock('./compose_discover_form/linked_action_policies_step', () => ({
   LinkedActionPoliciesStep: () => null,
 }));
 
-jest.mock('./compose_discover_form/centralized_action_policies_panel', () => ({
-  CentralizedActionPoliciesPanel: () => null,
-}));
-
 jest.mock('./compose_discover_form/esql_recovery_content', () => ({
   EsqlRecoveryContent: () => null,
 }));
@@ -148,7 +144,6 @@ jest.mock('./query_sandbox_flyout', () => ({
         <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
         <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
         {props.onTimeFieldChange ? (
-          // eslint-disable-next-line jsx-a11y/no-onchange
           <select
             data-test-subj="querySandboxTimeField"
             value={props.timeField}

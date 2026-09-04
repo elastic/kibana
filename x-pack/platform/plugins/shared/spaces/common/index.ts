@@ -7,6 +7,8 @@
 
 export { isReservedSpace } from './is_reserved_space';
 export {
+  ALL_SPACES_ID,
+  UNKNOWN_SPACE,
   MAX_SPACE_INITIALS,
   SPACE_SEARCH_COUNT_THRESHOLD,
   ENTER_SPACE_PATH,
@@ -21,3 +23,9 @@ export type {
   SolutionView,
 } from './types/latest';
 export type { spaceV1 } from './types';
+export type {
+  CompleteInitialSolutionSetupRequest,
+  CompleteInitialSolutionSetupResponse,
+  GetInitialSolutionSetupResponse,
+  InitialSolutionSetupView,
+} from './types/initial_solution_setup';

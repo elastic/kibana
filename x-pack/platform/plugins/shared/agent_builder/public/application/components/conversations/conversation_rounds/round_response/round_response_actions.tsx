@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
@@ -19,7 +19,7 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
-import { useAgentId } from '../../../../hooks/use_conversation';
+import { useAgentId, useConversationReadOnly } from '../../../../hooks/use_conversation';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
@@ -58,6 +58,15 @@ const labels = {
 
 const ADD_TO_DATASET_METADATA_SOURCE = 'agent_builder';
 
+// Round feedback is not modelled in the events timeline yet — it lives only on the
+// round (`ConversationRoundFeedback`) and is dropped when rounds are projected from
+// events, so a vote can't round-trip and a submitted vote would silently vanish on
+// the next projection. Hide the control until feedback becomes a first-class
+// timeline event. Typed `boolean` (not the `false` literal) so the gated render
+// paths don't read as statically unreachable.
+// TODO(agent-builder): re-enable once round feedback is captured as a timeline event.
+const ROUND_FEEDBACK_ENABLED: boolean = false;
+
 interface RoundResponseActionsProps {
   content: string;
   isVisible: boolean;
@@ -74,13 +83,13 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   rawRound,
   copyTarget = 'response',
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { addSuccessToast } = useToasts();
   const { regenerate, isRegenerating, isResponseLoading } = useConversationStream();
   const { services } = useKibana();
   const isExperimentalEnabled = useExperimentalFeatures();
   const isTracingEnabled = useTracingEnabled();
   const agentId = useAgentId();
+  const { isReadOnly, isLoading: isConversationReadOnlyLoading } = useConversationReadOnly();
 
   const { action: copyLabel, success: copySuccessLabel } = copyLabels[copyTarget];
 
@@ -149,13 +158,19 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
 
   const showTraceButton = isTracingEnabled && Boolean(traceId);
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
-  const showFeedback = Boolean(rawRound) && rawRound?.status === ConversationRoundStatus.completed;
+  const isEditable = !isReadOnly && !isConversationReadOnlyLoading;
+  const showFeedback =
+    ROUND_FEEDBACK_ENABLED &&
+    Boolean(rawRound) &&
+    rawRound?.status === ConversationRoundStatus.completed &&
+    isEditable;
+  const showRegenerateButton = isLastRound && isEditable;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
-          direction="rowReverse"
+          direction="row"
           justifyContent="flexStart"
           gutterSize="xs"
           alignItems="center"
@@ -181,7 +196,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
               />
             </EuiToolTip>
           </EuiFlexItem>
-          {isLastRound && (
+          {showRegenerateButton && (
             <EuiFlexItem grow={false}>
               <EuiToolTip content={labels.regenerate} disableScreenReaderOutput>
                 <EuiButtonIcon
@@ -229,16 +244,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           )}
           {showFeedback && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                gutterSize="s"
-                alignItems="center"
-                responsive={false}
-                css={css`
-                  padding-left: ${euiTheme.size.s};
-                  margin-left: ${euiTheme.size.xxs};
-                  border-left: ${euiTheme.border.thin};
-                `}
-              >
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <ThumbButton
                     direction="up"

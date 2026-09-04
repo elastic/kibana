@@ -186,6 +186,9 @@ const editorStyleMap = {
       },
     }),
 
+  // paddingRight is intentionally omitted here: the call site adds it conditionally
+  // via `isVisualEditorEnabled && css({ paddingRight: MINIMAP_RESERVE_PX })` so there
+  // is no set-then-unset pattern depending on Emotion's array-compose order.
   editorContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: '1 1 0',
@@ -199,36 +202,45 @@ const editorStyleMap = {
     }),
 
   validationErrorsContainer: css({
+    position: 'relative',
     flexShrink: 0,
     overflow: 'hidden',
-    zIndex: 2, // overlay the editor flying action buttons
+    zIndex: 10, // renders above the step minimap (zIndex: 9)
   }),
 
   stepActionsContainer: css({
     position: 'absolute',
     zIndex: 1002, // above the highlighting and pseudo-element
+    // translateX: twice the decoration inset (outside and inside) plus the slim
+    // scrollbar width so the button cluster stays clear of the scrollbar.
     transform: `translateY(${FOCUSED_STEP_DECORATION_INSET_PX}px) translateX(-${
-      EDITOR_SCROLLBAR_WIDTH_PX + 2 * FOCUSED_STEP_DECORATION_INSET_PX
-    }px)`, // scrollbar + twice decoration inset (outside and inside)
+      2 * FOCUSED_STEP_DECORATION_INSET_PX + EDITOR_SCROLLBAR_WIDTH_PX
+    }px)`,
   }),
 
-  downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textSubdued,
-      '&:hover': {
-        color: euiTheme.colors.textPrimary,
-      },
-      '&:hover:not(:disabled)::before': {
-        backgroundColor: 'transparent',
-      },
-    }),
-  agentBuilderSectionCss: (euiThemeContext: UseEuiTheme) =>
-    css({
-      position: 'absolute',
-      top: euiThemeContext.euiTheme.size.xxs,
-      right: euiThemeContext.euiTheme.size.m,
-      zIndex: 10,
-    }),
+  editorAreaWrapper: css({
+    flex: '1 1 0',
+    minHeight: 0,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+
+  // Plain css value (no theme needed): the minimap hides its own scrollbar completely
+  // so it can be scrolled programmatically without a visible track competing with the
+  // viewport indicator.
+  minimapContainer: css({
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    zIndex: 9,
+    overflowY: 'auto',
+    overflowX: 'visible',
+    scrollbarWidth: 'none',
+    '&::-webkit-scrollbar': { display: 'none' },
+  }),
+
   hiddenButtonCss: css({ display: 'none' }),
 };
 
