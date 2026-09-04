@@ -101,6 +101,31 @@ describe('ServiceNow', () => {
           (api.closeIncident as jest.Mock).mock.calls[0][0].params.incident.correlationId
         ).toBe('custom_correlation_id');
       });
+
+      test('calls getIncident sub action correctly', async () => {
+        const actionId = 'some-action-id';
+        const incident = { sys_id: 'incident-id', number: 'INC0010001' };
+        (api.getIncident as jest.Mock).mockResolvedValue(incident);
+        const executorOptions = {
+          actionId,
+          config,
+          secrets,
+          params: {
+            subAction: 'getIncident',
+            subActionParams: { externalId: 'incident-id' },
+          },
+          services,
+          logger: mockedLogger,
+        } as unknown as ServiceNowConnectorTypeExecutorOptions<
+          ServiceNowPublicConfigurationType,
+          ExecutorParams
+        >;
+        const result = await connectorType.executor(executorOptions);
+        expect((api.getIncident as jest.Mock).mock.calls[0][0].params.externalId).toBe(
+          'incident-id'
+        );
+        expect(result).toEqual({ status: 'ok', data: incident, actionId });
+      });
     });
   });
 });
