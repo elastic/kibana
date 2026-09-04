@@ -490,21 +490,21 @@ export class MapApp extends React.Component<Props, State> {
 
     this._initMapAndLayerSettings(this.props.savedMap.getAttributes());
 
-    let hasSavedMaps = Boolean(this.props.savedMap.getSavedObjectId());
-    if (!hasSavedMaps && !this.props.savedMap.hasSaveAndReturnConfig()) {
-      try {
-        const results = await getMapClient().search({ limit: 1 });
-        hasSavedMaps = results.hits.length > 0;
-      } catch {
-        hasSavedMaps = false;
-      }
-    }
+    const hasSavedObject = Boolean(this.props.savedMap.getSavedObjectId());
+    this.setState({ initialized: true, hasSavedMaps: hasSavedObject });
 
-    if (!this._isMounted) {
+    if (hasSavedObject || this.props.savedMap.hasSaveAndReturnConfig()) {
       return;
     }
 
-    this.setState({ initialized: true, hasSavedMaps });
+    try {
+      const results = await getMapClient().search({ limit: 1 });
+      if (this._isMounted) {
+        this.setState({ hasSavedMaps: results.hits.length > 0 });
+      }
+    } catch {
+      // Keep hasSavedMaps false so create-without-library does not render a looping back button.
+    }
   }
 
   _getManagedBadge(): AppHeaderBadge[] | undefined {
