@@ -9,8 +9,9 @@ import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eu
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import { useNightshiftManagementBreadcrumbs } from '../../hooks/use_nightshift_management_breadcrumbs';
 import { getFormattedError } from '../../util/errors';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
@@ -62,7 +63,6 @@ export function SignificantEventsPage() {
         getUrlForApp,
         capabilities: { streams },
       },
-      chrome,
       notifications: { toasts },
     },
     dependencies: {
@@ -145,16 +145,7 @@ export function SignificantEventsPage() {
     systemOnboardingLabel,
   ]);
 
-  useEffect(() => {
-    chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('xpack.significantEventsApp.breadcrumb', {
-          defaultMessage: 'Nightshift Management',
-        }),
-      },
-    ]);
-  }, [chrome]);
-
+  useNightshiftManagementBreadcrumbs();
   const tabs = useMemo(
     () => [
       {

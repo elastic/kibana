@@ -50315,7 +50315,6 @@
     "xpack.significantEvents.sigEventsTuningConfigDescription": "Configuration JSON pour les paramètres d'ajustement des événements importants, incluant les tailles d'échantillon, les ratios, les TTL et les seuils de recherche.",
     "xpack.significantEvents.sigEventsTuningConfigName": "Réglage des événements significatifs",
     "xpack.significantEventsApp.appTitle": "Événements importants",
-    "xpack.significantEventsApp.breadcrumb": "Événements importants",
     "xpack.significantEventsApp.bulkOnboarding.schedulingErrorSummary": "Impossible de planifier l'intégration pour {count, plural, one {# stream} other {# flux}}",
     "xpack.significantEventsApp.cancelDiscoveryLabel": "Annuler",
     "xpack.significantEventsApp.changeType.dip": "Baisse",

@@ -50713,7 +50713,6 @@
     "xpack.significantEvents.sigEventsTuningConfigDescription": "重大事件调优参数的 JSON 配置，包括样本大小、比率、TTL 和搜索阈值。",
     "xpack.significantEvents.sigEventsTuningConfigName": "重大事件调整",
     "xpack.significantEventsApp.appTitle": "重大事件",
-    "xpack.significantEventsApp.breadcrumb": "重大事件",
     "xpack.significantEventsApp.bulkOnboarding.schedulingErrorSummary": "未能为 {count, plural, one {# 个数据流} other {# 个数据流}}安排数据接入",
     "xpack.significantEventsApp.cancelDiscoveryLabel": "取消",
     "xpack.significantEventsApp.changeType.dip": "谷值",

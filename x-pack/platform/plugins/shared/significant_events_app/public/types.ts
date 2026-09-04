@@ -11,6 +11,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -28,6 +29,7 @@ export interface SignificantEventsAppStartDependencies {
   cps?: CPSPluginStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
+  serverless?: ServerlessPluginStart;
   share: SharePluginStart;
   significantEvents: SignificantEventsPublicPluginStart;
   spaces?: SpacesPluginStart;

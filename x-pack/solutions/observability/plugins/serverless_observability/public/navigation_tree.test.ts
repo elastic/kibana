@@ -53,6 +53,13 @@ describe('Navigation Tree', () => {
     expect(navigation.body[0]).toMatchObject({
       link: 'nightshift',
       icon: NightshiftNavigationIcon,
+      children: [
+        {
+          link: 'significantEvents',
+          title: 'Management',
+          sideNavStatus: 'hidden',
+        },
+      ],
     });
     expect(navigation.body[1]).toMatchObject({
       link: 'observability-overview',

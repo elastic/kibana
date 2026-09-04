@@ -57,9 +57,9 @@ export class SignificantEventsAppPlugin
       title: i18n.translate('xpack.significantEventsApp.appTitle', {
         defaultMessage: 'Nightshift Management',
       }),
-      euiIconType: 'logoElastic',
+      euiIconType: 'logoObservability',
       appRoute: SIGNIFICANT_EVENTS_APP_ROUTE,
-      category: DEFAULT_APP_CATEGORIES.management,
+      category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: [],
       keywords: [
         'nightshift management',

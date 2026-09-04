@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/share-plugin'
   - '@kbn/scout'
+  - '@kbn/serverless'
   - '@kbn/significant-events-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'

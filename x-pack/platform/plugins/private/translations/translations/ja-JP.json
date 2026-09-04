@@ -50709,7 +50709,6 @@
     "xpack.significantEvents.sigEventsTuningConfigDescription": "サンプルサイズ、比率、TTL、検索閾値などの重要イベントの調整パラメータのJSON設定。",
     "xpack.significantEvents.sigEventsTuningConfigName": "重要イベントの調整",
     "xpack.significantEventsApp.appTitle": "重要なイベント",
-    "xpack.significantEventsApp.breadcrumb": "重要なイベント",
     "xpack.significantEventsApp.bulkOnboarding.schedulingErrorSummary": "{count, plural, one {# stream} other {#件のストリーム}}に対するオンボーディングのスケジュール設定に失敗しました",
     "xpack.significantEventsApp.cancelDiscoveryLabel": "キャンセル",
     "xpack.significantEventsApp.changeType.dip": "Dip",
