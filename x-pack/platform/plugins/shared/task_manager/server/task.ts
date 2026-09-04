@@ -11,6 +11,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -381,7 +382,7 @@ export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-s
 export interface TaskUserScope {
   apiKeyId: string;
   uiamApiKeyId?: string;
-  spaceId?: string;
+  spaceId?: SpaceId;
   /**
    * True when the credentials were supplied by the caller (a scheduling request already
    * authenticated with an ES or UIAM API key — not necessarily a human, e.g. a service account)
