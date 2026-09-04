@@ -22,6 +22,7 @@ import type {
   ChromeNavLink,
   GlobalHeaderAiButton,
   ChromeUserBanner,
+  AppHeaderTitle,
   ChromeAppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/app-menu';
@@ -71,7 +72,8 @@ export interface ChromeState {
   appMenu: State<AppMenuConfig | undefined>;
   contextSwitcher: State<ReactNode>;
   projectPicker: State<ReactNode>;
-  inlineAppHeader: State<boolean>;
+  inlineAppHeader: State<{ title?: AppHeaderTitle } | undefined>;
+  inlineAppHeaderOwnerId: number;
   appHeader: State<ChromeAppHeaderConfig | undefined>;
   userMenu: State<ReactNode>;
 
@@ -128,7 +130,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
   const contextSwitcher = createState<ReactNode>(null);
   const projectPicker = createState<ReactNode>(null);
-  const inlineAppHeader = createState<boolean>(false);
+  const inlineAppHeader = createState<{ title?: AppHeaderTitle } | undefined>(undefined);
   const appHeader = createState<ChromeAppHeaderConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
 
@@ -166,6 +168,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     customNavLink,
     appMenu,
     inlineAppHeader,
+    inlineAppHeaderOwnerId: 0,
     appHeader,
     help: {
       extension: helpExtension,

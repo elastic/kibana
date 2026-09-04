@@ -8,61 +8,34 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useEffect, useRef } from 'react';
-import { EuiSkipLink, EuiLiveAnnouncer, keys } from '@elastic/eui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { EuiLiveAnnouncer, EuiSkipLink, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FLYOUT_SELECTOR, MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+import { useChromeComponentsDeps } from '../context';
 import { useCustomBranding } from './chrome_hooks';
+import { resolveChromeNextAnnouncement } from './resolve_chrome_next_announcement';
 
-const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/src/core/packages/rendering/server-internal/src/views/template.tsx#L35
-const SEPARATOR = ' - ';
+const DEFAULT_BRAND = 'Elastic';
+const TITLE_SEPARATOR = ' - ';
 
-export const HeaderPageAnnouncer: FC<{
-  breadcrumbs: ChromeBreadcrumb[];
-}> = ({ breadcrumbs }) => {
-  const [routeTitle, setRouteTitle] = useState('');
-  const branding = useCustomBranding()?.pageTitle || DEFAULT_BRAND;
+const PageAnnouncerView: FC<{
+  routeTitle: string;
+  shouldHandleTab: boolean;
+  onInteraction: () => void;
+}> = ({ routeTitle, shouldHandleTab, onInteraction }) => {
   const skipLinkRef = useRef<HTMLAnchorElement | null>(null);
-  const [shouldHandleTab, setShouldHandleTab] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!breadcrumbs.length) {
-      setRouteTitle('');
-      return;
-    }
-
-    const breadcrumbText = [...breadcrumbs]
-      .reverse()
-      .map((breadcrumb) => {
-        if (typeof breadcrumb['aria-label'] === 'string') {
-          return breadcrumb['aria-label'];
-        }
-
-        if (typeof breadcrumb.text === 'string') {
-          return breadcrumb.text;
-        }
-
-        return null;
-      })
-      .filter(Boolean) as string[];
-
-    breadcrumbText.push(branding);
-
-    const joinedBreadcrumbs = breadcrumbText.join(SEPARATOR);
-
-    if (routeTitle !== joinedBreadcrumbs) {
-      setRouteTitle(joinedBreadcrumbs);
-      setShouldHandleTab(true);
-    }
-  }, [breadcrumbs, branding, routeTitle]);
+  const onInteractionRef = useRef(onInteraction);
+  onInteractionRef.current = onInteraction;
 
   useEffect(() => {
     const events: Array<keyof WindowEventMap> = ['keydown', 'mousedown'];
 
     const handleTabFn: EventListener = (e) => {
       if (shouldHandleTab && e instanceof KeyboardEvent && e.key === keys.TAB) {
-        // Only intercept Tab if the user is not already focused within the main content area
         const activeElement = document.activeElement;
         const mainContent = document.querySelector(MAIN_CONTENT_SELECTORS.join(','));
         const openFlyout = document.querySelector(FLYOUT_SELECTOR);
@@ -74,7 +47,7 @@ export const HeaderPageAnnouncer: FC<{
           e.preventDefault?.();
         }
       }
-      setShouldHandleTab(false);
+      onInteractionRef.current();
     };
 
     const removeListeners = () =>
@@ -113,5 +86,108 @@ export const HeaderPageAnnouncer: FC<{
         })}
       </EuiSkipLink>
     </>
+  );
+};
+
+export const HeaderPageAnnouncer: FC<{
+  breadcrumbs: ChromeBreadcrumb[];
+}> = ({ breadcrumbs }) => {
+  const [routeTitle, setRouteTitle] = useState('');
+  const branding = useCustomBranding()?.pageTitle || DEFAULT_BRAND;
+  const [shouldHandleTab, setShouldHandleTab] = useState(false);
+
+  useEffect(() => {
+    if (!breadcrumbs.length) {
+      setRouteTitle('');
+      return;
+    }
+
+    const breadcrumbText = [...breadcrumbs]
+      .reverse()
+      .map((breadcrumb) => {
+        if (typeof breadcrumb['aria-label'] === 'string') {
+          return breadcrumb['aria-label'];
+        }
+
+        if (typeof breadcrumb.text === 'string') {
+          return breadcrumb.text;
+        }
+
+        return null;
+      })
+      .filter(Boolean) as string[];
+
+    breadcrumbText.push(branding);
+
+    const joinedBreadcrumbs = breadcrumbText.join(TITLE_SEPARATOR);
+
+    if (routeTitle !== joinedBreadcrumbs) {
+      setRouteTitle(joinedBreadcrumbs);
+      setShouldHandleTab(true);
+    }
+  }, [breadcrumbs, branding, routeTitle]);
+
+  return (
+    <PageAnnouncerView
+      routeTitle={routeTitle}
+      shouldHandleTab={shouldHandleTab}
+      onInteraction={() => setShouldHandleTab(false)}
+    />
+  );
+};
+
+export const ChromeNextPageAnnouncer: FC = () => {
+  const chrome = useChromeService();
+  const { application } = useChromeComponentsDeps();
+
+  const inline$ = useMemo(() => chrome.next.inlineAppHeader.get$(), [chrome]);
+  const registered$ = useMemo(() => chrome.next.appHeader.get$(), [chrome]);
+  const navigation$ = useMemo(() => chrome.project.getNavigation$(), [chrome]);
+
+  const inline = useObservable(inline$, undefined);
+  const registered = useObservable(registered$, undefined);
+  const navigation = useObservable(navigation$, undefined);
+  const docTitleParts = useObservable(chrome.componentDeps.docTitleParts$, []);
+  const location = useObservable(application.currentLocation$, '');
+
+  const announcement = resolveChromeNextAnnouncement({
+    inline,
+    registeredTitle: registered?.title,
+    docTitleParts,
+    activeNodes: navigation?.activeNodes,
+  });
+
+  const [routeTitle, setRouteTitle] = useState('');
+  const [shouldHandleTab, setShouldHandleTab] = useState(false);
+  const previousLocationRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    const locationChanged = previousLocationRef.current !== location;
+    previousLocationRef.current = location;
+
+    if (locationChanged) {
+      setRouteTitle('');
+      setShouldHandleTab(true);
+    }
+
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const frame = requestAnimationFrame(() => {
+      timeout = setTimeout(() => setRouteTitle(announcement), 0);
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      if (timeout !== undefined) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [announcement, location]);
+
+  return (
+    <PageAnnouncerView
+      routeTitle={routeTitle}
+      shouldHandleTab={shouldHandleTab}
+      onInteraction={() => setShouldHandleTab(false)}
+    />
   );
 };

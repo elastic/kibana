@@ -15,6 +15,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
+  AppHeaderTitle,
   ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
@@ -46,6 +47,7 @@ export interface InternalChromeStart extends ChromeStart {
     readonly basePath: IBasePath;
     readonly legacyActionMenu$: Observable<MountPoint | undefined>;
     readonly capabilities: Capabilities;
+    readonly docTitleParts$: Observable<readonly string[]>;
   };
 
   sideNav: ChromeStart['sideNav'] & {
@@ -152,6 +154,17 @@ export interface InternalChromeStart extends ChromeStart {
 }
 
 /** @internal */
+export interface InlineAppHeaderState {
+  title?: AppHeaderTitle;
+}
+
+/** @internal */
+export interface InlineAppHeaderRegistration {
+  update(title?: AppHeaderTitle): void;
+  unregister(): void;
+}
+
+/** @internal */
 export interface InternalChromeNext extends ChromeNext {
   aiButton: ChromeNext['aiButton'] & {
     get$(): Observable<GlobalHeaderAiButton[]>;
@@ -166,8 +179,8 @@ export interface InternalChromeNext extends ChromeNext {
     get$(): Observable<GlobalSearchConfig | undefined>;
   };
   inlineAppHeader: {
-    get$(): Observable<boolean>;
-    set(mounted: boolean): void;
+    get$(): Observable<InlineAppHeaderState | undefined>;
+    register(title?: AppHeaderTitle): InlineAppHeaderRegistration;
   };
   appHeader: ChromeNext['appHeader'] & {
     get$(): Observable<ChromeAppHeaderConfig | undefined>;

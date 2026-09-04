@@ -105,6 +105,27 @@ Do not register `{ back: false }` separately from another app-header config on t
 `set` replaces the whole config. Prefer combining fields on one registration, or use
 `SuppressChromeBackButton` when suppression is the only registration.
 
+## Page announcements
+
+Chrome Next announces the visible page title, not breadcrumbs. The live region speaks the
+page name only. Do not append Elastic or a custom brand suffix; `document.title` stays branded.
+
+Resolution order:
+
+1. The inline `AppHeader` title when that header owns the slot.
+2. The Chrome-owned `ChromeAppHeaderRegistration` title when no inline header is mounted.
+3. A descriptive value from the document-title stream.
+4. The deepest titled node in the first active project-navigation path.
+5. No announcement.
+
+`AppHeaderLoading` owns the inline slot without a title, so a hidden Chrome-owned registration is
+ignored while it is mounted. Document title and the deepest active navigation node are migration
+fallbacks. Manual and merged project breadcrumbs are not announcement inputs.
+
+Classic Chrome continues to announce its visible breadcrumb trail. Breadcrumb-derived back
+navigation is separate; see [Back navigation](#back-navigation) and
+[#283613](https://github.com/elastic/kibana/issues/283613).
+
 ## Discover tabs
 
 Discover uses `DiscoverAppHeader` from `@kbn/app-header/discover` to place its UnifiedTabs bar beside

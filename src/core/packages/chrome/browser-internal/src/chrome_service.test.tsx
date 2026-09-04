@@ -724,6 +724,65 @@ describe('start', () => {
   });
 });
 
+describe('componentDeps.docTitleParts$', () => {
+  it('exposes initial, changed, and reset title parts', async () => {
+    document.title = 'Kibana';
+    const { chrome, service } = await start();
+    const titles: Array<readonly string[]> = [];
+    const subscription = chrome.componentDeps.docTitleParts$.subscribe((parts) =>
+      titles.push(parts)
+    );
+
+    chrome.docTitle.change('Dashboard');
+    chrome.docTitle.reset();
+
+    expect(titles).toEqual([['Kibana'], ['Dashboard', 'Kibana'], ['Kibana']]);
+
+    subscription.unsubscribe();
+    service.stop();
+  });
+});
+
+describe('inline app header', () => {
+  it('clears inline state on app change and ignores the previous registration', async () => {
+    const startDeps = defaultStartDeps([new FakeApp('alpha')]);
+    const { chrome, service } = await start({ startDeps });
+    const values: Array<{ title?: unknown } | undefined> = [];
+    const subscription = chrome.next.inlineAppHeader
+      .get$()
+      .subscribe((value) => values.push(value));
+
+    const registration = chrome.next.inlineAppHeader.register('First');
+    startDeps.application.navigateToApp('alpha');
+    registration.update('Stale');
+    registration.unregister();
+
+    expect(values).toContainEqual({ title: 'First' });
+    expect(values).not.toContainEqual({ title: 'Stale' });
+    expect(values[values.length - 1]).toBeUndefined();
+
+    subscription.unsubscribe();
+    service.stop();
+  });
+
+  it('does not let a stale registration update or clear a newer one', async () => {
+    const { chrome, service } = await start();
+    const first = chrome.next.inlineAppHeader.register('First');
+    const second = chrome.next.inlineAppHeader.register('Second');
+
+    first.update('Stale');
+    first.unregister();
+
+    await expect(firstValueFrom(chrome.next.inlineAppHeader.get$())).resolves.toEqual({
+      title: 'Second',
+    });
+
+    second.unregister();
+    await expect(firstValueFrom(chrome.next.inlineAppHeader.get$())).resolves.toBeUndefined();
+    service.stop();
+  });
+});
+
 describe('stop', () => {
   it('stops sub-services without relying on observable completion', async () => {
     const navLinksStopSpy = jest.spyOn(NavLinksService.prototype, 'stop');
