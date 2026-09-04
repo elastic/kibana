@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useMemo } from 'react';
+import React, { lazy, Suspense } from 'react';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import ServicesWrapper from './services_wrapper';
 import type { ServicesWrapperProps } from './services_wrapper';
@@ -23,23 +23,13 @@ export const getLazyOsqueryAction =
   // eslint-disable-next-line react/display-name
   (props: OsqueryActionProps & { ecsData?: Ecs }) => {
     const { ecsData, ...restProps } = props;
-    const alertId = ecsData?._id;
-
-    // `alertIds` is what makes the server load the alert document and substitute
-    // `{{parameter}}` itself. Without it the request carries no `alert_ids`, the server has
-    // no alert context, and the literal template would reach the agent.
-    const defaultValues = useMemo(
-      () =>
-        alertId ? { ...restProps.defaultValues, alertIds: [alertId] } : restProps.defaultValues,
-      [alertId, restProps.defaultValues]
-    );
 
     return (
       <Suspense fallback={null}>
         <ServicesWrapper services={services}>
-          {ecsData && alertId ? (
+          {ecsData?._id ? (
             <AlertAttachmentContext.Provider value={ecsData}>
-              <OsqueryAction {...restProps} defaultValues={defaultValues} />
+              <OsqueryAction {...restProps} />
             </AlertAttachmentContext.Provider>
           ) : (
             <OsqueryAction {...restProps} />

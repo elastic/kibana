@@ -444,28 +444,6 @@ describe('isOsqueryResponseActionAuthorized', () => {
       ).resolves.toBe(false);
     });
 
-    it('should authorize the unsubstituted template, which the UI now sends', async () => {
-      // The client shows the substituted SQL but posts the template plus `alert_ids`, so the
-      // server owns substitution. That makes this the exact-match fast path.
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        { [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" } }
-      );
-
-      await expect(
-        isOsqueryResponseActionAuthorized(
-          coreStart,
-          request,
-          {
-            saved_query_id: SAVED_QUERY_ID,
-            query: "select * from os_version where name='{{host.os.name}}';",
-          },
-          undefined,
-          UBUNTU_ALERT
-        )
-      ).resolves.toBe(true);
-    });
-
     it('should authorize a client-substituted query when it matches server-side substitution', async () => {
       const coreStart = createMockCoreStart(
         { writeLiveQueries: false, runSavedQueries: true },

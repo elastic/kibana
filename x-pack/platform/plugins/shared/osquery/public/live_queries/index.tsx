@@ -90,10 +90,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       ...(initialAgentSelection ? { agentSelection: initialAgentSelection } : {}),
       alertIds,
       query: initialQuery,
-      // The editor shows the substituted SQL so the analyst sees concrete values, but the
-      // request carries the original template. Together with `alertIds` the server substitutes
-      // from the alert document it authorizes against, so one side owns substitution.
-      submittedQuery: query,
       savedQueryId,
       ecs_mapping,
       timeout,
@@ -101,16 +97,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
     };
 
     return !isEmpty(pickBy(initialValue, (value) => !isEmpty(value))) ? initialValue : undefined;
-  }, [
-    alertIds,
-    ecs_mapping,
-    initialAgentSelection,
-    initialQuery,
-    packId,
-    query,
-    savedQueryId,
-    timeout,
-  ]);
+  }, [alertIds, ecs_mapping, initialAgentSelection, initialQuery, packId, savedQueryId, timeout]);
 
   return (
     <LiveQueryForm
