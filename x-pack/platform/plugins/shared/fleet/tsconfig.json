@@ -17,6 +17,7 @@
     "../../../../../typings/**/*",
     "test/scout/**/*",
     "test/scout_automatic_import/**/*",
+    "test/scout_fi_agentless/**/*",
     "test/scout_iac_provisioner/**/*"
   ],
   "kbn_references": [

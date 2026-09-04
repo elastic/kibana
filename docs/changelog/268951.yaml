@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/268951
+issues:
+- https://github.com/elastic/kibana/issues/267607
+type: breaking-change
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Change Dashboards API search endpoint to use a new response schema with page size limit

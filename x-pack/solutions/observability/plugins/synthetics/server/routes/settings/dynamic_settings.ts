@@ -25,6 +25,11 @@ import {
   PRIVATE_LOCATIONS_SYNC_TASK_ID,
   runSynPrivateLocationMonitorsTaskSoon,
 } from '../../tasks/sync_private_locations_monitors_task';
+import { runRebalanceShardsTaskSoon } from '../../tasks/rebalance_private_location_shards_task';
+import {
+  getRebalancePrivateLocationShardsEnabled,
+  setRebalancePrivateLocationShardsEnabled,
+} from '../../tasks/rebalance_shards_enabled';
 
 const parseIntervalMinutes = (interval: string): number =>
   parseInt(interval, 10) || MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
@@ -51,7 +56,15 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       // not yet created
     }
 
-    return { ...fromSettingsAttribute(dynamicSettingsAttributes), privateLocationsSyncInterval };
+    const rebalancePrivateLocationShardsEnabled = await getRebalancePrivateLocationShardsEnabled(
+      server.pluginsStart.taskManager
+    );
+
+    return {
+      ...fromSettingsAttribute(dynamicSettingsAttributes),
+      privateLocationsSyncInterval,
+      rebalancePrivateLocationShardsEnabled,
+    };
   },
 });
 
@@ -65,11 +78,17 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   },
   writeAccess: true,
   handler: async ({ savedObjectsClient, request, response, server }): Promise<DynamicSettings> => {
-    const { privateLocationsSyncInterval, ...otherSettings } = request.body;
+    const {
+      privateLocationsSyncInterval,
+      rebalancePrivateLocationShardsEnabled,
+      ...otherSettings
+    } = request.body;
     const prevSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
+    const { rebalancePrivateLocationShardsEnabled: _ignoredRebalance, ...prevWithoutRebalance } =
+      prevSettings;
 
     const attr = await setSyntheticsDynamicSettings(savedObjectsClient, {
-      ...prevSettings,
+      ...prevWithoutRebalance,
       ...otherSettings,
     } as DynamicSettingsAttributes);
 
@@ -77,7 +96,25 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       await server.pluginsStart.taskManager.bulkUpdateSchedules([PRIVATE_LOCATIONS_SYNC_TASK_ID], {
         interval: `${privateLocationsSyncInterval}m`,
       });
-      void runSynPrivateLocationMonitorsTaskSoon({ server });
+      // Fire-and-forget: the new interval is already persisted, so a failure to
+      // kick the task early only means it starts on its next cycle. Swallow it
+      // here (it is already logged) rather than failing the settings write.
+      void runSynPrivateLocationMonitorsTaskSoon({ server }).catch(() => {});
+    }
+
+    let persistedRebalance = true;
+    if (rebalancePrivateLocationShardsEnabled != null) {
+      persistedRebalance = await setRebalancePrivateLocationShardsEnabled(
+        server.pluginsStart.taskManager,
+        rebalancePrivateLocationShardsEnabled
+      );
+      // Drain leftover pins (when off) or resume assignment (when on) on the
+      // next task cycle — don't block this request on Fleet rewrites.
+      void runRebalanceShardsTaskSoon({ server });
+    } else {
+      persistedRebalance = await getRebalancePrivateLocationShardsEnabled(
+        server.pluginsStart.taskManager
+      );
     }
 
     let persistedInterval = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
@@ -105,9 +142,24 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       }) as never;
     }
 
+    if (
+      rebalancePrivateLocationShardsEnabled != null &&
+      persistedRebalance !== rebalancePrivateLocationShardsEnabled
+    ) {
+      return response.conflict({
+        body: {
+          message: i18n.translate('xpack.synthetics.settings.rebalanceShards.taskRunning', {
+            defaultMessage:
+              'The rebalance task could not be updated. Please try saving this setting again in a moment.',
+          }),
+        },
+      }) as never;
+    }
+
     return {
       ...fromSettingsAttribute(attr as DynamicSettingsAttributes),
       privateLocationsSyncInterval: persistedInterval,
+      rebalancePrivateLocationShardsEnabled: persistedRebalance,
     };
   },
 });
@@ -122,7 +174,6 @@ export const fromSettingsAttribute = (
     defaultEmail: attr.defaultEmail,
     defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
     defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
-    rebalancePrivateLocationShardsEnabled: attr.rebalancePrivateLocationShardsEnabled ?? true,
   };
 };
 

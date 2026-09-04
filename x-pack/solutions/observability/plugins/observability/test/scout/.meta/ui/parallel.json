@@ -1,5 +1,5 @@
 {
-  "sha1": "1fdc51b8ab09fba8b5b212047a092927fd40a598",
+  "sha1": "a553c51928c3cf9555be8f33e9e8f2bd722ec7ec",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -433,8 +433,8 @@
       }
     },
     {
-      "id": "19ff7375d931f4e-920679a76f69971",
-      "title": "Custom threshold preview chart should render the empty chart only once at bootstrap",
+      "id": "19ff7375d931f4e-07ca570af3e7fd8",
+      "title": "Custom threshold preview chart should show an error message when the equation is invalid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -449,22 +449,6 @@
       }
     },
     {
-      "id": "19ff7375d931f4e-07ca570af3e7fd8",
-      "title": "Custom threshold preview chart should show an error message when the equation is invalid",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 23,
-        "column": 75
-      }
-    },
-    {
       "id": "19ff7375d931f4e-7d7813aed627c3b",
       "title": "Custom threshold preview chart should render chart correctly after fixing an invalid equation",
       "expectedStatus": "passed",
@@ -476,8 +460,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 35,
-        "column": 13
+        "line": 32,
+        "column": 26
       }
     },
     {
