@@ -18,6 +18,7 @@ import type {
   ChromeBreadcrumbsBadge,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  ChromeHelpMenuLink,
   GlobalSearchConfig,
   ChromeNavLink,
   GlobalHeaderAiButton,
@@ -80,6 +81,7 @@ export interface ChromeState {
     extension: State<ChromeHelpExtension | undefined>;
     supportUrl: State<string>;
     globalMenuLinks: ArrayState<ChromeGlobalHelpExtensionMenuLink>;
+    menuLinks: State<ChromeHelpMenuLink[]>;
   };
 
   /** Feedback handler registered by the feedback plugin */
@@ -136,6 +138,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
   const helpSupportUrl = createState<string>(docLinks.links.kibana.askElastic);
   const globalHelpMenuLinks = createArrayState<ChromeGlobalHelpExtensionMenuLink>();
+  const helpMenuLinks = createState<ChromeHelpMenuLink[]>([]);
 
   // Feedback
   const feedbackHandler = createState<(() => void) | undefined>(undefined);
@@ -171,6 +174,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       extension: helpExtension,
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
+      menuLinks: helpMenuLinks,
     },
     contextSwitcher,
     projectPicker,
