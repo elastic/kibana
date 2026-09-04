@@ -144,6 +144,19 @@ export async function findFleetPoliciesUsingSecrets(opts: {
       }
     };
 
+    // Partial shard failures return HTTP 200 with no exception — the catch below won't fire.
+    // A failed shard means some compiled docs were not examined; treat it as checkFailed so
+    // we never produce a false "no references" verdict that deletes a live secret.
+    const shards = res._shards as
+      | { total?: number; successful?: number; failed?: number }
+      | undefined;
+    if ((shards?.failed ?? 0) > 0 || shards?.total !== shards?.successful) {
+      logger.warn(
+        `[findFleetPoliciesUsingSecrets] Partial shard failure querying .fleet-policies (total=${shards?.total}, successful=${shards?.successful}, failed=${shards?.failed}) — skipping deletion to avoid removing a referenced secret.`
+      );
+      return { referencedIds: new Set(), checkFailed: true };
+    }
+
     collectFromBuckets(res.aggregations?.by_policy_base_id as ByPolicyAgg | undefined);
     collectFromBuckets(res.aggregations?.by_policy_id as ByPolicyAgg | undefined);
 

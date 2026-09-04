@@ -162,6 +162,22 @@ describe('findFleetPoliciesUsingSecrets', () => {
     expect(result.referencedIds.has('secret-not-referenced')).toBe(false);
   });
 
+  it('returns checkFailed: true on partial shard failure (HTTP 200 with _shards.failed > 0)', async () => {
+    esClientMock.search.mockResolvedValueOnce({
+      ...makeAggResponse([{ policyId: 'policy-1', secretRefs: [{ id: 'secret-1' }] }]),
+      _shards: { total: 3, successful: 2, failed: 1 },
+    } as any);
+
+    const result = await findFleetPoliciesUsingSecrets({
+      esClient: esClientMock,
+      ids: ['secret-1'],
+      agentPolicyIds: ['policy-1'],
+    });
+
+    expect(result).toEqual({ referencedIds: new Set(), checkFailed: true });
+    expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('Partial shard failure'));
+  });
+
   it('returns checkFailed: true when the ES search throws', async () => {
     esClientMock.search.mockRejectedValueOnce(new Error('ES unavailable'));
 
