@@ -88,10 +88,16 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     if (match) setSelected({ id: match.id, name: match.name });
   }, [cloudConnectors, selected]);
 
+  // A selection made in this component always carries its name, so an id without a name can only
+  // be the initialConnectorId seed whose name is still being resolved above. Hold the emission
+  // until it lands, otherwise consumers persist an id with no name and render an empty summary.
+  const isAwaitingInitialName = !!selected?.id && !selected.name && isLoadingConnectors;
+
   useEffect(() => {
     onReadyChange?.(!!selected?.id);
+    if (isAwaitingInitialName) return;
     onConnectorIdChange?.(selected?.id, selected?.name);
-  }, [selected, onReadyChange, onConnectorIdChange]);
+  }, [selected, isAwaitingInitialName, onReadyChange, onConnectorIdChange]);
 
   const cloudFormationUrl = cloud
     ? getCloudConnectorRemoteRoleTemplate({
