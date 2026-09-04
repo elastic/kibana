@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SaveResult } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
 import { AccessModeContainer } from '@kbn/content-management-access-control-public';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
@@ -42,7 +41,7 @@ interface DashboardSaveModalProps {
     newTimeRestore,
     newProjectRoutingRestore,
     newAccessMode,
-  }: DashboardSaveOptions) => Promise<SaveResult>;
+  }: DashboardSaveOptions) => Promise<void>;
   onClose: () => void;
   lastSavedTitle: string;
   title: string;
@@ -62,7 +61,7 @@ type SaveDashboardHandler = (args: {
   newTitle: string;
   newDescription: string;
   newCopyOnSave: boolean;
-}) => ReturnType<DashboardSaveModalProps['onSave']>;
+}) => void;
 
 export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   customModalTitle,

@@ -23,6 +23,7 @@ import { getLastSavedState } from '../../common/default_dashboard_state';
 import { initializeLayoutManager } from './layout_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { saveDashboard } from './save_modal/save_dashboard';
+import type { SaveDashboardReturn } from './save_modal/types';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeTimesliceManager } from './timeslice_manager';
@@ -237,7 +238,7 @@ export function getDashboardApi({
       attributes: getState(),
     }),
     setState,
-    runInteractiveSave: async () => {
+    runInteractiveSave: () => {
       trackOverlayApi.clearOverlays();
       const previousDashboardId = savedObjectId$.value;
 
@@ -249,7 +250,12 @@ export function getDashboardApi({
         title,
       } = settingsManager.api.getSettings();
 
-      const saveResult = await openSaveModal({
+      let resolve: ((saveResult: SaveDashboardReturn | undefined) => void) | undefined;
+      const promise = new Promise<SaveDashboardReturn | undefined>(
+        (_resolve) => (resolve = _resolve)
+      );
+
+      openSaveModal({
         description,
         isManaged,
         lastSavedId: savedObjectId$.value,
@@ -257,36 +263,38 @@ export function getDashboardApi({
         setTimeRestore: (newTimeRestore: boolean) =>
           settingsManager.api.setSettings({ time_restore: newTimeRestore }),
         setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
-          settingsManager.api.setSettings({ project_routing_restore: newProjectRoutingRestore }),
+          settingsManager.api.setSettings({
+            project_routing_restore: newProjectRoutingRestore,
+          }),
         tags,
         timeRestore,
         projectRoutingRestore,
         title,
         viewMode: viewModeManager.api.viewMode$.value,
         accessControl: accessControlManager.api.accessControl$.value,
-        parentApi: trackOverlayApi,
+        onSave: (saveResult) => {
+          if (saveResult && !saveResult.error) {
+            const settings = settingsManager.api.getSettings();
+            settingsManager.api.setSettings({
+              ...settings,
+              hide_panel_titles: settings.hide_panel_titles ?? false,
+              description: saveResult.savedState.description,
+              tags: saveResult.savedState.tags,
+              title: saveResult.savedState.title,
+            });
+            savedObjectId$.next(saveResult.id);
+            onSave$.next({
+              previousDashboardId,
+              dashboardId: saveResult.id,
+              dashboardState: getState(),
+            });
+          }
+          resolve?.(saveResult);
+        },
+        onClose: () => resolve?.(undefined),
       });
 
-      if (!saveResult || saveResult.error) {
-        return;
-      }
-
-      const settings = settingsManager.api.getSettings();
-      settingsManager.api.setSettings({
-        ...settings,
-        hide_panel_titles: settings.hide_panel_titles ?? false,
-        description: saveResult.savedState.description,
-        tags: saveResult.savedState.tags,
-        title: saveResult.savedState.title,
-      });
-      savedObjectId$.next(saveResult.id);
-      onSave$.next({
-        previousDashboardId,
-        dashboardId: saveResult.id,
-        dashboardState: getState(),
-      });
-
-      return saveResult;
+      return promise;
     },
     runQuickSave: async () => {
       if (isManaged) return;

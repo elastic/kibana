@@ -45,16 +45,19 @@ export const saveDashboard = async ({
     }
     return { id: newId };
   } catch (error) {
-    coreServices.notifications.toasts.addDanger({
-      title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-        defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
-        values: {
-          title: dashboardState.title,
-          errorMessage: error.message,
-        },
-      }),
-      'data-test-subj': 'saveDashboardFailure',
-    });
+    coreServices.notifications.toasts.addDanger(
+      generateDashboardNotSavedToast(dashboardState.title, error.message)
+    );
     return { error };
   }
 };
+
+export function generateDashboardNotSavedToast(title: string, errorMessage: string) {
+  return {
+    title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
+      defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
+      values: { title, errorMessage },
+    }),
+    'data-test-subj': 'saveDashboardFailure',
+  };
+}
