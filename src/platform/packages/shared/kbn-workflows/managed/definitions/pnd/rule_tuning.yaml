@@ -239,11 +239,6 @@ steps:
           patch:
             id: "{{ foreach.item.0 }}"
             query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
-            # Pinning type to "query" here to avoid any future added type-specific fields (like `index`) 
-            # from being silently dropped due to a bug in the Patch Rule API.
-            # Bug: https://github.com/elastic/kibana/issues/287579.
-            # Explicit: `type: query` below can be removed once the Patch Rule API bug is fixed.
-            type: query
 
       # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
       # harvest's KEEP projects: the alert_ids multivalue.
