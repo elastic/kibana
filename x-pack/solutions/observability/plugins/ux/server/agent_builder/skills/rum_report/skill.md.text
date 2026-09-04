@@ -1,0 +1,5 @@
+## Reporting / week-over-week
+
+1. `observability.ux.get_report` with `templateId=scorecard` for a full brief. Use `compare=previous` for an equal-length prior window. Other templates: pages, errors, frustration, funnel, clients, users.
+2. Do not use this for a quick KPI lookup — that is `observability.ux.get_overview`.
+3. Write stakeholder language: headline, 3–6 bullets, what moved vs previous, then next steps. Numbers must come from the tool.

@@ -277,6 +277,7 @@ export default function ({ getService }: FtrProviderContext) {
         'task_manager:invalidate_api_keys',
         'task_manager:mark_removed_tasks_as_unrecognized',
         'unusedUrlsCleanupTask',
+        'ux:rum-report-email',
         'workflow:resume',
         'workflow:run',
         'workflow:scheduled',

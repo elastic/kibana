@@ -2024,6 +2024,15 @@
       "enabled": true
     },
     {
+      "groupName": "rrweb",
+      "matchDepNames": ["rrweb"],
+      "reviewers": ["team:actionable-obs-team"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:actionable-obs"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "react-hook-form",
       "matchDepNames": ["react-hook-form"],
       "reviewers": ["team:actionable-obs-team"],

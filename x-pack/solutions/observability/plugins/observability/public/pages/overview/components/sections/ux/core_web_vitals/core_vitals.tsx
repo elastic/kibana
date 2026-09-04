@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import {
   CLS_HELP_LABEL,
@@ -15,6 +15,9 @@ import {
   INP_LABEL,
   LCP_HELP_LABEL,
   LCP_LABEL,
+  LEGEND_GOOD_LABEL,
+  LEGEND_NEEDS_IMPROVEMENT_LABEL,
+  LEGEND_POOR_LABEL,
 } from './translations';
 import { CoreVitalItem } from './core_vital_item';
 import { WebCoreVitalsTitle } from './web_core_vitals_title';
@@ -27,6 +30,7 @@ export interface CoreVitalProps {
   serviceName?: string;
   totalPageViews?: number;
   displayTrafficMetric?: boolean;
+  layout?: 'row' | 'column';
 }
 
 function formatToSec(value?: number | string, fromUnit = 'MicroSec'): string {
@@ -59,56 +63,86 @@ export default function CoreVitals({
   serviceName,
   totalPageViews,
   displayTrafficMetric = false,
+  layout = 'row',
 }: CoreVitalProps) {
   const { lcp, lcpRanks, inp, inpRanks, cls, clsRanks, coreVitalPages } = data || {};
+  const isColumn = layout === 'column';
 
   return (
-    <>
-      <WebCoreVitalsTitle
-        loading={loading}
-        coreVitalPages={coreVitalPages}
-        totalPageViews={totalPageViews}
-        displayTrafficMetric={displayTrafficMetric}
-      />
-      <EuiSpacer size="s" />
-      {displayServiceName && <ServiceName name={serviceName!} />}
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="xl" justifyContent={'spaceBetween'} wrap>
-        <EuiFlexItem style={{ flexBasis: 380 }}>
-          <CoreVitalItem
-            title={LCP_LABEL}
-            value={formatToMilliseconds(lcp)}
-            ranks={lcpRanks}
-            loading={loading}
-            thresholds={CoreVitalsThresholds.LCP}
-            helpLabel={LCP_HELP_LABEL}
-            dataTestSubj={'lcp-core-vital'}
-          />
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <WebCoreVitalsTitle
+          loading={loading}
+          coreVitalPages={coreVitalPages}
+          totalPageViews={totalPageViews}
+          displayTrafficMetric={displayTrafficMetric}
+          hideHeading={isColumn}
+        />
+      </EuiFlexItem>
+      {displayServiceName && (
+        <EuiFlexItem grow={false}>
+          <ServiceName name={serviceName!} />
         </EuiFlexItem>
-        <EuiFlexItem style={{ flexBasis: 380 }}>
-          <CoreVitalItem
-            title={INP_LABEL}
-            value={formatToMilliseconds(inp)}
-            ranks={inpRanks}
-            loading={loading}
-            thresholds={CoreVitalsThresholds.INP}
-            helpLabel={INP_HELP_LABEL}
-            dataTestSubj={'inp-core-vital'}
-          />
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize={isColumn ? 'm' : 'l'} direction={layout}>
+          <EuiFlexItem grow={!isColumn}>
+            <CoreVitalItem
+              title={LCP_LABEL}
+              value={formatToMilliseconds(lcp)}
+              ranks={lcpRanks}
+              loading={loading}
+              thresholds={CoreVitalsThresholds.LCP}
+              helpLabel={LCP_HELP_LABEL}
+              dataTestSubj={'lcp-core-vital'}
+              showLegend={!isColumn}
+              compact={isColumn}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={!isColumn}>
+            <CoreVitalItem
+              title={INP_LABEL}
+              value={formatToMilliseconds(inp)}
+              ranks={inpRanks}
+              loading={loading}
+              thresholds={CoreVitalsThresholds.INP}
+              helpLabel={INP_HELP_LABEL}
+              dataTestSubj={'inp-core-vital'}
+              showLegend={!isColumn}
+              compact={isColumn}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={!isColumn}>
+            <CoreVitalItem
+              title={CLS_LABEL}
+              value={cls?.toFixed(3) ?? null}
+              ranks={clsRanks}
+              loading={loading}
+              thresholds={CoreVitalsThresholds.CLS}
+              isCls={true}
+              helpLabel={CLS_HELP_LABEL}
+              dataTestSubj={'cls-core-vital'}
+              showLegend={!isColumn}
+              compact={isColumn}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      {isColumn && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color="success">{LEGEND_GOOD_LABEL}</EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color="warning">{LEGEND_NEEDS_IMPROVEMENT_LABEL}</EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color="danger">{LEGEND_POOR_LABEL}</EuiHealth>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem style={{ flexBasis: 380 }}>
-          <CoreVitalItem
-            title={CLS_LABEL}
-            value={cls?.toFixed(3) ?? null}
-            ranks={clsRanks}
-            loading={loading}
-            thresholds={CoreVitalsThresholds.CLS}
-            isCls={true}
-            helpLabel={CLS_HELP_LABEL}
-            dataTestSubj={'cls-core-vital'}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+      )}
+    </EuiFlexGroup>
   );
 }

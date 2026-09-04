@@ -55,23 +55,46 @@ export function useJsErrorsQuery(pagination: { pageIndex: number; pageSize: numb
   const data = useMemo(() => {
     if (!esQueryResponse) return {};
 
-    const { totalErrorGroups, totalErrorPages, errors } = esQueryResponse?.aggregations ?? {};
+    const { totalErrorGroups, totalErrorPages, errors, otelErrors } =
+      esQueryResponse?.aggregations ?? {};
+
+    const classicItems =
+      errors?.buckets.map(({ sample, key, impactedPages }) => {
+        const source = sample.hits.hits[0]?._source as
+          | {
+              error?: { exception?: Array<{ message?: string }> };
+              attributes?: { exception?: { message?: string } };
+            }
+          | undefined;
+        return {
+          count: impactedPages?.pageCount?.value ?? sample.hits.hits.length,
+          errorGroupId: key,
+          errorMessage:
+            source?.error?.exception?.[0]?.message ??
+            source?.attributes?.exception?.message ??
+            String(key),
+        };
+      }) ?? [];
+
+    const otelItems =
+      otelErrors?.buckets.map(({ sample, key }) => {
+        const source = sample.hits.hits[0]?._source as
+          | { attributes?: { exception?: { message?: string } } }
+          | undefined;
+        return {
+          count: sample.hits.total?.value ?? sample.hits.hits.length,
+          errorGroupId: String(key),
+          errorMessage: source?.attributes?.exception?.message ?? String(key),
+        };
+      }) ?? [];
+
+    const items = classicItems.length > 0 ? classicItems : otelItems;
 
     return {
       totalErrorPages: totalErrorPages?.value ?? 0,
       totalErrors: esQueryResponse.hits.total.value ?? 0,
-      totalErrorGroups: totalErrorGroups?.value ?? 0,
-      items: errors?.buckets.map(({ sample, key, impactedPages }) => {
-        return {
-          count: impactedPages.pageCount.value,
-          errorGroupId: key,
-          errorMessage: (
-            sample.hits.hits[0]._source as {
-              error: { exception: Array<{ message: string }> };
-            }
-          ).error.exception?.[0].message,
-        };
-      }),
+      totalErrorGroups: (totalErrorGroups?.value ?? 0) || otelItems.length,
+      items,
     };
   }, [esQueryResponse]);
 

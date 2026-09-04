@@ -9,7 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { Plugin } = await import('./plugin');
-  return new Plugin();
+  return new Plugin(initializerContext);
 };
 
 export { config } from '../common/config';

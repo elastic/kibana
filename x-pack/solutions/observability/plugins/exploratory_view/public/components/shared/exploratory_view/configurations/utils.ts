@@ -81,6 +81,26 @@ export function buildExistsFilter(field: string, dataView?: DataView) {
   return [];
 }
 
+export const RUM_PAGE_LOAD_KQL =
+  '(transaction.type: page-load and processor.event: transaction) or name: documentLoad';
+
+export const RUM_PAGE_LOAD_OR_EXIT_KQL =
+  '((transaction.type: page-load or transaction.type: page-exit) and processor.event: transaction) or name: documentLoad or event_name: browser.web_vital';
+
+export function buildKueryFilter(kql: string, dataView?: DataView): PersistableFilter[] {
+  if (dataView?.id) {
+    return [
+      buildQueryFilter({ query_string: { query: kql } }, dataView.id, '') as PersistableFilter,
+    ];
+  }
+  return [
+    {
+      meta: { alias: null, disabled: false, negate: false, type: 'custom', key: 'query' },
+      query: { query_string: { query: kql } },
+    } as PersistableFilter,
+  ];
+}
+
 type FiltersType = Array<PersistableFilter | ExistsFilter | PhraseFilter>;
 
 export function urlFilterToPersistedFilter({

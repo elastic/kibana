@@ -6,6 +6,7 @@
  */
 
 import { TRANSACTION_DURATION, TRANSACTION_URL } from '../../../common/elasticsearch_fieldnames';
+import { OTEL_TRANSACTION_DURATION_US, OTEL_URL_FULL } from '../../../common/otel_rum';
 import type { SetupUX } from '../../../typings/ui_filters';
 import { getRumPageLoadTransactionsProjection } from './projections';
 import { callDateMath } from './call_date_math';
@@ -28,6 +29,11 @@ export function urlSearchQuery(restFilters: any, uxQuery: any, searchValue: stri
           field: TRANSACTION_URL,
         },
       },
+      otelTotalUrls: {
+        cardinality: {
+          field: OTEL_URL_FULL,
+        },
+      },
       urls: {
         terms: {
           field: TRANSACTION_URL,
@@ -37,6 +43,20 @@ export function urlSearchQuery(restFilters: any, uxQuery: any, searchValue: stri
           medianPLD: {
             percentiles: {
               field: TRANSACTION_DURATION,
+              percents: [Number(uxQuery?.percentile)],
+            },
+          },
+        },
+      },
+      otelUrls: {
+        terms: {
+          field: OTEL_URL_FULL,
+          size: 10,
+        },
+        aggs: {
+          medianPLD: {
+            percentiles: {
+              field: OTEL_TRANSACTION_DURATION_US,
               percents: [Number(uxQuery?.percentile)],
             },
           },

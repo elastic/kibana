@@ -99365,6 +99365,7 @@ components:
                     synthetics_monitors: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_monitors'
                     synthetics_stats_overview: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                     time_slider_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
+                    ux_overview_panel: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ux_overview_panel'
                     vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
                   propertyName: type
                 oneOf:
@@ -99391,6 +99392,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_monitors'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ux_overview_panel'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-section'
           maxItems: 1000
@@ -101035,6 +101037,26 @@ components:
         - config
       title: Time slider control
       type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-ux_overview_panel:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_ux-overview-panel-embeddable'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - ux_overview_panel
+          type: string
+      required:
+        - type
+        - grid
+        - config
+      title: User Experience overview panel
+      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis:
       additionalProperties: false
       properties:
@@ -101390,6 +101412,7 @@ components:
                 synthetics_monitors: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_monitors'
                 synthetics_stats_overview: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                 time_slider_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
+                ux_overview_panel: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ux_overview_panel'
                 vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               propertyName: type
             oneOf:
@@ -101416,6 +101439,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_monitors'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ux_overview_panel'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
           maxItems: 1000
           type: array
@@ -116939,6 +116963,107 @@ components:
         - packagePolicyIds
       title: upgrade_package_policies_request
       type: object
+    Kibana_HTTP_APIs_ux-overview-panel-embeddable:
+      additionalProperties: false
+      description: User Experience Overview panel embeddable
+      type: object
+      properties:
+        analytics_mode:
+          description: Analytics mode
+          maxLength: 1024
+          type: string
+        bot_ua:
+          description: Bot user-agent filter
+          maxLength: 1024
+          type: string
+        breakpoint:
+          description: Viewport breakpoint filter
+          maxLength: 1024
+          type: string
+        browser:
+          description: Browser filter
+          maxLength: 1024
+          type: string
+        connection:
+          description: Connection type filter
+          maxLength: 1024
+          type: string
+        description:
+          description: A short description of the panel.
+          type: string
+        device:
+          description: Device type filter
+          maxLength: 1024
+          type: string
+        frustration:
+          description: Frustration kind filter
+          maxLength: 1024
+          type: string
+        hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
+          type: boolean
+        hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
+          type: boolean
+        include_bots:
+          description: Include-bots flag
+          maxLength: 1024
+          type: string
+        kuery:
+          description: KQL from the Overview filter bar
+          maxLength: 4096
+          type: string
+        location:
+          description: Country ISO filter
+          maxLength: 1024
+          type: string
+        os:
+          description: OS filter
+          maxLength: 1024
+          type: string
+        page_url:
+          description: Page path filter
+          maxLength: 1024
+          type: string
+        panel:
+          description: Which User Experience widget this panel renders
+          enum:
+            - cover
+            - kpis
+            - vitals
+            - trends
+            - frustration
+            - browsers
+            - countries
+            - pages
+            - sessions
+            - funnels
+            - budgets
+            - alerts
+          type: string
+        range_from:
+          description: Start of the captured time range when the dashboard time picker is unavailable
+          maxLength: 128
+          type: string
+        range_to:
+          description: End of the captured time range when the dashboard time picker is unavailable
+          maxLength: 128
+          type: string
+        service_name:
+          description: Application name from the UX inventory
+          maxLength: 1024
+          type: string
+        title:
+          description: The panel title.
+          type: string
+        user:
+          description: Identified user filter
+          maxLength: 1024
+          type: string
+      required:
+        - panel
+        - range_from
+        - range_to
     Kibana_HTTP_APIs_valueDisplay:
       additionalProperties: false
       description: Configure the visibility and the format of the values rendered on each chart partition section

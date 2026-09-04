@@ -3,97 +3,200 @@
 exports[`core web vitals query fetches rum core vitals 1`] = `
 Object {
   "aggs": Object {
-    "cls": Object {
-      "percentiles": Object {
-        "field": "transaction.experience.cls",
-        "percents": Array [
-          50,
-        ],
+    "classic": Object {
+      "aggs": Object {
+        "cls": Object {
+          "percentiles": Object {
+            "field": "transaction.experience.cls",
+            "percents": Array [
+              50,
+            ],
+          },
+        },
+        "clsRanks": Object {
+          "percentile_ranks": Object {
+            "field": "transaction.experience.cls",
+            "keyed": false,
+            "values": Array [
+              0.1,
+              0.25,
+            ],
+          },
+        },
+        "coreVitalPages": Object {
+          "filter": Object {
+            "exists": Object {
+              "field": "transaction.experience",
+            },
+          },
+        },
+        "fcp": Object {
+          "percentiles": Object {
+            "field": "transaction.marks.agent.firstContentfulPaint",
+            "percents": Array [
+              50,
+            ],
+          },
+        },
+        "lcp": Object {
+          "percentiles": Object {
+            "field": "transaction.marks.agent.largestContentfulPaint",
+            "percents": Array [
+              50,
+            ],
+          },
+        },
+        "lcpRanks": Object {
+          "percentile_ranks": Object {
+            "field": "transaction.marks.agent.largestContentfulPaint",
+            "keyed": false,
+            "values": Array [
+              2500,
+              4000,
+            ],
+          },
+        },
+        "tbt": Object {
+          "percentiles": Object {
+            "field": "transaction.experience.tbt",
+            "percents": Array [
+              50,
+            ],
+          },
+        },
       },
-    },
-    "clsRanks": Object {
-      "percentile_ranks": Object {
-        "field": "transaction.experience.cls",
-        "keyed": false,
-        "values": Array [
-          0.1,
-          0.25,
-        ],
-      },
-    },
-    "coreVitalPages": Object {
       "filter": Object {
-        "exists": Object {
-          "field": "transaction.experience",
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "term": Object {
+                "processor.event": "transaction",
+              },
+            },
+            Object {
+              "term": Object {
+                "transaction.type": "page-load",
+              },
+            },
+          ],
         },
       },
     },
-    "fcp": Object {
-      "percentiles": Object {
-        "field": "transaction.marks.agent.firstContentfulPaint",
-        "percents": Array [
-          50,
-        ],
+    "otelVitals": Object {
+      "aggs": Object {
+        "byName": Object {
+          "aggs": Object {
+            "clsRanks": Object {
+              "percentile_ranks": Object {
+                "field": "attributes.browser.web_vital.value",
+                "keyed": false,
+                "values": Array [
+                  0.1,
+                  0.25,
+                ],
+              },
+            },
+            "lcpRanks": Object {
+              "percentile_ranks": Object {
+                "field": "attributes.browser.web_vital.value",
+                "keyed": false,
+                "values": Array [
+                  2500,
+                  4000,
+                ],
+              },
+            },
+            "value": Object {
+              "percentiles": Object {
+                "field": "attributes.browser.web_vital.value",
+                "percents": Array [
+                  50,
+                ],
+              },
+            },
+          },
+          "terms": Object {
+            "field": "attributes.browser.web_vital.name",
+            "size": 10,
+          },
+        },
       },
-    },
-    "lcp": Object {
-      "percentiles": Object {
-        "field": "transaction.marks.agent.largestContentfulPaint",
-        "percents": Array [
-          50,
-        ],
-      },
-    },
-    "lcpRanks": Object {
-      "percentile_ranks": Object {
-        "field": "transaction.marks.agent.largestContentfulPaint",
-        "keyed": false,
-        "values": Array [
-          2500,
-          4000,
-        ],
-      },
-    },
-    "tbt": Object {
-      "percentiles": Object {
-        "field": "transaction.experience.tbt",
-        "percents": Array [
-          50,
-        ],
+      "filter": Object {
+        "term": Object {
+          "event_name": "browser.web_vital",
+        },
       },
     },
   },
   "query": Object {
     "bool": Object {
-      "filter": Array [
+      "minimum_should_match": 1,
+      "must_not": Array [],
+      "should": Array [
         Object {
-          "range": Object {
-            "@timestamp": Object {
-              "format": "epoch_millis",
-              "gte": 0,
-              "lte": 5000,
-            },
-          },
-        },
-        Object {
-          "term": Object {
-            "transaction.type": "page-load",
-          },
-        },
-        Object {
-          "terms": Object {
-            "processor.event": Array [
-              "transaction",
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "epoch_millis",
+                    "gte": 0,
+                    "lte": 5000,
+                  },
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "term": Object {
+                              "transaction.type": "page-load",
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "processor.event": "transaction",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "name": "documentLoad",
+                      },
+                    },
+                  ],
+                },
+              },
             ],
           },
         },
         Object {
-          "exists": Object {
-            "field": "transaction.marks.navigationTiming.fetchStart",
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "epoch_millis",
+                    "gte": 0,
+                    "lte": 5000,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "event_name": "browser.web_vital",
+                },
+              },
+            ],
           },
         },
       ],
-      "must_not": Array [],
     },
   },
   "size": 0,

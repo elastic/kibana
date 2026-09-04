@@ -27,7 +27,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
@@ -44,8 +44,14 @@ import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { SLOPublicStart } from '@kbn/slo-plugin/public';
+import type { ApmSharedPluginStart } from '@kbn/apm-shared/public';
+import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
+import { UX_APP_TITLE } from './application/ux_breadcrumbs';
+import { registerUxEmbeddables } from './embeddable/register_embeddables';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -59,6 +65,7 @@ export interface ApmPluginSetupDeps {
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -75,6 +82,10 @@ export interface ApmPluginStartDeps {
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   spaces?: SpacesPluginStart;
+  inference: InferencePublicStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  slo?: SLOPublicStart;
+  apmShared: ApmSharedPluginStart;
 }
 
 async function getDataStartPlugin(core: CoreSetup) {
@@ -85,8 +96,9 @@ async function getDataStartPlugin(core: CoreSetup) {
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
+  public setup(core: CoreSetup<ApmPluginStartDeps>, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
+    registerUxEmbeddables(core, plugins);
     if (plugins.observability) {
       const getUxDataHelper = async () => {
         const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
@@ -149,17 +161,25 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
             return [
               // UX navigation
               {
-                label: 'User Experience',
+                label: UX_APP_TITLE,
                 sortKey: 600,
                 entries: [
                   {
-                    label: i18n.translate('xpack.ux.overview.heading', {
-                      defaultMessage: 'Dashboard',
+                    label: i18n.translate('xpack.ux.nav.applicationsLabel', {
+                      defaultMessage: 'Applications',
                     }),
                     app: OBLT_UX_APP_ID,
                     path: '/',
-                    matchFullPath: true,
+                    matchFullPath: false,
                     ignoreTrailingSlash: true,
+                  },
+                  {
+                    label: i18n.translate('xpack.ux.nav.errorsLabel', {
+                      defaultMessage: 'Errors',
+                    }),
+                    app: OBLT_UX_APP_ID,
+                    path: '/errors',
+                    matchFullPath: true,
                   },
                 ],
               },
@@ -175,7 +195,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
 
     core.application.register({
       id: OBLT_UX_APP_ID,
-      title: 'User Experience',
+      title: UX_APP_TITLE,
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -215,5 +235,13 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       },
     });
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
+  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
+    // Session capture is toggled at runtime via a saved object (see Settings →
+    // Capture); the bootstrap reads it and no-ops when disabled.
+    import('./session_replay/start_session_replay')
+      .then(({ startSessionReplay }) => startSessionReplay(core))
+      .catch(() => {
+        // best-effort; replay must never break Kibana
+      });
+  }
 }

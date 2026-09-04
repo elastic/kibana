@@ -87,7 +87,7 @@ describe('SingleMetricAttributes', () => {
         query: {
           language: 'kuery',
           query:
-            'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+            '((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : *',
         },
         visualization: {
           accessor: 'layer-0-column-1',
@@ -150,7 +150,7 @@ describe('SingleMetricAttributes', () => {
         query: {
           language: 'kuery',
           query:
-            'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+            '((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : *',
         },
         visualization: {
           accessor: 'layer-0-column-1',

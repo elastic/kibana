@@ -1,0 +1,1 @@
+Rank routes by poor LCP weighted by views. Use when the user asks where the site is slow, which pages hurt Core Web Vitals, or geo-level slowness.

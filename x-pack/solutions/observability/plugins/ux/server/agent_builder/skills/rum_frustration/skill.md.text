@@ -1,0 +1,5 @@
+## Frustration
+
+1. `observability.ux.get_overview` for frustration counts in the range.
+2. `observability.ux.find_sessions` with `hasRage=true`, sorted by rage or duration.
+3. Note pages and browsers that dominate. Give session IDs for Session Replay. Do not invent rage counts.

@@ -7,6 +7,28 @@ Object {
     "adHocDataViews": Object {
       "xxxx-xxxxxxxxxxx-xxxx": Object {
         "id": "xxxx-xxxxxxxxxxx-xxxx",
+        "runtimeFieldMap": Object {
+          "ux.visitor.browser": Object {
+            "script": Object {
+              "source": "if (doc.containsKey('user_agent.name') && doc['user_agent.name'].size() != 0) {
+  emit(doc['user_agent.name'].value);
+} else if (doc.containsKey('resource.attributes.browser.name') && doc['resource.attributes.browser.name'].size() != 0) {
+  emit(doc['resource.attributes.browser.name'].value);
+}",
+            },
+            "type": "keyword",
+          },
+          "ux.visitor.os": Object {
+            "script": Object {
+              "source": "if (doc.containsKey('user_agent.os.name') && doc['user_agent.os.name'].size() != 0) {
+  emit(doc['user_agent.os.name'].value);
+} else if (doc.containsKey('resource.attributes.browser.platform') && doc['resource.attributes.browser.platform'].size() != 0) {
+  emit(doc['resource.attributes.browser.platform'].value);
+}",
+            },
+            "type": "keyword",
+          },
+        },
       },
     },
     "datasourceStates": Object {
@@ -21,7 +43,7 @@ Object {
               "col1": Object {
                 "dataType": "string",
                 "isBucketed": true,
-                "label": "Top 9 values of user_agent.os.name",
+                "label": "Top 9 values of ux.visitor.os",
                 "operationType": "terms",
                 "params": Object {
                   "orderBy": Object {
@@ -36,7 +58,7 @@ Object {
                   "size": 9,
                 },
                 "scale": "ordinal",
-                "sourceField": "user_agent.os.name",
+                "sourceField": "ux.visitor.os",
               },
               "col2": Object {
                 "dataType": "number",
@@ -62,25 +84,58 @@ Object {
           "bool": Object {
             "filter": Array [
               Object {
-                "term": Object {
-                  "transaction.type": "page-load",
-                },
-              },
-              Object {
-                "terms": Object {
-                  "processor.event": Array [
-                    "transaction",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "term": Object {
+                              "transaction.type": "page-load",
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "processor.event": "transaction",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "name": "documentLoad",
+                      },
+                    },
                   ],
                 },
               },
               Object {
-                "exists": Object {
-                  "field": "transaction.marks.navigationTiming.fetchStart",
-                },
-              },
-              Object {
-                "wildcard": Object {
-                  "url.full": "*elastic.co*",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "wildcard": Object {
+                        "url.full": "*elastic.co*",
+                      },
+                    },
+                    Object {
+                      "wildcard": Object {
+                        "attributes.url.full": "*elastic.co*",
+                      },
+                    },
+                    Object {
+                      "wildcard": Object {
+                        "attributes.page.url": "*elastic.co*",
+                      },
+                    },
+                    Object {
+                      "wildcard": Object {
+                        "attributes.http.url": "*elastic.co*",
+                      },
+                    },
+                  ],
                 },
               },
             ],
@@ -128,7 +183,7 @@ Object {
       "shape": "pie",
     },
   },
-  "title": "ux-visitor-breakdown-user_agent.os.name",
+  "title": "ux-visitor-breakdown-ux.visitor.os",
   "visualizationType": "lnsPie",
 }
 `;

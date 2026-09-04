@@ -132,7 +132,8 @@ describe('Lens Attribute', () => {
           dataType: 'number',
           filter: {
             language: 'kuery',
-            query: 'transaction.type: page-load and processor.event: transaction',
+            query:
+              '((transaction.type: page-load and processor.event: transaction) or name: documentLoad)',
           },
           isBucketed: false,
           label: 'Page load time',
@@ -526,7 +527,7 @@ describe('Lens Attribute', () => {
             filter: {
               language: 'kuery',
               query:
-                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                '((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : *',
             },
             isBucketed: false,
             label: 'test-series',
@@ -539,7 +540,7 @@ describe('Lens Attribute', () => {
                 },
               },
               formula:
-                "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                "count(kql='((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : *') / overall_sum(count(kql='((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : *'))",
               isFormulaBroken: false,
             },
             references: [],
@@ -571,7 +572,7 @@ describe('Lens Attribute', () => {
       const filters = lnsAttr.getLayerFilters(layerConfig1, 2);
 
       expect(filters).toEqual(
-        '@timestamp >= now-15m and @timestamp <= now and transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)'
+        '@timestamp >= now-15m and @timestamp <= now and ((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : * and service.name: (elastic or kibana)'
       );
     });
   });
