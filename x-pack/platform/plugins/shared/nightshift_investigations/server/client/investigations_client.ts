@@ -124,6 +124,8 @@ const LIST_INVESTIGATION_ITEM_FIELDS = {
   concurrency_key: ['concurrency_key'],
   executed_by: ['executed_by'],
   subject: ['subject_type', 'subject_id', 'subject_summary'],
+  summary: ['summary'],
+  impact: ['impact'],
 } as const satisfies Record<
   keyof ListInvestigationItem,
   readonly (keyof InvestigationAttributes)[]
@@ -149,6 +151,8 @@ const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestiga
     subjectId: record.subject_id,
     subjectSummary: record.subject_summary,
   }),
+  summary: record.summary,
+  impact: record.impact,
 });
 
 const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
@@ -637,6 +641,9 @@ export class NightshiftInvestigationsClient {
 
   async list({
     statuses,
+    severities,
+    subject_types,
+    query,
     created_after,
     created_before,
     started_after,
@@ -650,6 +657,9 @@ export class NightshiftInvestigationsClient {
   }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
     const result = await this.investigationRepository.find({
       statuses,
+      severities,
+      subjectTypes: subject_types,
+      query,
       createdAfter: created_after,
       createdBefore: created_before,
       startedAfter: started_after,
@@ -669,6 +679,7 @@ export class NightshiftInvestigationsClient {
       page: result.page,
       size: result.size,
       total: result.total,
+      severity_counts: result.severityCounts,
     };
   }
 }
