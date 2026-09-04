@@ -99,6 +99,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
   actions: {
     readDoc: {
       isTool: true,
+      scope: 'read',
       description:
         'Read the full content of a Google Doc as Markdown. ' +
         'Returns the document title, Markdown content, total character count, and a web link. ' +

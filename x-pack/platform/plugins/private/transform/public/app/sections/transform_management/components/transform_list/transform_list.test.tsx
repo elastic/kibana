@@ -27,6 +27,9 @@ const useQueryMock = jest.spyOn(ReactQuery, 'useQuery').mockImplementation((quer
 const queryClient = new QueryClient();
 
 jest.mock('../../../../app_dependencies');
+jest.mock('../../../../hooks/use_get_transform_cps_enabled', () => ({
+  useGetTransformCpsEnabled: () => ({ data: true }),
+}));
 
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', async () => {

@@ -86,6 +86,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/observability-get-padded-alert-time-range-util",
     "@kbn/apm-data-access-plugin",
+    "@kbn/ebt-click",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
     "@kbn/core-saved-objects-api-server",

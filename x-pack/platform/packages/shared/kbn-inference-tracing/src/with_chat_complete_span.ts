@@ -28,6 +28,7 @@ import { SpanKind } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
 import { withActiveInferenceSpan } from './with_active_inference_span';
+import { getGenAiToolDefinitions } from './gen_ai_tool_definitions';
 import type {
   GenAIInputMessage,
   GenAIMessagePart,
@@ -206,7 +207,9 @@ export function withChatCompleteSpan(
         [GenAISemanticConventions.GenAIRequestModel]: modelId,
         [GenAISemanticConventions.GenAIProviderName]: modelProvider,
         [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
-        [GenAISemanticConventions.GenAIToolDefinitions]: tools ? JSON.stringify(tools) : undefined,
+        [GenAISemanticConventions.GenAIToolDefinitions]: tools
+          ? JSON.stringify(getGenAiToolDefinitions(tools))
+          : undefined,
         [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
         ...(cacheControl
           ? {

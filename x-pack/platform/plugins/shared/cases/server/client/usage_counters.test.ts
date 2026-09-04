@@ -14,7 +14,7 @@ import { newCase } from '../mocks';
 import { createCasesSubClient } from './cases/client';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import type { CasesClientSource } from './types';
-import { withUsageCounter } from './usage_counters';
+import { incrementCasesClientCounter, withUsageCounter } from './usage_counters';
 import { createAttachmentsSubClient } from './attachments/client';
 
 jest.mock('./cases/create', () => ({ create: jest.fn().mockResolvedValue({ id: 123 }) }));
@@ -96,5 +96,59 @@ describe('withUsageCounter', () => {
       mockCasesClientInternal
     );
     await expect(clientWithoutUsageCounter.create(newCase)).resolves.toEqual({ id: 123 });
+  });
+});
+
+describe('incrementCasesClientCounter', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const usageCounter = usageCollectionPluginMock.createSetupContract().createUsageCounter('cases');
+  const clientArgs = {
+    ...createCasesClientMockArgs(),
+    usageCounter,
+    clientSource: 'connector' as CasesClientSource,
+  };
+
+  it('tags the counter with the calling source', () => {
+    incrementCasesClientCounter(clientArgs, 'create_case_with_template');
+
+    expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: 'create_case_with_template',
+      counterType: 'cases_client.connector',
+    });
+  });
+
+  it('passes an explicit amount through', () => {
+    incrementCasesClientCounter(clientArgs, 'create_case_with_template', 3);
+
+    expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: 'create_case_with_template',
+      counterType: 'cases_client.connector',
+      incrementBy: 3,
+    });
+  });
+
+  it('does not emit anything for an empty bucket', () => {
+    incrementCasesClientCounter(clientArgs, 'create_case_with_template', 0);
+
+    expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
+    expect(clientArgs.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('warns and emits nothing for a negative amount', () => {
+    incrementCasesClientCounter(clientArgs, 'create_case_with_template', -1);
+
+    expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
+    expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+      'Skipped cases client counter "create_case_with_template": incrementBy must not be negative (received -1).'
+    );
+  });
+
+  it('does not throw if usageCounter is undefined', () => {
+    expect(() =>
+      incrementCasesClientCounter(createCasesClientMockArgs(), 'create_case_with_template')
+    ).not.toThrow();
   });
 });

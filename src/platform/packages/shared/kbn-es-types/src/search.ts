@@ -658,6 +658,7 @@ export interface ESQLColumn {
   name: string;
   type: string;
   original_types?: string[];
+  suggested_cast?: string;
   _meta?: estypes.Metadata;
 }
 

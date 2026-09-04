@@ -393,5 +393,30 @@ describe('ValueControlForm', () => {
         });
       });
     });
+
+    describe('Multi values type', () => {
+      it('should default to "Values from a query" and enable the type dropdown for MULTI_VALUES', async () => {
+        const { findByTestId } = render(
+          <KibanaContextProvider services={services}>
+            <IntlProvider locale="en">
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.MULTI_VALUES}
+                queryString="FROM foo | WHERE MV_CONTAINS(field, "
+                esqlVariables={[]}
+              />
+            </IntlProvider>
+          </KibanaContextProvider>
+        );
+
+        expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
+        expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(
+          `Values from a query`
+        );
+
+        const typeDropdown = await findByTestId('esqlControlTypeDropdown');
+        expect(typeDropdown).not.toBeDisabled();
+      });
+    });
   });
 });
