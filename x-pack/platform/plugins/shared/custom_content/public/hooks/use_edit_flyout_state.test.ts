@@ -9,16 +9,17 @@ import { renderHook, act } from '@testing-library/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
 jest.mock('../services');
-jest.mock('../utils/fetch_esql_data');
-jest.mock('../utils/fill_template');
-jest.mock('../utils/prepare_html');
+jest.mock('@kbn/custom-content-renderer');
 jest.mock('@kbn/data-plugin/public', () => ({ getEsQueryConfig: jest.fn() }));
 
 import type { HttpStart } from '@kbn/core/public';
+import {
+  fetchEsqlData,
+  fillTemplate,
+  sanitizeHtml,
+  applyHtmlTheme,
+} from '@kbn/custom-content-renderer';
 import { getServices } from '../services';
-import { fetchEsqlData } from '../utils/fetch_esql_data';
-import { fillTemplate } from '../utils/fill_template';
-import { sanitizeHtml, applyHtmlTheme } from '../utils/prepare_html';
 import { useEditFlyoutState } from './use_edit_flyout_state';
 
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
