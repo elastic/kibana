@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { registerListSourcesRoute, registerUpdateSourceRoute } from './list_sources';
 import {
-  LIST_SOURCES_API_PATH,
-  SOURCE_BY_ID_API_PATH,
-} from '../../../common/threat_intel';
+  httpServiceMock,
+  httpServerMock,
+  coreMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
+import { registerListSourcesRoute, registerUpdateSourceRoute } from './list_sources';
+import { LIST_SOURCES_API_PATH, SOURCE_BY_ID_API_PATH } from '../../../common/threat_intel';
 import { THREAT_INTEL_READ_AUTHZ, THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 
 /**
  * Handler-level tests for the list/update sources routes. Verifies what a
- * unit test on the extracted `*ForTest` helpers cannot: that the route
- * actually applies its declared `security.authz`, gates on bootstrap, and
- * returns the right status/shape for the success and failure paths.
+ * unit test on the extracted helper functions cannot: that the route actually
+ * applies its declared `security.authz`, gates on bootstrap, and returns the
+ * right status/shape for the success and failure paths.
  */
 describe('list_sources routes', () => {
   const logger = loggingSystemMock.createLogger();
@@ -40,6 +41,15 @@ describe('list_sources routes', () => {
     return Object.values(route.versions)[0];
   };
 
+  // A request handler context whose ES internal user is a fully-typed ES client
+  // mock, so tests configure `esClient.search`/`get`/`update` without casting.
+  const buildContext = () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const context = coreMock.createRequestHandlerContext();
+    context.elasticsearch.client.asInternalUser = esClient;
+    return { context, esClient };
+  };
+
   describe('registerListSourcesRoute', () => {
     it('declares the read authz on the route config', () => {
       const { router, getSpacesService, getBootstrapReady } = buildDeps();
@@ -50,9 +60,7 @@ describe('list_sources routes', () => {
     });
 
     it('returns 503 when bootstrap has not resolved', async () => {
-      const { router, getSpacesService } = buildDeps({
-        getBootstrapReady: jest.fn().mockRejectedValue(new Error('template install failed')),
-      });
+      const { router, getSpacesService } = buildDeps();
       registerListSourcesRoute({
         router,
         logger,
@@ -61,7 +69,7 @@ describe('list_sources routes', () => {
       } as never);
 
       const version = getRegisteredVersion(router, 'post', LIST_SOURCES_API_PATH);
-      const context = coreMock.createRequestHandlerContext();
+      const { context } = buildContext();
       const request = httpServerMock.createKibanaRequest({ body: {} });
       const response = httpServerMock.createResponseFactory();
 
@@ -77,14 +85,19 @@ describe('list_sources routes', () => {
       registerListSourcesRoute({ router, logger, getSpacesService, getBootstrapReady } as never);
 
       const version = getRegisteredVersion(router, 'post', LIST_SOURCES_API_PATH);
-      const context = coreMock.createRequestHandlerContext();
-      const esClient = context.elasticsearch.client.asInternalUser;
-      (esClient.indices.getAlias as jest.Mock).mockResolvedValue({});
-      (esClient.indices.putAlias as jest.Mock).mockResolvedValue({});
-      (esClient.search as jest.Mock).mockResolvedValue({
+      const { context, esClient } = buildContext();
+      esClient.indices.getAlias.mockResolvedValue({});
+      esClient.indices.putAlias.mockResolvedValue({ acknowledged: true });
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
         hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: null,
           hits: [
             {
+              _index: '.kibana-threat-intel-sources',
               _id: 'vendor_api:elastic-security-labs',
               _source: { name: 'Elastic Security Labs', adapter_type: 'vendor_api', enabled: true },
             },
@@ -114,11 +127,10 @@ describe('list_sources routes', () => {
       registerListSourcesRoute({ router, logger, getSpacesService, getBootstrapReady } as never);
 
       const version = getRegisteredVersion(router, 'post', LIST_SOURCES_API_PATH);
-      const context = coreMock.createRequestHandlerContext();
-      const esClient = context.elasticsearch.client.asInternalUser;
-      (esClient.indices.getAlias as jest.Mock).mockResolvedValue({});
-      (esClient.indices.putAlias as jest.Mock).mockResolvedValue({});
-      (esClient.search as jest.Mock).mockRejectedValue(new Error('cluster unavailable'));
+      const { context, esClient } = buildContext();
+      esClient.indices.getAlias.mockResolvedValue({});
+      esClient.indices.putAlias.mockResolvedValue({ acknowledged: true });
+      esClient.search.mockRejectedValue(new Error('cluster unavailable'));
 
       const request = httpServerMock.createKibanaRequest({ body: {} });
       const response = httpServerMock.createResponseFactory();
@@ -150,7 +162,7 @@ describe('list_sources routes', () => {
       } as never);
 
       const version = getRegisteredVersion(router, 'patch', SOURCE_BY_ID_API_PATH);
-      const context = coreMock.createRequestHandlerContext();
+      const { context } = buildContext();
       const request = httpServerMock.createKibanaRequest({
         params: { sourceId: 'vendor_api:elastic-security-labs' },
         body: { enabled: false },
@@ -169,12 +181,22 @@ describe('list_sources routes', () => {
       registerUpdateSourceRoute({ router, logger, getSpacesService, getBootstrapReady } as never);
 
       const version = getRegisteredVersion(router, 'patch', SOURCE_BY_ID_API_PATH);
-      const context = coreMock.createRequestHandlerContext();
-      const esClient = context.elasticsearch.client.asInternalUser;
-      (esClient.get as jest.Mock).mockResolvedValue({
+      const { context, esClient } = buildContext();
+      esClient.get.mockResolvedValue({
+        _index: '.kibana-threat-intel-sources',
+        _id: 'vendor_api:elastic-security-labs',
+        found: true,
         _source: { name: 'Elastic Security Labs', adapter_type: 'vendor_api' },
       });
-      (esClient.update as jest.Mock).mockResolvedValue({});
+      esClient.update.mockResolvedValue({
+        _index: '.kibana-threat-intel-sources',
+        _id: 'vendor_api:elastic-security-labs',
+        _version: 2,
+        result: 'updated',
+        _shards: { total: 1, successful: 1, failed: 0 },
+        _seq_no: 1,
+        _primary_term: 1,
+      });
 
       const request = httpServerMock.createKibanaRequest({
         params: { sourceId: 'vendor_api:elastic-security-labs' },
@@ -196,7 +218,7 @@ describe('list_sources routes', () => {
       registerUpdateSourceRoute({ router, logger, getSpacesService, getBootstrapReady } as never);
 
       const version = getRegisteredVersion(router, 'patch', SOURCE_BY_ID_API_PATH);
-      const context = coreMock.createRequestHandlerContext();
+      const { context } = buildContext();
       const request = httpServerMock.createKibanaRequest({
         params: { sourceId: 'rss:not-approved' },
         body: { enabled: false },
@@ -213,12 +235,14 @@ describe('list_sources routes', () => {
       registerUpdateSourceRoute({ router, logger, getSpacesService, getBootstrapReady } as never);
 
       const version = getRegisteredVersion(router, 'patch', SOURCE_BY_ID_API_PATH);
-      const context = coreMock.createRequestHandlerContext();
-      const esClient = context.elasticsearch.client.asInternalUser;
-      (esClient.get as jest.Mock).mockResolvedValue({
+      const { context, esClient } = buildContext();
+      esClient.get.mockResolvedValue({
+        _index: '.kibana-threat-intel-sources',
+        _id: 'vendor_api:elastic-security-labs',
+        found: true,
         _source: { name: 'Elastic Security Labs', adapter_type: 'vendor_api' },
       });
-      (esClient.update as jest.Mock).mockRejectedValue(new Error('write conflict'));
+      esClient.update.mockRejectedValue(new Error('write conflict'));
 
       const request = httpServerMock.createKibanaRequest({
         params: { sourceId: 'vendor_api:elastic-security-labs' },
