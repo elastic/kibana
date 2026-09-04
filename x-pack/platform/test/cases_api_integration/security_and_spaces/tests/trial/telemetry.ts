@@ -17,6 +17,7 @@ import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../common/lib/mock';
 import {
   deleteAllCaseItems,
+  deleteFieldDefinitions,
   createCase,
   getTelemetry,
   runTelemetryTask,
@@ -239,8 +240,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('field library', () => {
-      const FIXTURE_OWNER = 'securitySolutionFixture';
-
       const createFieldDefinition = async (
         name: string,
         owner: string,
@@ -249,6 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(INTERNAL_FIELD_DEFINITIONS_URL)
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
           .send({
             name,
             owner,
@@ -276,13 +276,19 @@ export default ({ getService }: FtrProviderContext): void => {
       const zeroedScope = { total: 0, totalGlobal: 0, totalReusable: 0 };
 
       it('should report the field library snapshot', async () => {
+        // The counts below are absolute, so they only stay diagnostic from an empty start. A
+        // single leftover reusable definition would reproduce them even with a broken query.
+        await deleteFieldDefinitions(es);
+
         await createFieldDefinition('sec_global', 'securitySolution', { isGlobal: true });
         await createFieldDefinition('sec_reusable', 'securitySolution', { isGlobal: false });
         // No `isGlobal` key at all, which the create route allows and nothing backfills.
         await createFieldDefinition('sec_unset', 'securitySolution');
 
         // Not one of the three real owners, so it must reach `all` and no solution scope.
-        await createFieldDefinition('fixture_global', FIXTURE_OWNER, { isGlobal: true });
+        await createFieldDefinition('fixture_global', 'securitySolutionFixture', {
+          isGlobal: true,
+        });
 
         await deleteTelemetrySnapshot();
         await runTelemetryTask(supertest);
@@ -297,7 +303,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(casesTelemetry.fieldLibrary).toEqual({
             featureEnabled: true,
-            // Spans every owner, so the fixture-owned definition lands here and nowhere else.
             all: { total: 4, totalGlobal: 2, totalReusable: 2 },
             sec: { total: 3, totalGlobal: 1, totalReusable: 2 },
             obs: zeroedScope,
