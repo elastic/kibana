@@ -19,7 +19,7 @@ const featureIdentificationInstructions = `${featuresPrompt}
 
 ## Prior-knowledge grounding
 
-Before finalizing, call \`platform_sig_events_memory_search\` at least once, scoped to the services, symptoms, and patterns in the sample documents. An empty result is acceptable; skipping the search is not. Use \`platform_sig_events_memory_read\` for relevant pages and \`platform_sig_events_memory_list\` only when you need to browse available pages.
+Before finalizing, call \`platform_sig_events_memory_search\` at least once, scoped to the services, symptoms, and patterns in the sample documents. For the initial search, omit \`categories\`, \`tags\`, and \`references\`; use these filters only when you know exact stored values. An empty result is acceptable; skipping the search is not. Use \`platform_sig_events_memory_read\` for relevant pages and \`platform_sig_events_memory_list\` only when you need to browse available pages.
 
 Memory contains durable prior knowledge, known-benign patterns, and past false positives. Use it to avoid regenerating known-bad or demoted features, but keep every emitted feature grounded in the current sample documents.
 
