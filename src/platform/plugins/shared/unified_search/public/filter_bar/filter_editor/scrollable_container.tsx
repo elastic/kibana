@@ -37,14 +37,21 @@ export function ScrollableContainer({
   useLayoutEffect(() => {
     if (!containerRef.current) return;
 
-    const resizeObserver = new ResizeObserver(() => {
+    function updateVisibleHeight() {
       if (!containerRef.current) return;
       setVisibleHeigth(getVisibleHeightInViewport(containerRef.current));
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateVisibleHeight();
     });
     resizeObserver.observe(containerRef.current);
 
+    window.addEventListener('resize', updateVisibleHeight);
+
     return () => {
       resizeObserver.disconnect();
+      window.removeEventListener('resize', updateVisibleHeight);
     };
   }, []);
 
