@@ -163,7 +163,6 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
                 color="subdued"
                 aria-label={agentAccessHelpAriaLabel}
                 content={agentAccessHelpLabel(agentName)}
-                iconProps={{ 'data-test-subj': 'agentBuilderConversationSharingAgentAccessHelp' }}
               />
             ) : null}
           </>
