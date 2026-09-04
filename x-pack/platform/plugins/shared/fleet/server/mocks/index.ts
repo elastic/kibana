@@ -262,6 +262,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     listIds: jest.fn(),
     update: jest.fn(),
     bulkUpdate: jest.fn(),
+    bulkUpdatePartial: jest.fn(),
     bulkUpgrade: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),

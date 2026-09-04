@@ -792,7 +792,7 @@ export class WorkflowExecutionQueryService {
     }
   }
 
-  /** Returns the claimable `waitForInput` step currently blocking the run. */
+  /** Returns the claimable HITL wait step currently blocking the run. */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
       const response = (await this.deps.stepExecutionsDataClient.search({
@@ -801,7 +801,7 @@ export class WorkflowExecutionQueryService {
             must: [
               { term: { workflowRunId: executionId } },
               { term: { spaceId } },
-              { term: { stepType: 'waitForInput' } },
+              { terms: { stepType: ['waitForInput', 'waitForApproval'] } },
               { term: { status: 'waiting_for_input' } },
             ],
             must_not: [
@@ -860,7 +860,7 @@ export class WorkflowExecutionQueryService {
    */
   async markStepAsResponded(
     stepExecutionId: string,
-    audit: { respondedBy: string; respondedAt: string; channel: string },
+    audit: { respondedBy: string; respondedAt: string; channel?: string },
     spaceId: string
   ): Promise<boolean> {
     try {
@@ -878,13 +878,13 @@ export class WorkflowExecutionQueryService {
           'if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
           'ctx._source.hitl.respondedBy = params.respondedBy;' +
           'ctx._source.hitl.respondedAt = params.respondedAt;' +
-          'ctx._source.hitl.channel = params.channel;' +
+          'if (params.channel != null) { ctx._source.hitl.channel = params.channel; }' +
           'if (ctx._source.input != null) { ctx._source.input.remove(params.tokenHashField); ctx._source.input.remove(params.tokenExpiresAtField); }',
         params: {
           spaceId,
           respondedBy: audit.respondedBy,
           respondedAt: audit.respondedAt,
-          channel: audit.channel,
+          channel: audit.channel ?? null,
           settledStatuses: SETTLED_STEP_STATUSES,
           tokenHashField: HITL_TOKEN_HASH_INPUT_FIELD,
           tokenExpiresAtField: HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,

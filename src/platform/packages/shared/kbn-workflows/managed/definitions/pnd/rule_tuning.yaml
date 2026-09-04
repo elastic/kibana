@@ -228,7 +228,7 @@ steps:
             {% endif %}
 
       - name: apply_query_tuning
-        type: kibana.request
+        type: security.patchRule
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
             and steps.diagnose_rule.output.structured_output.proposed_query != ''
@@ -236,13 +236,7 @@ steps:
             and steps.preview_proposed_query.output.succeeded == true
             and steps.preview_proposed_query.output.is_aborted == false }}
         with:
-          method: PATCH
-          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-          headers:
-            kbn-xsrf: string
-            elastic-api-version: "2023-10-31"
-            Content-Type: application/json
-          body:
+          patch:
             id: "{{ foreach.item.0 }}"
             query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
 

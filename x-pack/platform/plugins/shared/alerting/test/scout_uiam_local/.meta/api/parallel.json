@@ -1,5 +1,5 @@
 {
-  "sha1": "2d3e9ef9230502d5bd43fa938c1c86f533b31a3a",
+  "sha1": "f01152b6f883f5cdc0989c183c6d25e448805ad0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -57,6 +57,146 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/org_level_uiam_api_key.spec.ts",
         "line": 56,
+        "column": 16
+      }
+    },
+    {
+      "id": "aebe9d19ea3aa34-1d763c4e720a36c",
+      "title": "[NON-MKI] Rule execution survives API key rotation rotating the API key leaves the rule with a working key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/rule_api_key_rotation.spec.ts",
+        "line": 60,
+        "column": 13
+      }
+    },
+    {
+      "id": "aebe9d19ea3aa34-3d8d535957e9aa6",
+      "title": "[NON-MKI] Rule execution survives API key rotation rotating with an Elasticsearch API key drops the UIAM key rather than stranding it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/rule_api_key_rotation.spec.ts",
+        "line": 80,
+        "column": 16
+      }
+    },
+    {
+      "id": "aebe9d19ea3aa34-feec56015fd031c",
+      "title": "[NON-MKI] Rule execution survives API key rotation enabling a rule that has no API key mints one the rule can run with",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/rule_api_key_rotation.spec.ts",
+        "line": 105,
+        "column": 63
+      }
+    },
+    {
+      "id": "aebe9d19ea3aa34-4eecfee4677e96c",
+      "title": "[NON-MKI] Rule execution survives API key rotation re-enabling a rule keeps the key it was already running with",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/rule_api_key_rotation.spec.ts",
+        "line": 121,
+        "column": 57
+      }
+    },
+    {
+      "id": "aebe9d19ea3aa34-5b82a0066fac97b",
+      "title": "[NON-MKI] Rule execution survives API key rotation updating a rule leaves it with a working key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/rule_api_key_rotation.spec.ts",
+        "line": 151,
         "column": 16
       }
     }

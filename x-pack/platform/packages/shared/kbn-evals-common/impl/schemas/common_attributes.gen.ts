@@ -33,6 +33,14 @@ export const DatasetTags = lazySchema(() =>
 export type DatasetTags = z.infer<typeof DatasetTags>;
 
 /**
+ * Metric polarity. `maximize` means a higher score is better (e.g. faithfulness, accuracy). `minimize` means a lower score is better (e.g. latency, token count). `neutral` means the metric is informational only and has no improvement direction.
+ */
+export const Direction = lazySchema(() => z.enum(['maximize', 'minimize', 'neutral']));
+export type Direction = z.infer<typeof Direction>;
+export type DirectionEnum = typeof Direction.enum;
+export const DirectionEnum = Direction.enum;
+
+/**
  * How curated the dataset is, from raw captures through cleaned data to "golden" reference datasets. Absent when a dataset has no maturity set.
  */
 export const DatasetMaturity = lazySchema(() => z.enum(['raw', 'cleaned', 'golden']));
@@ -116,10 +124,7 @@ export const EvaluatorInfo = lazySchema(() =>
     explanation: z.string().max(4096).nullable().optional(),
     metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     trace_id: z.string().max(256).nullable().optional(),
-    /**
-     * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
-     */
-    direction: z.enum(['maximize', 'minimize', 'neutral']).optional(),
+    direction: Direction.optional(),
     model: Model.optional(),
     /**
      * Whether the evaluator invoked a model. Absent on documents written before per-evaluator attribution was introduced.

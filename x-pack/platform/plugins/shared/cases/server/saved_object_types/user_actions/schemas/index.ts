@@ -8,3 +8,7 @@
 export * from './latest';
 
 export { userActionCreateSchema as userActionCreateSchemaV1 } from './v1';
+export {
+  userActionCreateSchema as userActionCreateSchemaV2,
+  userActionForwardCompatibilitySchema as userActionForwardCompatibilitySchemaV2,
+} from './v2';

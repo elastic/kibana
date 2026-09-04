@@ -248,6 +248,22 @@ describe('classifyStreams', () => {
     expect(result.candidates).toEqual([]);
   });
 
+  it('immediately reschedules a cancelled execution because no extraction completed', () => {
+    const result = classifyStreams({
+      ...defaultArgs,
+      allStreams: [makeStream('cancelled-stream')],
+      executions: [
+        makeExecution('cancelled-stream', {
+          status: ExecutionStatus.CANCELLED,
+          finishedAt: new Date().toISOString(),
+        }),
+      ],
+    });
+
+    expect(result.candidates).toEqual([{ streamName: 'cancelled-stream', lastCompletedAt: null }]);
+    expect(result.upToDate).toEqual([]);
+  });
+
   it('places no-execution streams before old-execution streams in candidates', () => {
     const oldCompletion = '2024-01-01T00:00:00Z';
     const result = classifyStreams({

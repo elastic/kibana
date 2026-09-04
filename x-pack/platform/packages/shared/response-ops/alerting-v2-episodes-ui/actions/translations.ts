@@ -36,7 +36,7 @@ export const UNRESOLVE = i18n.translate('xpack.alertingV2.episodesUi.resolveActi
 });
 
 export const EDIT_TAGS = i18n.translate('xpack.alertingV2.episodesUi.tagsAction.editTags', {
-  defaultMessage: 'Edit Tags',
+  defaultMessage: 'Edit alert tags',
 });
 
 export const EDIT_ASSIGNEE = i18n.translate(
@@ -56,7 +56,7 @@ export const OPEN_IN_DISCOVER = i18n.translate(
 export const TAGS_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
   {
-    defaultMessage: 'Edit Tags',
+    defaultMessage: 'Edit alert tags',
   }
 );
 

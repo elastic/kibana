@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -44,7 +45,7 @@ export class GenAiSettingsPage {
    * Get the GenAI Settings page title element
    */
   getGenAiSettingsPageTitle() {
-    return this.page.testSubj.locator('genAiSettingsTitle');
+    return this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
   }
 
   /**

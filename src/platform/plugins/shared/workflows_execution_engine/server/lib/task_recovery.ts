@@ -11,6 +11,10 @@ import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
+import {
+  MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+  MISSING_EXECUTION_IDENTITY_MESSAGE,
+} from './execution_identity';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -219,7 +223,10 @@ export async function markExecutionFailedTaskRecovery(
     type = TASK_RECOVERY_ERROR_TYPE,
   }: {
     message: string;
-    type?: typeof TASK_RECOVERY_ERROR_TYPE | 'TaskAttemptsExhaustedError';
+    type?:
+      | typeof TASK_RECOVERY_ERROR_TYPE
+      | 'TaskAttemptsExhaustedError'
+      | typeof MISSING_EXECUTION_IDENTITY_ERROR_TYPE;
   },
   options: { refresh?: boolean | 'wait_for' } = {}
 ): Promise<void> {
@@ -356,6 +363,51 @@ export async function markScheduledExecutionFailedAfterTaskError(params: {
   } catch (markFailedErr) {
     logger.error(
       `Failed to mark scheduled workflow execution ${workflowRunId} as FAILED after task error: ${
+        markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
+      }`
+    );
+  }
+}
+
+/**
+ * Persist a terminal FAILED state when a workflow task is claimed without a
+ * Task Manager identity (`fakeRequest` / API key). Completing the task after
+ * this write avoids leaving the execution pending forever.
+ */
+export async function failExecutionMissingIdentity(params: {
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
+  workflowRunId: string;
+  spaceId: string;
+  logger: Logger;
+}): Promise<void> {
+  const { workflowExecutionRepository, stepExecutionRepository, workflowRunId, spaceId, logger } =
+    params;
+
+  try {
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    if (!execution || isTerminalStatus(execution.status)) {
+      return;
+    }
+
+    await markExecutionFailedTaskRecovery(
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      workflowRunId,
+      {
+        type: MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+        message: MISSING_EXECUTION_IDENTITY_MESSAGE,
+      }
+    );
+    logger.warn(
+      `Marked workflow execution ${workflowRunId} FAILED: ${MISSING_EXECUTION_IDENTITY_MESSAGE}`
+    );
+  } catch (markFailedErr) {
+    logger.error(
+      `Failed to mark workflow execution ${workflowRunId} as FAILED (missing identity): ${
         markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
       }`
     );
