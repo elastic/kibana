@@ -56,10 +56,6 @@ jest.mock('./compose_discover_form/linked_action_policies_step', () => ({
   LinkedActionPoliciesStep: () => null,
 }));
 
-jest.mock('./compose_discover_form/centralized_action_policies_panel', () => ({
-  CentralizedActionPoliciesPanel: () => null,
-}));
-
 jest.mock('./compose_discover_form/esql_recovery_content', () => ({
   EsqlRecoveryContent: () => null,
 }));

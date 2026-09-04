@@ -30,7 +30,6 @@ import { EsqlRecoveryContent } from './esql_recovery_content';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { NotificationsStep } from './notifications_step';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
-import { CentralizedActionPoliciesPanel } from './centralized_action_policies_panel';
 import { QueryFieldRules } from './query_field_rules';
 
 interface Props {
@@ -99,8 +98,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     }),
     render: (props) => (
       <>
-        <CentralizedActionPoliciesPanel http={props.services.http} />
-        <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
         <EuiHorizontalRule margin="m" />
         <NotificationsStep />

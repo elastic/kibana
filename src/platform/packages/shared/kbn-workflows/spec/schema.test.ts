@@ -15,7 +15,6 @@ import {
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
   ElasticsearchStepSchema,
   EventTimestampSchema,
-  IF_CONDITION_MAX_LENGTH,
   IfStepSchema,
   KibanaStepSchema,
   LIQUID_MEMORY_LIMIT_MAX,
@@ -38,6 +37,7 @@ import {
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
+import { IF_CONDITION_MAX_LENGTH } from '../common/constants';
 import { getShape } from '../common/utils/zod';
 
 describe('WorkflowSchemaForAutocomplete', () => {

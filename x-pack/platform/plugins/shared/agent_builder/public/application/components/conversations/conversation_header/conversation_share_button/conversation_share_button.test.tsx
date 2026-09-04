@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   ConversationAccessControlMode,
@@ -23,7 +24,6 @@ import {
   useInviteMembersSummary,
   useUpdateConversationAccessControl,
 } from '../../../../hooks/use_conversation_access_control';
-import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { ConversationShareButton } from './conversation_share_button';
 
@@ -51,10 +51,6 @@ jest.mock('../../../../hooks/use_user_profiles', () => ({
   useUserProfiles: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: jest.fn(),
-}));
-
 jest.mock('../../../../hooks/agents/use_agent_by_id', () => ({
   useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
 }));
@@ -65,7 +61,6 @@ const mockUseIsUnpersistedConversation = jest.mocked(useIsUnpersistedConversatio
 const mockUseSuggestUsers = jest.mocked(useSuggestUsers);
 const mockUseInviteMembersSummary = jest.mocked(useInviteMembersSummary);
 const mockUseUpdateConversationAccessControl = jest.mocked(useUpdateConversationAccessControl);
-const mockUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 const mockUseUserProfiles = jest.mocked(useUserProfiles);
 
 const mutate = jest.fn();
@@ -122,13 +117,11 @@ const renderShareButton = ({
   conversation = baseConversation,
   canUpdateAccessControl = true,
   isUnpersistedConversation = false,
-  isExperimentalFeaturesEnabled = true,
   inviteMembersSummary = { profiles: [], extraCount: 0, shouldShowSummary: false },
 }: {
   conversation?: ConversationWithPermissions;
   canUpdateAccessControl?: boolean;
   isUnpersistedConversation?: boolean;
-  isExperimentalFeaturesEnabled?: boolean;
   inviteMembersSummary?: ReturnType<typeof useInviteMembersSummary>;
 } = {}) => {
   mockUseConversation.mockReturnValue({
@@ -145,7 +138,6 @@ const renderShareButton = ({
     delete: false,
     update_access_control: canUpdateAccessControl,
   });
-  mockUseExperimentalFeatures.mockReturnValue(isExperimentalFeaturesEnabled);
   mockUseSuggestUsers.mockReturnValue({ data: [], isFetching: false } as never);
   mockUseInviteMembersSummary.mockReturnValue(inviteMembersSummary);
   mockUseUserProfiles.mockReturnValue({
@@ -157,9 +149,11 @@ const renderShareButton = ({
   });
 
   render(
-    <IntlProvider locale="en">
-      <ConversationShareButton />
-    </IntlProvider>
+    <EuiThemeProvider>
+      <IntlProvider locale="en">
+        <ConversationShareButton />
+      </IntlProvider>
+    </EuiThemeProvider>
   );
 };
 
@@ -230,12 +224,6 @@ describe('ConversationShareButton', () => {
     expect(
       screen.queryByTestId('agentBuilderConversationShareRemoveMember')
     ).not.toBeInTheDocument();
-  });
-
-  it('does not render when experimental features are disabled', () => {
-    renderShareButton({ isExperimentalFeaturesEnabled: false });
-
-    expect(screen.queryByTestId('agentBuilderConversationInviteButton')).not.toBeInTheDocument();
   });
 
   it('opens the sharing popover with owner and current members', async () => {

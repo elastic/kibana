@@ -64,6 +64,8 @@ dependsOn:
   - '@kbn/shared-ux-ai-components'
   - '@kbn/deeplinks-management'
   - '@kbn/ui-callout'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod
