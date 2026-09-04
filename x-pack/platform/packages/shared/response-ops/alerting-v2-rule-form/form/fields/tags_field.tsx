@@ -12,6 +12,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
+import { OPTIONAL_LABEL } from '../translations';
 
 export const validateTags = (value?: string[]): true | string => {
   if (value?.some((tag) => tag.length > MAX_TAG_LENGTH)) {
@@ -48,9 +49,7 @@ export const TagsField = () => {
             label={i18n.translate('xpack.alertingV2.ruleForm.tagsLabel', {
               defaultMessage: 'Tags',
             })}
-            labelAppend={i18n.translate('xpack.alertingV2.ruleForm.tagsOptional', {
-              defaultMessage: 'optional',
-            })}
+            labelAppend={OPTIONAL_LABEL}
             isInvalid={!!error}
             error={error?.message}
             fullWidth

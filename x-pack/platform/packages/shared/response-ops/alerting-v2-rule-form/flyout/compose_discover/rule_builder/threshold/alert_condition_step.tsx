@@ -63,6 +63,7 @@ import {
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
 import { splitQuery } from '../../use_heuristic_split';
+import { OPTIONAL_LABEL } from '../../../../form/translations';
 import {
   AGGREGATION_OPTIONS,
   COMPARATOR_OPTIONS,
@@ -431,37 +432,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   return (
     <>
-      {/* ── Header with preview icon ── */}
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.alertingV2.ruleBuilder.dataSource.title"
-                defaultMessage="Data source"
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.ruleBuilder.alertCondition.previewTooltip', {
-              defaultMessage: 'Preview results',
-            })}
-          >
-            <EuiButtonIcon
-              iconType="inspect"
-              aria-label={i18n.translate(
-                'xpack.alertingV2.ruleBuilder.alertCondition.previewAriaLabel',
-                { defaultMessage: 'Preview results' }
-              )}
-              isDisabled={state.childOpen}
-              onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-              data-test-subj="ruleBuilderOpenPreview"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.ruleBuilder.dataSource.title"
+            defaultMessage="Data source"
+          />
+        </h3>
+      </EuiTitle>
       <EuiSpacer size="m" />
 
       {/* ── Field-load error ── */}
@@ -566,8 +544,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
       <EuiFormRow
         label={i18n.translate('xpack.alertingV2.ruleBuilder.filterLabel', {
-          defaultMessage: 'Filter (optional)',
+          defaultMessage: 'Filter',
         })}
+        labelAppend={OPTIONAL_LABEL}
         fullWidth
       >
         <EuiFieldText
@@ -719,8 +698,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
               <EuiSpacer size="xs" />
               <EuiFormRow
                 label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.filterLabel', {
-                  defaultMessage: 'Filter (optional)',
+                  defaultMessage: 'Filter',
                 })}
+                labelAppend={<EuiText size="xs">{OPTIONAL_LABEL}</EuiText>}
                 fullWidth
               >
                 <EuiFieldText
@@ -758,7 +738,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         <h4>
           <FormattedMessage
             id="xpack.alertingV2.ruleBuilder.evaluationsTitle"
-            defaultMessage="Evaluations (optional)"
+            defaultMessage="Evaluations"
           />
         </h4>
       </EuiTitle>

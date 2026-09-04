@@ -9,9 +9,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../contexts';
+import { OPTIONAL_LABEL } from '../translations';
 import type { FormValues } from '../types';
 import { getDashboardId } from '../utils/artifact_data';
 import { buildDashboardArtifactsFromSelection } from './dashboard_artifact_selection';
@@ -78,14 +78,7 @@ export const RelatedDashboardSelector: React.FC = () => {
           </span>
         }
         fullWidth
-        labelAppend={
-          <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.alertingV2.ruleForm.artifactFieldOptional"
-              defaultMessage="optional"
-            />
-          </EuiText>
-        }
+        labelAppend={<EuiText size="xs">{OPTIONAL_LABEL}</EuiText>}
       >
         <RelatedDashboardsComboBox
           dashboard={dashboard}
