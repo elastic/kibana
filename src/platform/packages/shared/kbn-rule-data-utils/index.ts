@@ -18,3 +18,4 @@ export * from './src/rule_locator_params';
 export * from './src/routes/stack_rule_paths';
 export * from './src/rule_types';
 export * from './src/rule_constants';
+export * from './src/rule_capabilities';

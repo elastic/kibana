@@ -8,10 +8,14 @@
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderMenu } from '@kbn/app-header';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
+import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { experimentalBadge } from '../../components/experimental_badge';
+import { paths } from '../../constants';
+import { canReadV1Rules } from '../../utils/can_read_v1_rules';
 
 const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTitle', {
   defaultMessage: 'Rules',
@@ -115,6 +119,45 @@ export const RulesListHeader = ({
   const phase = useContentListPhase();
   const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
 
+  const application = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+
+  const tabs = useMemo<AppHeaderTab[]>(() => {
+    const headerTabs: AppHeaderTab[] = [
+      {
+        id: 'v2Rules',
+        label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
+          defaultMessage: 'V2 rules',
+        }),
+        isSelected: true,
+        href: basePath.prepend(paths.ruleList),
+        badge: {
+          iconType: 'sparkles',
+          tooltip: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabNewBadgeTooltip', {
+            defaultMessage: 'New',
+          }),
+        },
+        'data-test-subj': 'v2RulesTab',
+      },
+    ];
+
+    // Keeps the tab from pointing at a privileges wall.
+    if (canReadV1Rules(application.capabilities)) {
+      headerTabs.push({
+        id: 'v1Rules',
+        label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
+          defaultMessage: 'V1 rules',
+        }),
+        isSelected: false,
+        href: basePath.prepend(triggersActionsRoute),
+        'data-test-subj': 'v1RulesTab',
+      });
+    }
+
+    // A one-item tablist is not a tablist — omit tabs unless both surfaces are shown.
+    return headerTabs.length > 1 ? headerTabs : [];
+  }, [basePath, application.capabilities]);
+
   const headerMenu = useMemo(
     () =>
       showHeaderMenu
@@ -143,6 +186,7 @@ export const RulesListHeader = ({
       <AppHeader
         sticky={false}
         title={RULES_LIST_PAGE_TITLE}
+        tabs={tabs}
         badges={[experimentalBadge]}
         spacing="bleed"
         menu={headerMenu}

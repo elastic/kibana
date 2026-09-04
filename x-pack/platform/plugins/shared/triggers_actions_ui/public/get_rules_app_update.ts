@@ -7,7 +7,7 @@
 
 import type { AppDeepLinkLocations, AppUpdatableFields, Capabilities } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
-import { RULES_CAPABILITY_ID } from './common/constants';
+import { TRIGGERS_ACTIONS_RULES_CAPABILITY_ID } from '@kbn/rule-data-utils';
 
 const RULES_APP_VISIBLE_IN: AppDeepLinkLocations[] = ['projectSideNav'];
 
@@ -20,7 +20,7 @@ export const getRulesAppUpdate = (
   capabilities: Capabilities
 ): Pick<AppUpdatableFields, 'status' | 'visibleIn'> => {
   const hasRulesAccess = Boolean(
-    capabilities.management?.insightsAndAlerting?.[RULES_CAPABILITY_ID]
+    capabilities.management?.insightsAndAlerting?.[TRIGGERS_ACTIONS_RULES_CAPABILITY_ID]
   );
   return hasRulesAccess
     ? { status: AppStatus.accessible, visibleIn: RULES_APP_VISIBLE_IN }
