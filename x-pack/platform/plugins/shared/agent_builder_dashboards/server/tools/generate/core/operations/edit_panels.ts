@@ -41,7 +41,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1).max(100),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports Lens API presentation edits, including form-based charts (source: "config", type: "vis", config.changes). Vega supports only title, description, and hide_title changes. Use source: "request" for ES|QL/Vega query or chart-family changes, markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). DSL, form-based, and other non-ES|QL visualization panels are not supported for query edits and may be recreated as ES|QL panels only with explicit user permission.'
+      'Edit existing panels in place by panelId. Visualizations: source: "request" regenerates an ES|QL Lens or Vega panel for query or chart-family changes; source: "config", type: "vis" applies presentation-only changes to any Lens API panel (Vega: title, description, hide_title only). Markdown: source: "config", type: "markdown". Custom content: source: "config", type: "custom_content". Non-ES|QL panels cannot take query edits; recreate them as ES|QL panels only with explicit user permission.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;

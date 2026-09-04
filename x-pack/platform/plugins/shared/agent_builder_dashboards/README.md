@@ -4,24 +4,31 @@ Contains dashboard-related entities for the Agent Builder, including tools, atta
 
 ## Prettify
 
-The dashboard agent reads the dashboard and screenshot attachments, assesses the existing
-charts, and batches presentation/layout edits. It asks about specific additional charts only
-when they would be useful and the user has not already chosen the scope. Styling does not
-invoke visualization generation, data discovery, time-range selection, or a second review model.
+The "Enhance this dashboard" button attaches the dashboard and a screenshot and sends
+`/dashboard-management prettify this dashboard`. The dashboard agent then reads the
+`dashboard-prettify.md` reference file of the skill and follows it: assess the screenshot and
+payload, optionally ask once whether to also add specific charts, and batch presentation and
+layout edits into one `generate_dashboard` call. Styling never invokes visualization generation,
+data discovery, time-range selection, or a second review model.
 
-The visualization server's `lens/chart_defaults.ts` defines per-chart `CHART_DEFAULTS` as
-guidance, not executable presets. Both agents receive the same visual preferences, including
-shared title, number-format, and color rules. The generator emits its chosen configuration;
-Prettify emits explicit `set`/`remove` changes based on the screenshot and existing settings.
-Chart types without specific preferences use only the common rules. Generation-only binding
-rules and presentation-edit instructions remain separate from the shared visual preferences.
-Neither flow automatically applies these preferences. Native Lens defaults and validation remain.
-Metric charts are always titleless. XY charts hide axis titles and use bottom/outside legends;
-most time-series lines become gradient areas, keeping at most one primary overview line.
-Pie legends use auto visibility. Gauge min/max settings are omitted and goals require an
-explicit request. Invented custom colors and mappings are removed unless the user requested them.
+### Where the prompts live
 
-Example `platform.dashboard.generate_dashboard` update:
+| Content | Source | Reaches the agent through |
+| --- | --- | --- |
+| Operations vocabulary, panel types, chart-type selection | `server/skills/generation_guidance/generation_guidance.ts` | skill body (always loaded) |
+| Dashboard design: composition, panel layout, controls | `server/skills/generation_guidance/design/` | skill body (always loaded) |
+| Prettify steps and dashboard review checklist | `server/skills/generation_guidance/prettify_guidance.ts` | `dashboard-prettify.md`, read on demand |
+| Chart style rules (titles, number formats, colors, per-chart rules) | `agent-builder-visualizations-server/lens/chart_style_rules.ts` and `config_rules.ts` | `dashboard-prettify.md` and the chart generation prompt |
+| Presentation edit syntax | `agent-builder-visualizations-server/lens/presentation.ts` | `dashboard-prettify.md` and the `edit_panels` schema |
+
+The chart style rules are the single source of visual preferences: the chart generator applies
+them to new charts, and Prettify applies them to existing ones. Generation-only data-binding rules
+stay in `chart_type_registry.ts`.
+
+### Presentation edits
+
+Chart styling uses `edit_panels` with `source: "config"`, `type: "vis"`, and explicit
+`set`/`remove` changes on Lens API fields:
 
 ```json
 {
@@ -33,35 +40,19 @@ Example `platform.dashboard.generate_dashboard` update:
       "type": "vis",
       "panelId": "existing-panel-id",
       "config": {
-        "changes": [{
-          "operation": "set",
-          "path": "legend.visibility",
-          "value": "hidden"
-        }]
+        "changes": [{ "operation": "set", "path": "legend.visibility", "value": "hidden" }]
       }
     }]
   }]
 }
 ```
 
-Changes address Lens API fields, not internal `visualization.*` state. There is no per-chart
-path allowlist. Changes can set scalar values (or legend statistics) and remove settings;
-object settings such as number formats are edited through their individual fields.
-Each panel edit is validated with the native Lens schema and applied atomically;
-failed panels remain unchanged. Unmentioned settings and panel IDs are preserved. Form-based
-Lens charts support the same presentation edits. When removing arbitrary metric/table coloring, emit
-explicit removals for both `color` and `apply_color_to`. Unsafe object paths and array growth
-are rejected. Vega remains limited to panel chrome and layout.
+`editLensPresentation` applies each panel's changes atomically, rejects unsafe paths and array
+growth, validates the result with the native Lens schema, and leaves failed panels unchanged.
+Unmentioned settings and panel IDs are preserved; form-based Lens charts are supported; Vega panels
+accept only `title`, `description`, and `hide_title`. Keeping queries, data sources, and chart
+families unchanged is an agent instruction, not a guarantee enforced by the tool.
 
-The agent is instructed to preserve queries, data sources, filters, aggregations, chart families,
-and layer membership. Column bindings are preserved except for optional gauge min/max/goal
-removals required by the chart rules. Line-to-area restyling keeps the existing layer's data and
-bindings. These are agent responsibilities, not semantic guarantees enforced by the editing tool;
-Lens validation checks configuration validity.
-
-Updates use the latest attachment payload and retain attachment version history. Existing
-dashboards retain an absent or saved time range unless an operation explicitly changes it.
-
-Use `update_panel_layouts` with `newSections`/`newSectionKey` to regroup existing panels
-without regenerating them. The original screenshot is assessment input, not visual
-verification of the updated dashboard.
+`update_panel_layouts` with `newSections`/`newSectionKey` regroups existing panels without
+regenerating them. Updates to existing dashboards keep the saved (or absent) time range; only new
+dashboards get a data-aware default.

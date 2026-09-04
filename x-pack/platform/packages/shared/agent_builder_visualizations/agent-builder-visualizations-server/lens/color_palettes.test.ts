@@ -6,7 +6,7 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { CHART_DEFAULTS } from './chart_defaults';
+import { CHART_STYLE_RULES } from './chart_style_rules';
 import {
   INVENTED_COLOR_BAN,
   LEGACY_PALETTE_BAN,
@@ -17,7 +17,7 @@ import {
 describe('getColorPalettesPromptContent', () => {
   it('keeps shared policy out of chart-specific rules and palette examples', () => {
     for (const chartType of Object.values(SupportedChartType)) {
-      expect(CHART_DEFAULTS[chartType]?.rules ?? []).not.toContain(LEGACY_PALETTE_BAN);
+      expect(CHART_STYLE_RULES[chartType]?.rules ?? []).not.toContain(LEGACY_PALETTE_BAN);
       expect(getColorPalettesPromptContent(chartType)).not.toContain(LEGACY_PALETTE_BAN);
     }
   });
@@ -36,7 +36,6 @@ describe('getColorPalettesPromptContent', () => {
     expect(content).toContain('DEFAULT POLICY');
     expect(content).toContain('Drop invented static hex colors, per-value `color_code` mappings');
     expect(content).toContain('unless the user asked for those colors');
-    expect(content).not.toContain('Preserve meaningful existing colors');
   });
 
   it.each([

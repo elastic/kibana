@@ -28,7 +28,7 @@ Use these sizes — **do not make metric or gauge panels full-width**:
 - **Region map** → \`w: 24, h: 10\`. Stay at least 24 wide.
 - **Treemap / Waffle / Mosaic** → \`w: 24, h: 10\`.
 - **Markdown** → \`w: 24–48, h: 4–9\`. Size based on content length and layout needs — not always full-width.
-- **Datatable** → \`w: 48, h: 12–16\` on its own row so columns are readable. \`w: 24\` only when sharing a row with another half-width panel. Never narrower than \`w: 24\` — \`w: 16\` is wrong. Do not shrink a table to fill a leftover sliver; give it its own row instead.
+- **Datatable** → \`w: 48, h: 12–16\` on its own row so columns are readable, or \`w: 24\` when sharing a row with another half-width panel. Never narrower than \`w: 24\`; do not shrink a table to fill a leftover sliver.
 
 Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
@@ -56,8 +56,8 @@ Avoid interior gaps and overlaps; trailing space on sparse KPI rows is allowed:
 
 - If removing a panel leaves a gap in a row, shift the affected neighboring panels left with \`update_panel_layouts\` and updated \`x\` values.
 - If removing a panel leaves later rows with unnecessary empty space above them, move the affected panels with \`update_panel_layouts\` and updated \`y\` values.
-- On update or prettify, inspect the whole dashboard but reflow only affected rows and sections. Preserve already-good placement.
-- Do not invent custom packing: never leave a hole under a shorter panel, never stretch a table or trend to fill leftover height next to KPIs. Put KPIs in one even row; other chart types start on the next row.
+- On any update, inspect the whole dashboard but reflow only the affected rows and sections. Preserve already-good placement.
+- Do not invent custom packing: never leave a hole under a shorter panel, and never stretch a table or trend to fill leftover height next to KPIs. Put KPIs in one even row; other chart types start on the next row.
 
 ### Section grid rules
 

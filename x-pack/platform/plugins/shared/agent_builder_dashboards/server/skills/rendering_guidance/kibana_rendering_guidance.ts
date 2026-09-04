@@ -36,7 +36,7 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - Render only the final dashboard attachment inline, as the last part of your response, after any text. Never render individual visualization attachments during dashboard composition.
 - Remember the dashboard's \`attachment_id\`. On later updates, pass the same \`attachment_id\` back as \`dashboardAttachmentId\` so generation edits the existing dashboard in place.
 - Use returned panel \`id\` values for future panel removals, and section \`id\` values for future section-targeted changes.
-- Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results. A \`newSectionKey\` is a local alias for \`update_panel_layouts.newSections\` in that same operation only.
+- Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
 - If the generation result includes \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
 
 ## Rendering Edge Cases

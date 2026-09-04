@@ -7,7 +7,6 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import {
-  DASHBOARD_PRETTIFY_FILE_PATH,
   DASHBOARD_PRETTIFY_REFERENCE,
   dashboardManagementSkill as skill,
 } from './dashboard_management_skill';
@@ -45,24 +44,13 @@ describe('registerSkills', () => {
   });
 
   it('keeps the prettify playbook in referenced content, not the default skill body', () => {
-    expect(skill.content).toContain(DASHBOARD_PRETTIFY_FILE_PATH);
+    expect(skill.content).toContain(`${DASHBOARD_PRETTIFY_REFERENCE.name}.md`);
     expect(skill.content).toContain('read_file');
-    expect(skill.content).toContain('and follow that file');
     expect(skill.content).not.toContain('## Prettifying a Dashboard');
-    expect(skill.content).not.toContain('ask_user_question');
-    expect(skill.content).not.toContain('**All of them**');
-    expect(skill.content).not.toContain('## Dashboard Review');
-    expect(skill.content).not.toContain('CHART REVIEW RULES');
-    expect(skill.referencedContent).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          name: DASHBOARD_PRETTIFY_REFERENCE.name,
-          relativePath: DASHBOARD_PRETTIFY_REFERENCE.relativePath,
-        }),
-      ])
-    );
+    expect(skill.content).not.toContain('CHART STYLE RULES');
+    expect(skill.referencedContent).toContainEqual(DASHBOARD_PRETTIFY_REFERENCE);
     expect(DASHBOARD_PRETTIFY_REFERENCE.content).toContain('## Prettifying a Dashboard');
-    expect(DASHBOARD_PRETTIFY_REFERENCE.content).toContain('## Dashboard Review');
+    expect(DASHBOARD_PRETTIFY_REFERENCE.content).toContain('CHART STYLE RULES');
   });
 
   it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {

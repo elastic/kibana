@@ -25,5 +25,5 @@ When the user's request is vague (e.g., "create a dashboard for my logs"), explo
 - Use sections when panels fall into distinct topics such as overview metrics, trends, breakdowns, or per-domain groupings.
 - Prefer sections for larger dashboards, especially when there are roughly 6 or more visualization panels or when the layout would otherwise feel long and hard to navigate.
 - Do not add sections only for decoration. Use them when they make the dashboard structure clearer.
-- Put each panel in the section that matches its role: KPIs in Overview/Key Metrics, time series in Trends, rankings and distributions in Breakdowns. Overview/Key Metrics is KPI-only — do not invent a mixed section by parking a table or trend there. If placement is wrong, rethink where panels live: \`update_panel_layouts\` with \`newSections\` / \`sectionId\` — do not only tweak widths in place.
+- Put each panel in the section that matches its role: KPIs in Overview/Key Metrics, time series in Trends, rankings and distributions in Breakdowns. Overview/Key Metrics is KPI-only — do not park a table or trend there. When placement is wrong, move the panel to the right section instead of only tweaking widths in place.
 `;

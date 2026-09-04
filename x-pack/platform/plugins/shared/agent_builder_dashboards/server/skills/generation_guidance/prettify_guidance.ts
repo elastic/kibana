@@ -5,23 +5,33 @@
  * 2.0.
  */
 
+import {
+  getChartStyleRulesPromptContent,
+  getLensPresentationEditGuidance,
+} from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
-import { getDashboardReviewPromptContent } from './dashboard_guidance';
 
-const prettifyGuidance = `## Prettifying a Dashboard
+const prettifySteps = `## Prettifying a Dashboard
 
-1. Read the dashboard attachment. Read the paired image attachment explicitly. Use the screenshot to judge appearance and the payload to identify panel IDs, data bindings, and settings. If the screenshot is missing or unreadable, review the payload and state that visual assessment is limited. If image and payload disagree, prefer the latest payload and do not guess panel identities from the image.
-2. Inspect the full dashboard for layout, chart styling, and useful section grouping. Apply the shared chart rules below, including their conditions for titles, colors, legends, gauge settings, and line-to-area restyling. Preserve queries, data sources, filters, controls, time range, and panel identity. Do not replace charts just to improve appearance.
-3. If the dashboard lacks useful coverage, make at most one focused data-discovery pass against its existing data sources to identify specific useful additions. Skip discovery when the user requested existing-only improvements. Do not run queries for ordinary presentation fixes or explore unrelated indices.
-4. When useful additions are supported by that discovery and the user has not already chosen, call ask_user_question once with a single-choice question: "Improve existing charts only" or "Also add the suggested charts". Describe the specific additions. Both choices include all applicable fixes to existing charts. If there are no useful additions, or the user already chose the scope, proceed without this question. Never add, remove, or replace charts without permission.
-5. Batch the agreed changes in ${dashboardTools.generateDashboard} with dashboardAttachmentId. Use edit_panels with source: "config", type: "vis", and config.changes containing the explicit edits you chose from the shared chart guidance. For example:
-   { "changes": [{ "operation": "set", "path": "legend.visibility", "value": "hidden" }, { "operation": "remove", "path": "layers.0.y.0.color" }] }
-   Emit only presentation changes that make sense for this panel; defaults are guidance, not an operation. Follow the presentation-edit instructions below. Do not use source: "request" for styling; it is for approved new charts or intentional data changes.
-6. Use update_panel_layouts to move/resize existing panels, including newSections/newSectionKey for grouping without recreating them. Keep IDs and unrelated settings. Supported Lens API presentation edits work for both ES|QL and form-based charts. Vega supports only panel title/description/hide_title and layout; leave unsupported chart internals intact and report them.
-7. Report per-panel failures without claiming they were fixed. If nothing needs changing, make no tool call.
-8. Summarize the changes and anything left unsupported. The original screenshot is not visual verification of the result. Do not start another model-based review loop or claim to have seen the updated dashboard unless a new image is available.
-`;
+1. Read the dashboard attachment and its paired screenshot attachment. Judge appearance from the screenshot; take panel IDs, data bindings, and settings from the payload, and trust the payload when the two disagree. Without a readable screenshot, review the payload and say that the visual assessment is limited.
+2. Review layout, grouping, and chart styling against the Dashboard Design rules of this skill, the checklist below, and the chart style rules. Improve appearance only; never replace a chart to restyle it, and keep queries, filters, controls, time range, and panel IDs as they are.
+3. Additions are optional. If the dashboard lacks useful coverage and the user has not limited the scope to existing charts, make at most one focused data-discovery pass against its existing data sources — never for presentation fixes. When that yields useful additions, ask once with ask_user_question (single choice): "Improve existing charts only" or "Also add the suggested charts", naming the additions. Both choices include every fix to existing charts. Otherwise skip the question. Never add, remove, or replace charts without permission.
+4. Apply everything in one ${dashboardTools.generateDashboard} call with dashboardAttachmentId:
+   - edit_panels with source: "config", type: "vis", and config.changes for chart styling, e.g. { "changes": [{ "operation": "set", "path": "legend.visibility", "value": "hidden" }, { "operation": "remove", "path": "layers.0.y.0.color" }] } (syntax below).
+   - update_panel_layouts for moves, resizes, and grouping into sections (newSections/newSectionKey), keeping panel IDs.
+   - source: "request" only for approved new charts.
+   If nothing needs changing, make no tool call.
+5. Report what changed, per-panel failures, and anything left unsupported. The original screenshot does not verify the result: do not claim to have seen the updated dashboard, and do not start another review loop.
 
-/** On-demand screenshot-first improvement flow for the main dashboard agent. */
+## Dashboard Review Checklist
+
+- Layout: overlaps, inconsistent sizes among comparable panels, tables narrower than 24 columns, L-shaped holes. Change only the affected rows and sections.
+- Grouping: panels in a section that does not match their role, or a long multi-topic dashboard without sections. Move existing panels; do not recreate them.
+- Legend statistics: avg/min/max on the primary time series when useful. Set legend.statistics directly without touching the query.
+- Controls and filters: keep the existing ones. Suggest a categorical control only when it helps navigate real entities.`;
+
+/** The on-demand Prettify reference: steps, review checklist, shared chart style rules, and edit syntax. */
 export const getDashboardPrettifyPromptContent = (): string =>
-  [prettifyGuidance, getDashboardReviewPromptContent()].join('\n\n');
+  [prettifySteps, getChartStyleRulesPromptContent(), getLensPresentationEditGuidance()].join(
+    '\n\n'
+  );

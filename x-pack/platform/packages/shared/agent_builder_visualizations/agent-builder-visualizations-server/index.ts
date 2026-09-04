@@ -6,9 +6,13 @@
  */
 
 export { buildLensConfig } from './lens/build_lens_config';
-export { editLensPresentation, lensPresentationEditSchema } from './lens/presentation';
 export {
-  getChartTypeReviewPromptContent,
+  editLensPresentation,
+  getLensPresentationEditGuidance,
+  lensPresentationEditSchema,
+} from './lens/presentation';
+export {
+  getChartStyleRulesPromptContent,
   getChartTypeSelectionPromptContent,
 } from './lens/chart_type_guidance';
 export { seriesStatisticsAgentGuidance } from './shared/series_statistics_prompt';

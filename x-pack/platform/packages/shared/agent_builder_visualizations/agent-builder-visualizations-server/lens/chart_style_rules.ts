@@ -7,16 +7,20 @@
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
-interface ChartDefaults {
+interface ChartStyleRules {
   readonly rules: readonly string[];
+  /** Enables palette previews in the generation prompt (see `color_palettes.ts`). */
   readonly coloring?: {
     readonly dynamic?: { readonly recommendedStepCount: number };
     readonly categorical?: true;
   };
 }
 
-/** Visual preferences shared by chart generation and dashboard Prettify, never applied by code. */
-export const CHART_DEFAULTS: Readonly<Partial<Record<SupportedChartType, ChartDefaults>>> = {
+/**
+ * Per-chart-type style rules shared by chart generation and dashboard Prettify.
+ * Both agents read these as instructions; nothing applies them automatically.
+ */
+export const CHART_STYLE_RULES: Readonly<Partial<Record<SupportedChartType, ChartStyleRules>>> = {
   metric: {
     rules: [
       'Always omit panel titles on metric charts, including legacy metrics. The metric must be titleless.',
@@ -32,10 +36,9 @@ export const CHART_DEFAULTS: Readonly<Partial<Record<SupportedChartType, ChartDe
   xy: {
     rules: [
       'Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis.x.title.visible: false and axis.y.title.visible: false, and hide the secondary Y-axis title when present.',
-      'Place the legend outside at the bottom: legend.placement: "outside" and legend.position: "bottom". Omit legend.layout.type.',
+      'Place the legend outside at the bottom: legend.placement: "outside" and legend.position: "bottom". Omit legend.layout.type and legend.columns.',
       'Leave legend.visibility unset by default. When legend statistics are set, use legend.visibility: "visible". For a one-series categorical chart without legend statistics, hide the legend with legend.visibility: "hidden".',
-      'For area series, set styling.areas.fill: "gradient" rather than solid.',
-      'Most time-series line charts should be gradient area. Keep at most one line (the primary overview trend); convert the rest to area with styling.areas.fill: "gradient". Skip bars, categorical charts, and a lone line that is already the only time series.',
+      'Area series use styling.areas.fill: "gradient", not solid. Most time-series lines should be gradient areas: keep at most one line (the primary overview trend) and make the other time-series layers areas. Leave bars, categorical charts, and a lone line that is the only time series unchanged.',
     ],
   },
   gauge: {

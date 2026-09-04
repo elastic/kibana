@@ -7,7 +7,7 @@
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getPalettes } from '@kbn/palettes';
-import { CHART_DEFAULTS } from './chart_defaults';
+import { CHART_STYLE_RULES } from './chart_style_rules';
 
 /**
  * Number of color stops sampled from each categorical palette in the prompt
@@ -73,7 +73,7 @@ const DEFAULT_POLICY_LINES = [
   '- Use "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, or "Cool"/"Warm"/"Gray" for neutral magnitude.',
   '- Step thresholds are data values, not display labels; keep them in the same unit and scale as the metric column. For rates, do not assume per-second thresholds unless the query computes per-second values.',
   '- Never introduce the deprecated color type "legacy_dynamic".',
-  '- Chart-specific defaults override this policy where they differ.',
+  '- Chart-specific rules override this policy where they differ.',
 ];
 
 const getDynamicStepsLines = (stepCountLine: string): string[] => [
@@ -84,7 +84,7 @@ const getDynamicStepsLines = (stepCountLine: string): string[] => [
   '',
 ];
 
-/** Shared policy; exact palette samples remain chart-specific. */
+/** Color policy shared by generation and Prettify; palette previews stay generation-only. */
 export const getSharedColorPalettesPromptContent = (): string =>
   [
     'COLOR PALETTE RULES:',
@@ -93,9 +93,9 @@ export const getSharedColorPalettesPromptContent = (): string =>
     ...DEFAULT_POLICY_LINES,
   ].join('\n');
 
-/** Palette construction examples for generation; visual policy is shared in chart defaults. */
+/** Generation-only palette mechanics and previews; the color policy itself is in the shared chart style rules. */
 export const getColorPalettesPromptContent = (chartType: SupportedChartType): string => {
-  const coloringOptions = CHART_DEFAULTS[chartType]?.coloring;
+  const coloringOptions = CHART_STYLE_RULES[chartType]?.coloring;
   const dynamicColoringOptions = coloringOptions?.dynamic;
   const supportsDynamic = dynamicColoringOptions !== undefined;
   const supportsCategorical = coloringOptions?.categorical ?? false;

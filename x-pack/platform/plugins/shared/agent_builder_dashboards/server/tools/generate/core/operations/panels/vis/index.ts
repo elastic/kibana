@@ -201,7 +201,7 @@ export const editVisPanelConfigInputSchema = z.object({
   type: z.literal('vis'),
   panelId: z.string().max(256).describe('Existing Lens or Vega panel id to update.'),
   config: lensPresentationEditSchema.describe(
-    'Explicit Lens presentation changes, e.g. { changes: [{ operation: "set", path: "legend.visibility", value: "hidden" }] }. Unmentioned settings remain unchanged. Follow the shared chart guidance; queries, data sources, filters, and chart families must stay unchanged. Vega supports only title, description, and hide_title changes; spec editing requires source: "request".'
+    'Presentation-only changes to an existing Lens API panel; unmentioned settings are preserved. Queries, data sources, filters, and chart families must stay unchanged (use source: "request" for those). Vega panels accept only title, description, and hide_title.'
   ),
 });
 

@@ -16,6 +16,7 @@ const valueSchema = z.union([
   z.number().finite(),
   z.array(z.string().max(64)).max(20),
 ]);
+/** Panel-level fields that every visualization panel, including Vega, may change. */
 const chromePaths = ['title', 'description', 'hide_title'] as const;
 const pathSchema = z
   .string()
@@ -43,7 +44,7 @@ export const lensPresentationEditSchema = z.strictObject({
     .min(1)
     .max(100)
     .describe(
-      'Explicit presentation changes chosen by the agent. Use dot-separated Lens API paths, with existing array indices. Never replace arrays, data sources, or chart families. Follow the shared chart guidance for line-to-area restyling and optional gauge binding removals.'
+      'Presentation changes: { operation: "set", path, value } or { operation: "remove", path }. Paths are dot-separated Lens API fields with existing array indices, e.g. legend.visibility or layers.0.y.0.color.'
     ),
 });
 
@@ -112,13 +113,14 @@ export const editLensPresentation = <T extends object>(
   return result;
 };
 
-/** Describes explicit edits and the agent's responsibility to preserve chart semantics. */
+/** How to express `edit_panels` presentation changes; what to change is defined by the chart style rules. */
 export const getLensPresentationEditGuidance = (): string =>
   [
-    'PRESENTATION EDITS:',
-    'Emit only explicit changes: { operation: "set", path, value } or { operation: "remove", path }. Unmentioned settings remain unchanged. Use dot-separated Lens API fields with existing array indices, not internal visualization.* state. Set accepts scalars or a list of legend statistics, not objects. Edit object settings through individual fields, e.g. layers.0.y.0.format.type and layers.0.y.0.format.decimals. Remove a setting explicitly to restore the native Lens default. When removing metric/table coloring, explicitly remove apply_color_to as well as color.',
-    'To remove a panel title, explicitly clear title or set hide_title: true; for metrics, always clear title. When changing XY legend placement, remove incompatible legend.layout and legend.columns settings explicitly. Apply the line-to-area guidance by setting the existing layers.<index>.type to "area" and styling.areas.fill to "gradient".',
-    'Only change presentation. Never modify queries, data sources, filters, aggregations, chart families, or layer membership during Prettify. Preserve panel identity, units, and column bindings, except for removing optional gauge metric.min, metric.max, and unrequested metric.goal as required by the gauge rules. Line-to-area restyling must keep the layer data and bindings unchanged. Do not regenerate a chart for styling; query and chart-family changes require a separate user request.',
-    `Vega supports only ${chromePaths.join(', ')} changes; leave its spec unchanged.`,
-    'Lens validates the resulting configuration. If an edit fails validation, report the panel failure rather than claiming it was fixed.',
+    'PRESENTATION EDITS (edit_panels with source: "config", type: "vis", config.changes):',
+    '- Each change is { operation: "set", path, value } or { operation: "remove", path }. Paths are dot-separated Lens API fields with existing array indices, e.g. title, hide_title, legend.visibility, axis.x.title.visible, layers.0.y.0.color — never internal visualization.* state.',
+    '- Values are scalars or a list of legend statistics. Edit objects field by field, e.g. layers.0.y.0.format.type and layers.0.y.0.format.decimals.',
+    '- Unmentioned settings stay unchanged. Remove a setting to restore the Lens default; to drop chart coloring, remove both color and apply_color_to.',
+    '- Presentation only: queries, data sources, filters, aggregations, column bindings, chart families, and layer membership stay as they are. The only exceptions are those the chart style rules call for: removing optional gauge metric.min, metric.max, and an unrequested metric.goal, and setting a time-series layers.<index>.type to "area".',
+    `- Vega panels accept only ${chromePaths.join(', ')}.`,
+    '- Each panel is validated against the Lens schema and applied atomically; a failed panel is left unchanged. Report failures instead of claiming they were fixed.',
   ].join('\n');

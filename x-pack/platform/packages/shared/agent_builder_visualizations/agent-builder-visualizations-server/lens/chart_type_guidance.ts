@@ -6,10 +6,9 @@
  */
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { CHART_DEFAULTS } from './chart_defaults';
+import { CHART_STYLE_RULES } from './chart_style_rules';
 import { titleRulesPromptContent, numberFormatRulesPromptContent } from './config_rules';
 import { getSharedColorPalettesPromptContent } from './color_palettes';
-import { getLensPresentationEditGuidance } from './presentation';
 import { chartTypeRegistry } from './chart_type_registry';
 
 export const getChartTypeSelectionPromptContent = () =>
@@ -20,6 +19,7 @@ export const getChartTypeSelectionPromptContent = () =>
     ),
   ].join('\n');
 
+/** Generation-only data-binding rules for one chart type. */
 export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) => {
   const rules = chartTypeRegistry[chartType].prompt.config?.rules;
 
@@ -33,23 +33,22 @@ export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) =
   ].join('\n');
 };
 
-/** Compiles the same visual preferences for the chart generator and dashboard agent. */
-export const getChartDefaultsPromptContent = (chartType?: SupportedChartType): string => {
+/**
+ * Style rules shared by chart generation (one chart type) and dashboard Prettify (all
+ * chart types): titles, number formats, color policy, and per-chart-type rules.
+ */
+export const getChartStyleRulesPromptContent = (chartType?: SupportedChartType): string => {
   const entries = chartType
-    ? [[chartType, CHART_DEFAULTS[chartType]] as const]
-    : Object.entries(CHART_DEFAULTS);
+    ? [[chartType, CHART_STYLE_RULES[chartType]] as const]
+    : Object.entries(CHART_STYLE_RULES);
   return [
-    'CHART DEFAULTS:',
-    'Apply these chart rules when generating or improving charts. Use the data and user request to evaluate conditional rules; follow explicit requirements even when existing settings conflict with them.',
+    'CHART STYLE RULES:',
+    'Apply these rules when creating or restyling charts. Judge conditional rules from the data and the user request; when an existing setting conflicts with a rule, follow the rule.',
     titleRulesPromptContent,
     numberFormatRulesPromptContent,
     getSharedColorPalettesPromptContent(),
-    ...entries.flatMap(([type, defaults]) =>
-      defaults ? [`### ${type}`, ...defaults.rules.map((rule) => `- ${rule}`)] : []
+    ...entries.flatMap(([type, styleRules]) =>
+      styleRules ? [`### ${type}`, ...styleRules.rules.map((rule) => `- ${rule}`)] : []
     ),
   ].join('\n');
 };
-
-/** Shared chart guidance plus the explicit presentation-edit interface for Prettify. */
-export const getChartTypeReviewPromptContent = (): string =>
-  [getChartDefaultsPromptContent(), getLensPresentationEditGuidance()].join('\n');
