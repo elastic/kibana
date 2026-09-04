@@ -29,6 +29,7 @@ interface CustomContentComponentProps {
   esqlVariables: ESQLControlVariable[] | undefined;
   previewHtml: string | null;
   onLoadingChange: (isLoading: boolean) => void;
+  setApproximationApplied?: (approximationApplied: boolean | undefined) => void;
   onGenerateWithChat?: () => void;
 }
 
@@ -64,6 +65,7 @@ export const CustomContentComponent = ({
   esqlVariables,
   previewHtml,
   onLoadingChange,
+  setApproximationApplied,
   onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
@@ -80,6 +82,7 @@ export const CustomContentComponent = ({
     query,
     filters,
     esqlVariables,
+    setApproximationApplied,
   });
 
   const { agentBuilder } = getServices();

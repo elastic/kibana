@@ -217,7 +217,9 @@ export const createLensEmbeddableFactory = (
         api,
         parentApi,
         internalApi,
-        services
+        services,
+        undefined,
+        searchContextConfig.internalApi.setApproximationApplied
       );
 
       const onUnmount = () => {

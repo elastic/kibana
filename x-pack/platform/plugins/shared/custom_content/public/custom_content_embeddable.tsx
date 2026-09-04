@@ -86,6 +86,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const usesEsql$ = new BehaviorSubject<boolean>(Boolean(readEsqlQuery(initialState)));
+    const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
@@ -152,6 +153,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ...timeRangeManager.api,
       serializeState,
       usesEsql$,
+      approximationApplied$,
       dataViews$,
       dataLoading$,
       getTypeDisplayName: () =>
@@ -414,6 +416,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           dataLoading$.next(isLoading);
         }, []);
 
+        const setApproximationApplied = useCallback((value: boolean | undefined) => {
+          if (approximationApplied$.getValue() !== value) {
+            approximationApplied$.next(value);
+          }
+        }, []);
+
         const handleGenerateWithChat = useCallback(() => {
           const { agentBuilder } = getServices();
           if (!agentBuilder) return;
@@ -445,6 +453,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             esqlVariables={esqlVariables}
             previewHtml={previewHtml}
             onLoadingChange={handleLoadingChange}
+            setApproximationApplied={setApproximationApplied}
             onGenerateWithChat={handleGenerateWithChat}
           />
         );

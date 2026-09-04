@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Subscription, switchMap } from 'rxjs';
@@ -18,6 +19,10 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { uiActions } from '../../../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from '../types';
 
+interface PanelBadgeExtension {
+  color?: EuiBadgeProps['color'];
+}
+
 export const useBadges = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
 >(
@@ -25,7 +30,7 @@ export const useBadges = <
   api: ApiType,
   getActions: PresentationPanelProps['getActions']
 ) => {
-  const [badges, setBadges] = useState<Action<EmbeddableApiContext>[]>([]);
+  const [badges, setBadges] = useState<Action<EmbeddableApiContext, PanelBadgeExtension>[]>([]);
 
   /**
    * Get all actions once on mount of the panel. Any actions that are Frequent Compatibility
@@ -53,7 +58,7 @@ export const useBadges = <
 
     const handleActionCompatibilityChange = (
       isCompatible: boolean,
-      action: Action<EmbeddableApiContext>
+      action: Action<EmbeddableApiContext, PanelBadgeExtension>
     ) => {
       if (canceled) return;
       setBadges((currentActions) => {
@@ -66,7 +71,7 @@ export const useBadges = <
     (async () => {
       const initialBadges = await getActionsForTrigger(PANEL_BADGE_TRIGGER);
       if (canceled) return;
-      setBadges(initialBadges);
+      setBadges(initialBadges as Action<EmbeddableApiContext, PanelBadgeExtension>[]);
 
       const apiContext = { embeddable: api };
 
@@ -88,7 +93,10 @@ export const useBadges = <
             })
           )
           .subscribe(async (isCompatible) => {
-            handleActionCompatibilityChange(isCompatible, badge as Action<EmbeddableApiContext>);
+            handleActionCompatibilityChange(
+              isCompatible,
+              badge as Action<EmbeddableApiContext, PanelBadgeExtension>
+            );
           });
         subscriptions.add(compatibilitySubject);
       }
@@ -109,6 +117,7 @@ export const useBadges = <
       const badgeElement = (
         <EuiBadge
           key={badge.id}
+          {...(badge.extension?.color && { color: badge.extension.color })}
           iconType={badge.getIconType({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
           onClick={() => badge.execute({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
           onClickAriaLabel={badge.getDisplayName({

@@ -11,6 +11,7 @@ export { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilld
 export { transformDashboardDrilldown } from './bwc/dashboard_drilldown';
 export { openCreateDrilldownFlyout } from './ui_actions/open_create_drilldown_flyout';
 export { openManageDrilldownsFlyout } from './ui_actions/open_manage_drilldowns_flyout';
+export { approximationAppliedBadge } from './ui_actions/approximation_applied_badge';
 export { RemovePanelAction } from './ui_actions/remove_panel_action/remove_panel_action';
 export { CustomTimeRangeBadge } from './ui_actions/customize_panel_action';
 export { CpsUsageOverridesBadge } from './ui_actions/customize_panel_action';
