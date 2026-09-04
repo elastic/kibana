@@ -12,8 +12,9 @@ import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 
 /**
- * Registers ES|QL Monaco language providers (autocomplete, signature help, hover)
- * for the lifetime of the component that calls this hook.
+ * Registers ES|QL Monaco language providers (autocomplete, signature help, hover,
+ * inline completions, code actions, document highlight) for the lifetime of the
+ * component that calls this hook.
  *
  * Providers are registered per-hook-instance rather than via a module-level singleton.
  * This avoids two problems with the previous singleton pattern:
@@ -70,6 +71,27 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
     const hover = ESQLLang.getHoverProvider?.(stableCallbacks);
     if (hover) {
       disposables.push(monaco.languages.registerHoverProvider(ESQL_LANG_ID, hover));
+    }
+
+    const inlineCompletions = ESQLLang.getInlineCompletionsProvider?.(stableCallbacks);
+    if (inlineCompletions) {
+      disposables.push(
+        monaco.languages.registerInlineCompletionsProvider(ESQL_LANG_ID, inlineCompletions)
+      );
+    }
+
+    // Quick fixes only surface once validation markers exist (wired separately);
+    // registering here is harmless until then.
+    const codeActions = ESQLLang.getCodeActionProvider?.(stableCallbacks);
+    if (codeActions) {
+      disposables.push(monaco.languages.registerCodeActionProvider(ESQL_LANG_ID, codeActions));
+    }
+
+    const documentHighlight = ESQLLang.getDocumentHighlightProvider?.();
+    if (documentHighlight) {
+      disposables.push(
+        monaco.languages.registerDocumentHighlightProvider(ESQL_LANG_ID, documentHighlight)
+      );
     }
 
     return () => {
