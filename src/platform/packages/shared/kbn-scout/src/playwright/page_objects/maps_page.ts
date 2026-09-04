@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Locator } from 'playwright/test';
 import type { ScoutPage } from '..';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
@@ -54,22 +55,32 @@ export class MapsPage {
     await this.waitForRenderComplete();
   }
 
-  /** Opens the AppHeader overflow menu when Full screen is not inline. */
-  async revealFullScreenModeButton() {
-    if (await this.fullScreenModeButton.isVisible()) {
+  private async revealAppMenuItem(item: Locator) {
+    if (await item.isVisible()) {
       return;
     }
-    await this.fullScreenModeButton.or(this.appMenuOverflowButton).waitFor({ state: 'visible' });
-    if (await this.fullScreenModeButton.isVisible()) {
+    await item.or(this.appMenuOverflowButton).waitFor({ state: 'visible' });
+    if (await item.isVisible()) {
       return;
     }
     await this.appMenuOverflowButton.click();
-    await this.fullScreenModeButton.waitFor({ state: 'visible' });
+    await item.waitFor({ state: 'visible' });
+  }
+
+  /** Opens the AppHeader overflow menu when Full screen is not inline. */
+  async revealFullScreenModeButton() {
+    await this.revealAppMenuItem(this.fullScreenModeButton);
   }
 
   async clickFullScreenMode() {
     await this.revealFullScreenModeButton();
     await this.fullScreenModeButton.click();
+  }
+
+  /** Save sits in overflow during save-and-return; primary is Save and return. */
+  async clickSaveButton() {
+    await this.revealAppMenuItem(this.saveButton);
+    await this.saveButton.click();
   }
 
   async waitForRenderComplete() {
