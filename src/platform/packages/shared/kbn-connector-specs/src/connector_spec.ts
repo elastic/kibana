@@ -306,7 +306,7 @@ export interface ConnectorTest {
    */
   handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
-  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler */
+  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler. Events-only specs must keep this false; Test is outbound HTTP. */
   enabled: boolean;
 }
 
