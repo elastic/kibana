@@ -7,7 +7,6 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { z } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
@@ -17,36 +16,18 @@ import {
   RULES_API_ALL,
 } from '@kbn/security-solution-features/constants';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
-import type {
-  PatchRuleRequestBody,
-  PatchRuleResponse,
-} from '../../../../../../../common/api/detection_engine/rule_management';
-import { validatePatchRuleRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
-  RuleObjectId,
-  RuleSignatureId,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+  SharedPatchRuleRequestBody,
+  validatePatchRuleRequestBody,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { validateRulePatchByRuleType } from '../../../utils/validate';
 import { getIdError } from '../../../utils/utils';
-
-/**
- * Validates only the rule selector at the route boundary and preserves all other keys.
- * The body cannot be validated against the `RulePatchProps` union here: `type` is optional
- * in PATCH bodies, so a typeless body matches the union's first branch (EQL) and strip-mode
- * parsing silently drops the actual type's specific fields (e.g. `threshold`). Full
- * validation happens in the handler via `validateRulePatchByRuleType` once the existing
- * rule — and therefore its type — is known.
- */
-const PatchRuleLooseRequestBody = z.looseObject({
-  id: RuleObjectId.optional(),
-  rule_id: RuleSignatureId.optional(),
-});
 
 export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -74,20 +55,22 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(PatchRuleLooseRequestBody),
+            // Only the type-independent props are validated here: `type` is optional in patch
+            // bodies, so the type-specific union cannot be resolved until the existing rule is
+            // fetched. Type-specific fields are preserved and validated further down the stack,
+            // in `patchTypeSpecificParams`, once the rule type is known.
+            body: buildRouteValidationWithZod(SharedPatchRuleRequestBody),
           },
         },
       },
       async (context, request, response): Promise<IKibanaResponse<PatchRuleResponse>> => {
         const siemResponse = buildSiemResponse(response);
-        // Presence/pairing checks only; the full type-specific validation runs below once the
-        // existing rule is read.
-        const validationErrors = validatePatchRuleRequestBody(request.body as PatchRuleRequestBody);
+        const validationErrors = validatePatchRuleRequestBody(request.body);
         if (validationErrors.length) {
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
         try {
-          const { id, rule_id: ruleId } = request.body;
+          const params = request.body;
           const securitySolutionCtx = await context.securitySolution;
 
           const rulesClient = await (await context.alerting).getRulesClient();
@@ -95,26 +78,22 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
 
           const existingRule = await readRules({
             rulesClient,
-            ruleId,
-            id,
+            ruleId: params.rule_id,
+            id: params.id,
           });
 
           if (!existingRule) {
-            const error = getIdError({ id, ruleId });
+            const error = getIdError({ id: params.id, ruleId: params.rule_id });
             return siemResponse.error({
               body: error.message,
               statusCode: error.statusCode,
             });
           }
 
-          // `existingRule` is the internal alerting rule: the detection rule type lives on
-          // its params, not on the top-level `type` (which is the alerting rule type id).
-          const params = validateRulePatchByRuleType(request.body, existingRule.params.type);
-
           await validateRuleResponseActions({
             endpointAuthz: await securitySolutionCtx.getEndpointAuthz(),
             endpointService: securitySolutionCtx.getEndpointService(),
-            rulePayload: params,
+            rulePayload: request.body,
             spaceId: securitySolutionCtx.getSpaceId(),
             existingRule,
             checkOsqueryResponseActionAuthz:

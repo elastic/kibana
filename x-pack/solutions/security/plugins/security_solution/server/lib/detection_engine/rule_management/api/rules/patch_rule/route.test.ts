@@ -142,9 +142,11 @@ describe('Patch rule route', () => {
       expect(response.body.anomaly_threshold).toEqual(anomalyThreshold);
     });
 
-    // PATCH cannot change a rule's type: the body is validated against the schema of the
-    // existing rule's type, so a contradicting `type` fails before the rule is patched.
-    it('rejects patching a rule to a different type', async () => {
+    it('rejects patching a rule to ML if mlAuthz fails', async () => {
+      clients.detectionRulesClient.patchRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
+      });
+
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
@@ -152,10 +154,11 @@ describe('Patch rule route', () => {
       });
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(response.status).toEqual(400);
-      expect(response.body.message).toEqual(
-        expect.stringContaining('type: Invalid input: expected "query"')
-      );
+      expect(response.status).toEqual(403);
+      expect(response.body).toEqual({
+        message: 'mocked validation message',
+        status_code: 403,
+      });
     });
 
     it('rejects patching an ML rule if mlAuthz fails', async () => {
@@ -204,19 +207,24 @@ describe('Patch rule route', () => {
       expect(result.ok).toHaveBeenCalled();
     });
 
-    // Unknown/invalid values pass the loose route boundary and are rejected by the handler,
-    // which validates against the schema of the existing rule's type.
-    test('rejects unknown rule type', async () => {
+    // Regression test: the boundary used to validate the body against the `RulePatchProps`
+    // union. A body without the optional `type` matched the union's first branch (EQL), whose
+    // strip-mode parsing dropped type-specific fields, turning the request into a 200 no-op.
+    // `type` is resolved from the existing rule further down the stack, so the boundary must
+    // preserve those fields. Rejecting an unknown or contradicting `type` happens there too and
+    // is covered by `apply_rule_patch.test.ts`.
+    test('preserves type-specific fields when "type" is omitted', async () => {
+      const threshold = { field: ['host.name'], value: 200 };
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...getPatchRulesSchemaMock(), type: 'unknown_type' },
+        body: { rule_id: 'rule-1', threshold },
       });
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(response.status).toEqual(400);
-      expect(response.body.message).toEqual(
-        expect.stringContaining('type: Invalid input: expected "query"')
+      expect(response.status).toEqual(200);
+      expect(clients.detectionRulesClient.patchRule).toHaveBeenCalledWith(
+        expect.objectContaining({ rulePatch: expect.objectContaining({ threshold }) })
       );
     });
 
@@ -241,10 +249,8 @@ describe('Patch rule route', () => {
           ...getPatchRulesSchemaMock(),
         },
       });
-      const response = await server.inject(request, requestContextMock.convertContext(context));
-
-      expect(response.status).toEqual(400);
-      expect(response.body.message).toEqual(
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
         expect.stringContaining('from: Failed to parse date-math expression')
       );
     });
