@@ -1455,6 +1455,8 @@
       "@kbn/files-plugin/*": ["./src/platform/plugins/shared/files/*"],
       "@kbn/find-used-node-modules": ["./packages/kbn-find-used-node-modules"],
       "@kbn/find-used-node-modules/*": ["./packages/kbn-find-used-node-modules/*"],
+      "@kbn/flaky-test-analyzer": ["./packages/kbn-flaky-test-analyzer"],
+      "@kbn/flaky-test-analyzer/*": ["./packages/kbn-flaky-test-analyzer/*"],
       "@kbn/fleet-plugin": ["./x-pack/platform/plugins/shared/fleet"],
       "@kbn/fleet-plugin/*": ["./x-pack/platform/plugins/shared/fleet/*"],
       "@kbn/fleet-plugin-cypress": ["./x-pack/platform/plugins/shared/fleet/cypress"],

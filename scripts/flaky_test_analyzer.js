@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -7,12 +9,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getValidatedESClient } from './elasticsearch';
-export { getKibanaModuleData, type KibanaModuleMetadata } from './read_manifest';
-export { excapeHtmlCharacters, stripFilePath, parseStdout } from './text_processing';
-export {
-  getRunCommand,
-  getTestTargetFromProcessArguments,
-  stripRunCommand,
-} from './cli_processing';
-export { computeTestID, generateTestRunId } from './test_id_generator';
+require('@kbn/setup-node-env');
+require('@kbn/flaky-test-analyzer').runAnalyzeFlakinessCli();

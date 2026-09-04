@@ -71,6 +71,7 @@ packages/kbn-eslint-plugin-telemetry @elastic/kibana-core
 packages/kbn-extract-plugin-translations @elastic/kibana-core
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-find-used-node-modules @elastic/kibana-operations
+packages/kbn-flaky-test-analyzer @elastic/appex-qa
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/kibana-management
 packages/kbn-heap-snapshot-analyzer-cli @elastic/kibana-core

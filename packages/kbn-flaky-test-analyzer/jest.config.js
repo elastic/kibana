@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getValidatedESClient } from './elasticsearch';
-export { getKibanaModuleData, type KibanaModuleMetadata } from './read_manifest';
-export { excapeHtmlCharacters, stripFilePath, parseStdout } from './text_processing';
-export {
-  getRunCommand,
-  getTestTargetFromProcessArguments,
-  stripRunCommand,
-} from './cli_processing';
-export { computeTestID, generateTestRunId } from './test_id_generator';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-flaky-test-analyzer'],
+};
