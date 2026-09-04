@@ -107,24 +107,15 @@ Do not register `{ back: false }` separately from another app-header config on t
 
 ## Page announcements
 
-Chrome Next announces the visible page title, not breadcrumbs. The live region speaks the
-page name only. Do not append Elastic or a custom brand suffix; `document.title` stays branded.
+Chrome Next announces the `AppHeader` / `ChromeAppHeaderRegistration` title. Do not put
+breadcrumbs or a brand suffix in that title; `document.title` stays branded.
 
-Resolution order:
+`AppHeaderLoading` owns the header slot without a title, so a registered chrome-owned title is
+not announced while it is mounted. Unmigrated routes fall back to the document title, then the
+active nav item. Project breadcrumbs are never announced.
 
-1. The inline `AppHeader` title when that header owns the slot.
-2. The Chrome-owned `ChromeAppHeaderRegistration` title when no inline header is mounted.
-3. A descriptive value from the document-title stream.
-4. The deepest titled node in the first active project-navigation path.
-5. No announcement.
-
-`AppHeaderLoading` owns the inline slot without a title, so a hidden Chrome-owned registration is
-ignored while it is mounted. Document title and the deepest active navigation node are migration
-fallbacks. Manual and merged project breadcrumbs are not announcement inputs.
-
-Classic Chrome continues to announce its visible breadcrumb trail. Breadcrumb-derived back
-navigation is separate; see [Back navigation](#back-navigation) and
-[#283613](https://github.com/elastic/kibana/issues/283613).
+Classic Chrome still announces its visible breadcrumb trail. Back navigation is separate; see
+[Back navigation](#back-navigation).
 
 ## Discover tabs
 
