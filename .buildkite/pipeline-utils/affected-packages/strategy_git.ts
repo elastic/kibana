@@ -21,14 +21,20 @@ export function getAffectedModulesGit({
   ignorePatterns = [],
   commit = 'HEAD',
   ignoreUncategorizedChanges = false,
+  changedFiles: providedFiles,
 }: {
-  mergeBase: string;
+  mergeBase?: string;
   includeDownstream: boolean;
   ignorePatterns?: string[];
   commit?: string;
   ignoreUncategorizedChanges?: boolean;
+  changedFiles?: string[];
 }): Set<string> {
-  const allChangedFiles = listChangedFiles({ mergeBase, commit });
+  if (!providedFiles && !mergeBase) {
+    throw new Error('No merge base found');
+  }
+
+  const allChangedFiles = providedFiles ?? listChangedFiles({ mergeBase: mergeBase!, commit });
 
   const changedFiles = filterIgnoredFiles(allChangedFiles, ignorePatterns);
 
