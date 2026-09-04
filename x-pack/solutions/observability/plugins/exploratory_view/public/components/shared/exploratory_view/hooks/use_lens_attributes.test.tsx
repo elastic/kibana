@@ -87,7 +87,7 @@ describe('useExpViewTimeRange', function () {
       wrapper: Wrapper,
     });
 
-    expect(lensAttributesSpy).toBeCalledWith(
+    expect(lensAttributesSpy).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           seriesConfig: expect.objectContaining({ reportType: ReportTypes.KPI }),

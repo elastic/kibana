@@ -10,11 +10,14 @@ import userEvent from '@testing-library/user-event';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 
+const mockCodeEditor = jest.fn();
+
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     CodeEditor: (props: any) => {
+      mockCodeEditor(props);
       return <MockedCodeEditor {...props} />;
     },
   };
@@ -79,5 +82,37 @@ describe('JsonEditorWithMessageVariables', () => {
     rerender(<JsonEditorWithMessageVariables {...props} inputTargetValue={inputTargetValue} />);
 
     expect(fooJsonEditor.getAttribute('data-currentvalue')).toEqual(inputTargetValue);
+  });
+
+  test('renders the validation decorations by default', () => {
+    render(<JsonEditorWithMessageVariables {...props} inputTargetValue={'{"foo": "test"}'} />);
+
+    expect(mockCodeEditor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ renderValidationDecorations: 'on' }),
+      })
+    );
+  });
+
+  test('does not render the validation decorations when the value contains a mustache template', () => {
+    render(
+      <JsonEditorWithMessageVariables {...props} inputTargetValue={'{"foo": {{context.value}}}'} />
+    );
+
+    expect(mockCodeEditor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ renderValidationDecorations: 'off' }),
+      })
+    );
+  });
+
+  test('does not render the validation decorations when the value is empty', () => {
+    render(<JsonEditorWithMessageVariables {...props} />);
+
+    expect(mockCodeEditor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ renderValidationDecorations: 'off' }),
+      })
+    );
   });
 });

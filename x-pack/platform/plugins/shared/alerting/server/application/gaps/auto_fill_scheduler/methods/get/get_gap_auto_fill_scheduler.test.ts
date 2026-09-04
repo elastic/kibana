@@ -130,7 +130,7 @@ describe('getGapFillAutoScheduler()', () => {
         throw new Error('error getting SO!');
       });
 
-      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrowError(
+      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrow(
         'error getting SO!'
       );
     });
@@ -167,7 +167,7 @@ describe('getGapFillAutoScheduler()', () => {
         throw new Error('Unauthorized');
       });
 
-      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrowError(
+      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrow(
         'Unauthorized'
       );
 

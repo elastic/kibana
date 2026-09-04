@@ -11,6 +11,7 @@ import type {
   AgentTypeDefinition,
   AgentAvailabilityConfig,
   AgentBaseConfiguration,
+  AiIndexResolver,
 } from '@kbn/agent-builder-server/agents';
 import type {
   AgentConfiguration,
@@ -23,6 +24,7 @@ import type { AgentsUsingSkillsResult, AgentsUsingToolsResult } from './persiste
 export interface AgentsServiceSetup {
   register(agent: BuiltInAgentDefinition): void;
   registerType(type: AgentTypeDefinition): void;
+  registerAiIndexResolver(resolver: AiIndexResolver): void;
 }
 
 export interface ToolRefsParams {
@@ -62,4 +64,5 @@ export interface AgentsServiceStart {
   getAgentsUsingPlugins: (params: PluginRefsParams) => Promise<AgentsUsingToolsResult>;
   removeSkillRefsFromAgents: (params: SkillRefsParams) => Promise<AgentsUsingSkillsResult>;
   getAgentsUsingSkills: (params: SkillRefsParams) => Promise<AgentsUsingSkillsResult>;
+  getAiIndexResolver: () => AiIndexResolver | undefined;
 }

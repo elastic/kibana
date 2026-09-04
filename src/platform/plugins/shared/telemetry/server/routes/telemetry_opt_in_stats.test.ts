@@ -39,7 +39,7 @@ describe('sendTelemetryOptInStatus', () => {
       mockStatsGetterConfig
     );
     expect(result).toBeUndefined();
-    expect(fetch).toBeCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
     expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "https://telemetry.elastic.co/v3/send/kibana-opt-in-reports",
@@ -71,7 +71,7 @@ describe('sendTelemetryOptInStatus', () => {
       mockStatsGetterConfig
     );
 
-    expect(fetch).toBeCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
     expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "https://telemetry-staging.elastic.co/v3/send/kibana-opt-in-reports",

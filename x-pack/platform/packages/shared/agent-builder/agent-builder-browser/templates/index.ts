@@ -11,4 +11,4 @@ export type {
   ConversationTemplateUIDefinition,
   ConversationTemplateServiceStartContract,
 } from './contract';
-export { ATTACHMENTS_TAB_ID, TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './constants';
+export { TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './constants';

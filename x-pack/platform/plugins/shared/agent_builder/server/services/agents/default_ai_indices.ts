@@ -9,11 +9,8 @@ import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
 import { smlAiIndexDescription, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 
 export interface DefaultAiIndex {
-  /** The Elasticsearch index or data stream to query, i.e. what goes in a `FROM` clause. */
-  name: string;
+  esqlTarget: string;
   description: string;
-  /** Extra prompt advice for this index, printed after the description. */
-  guidance?: string;
 }
 
 /**
@@ -25,10 +22,7 @@ export interface DefaultAiIndex {
  */
 export const defaultAiIndices: Record<string, DefaultAiIndex> = {
   [agentBuilderDefaultAiIndexId]: {
-    name: smlIndexName,
+    esqlTarget: smlIndexName,
     description: smlAiIndexDescription,
-    guidance:
-      "Entries can be attached to the conversation, which loads an entry's full specification; " +
-      'querying the index returns only its summary. Attach an entry before acting on it.',
   },
 };

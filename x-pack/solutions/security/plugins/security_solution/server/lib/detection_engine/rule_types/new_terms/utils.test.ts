@@ -27,15 +27,13 @@ describe('new terms utils', () => {
     test(`should throw an error without a name if the string can't be parsed as a date`, () => {
       const date = 'notValid';
       const forceNow = new Date();
-      expect(() => parseDateString({ date, forceNow })).toThrowError(
-        `Failed to parse 'date string'`
-      );
+      expect(() => parseDateString({ date, forceNow })).toThrow(`Failed to parse 'date string'`);
     });
 
     test(`should throw an error with a name if the string can't be parsed as a date`, () => {
       const date = 'notValid';
       const forceNow = new Date();
-      expect(() => parseDateString({ date, forceNow, name: 'historyWindowStart' })).toThrowError(
+      expect(() => parseDateString({ date, forceNow, name: 'historyWindowStart' })).toThrow(
         `Failed to parse 'historyWindowStart'`
       );
     });
@@ -51,7 +49,7 @@ describe('new terms utils', () => {
     test('should throw if historyWindowStart is equal to from', () => {
       const historyWindowStart = 'now-7m';
       const from = 'now-7m';
-      expect(() => validateHistoryWindowStart({ historyWindowStart, from })).toThrowError(
+      expect(() => validateHistoryWindowStart({ historyWindowStart, from })).toThrow(
         `History window size is smaller than rule interval + additional lookback, 'historyWindowStart' must be earlier than 'from'`
       );
     });
@@ -59,7 +57,7 @@ describe('new terms utils', () => {
     test('should throw if historyWindowStart is later than from', () => {
       const historyWindowStart = 'now-7m';
       const from = 'now-8m';
-      expect(() => validateHistoryWindowStart({ historyWindowStart, from })).toThrowError(
+      expect(() => validateHistoryWindowStart({ historyWindowStart, from })).toThrow(
         `History window size is smaller than rule interval + additional lookback, 'historyWindowStart' must be earlier than 'from'`
       );
     });

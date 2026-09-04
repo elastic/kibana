@@ -383,6 +383,40 @@ describe('createCaseFromTemplateStepDefinition', () => {
       expect(createPayload.template).toEqual({ id: 'triage_template', version: 4 });
     });
 
+    it('passes overwrites.extended_fields through to cases.create', async () => {
+      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = jest.fn().mockResolvedValue(
+        buildTemplateSO({
+          name: 'Triage default title',
+          description: 'Triage default description',
+          fields: [],
+        })
+      );
+      const getCasesClient = jest.fn().mockResolvedValue({
+        templates: { getTemplate },
+        configure: { get: jest.fn() },
+        cases: { create },
+      } as unknown as CasesClient);
+
+      const definition = createCaseFromTemplateStepDefinition(getCasesClient, true);
+      await definition.handler(
+        createContext({
+          owner: 'securitySolution',
+          case_template_id: 'triage_template',
+          overwrites: {
+            extended_fields: { priority_as_keyword: 'high' },
+          },
+        })
+      );
+
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extended_fields: { priority_as_keyword: 'high' },
+          template: { id: 'triage_template', version: 4 },
+        })
+      );
+    });
+
     it('fails with owner context when the resolved template belongs to a different owner', async () => {
       const create = jest.fn();
       const getTemplate = jest

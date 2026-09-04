@@ -8,6 +8,7 @@
  */
 
 import type { InboxAction, InboxActionStatus } from '@kbn/inbox-common';
+import { buildWorkflowSourceId as buildSourceId } from '@kbn/inbox-common';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -76,7 +77,7 @@ export const deriveHistoryStatus = (
  * propagation work per [security-team#16710](https://github.com/elastic/security-team/issues/16710).
  */
 export const buildWorkflowSourceId = (step: EsWorkflowStepExecution): string =>
-  `${step.workflowId}:${step.workflowRunId}:${step.id}`;
+  buildSourceId(step.workflowId, step.workflowRunId, step.id);
 
 /**
  * Extracts the `workflowRunId` (a.k.a. executionId) from a composite source id.

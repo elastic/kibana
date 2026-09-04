@@ -13,6 +13,7 @@ import { transformRequestV1, transformResponseV1 } from './transforms';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { scheduleBackfillRoute, scheduleBackfillPublicRoute } from './schedule_backfill_route';
 import type { ScheduleBackfillResults } from '../../../../application/backfill/methods/schedule/types';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const rulesClient = rulesClientMock.create();
 
@@ -57,7 +58,7 @@ const mockBackfillResult: ScheduleBackfillResults = [
       revision: 0,
       id: '1',
     },
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
     start: '2023-11-16T08:00:00.000Z',
     status: 'pending',
     schedule: [{ runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' }],
@@ -86,7 +87,7 @@ const mockBackfillResult: ScheduleBackfillResults = [
       revision: 0,
       id: '2',
     },
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
     start: '2023-11-16T08:00:00.000Z',
     status: 'pending',
     schedule: [

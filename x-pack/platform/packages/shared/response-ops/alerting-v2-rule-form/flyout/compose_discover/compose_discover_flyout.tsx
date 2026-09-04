@@ -109,16 +109,23 @@ const EDIT_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.editMo
 });
 
 const CLONE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.cloneTitleLabel', {
-  defaultMessage: 'Clone alert rule',
+  defaultMessage: 'Clone rule',
 });
 
-const CREATE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.createTitleLabel', {
-  defaultMessage: 'Create alert rule',
-});
+const CREATE_ESQL_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.createEsqlTitleLabel',
+  { defaultMessage: 'Create ES|QL rule' }
+);
 
-const EDIT_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.editTitleLabel', {
-  defaultMessage: 'Edit alert rule',
-});
+const CREATE_RULE_FALLBACK_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.createTitleLabel',
+  { defaultMessage: 'Create rule' }
+);
+
+const EDIT_RULE_FALLBACK_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.editTitleLabel',
+  { defaultMessage: 'Edit rule' }
+);
 
 const YAML_ONLY_TOOLTIP = i18n.translate(
   'xpack.alertingV2.composeDiscover.editMode.yamlOnlyTooltip',
@@ -165,10 +172,32 @@ const getQuerySandboxTitle = (isBuilderMode: boolean) =>
         defaultMessage: 'Query sandbox: Edit queries',
       });
 
-const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
-  if (mode === 'clone') return CLONE_TITLE;
-  if (mode === 'edit') return EDIT_TITLE;
-  return CREATE_TITLE;
+const getFlyoutTitle = ({
+  mode,
+  builderType,
+  ruleName,
+}: {
+  mode: ComposeDiscoverMode;
+  builderType?: string;
+  ruleName?: string;
+}): string => {
+  if (mode === 'clone') {
+    return CLONE_TITLE;
+  }
+  if (mode === 'edit') {
+    const trimmedName = ruleName?.trim();
+    if (!trimmedName) {
+      return EDIT_RULE_FALLBACK_TITLE;
+    }
+    return i18n.translate('xpack.alertingV2.composeDiscover.flyout.editNamedTitleLabel', {
+      defaultMessage: 'Edit {ruleName}',
+      values: { ruleName: trimmedName },
+    });
+  }
+  if (builderType) {
+    return RULE_BUILDER_REGISTRY[builderType]?.createFlyoutTitle ?? CREATE_RULE_FALLBACK_TITLE;
+  }
+  return CREATE_ESQL_TITLE;
 };
 
 const getInitialRecoveryType = (
@@ -244,6 +273,16 @@ const composeDiscoverYamlFlyoutBodyCss = css`
     display: flex;
     flex-direction: column;
   }
+`;
+
+const flyoutTitleCss = css`
+  min-width: 0;
+`;
+
+const flyoutTitleTextCss = css`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['status'] => {
@@ -498,6 +537,7 @@ export function ComposeDiscoverFlyout({
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
   const watchedTimeField = useWatch({ control: methods.control, name: 'timeField' });
+  const watchedRuleName = useWatch({ control: methods.control, name: 'metadata.name' });
   /*
    * One-way RHF -> sandbox draft push. `sandboxTimeField` must stay out of the deps:
    * with it, the effect re-fires on its own output and reverts the user's in-progress
@@ -768,7 +808,7 @@ export function ComposeDiscoverFlyout({
   const isEditing = mode === 'edit';
   /** Create, edit, and clone share the unified ↔ split-tab sandbox toggle. */
   const supportsUnifiedEditorToggle = isCreate || isEditing;
-  const title = getFlyoutTitle(mode);
+  const title = getFlyoutTitle({ mode, builderType, ruleName: watchedRuleName });
 
   const { steps } = getSteps(isAlert, builderType);
   const currentStep = steps[uiState.step];
@@ -1212,11 +1252,15 @@ export function ComposeDiscoverFlyout({
             historyKey={historyKey}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
-            size={480}
+            size={540}
+            minWidth={480}
+            resizable
           >
             <EuiFlyoutHeader hasBorder>
-              <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-                <h2>{title}</h2>
+              <EuiTitle size="s" id={FLYOUT_TITLE_ID} css={flyoutTitleCss}>
+                <h2 title={title} css={flyoutTitleTextCss}>
+                  {title}
+                </h2>
               </EuiTitle>
 
               <EuiFlexGroup

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Locator, ScoutPage, KibanaUrl } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -19,6 +20,7 @@ export class SavedObjectsManagementPage {
   public readonly selectAllCheckbox: Locator;
   public readonly deleteListButton: Locator;
   public readonly inspectDeleteButton: Locator;
+  public readonly appMenuOverflowButton: Locator;
   public readonly inspectSaveButton: Locator;
   public readonly codeEditor: Locator;
   public readonly appNotFoundPageContent: Locator;
@@ -34,6 +36,7 @@ export class SavedObjectsManagementPage {
     this.selectAllCheckbox = this.page.testSubj.locator('checkboxSelectAll');
     this.deleteListButton = this.page.testSubj.locator('savedObjectsManagementDelete');
     this.inspectDeleteButton = this.page.testSubj.locator('savedObjectEditDelete');
+    this.appMenuOverflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
     this.inspectSaveButton = this.page.testSubj.locator('savedObjectEditSave');
     this.codeEditor = this.page.testSubj.locator('kibanaCodeEditor');
     this.appNotFoundPageContent = this.page.testSubj.locator('appNotFoundPageContent');
@@ -112,9 +115,14 @@ export class SavedObjectsManagementPage {
       .click();
   }
 
+  /** Opens the inspect AppHeader overflow so Delete is queryable. */
+  async openInspectHeaderOverflow(): Promise<void> {
+    await this.appMenuOverflowButton.click();
+  }
+
   /** Clicks the inspect-view delete button and confirms the modal. */
   async deleteFromInspect(): Promise<void> {
-    await this.inspectDeleteButton.waitFor({ state: 'visible' });
+    await this.openInspectHeaderOverflow();
     await this.inspectDeleteButton.click();
     const confirmTitle = this.page.testSubj.locator('confirmModalTitleText');
     await confirmTitle.waitFor({ state: 'visible' });

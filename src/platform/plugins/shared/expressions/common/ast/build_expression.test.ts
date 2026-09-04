@@ -288,7 +288,7 @@ describe('buildExpression()', () => {
       const exp = buildExpression(ast);
       expect(() => {
         exp.toAst();
-      }).toThrowError();
+      }).toThrow();
     });
   });
 
@@ -305,7 +305,7 @@ describe('buildExpression()', () => {
       const exp = buildExpression(ast);
       expect(() => {
         exp.toString();
-      }).toThrowError();
+      }).toThrow();
     });
   });
 

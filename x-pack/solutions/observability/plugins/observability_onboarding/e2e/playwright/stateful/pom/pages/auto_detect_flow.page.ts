@@ -10,7 +10,6 @@ import { expect, type Page, type Locator } from '@playwright/test';
 export class AutoDetectFlowPage {
   page: Page;
 
-  private readonly copyToClipboardButton: Locator;
   private readonly receivedDataIndicator: Locator;
   private readonly autoDetectSystemIntegrationActionLink: Locator;
   private readonly codeBlock: Locator;
@@ -19,9 +18,6 @@ export class AutoDetectFlowPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.copyToClipboardButton = this.page.getByTestId(
-      'observabilityOnboardingCopyToClipboardButton'
-    );
     this.receivedDataIndicator = this.page
       .getByTestId('observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator')
       .getByText('Your data is ready to explore!');
@@ -37,8 +33,10 @@ export class AutoDetectFlowPage {
     );
   }
 
-  public async copyToClipboard() {
-    await this.copyToClipboardButton.click();
+  /** Reads the install command. v2 host pages no longer render the standalone copy button. */
+  public async getInstallCommand(): Promise<string> {
+    await this.codeBlock.waitFor({ state: 'visible' });
+    return ((await this.codeBlock.textContent()) ?? '').trim();
   }
 
   public async assertVisibilityCodeBlock() {

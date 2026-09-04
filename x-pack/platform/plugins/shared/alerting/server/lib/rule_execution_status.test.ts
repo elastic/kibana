@@ -360,7 +360,7 @@ describe('RuleExecutionStatus', () => {
       expect(result.status).toBe('unknown');
       expect(result.error).toBe(undefined);
       expect(result.warning).toBe(undefined);
-      expect(MockLogger.debug).toBeCalledWith(
+      expect(MockLogger.debug).toHaveBeenCalledWith(
         'invalid ruleExecutionStatus lastExecutionDate "an invalid date" in raw rule rule-id'
       );
     });

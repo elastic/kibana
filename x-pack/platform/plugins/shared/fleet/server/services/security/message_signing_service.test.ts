@@ -93,7 +93,7 @@ describe('MessageSigningService', () => {
       mockCreatePointInTimeFinderAsInternalUser();
 
       const generateKeyPairResponse = await messageSigningService.generateKeyPair();
-      expect(soClientMock.create).toBeCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
+      expect(soClientMock.create).toHaveBeenCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
         private_key: expect.any(String),
         public_key: expect.any(String),
         passphrase: expect.any(String),
@@ -111,11 +111,11 @@ describe('MessageSigningService', () => {
 
       await messageSigningService.rotateKeyPair();
 
-      expect(soClientMock.delete).toBeCalledWith(
+      expect(soClientMock.delete).toHaveBeenCalledWith(
         MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
         keyPairObj.id
       );
-      expect(soClientMock.create).toBeCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
+      expect(soClientMock.create).toHaveBeenCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
         private_key: expect.any(String),
         public_key: expect.any(String),
         passphrase: expect.any(String),
@@ -127,7 +127,7 @@ describe('MessageSigningService', () => {
       mockCreatePointInTimeFinderAsInternalUserOnce([]);
 
       const response = messageSigningService.rotateKeyPair();
-      await expect(response).rejects.toThrowError(
+      await expect(response).rejects.toThrow(
         'Error rotating key pair: Error fetching current key pair: No current key pair found!'
       );
     });
@@ -140,7 +140,7 @@ describe('MessageSigningService', () => {
         .mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
-      await expect(response).rejects.toThrowError(
+      await expect(response).rejects.toThrow(
         'Error rotating key pair: Error fetching current key pair: foo'
       );
     });
@@ -151,7 +151,7 @@ describe('MessageSigningService', () => {
       soClientMock.delete.mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
-      await expect(response).rejects.toThrowError(
+      await expect(response).rejects.toThrow(
         'Error rotating key pair: Error deleting current key pair: foo'
       );
     });
@@ -162,7 +162,7 @@ describe('MessageSigningService', () => {
       soClientMock.create.mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
-      await expect(response).rejects.toThrowError(
+      await expect(response).rejects.toThrow(
         'Error rotating key pair: Error creating key pair: foo'
       );
     });
@@ -173,14 +173,14 @@ describe('MessageSigningService', () => {
       messageSigningService.generateKeyPair = jest.fn().mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
-      await expect(response).rejects.toThrowError('Error rotating key pair: foo');
+      await expect(response).rejects.toThrow('Error rotating key pair: foo');
     });
 
     it('does not generate key pair if one exists', async () => {
       mockCreatePointInTimeFinderAsInternalUser([keyPairObj]);
 
       const generateKeyPairResponse = await messageSigningService.generateKeyPair();
-      expect(soClientMock.create).not.toBeCalled();
+      expect(soClientMock.create).not.toHaveBeenCalled();
 
       expect(generateKeyPairResponse).toEqual({
         passphrase: expect.any(String),
@@ -223,7 +223,7 @@ describe('MessageSigningService', () => {
         });
 
       const generateKeyPairResponse = await messageSigningService.generateKeyPair();
-      expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledTimes(3);
+      expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledTimes(3);
       expect(soClientMock.create).toHaveBeenLastCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
         private_key: expect.any(String),
         public_key: expect.any(String),
@@ -263,7 +263,7 @@ describe('MessageSigningService', () => {
       mockCreatePointInTimeFinderAsInternalUser();
 
       await messageSigningService.generateKeyPair();
-      expect(soClientMock.create).toBeCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
+      expect(soClientMock.create).toHaveBeenCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
         private_key: expect.any(String),
         public_key: expect.any(String),
         passphrase_plain: expect.any(String),
@@ -275,8 +275,8 @@ describe('MessageSigningService', () => {
       mockCreatePointInTimeFinderAsInternalUser([keyPairObj]);
 
       await messageSigningService.generateKeyPair();
-      expect(soClientMock.create).not.toBeCalled();
-      expect(soClientMock.update).toBeCalledWith(
+      expect(soClientMock.create).not.toHaveBeenCalled();
+      expect(soClientMock.update).toHaveBeenCalledWith(
         MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
         keyPairObj.id,
         {

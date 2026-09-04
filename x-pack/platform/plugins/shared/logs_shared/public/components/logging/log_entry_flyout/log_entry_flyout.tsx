@@ -17,7 +17,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { OverlayRef } from '@kbn/core/public';
-import type { Query } from '@kbn/es-query';
+import type { ProjectRouting, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -37,6 +37,10 @@ export interface LogEntryFlyoutProps {
   onCloseFlyout: () => void;
   onSetFieldFilter?: (filter: Query, logEntryId: string, timeKey?: TimeKey) => void;
   logViewReference: LogViewReference | null | undefined;
+  /**
+   * CPS project scope to look the log entry up with, overriding the project picker.
+   */
+  projectRouting?: ProjectRouting;
 }
 
 export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
@@ -101,6 +105,7 @@ export const LogEntryFlyout = ({
   onCloseFlyout,
   onSetFieldFilter,
   logViewReference,
+  projectRouting,
 }: LogEntryFlyoutProps) => {
   const modalTitleId = useGeneratedHtmlId();
 
@@ -115,6 +120,7 @@ export const LogEntryFlyout = ({
   } = useLogEntry({
     logViewReference,
     logEntryId,
+    projectRouting,
   });
 
   const {

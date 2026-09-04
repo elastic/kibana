@@ -54,6 +54,8 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/scout'
   - '@kbn/presentation-util'
+  - '@kbn/zod'
+  - '@kbn/presentation-publishing-schemas'
 tags:
   - plugin
   - prod
@@ -62,6 +64,7 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - common/**/*
     - server/**/*
     - public/**/*
     - test/scout/**/*

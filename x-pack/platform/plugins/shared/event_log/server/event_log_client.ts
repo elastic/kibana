@@ -14,6 +14,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 import type { KueryNode } from '@kbn/es-query';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { EsContext } from './es';
 import type { IEventLogClient } from './types';
 import type {
@@ -100,7 +101,7 @@ interface EventLogServiceCtorParams {
   savedObjectGetter: SavedObjectBulkGetterResult;
   spacesService?: SpacesServiceStart;
   request: KibanaRequest;
-  spaceId?: string;
+  spaceId?: SpaceId;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
@@ -109,7 +110,7 @@ export class EventLogClient implements IEventLogClient {
   private savedObjectGetter: SavedObjectBulkGetterResult;
   private spacesService?: SpacesServiceStart;
   private request: KibanaRequest;
-  private spaceId?: string;
+  private spaceId?: SpaceId;
 
   constructor({
     esContext,

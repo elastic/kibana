@@ -134,11 +134,20 @@ interface InstallMockPrebuiltRulesPackageParams {
 /**
  * Installs a prepared mock prebuilt rules package `security_detection_engine`.
  * Installing it up front prevents installing the real package when making API requests.
+ *
+ * On TEST_CLOUD (MKI quality gate) Fleet rejects that upload because the name
+ * exists in the registry, and `kbnTestServerArgs` are not applied to the
+ * pre-deployed Kibana. Leave the environment package in place.
  */
 export const installMockPrebuiltRulesPackage = async ({
   getService,
-}: InstallMockPrebuiltRulesPackageParams): Promise<InstallPackageResponse> => {
+}: InstallMockPrebuiltRulesPackageParams): Promise<InstallPackageResponse | undefined> => {
   const log = getService('log');
+
+  if (process.env.TEST_CLOUD === '1') {
+    log.info('Skipping mock prebuilt rules package upload on TEST_CLOUD');
+    return undefined;
+  }
 
   log.info('Installing mock prebuilt rules package...');
 
