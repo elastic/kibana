@@ -954,6 +954,16 @@ describe('project watch', () => {
         expect(String(diagnose.with?.message)).toContain('investigate-rule.get_alerts_by_ids');
       });
 
+      // The harvested ids are the dataset. A security.alerts query would re-fetch the
+      // same alerts through a natural-language round trip and burn agent time.
+      it('keeps the diagnosis on the supplied ids instead of querying alerts again', () => {
+        const diagnose = proposalSteps.find(({ name }) => name === 'diagnose_rule')!;
+        const message = String(diagnose.with?.message);
+
+        expect(message).toContain('do not run the security.alerts queries');
+        expect(message).not.toContain('time_window_hours');
+      });
+
       it('does not use classify_proposal or can_apply', () => {
         for (const steps of [tuningSteps, proposalSteps]) {
           expect(steps.some(({ name }) => name === 'classify_proposal')).toBe(false);

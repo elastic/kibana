@@ -118,7 +118,23 @@ version.
 Extract and retain: \`rule_id\`, \`id\`, \`name\`, \`type\`, \`language\`, \`query\`,
 \`index\`, \`interval\`, \`from\`, \`enabled\`, and \`investigation_fields\` when present.
 
-### Step 2: Fetch the Rule's Alerts (two focused queries)
+### Step 2: Fetch the Rule's Alerts
+
+**Before querying anything, check whether the request itself supplies explicit alert
+document ids** (for example, a rule tuning workflow passing the ids of the alerts
+analysts closed as false positives).
+
+**Ids provided — retrieve exactly those, and nothing else.** Call
+\`investigate-rule.get_alerts_by_ids\` with the ids, passing the rule's
+\`investigation_fields\` (from the attachment, Step 1) as \`additional_fields\`. Those
+alerts are your whole dataset: do **not** call \`security.alerts\`, and
+do not re-derive the closed set. The caller already picked the alerts that matter, so
+any query would re-fetch data you are holding. Go to Step 3 and report every count as scoped to this
+set (Step 4 says how). Fall back to the two queries below **only** when the tool errors
+or returns fewer alerts than you asked for — the missing ones may have aged out of the
+index.
+
+**No ids provided — run the two queries below.**
 
 Call the \`security.alerts\` tool **twice**, keeping the two concerns separate so the
 result is unambiguous. Both queries filter to this rule only. Map each identifier to its
@@ -155,18 +171,6 @@ these are the candidates for an exception condition (Step 4), so request exactly
 
 These are the only alerts you can speak about with certainty — they carry a human verdict.
 
-**Provided alert ids shortcut.** When the request itself supplies explicit alert
-document ids (for example, a rule tuning workflow passing the ids of alerts analysts
-closed as false positives), do not re-derive the closed set: call
-\`investigate-rule.get_alerts_by_ids\` with those ids, passing the rule's
-\`investigation_fields\` (from the attachment, Step 1) as \`additional_fields\`, and use
-the returned alerts as the confirmed dispositions data. Skip the confirmed dispositions
-query only when the tool found every requested id; if it errors or returns fewer alerts
-(they may have aged out of the index), run the confirmed dispositions query as usual.
-Still run the noise query — the id list only holds confirmed false positives, and only
-the whole-rule picture shows whether the pattern you want to exclude also matches
-open or true-positive alerts.
-
 **Time window (both queries):** set the \`time_window_hours\` parameter (NOT the query
 text) — it defaults to 24. When the request states an explicit analysis window (for
 example, a workflow passing the number of days it harvested over), use that window,
@@ -188,6 +192,12 @@ The two queries differ in **certainty**, and the diagnosis must respect that:
 - **Noise query (volume / concentration)** only shows the rule is *loud*. It is **not**
   proof that any specific still-open alert is a false positive — never present
   concentration as a verdict.
+
+**Working from provided ids?** Every alert you hold carries an analyst verdict, so
+Signal A is the whole analysis and Signal B does not apply — you have no open-alert
+data and must not speculate about it. You also cannot see whether a pattern you are
+about to exclude appears on the rule's *other* alerts, which makes the exclusion
+caveat in Step 4 mandatory rather than optional.
 
 Use the two signals below in this order.
 
@@ -268,10 +278,14 @@ The output must always contain these five sections, in order. Use a \`##\` heade
 section (e.g. \`## Alert Volume\`) — **do not use numbered list items for sections**; tables
 placed inside a list item do not render in the Security UI.
 
-### Alert volume and entity breakdown (always required — from the noise query)
+### Alert volume and entity breakdown (always required)
 
-Show the total alert count and status breakdown (open / closed). Then present the
-top entity rankings: top \`host.name\`, top \`user.name\`, top \`source.ip\`. Use a
+When you ran the noise query, show the total alert count and status breakdown
+(open / closed). When you worked from provided ids, rank the entities within that
+set instead and open the section by naming the scope — "across the N alerts supplied"
+— so nobody reads the numbers as the rule's full volume.
+
+Then present the top entity rankings: top \`host.name\`, top \`user.name\`, top \`source.ip\`. Use a
 **bullet list** for each dimension (e.g. \`- svc-ci: 44 (76%)\`) — do not use a table
 for entity rankings; two-column count lists render more reliably as bullets and are
 easier to scan. Tables are reserved for the confirmed-dispositions section where
@@ -310,7 +324,9 @@ options (Signal B).
 - **Caveat — consistent does not mean safe to exclude.** A field can be consistent across
   the confirmed FPs and still appear in real threats (e.g. \`process.parent.name IS
   gitlab-runner\`). The analyst must confirm that excluding the chosen values will not hide
-  genuine activity. Do not decide that for them.
+  genuine activity. Do not decide that for them. When you worked from provided ids, add
+  that you did not look at the rule's other alerts, so how far the pattern reaches beyond
+  this set is unknown.
 
 *Unconfirmed concentration (Signal B) → present options, do not prescribe:* suppression on
 the concentrated entity field (reduces noise, preserves coverage), an exception only if the
@@ -322,6 +338,10 @@ verdicts first.
 State explicitly what is confirmed vs. not. Offer the alert-analysis handoff for
 open alerts: "If you want a true/false-positive verdict on the open alerts, I can
 load the alert-analysis skill."
+
+When you worked from provided ids, name the boundary plainly: the diagnosis covers
+those N alerts, every one of them analyst-confirmed, and the rule's remaining alerts
+were not examined.
 
 ---
 

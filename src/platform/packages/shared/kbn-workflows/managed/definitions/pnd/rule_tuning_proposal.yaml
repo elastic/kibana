@@ -138,11 +138,9 @@ steps:
         them as the confirmed false positives grounding the diagnosis; do not
         re-derive the closed set. Return one structured tuning proposal.
 
-        Run the alert queries with time_window_hours set to
-        {{ inputs.analysis_window_days | default: consts.analysis_window_days | times: 24 | at_most: 168 }} — the analysis
-        window above, capped at the tool maximum. The false-positive ids span the
-        full {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days, so call out any totals that
-        cover a shorter window than the ids.
+        These ids are the whole dataset, so do not run the security.alerts queries:
+        they would re-fetch alerts already in hand. Base the volume and entity
+        breakdown on the retrieved alerts and say the counts cover only them.
 
         This pipeline backtests and applies query changes directly, so prefer
         change_type "query": narrow the KQL to exclude the confirmed benign

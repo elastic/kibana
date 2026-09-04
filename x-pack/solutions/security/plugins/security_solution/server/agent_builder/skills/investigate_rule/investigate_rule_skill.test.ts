@@ -62,6 +62,22 @@ describe('investigateRuleSkill', () => {
       expect(investigateRuleSkill.content).toContain('investigate-rule.get_alerts_by_ids');
       expect(investigateRuleSkill.content).toContain('do not re-derive the closed set');
     });
+
+    // Supplied ids are the caller's whole dataset, so a security.alerts round trip only
+    // re-fetches alerts the agent already holds.
+    it('drops the alert queries when the caller supplies ids', () => {
+      expect(investigateRuleSkill.content).toContain('do **not** call `security.alerts`');
+      expect(investigateRuleSkill.content).toContain(
+        'Fall back to the two queries below **only** when the tool errors'
+      );
+    });
+
+    // Without the noise query there is no whole-rule picture, so the output must not
+    // read as if the supplied alerts were everything the rule produced.
+    it('requires the id-scoped analysis to state its own boundary', () => {
+      expect(investigateRuleSkill.content).toContain('across the N alerts supplied');
+      expect(investigateRuleSkill.content).toContain("you did not look at the rule's other alerts");
+    });
   });
 
   // ── resolve_rule_attachment ─────────────────────────────────────────────────
