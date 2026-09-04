@@ -293,6 +293,7 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      onExitFullscreen: jest.fn(),
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
@@ -473,6 +474,7 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
+      onExitFullscreen: jest.fn(),
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
@@ -524,6 +526,7 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
+      onExitFullscreen: jest.fn(),
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
@@ -562,6 +565,7 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
+      onExitFullscreen: jest.fn(),
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
@@ -590,6 +594,81 @@ describe('MetricsExperienceGrid', () => {
     expect(onToggleFullscreen).toHaveBeenCalledTimes(1);
   });
 
+  describe('exit fullscreen on empty results (#279480)', () => {
+    // Smoke tests only: these assert the grid feeds `useExitFullscreenOnEmptyResults`
+    // the unfiltered metrics. The full matrix of gates lives in
+    // `use_exit_fullscreen_on_empty_results.test.ts`.
+    const mockFullscreenState = (onExitFullscreen: jest.Mock, searchTerm = '') => {
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: true,
+        searchTerm,
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        onExitFullscreen,
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
+        onMetricsSortChange: jest.fn(),
+        profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
+        onGridSettingsChange: jest.fn(),
+      });
+    };
+
+    it('exits fullscreen when a settled fetch returns no metrics', () => {
+      const onExitFullscreen = jest.fn();
+      mockFullscreenState(onExitFullscreen);
+
+      useFetchMetricsDataMock.mockReturnValue({
+        metricItems: [],
+        allDimensions: [],
+        activeDimensions: [],
+        loading: false,
+        error: null,
+      });
+      useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+      render(<MetricsExperienceGrid {...defaultProps} />, { wrapper: TestWrapper });
+
+      expect(onExitFullscreen).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays in fullscreen while a fetch is in flight', () => {
+      const onExitFullscreen = jest.fn();
+      mockFullscreenState(onExitFullscreen);
+
+      useFetchMetricsDataMock.mockReturnValue({
+        metricItems: [],
+        allDimensions: [],
+        activeDimensions: [],
+        loading: true,
+        error: null,
+      });
+      useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+      render(<MetricsExperienceGrid {...defaultProps} />, { wrapper: TestWrapper });
+
+      expect(onExitFullscreen).not.toHaveBeenCalled();
+    });
+
+    it('stays in fullscreen when a search term filters every metric out', () => {
+      const onExitFullscreen = jest.fn();
+      mockFullscreenState(onExitFullscreen, 'no-such-metric');
+
+      useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+      render(<MetricsExperienceGrid {...defaultProps} />, { wrapper: TestWrapper });
+
+      expect(onExitFullscreen).not.toHaveBeenCalled();
+    });
+  });
+
   describe('wipe orphan dimensions on stream switch (#264957)', () => {
     // Smoke tests only: these assert the grid wires `useDimensionsWipe`
     // correctly (selection + breakdown callbacks reach Discover). The full
@@ -610,6 +689,7 @@ describe('MetricsExperienceGrid', () => {
         searchTerm: '',
         onSearchTermChange: jest.fn(),
         onToggleFullscreen: jest.fn(),
+        onExitFullscreen: jest.fn(),
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
@@ -655,6 +735,7 @@ describe('MetricsExperienceGrid', () => {
         searchTerm: '',
         onSearchTermChange: jest.fn(),
         onToggleFullscreen: jest.fn(),
+        onExitFullscreen: jest.fn(),
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
@@ -705,6 +786,7 @@ describe('MetricsExperienceGrid', () => {
         searchTerm: '',
         onSearchTermChange: jest.fn(),
         onToggleFullscreen: jest.fn(),
+        onExitFullscreen: jest.fn(),
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
@@ -754,6 +836,7 @@ describe('MetricsExperienceGrid', () => {
         searchTerm: '',
         onSearchTermChange: jest.fn(),
         onToggleFullscreen: jest.fn(),
+        onExitFullscreen: jest.fn(),
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),

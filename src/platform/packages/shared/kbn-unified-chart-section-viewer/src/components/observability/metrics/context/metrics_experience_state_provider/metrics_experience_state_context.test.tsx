@@ -182,6 +182,36 @@ describe('MetricsExperienceStateProvider', () => {
     });
   });
 
+  describe('onExitFullscreen', () => {
+    it('leaves fullscreen', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      act(() => {
+        result.current.onToggleFullscreen();
+      });
+      expect(result.current.isFullscreen).toBe(true);
+
+      act(() => {
+        result.current.onExitFullscreen();
+      });
+      expect(result.current.isFullscreen).toBe(false);
+    });
+
+    it('is a no-op when already out of fullscreen', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      act(() => {
+        result.current.onExitFullscreen();
+      });
+      expect(result.current.isFullscreen).toBe(false);
+
+      act(() => {
+        result.current.onExitFullscreen();
+      });
+      expect(result.current.isFullscreen).toBe(false);
+    });
+  });
+
   describe('gridSettings', () => {
     it('defaults to METRICS_GRID_SETTINGS_DEFAULTS when not provided', () => {
       const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });

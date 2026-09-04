@@ -36,6 +36,7 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
   onSearchTermChange: (value: string) => void;
   onMetricsSortChange: (value: MetricsSort) => void;
   onToggleFullscreen: () => void;
+  onExitFullscreen: () => void;
   onFlyoutStateChange: (value: FlyoutState | undefined) => void;
   onFlyoutSelectedTabChange: (value: FlyoutTabId) => void;
   onGridSettingsChange: (update: Partial<MetricsGridSettings>) => void;
@@ -136,6 +137,10 @@ export function MetricsExperienceStateProvider({
     setIsFullscreen((prev) => !prev);
   }, [setIsFullscreen]);
 
+  const onExitFullscreen = useCallback(() => {
+    setIsFullscreen(false);
+  }, [setIsFullscreen]);
+
   const onFlyoutStateChange = useCallback(
     (nextFlyoutState: FlyoutState | undefined) => {
       setFlyoutState(nextFlyoutState);
@@ -175,6 +180,7 @@ export function MetricsExperienceStateProvider({
         onSearchTermChange,
         onMetricsSortChange: handleMetricsSortChange,
         onToggleFullscreen,
+        onExitFullscreen,
         onFlyoutStateChange,
         onFlyoutSelectedTabChange,
         onGridSettingsChange: handleGridSettingsChange,

@@ -25,6 +25,7 @@ import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
+  useExitFullscreenOnEmptyResults,
   useMetricFieldsFilter,
   useMetricsSort,
   useResetPageOnDimensionsChange,
@@ -50,6 +51,7 @@ export const MetricsExperienceGrid = ({
     searchTerm,
     isFullscreen,
     onToggleFullscreen,
+    onExitFullscreen,
     selectedDimensions,
     onDimensionsChange,
     onPageChange,
@@ -112,6 +114,14 @@ export const MetricsExperienceGrid = ({
     breakdownField,
     onSelectedDimensionsChange: onDimensionsChange,
     onBreakdownFieldChange,
+  });
+
+  useExitFullscreenOnEmptyResults({
+    isFullscreen,
+    isLoading: isDiscoverLoading,
+    isComponentVisible,
+    hasMetrics: metricItems.length > 0,
+    onExitFullscreen,
   });
 
   const { onPageReady } = usePerformanceContext();
