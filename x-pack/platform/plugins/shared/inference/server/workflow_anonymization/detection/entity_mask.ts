@@ -36,7 +36,7 @@ export const generateEntityToken = (
 
   // Length-prefixed format prevents delimiter collisions when components
   // contain the separator character.
-  const hmacInput = `${entityClass.length}:${entityClass}:${entityClass.length}:${entityClass}:${value}`;
+  const hmacInput = `${entityClass.length}:${entityClass}:${value.length}:${value}`;
   const hash = createHmac('sha256', executionScope).update(hmacInput).digest('hex');
   return `${entityClass}_${hash.substring(0, clampedLen)}`;
 };
