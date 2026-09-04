@@ -95,6 +95,8 @@ export {
   selectCurrentProfileStateDefinition,
   selectCurrentProfileUrlState,
   selectCurrentProfileLocatorState,
+  selectCurrentTabType,
+  selectTabTypeForPersistence,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,

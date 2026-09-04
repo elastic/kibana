@@ -88,6 +88,41 @@ describe('getConnectorRoute', () => {
     });
   });
 
+  it('omits ingestTokenHash from public config', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getConnectorRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.inboundWebhook',
+        name: 'sales-ingress',
+        config: { ingestTokenHash: 'a'.repeat(64), other: 'kept' },
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        config: { other: 'kept' },
+      }),
+    });
+  });
+
   it('ensures the license allows getting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
