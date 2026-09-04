@@ -17,7 +17,7 @@ steps (query, exception, suppression, risk_score) are correctly gated.
 |---|---|
 | `found_defect_step` | `apply_disable_tuning` |
 | `defect_approval_missing` | true (approval clause absent/commented) |
-| `vacuous_assertions_count` | all assertions in `gate.test.ts` are `toContain`-on-source — every one is vacuous (9 assertions across 4 tests) |
+| `vacuous_assertions_count` | all assertions in `gate.test.ts.txt` are `toContain`-on-source — every one is vacuous (9 assertions across 4 tests) |
 | `false_positive_steps` | empty — all four sibling gates are sound |
 
 ## Scoring rules
