@@ -6,6 +6,7 @@
  */
 
 export type { AgentBuilderEvent } from './base/events';
+export { apiTargets, type ApiTarget } from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,
   type ConversationMetadataUpdatedEvent,
@@ -150,8 +151,13 @@ export {
   SubagentMode,
   ExecutionStatus,
   type SerializedExecutionError,
+  type AutoApprovedApi,
   type InteractivityConfig,
+  type InteractivityConfigInput,
+  createNonInteractiveConfig,
+  isApiAutoApproved,
   normalizeInteractive,
+  toAutoApprovedApis,
   type AgentListOptions,
   type AgentCreateRequest,
   type AgentUpdateRequest,
@@ -250,6 +256,8 @@ export {
   type MessageCompleteEvent,
   type ThinkingCompleteEventData,
   type ThinkingCompleteEvent,
+  type RoundStartedEventData,
+  type RoundStartedEvent,
   type RoundCompleteEventData,
   type RoundCompleteEvent,
   type ToolCallProgress,
@@ -261,6 +269,7 @@ export {
   isMessageChunkEvent,
   isMessageCompleteEvent,
   isThinkingCompleteEvent,
+  isRoundStartedEvent,
   isRoundCompleteEvent,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
@@ -315,6 +324,8 @@ export {
   type PromptResponseEvent,
   type ExecutionStartedEventData,
   type ExecutionStartedEvent,
+  type ExecutionStepEventData,
+  type ExecutionStepEvent,
   type ExecutionRunSummary,
   type ExecutionOutcome,
   type ExecutionTerminatedEventData,

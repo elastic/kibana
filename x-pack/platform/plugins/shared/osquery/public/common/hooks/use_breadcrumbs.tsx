@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 
 import { BASE_PATH } from '../../../common/constants';
-import type { Page, DynamicPagePathValues } from '../page_paths';
+import type { Page } from '../page_paths';
 import { pagePathGetters } from '../page_paths';
 
 import { useKibana } from '../lib/kibana';
@@ -21,8 +21,17 @@ const BASE_BREADCRUMB: ChromeBreadcrumb = {
   }),
 };
 
+/**
+ * Values interpolated into breadcrumb text. Unlike `DynamicPagePathValues` -- which
+ * feeds URL builders and is therefore string-only -- these are rendered, not
+ * serialized into a path, so flags stay booleans and can't silently mistype.
+ */
+export interface BreadcrumbValues {
+  [key: string]: string | number | boolean | undefined;
+}
+
 const breadcrumbGetters: {
-  [key in Page]?: (values: DynamicPagePathValues) => ChromeBreadcrumb[];
+  [key in Page]?: (values: BreadcrumbValues) => ChromeBreadcrumb[];
 } = {
   base: () => [BASE_BREADCRUMB],
   overview: () => [
@@ -142,7 +151,7 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  pack_edit: ({ packName }) => [
+  pack_edit: ({ packName, isReadOnly }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.packs(),
@@ -154,14 +163,20 @@ const breadcrumbGetters: {
       text: packName,
     },
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.editpacksPageTitle', {
-        defaultMessage: 'Edit',
-      }),
+      // A readPacks-only user lands on a read-only pack page, so the trailing crumb
+      // must not say "Edit" (matches the kebab affordance in pack_row_actions).
+      text: isReadOnly
+        ? i18n.translate('xpack.osquery.breadcrumbs.viewpacksPageTitle', {
+            defaultMessage: 'View',
+          })
+        : i18n.translate('xpack.osquery.breadcrumbs.editpacksPageTitle', {
+            defaultMessage: 'Edit',
+          }),
     },
   ],
 };
 
-export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
+export function useBreadcrumbs(page: Page, values: BreadcrumbValues = {}) {
   const { chrome, http, application } = useKibana().services;
 
   const breadcrumbs: ChromeBreadcrumb[] =

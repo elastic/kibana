@@ -14,12 +14,16 @@
  *   "last hour", "trending", "first seen").
  * - field_specific_lookup: User asks which hosts, IPs, users, or other field
  *   values appear in the alert set.
+ * - space_isolation: User asks about alerts from a Kibana space that has no
+ *   alerts index; the agent must stay on `security.alerts` and report 0
+ *   rather than leaking alerts from another space.
  */
 export type AlertsRagCategory =
   | 'single_alert_query'
   | 'multi_alert_correlation'
   | 'temporal_query'
-  | 'field_specific_lookup';
+  | 'field_specific_lookup'
+  | 'space_isolation';
 
 /**
  * One question/reference pair driven through Agent Builder.
@@ -55,5 +59,11 @@ export interface AlertsRagExample {
   metadata: {
     category: AlertsRagCategory;
     dataset_split: string[];
+    /**
+     * When set, the converse call is scoped to this Kibana space
+     * (`/s/<spaceId>/api/agent_builder/converse`). Used by space_isolation
+     * examples that must not see the default-space alerts snapshot.
+     */
+    spaceId?: string;
   };
 }
