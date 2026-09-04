@@ -121,17 +121,20 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 // server-side; fetch the params visible in the target namespaces and compare in memory.
 // Keys are checked per namespace scope so a mixed bulk request (shared + space-local)
 // does not widen the search for space-local keys to all spaces via `*`.
+// Best effort only: params use generated ids and `key` is not indexed, so nothing enforces
+// uniqueness on write and concurrent creates of the same key can still both succeed.
 const findConflictingParamKey = async (
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsData: Array<SavedObjectsBulkCreateObject<Omit<SyntheticsParamSOAttributes, 'id'>>>
 ): Promise<string | undefined> => {
   const requestedKeys = savedObjectsData.map((obj) => obj.attributes.key);
 
-  const duplicateInRequest = requestedKeys.find(
-    (key, index) => requestedKeys.indexOf(key) !== index
-  );
-  if (duplicateInRequest) {
-    return duplicateInRequest;
+  const seenKeys = new Set<string>();
+  for (const key of requestedKeys) {
+    if (seenKeys.has(key)) {
+      return key;
+    }
+    seenKeys.add(key);
   }
 
   const keysByNamespaceScope = new Map<string, { namespaces: string[]; keys: string[] }>();
