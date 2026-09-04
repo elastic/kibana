@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/flaky-test-analyzer",
+  "owner": "@elastic/appex-qa",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}
