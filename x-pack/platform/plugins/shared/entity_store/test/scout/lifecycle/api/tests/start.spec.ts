@@ -18,8 +18,9 @@ import {
   uninstallAllEntityTypes,
 } from '../../../common/fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
+import { BASE_ENTITY_TYPES } from '../../../../../common/domain/definitions/entity_schema';
 
-const ALL_ENTITY_TYPES = ['generic', 'host', 'service', 'user'];
+const ALL_ENTITY_TYPES = [...BASE_ENTITY_TYPES].sort();
 
 apiTest.describe('Entity Store Start API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;

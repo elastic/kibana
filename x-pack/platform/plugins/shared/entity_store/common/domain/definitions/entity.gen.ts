@@ -522,6 +522,41 @@ export const HostEntity = lazySchema(() =>
 export type HostEntity = z.infer<typeof HostEntity>;
 
 /**
+ * The health level classification of a service entity.
+ */
+export const EntityHealthLevels = lazySchema(() =>
+  z.enum(['Unknown', 'Critical', 'Unhealthy', 'Degraded', 'Healthy'])
+);
+export type EntityHealthLevels = z.infer<typeof EntityHealthLevels>;
+export type EntityHealthLevelsEnum = typeof EntityHealthLevels.enum;
+export const EntityHealthLevelsEnum = EntityHealthLevels.enum;
+
+/**
+  * A summary of the entity's health score. Note the score direction is inverted relative to risk - a higher normalized score means healthier (100 = fully healthy, 0 = completely degraded).
+
+  */
+export const EntityHealthSummary = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Lexical description of the entity's health.
+       */
+      calculated_level: EntityHealthLevels.optional(),
+      /**
+       * The raw degradation value (higher means more degraded). Internal use only.
+       */
+      calculated_score: z.number().optional(),
+      /**
+      * The normalized health score (0-100, higher is healthier). Use this for display and comparison.
+
+      */
+      calculated_score_norm: z.number().min(0).max(100).optional(),
+    })
+    .strict()
+);
+export type EntityHealthSummary = z.infer<typeof EntityHealthSummary>;
+
+/**
  * An entity record representing a service.
  */
 export const ServiceEntity = lazySchema(() =>
@@ -590,6 +625,7 @@ export const ServiceEntity = lazySchema(() =>
            */
           version: z.string().optional(),
           risk: EntityRiskSummary.optional(),
+          health: EntityHealthSummary.optional(),
         })
         .strict()
         .optional(),

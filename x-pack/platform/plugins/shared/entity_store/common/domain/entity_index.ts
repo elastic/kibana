@@ -15,7 +15,7 @@ export const ENTITY_BASE_PREFIX = 'entities';
 export const ENTITY_SCHEMA_VERSION_V2 = 'v2';
 
 // Bump this integer whenever entity index mappings change.
-export const MAPPING_VERSION = 1;
+export const MAPPING_VERSION = 2;
 
 type SchemaVersion = `v${number}`;
 type Dataset =

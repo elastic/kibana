@@ -319,11 +319,100 @@ const version6: SavedObjectsFullModelVersion = {
   },
 };
 
+// Version 7 widens the `type` field to include the 7 Kubernetes entity types
+// added in this version. Existing engine descriptors (host/user/service/generic)
+// remain at v6; new k8s engines create descriptors under this schema.
+const engineDescriptorSchemaV7 = schema.object({
+  type: schema.oneOf([
+    schema.literal('user'),
+    schema.literal('host'),
+    schema.literal('service'),
+    schema.literal('generic'),
+    schema.literal('k8s.pod'),
+    schema.literal('k8s.container'),
+    schema.literal('k8s.deployment'),
+    schema.literal('k8s.replicaset'),
+    schema.literal('k8s.namespace'),
+    schema.literal('k8s.node'),
+    schema.literal('k8s.daemonset'),
+  ]),
+  status: schema.oneOf([
+    schema.literal('installing'),
+    schema.literal('started'),
+    schema.literal('stopped'),
+    schema.literal('updating'),
+    schema.literal('error'),
+  ]),
+  logExtractionState: logExtractionRuntimeStateSchemaV6,
+  error: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+  versionState: schema.object({
+    version: schema.oneOf([schema.literal(1), schema.literal(2)]),
+    state: schema.oneOf([schema.literal('running'), schema.literal('migrating')]),
+    isMigratedFromV1: schema.boolean(),
+  }),
+});
+
+const version7: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV7,
+    forwardCompatibility: engineDescriptorSchemaV7.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+// Version 8 widens `type` to schema.string() to support arbitrary entity types
+// (e.g. perf.entity.NNN synthetic types for performance testing). All existing
+// engines continue to pass; new types are not constrained to the original 11.
+const engineDescriptorSchemaV8 = schema.object({
+  type: schema.string({ minLength: 1, maxLength: 200 }),
+  status: schema.oneOf([
+    schema.literal('installing'),
+    schema.literal('started'),
+    schema.literal('stopped'),
+    schema.literal('updating'),
+    schema.literal('error'),
+  ]),
+  logExtractionState: logExtractionRuntimeStateSchemaV6,
+  error: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+  versionState: schema.object({
+    version: schema.oneOf([schema.literal(1), schema.literal(2)]),
+    state: schema.oneOf([schema.literal('running'), schema.literal('migrating')]),
+    isMigratedFromV1: schema.boolean(),
+  }),
+});
+
+const version8: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV8,
+    forwardCompatibility: engineDescriptorSchemaV8.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5, 6: version6 },
+  modelVersions: {
+    1: version1,
+    2: version2,
+    3: version3,
+    4: version4,
+    5: version5,
+    6: version6,
+    7: version7,
+    8: version8,
+  },
   hiddenFromHttpApis: true,
 };

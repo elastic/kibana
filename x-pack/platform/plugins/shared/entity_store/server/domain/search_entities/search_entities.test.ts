@@ -57,7 +57,7 @@ describe('searchEntitiesV2', () => {
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: ['.entities.v2.latest.default-00001'],
+        index: ['.entities.v2.latest.default-00002'],
         query: {
           bool: {
             must: [

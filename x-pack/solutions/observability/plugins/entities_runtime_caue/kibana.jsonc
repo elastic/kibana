@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/entities-runtime-caue-plugin",
+  "owner": ["@elastic/obs-ux-infra_services-team"],
+  "group": "observability",
+  "visibility": "private",
+  "description": "Runtime (non-materialised) entity discovery with user-authored definitions",
+  "plugin": {
+    "id": "entitiesRuntimeCaue",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["data", "observabilityShared", "unifiedSearch"],
+    "optionalPlugins": []
+  }
+}

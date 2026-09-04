@@ -11,7 +11,12 @@ import {
   getEntityFieldsDescriptions,
 } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
+import {
+  collectValues as collect,
+  managedValue,
+  newestValue,
+  oldestValue,
+} from './field_retention_operations';
 
 export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   type: 'service',
@@ -39,5 +44,15 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'service.version' }),
     ...getCommonFieldDescriptions('service'),
     ...getEntityFieldsDescriptions('service'),
+    // Health score fields — written by the service-health-score entity maintainer.
+    // Using managedValue (no extraction source) so periodic log re-extraction never
+    // overwrites the maintainer's writes. force:true required when writing (allowAPIUpdate
+    // defaults to false).
+    managedValue({ destination: 'service.health.calculated_level' }),
+    managedValue({ destination: 'service.health.calculated_score', mapping: { type: 'float' } }),
+    managedValue({
+      destination: 'service.health.calculated_score_norm',
+      mapping: { type: 'float' },
+    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

@@ -23,6 +23,13 @@ const ENTITY_NAME_FIELD: Record<EntityType, string> = {
   host: 'host.name',
   service: 'service.name',
   generic: 'entity.name',
+  'k8s.pod': 'k8s.pod.name',
+  'k8s.container': 'k8s.container.name',
+  'k8s.deployment': 'k8s.deployment.name',
+  'k8s.replicaset': 'k8s.replicaset.name',
+  'k8s.namespace': 'k8s.namespace.name',
+  'k8s.node': 'k8s.node.name',
+  'k8s.daemonset': 'k8s.daemonset.name',
 };
 
 const hasEsSource = (d: EsHit | SourceDoc): d is EsHit =>

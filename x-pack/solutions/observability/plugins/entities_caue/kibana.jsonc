@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/entities-caue-plugin",
+  "owner": ["@elastic/obs-ux-infra_services-team"],
+  "group": "observability",
+  "visibility": "private",
+  "description": "Browse Entity Store service entities",
+  "plugin": {
+    "id": "entitiesCaue",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["data", "observabilityShared", "entityStore", "share"],
+    "optionalPlugins": []
+  }
+}

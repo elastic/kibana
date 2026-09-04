@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/api';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
+import { BASE_ENTITY_TYPES } from '../../../../common/domain/definitions/entity_schema';
 
 import {
   ENTITY_STORE_ROUTES,
@@ -391,10 +392,12 @@ export const installAllEntityTypes = (
   apiClient: ApiClientFixture,
   headers: Record<string, string>
 ) =>
+  // Explicitly pass the 11 base entity types so that tests are not affected by the
+  // synthetic performance-test definitions (perf.entity.NNN) added to the registry.
   apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
     headers,
     responseType: 'json',
-    body: {},
+    body: { entityTypes: [...BASE_ENTITY_TYPES] },
   });
 
 export const uninstallAllEntityTypes = (

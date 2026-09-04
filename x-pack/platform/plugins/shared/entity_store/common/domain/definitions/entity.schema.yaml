@@ -561,6 +561,8 @@ components:
               example: '2.4.1'
             risk:
               $ref: '#/components/schemas/EntityRiskSummary'
+            health:
+              $ref: '#/components/schemas/EntityHealthSummary'
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
@@ -771,3 +773,40 @@ components:
         - "Moderate"
         - "High"
         - "Critical"
+
+    EntityHealthSummary:
+      type: object
+      additionalProperties: false
+      description: >
+        A summary of the entity's health score. Note the score direction is inverted
+        relative to risk - a higher normalized score means healthier (100 = fully healthy,
+        0 = completely degraded).
+      properties:
+        calculated_level:
+          $ref: '#/components/schemas/EntityHealthLevels'
+          description: Lexical description of the entity's health.
+          example: 'Degraded'
+        calculated_score:
+          type: number
+          format: double
+          description: The raw degradation value (higher means more degraded). Internal use only.
+          example: 30.0
+        calculated_score_norm:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+          description: >
+            The normalized health score (0-100, higher is healthier). Use this for display
+            and comparison.
+          example: 70.0
+
+    EntityHealthLevels:
+      type: string
+      description: The health level classification of a service entity.
+      enum:
+        - "Unknown"
+        - "Critical"
+        - "Unhealthy"
+        - "Degraded"
+        - "Healthy"

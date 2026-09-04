@@ -2,11 +2,11 @@ pageLoadAssetSize:
   actions: 20800
   advancedSettings: 6119
   agentBuilder: 51190
-  agentBuilderDashboards: 8685
+  agentBuilderDashboards: 8200
   agentBuilderPlatform: 26248
   agentBuilderSml: 2103
   agentBuilderVisualizations: 7356
-  agentBuilderWorkflows: 4955
+  agentBuilderWorkflows: 4841
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -17,11 +17,11 @@ pageLoadAssetSize:
   automaticImport: 18629
   banners: 4006
   canvas: 14881
-  cases: 310000
+  cases: 304481
   charts: 40269
   clientApps: 4688
   cloud: 11743
-  cloudConnect: 9149
+  cloudConnect: 10296
   cloudDataMigration: 5687
   cloudDefend: 8146
   cloudExperiments: 98888
@@ -37,7 +37,7 @@ pageLoadAssetSize:
   core: 563693
   cps: 9209
   crossClusterReplication: 12662
-  customContent: 6111
+  customContent: 6003
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8613
@@ -63,6 +63,7 @@ pageLoadAssetSize:
   embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
+  entitiesCaue: 5142
   entityStore: 15562
   esql: 29469
   esqlDataGrid: 10209
@@ -131,7 +132,7 @@ pageLoadAssetSize:
   ml: 99842
   mockIdpPlugin: 7421
   monitoring: 28983
-  navigation: 18855
+  navigation: 18616
   newsfeed: 11110
   nightshift: 7911
   nightshiftInvestigations: 5000
@@ -144,11 +145,11 @@ pageLoadAssetSize:
   observabilityAiAssistantManagement: 7126
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 14161
-  observabilityShared: 86067
+  observabilityShared: 86064
   osquery: 48500
   painlessLab: 6299
   pnd: 13291
-  presentationUtil: 8391
+  presentationUtil: 5054
   productDocBase: 6767
   productIntercept: 9860
   profiling: 20716
@@ -188,15 +189,15 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 5347
   sessionView: 47912
   share: 64059
-  significantEvents: 12119
-  significantEventsApp: 13163
+  significantEvents: 12057
+  significantEventsApp: 12569
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 32595
-  streamsApp: 340704
+  streamsApp: 25399
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
@@ -204,7 +205,7 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 123512
   uiActions: 35180
-  unifiedDocViewer: 16519
+  unifiedDocViewer: 18418
   unifiedSearch: 19500
   upgradeAssistant: 6898
   uptime: 48171
@@ -221,12 +222,12 @@ pageLoadAssetSize:
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
   visTypeTimeseries: 21819
-  visTypeVega: 11562
+  visTypeVega: 11064
   visTypeVislib: 14679
   visTypeXy: 32342
   visualizationListing: 5148
   visualizations: 52092
   watcher: 10485
   workflowsExtensions: 43032
-  workflowsManagement: 39968
+  workflowsManagement: 44511
   workplaceAIApp: 6234

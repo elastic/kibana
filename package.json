@@ -697,6 +697,8 @@
     "@kbn/encrypted-saved-objects-plugin": "link:x-pack/platform/plugins/shared/encrypted_saved_objects",
     "@kbn/encrypted-saved-objects-shared": "link:src/platform/packages/shared/kbn-encrypted-saved-objects-shared",
     "@kbn/enterprise-search-plugin": "link:x-pack/solutions/search/plugins/enterprise_search",
+    "@kbn/entities-caue-plugin": "link:x-pack/solutions/observability/plugins/entities_caue",
+    "@kbn/entities-runtime-caue-plugin": "link:x-pack/solutions/observability/plugins/entities_runtime_caue",
     "@kbn/entity-store": "link:x-pack/platform/plugins/shared/entity_store",
     "@kbn/error-boundary-example-plugin": "link:examples/error_boundary",
     "@kbn/es-errors": "link:src/platform/packages/shared/kbn-es-errors",

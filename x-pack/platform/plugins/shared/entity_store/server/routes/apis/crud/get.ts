@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
-import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
+import { API_VERSIONS, ENTITY_STORE_ROUTES, EntityType } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
@@ -19,7 +19,7 @@ import { BadCRUDRequestError } from '../../../domain/errors';
 import type { ListEntitiesParams } from '../../../domain/crud/crud_client';
 
 /** `ArrayFromString` expects a Zod schema; align with search / CRUD entity types. */
-const entityTypeSchema = z.enum(['user', 'host', 'service', 'generic']);
+const entityTypeSchema = EntityType;
 
 const querySchema = z
   .object({
