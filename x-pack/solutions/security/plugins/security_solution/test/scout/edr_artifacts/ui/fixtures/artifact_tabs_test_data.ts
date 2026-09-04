@@ -11,16 +11,12 @@ import type { PolicyArtifactKind } from './page_objects';
 
 /**
  * Displayed lowercase. Forms enter it uppercase on purpose so create flows
- * cover hash normalization. Keep in sync with Cypress `artifacts_page.ts`
- * criteria strings.
+ * cover hash normalization.
  */
 export const TRUSTED_APP_HASH = 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476';
 
 /**
- * Policy-details tab cases for Scout. Cypress `getArtifactsListTestsData()` in
- * `public/management/cypress/fixtures/artifacts_page.ts` is a live fork used
- * by `artifacts.cy.ts`. If you change a criteriaConditions string here, update
- * the other.
+ * Policy-details tab cases for Scout.
  *
  * Event Filters / Endpoint Exceptions autocomplete fields (`@timestamp`,
  * `agent.version`, `process.name`) are seeded in `seed_endpoint_field_caps.ts`.
