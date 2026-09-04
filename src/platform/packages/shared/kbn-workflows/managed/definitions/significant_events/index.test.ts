@@ -52,7 +52,7 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(18);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(19);
   });
 
   it('marks discovery-triggered investigations as automatic', () => {
@@ -88,6 +88,6 @@ describe('significant events persistence workflow contracts', () => {
     const attach = requireStep(investigationCompleted, 'attach_completed_investigation');
     expect(getInvestigation.with?.path).toContain('/internal/nightshift/investigations/');
     expect(attach.with?.path).toContain('/internal/significant_events/events/');
-    expect(attach.with?.body?.trigger_feedback).toContain('result.trigger_feedback');
+    expect(attach.with?.body?.trigger_feedback).toContain('output.trigger_feedback');
   });
 });

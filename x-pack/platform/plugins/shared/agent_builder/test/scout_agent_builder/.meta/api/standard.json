@@ -1,5 +1,5 @@
 {
-  "sha1": "af67c325c1adb7714f3d5d0f0666462e0baae363",
+  "sha1": "fbd5c61c176f27c02a55391a2bc72ba58c386492",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -728,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 460,
+        "line": 478,
         "column": 7
       }
     },
@@ -742,7 +742,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 867,
+        "line": 934,
         "column": 20
       }
     },
@@ -756,7 +756,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 912,
+        "line": 979,
         "column": 16
       }
     },
@@ -770,7 +770,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1105,
+        "line": 1172,
         "column": 26
       }
     },
@@ -784,7 +784,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1156,
+        "line": 1223,
         "column": 70
       }
     },
@@ -798,7 +798,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1208,
+        "line": 1275,
         "column": 29
       }
     },
@@ -1043,22 +1043,6 @@
       }
     },
     {
-      "id": "1bf6ab7417a0378-69dccf9a88e32b3",
-      "title": "Agent Builder — concurrent conversation writes API keeps both rounds when two clients converse with the same conversation at once",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_concurrency_api.spec.ts",
-        "line": 37,
-        "column": 38
-      }
-    },
-    {
       "id": "9cd742bc3777cce-ba7ee492946819f",
       "title": "Agent Builder — POST /conversations returns 200 with correct default shape when called with an empty body",
       "expectedStatus": "passed",
@@ -1246,8 +1230,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_events_persistence_api.spec.ts",
-        "line": 59,
-        "column": 40
+        "line": 58,
+        "column": 56
       }
     },
     {
@@ -1263,7 +1247,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_events_persistence_api.spec.ts",
         "line": 85,
-        "column": 11
+        "column": 15
       }
     },
     {

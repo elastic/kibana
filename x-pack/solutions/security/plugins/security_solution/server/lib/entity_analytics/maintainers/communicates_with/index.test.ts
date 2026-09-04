@@ -64,6 +64,7 @@ describe('communicatesWithMaintainer', () => {
           totalNotFound: 0,
           totalWriteErrors: 0,
           totalMetadataDocsApplied: 6,
+          totalMetadataDocsFailed: 0,
           totalTargetIdsNotInStore: 0,
           totalIterations: 8,
           truncated: false,
@@ -88,6 +89,7 @@ describe('communicatesWithMaintainer', () => {
       targetIdsNotInStore: 0,
       failed: 0,
       metadataDocsApplied: 6,
+      metadataDocsFailed: 0,
     });
 
     expect(payload.sources).toEqual([
