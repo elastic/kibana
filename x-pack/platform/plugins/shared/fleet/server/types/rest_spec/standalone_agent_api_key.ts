@@ -9,6 +9,6 @@ import { schema } from '@kbn/config-schema';
 
 export const PostStandaloneAgentAPIKeyRequestSchema = {
   body: schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: 255 }),
   }),
 };

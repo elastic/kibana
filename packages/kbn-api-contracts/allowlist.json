@@ -236,6 +236,62 @@
       "approvedBy": "@elastic/workchat-eng",
       "oasdiffId": "request-property-max-length-decreased",
       "prUrl": "https://github.com/elastic/kibana/pull/286654"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_migrate",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_reassign",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_request_diagnostics",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_unenroll",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_update_agent_tags",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_upgrade",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/epm/packages/_bulk",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). Each item in the 'packages' array accepts a string (package name) or a package object; adding maxLength to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
     }
   ]
 }
