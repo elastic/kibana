@@ -2528,6 +2528,58 @@ export const ANALYZER_CROSS_PROJECT_RENDER_EVENT: EventTypeOpts<{
   },
 };
 
+export const NEW_TERMS_FIELD_CARDINALITY_EVENT: EventTypeOpts<{
+  isElasticRule: boolean;
+  newTermsFieldsCount: number;
+  distinctFieldCombinations: number;
+  maxCombinationValueLength: number;
+  avgCombinationValueLength: number;
+  completedFullScan: boolean;
+}> = {
+  eventType: 'new_terms_field_cardinality_on_rule_execution',
+  schema: {
+    isElasticRule: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'True for an Elastic prebuilt rule, false for a user-created rule. No rule id, name, field names or values are reported.',
+      },
+    },
+    newTermsFieldsCount: {
+      type: 'long',
+      _meta: { description: 'Number of fields the New Terms rule groups by (1-3)' },
+    },
+    distinctFieldCombinations: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of distinct combinations of the grouping fields observed in the rule run window during this execution',
+      },
+    },
+    maxCombinationValueLength: {
+      type: 'long',
+      _meta: {
+        description:
+          'Longest combined character length of the grouping-field values across a single distinct combination this run (value lengths only, not the values)',
+      },
+    },
+    avgCombinationValueLength: {
+      type: 'long',
+      _meta: {
+        description:
+          'Average combined character length of the grouping-field values across distinct combinations this run',
+      },
+    },
+    completedFullScan: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'True if the rule paged through all terms this run; false if it stopped early after reaching maxSignals, in which case the counts are a lower bound',
+      },
+    },
+  },
+};
+
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
@@ -2544,6 +2596,7 @@ export const events = [
   RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
   ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,
   ALERT_SUPPRESSION_EVENT,
+  NEW_TERMS_FIELD_CARDINALITY_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
