@@ -237,6 +237,46 @@ describe('WorkflowDetailConnectorFlyout', () => {
       const editorModel = mockEditorRef.current?.getModel();
       expect(editorModel?.pushEditOperations).not.toHaveBeenCalled();
     });
+
+    it('keeps the flyout open after creating an inbound webhook so the ingest token remains visible', () => {
+      let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+        onConnectorCreatedCallback = config.onConnectorCreated;
+        return <div data-test-subj="add-connector-flyout" />;
+      });
+
+      const { store } = renderComponent();
+      act(() => {
+        store.dispatch(
+          openCreateConnectorFlyout({
+            connectorType: '.inboundWebhook',
+            insertPosition: mockInsertPosition,
+          })
+        );
+      });
+
+      act(() => {
+        onConnectorCreatedCallback!({
+          ...mockConnector,
+          id: 'testong',
+          actionTypeId: '.inboundWebhook',
+        });
+      });
+
+      expect(mockLoadConnectors).toHaveBeenCalled();
+      expect(store.getState().detail.connectorFlyout.isOpen).toBe(true);
+      const editorModel = mockEditorRef.current?.getModel();
+      expect(editorModel?.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: expect.any(monaco.Range),
+            text: 'testong',
+          },
+        ],
+        expect.any(Function)
+      );
+    });
   });
 
   describe('when editing an existing connector', () => {

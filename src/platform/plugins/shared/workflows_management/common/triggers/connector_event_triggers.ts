@@ -74,3 +74,21 @@ export const getConnectorEventTriggerDefinitions = ({
     }))
   );
 };
+
+/**
+ * Maps a connector-event trigger id (e.g. `inboundWebhook.received`) to the
+ * connector type id used for instance lookup (e.g. `.inboundWebhook`).
+ */
+export const getConnectorTypeIdForTriggerEventId = (
+  eventId: string,
+  specs: ConnectorSpec[] = Object.values(connectorsSpecs)
+): string | undefined => {
+  const spec = specs
+    .filter(isConnectorSpecWithEvents)
+    .find((candidate) =>
+      Object.values(candidate.events.definitions).some(
+        (eventDefinition) => eventDefinition.eventId === eventId
+      )
+    );
+  return spec?.metadata.id;
+};

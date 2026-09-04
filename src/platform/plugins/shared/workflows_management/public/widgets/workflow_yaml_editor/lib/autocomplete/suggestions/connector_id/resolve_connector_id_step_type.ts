@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Document } from 'yaml';
 import {
   WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES,
   type WaitForApprovalChannelKey,
 } from '@kbn/workflows';
+import { getConnectorTypeIdForTriggerEventId } from '../../../../../../../common/triggers/connector_event_triggers';
 import type { StepInfo, StepPropInfo } from '../../../../../../entities/workflows/store';
+import {
+  getTriggerConnectorIdBlockIndex,
+  getTriggerTypeAtIndex,
+} from '../../context/triggers_utils';
 
 function resolveWaitForApprovalChannelConnectorType(
   propPath: ReadonlyArray<string | number>
@@ -50,4 +56,26 @@ export function resolveConnectorIdStepType(
   }
 
   return focusedStepInfo.stepType;
+}
+
+/**
+ * Resolves the connector type for a trigger-level `connector-id`
+ * (`triggers[i].type` → spec `metadata.id`).
+ */
+export function resolveConnectorIdTriggerType(
+  path: ReadonlyArray<string | number> | undefined,
+  yamlDocument: Document | undefined
+): string | null {
+  if (!path || !yamlDocument) {
+    return null;
+  }
+  const triggerIndex = getTriggerConnectorIdBlockIndex([...path]);
+  if (triggerIndex === null) {
+    return null;
+  }
+  const triggerType = getTriggerTypeAtIndex(yamlDocument, triggerIndex);
+  if (!triggerType) {
+    return null;
+  }
+  return getConnectorTypeIdForTriggerEventId(triggerType) ?? null;
 }

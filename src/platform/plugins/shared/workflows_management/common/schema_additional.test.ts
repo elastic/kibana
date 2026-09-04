@@ -309,6 +309,17 @@ describe('schema - additional coverage', () => {
       expect(dynamicContracts.every((contract) => contract.displayName === 'Inference')).toBe(true);
     });
 
+    it('should skip inbound-only connector types so they are not step types', () => {
+      const types = {
+        '.inboundWebhook': createMockConnectorTypeInfo({
+          actionTypeId: '.inboundWebhook',
+          displayName: 'Inbound Webhook',
+        }),
+      };
+
+      expect(convertDynamicConnectorsToContracts(types)).toEqual([]);
+    });
+
     it('should skip disabled connectors', () => {
       const types = {
         '.disabled': createMockConnectorTypeInfo({

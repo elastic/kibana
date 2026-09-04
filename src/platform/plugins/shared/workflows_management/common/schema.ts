@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import type {
   BaseConnectorContract,
   ConnectorContractUnion,
@@ -185,12 +186,21 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
  * Convert dynamic connector data from actions client to ConnectorContract format
  * Internal implementation - use exported convertDynamicConnectorsToContracts() instead
  */
+const inboundOnlyConnectorTypeIds = new Set(
+  Object.values(connectorsSpecs)
+    .filter(isInboundOnlyConnectorSpec)
+    .map((spec) => spec.metadata.id)
+);
+
 function convertDynamicConnectorsToContractsInternal(
   connectorTypes: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion[] {
   const connectorContracts: ConnectorContractUnion[] = [];
   Object.values(connectorTypes).forEach((connectorType) => {
     if (connectorType.enabled === false) {
+      return;
+    }
+    if (inboundOnlyConnectorTypeIds.has(connectorType.actionTypeId)) {
       return;
     }
     try {
