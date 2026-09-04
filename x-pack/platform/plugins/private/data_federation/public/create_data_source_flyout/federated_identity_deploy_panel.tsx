@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -22,7 +21,6 @@ import {
 } from '@elastic/eui';
 
 export function FederatedIdentityDeployPanel({
-  cloudProviderIcon,
   title,
   description,
   launchUrl,
@@ -31,7 +29,6 @@ export function FederatedIdentityDeployPanel({
   createsItems,
   testSubjPrefix,
 }: {
-  cloudProviderIcon: 'logoAWS' | 'logoGoogleG' | 'logoAzure';
   title: string;
   description: string;
   launchUrl: string;
@@ -52,10 +49,6 @@ export function FederatedIdentityDeployPanel({
   const deployPanelCss = css`
     padding-block: ${euiTheme.size.base};
   `;
-  /** Lines up with the description, past the provider icon beside it. */
-  const createsSectionCss = css`
-    padding-inline-start: calc(${euiTheme.size.xl} + ${euiTheme.size.m});
-  `;
   /** A footnote, so it sits below the surrounding headings in weight. */
   const createsTitleCss = css`
     font-weight: ${euiTheme.font.weight.medium};
@@ -71,20 +64,13 @@ export function FederatedIdentityDeployPanel({
     >
       <EuiFlexGroup responsive={false} gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiFlexGroup responsive={false} gutterSize="m" alignItems="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={cloudProviderIcon} size="xl" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h4>{title}</h4>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                <p>{description}</p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle size="xs">
+            <h4>{title}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>{description}</p>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -102,32 +88,29 @@ export function FederatedIdentityDeployPanel({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {/*
-        The resource list is a footnote to the description, so it keeps that
-        text's indent, but it reads better across the whole panel than squeezed
+        The resource list reads better across the whole panel than squeezed
         into the column beside the button.
       */}
-      <div css={createsSectionCss}>
-        <EuiAccordion
-          id={createsAccordionId}
-          buttonContent={
-            <EuiText size="s" css={createsTitleCss}>
-              {createsTitle}
-            </EuiText>
-          }
-          initialIsOpen={false}
-          paddingSize="s"
-          arrowProps={{ iconSize: 's' }}
-          data-test-subj={`${testSubjPrefix}DeployCreatesPanel`}
-        >
-          <EuiText size="xs" color="subdued" component="div" css={createsListCss}>
-            <ol>
-              {createsItems.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ol>
+      <EuiAccordion
+        id={createsAccordionId}
+        buttonContent={
+          <EuiText size="s" css={createsTitleCss}>
+            {createsTitle}
           </EuiText>
-        </EuiAccordion>
-      </div>
+        }
+        initialIsOpen={false}
+        paddingSize="s"
+        arrowProps={{ iconSize: 's' }}
+        data-test-subj={`${testSubjPrefix}DeployCreatesPanel`}
+      >
+        <EuiText size="xs" color="subdued" component="div" css={createsListCss}>
+          <ol>
+            {createsItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ol>
+        </EuiText>
+      </EuiAccordion>
     </EuiPanel>
   );
 }

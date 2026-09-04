@@ -129,7 +129,7 @@ export const getAzureFederatedIdentityDeployConfig = () => ({
     }),
     i18n.translate('xpack.dataFederation.createFlyout.azure.federated.deploy.creates.output', {
       defaultMessage:
-        'Template outputs TenantId and ClientId — copy these from the deployment outputs.',
+        'Template outputs TenantId and ClientId. Copy these from the deployment outputs.',
     }),
   ],
 });

@@ -70,7 +70,7 @@ ISSUER_HOST="\${JWT_ISSUER#https://}"`,
       'xpack.dataFederation.createFlyout.s3.federated.manual.step2.description',
       {
         defaultMessage:
-          'ListBucket and GetBucketLocation are needed so prefix and glob queries resolve, not just object reads. The policy covers the whole bucket — narrow the object resource to a prefix for a tighter scope.',
+          'ListBucket and GetBucketLocation are needed so prefix and glob queries resolve, not just object reads. The policy covers the whole bucket, so narrow the object resource to a prefix for a tighter scope.',
       }
     ),
     command: `export BUCKET_NAME="<your-bucket-name>"
@@ -173,7 +173,7 @@ export const getS3FederatedIdentityDeployConfig = () => ({
   createsItems: [
     i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.idp', {
       defaultMessage:
-        'IAM OIDC identity provider — trusts the JWT issuer for your Elastic project or deployment.',
+        'IAM OIDC identity provider that trusts the JWT issuer for your Elastic project or deployment.',
     }),
     i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.role', {
       defaultMessage:
@@ -181,7 +181,7 @@ export const getS3FederatedIdentityDeployConfig = () => ({
     }),
     i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.policy', {
       defaultMessage:
-        'S3 read policy — s3:GetObject, s3:ListBucket, s3:GetBucketLocation permissions.',
+        'S3 read policy granting s3:GetObject, s3:ListBucket, and s3:GetBucketLocation.',
     }),
   ],
 });

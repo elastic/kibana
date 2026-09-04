@@ -135,7 +135,7 @@ export const getGcsFederatedIdentityDeployConfig = () => ({
       defaultMessage: 'Service account binding with storage.objectViewer on your bucket.',
     }),
     i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.deploy.creates.output', {
-      defaultMessage: 'Provider resource name — use this value as the STS audience in Elastic.',
+      defaultMessage: 'Provider resource name. Use this value as the STS audience in Elastic.',
     }),
   ],
 });
