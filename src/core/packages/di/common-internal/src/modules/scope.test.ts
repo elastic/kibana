@@ -7,24 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Container, ContainerModule } from 'inversify';
+import { Container, ContainerModule } from 'inversify';
 import { Scope, type ScopedContainer } from '@kbn/core-di';
-import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { InternalCoreStart, type InternalCoreStartContext } from './lifecycle';
 import { Global } from './plugin';
 import { loadScope } from './scope';
 
 describe('loadScope', () => {
-  let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
+  let injection: jest.Mocked<InternalCoreStartContext['injection']>;
   let container: Container;
 
   beforeEach(() => {
-    injection = injectionServiceMock.createStartContract();
-    container = injection.getContainer();
+    container = new Container();
+    injection = {
+      fork: jest.fn(() => new Container({ parent: container })),
+    } as unknown as typeof injection;
+    container.bind(InternalCoreStart('injection')).toConstantValue(injection);
     container.load(new ContainerModule(loadScope));
   });
 
-  it('should bind the Scope service', () => {
+  it('should bind the `Scope` service', () => {
     expect(container.isBound(Scope)).toBe(true);
+  });
+
+  it('should fork the injection container', () => {
+    const scope = container.get(Scope);
+
+    expect(scope).not.toBe(container);
+    expect(injection.fork).toHaveBeenCalledTimes(1);
+    expect(injection.fork).toHaveReturnedWith(scope);
   });
 
   describe('Scope', () => {
