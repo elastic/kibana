@@ -24,6 +24,8 @@ export class GraphPage {
 
   // Internal locators — consumed only by methods on this class.
   private readonly newButton: Locator;
+  private readonly settingsButton: Locator;
+  private readonly appMenuOverflowButton: Locator;
   private readonly homeBreadcrumb: Locator;
   private readonly datasourceButton: Locator;
   private readonly addFieldButton: Locator;
@@ -50,6 +52,8 @@ export class GraphPage {
 
     this.newButton = this.page.testSubj.locator('graphNewButton');
     this.saveButton = this.page.testSubj.locator('graphSaveButton');
+    this.settingsButton = this.page.testSubj.locator('graphSettingsButton');
+    this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
     // Two breadcrumbs register `graphHomeBreadcrumb` (chrome + shared-ux
     // mirror); match `first` to pick the chrome one.
     this.homeBreadcrumb = this.page.locator(
@@ -97,7 +101,16 @@ export class GraphPage {
   }
 
   async waitForListing() {
-    await this.contentList.waitForReady();
+    await this.page.testSubj.locator('appHeader').waitFor({ state: 'visible' });
+    await this.contentList.toolbar.or(this.createGraphPromptButton).waitFor({ state: 'visible' });
+  }
+
+  private async clickAppMenuItem(item: Locator) {
+    if (!(await item.isVisible())) {
+      await this.appMenuOverflowButton.click();
+      await item.waitFor({ state: 'visible' });
+    }
+    await item.click();
   }
 
   async clickCreateGraph() {
@@ -148,14 +161,18 @@ export class GraphPage {
   }
 
   async saveWorkspaceAs(title: string) {
-    await this.saveButton.click();
+    await this.clickAppMenuItem(this.saveButton);
     await this.saveTitleInput.fill(title);
     await this.saveConfirmButton.click();
     await this.saveSuccessToast.waitFor({ state: 'visible' });
   }
 
+  async clickSettings() {
+    await this.clickAppMenuItem(this.settingsButton);
+  }
+
   async newWorkspace({ discardChanges = false }: { discardChanges?: boolean } = {}) {
-    await this.newButton.click();
+    await this.clickAppMenuItem(this.newButton);
     if (discardChanges) {
       await this.confirmModalTitle.waitFor({ state: 'visible' });
       await this.confirmModalConfirmButton.click();

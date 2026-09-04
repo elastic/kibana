@@ -19,16 +19,19 @@ export class GraphListingPage {
   readonly contentList: ContentListWrapper;
   readonly createGraphButton: Locator;
   readonly emptyPromptCreateButton: Locator;
+  readonly appHeader: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.contentList = new ContentListWrapper(page);
     this.createGraphButton = this.page.testSubj.locator('graphCreateGraphButton');
     this.emptyPromptCreateButton = this.page.testSubj.locator('graphCreateGraphPromptButton');
+    this.appHeader = this.page.testSubj.locator('appHeader');
   }
 
   /** Navigate to the Graph listing page and wait for the header to be visible. */
   async goto() {
     await this.page.gotoApp('graph');
-    await this.contentList.waitForReady();
+    await this.appHeader.waitFor({ state: 'visible' });
+    await this.contentList.toolbar.or(this.emptyPromptCreateButton).waitFor({ state: 'visible' });
   }
 }

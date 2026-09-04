@@ -38,7 +38,7 @@ spaceTest.describe('Graph listing page', { tag: tags.stateful.classic }, () => {
 
   spaceTest('renders the page header and saved graphs', async ({ pageObjects }) => {
     await pageObjects.graphListing.goto();
-    await expect(pageObjects.graphListing.contentList.pageHeader).toBeVisible();
+    await expect(pageObjects.graphListing.appHeader).toBeVisible();
     await expect(pageObjects.graphListing.contentList.itemLinks).toHaveCount(2);
   });
 
