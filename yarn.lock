@@ -7094,6 +7094,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/flyout-template-overlay@link:src/platform/packages/shared/shared-ux/flyout/template-overlay":
+  version "0.0.0"
+  uid ""
+
 "@kbn/flyout-template@link:src/platform/packages/shared/shared-ux/flyout/template":
   version "0.0.0"
   uid ""

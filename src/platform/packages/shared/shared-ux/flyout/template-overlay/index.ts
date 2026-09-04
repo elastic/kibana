@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutOwnFocusSwitch } from './flyout_ownfocus_switch';
-export { FlyoutTypeSwitch } from './flyout_type_switch';
+export { useFlyoutTemplate } from './src/use_flyout_template';
 
-export {
-  createChildFlyoutDescriptionItems,
-  createMainFlyoutDescriptionItems,
-} from './flyout_description_items';
-
-export const FLYOUT_MIN_WIDTH = 300;
+export type { UseFlyoutTemplateOptions, UseFlyoutTemplateResult } from './src/use_flyout_template';

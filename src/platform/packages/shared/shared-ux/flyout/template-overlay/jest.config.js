@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutOwnFocusSwitch } from './flyout_ownfocus_switch';
-export { FlyoutTypeSwitch } from './flyout_type_switch';
-
-export {
-  createChildFlyoutDescriptionItems,
-  createMainFlyoutDescriptionItems,
-} from './flyout_description_items';
-
-export const FLYOUT_MIN_WIDTH = 300;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/flyout/template-overlay'],
+};
