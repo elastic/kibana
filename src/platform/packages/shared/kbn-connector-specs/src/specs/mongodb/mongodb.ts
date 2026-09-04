@@ -228,6 +228,7 @@ export const MongoDBConnector: ConnectorSpec = {
   actions: {
     find: {
       isTool: true,
+      scope: 'read',
       description:
         'Query documents in a MongoDB collection. Supports filter, projection, sort, limit, and skip. ' +
         'Returns an array of matching documents. Maximum 1000 documents per call. ' +
@@ -255,6 +256,7 @@ export const MongoDBConnector: ConnectorSpec = {
 
     aggregate: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a MongoDB aggregation pipeline on a collection. Supports all read-only pipeline stages ' +
         '($match, $group, $sort, $project, $lookup, $unwind, $limit, $skip, $count, etc.). ' +
@@ -283,6 +285,7 @@ export const MongoDBConnector: ConnectorSpec = {
 
     count: {
       isTool: true,
+      scope: 'read',
       description:
         'Count documents in a MongoDB collection matching an optional filter. ' +
         'Returns the total document count as a number. Useful for understanding data volume ' +
@@ -303,6 +306,7 @@ export const MongoDBConnector: ConnectorSpec = {
 
     listCollections: {
       isTool: true,
+      scope: 'read',
       description:
         'List all collections in the configured database. Returns collection names and types. ' +
         'Use this first to discover what data is available before calling find, aggregate, or count.',
@@ -332,6 +336,7 @@ export const MongoDBConnector: ConnectorSpec = {
 
     insertOne: {
       isTool: false,
+      scope: 'write',
       description:
         'Insert a single document into a MongoDB collection. Use this to create a new record ' +
         'from a workflow, such as logging an event or saving a processed result. ' +
@@ -351,6 +356,7 @@ export const MongoDBConnector: ConnectorSpec = {
 
     updateOne: {
       isTool: false,
+      scope: 'write',
       description:
         'Update the first document matching a filter in a MongoDB collection. Use this to ' +
         'modify an existing record from a workflow, such as changing a status field or applying ' +
@@ -376,6 +382,7 @@ export const MongoDBConnector: ConnectorSpec = {
 
     deleteOne: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Delete the first document matching a filter from a MongoDB collection. Use this to ' +
         'remove a single record from a workflow, such as cleaning up a processed item. ' +

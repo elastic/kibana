@@ -52,13 +52,7 @@ export interface ConnectorNetworkSettings {
   getProxySettings(): ProxySettings | undefined;
   getCustomHostSettings(url: string): CustomHostSettings | undefined;
   getResponseSettings(): ConnectorResponseSettings;
-  /**
-   * Builds Node TLS connection options (ca, rejectUnauthorized, etc.) via `getNodeSSLOptions`.
-   * Routed through here for the same reason `resolveSrvHosts` is: even a type-safe *value*
-   * import of `getNodeSSLOptions` in an isomorphic client type would pull `@kbn/actions-utils`'s
-   * Node-only proxy-agent code into this package's bundle, since its single entry point
-   * co-exports `getCustomAgents` (which imports `https`/`http-proxy-agent`/`https-proxy-agent`).
-   */
+  /** Builds Node TLS connection options; routed through here to keep Node-only imports server-side. */
   getTlsOptions(
     logger: Logger,
     verificationMode: string | undefined,
