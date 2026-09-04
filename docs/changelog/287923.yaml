@@ -8,4 +8,4 @@ products:
 - product: kibana
 areas:
 - Dashboards and visualizations
-title: "Fix an issue where deleting a dashboard section leaves panel APIs in `children$`"
+title: Fix orphaned panel state after deleting a dashboard section

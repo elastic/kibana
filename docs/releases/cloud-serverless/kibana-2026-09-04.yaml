@@ -46,9 +46,9 @@ entries:
   - https://github.com/elastic/kibana/pull/285223
 - file:
     name: 287592.yaml
-    checksum: a491e0a3206c9bf354035ddfc09a65828db32713
+    checksum: 8482889292d5fe961a937e4b7380a733d14b8e4a
   type: bug-fix
-  title: Fix dead `isRequestTimeout` guard masking transport errors as generic 500 errors
+  title: Fix transform actions returning generic 500 errors on request timeouts
   products:
   - product: cloud-serverless
   - product: kibana
@@ -61,9 +61,9 @@ entries:
   - https://github.com/elastic/kibana/issues/282974
 - file:
     name: 288124.yaml
-    checksum: a7e508b5061a45a99c7133da6e93e4b6b3c325f6
+    checksum: 82450fe6f6da72c7666c146017768f88f0477045
   type: bug-fix
-  title: 'Add validation for console command arguments that are defined as `mustHaveValue: false` (boolean flags)'
+  title: Add validation for boolean flag arguments in Endpoint console commands
   products:
   - product: cloud-serverless
   - product: kibana
@@ -151,9 +151,9 @@ entries:
   - https://github.com/elastic/kibana/pull/287633
 - file:
     name: 287923.yaml
-    checksum: 8fd62aa97420492984ea90c2e179336616f81d47
+    checksum: 00db849bb058d0869a84ef2b5ff30b660ae2b704
   type: bug-fix
-  title: Fix an issue where deleting a dashboard section leaves panel APIs in `children$`
+  title: Fix orphaned panel state after deleting a dashboard section
   products:
   - product: cloud-serverless
   - product: kibana
@@ -177,9 +177,9 @@ entries:
   - https://github.com/elastic/kibana/pull/287935
 - file:
     name: 287763.yaml
-    checksum: 18e5bd659ef3f57211330541f53188bcdc4aeaed
+    checksum: 23256834b036306a389a843b438b48ce8f2bda60
   type: enhancement
-  title: Add support for `stream` mode for A2A
+  title: Add streaming support to Agent Builder's Agent-to-Agent endpoint
   products:
   - product: cloud-serverless
   - product: kibana
@@ -205,9 +205,9 @@ entries:
   - '# PRIVATE: https://github.com/elastic/security-team/issues/19063'
 - file:
     name: 285139.yaml
-    checksum: 5a39fba703bced9a09b07a65834e6dac21dc525f
+    checksum: abfded823c2d7f6c0b96220e9ae0902a614f3ae5
   type: bug-fix
-  title: Guard nullable columns in graph pinned ES|QL predicate
+  title: Fix 500 error in Cloud Security graph when querying with pinned nodes
   products:
   - product: cloud-serverless
   - product: kibana
@@ -292,9 +292,9 @@ entries:
   - '# PRIVATE: https://github.com/elastic/search-team/issues/15820'
 - file:
     name: 287949.yaml
-    checksum: 569689f560453ba9eea53ed587bf5208b9d1665a
+    checksum: fcd56418b647f334852a40805c5d35dd933da3ff
   type: enhancement
-  title: Cancel async searches on browser navigation
+  title: Cancel async searches when navigating away from Discover or Dashboard
   products:
   - product: cloud-serverless
   - product: kibana
