@@ -71,8 +71,8 @@ const getSessionTab = (
 };
 
 spaceTest.describe('Discover session panel CSV export', { tag: '@local-stateful-classic' }, () => {
-  // Each scenario generates two reports, which can exceed Scout's default timeout under CI load.
-  spaceTest.setTimeout(5 * 60_000);
+  // Report generation can take up to two minutes on shared CI workers.
+  spaceTest.setTimeout(150_000);
 
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -91,42 +91,52 @@ spaceTest.describe('Discover session panel CSV export', { tag: '@local-stateful-
     { mode: 'ES|QL', sessionTitle: ESQL_SESSION_TITLE },
   ] as const) {
     spaceTest(
-      `exports a ${mode} Discover session panel with global and custom time ranges`,
+      `exports a ${mode} Discover session panel with the dashboard global time range`,
+      async ({ apiServices, discoverScoutSpace, pageObjects, scoutSpace }) => {
+        const dashboardId = await createDashboardWithSessionPanel(
+          apiServices,
+          scoutSpace.id,
+          sessionTitle,
+          `Reporting ${mode} global range dashboard ${scoutSpace.id}`,
+          getSessionTab(mode, discoverScoutSpace)
+        );
+        await pageObjects.dashboard.openDashboardWithId(dashboardId);
+
+        await expect.poll(() => pageObjects.dashboard.getSavedSearchRowCount()).toBeGreaterThan(0);
+
+        const download = await pageObjects.dashboard.exportPanelAsCsv(sessionTitle);
+
+        expect(download.suggestedFilename()).toMatch(/\.csv$/);
+      }
+    );
+
+    spaceTest(
+      `exports a ${mode} Discover session panel with a custom time range`,
       async ({ apiServices, discoverScoutSpace, page, pageObjects, scoutSpace }) => {
         const dashboardId = await createDashboardWithSessionPanel(
           apiServices,
           scoutSpace.id,
           sessionTitle,
-          `Reporting ${mode} dashboard ${scoutSpace.id}`,
+          `Reporting ${mode} custom range dashboard ${scoutSpace.id}`,
           getSessionTab(mode, discoverScoutSpace)
         );
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
-        await spaceTest.step('exports with the dashboard global time range', async () => {
-          await expect
-            .poll(() => pageObjects.dashboard.getSavedSearchRowCount())
-            .toBeGreaterThan(0);
+        await expect.poll(() => pageObjects.dashboard.getSavedSearchRowCount()).toBeGreaterThan(0);
 
-          const download = await pageObjects.dashboard.exportPanelAsCsv(sessionTitle);
+        await pageObjects.dashboard.openCustomizePanel(sessionTitle);
+        await pageObjects.dashboard.enableCustomTimeRange();
+        await pageObjects.dashboard.openDatePickerQuickMenu();
+        await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_24 hours');
+        await pageObjects.dashboard.saveCustomizePanel();
 
-          expect(download.suggestedFilename()).toMatch(/\.csv$/);
-        });
+        await expect(
+          page.testSubj.locator('embeddablePanelBadge-CUSTOM_TIME_RANGE_BADGE')
+        ).toBeVisible();
 
-        await spaceTest.step('exports with a custom panel time range', async () => {
-          await pageObjects.dashboard.openCustomizePanel(sessionTitle);
-          await pageObjects.dashboard.enableCustomTimeRange();
-          await pageObjects.dashboard.openDatePickerQuickMenu();
-          await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_24 hours');
-          await pageObjects.dashboard.saveCustomizePanel();
+        const download = await pageObjects.dashboard.exportPanelAsCsv(sessionTitle);
 
-          await expect(
-            page.testSubj.locator('embeddablePanelBadge-CUSTOM_TIME_RANGE_BADGE')
-          ).toBeVisible();
-
-          const download = await pageObjects.dashboard.exportPanelAsCsv(sessionTitle);
-
-          expect(download.suggestedFilename()).toMatch(/\.csv$/);
-        });
+        expect(download.suggestedFilename()).toMatch(/\.csv$/);
       }
     );
   }
