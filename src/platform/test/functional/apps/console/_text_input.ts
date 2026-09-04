@@ -40,8 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           const actualRequest = await PageObjects.console.getEditorText();
-          // The data should be appended after the existing text
-          expect(actualRequest.trim()).to.eql('GET _search\nhello');
+          // INTENTIONALLY BROKEN to exercise the skipped-on-main evaluator (revert before merge)
+          expect(actualRequest.trim()).to.eql('GET _search\nINTENTIONALLY_BROKEN');
         });
       });
 
