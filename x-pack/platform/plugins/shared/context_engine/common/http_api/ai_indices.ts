@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ImprovementAction } from './improvement_actions';
 
 /**
@@ -120,4 +121,68 @@ export interface DeleteAiIndexResponse {
 export interface KiTypeCount {
   type: string;
   count: number;
+}
+
+export type AiIndexQueryParamValue = string | number | boolean;
+
+/** The query decides the target; the server injects the space filter and a row limit. */
+export interface QueryAiIndicesRequest {
+  query: string;
+  params?: Record<string, AiIndexQueryParamValue>;
+  /** Capped at `MAX_AI_INDEX_QUERY_LIMIT`. */
+  limit?: number;
+}
+
+export interface QueryAiIndicesResponse {
+  columns: EsqlEsqlColumnInfo[];
+  values: FieldValue[][];
+}
+
+export interface AiIndexField {
+  path: string;
+  /** ES field type, or `conflict` when the target's indices map this path to different types. */
+  type: string;
+  searchable: boolean;
+  aggregatable: boolean;
+}
+
+export interface AiIndexTagCount {
+  tag: string;
+  count: number;
+}
+
+/** A runnable ES|QL query stored on a KI under `attributes.esql`. */
+export interface AiIndexQueryTemplate {
+  ki_id: string;
+  title: string;
+  description?: string;
+  esql: string;
+}
+
+/** Each entry is omitted when the index lacks the fields it needs. */
+export interface AiIndexSuggestedQueries {
+  hybrid_search?: string;
+  keyword_search?: string;
+  scoped_hybrid_search?: string;
+  extract_esql_attribute?: string;
+}
+
+export interface DescribeAiIndexResponse {
+  id: string;
+  /** `dest.value`, the ES|QL `FROM` target. */
+  esql_target: string;
+  description?: string;
+  dest: AiIndexDest;
+  managed: boolean;
+  fields: AiIndexField[];
+  /** Searchable `semantic_text` paths. */
+  semantic_fields: string[];
+  ki_type_counts: KiTypeCount[];
+  tag_counts: AiIndexTagCount[];
+  query_templates: AiIndexQueryTemplate[];
+  suggested_queries: AiIndexSuggestedQueries;
+  truncated: {
+    fields: boolean;
+    query_templates: boolean;
+  };
 }
