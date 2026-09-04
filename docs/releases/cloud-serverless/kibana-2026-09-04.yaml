@@ -9,6 +9,19 @@ hide-features:
 - data-federation
 entries:
 - file:
+    name: cps-breaking-change.yaml
+    checksum: 0aeb1e80257f0d0e047ec99a3d96a93786b7fa08
+  type: breaking-change
+  title: Predefined Serverless Security roles gain index-level read access to Elastic Defend and Osquery data
+  products:
+  - product: cloud-serverless
+    versions:
+    - 2026-09-04
+  impact: The 12 predefined Serverless Security roles now include read access to Elastic Defend and Osquery index patterns. Because predefined roles apply across all spaces, users with these roles can read this data from all spaces in Discover, regardless of space assignments. Spaces are not a data-isolation boundary for index-level access.
+  action: If you require space-level data isolation for Elastic Defend or Osquery data, replace predefined roles with custom roles scoped to specific spaces.
+  areas:
+  - Elastic Security
+- file:
     name: 287194.yaml
     checksum: fbc9d94c63219f4f4eca18d8e2c596c911ed8f02
   type: enhancement
