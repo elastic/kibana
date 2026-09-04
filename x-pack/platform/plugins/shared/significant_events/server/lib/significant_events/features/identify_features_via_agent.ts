@@ -29,6 +29,8 @@ import {
 } from '@kbn/streams-ai';
 import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
 import { parseFinalizedFeatures } from './parse_finalized_features';
+import { buildFeatureIdentificationUserMessage } from './build_user_message';
+import { chatTokenCountFromModelUsage } from './chat_token_count';
 
 export interface ExecuteFeatureIdentificationAgentOptions {
   agentBuilder: AgentBuilderPluginStart;
@@ -41,34 +43,6 @@ export interface ExecuteFeatureIdentificationAgentOptions {
   knownFeatureIds?: string;
   signal?: AbortSignal;
   logger: Logger;
-}
-
-export function buildFeatureIdentificationUserMessage({
-  streamName,
-  sampleDocuments,
-  previouslyIdentifiedFeatures,
-  knownFeatureIds,
-  excludedFeatures,
-}: {
-  streamName: string;
-  sampleDocuments: string;
-  previouslyIdentifiedFeatures?: string;
-  knownFeatureIds?: string;
-  excludedFeatures?: string;
-}): string {
-  const parts: string[] = [];
-  parts.push(`\`stream_name\`: ${streamName}`);
-  if (excludedFeatures) {
-    parts.push(`\`excluded_features\`:\n${excludedFeatures}`);
-  }
-  if (previouslyIdentifiedFeatures) {
-    parts.push(`\`previously_identified_features\`:\n${previouslyIdentifiedFeatures}`);
-  }
-  if (knownFeatureIds) {
-    parts.push(`\`known_feature_ids\`:\n${knownFeatureIds}`);
-  }
-  parts.push(`\`sample_documents\`:\n${sampleDocuments}`);
-  return parts.join('\n\n');
 }
 
 export async function executeFeatureIdentificationAgent({
@@ -139,15 +113,9 @@ export async function executeFeatureIdentificationAgent({
   const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, streamName, logger);
 
   const roundEvent = events.find(isRoundCompleteEvent);
-  const modelUsage = roundEvent?.data.round.model_usage;
-  const tokensUsed: ChatCompletionTokenCount = modelUsage
-    ? {
-        prompt: modelUsage.input_tokens,
-        completion: modelUsage.output_tokens,
-        total: modelUsage.input_tokens + modelUsage.output_tokens,
-        cached: modelUsage.cached_input_tokens,
-      }
-    : { ...EMPTY_TOKENS };
+  const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(
+    roundEvent?.data.round.model_usage
+  ) ?? { ...EMPTY_TOKENS };
 
   return {
     features,

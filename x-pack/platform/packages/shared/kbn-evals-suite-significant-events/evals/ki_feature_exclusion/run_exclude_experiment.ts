@@ -9,7 +9,6 @@ import { isDuplicateFeature } from '@kbn/significant-events-schema';
 import { type ExcludedFeatureSummary, sumTokens } from '@kbn/streams-ai';
 import { sortBy } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderClient } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -26,7 +25,6 @@ export async function runExcludeExperiment({
   excludeCount,
   followUpRuns,
   agentBuilderClient,
-  logger: _logger,
   sampleSize,
   log,
 }: {
@@ -34,7 +32,6 @@ export async function runExcludeExperiment({
   excludeCount: number;
   followUpRuns: number;
   agentBuilderClient: AgentBuilderClient;
-  logger: Logger;
   sampleSize: number;
   log: ToolingLog;
 }): Promise<ExcludeExperimentOutput> {

@@ -112,7 +112,6 @@ evaluate.describe(
             evaluators,
             traceEsClient,
             log,
-            logger,
             executorClient,
           }) => {
             const evaluatorInferenceClient = inferenceClient.bindTo({
@@ -158,7 +157,6 @@ evaluate.describe(
                     excludeCount: input.exclude_count,
                     followUpRuns: input.follow_up_runs,
                     agentBuilderClient,
-                    logger,
                     sampleSize: input.sample_document_count,
                     log,
                   });
