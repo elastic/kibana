@@ -219,3 +219,131 @@ def infer_team_label(
         seen.add(label)
         candidates.append(label)
     return TeamInference("ask", None, tuple(candidates))
+
+
+_UNKNOWN = "_unknown_"
+_DEV_INSTALL = "from source (dev)"
+_LOCAL_KINDS = frozenset({"local", "scout"})
+_SCREENSHOT_PREFIX = "Screenshot:"
+_CONSOLE_PREFIX = "Console:"
+_NETWORK_PREFIX = "Network:"
+
+
+def _as_mapping(value: object) -> dict:
+    return value if isinstance(value, dict) else {}
+
+
+def _first_text(*values: object) -> str:
+    for value in values:
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text:
+            return text
+    return _UNKNOWN
+
+
+def _environment(config: dict) -> dict:
+    return _as_mapping(config.get("environment"))
+
+
+def _install_method(environment: dict) -> str:
+    explicit = _first_text(environment.get("install_method"))
+    if explicit != _UNKNOWN:
+        return explicit
+    if environment.get("kind") in _LOCAL_KINDS:
+        return _DEV_INSTALL
+    return _UNKNOWN
+
+
+def _describe_the_bug(finding: dict) -> str:
+    parts: list[str] = []
+    current = finding.get("current_behavior")
+    if current is not None and str(current).strip():
+        parts.append(str(current).strip())
+    why = finding.get("why_issue")
+    if why is not None and str(why).strip():
+        parts.append(str(why).strip())
+    return "\n\n".join(parts) if parts else _UNKNOWN
+
+
+def _numbered_steps(finding: dict) -> str:
+    steps = finding.get("steps_followed")
+    if not isinstance(steps, list) or not steps:
+        return _UNKNOWN
+    return "\n".join(f"{index}. {step}" for index, step in enumerate(steps, start=1))
+
+
+def _evidence_lines(finding: dict) -> list[str]:
+    evidence = finding.get("evidence")
+    if not isinstance(evidence, list):
+        return []
+    return [str(line) for line in evidence]
+
+
+def _values_with_prefix(lines: list[str], prefix: str) -> list[str]:
+    return [line[len(prefix) :].strip() for line in lines if line.startswith(prefix)]
+
+
+def _remaining_evidence(lines: list[str]) -> list[str]:
+    classified = (_SCREENSHOT_PREFIX, _CONSOLE_PREFIX, _NETWORK_PREFIX)
+    return [line for line in lines if not line.startswith(classified)]
+
+
+def _joined_or_unknown(values: list[str]) -> str:
+    return "\n".join(values) if values else _UNKNOWN
+
+
+def render_bug_body(finding: dict, config: dict) -> str:
+    environment = _environment(config)
+    evidence = _evidence_lines(finding)
+    additional = [
+        f"Role: {_first_text(finding.get('role'))}",
+        f"Flow: {_first_text(finding.get('flow'))}",
+        f"Level: {_first_text(finding.get('level'))}",
+        *_remaining_evidence(evidence),
+    ]
+    sections = (
+        ("**Kibana version:**", _first_text(
+            config.get("kibana_version"), environment.get("kibana_version")
+        )),
+        ("**Elasticsearch version:**", _first_text(
+            config.get("elasticsearch_version"),
+            environment.get("elasticsearch_version"),
+        )),
+        ("**Server OS version:**", _first_text(
+            environment.get("server_os_version"),
+            environment.get("server_os"),
+            environment.get("os_version"),
+            environment.get("os"),
+        )),
+        ("**Browser version:**", _first_text(
+            environment.get("browser_version"),
+            environment.get("browser"),
+        )),
+        ("**Browser OS version:**", _first_text(
+            environment.get("browser_os_version"),
+            environment.get("browser_os"),
+        )),
+        (
+            "**Original install method (e.g. download page, yum, from source, etc.):**",
+            _install_method(environment),
+        ),
+        ("**Describe the bug:**", _describe_the_bug(finding)),
+        ("**Steps to reproduce:**", _numbered_steps(finding)),
+        ("**Expected behavior:**", _first_text(finding.get("expected_behavior"))),
+        (
+            "**Screenshots (if relevant):**",
+            _joined_or_unknown(_values_with_prefix(evidence, _SCREENSHOT_PREFIX)),
+        ),
+        (
+            "**Errors in browser console (if relevant):**",
+            _joined_or_unknown(_values_with_prefix(evidence, _CONSOLE_PREFIX)),
+        ),
+        (
+            "**Provide logs and/or server output (if relevant):**",
+            _joined_or_unknown(_values_with_prefix(evidence, _NETWORK_PREFIX)),
+        ),
+        ("**Any additional context:**", "\n".join(additional)),
+    )
+    return "\n\n".join(f"{heading}\n{body}" for heading, body in sections) + "\n"

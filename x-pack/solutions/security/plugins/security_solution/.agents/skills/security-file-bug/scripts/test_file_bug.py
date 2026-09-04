@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import os
 import sys
 import unittest
@@ -8,7 +9,13 @@ sys.dont_write_bytecode = True
 os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from file_bug import IssueMatch, decide_write_path, infer_team_label, validate_labels  # noqa: E402
+from file_bug import (  # noqa: E402
+    IssueMatch,
+    decide_write_path,
+    infer_team_label,
+    render_bug_body,
+    validate_labels,
+)
 
 FIXTURE = Path(__file__).resolve().parent / "__tests__" / "fixtures" / "domain_snippet.md"
 
@@ -107,6 +114,24 @@ class InferTeamLabelTest(unittest.TestCase):
         self.assertEqual(result.status, "ask")
         self.assertIsNone(result.label)
         self.assertIn("Team:Entity Analytics", result.candidates)
+
+
+FIXTURES = Path(__file__).resolve().parent / "__tests__" / "fixtures"
+
+
+class RenderBugBodyTest(unittest.TestCase):
+    def test_uses_official_headings_and_finding_fields(self):
+        finding = json.loads((FIXTURES / "finding.json").read_text())
+        config = json.loads((FIXTURES / "session-config.json").read_text())
+        body = render_bug_body(finding, config)
+        self.assertIn("**Kibana version:**", body)
+        self.assertIn("9.3.0", body)
+        self.assertIn("Open Entity Analytics", body)
+        self.assertIn("Table shows 0 entities", body)
+        self.assertIn("Table lists entities in range", body)
+        self.assertIn("TypeError: cannot read map of undefined", body)
+        self.assertIn("t2_analyst", body)
+        self.assertNotIn("**Describe the bug:**\n\n**Steps", body)
 
 
 if __name__ == "__main__":
