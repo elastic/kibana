@@ -244,16 +244,20 @@ describe('identifyCodeQueries', () => {
   });
 
   it.each([
-    ['match', 59, false],
-    ['match', 60, true],
+    ['match', 0, true],
+    ['match', 39, true],
+    ['match', 40, true],
+    ['match', 59, true],
+    ['stats', 60, true],
     ['stats', 79, true],
     ['stats', 80, true],
+    ['stats', 100, true],
     ['match', undefined, false],
-  ] as const)('retains %s queries only at or above the threshold (%s)', (_type, severity, kept) => {
+  ] as const)('retains scored %s queries across every severity (%s)', (_type, severity, kept) => {
     expect(shouldPersistCodeIntelligenceQuery({ severity_score: severity })).toBe(kept);
   });
 
-  it('does not bulk persist low-severity deterministic logging predictions', async () => {
+  it('bulk persists medium-severity deterministic logging predictions', async () => {
     const { kiClient, bulk } = createKiClient([]);
     const result = await identifyCodeQueries({
       serviceName: SERVICE_KEY,
@@ -268,8 +272,8 @@ describe('identifyCodeQueries', () => {
       beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
 
-    expect(result.generatedCount).toBe(0);
-    expect(bulk).not.toHaveBeenCalled();
+    expect(result.generatedCount).toBe(1);
+    expect(bulk).toHaveBeenCalledWith(LOG_SOURCE_ID, expect.any(Array));
   });
 
   it('de-duplicates against queries that already exist on the logs stream', async () => {

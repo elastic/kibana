@@ -106,6 +106,32 @@ describe('generatePredictiveQueries', () => {
     expect(query.id).toBeDefined();
   });
 
+  it('retains low- and medium-severity signatures', () => {
+    const queries = generatePredictiveQueries({
+      serviceName: 'checkoutservice',
+      samplingSource: 'logs.checkout',
+      signatures: [
+        signature({
+          level: 'debug',
+          severity: 20,
+          message: 'Debugging checkout',
+          staticPrefix: 'Debugging checkout',
+          staticSegments: ['Debugging checkout'],
+        }),
+        signature({
+          level: 'warn',
+          severity: 50,
+          message: 'Checkout delayed',
+          staticPrefix: 'Checkout delayed',
+          staticSegments: ['Checkout delayed'],
+        }),
+      ],
+      repository: 'acme/checkout',
+    });
+
+    expect(queries.map(({ severity_score: severityScore }) => severityScore)).toEqual([20, 50]);
+  });
+
   it('retains a high-severity signature when an equivalent warning comes first', () => {
     const queries = generatePredictiveQueries({
       serviceName: 'checkoutservice',

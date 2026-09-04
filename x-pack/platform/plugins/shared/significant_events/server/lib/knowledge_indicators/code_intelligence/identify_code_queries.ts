@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { HIGH_SEVERITY_THRESHOLD, type StreamQuery } from '@kbn/significant-events-schema';
+import type { StreamQuery } from '@kbn/significant-events-schema';
 import { normalizeEsqlSafe } from '@kbn/streams-schema';
 import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicator_client';
 import { FALLBACK_LOG_INDEX_PATTERN, FALLBACK_LOG_MESSAGE_FIELD } from './constants';
@@ -37,10 +37,10 @@ export interface IdentifyCodeQueriesResult {
   streams?: string[];
 }
 
-/** Keeps only high and critical Code Intelligence query KIs. */
+/** Keeps Code Intelligence queries assigned to any defined severity band. */
 export const shouldPersistCodeIntelligenceQuery = (
   query: Pick<StreamQuery, 'severity_score'>
-): boolean => query.severity_score !== undefined && query.severity_score >= HIGH_SEVERITY_THRESHOLD;
+): boolean => query.severity_score !== undefined;
 
 export interface IdentifyCodeQueriesOptions {
   /** The code KI key (service name) whose Stage 1 features drive query generation. */
@@ -148,8 +148,8 @@ export async function identifyCodeQueries({
       messageIsText: binding.messageIsText,
     });
 
-    // Retain only high/critical predictions after their final deterministic
-    // classification, before deduplication and persistence.
+    // Retain predictions assigned to any defined severity band after their
+    // final deterministic classification, before persistence.
     const retainedCandidates = candidates.filter(shouldPersistCodeIntelligenceQuery);
 
     // De-duplicate against queries already on this stream (any source).

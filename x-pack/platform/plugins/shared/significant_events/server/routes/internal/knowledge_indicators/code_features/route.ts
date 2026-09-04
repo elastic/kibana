@@ -1013,8 +1013,8 @@ const identifyOtelSignalsRoute = createServerRoute({
       );
     }
 
-    // Retain only high/critical predictions after classifier scores are final,
-    // before stream deduplication and persistence.
+    // Retain predictions assigned to any defined severity band after classifier
+    // scores are final, before stream deduplication and persistence.
     const retained = classified.filter(({ query }) => shouldPersistCodeIntelligenceQuery(query));
     let queriesGenerated = 0;
     const byStream = new Map<string, typeof retained>();

@@ -930,9 +930,12 @@ describe('Code Intelligence routes', () => {
     expect(bulk).toHaveBeenCalledWith(defaultTraceSource, expect.any(Array));
   });
 
-  it.each([59, undefined])(
-    'does not bulk persist OTel classifier output below the threshold (%s)',
-    async (severityScore) => {
+  it.each([
+    [59, 1, true],
+    [undefined, 0, false],
+  ] as const)(
+    'persists OTel classifier output at every defined severity (%s)',
+    async (severityScore, queriesGenerated, shouldBulk) => {
       const typedCandidate = {
         stream: defaultTraceSource,
         query: {
@@ -981,7 +984,10 @@ describe('Code Intelligence routes', () => {
             inferenceClient: {},
             streamDataEsClient: {},
             streamsClient: { listStreams: jest.fn().mockResolvedValue([]) },
-            getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ bulk }),
+            getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+              bulk,
+              getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ [defaultTraceSource]: [] }),
+            }),
           }),
           server: { core: { featureFlags: enabledFeatureFlags } },
           logger: {
@@ -989,9 +995,13 @@ describe('Code Intelligence routes', () => {
           },
           maintenanceService: createMaintenanceService(),
         } as unknown as IdentifyOtelHandlerParams)
-      ).resolves.toEqual({ status: 'generated', queriesGenerated: 0, otelSignalsFound: 1 });
+      ).resolves.toEqual({ status: 'generated', queriesGenerated, otelSignalsFound: 1 });
 
-      expect(bulk).not.toHaveBeenCalled();
+      if (shouldBulk) {
+        expect(bulk).toHaveBeenCalledWith(defaultTraceSource, expect.any(Array));
+      } else {
+        expect(bulk).not.toHaveBeenCalled();
+      }
     }
   );
 

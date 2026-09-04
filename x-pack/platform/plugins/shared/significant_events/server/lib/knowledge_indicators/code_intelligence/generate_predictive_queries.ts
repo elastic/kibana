@@ -7,11 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Parser, Walker } from '@elastic/esql';
-import {
-  HIGH_SEVERITY_THRESHOLD,
-  QUERY_TYPE_MATCH,
-  type StreamQuery,
-} from '@kbn/significant-events-schema';
+import { QUERY_TYPE_MATCH, type StreamQuery } from '@kbn/significant-events-schema';
 import { normalizeEsqlSafe } from '@kbn/streams-schema';
 import { CODE_FEATURE_SUBTYPE_SERVICE_NAME } from './constants';
 import type { LogSignature } from './types';
@@ -118,17 +114,11 @@ export function generatePredictiveQueries({
   messageIsText?: boolean;
 }): StreamQuery[] {
   const ref = fingerprint ? `${repository}@${fingerprint}` : repository;
-  const seenEsql = new Set<string>();
-  const queries: StreamQuery[] = [];
+  const queriesByEsql = new Map<string, StreamQuery>();
 
-  // Filter signatures before ES|QL generation and batch deduplication. Otherwise
-  // a low/medium log call can claim an ES|QL key and suppress an equivalent
-  // high/critical call encountered later in source order.
+  // Keep one query for each normalized ES|QL expression. When multiple logging
+  // calls produce the same expression, retain the strongest observed severity.
   for (const signature of signatures) {
-    if (signature.severity < HIGH_SEVERITY_THRESHOLD) {
-      continue;
-    }
-
     const esql = buildPredictiveEsql({
       samplingSource,
       staticPrefix: signature.staticPrefix,
@@ -142,14 +132,14 @@ export function generatePredictiveQueries({
     }
 
     const normalized = normalizeEsqlSafe(esql);
-    if (seenEsql.has(normalized)) {
+    const existing = queriesByEsql.get(normalized);
+    if (existing?.severity_score !== undefined && existing.severity_score >= signature.severity) {
       continue;
     }
-    seenEsql.add(normalized);
 
     const location = signature.location ? `${ref}:${signature.location}` : ref;
 
-    queries.push({
+    queriesByEsql.set(normalized, {
       id: uuidv4(),
       type: QUERY_TYPE_MATCH,
       title: toTitle(signature.staticPrefix),
@@ -161,5 +151,5 @@ export function generatePredictiveQueries({
     });
   }
 
-  return queries;
+  return [...queriesByEsql.values()];
 }
