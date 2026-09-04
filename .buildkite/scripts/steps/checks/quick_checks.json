@@ -52,7 +52,7 @@
     "script": ".buildkite/scripts/steps/checks/ftr_configs.sh"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/yarn_deduplicate.sh",
+    "script": ".buildkite/scripts/steps/checks/deduplicate_dependencies.sh",
     "mayChangeFiles": true
   },
   {
