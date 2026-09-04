@@ -47,31 +47,6 @@ export const collectTelemetryData = async ({
   logger,
   templatesEnabled,
 }: CollectCasesTelemetryParams): Promise<Partial<CasesTelemetry>> => {
-  /**
-   * The templates error boundary. It is a `.catch` here rather than a `try` around the
-   * await below for a reason: this promise is awaited inside the shared boundary, so a
-   * rejection would blank the whole payload — the exact failure this boundary prevents.
-   * Attaching the handler at creation makes that impossible by construction instead of by
-   * a rule every future edit has to remember.
-   *
-   * Resolving to `undefined` rather than zeroed counts makes the caller omit the key, which
-   * keeps three states distinguishable: the key absent means collection failed,
-   * `featureEnabled: false` means the feature is off, and `featureEnabled: true` with
-   * zeroed counts means the feature is on and unused.
-   *
-   * Starting it here also lets it run alongside the reads below.
-   */
-  const templatesPromise = collectTemplatesTelemetry({
-    savedObjectsClient,
-    logger,
-    templatesEnabled,
-  }).catch((err) => {
-    logger.debug('Failed collecting Cases templates telemetry data');
-    logger.debug(err);
-
-    return undefined;
-  });
-
   try {
     const [
       cases,
@@ -82,6 +57,7 @@ export const collectTelemetryData = async ({
       pushes,
       configuration,
       casesSystemAction,
+      templates,
     ] = await Promise.all([
       getCasesTelemetryData({ savedObjectsClient, logger }),
       getUserActionsTelemetryData({ savedObjectsClient, logger }),
@@ -91,9 +67,12 @@ export const collectTelemetryData = async ({
       getPushedTelemetryData({ savedObjectsClient, logger }),
       getConfigurationTelemetryData({ savedObjectsClient, logger }),
       getCasesSystemActionData({ savedObjectsClient, logger }),
+      collectTemplatesTelemetry({ savedObjectsClient, logger, templatesEnabled }).catch((err) => {
+        logger.debug('Failed collecting Cases templates telemetry data');
+        logger.debug(err);
+        return undefined;
+      }),
     ]);
-
-    const templates = await templatesPromise;
 
     return {
       cases,
@@ -113,12 +92,7 @@ export const collectTelemetryData = async ({
      * Return an empty object instead of an empty state to distinguish between
      * clusters that they do not use cases thus all counts will be zero
      * and clusters where an error occurred.
-     *
-     * The isolation above is one-directional by design: a templates failure costs only
-     * the templates numbers, but a failure in any area collected here still discards the
-     * whole payload, templates included. Isolating the other areas is a separate concern.
-     *  */
-
+     */
     return {};
   }
 };
