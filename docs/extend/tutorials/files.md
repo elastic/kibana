@@ -56,7 +56,7 @@ export const exampleFileKind: FileKind = {
 };
 ```
 
-Only list the HTTP actions you need. `httpTags.requiredPrivileges` become `access:` privileges — grant those privileges to the users who must reach the files.
+Only list the HTTP actions you need. `httpTags.requiredPrivileges` are the [API authorization privileges](../key-concepts/security/api-authorization.md) on the generated file-kind routes. Grant those privileges to the users who must reach the files.
 
 ### Register the file kind
 

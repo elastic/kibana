@@ -152,3 +152,6 @@ redirects:
   'extend/lens-config-api/lens-config-builder-api-table.md': 'extend/key-concepts/ui/lens-config-api/lens-config-builder-api-table.md'
   'extend/lens-config-api/lens-config-builder-api-heatmap.md': 'extend/key-concepts/ui/lens-config-api/lens-config-builder-api-heatmap.md'
   'extend/lens-config-api/lens-config-builder-api-xy-chart.md': 'extend/key-concepts/ui/lens-config-api/lens-config-builder-api-xy-chart.md'
+  'extend/key-concepts/ui/building-blocks.md': 'extend/key-concepts/index.md'
+  'extend/tutorials/kibana-page-template.md': 'extend/tutorials/registering-an-application.md'
+  'extend/tutorials/chrome-recently-viewed.md': 'extend/tutorials/index.md'

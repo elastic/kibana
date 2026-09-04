@@ -64,53 +64,7 @@ import { FeedbackTriggerButton } from '@kbn/ui-feedback';
 | `showToast` | Surfaces success and error toasts to the user. |
 | `checkTelemetryOptIn` | Resolves whether usage collection is opted in (`FeedbackTriggerButton` only). |
 
-Questions are defined per application in `@kbn/feedback-registry`. The registry lazily loads only the set for the current app.
-
-## Register application questions [kbn-ui-feedback-register-questions]
-
-Define at most two questions in `x-pack/platform/packages/private/feedback-registry/src/questions/<your_app>.ts`:
-
-```ts
-import type { FeedbackRegistryEntry } from '@kbn/ui-feedback';
-
-export const questions: FeedbackRegistryEntry[] = [
-  {
-    id: 'my_app_experience',
-    order: 1,
-    question: 'Describe your experience',
-    placeholder: {
-      i18nId: 'xpack.feedbackRegistry.myAppExperiencePlaceholder',
-      defaultMessage: 'Describe your experience',
-    },
-    ariaLabel: {
-      i18nId: 'xpack.feedbackRegistry.myAppExperienceAriaLabel',
-      defaultMessage: 'Describe your experience',
-    },
-  },
-];
-```
-
-Add a lazy loader in `x-pack/platform/packages/private/feedback-registry/src/registry.ts`. The map key is the chrome app id:
-
-```ts
-async function myAppLoader() {
-  const m = await import('./questions/my_app');
-  return m.questions;
-}
-
-const feedbackRegistry: FeedbackRegistry = new Map([
-  [DEFAULT_REGISTRY_ID, () => import('./questions/default').then((m) => m.questions)],
-  ['myApp', myAppLoader],
-]);
-```
-
-If you are unsure of the app id, open the feedback form on that page and evaluate:
-
-```js
-document.querySelector('[data-app-id]')?.getAttribute('data-app-id')
-```
-
-Apps without a registry entry fall back to the default questions.
+Questions are defined per application in `@kbn/feedback-registry`. See that package [README](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/private/feedback-registry/README.md) to register questions.
 
 ## Development [kbn-ui-feedback-development]
 
