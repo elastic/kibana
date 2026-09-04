@@ -59,8 +59,8 @@ export async function processJUnitReports(
     }
 
     const seenNewIssueKeys = new Set<string>();
-    let newIssueCreated = false;
-    let skippedNewFailures = 0;
+    const newIssueCreated = false;
+    const skippedNewFailures = 0;
     let cascadingFailures = 0;
 
     for (const failure of failures) {
