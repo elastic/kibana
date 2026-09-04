@@ -16,11 +16,11 @@ import {
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 import type { discoverSessionControlPanelsSchema } from '@kbn/as-code-discover-schema';
+import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
 import {
-  discoverSessionApiDataSchema,
   MAX_DISCOVER_SESSION_TAGS,
   MAX_SEARCH_QUERY_LENGTH,
-} from '@kbn/as-code-discover-schema';
+} from '@kbn/discover-session-constants';
 
 export const discoverSessionApiResponseSchema = z
   .object({
