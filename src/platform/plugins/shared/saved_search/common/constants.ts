@@ -20,4 +20,6 @@ export const MAX_DISCOVER_SESSION_COLUMNS = 10_000;
 export const MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS = 50;
 export const MAX_DISCOVER_SESSION_TABS = 25;
 
+export const MAX_METRICS_TAB_DIMENSIONS = 5;
+
 export type SavedSearchContentType = typeof SavedSearchType;

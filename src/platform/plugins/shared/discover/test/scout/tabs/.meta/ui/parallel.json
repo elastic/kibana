@@ -1,5 +1,5 @@
 {
-  "sha1": "7d28b84e8f725fb323b6eaea93c074f12d136bcd",
+  "sha1": "a56d807169262adc6d6e6b470aae065bca603ee5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -221,6 +221,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/inspector.spec.ts",
         "line": 24,
         "column": 13
+      }
+    },
+    {
+      "id": "71f7ec98738b310-d006a1b3c051acc",
+      "title": "Discover tabs - keyboard navigation and reorder navigates and reorders tabs with the keyboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/keyboard_navigation.spec.ts",
+        "line": 23,
+        "column": 25
       }
     },
     {

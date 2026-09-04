@@ -22,8 +22,8 @@ export const PairedTTestResult = lazySchema(() =>
     datasetName: z.string().max(256),
     evaluatorName: z.string().max(256),
     sampleSize: z.number().int(),
-    meanA: z.number(),
-    meanB: z.number(),
+    meanBaseline: z.number(),
+    meanTarget: z.number(),
     pValue: z.number().nullable(),
     /**
      * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`) for this evaluator.
@@ -62,11 +62,11 @@ export const CompareExperimentsResponse = lazySchema(() =>
       /**
        * Whether the baseline scores were truncated due to size limits
        */
-      truncatedA: z.boolean(),
+      truncatedBaseline: z.boolean(),
       /**
        * Whether the target scores were truncated due to size limits
        */
-      truncatedB: z.boolean(),
+      truncatedTarget: z.boolean(),
     }),
   })
 );
