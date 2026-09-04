@@ -695,6 +695,102 @@ describe('CreateConnectorFlyout', () => {
         expect(screen.getByText('Error on pre submit validator')).toBeInTheDocument();
       });
     });
+
+    it('keeps the flyout open and shows webhook URL and ingest token after inbound create', async () => {
+      appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+        if (String(path).includes('_rotate_event_token')) {
+          return Promise.resolve({ ingest_token: 'once-token' });
+        }
+        return Promise.resolve({
+          ...createConnectorResponse,
+          connector_type_id: '.inboundWebhook',
+          config: {},
+        });
+      });
+
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+
+      await userEvent.click(await screen.findByTestId('nameInput'));
+      await userEvent.paste('My test');
+
+      await userEvent.click(screen.getByTestId('test-connector-text-field'));
+      await userEvent.paste('My text field');
+
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('inbound-ingress-credentials')).toBeInTheDocument();
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onConnectorCreated).toHaveBeenCalled();
+      expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+        expect.stringContaining('_rotate_event_token')
+      );
+      expect(screen.getByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
+      expect(screen.getByTestId('connector-settings-label')).toBeInTheDocument();
+      expect(screen.getByTestId('create-connector-flyout-save-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
+    });
+
+    it('stays on the create form when inbound rotate fails after create', async () => {
+      appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+        if (String(path).includes('_rotate_event_token')) {
+          return Promise.reject({ name: 'Error', body: { message: 'Cannot rotate' } });
+        }
+        return Promise.resolve({
+          ...createConnectorResponse,
+          connector_type_id: '.inboundWebhook',
+          config: {},
+        });
+      });
+
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+
+      await userEvent.click(await screen.findByTestId('nameInput'));
+      await userEvent.paste('My test');
+
+      await userEvent.click(screen.getByTestId('test-connector-text-field'));
+      await userEvent.paste('My text field');
+
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(onConnectorCreated).toHaveBeenCalled();
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('inbound-ingress-credentials')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('inbound-ingress-ingest-token')).not.toBeInTheDocument();
+      expect(screen.getByTestId('create-connector-flyout-save-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
+    });
   });
 
   describe('Save & Test transition', () => {
