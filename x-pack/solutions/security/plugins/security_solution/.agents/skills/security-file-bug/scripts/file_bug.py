@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import json
 import re
+import shutil
+import subprocess
+import tempfile
 from dataclasses import dataclass
-from typing import Literal
+from pathlib import Path
+from typing import Callable, Literal
 
 WriteAction = Literal["create", "comment", "reopen_comment", "ask"]
 
@@ -347,3 +352,154 @@ def render_bug_body(finding: dict, config: dict) -> str:
         ("**Any additional context:**", "\n".join(additional)),
     )
     return "\n\n".join(f"{heading}\n{body}" for heading, body in sections) + "\n"
+
+
+_ASSET_URL = (
+    "https://uploads.github.com/repos/{repo}/issues/{issue_number}/assets?name={name}"
+)
+_VIDEO_SUFFIXES = frozenset({".mp4", ".mov", ".webm"})
+_COMPRESS_MAX_SIZE = "9M"
+
+HttpPost = Callable[[str, dict], dict]
+CommandRunner = Callable[[list], object]
+CompressVideo = Callable[[Path, Path], None]
+
+
+@dataclass(frozen=True)
+class UploadResult:
+    uploaded: tuple[tuple[str, str], ...]
+    leftovers: tuple[tuple[str, str], ...]
+
+
+class UploadError(Exception):
+    """Raised by an `http_post` implementation that never reached GitHub."""
+
+    def __init__(self, message: str, status: int = 0) -> None:
+        super().__init__(message)
+        self.status = status
+
+
+def _run_checked(argv: list) -> object:
+    return subprocess.run(argv, check=True, capture_output=True, text=True)
+
+
+def compress_video(src: Path, dest: Path, run: CommandRunner | None = None) -> None:
+    """Re-encode `src` into `dest` under the GitHub asset size limit."""
+    runner = _run_checked if run is None else run
+    runner(
+        [
+            "ffmpeg",
+            "-y",
+            "-i",
+            str(src),
+            "-vcodec",
+            "libx264",
+            "-acodec",
+            "aac",
+            "-crf",
+            "28",
+            "-fs",
+            _COMPRESS_MAX_SIZE,
+            str(dest),
+        ]
+    )
+
+
+def _default_http_post(url: str, headers: dict, file_path: Path) -> dict:
+    """Multipart-POST `file_path` to a GitHub asset URL with `curl`."""
+    argv = ["curl", "-s", "-X", "POST", "-w", "\n%{http_code}"]
+    for key, value in headers.items():
+        argv += ["-H", f"{key}: {value}"]
+    argv += ["-F", f"file=@{file_path}", url]
+    completed = subprocess.run(argv, capture_output=True, text=True, check=False)
+    if completed.returncode != 0:
+        raise UploadError(completed.stderr.strip() or "curl failed", 0)
+    body, _, code = completed.stdout.rpartition("\n")
+    status = int(code.strip()) if code.strip().isdigit() else 0
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError:
+        payload = {}
+    asset_url = _as_mapping(payload).get("browser_download_url")
+    return {
+        "ok": 200 <= status < 300 and bool(asset_url),
+        "status": status,
+        "url": asset_url,
+    }
+
+
+def _post(
+    http_post: HttpPost, url: str, headers: dict, file_path: Path
+) -> tuple[bool, int, str | None]:
+    try:
+        response = _as_mapping(http_post(url, headers, file_path))
+    except UploadError as error:
+        return False, error.status, None
+    return (
+        bool(response.get("ok")),
+        int(response.get("status") or 0),
+        response.get("url"),
+    )
+
+
+def _rejected_reason(status: int, *, after_compress: bool = False) -> str:
+    stage = "after compress retry" if after_compress else "on upload"
+    return f"GitHub rejected the file {stage} (status {status})"
+
+
+def _retry_compressed(
+    path: Path,
+    url: str,
+    headers: dict,
+    http_post: HttpPost,
+    compress_video_fn: CompressVideo,
+) -> tuple[bool, str, str]:
+    workdir = Path(tempfile.mkdtemp(prefix="file_bug_compress_"))
+    try:
+        dest = workdir / path.name
+        try:
+            compress_video_fn(path, dest)
+        except (OSError, subprocess.SubprocessError) as error:
+            return False, "", f"compress failed before the retry ({error})"
+        ok, status, asset_url = _post(http_post, url, headers, dest)
+        if ok:
+            return True, asset_url or "", ""
+        return False, "", _rejected_reason(status, after_compress=True)
+    finally:
+        shutil.rmtree(workdir, ignore_errors=True)
+
+
+def upload_evidence(
+    *,
+    issue_number: int,
+    repo: str,
+    files: list,
+    token: str,
+    http_post: HttpPost = _default_http_post,
+    compress_video_fn: CompressVideo = compress_video,
+) -> UploadResult:
+    """Upload every evidence file, compressing a rejected video once before retrying."""
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+    }
+    uploaded: list[tuple[str, str]] = []
+    leftovers: list[tuple[str, str]] = []
+    for file_path in files:
+        path = Path(file_path)
+        url = _ASSET_URL.format(repo=repo, issue_number=issue_number, name=path.name)
+        ok, status, asset_url = _post(http_post, url, headers, path)
+        if ok:
+            uploaded.append((str(path), asset_url or ""))
+            continue
+        if path.suffix.lower() not in _VIDEO_SUFFIXES:
+            leftovers.append((str(path), _rejected_reason(status)))
+            continue
+        ok, asset_url, reason = _retry_compressed(
+            path, url, headers, http_post, compress_video_fn
+        )
+        if ok:
+            uploaded.append((str(path), asset_url))
+            continue
+        leftovers.append((str(path), reason))
+    return UploadResult(tuple(uploaded), tuple(leftovers))

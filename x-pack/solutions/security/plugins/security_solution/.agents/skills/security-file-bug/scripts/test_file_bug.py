@@ -4,6 +4,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 sys.dont_write_bytecode = True
 os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
@@ -11,9 +12,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from file_bug import (  # noqa: E402
     IssueMatch,
+    compress_video,
     decide_write_path,
     infer_team_label,
     render_bug_body,
+    upload_evidence,
     validate_labels,
 )
 
@@ -132,6 +135,96 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertIn("TypeError: cannot read map of undefined", body)
         self.assertIn("t2_analyst", body)
         self.assertNotIn("**Describe the bug:**\n\n**Steps", body)
+
+
+class UploadEvidenceTest(unittest.TestCase):
+    def test_png_uploads_first_try(self):
+        posts = []
+
+        def http_post(url, headers, file_path):
+            posts.append(url)
+            return {"ok": True, "status": 201, "url": "https://img/a.png"}
+
+        with TemporaryDirectory() as tmp:
+            png = Path(tmp) / "shot.png"
+            png.write_bytes(b"png")
+            result = upload_evidence(
+                issue_number=99,
+                repo="elastic/kibana",
+                files=[png],
+                token="t",
+                http_post=http_post,
+                compress_video_fn=lambda *a, **k: None,
+            )
+        self.assertEqual(len(result.uploaded), 1)
+        self.assertEqual(result.leftovers, ())
+        self.assertIn("/issues/99/assets?name=shot.png", posts[0])
+
+    def test_video_rejected_then_compress_retry_succeeds(self):
+        calls = {"n": 0}
+
+        def http_post(url, headers, file_path):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                return {"ok": False, "status": 413, "url": None}
+            return {"ok": True, "status": 201, "url": "https://img/v.mp4"}
+
+        compressed = {"done": False}
+
+        def compress(src, dest, run=None):
+            compressed["done"] = True
+            dest.write_bytes(b"small")
+
+        with TemporaryDirectory() as tmp:
+            video = Path(tmp) / "flow.mp4"
+            video.write_bytes(b"huge")
+            result = upload_evidence(
+                issue_number=99,
+                repo="elastic/kibana",
+                files=[video],
+                token="t",
+                http_post=http_post,
+                compress_video_fn=compress,
+            )
+        self.assertTrue(compressed["done"])
+        self.assertEqual(len(result.uploaded), 1)
+        self.assertEqual(result.leftovers, ())
+
+    def test_video_still_failing_is_leftover_not_raised(self):
+        def http_post(url, headers, file_path):
+            return {"ok": False, "status": 413, "url": None}
+
+        with TemporaryDirectory() as tmp:
+            video = Path(tmp) / "flow.mp4"
+            video.write_bytes(b"huge")
+            result = upload_evidence(
+                issue_number=99,
+                repo="elastic/kibana",
+                files=[video],
+                token="t",
+                http_post=http_post,
+                compress_video_fn=lambda src, dest, run=None: dest.write_bytes(b"x"),
+            )
+        self.assertEqual(result.uploaded, ())
+        self.assertEqual(len(result.leftovers), 1)
+
+    def test_compress_video_invokes_ffmpeg(self):
+        seen = []
+
+        def run(argv, **kwargs):
+            seen.append(argv)
+            class R:
+                returncode = 0
+            return R()
+
+        with TemporaryDirectory() as tmp:
+            src = Path(tmp) / "in.mp4"
+            dest = Path(tmp) / "out.mp4"
+            src.write_bytes(b"x")
+            compress_video(src, dest, run)
+        self.assertEqual(seen[0][0], "ffmpeg")
+        self.assertIn("-fs", seen[0])
+        self.assertIn("9M", seen[0])
 
 
 if __name__ == "__main__":
