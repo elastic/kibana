@@ -24,6 +24,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import type { CustomizePanelActionApi } from '../../../ui_actions/customize_panel_action';
 import { isApiCompatibleWithCustomizePanelAction } from '../../../ui_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../../ui_actions/customize_panel_action/open_customize_panel';
+import { PanelDescription } from './panel_description';
 
 export const PresentationPanelTitle = ({
   api,
@@ -154,7 +155,7 @@ export const PresentationPanelTitle = ({
     return (
       <EuiToolTip
         title={panelTitle}
-        content={panelDescription}
+        content={<PanelDescription description={panelDescription} />}
         position="top"
         anchorProps={{
           'data-test-subj': 'embeddablePanelTooltipAnchor',
