@@ -1612,6 +1612,9 @@ const InternalUnifiedDataTable = React.forwardRef<
               />
             ) : (
               <EuiDataGridMemoized
+                // Remount on display-mode change to reset EuiDataGrid's auto-height cache; otherwise
+                // some rows stay stuck at the taller JSON height when switching back to table mode.
+                key={documentsDisplayMode}
                 id={dataGridId}
                 aria-describedby={randomId}
                 aria-labelledby={ariaLabelledBy}

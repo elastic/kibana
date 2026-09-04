@@ -187,10 +187,14 @@ describe('SourceDocumentJsonMode', () => {
 
     it('filters on the exact clicked element of a multi-value field', async () => {
       const onFilter = jest.fn();
-      renderCell({ _id: '1', _index: 'test', _source: { bytes: [100, 200] } }, { onFilter });
+      renderCell(
+        { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
+        { onFilter, jsonModeSettings: { defaultRenderedNodes: 0 } }
+      );
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));
 
+      await userEvent.hover(screen.getByTestId(rowTestId('bytes.1')));
       await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
       expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 200, '+');
     });
@@ -199,11 +203,12 @@ describe('SourceDocumentJsonMode', () => {
       const onFilter = jest.fn();
       renderCell(
         { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
-        { onFilter, isPlainRecord: true }
+        { onFilter, isPlainRecord: true, jsonModeSettings: { defaultRenderedNodes: 0 } }
       );
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));
 
+      await userEvent.hover(screen.getByTestId(rowTestId('bytes.1')));
       await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
       expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), [200], '+');
     });
@@ -235,6 +240,22 @@ describe('SourceDocumentJsonMode', () => {
 
       expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
       expect(screen.queryByTestId(filterForTestId('computedField'))).not.toBeInTheDocument();
+    });
+
+    it('does not render filter buttons when Elasticsearch ignored the field value', () => {
+      renderCell(
+        {
+          _id: '1',
+          _index: 'test',
+          _source: { extension: 'a-very-long-extension', bytes: 100 },
+          _ignored: ['extension'],
+        },
+        { onFilter: jest.fn() }
+      );
+
+      expect(screen.queryByTestId(filterForTestId('extension'))).not.toBeInTheDocument();
+      expect(screen.queryByTestId(filterOutTestId('extension'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(filterForTestId('bytes'))).toBeInTheDocument();
     });
   });
 

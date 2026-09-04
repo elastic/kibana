@@ -226,6 +226,13 @@ const SCHEMA_TAB_TYPE_STATE_V16 = schema.oneOf([
 
 const SCHEMA_TAB_ATTRIBUTES_V16 = SCHEMA_TAB_ATTRIBUTES_V15.extends({
   tabTypeState: schema.maybe(SCHEMA_TAB_TYPE_STATE_V16),
+  jsonModeSettings: schema.maybe(
+    schema.object({
+      hideNulls: schema.maybe(schema.boolean()),
+      wrapLines: schema.maybe(schema.boolean()),
+      defaultRenderedNodes: schema.maybe(schema.number({ min: 10, max: 200 })),
+    })
+  ),
 });
 
 const SCHEMA_TAB_V16 = SCHEMA_TAB_V15.extends({

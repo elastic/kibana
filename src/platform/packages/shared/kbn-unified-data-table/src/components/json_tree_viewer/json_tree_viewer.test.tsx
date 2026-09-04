@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { copyToClipboard } from '@elastic/eui';
 import {
@@ -171,6 +171,22 @@ describe('JsonTreeViewer', () => {
       await userEvent.keyboard('{ArrowRight}');
 
       expect(screen.getByTestId(copyTestId('message'))).toHaveFocus();
+    });
+
+    it('steps from an expanded collection into its copy button with ArrowRight', async () => {
+      render(<JsonTreeViewer json={{ user: { city: 'Berlin' } }} />);
+
+      const userRow = screen.getByTestId(rowTestId('user'));
+      userRow.focus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId(rowTestId('user.city'))).toBeVisible();
+      expect(userRow).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId(copyTestId('user'))).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(userRow).toHaveFocus();
     });
 
     it('steps from a pager row into its first button with ArrowRight', async () => {
@@ -431,6 +447,14 @@ describe('JsonTreeViewer', () => {
       expect(actions.getByTestId('treeFilterOut-message')).toBeInTheDocument();
     });
 
+    it('mounts a row’s actions when it becomes the focused row (keyboard)', () => {
+      render(<JsonTreeViewer json={{ a: 1, b: 2 }} />);
+      expect(screen.queryByTestId(copyTestId('b'))).not.toBeInTheDocument();
+
+      act(() => screen.getByTestId(rowTestId('b')).focus());
+      expect(screen.getByTestId(copyTestId('b'))).toBeInTheDocument();
+    });
+
     it('invokes an action onClick when the button is clicked', async () => {
       const onFilterFor = jest.fn();
       const onFilterOut = jest.fn();
@@ -519,6 +543,46 @@ describe('JsonTreeViewer', () => {
       const noWrapClassName = screen.getByRole('tree').parentElement?.className;
 
       expect(noWrapClassName).not.toEqual(wrappingClassName);
+    });
+  });
+
+  describe('defaultRenderedNodes', () => {
+    const doc = { user: { name: 'Alice', address: { city: 'Berlin' } } };
+
+    it('leaves everything collapsed when the budget is 0', () => {
+      render(<JsonTreeViewer json={doc} defaultRenderedNodes={0} />);
+
+      expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
+    });
+
+    it('is collapsed by default when the prop is omitted', () => {
+      render(<JsonTreeViewer json={doc} />);
+
+      expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
+    });
+
+    it('seeds a fresh cell with enough expansion to render the requested rows', () => {
+      render(<JsonTreeViewer json={doc} defaultRenderedNodes={2} />);
+
+      // A budget of 2 rows opens `user` and renders its child; nested `address` stays collapsed.
+      expect(screen.getByTestId(rowTestId('user.name'))).toHaveTextContent('"Alice"');
+      expect(screen.queryByTestId(rowTestId('user.address.city'))).not.toBeInTheDocument();
+    });
+
+    it('opens deeper nesting as the budget increases', () => {
+      render(<JsonTreeViewer json={doc} defaultRenderedNodes={10} />);
+
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
+    });
+
+    it('reveals a large list up to the budget instead of only the first 10', () => {
+      const bigArray = Array.from({ length: 25 }, (_, i) => i);
+      render(<JsonTreeViewer json={bigArray} defaultRenderedNodes={20} />);
+
+      // The pager is lifted from the default 10 to 20 items; the rest stay behind "Show more".
+      expect(screen.getByTestId(rowTestId('19'))).toBeVisible();
+      expect(screen.queryByTestId(rowTestId('20'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(moreTestId())).toBeVisible();
     });
   });
 });

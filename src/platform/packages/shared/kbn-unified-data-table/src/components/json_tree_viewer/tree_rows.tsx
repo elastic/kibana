@@ -77,6 +77,10 @@ export const NodeRowView = memo(function NodeRowView({
   const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
   const { node, hasChildren, isExpanded } = row;
+  // The row's action buttons (copy, filter) mount only while the row is active or hovered,
+  // so a large tree doesn't flood the document with focusable elements (which makes focus-trap /
+  // tabbable scans dominate page load time).
+  const [isHovered, setIsHovered] = useState(false);
   return (
     <div
       ref={rowRef}
@@ -91,6 +95,8 @@ export const NodeRowView = memo(function NodeRowView({
       style={{ paddingInlineStart: rowPaddingInlineStart(euiTheme, row.depth) }}
       onClick={onActivate}
       onFocus={onFocus}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onKeyDown={onKeyDown}
       data-test-subj={`jsonTreeViewerRow-${node.id}`}
     >
@@ -105,7 +111,12 @@ export const NodeRowView = memo(function NodeRowView({
       ) : (
         <span css={styles.caret} aria-hidden />
       )}
-      <NodeLabel row={row} formatValue={formatValue} getLeafActions={getLeafActions} />
+      <NodeLabel
+        row={row}
+        showActions={isActive || isHovered}
+        formatValue={formatValue}
+        getLeafActions={getLeafActions}
+      />
     </div>
   );
 });
@@ -172,6 +183,7 @@ export const PagerRowView = memo(function PagerRowView({
             : clickShowFewer
         }
         onKeyDown={pagerButtonKeyDown}
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
         data-test-subj={
           showMore
             ? `jsonTreeViewerMore-${row.collectionId}`
@@ -188,6 +200,7 @@ export const PagerRowView = memo(function PagerRowView({
           iconType="minus"
           onClick={clickShowFewer}
           onKeyDown={pagerButtonKeyDown}
+          onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
           data-test-subj={`jsonTreeViewerFewer-${row.collectionId}`}
         >
           {showFewerLabel(row.collectionType)}
@@ -326,6 +339,8 @@ const CopyButton = function CopyButton({
           event.stopPropagation();
           copy();
         }}
+        // Prevent focusing the Datagrid cell so it does not scroll to the top of it.
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
         onKeyDown={rowActionKeyDown}
         size="xs"
       />
@@ -416,6 +431,8 @@ const RowActionButton = memo(function RowActionButton({ action }: { action: Json
           event.stopPropagation();
           action.onClick();
         }}
+        // Prevent focusing the Datagrid cell so it does not scroll to the top of it.
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
         onKeyDown={rowActionKeyDown}
         size="xs"
       />
@@ -426,10 +443,12 @@ const RowActionButton = memo(function RowActionButton({ action }: { action: Json
 // The body of a node row: key prefix + value/brackets + comma.
 const NodeLabel = memo(function NodeLabel({
   row,
+  showActions,
   formatValue,
   getLeafActions,
 }: {
   row: NodeRow;
+  showActions: boolean;
   formatValue?: FormatValue;
   getLeafActions?: GetLeafActions;
 }) {
@@ -438,7 +457,9 @@ const NodeLabel = memo(function NodeLabel({
 
   if (node.kind === 'leaf') {
     const leafActions =
-      getLeafActions?.({ value: node.value, path: node.path, isArrayItem: node.isArrayItem }) ?? [];
+      showActions && getLeafActions
+        ? getLeafActions({ value: node.value, path: node.path, isArrayItem: node.isArrayItem })
+        : [];
     return (
       <span css={styles.label}>
         <span className={`${LABEL_TEXT_CLASS} ${LEAF_LABEL_CLASS}`} css={styles.labelText}>
@@ -450,12 +471,14 @@ const NodeLabel = memo(function NodeLabel({
           />
           {trailingComma && <Comma />}
         </span>
-        <span className="jsonTreeViewerRowActions" css={styles.actions}>
-          <ValueCopyButton nodeId={node.id} value={node.value} />
-          {leafActions.map((action) => (
-            <RowActionButton key={action.id} action={action} />
-          ))}
-        </span>
+        {showActions && (
+          <span className="jsonTreeViewerRowActions" css={styles.actions}>
+            <ValueCopyButton nodeId={node.id} value={node.value} />
+            {leafActions.map((action) => (
+              <RowActionButton key={action.id} action={action} />
+            ))}
+          </span>
+        )}
       </span>
     );
   }
@@ -485,7 +508,11 @@ const NodeLabel = memo(function NodeLabel({
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{open}</span>
         </span>
-        <SubtreeCopyButton node={node} />
+        {showActions && (
+          <span className="jsonTreeViewerRowActions" css={styles.actions}>
+            <SubtreeCopyButton node={node} />
+          </span>
+        )}
       </span>
     );
   }
@@ -502,7 +529,11 @@ const NodeLabel = memo(function NodeLabel({
         <span css={styles.bracket}>{close}</span>
         {trailingComma && <Comma />}
       </span>
-      <SubtreeCopyButton node={node} />
+      {showActions && (
+        <span className="jsonTreeViewerRowActions" css={styles.actions}>
+          <SubtreeCopyButton node={node} />
+        </span>
+      )}
     </span>
   );
 });
@@ -628,6 +659,12 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     paddingInlineEnd: euiTheme.size.xs,
     borderRadius: euiTheme.border.radius.small,
     cursor: 'default',
+    // Skip layout/paint of off-screen rows so large documents (e.g. indices-stats) stay cheap
+    // without giving each cell its own scrollbar. Rows stay in the DOM, so keyboard navigation,
+    // find-in-page, and assistive tech still reach them; `auto` remembers each row's real height, so
+    // the intrinsic size is only an estimate until a row has been shown once.
+    contentVisibility: 'auto',
+    containIntrinsicBlockSize: `auto ${euiTheme.size.base}`,
     '&:hover': {
       backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
     },
@@ -651,6 +688,9 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     alignItems: 'center',
     gap: euiTheme.size.xs,
     minHeight: euiTheme.size.base,
+    // See `row`: skip off-screen layout/paint while keeping the closing bracket in the DOM.
+    contentVisibility: 'auto',
+    containIntrinsicBlockSize: `auto ${euiTheme.size.base}`,
   }),
   caret: css({
     flexShrink: 0,
