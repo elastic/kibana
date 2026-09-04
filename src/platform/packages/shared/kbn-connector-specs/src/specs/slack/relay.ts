@@ -278,7 +278,9 @@ export function withRelayGuards(actions: ConnectorSpec['actions']): ConnectorSpe
           handler: async (ctx: ActionContext, input: unknown) => {
             if (isRelayAuth(ctx)) {
               throw new Error(
-                `${name} is not available through the Elastic Slack app. Supported actions: ${supported.join(', ')}.`
+                `${name} is not available through the Elastic Slack app. Supported actions: ${supported.join(
+                  ', '
+                )}.`
               );
             }
             return action.handler(ctx, input);
