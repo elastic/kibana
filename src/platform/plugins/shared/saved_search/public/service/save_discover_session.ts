@@ -108,6 +108,7 @@ export const saveDiscoverSession = async (
         jsonModeSettings: tab.jsonModeSettings,
         visContext: tab.visContext,
         controlGroupJson: tab.controlGroupJson,
+        tabTypeState: tab.tabTypeState,
       },
     };
   });

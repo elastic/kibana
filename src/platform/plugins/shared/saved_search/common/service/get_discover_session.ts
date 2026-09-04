@@ -57,6 +57,7 @@ export const getDiscoverSession = async (
       jsonModeSettings: tab.attributes.jsonModeSettings as JsonModeSettings,
       visContext: tab.attributes.visContext,
       controlGroupJson: tab.attributes.controlGroupJson,
+      tabTypeState: tab.attributes.tabTypeState,
     })),
     managed: Boolean(so.item.managed),
     tags: deps.savedObjectsTagging

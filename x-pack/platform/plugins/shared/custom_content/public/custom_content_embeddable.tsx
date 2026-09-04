@@ -156,7 +156,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       dataLoading$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
-          defaultMessage: 'Custom content',
+          defaultMessage: 'Custom panel',
         }),
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         const { core } = getServices();
