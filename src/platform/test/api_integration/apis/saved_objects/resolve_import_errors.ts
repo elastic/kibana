@@ -20,17 +20,17 @@ export default function ({ getService }: FtrProviderContext) {
     const indexPattern = {
       type: 'index-pattern',
       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-      meta: { title: 'logstash-*', icon: 'indexPatternApp' },
+      meta: { title: 'logstash-*', icon: 'pattern' },
     };
     const visualization = {
       type: 'visualization',
       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-      meta: { title: 'Count of requests', icon: 'visualizeApp' },
+      meta: { title: 'Count of requests', icon: 'chartBarVertical' },
     };
     const dashboard = {
       type: 'dashboard',
       id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-      meta: { title: 'Requests', icon: 'dashboardApp' },
+      meta: { title: 'Requests', icon: 'productDashboard' },
     };
     const SPACE_ID = 'ftr-so-resolve_import_errors';
 
@@ -163,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
                 {
                   type: 'visualization',
                   id: '1',
-                  meta: { title: 'My favorite vis', icon: 'visualizeApp' },
+                  meta: { title: 'My favorite vis', icon: 'chartBarVertical' },
                   managed: false,
                 },
               ],

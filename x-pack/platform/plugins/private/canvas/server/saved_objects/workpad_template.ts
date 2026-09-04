@@ -53,7 +53,7 @@ export const workpadTemplateType = (
   migrations: () => templateWorkpadMigrationsFactory(deps),
   management: {
     importableAndExportable: false,
-    icon: 'canvasApp',
+    icon: 'paintBucket',
     defaultSearchField: 'name',
     getTitle(obj) {
       return obj.attributes.name;
