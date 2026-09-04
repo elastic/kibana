@@ -53,6 +53,13 @@ Validates the spec, persists it as a ${ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE} attachm
 On validation failure the errors are returned; fix the spec and call this tool again. Call \`${adaptiveUiTools.getAuthoringContext}\` first if you need the spec schema or primitive catalog.`,
   schema: renderViewSchema,
   tags: ['adaptive-ui'],
+  annotations: {
+    title: 'Render Adaptive UI view',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   handler: async ({ spec, title }, { attachments, logger }) => {
     const candidate = title ? { ...spec, title } : spec;
 
