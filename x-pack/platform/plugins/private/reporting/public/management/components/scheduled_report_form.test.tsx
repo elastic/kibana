@@ -169,6 +169,7 @@ describe('ScheduledReportForm', () => {
   });
 
   it('does not shift the displayed or submitted start date by the dateFormat:tz timezone', async () => {
+    moment.tz.setDefault('America/New_York');
     user = userEvent.setup({ delay: null });
     mockUiSettings({
       'dateFormat:tz': 'America/New_York',
@@ -186,7 +187,7 @@ describe('ScheduledReportForm', () => {
       />
     );
 
-    expect(await screen.findByTestId('startDatePicker-input')).toHaveValue('Nov 10, 2025 @ 12:00');
+    expect(await screen.findByTestId('startDatePicker-input')).toHaveValue('Nov 10, 2025 @ 07:00');
 
     await user.click(await screen.findByTestId('scheduleExportSubmitButton'));
 
@@ -199,6 +200,7 @@ describe('ScheduledReportForm', () => {
         true
       );
     });
+    moment.tz.setDefault('UTC');
   });
 
   it('calls onSubmit correctly', async () => {
