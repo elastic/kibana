@@ -134,6 +134,14 @@ steps:
         ALERTS is not absence of an intruder -- alerts depend on rules
         that may not exist; raw telemetry does not.
 
+        SCOPE: your verdict is about the hosts named in THIS narrative
+        only. Telemetry on hosts this narrative does not name belongs
+        to other alerts and other investigations -- do not escalate
+        this alert on it. No telemetry at all for the named hosts
+        means the narrative is unverifiable; say so and judge on the
+        narrative's own evidence, but absence of telemetry alone is
+        not an incident.
+
         {{ steps.derive_ids.output.attackDiscoveryMarkdown }}
 
         Alert / event context:
