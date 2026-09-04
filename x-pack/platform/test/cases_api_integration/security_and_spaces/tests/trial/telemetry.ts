@@ -356,7 +356,7 @@ export default ({ getService }: FtrProviderContext): void => {
         totalDisabled: 0,
         totalSoftDeleted: 0,
         totalMigratedFromV1: 0,
-        versionDistribution: [],
+        versionPercentiles: { p50: 0, p90: 0, p99: 0 },
         fieldCount: { total: 0, max: 0, average: 0 },
         fieldDefinitions: { totalsByControl: {}, totalsByType: {} },
         cases: {
@@ -460,11 +460,8 @@ export default ({ getService }: FtrProviderContext): void => {
               // One template, not one per version document.
               totalSoftDeleted: 1,
               totalMigratedFromV1: 0,
-              // Two templates on version 1, the edited one on version 3, ordered by count.
-              versionDistribution: [
-                { version: 1, count: 2 },
-                { version: 3, count: 1 },
-              ],
+              // Two templates are on version 1, and the edited template is on version 3.
+              versionPercentiles: { p50: 1, p90: 3, p99: 3 },
               // 2 + 1 + 3 declared fields across the live templates only.
               fieldCount: { total: 6, max: 3, average: 2 },
               // Read from the indexed field definitions, not from a re-parse of the YAML.

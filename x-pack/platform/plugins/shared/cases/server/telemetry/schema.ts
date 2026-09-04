@@ -176,22 +176,23 @@ const templatesSolutionTelemetrySchema: TemplatesSolutionTelemetrySchema = {
         'Number of live templates that were created by the templates v1 to v2 migration rather than authored directly',
     },
   },
-  versionDistribution: {
-    type: 'array',
-    items: {
-      version: {
-        type: 'long',
-        _meta: {
-          description:
-            'A template version number. A template starts at 1 and gains one version per edit, so this doubles as a revision count',
-        },
+  versionPercentiles: {
+    p50: {
+      type: 'long',
+      _meta: {
+        description: 'Rounded 50th percentile of the version across live templates',
       },
-      count: {
-        type: 'long',
-        _meta: {
-          description:
-            'Number of live templates currently at this version. Only the most frequent versions are reported, so the counts need not sum to the total',
-        },
+    },
+    p90: {
+      type: 'long',
+      _meta: {
+        description: 'Rounded 90th percentile of the version across live templates',
+      },
+    },
+    p99: {
+      type: 'long',
+      _meta: {
+        description: 'Rounded 99th percentile of the version across live templates',
       },
     },
   },

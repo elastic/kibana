@@ -7,7 +7,6 @@
 
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { fromKueryExpression } from '@kbn/es-query';
-import type { SortOrder } from '../../../common/ui/types';
 import {
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
@@ -23,18 +22,12 @@ import type {
   CollectTelemetryDataParams,
   TemplatesSolutionTelemetry,
   TemplatesTelemetry,
-  TemplatesVersionCount,
 } from '../types';
 import type { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 import { findValueInBuckets, getCountsAggregationQuery, getCountsFromBuckets } from './utils';
 
 const SO = CASE_TEMPLATE_SAVED_OBJECT;
 
-/**
- * Caps on the reported map/list sizes. The version key space is open (a template gains a
- * version on every edit), so the cap is what keeps the payload bounded.
- */
-const MAX_VERSION_BUCKETS = 20;
 const MAX_FIELD_TYPE_BUCKETS = 20;
 
 /**
@@ -67,11 +60,10 @@ const getInventoryAggregations = () => ({
   migratedFromV1: {
     filter: { exists: { field: `${SO}.attributes.legacyKey` } },
   },
-  versions: {
-    terms: {
+  versionPercentiles: {
+    percentiles: {
       field: `${SO}.attributes.templateVersion`,
-      size: MAX_VERSION_BUCKETS,
-      order: { _count: 'desc' as SortOrder },
+      percents: [50, 90, 99],
     },
   },
   totalFieldCount: { sum: { field: `${SO}.attributes.fieldCount` } },
@@ -152,7 +144,7 @@ const getByOwnerAggregations = <T extends object>(
 interface InventoryScopeAggregationResult {
   enabledStates?: Buckets<number>;
   migratedFromV1?: { doc_count: number };
-  versions?: Buckets<number>;
+  versionPercentiles?: { values?: Record<string, number | null> };
   totalFieldCount?: { value: number | null };
   maxFieldCount?: { value: number | null };
   averageFieldCount?: { value: number | null };
@@ -240,8 +232,11 @@ const bucketsToRecord = (buckets?: Array<Bucket<string>>): Record<string, number
   return record;
 };
 
-const bucketsToVersionDistribution = (buckets?: Array<Bucket<number>>): TemplatesVersionCount[] =>
-  buckets?.map((bucket) => ({ version: bucket.key, count: bucket.doc_count })) ?? [];
+const getVersionPercentiles = (values?: Record<string, number | null>) => ({
+  p50: Math.round(values?.['50.0'] ?? 0),
+  p90: Math.round(values?.['90.0'] ?? 0),
+  p99: Math.round(values?.['99.0'] ?? 0),
+});
 
 const buildSolutionTelemetry = ({
   inventory,
@@ -264,7 +259,7 @@ const buildSolutionTelemetry = ({
     totalDisabled: findValueInBuckets(enabledBuckets, 0),
     totalSoftDeleted,
     totalMigratedFromV1: inventory?.migratedFromV1?.doc_count ?? 0,
-    versionDistribution: bucketsToVersionDistribution(inventory?.versions?.buckets),
+    versionPercentiles: getVersionPercentiles(inventory?.versionPercentiles?.values),
     fieldCount: {
       total: inventory?.totalFieldCount?.value ?? 0,
       max: inventory?.maxFieldCount?.value ?? 0,
