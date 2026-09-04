@@ -359,33 +359,26 @@ describe('detection rule workflows', () => {
         expect(tagSteps.map(({ name }) => name)).toEqual([
           'mark_alerts_dismissed',
           'mark_alerts_applied',
-          'mark_alerts_handoff',
         ]);
 
-        const [dismissed, applied, handoff] = tagSteps;
+        const [dismissed, applied] = tagSteps;
         expect(dismissed.if).toContain('steps.review_tuning.output.response.approved == false');
         expect(dismissed.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
         ]);
-        for (const step of [applied, handoff]) {
-          expect(step.if).toContain('steps.review_tuning.output.response.approved == true');
-        }
+        expect(applied.if).toContain('steps.review_tuning.output.response.approved == true');
         expect(applied.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.applied_tag }}',
-        ]);
-        expect(handoff.with?.tags_to_add).toEqual([
-          '{{ consts.reviewed_tag }}',
-          '{{ consts.handoff_tag }}',
         ]);
         for (const step of tagSteps) {
           expect(step).not.toHaveProperty('on-failure');
         }
       });
 
-      // The applied tag must mean this pipeline changed the rule. Manual handoffs use a
-      // distinct outcome; failed query applications remain unreviewed for a later retry.
+      // The applied tag must mean this pipeline changed the rule. Proposals that are
+      // not auto-applied stay unreviewed, so a later sweep can retry them.
       it('tags applied only when the rule was actually patched', () => {
         const applied = tagSteps.find(({ name }) => name === 'mark_alerts_applied')!;
 
@@ -472,7 +465,7 @@ describe('detection rule workflows', () => {
         expect(emitInput).toContain('_shards.failed == 0');
       });
 
-      it('keeps query modes with omitted preview fields as manual handoffs', () => {
+      it('excludes rule modes with omitted preview fields from auto-apply', () => {
         const support = proposalSteps.find(({ name }) => name === 'record_auto_apply_support')!;
         const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
         const condition = String(eligibility.with?.eligible);
@@ -526,7 +519,6 @@ describe('detection rule workflows', () => {
             reviewed_tag: reviewedTag,
             dismissed_tag: 'detection-watch:tuning-dismissed',
             applied_tag: 'detection-watch:tuning-applied',
-            handoff_tag: 'detection-watch:tuning-handoff',
           })
         );
 

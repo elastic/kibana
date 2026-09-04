@@ -91,7 +91,6 @@ consts:
   reviewed_tag: detection-watch:tuning-reviewed
   dismissed_tag: detection-watch:tuning-dismissed
   applied_tag: detection-watch:tuning-applied
-  handoff_tag: detection-watch:tuning-handoff
   no_items: []
 steps:
   # Fetched by saved-object id, which pins the exact rule incarnation that produced
@@ -173,8 +172,7 @@ steps:
         required: [change_type, summary, current_query, proposed_query, exception_condition, rekey_required]
 
   # These optional rule modes need fields that cannot be conditionally omitted from
-  # a YAML object. Keep their query proposals as explicit analyst handoffs instead of
-  # running a preview that differs from production.
+  # a YAML object, so their query change is not previewed or auto-applied.
   - name: record_auto_apply_support
     type: data.set
     with:
@@ -182,11 +180,6 @@ steps:
         ${{ steps.fetch_rule.output.data_view_id == null
           and steps.fetch_rule.output.timestamp_override == null
           and steps.fetch_rule.output.alert_suppression == null }}
-      manual_handoff: >-
-        ${{ steps.diagnose_rule.output.structured_output.change_type != 'query'
-          or steps.fetch_rule.output.data_view_id != null
-          or steps.fetch_rule.output.timestamp_override != null
-          or steps.fetch_rule.output.alert_suppression != null }}
 
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
@@ -320,16 +313,17 @@ steps:
         Proposed query:
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
 
-        This rule uses a data view, timestamp override, or alert suppression. Apply
-        the query manually so those settings can be validated with it.
+        This rule uses a data view, timestamp override, or alert suppression, so it
+        is not previewed or applied automatically.
         {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         Proposed exception:
         {{ steps.diagnose_rule.output.structured_output.exception_condition }}
         {% endif %}
-        Apply this {{ steps.diagnose_rule.output.structured_output.change_type }}
-        proposal manually in the Detection Rules UI. Approving records the handoff;
-        it does not change the rule.
+        This {{ steps.diagnose_rule.output.structured_output.change_type }} proposal
+        is not applied automatically; apply it manually in the Detection Rules UI if
+        appropriate. Approving does not tag the alerts, so a later sweep can propose
+        this rule again.
         {% endif %}
 
         {% if steps.diagnose_rule.output.conversation_id %}
@@ -415,19 +409,6 @@ steps:
       tags_to_add:
         - "{{ consts.reviewed_tag }}"
         - "{{ consts.applied_tag }}"
-
-  # Non-query proposals and query modes that cannot be previewed faithfully are
-  # manual handoffs, not applied rule changes.
-  - name: mark_alerts_handoff
-    type: security.setAlertTags
-    if: >-
-      ${{ steps.review_tuning.output.response.approved == true
-        and steps.record_auto_apply_support.output.manual_handoff == true }}
-    with:
-      alert_ids: "${{ inputs.alert_ids }}"
-      tags_to_add:
-        - "{{ consts.reviewed_tag }}"
-        - "{{ consts.handoff_tag }}"
 
   - name: emit_result
     type: workflow.output
