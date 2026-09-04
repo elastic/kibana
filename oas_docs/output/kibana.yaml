@@ -94460,7 +94460,7 @@ components:
           type: object
           properties:
             id:
-              description: The primary identifier (caseId, observableId, or alertId).
+              description: The primary identifier of the case, observable, or alert from which the workflow was triggered (`caseId`, `observableId`, or `alertId`).
               type: string
             index:
               description: For alert origins, the Elasticsearch index the alert lives in.
