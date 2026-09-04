@@ -24,6 +24,7 @@ export interface RunAgentParams {
    * The next message in this conversation that the agent should respond to.
    */
   nextInput: ConverseInput;
+  roundId?: string;
   /**
    * Current conversation.
    */

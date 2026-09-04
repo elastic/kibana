@@ -28,7 +28,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/observability/config.group2.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group5.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group6.ts
-  - x-pack/platform/test/serverless/functional/configs/observability/config.reporting.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group8.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group9.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group11.ts

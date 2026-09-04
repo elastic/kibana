@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ApmDataSourceWithSummary } from '@kbn/apm-types';
+import { getPreferredBucketSizeAndDataSource } from '@kbn/apm-data-access-plugin/common';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import type { SavedServiceGroup } from '../../../common/service_groups';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -17,11 +18,13 @@ export async function getServicesCounts({
   start,
   end,
   serviceGroups,
+  sources,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   serviceGroups: SavedServiceGroup[];
+  sources: ApmDataSourceWithSummary[];
 }) {
   if (!serviceGroups.length) {
     return {};
@@ -34,13 +37,15 @@ export async function getServicesCounts({
     {}
   );
 
+  const { source } = getPreferredBucketSizeAndDataSource({
+    sources,
+    bucketSizeInSeconds: (end - start) / 1000,
+  });
+  const { documentType, rollupInterval } = source;
+
   const params = {
     apm: {
-      // We're limiting the service count to only metrics documents. If a user
-      // actively disables system/app metrics and a service only ingests error
-      // events, that service will not be included in the service groups count.
-      // This is an edge case that only effects the count preview label.
-      events: [ProcessorEvent.metric],
+      sources: [{ documentType, rollupInterval }],
     },
     track_total_hits: 0,
     size: 0,
