@@ -589,7 +589,6 @@ describe('rule summary flyout', () => {
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     mockHttp.post.mockResolvedValue({ rules: [] });
-    mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
     renderPage();
     await waitFor(() => {
       const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
