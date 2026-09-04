@@ -10,6 +10,7 @@
   },
   "include": [
     "index.ts",
+    "jsx.ts",
     "react.ts",
     "node.ts",
     "builders.ts",
