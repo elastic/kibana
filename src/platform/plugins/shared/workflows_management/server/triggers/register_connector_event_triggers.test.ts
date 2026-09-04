@@ -28,6 +28,7 @@ const createOutboundSpec = (): ConnectorSpec => ({
     ping: {
       input: z.object({}),
       handler: async () => ({}),
+      scope: 'read',
     },
   },
   test: { enabled: false, handler: async () => ({}) },
@@ -45,6 +46,7 @@ const createDualSpec = (): ConnectorSpec => ({
     ping: {
       input: z.object({}),
       handler: async () => ({}),
+      scope: 'read',
     },
   },
   events: {
