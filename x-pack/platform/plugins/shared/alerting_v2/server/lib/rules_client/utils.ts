@@ -26,7 +26,7 @@ import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { toApiQuery, toApiStateTransition } from '../../saved_objects/legacy_rule_shape';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
-import type { BulkOperationError, RotationCandidate } from './types';
+import type { BulkOperationError, ResolvedCreateRuleData, RotationCandidate } from './types';
 
 /**
  * Maps a saved-object status code to the stable, machine-readable bulk-error
@@ -203,10 +203,12 @@ const toStoredLifecycle = (
   data.kind === 'alert' ? { recovery: data.recovery, no_data: data.no_data } : {};
 
 /**
- * Converts a create-rule API body into saved object attributes.
+ * Converts a create-rule API body into saved object attributes. The body's
+ * query must already be settled by `resolveCreateRuleBuilder`, since a
+ * builder-authored body carries its parameters instead of a query.
  */
 export function transformCreateRuleBodyToRuleSoAttributes(
-  data: CreateRuleData,
+  data: ResolvedCreateRuleData,
   serverFields: {
     enabled: boolean;
     createdBy: RuleSavedObjectAttributes['createdBy'];
@@ -223,6 +225,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       description: data.metadata.description,
       tags: data.metadata.tags,
       builder_type: data.metadata.builder_type,
+      builder_fields: data.metadata.builder_fields,
     },
     time_field: data.time_field,
     schedule: {
@@ -236,38 +239,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     artifacts: data.artifacts,
     ...serverFields,
   };
-}
-
-/**
- * Resolves `metadata.builder_type` for an update.
- *
- * Builder rules require an explicit `metadata.builder_type: null` in the request
- * to clear the field when the query changes.
- */
-function resolveBuilderType(
-  updateData: UpdateRuleData,
-  existingAttrs: RuleSavedObjectAttributes
-): string | undefined {
-  if (updateData.metadata?.builder_type !== undefined) {
-    return updateData.metadata.builder_type ?? undefined;
-  }
-
-  const queryChanged =
-    updateData.query !== undefined && !isEqual(updateData.query, toApiQuery(existingAttrs.query));
-
-  if (queryChanged && existingAttrs.metadata.builder_type) {
-    throw Boom.badRequest(
-      'Cannot update the query on a builder rule without explicitly clearing ' +
-        'metadata.builder_type. Send metadata.builder_type: null to confirm the transition to ES|QL mode.',
-      { code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED }
-    );
-  }
-
-  if (queryChanged) {
-    return undefined;
-  }
-
-  return existingAttrs.metadata.builder_type;
 }
 
 /**
@@ -295,7 +266,17 @@ export function buildUpdateRuleAttributes(
     metadata: {
       ...existingAttrs.metadata,
       ...updateData.metadata,
-      builder_type: resolveBuilderType(updateData, existingAttrs),
+      // `null` → clear (undefined): the SO schema uses `maybe()` without
+      // `nullable()`. Builder resolution has already rejected the combinations
+      // that would leave the pair inconsistent.
+      builder_type: nullToUndefined(
+        updateData.metadata?.builder_type,
+        existingAttrs.metadata.builder_type
+      ),
+      builder_fields: nullToUndefined(
+        updateData.metadata?.builder_fields,
+        existingAttrs.metadata.builder_fields
+      ),
       // `null` clears all tags. The SO schema is `maybe(...)` without
       // `nullable()`, so the cleared value must be stored as `undefined`.
       tags: nullToUndefined(updateData.metadata?.tags, existingAttrs.metadata.tags),
@@ -417,6 +398,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
       description: attrs.metadata.description,
       tags: attrs.metadata.tags,
       builder_type: attrs.metadata.builder_type,
+      builder_fields: attrs.metadata.builder_fields,
     },
     time_field: attrs.time_field,
     schedule: {

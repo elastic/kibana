@@ -35,6 +35,7 @@ import {
 } from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import { BuilderTypeRegistry } from '../lib/builder_types';
 import {
   RuleTemplatesClient,
   RuleTemplateSavedObjectsClientToken,
@@ -126,6 +127,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
+  bind(BuilderTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
