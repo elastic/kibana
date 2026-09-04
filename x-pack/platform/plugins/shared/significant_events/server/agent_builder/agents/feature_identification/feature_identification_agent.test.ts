@@ -6,24 +6,24 @@
  */
 
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
+import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import { platformStreamsMemoryTools } from '../../../memory_and_investigation/tools/memory/tool_ids';
 import { featureIdentificationAgentType } from './feature_identification_agent';
 
 describe('featureIdentificationAgentType', () => {
   it('exposes only parity-required tools', () => {
+    const toolIds = [
+      platformStreamsMemoryTools.memorySearch,
+      platformStreamsMemoryTools.memoryRead,
+      platformStreamsMemoryTools.memoryList,
+      platformSignificantEventsTools.searchSimilarFeatures,
+      platformSignificantEventsTools.searchEvent,
+      platformSignificantEventsTools.finalizeFeatures,
+    ];
+
     expect(featureIdentificationAgentType.baseConfiguration.skill_ids).toEqual([]);
-    expect(featureIdentificationAgentType.baseConfiguration.tools).toEqual([
-      {
-        tool_ids: [
-          platformStreamsMemoryTools.memorySearch,
-          platformStreamsMemoryTools.memoryRead,
-          platformStreamsMemoryTools.memoryList,
-          platformSignificantEventsTools.searchSimilarFeatures,
-          platformSignificantEventsTools.searchEvent,
-          platformSignificantEventsTools.finalizeFeatures,
-        ],
-      },
-    ]);
+    expect(featureIdentificationAgentType.baseConfiguration.tools).toEqual([{ tool_ids: toolIds }]);
+    expect(toolIds.every(isAllowedBuiltinTool)).toBe(true);
   });
 
   it('includes grounding instructions', () => {

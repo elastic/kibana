@@ -111,6 +111,7 @@ export function registerAgentBuilderTools({
       logger: logger.get('events_write_tool'),
       telemetry,
     }),
+    createFinalizeFeaturesTool(),
     ...[createMemorySearchTool, createMemoryReadTool, createMemoryListTool].map((createTool) => ({
       ...createTool(memoryToolsOptions),
       annotations: {
@@ -126,7 +127,6 @@ export function registerAgentBuilderTools({
         logger: logger.get('memory_read_tool'),
       }),
     })),
-    createFinalizeFeaturesTool(),
   ];
 
   for (const tool of tools) {

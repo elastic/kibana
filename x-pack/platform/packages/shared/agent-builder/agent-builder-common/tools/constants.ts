@@ -80,6 +80,9 @@ export const platformSignificantEventsTools = {
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
   finalizeFeatures: `${internalNamespaces.platformSignificantEvents}.ki_feature_finalize`,
+  searchMemory: `${internalNamespaces.platformSignificantEvents}.memory.search`,
+  readMemory: `${internalNamespaces.platformSignificantEvents}.memory.read`,
+  listMemory: `${internalNamespaces.platformSignificantEvents}.memory.list`,
 
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,

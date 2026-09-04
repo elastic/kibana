@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
+
 const NAMESPACE = 'platform.sig_events.memory';
 
 /**
@@ -12,11 +14,11 @@ const NAMESPACE = 'platform.sig_events.memory';
  * inlined via skills — they do not need to be registered or defined in the shared agent-builder-common package.
  */
 export const platformStreamsMemoryTools = {
-  memorySearch: `${NAMESPACE}.search`,
-  memoryRead: `${NAMESPACE}.read`,
+  memorySearch: platformSignificantEventsTools.searchMemory,
+  memoryRead: platformSignificantEventsTools.readMemory,
   memoryWrite: `${NAMESPACE}.write`,
   memoryPatch: `${NAMESPACE}.patch`,
-  memoryList: `${NAMESPACE}.list`,
+  memoryList: platformSignificantEventsTools.listMemory,
   memoryDelete: `${NAMESPACE}.delete`,
   memoryRecentChanges: `${NAMESPACE}.recent_changes`,
 } as const;
