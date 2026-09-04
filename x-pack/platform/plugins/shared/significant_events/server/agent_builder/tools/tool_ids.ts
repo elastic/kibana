@@ -15,6 +15,10 @@ export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchKnowledgeIndicators;
 export const SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchSimilarFeatures;
+export const SIGNIFICANT_EVENTS_GET_STREAM_FEATURES_TOOL_ID =
+  platformSignificantEventsTools.getStreamFeatures;
+export const SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID =
+  platformSignificantEventsTools.validateQueries;
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;

@@ -19,6 +19,8 @@ import { createEventTool } from './event_create/tool';
 import { createEventStatusUpdateTool } from './event_status_update/tool';
 import { createEventInvestigationAttachTool } from '../../memory_and_investigation/tools/event_investigation_attach/tool';
 import { createEventsWriteTool } from './event_write/tool';
+import { createGetStreamFeaturesTool } from './get_stream_features/tool';
+import { createValidateQueriesTool } from './validate_queries/tool';
 export {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID,
@@ -28,6 +30,8 @@ export {
   SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
   SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID,
   SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
+  SIGNIFICANT_EVENTS_GET_STREAM_FEATURES_TOOL_ID,
+  SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
 } from './tool_ids';
 
 export function registerAgentBuilderTools({
@@ -70,6 +74,16 @@ export function registerAgentBuilderTools({
       server,
       logger: logger.get('ki_query_create_tool'),
       telemetry,
+    }),
+    createGetStreamFeaturesTool({
+      getScopedClients,
+      server,
+      logger: logger.get('ki_stream_features_get_tool'),
+    }),
+    createValidateQueriesTool({
+      getScopedClients,
+      server,
+      logger: logger.get('ki_queries_validate_tool'),
     }),
     createSearchEventsTool({
       getScopedClients,

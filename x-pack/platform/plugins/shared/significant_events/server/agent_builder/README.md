@@ -14,12 +14,13 @@ Registered from `register.ts`. Tool ids live in `tools/tool_ids.ts` under the
 
 ### Tools (`tools/`)
 
-| Group                | Tools                                                                        |
-| -------------------- | ---------------------------------------------------------------------------- |
-| Knowledge indicators | `search_knowledge_indicators`, `create_feature_knowledge_indicator`, `create_query_knowledge_indicator` |
-| KI identification    | `ki_identification_start`, `ki_identification_cancel`, `ki_identification_status` |
-| Events               | `event_search`, `event_create`, `event_write`, `event_status_update`         |
-| Discovery            | `discovery_write`                                                            |
+| Group                | Tools                                                                                                     |
+| -------------------- | --------------------------------------------------------------------------------------------------------- |
+| Knowledge indicators | `search_knowledge_indicators`, `create_feature_knowledge_indicator`, `create_query_knowledge_indicator`    |
+| Query generation     | `ki_stream_features_get`, `ki_queries_validate`                                                           |
+| KI identification    | `ki_identification_start`, `ki_identification_cancel`, `ki_identification_status`                          |
+| Events               | `event_search`, `event_create`, `event_write`, `event_status_update`                                      |
+| Discovery            | `discovery_write`                                                                                         |
 
 `search_knowledge_indicators` is also consumed outside this plugin, by the
 `observability_agent_builder` RCA skill.

@@ -418,6 +418,20 @@ describe('identifyKIQueries agent', () => {
   });
 
   describe('query attempt diagnostics', () => {
+    it('validates feature links from authoritative state without callback closure state', async () => {
+      const { result } = await runIdentifyKIQueries({
+        callGetStreamFeatures: false,
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message:"failure"')]],
+      });
+
+      expect(result.queries).toEqual([
+        expect.objectContaining({
+          esql: 'FROM logs, logs.* | WHERE message : "failure"',
+          features: [{ id: 'feat-1', run_id: undefined }],
+        }),
+      ]);
+    });
+
     it('forwards maxDurationMs to the reasoning agent', async () => {
       const { capturedOptions } = await runIdentifyKIQueries({
         maxDurationMs: 300000,
