@@ -37,6 +37,29 @@ should_enable_fips() {
   is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"
 }
 
+# Buildkite checkouts push with the Buildkite GitHub App credential, which has limited scopes. It cannot push to workflows for example.
+# Use an isolated git config so gh can provide GITHUB_TOKEN credentials for this push without changing global auth.
+push_as_github_token() {
+  local required_env_var
+
+  for required_env_var in GITHUB_TOKEN GITHUB_PR_OWNER GITHUB_PR_REPO GITHUB_PR_BRANCH; do
+    if [[ -z "${!required_env_var:-}" ]]; then
+      echo "Missing required environment variable for GITHUB_TOKEN push: $required_env_var" >&2
+      exit 1
+    fi
+  done
+
+  (
+    git_config_global="$(mktemp)"
+    trap 'rm -f "$git_config_global"' EXIT
+
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" gh auth setup-git --hostname github.com --force
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" git push \
+      "https://github.com/${GITHUB_PR_OWNER}/${GITHUB_PR_REPO}.git" \
+      "HEAD:${GITHUB_PR_BRANCH}"
+  )
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
