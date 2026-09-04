@@ -150,7 +150,7 @@ describe('WatchDetailPage', () => {
     expect(screen.queryByTestId('pndCandidateLimit')).not.toBeInTheDocument();
   });
 
-  it('shows Dark Watch with one Worker that has enablement and autonomy', () => {
+  it('shows Hunt Watch with one Worker that has enablement and autonomy', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_DARK_ID, [darkWorker, ...floorWorkers]);
 
     const section = screen.getByTestId(

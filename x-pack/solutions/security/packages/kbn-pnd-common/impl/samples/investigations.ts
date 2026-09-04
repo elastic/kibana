@@ -234,7 +234,7 @@ const investigateInvestigations: Investigation[] = [
     recommendedAction: 'investigate',
     affectedSurface: 'host-srv-db02',
     summary:
-      'Dark Watch sweep corroborated a Floor beacon alert. Both hosts beaconing to the same C2 with a shared persistence mechanism — take over to deepen scope.',
+      'Hunt Watch sweep corroborated a Floor beacon alert. Both hosts beaconing to the same C2 with a shared persistence mechanism — take over to deepen scope.',
     priorityScore: 71,
     recordId: 'CASE-2054',
     primaryActionLabel: 'Take over',
@@ -243,7 +243,7 @@ const investigateInvestigations: Investigation[] = [
         id: 'evt-200',
         timestamp: new Date(Date.now() - 16.5 * 60 * 1000).toISOString(),
         type: 'sweep',
-        summary: 'Scheduled Dark Watch sweep started',
+        summary: 'Scheduled Hunt Watch sweep started',
         actor: SYSTEM_SECURITY_WATCH_DARK_ID,
       },
       {
@@ -298,7 +298,7 @@ const resolvedInvestigations: Investigation[] = [
     recommendedAction: 'contain',
     affectedSurface: 'j.reyes@corp',
     summary:
-      'Dark Watch removed a mailbox exfil rule on j.reyes and closed the case — resolved autonomously, full evidence trail in the record.',
+      'Hunt Watch removed a mailbox exfil rule on j.reyes and closed the case — resolved autonomously, full evidence trail in the record.',
     priorityScore: 0,
     recordId: 'CASE-2043',
     primaryActionLabel: 'Reviewed — file it',

@@ -43,7 +43,7 @@ export const WATCH_TIER_LABELS = Object.freeze({
     defaultMessage: 'Watch Officer',
   }),
   dark: i18n.translate('xpack.pnd.conversationCard.watchTier.dark', {
-    defaultMessage: 'Dark Watch',
+    defaultMessage: 'Hunt Watch',
   }),
   deep: i18n.translate('xpack.pnd.conversationCard.watchTier.deep', {
     defaultMessage: 'Deep Watch',
