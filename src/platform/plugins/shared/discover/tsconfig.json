@@ -129,7 +129,6 @@
     "@kbn/as-code-data-views-schema",
     "@kbn/as-code-data-views-transforms",
     "@kbn/as-code-export-flyout-component",
-    "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",
     "@kbn/as-code-discover-schema",
     "@kbn/as-code-shared-schemas",
