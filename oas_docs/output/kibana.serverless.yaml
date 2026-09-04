@@ -112402,6 +112402,7 @@ components:
         kibana:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_kibana_privilege'
+          maxItems: 1000
           type: array
         metadata:
           additionalProperties:
