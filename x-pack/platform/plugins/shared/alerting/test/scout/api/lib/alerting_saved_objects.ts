@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
 
 const ALERTING_SO_INDEX = '.kibana_alerting_cases_1';
+const PENDING_INVALIDATION_SO_TYPE = 'api_key_pending_invalidation';
 
 export interface RuleSavedObjectAttributes {
   apiKey: string | null;
@@ -70,4 +71,38 @@ export const waitForQuietRuleSavedObject = async (esClient: Client, ruleId: stri
       }
     )
     .toBe(true);
+};
+
+/**
+ * Counts the API keys queued for invalidation since the given moment.
+ *
+ * `api_key_pending_invalidation` objects are deployment-wide and hold their key material
+ * encrypted, so a queued key cannot be traced back to the rule it came from. Scoping the count to
+ * a window that opens right before an operation is what keeps the assertion about that operation
+ * rather than about every suite that has run against the deployment, and it means a suite never
+ * has to delete entries other suites are relying on. Nothing removes these entries mid-test: the
+ * invalidation task only collects ones older than
+ * `xpack.alerting.invalidateApiKeysTask.removalDelay`, an hour by default.
+ *
+ * The entries are searchable as soon as the operation that queued them responds, because the
+ * saved-objects client writes with `refresh: wait_for`. Do not try to refresh the index here: it is
+ * restricted, and `indices:admin/refresh` on it is denied even to a superuser.
+ */
+export const countApiKeysQueuedForInvalidationSince = async (
+  esClient: Client,
+  since: string
+): Promise<number> => {
+  const { count } = await esClient.count({
+    index: ALERTING_SO_INDEX,
+    query: {
+      bool: {
+        filter: [
+          { term: { type: PENDING_INVALIDATION_SO_TYPE } },
+          { range: { [`${PENDING_INVALIDATION_SO_TYPE}.createdAt`]: { gte: since } } },
+        ],
+      },
+    },
+  });
+
+  return count;
 };

@@ -9,9 +9,10 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
 import {
+  countApiKeysQueuedForInvalidationSince,
   getRuleSavedObjectAttributes,
   waitForQuietRuleSavedObject,
-} from '../lib/rule_saved_object';
+} from '../lib/alerting_saved_objects';
 import { waitForSuccessfulEventLogEntry } from '../lib/wait_for_successful_event_log';
 
 const INDEX_THRESHOLD_PARAMS = {
@@ -28,9 +29,9 @@ const INDEX_THRESHOLD_PARAMS = {
 
 apiTest.describe(
   '[NON-MKI] API key invalidation on rule operations',
-  // Local-only (no `@cloud-*`): the assertions read the rule's encrypted attributes straight from
-  // the alerting saved-object index and clear pending invalidations, neither of which is available
-  // against a Cloud project.
+  // Local-only (no `@cloud-*`): the assertions read the rule's encrypted attributes and the queued
+  // invalidations straight from the alerting saved-object index, which a Cloud project does not
+  // expose.
   { tag: ['@local-serverless-observability_complete'] },
   () => {
     const ruleIds: string[] = [];
@@ -41,7 +42,10 @@ apiTest.describe(
       apiTest.setTimeout(180_000);
     });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient, samlAuth }) => {
+    // Deleting the rules queues their keys for invalidation, which is the invalidation task's job
+    // to drain. The pending entries are deployment-wide, so this suite leaves them alone rather
+    // than deleting ones other suites are relying on.
+    apiTest.afterAll(async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       await Promise.allSettled(
         ruleIds.map((ruleId) =>
@@ -50,12 +54,11 @@ apiTest.describe(
           })
         )
       );
-      await kbnClient.savedObjects.clean({ types: ['api_key_pending_invalidation'] });
     });
 
     apiTest(
       'enable rule preserves existing API keys without invalidation',
-      async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+      async ({ apiClient, esClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
         const createResponse = await apiClient.post('api/alerting/rule', {
@@ -84,17 +87,15 @@ apiTest.describe(
           headers: { ...COMMON_HEADERS, ...cookieHeader },
         });
 
-        await kbnClient.savedObjects.clean({ types: ['api_key_pending_invalidation'] });
+        const since = new Date().toISOString();
 
         const enableResponse = await apiClient.post(`api/alerting/rule/${ruleId}/_enable`, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
         });
         expect(enableResponse).toHaveStatusCode(204);
 
-        const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
-          type: 'api_key_pending_invalidation',
-        });
-        expect(pendingInvalidations).toHaveLength(0);
+        // Enabling a rule that already has keys reuses them, so it must queue nothing.
+        expect(await countApiKeysQueuedForInvalidationSince(esClient, since)).toBe(0);
 
         const attrsAfter = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(attrsAfter.apiKey).toBeDefined();
@@ -104,7 +105,7 @@ apiTest.describe(
 
     apiTest(
       'update rule rotates both apiKey and uiamApiKey',
-      async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+      async ({ apiClient, esClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
         const createResponse = await apiClient.post('api/alerting/rule', {
@@ -137,7 +138,7 @@ apiTest.describe(
         expect(attrsBefore.apiKey).toBeDefined();
         expect(attrsBefore.uiamApiKey).toBeDefined();
 
-        await kbnClient.savedObjects.clean({ types: ['api_key_pending_invalidation'] });
+        const since = new Date().toISOString();
 
         const updateResponse = await apiClient.put(`api/alerting/rule/${ruleId}`, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
@@ -160,16 +161,13 @@ apiTest.describe(
 
         // Exactly the previous ES + UIAM keys should be queued for
         // invalidation: one entry each.
-        const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
-          type: 'api_key_pending_invalidation',
-        });
-        expect(pendingInvalidations).toHaveLength(2);
+        expect(await countApiKeysQueuedForInvalidationSince(esClient, since)).toBe(2);
       }
     );
 
     apiTest(
       'update_api_key rotates both apiKey and uiamApiKey',
-      async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+      async ({ apiClient, esClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
         const createResponse = await apiClient.post('api/alerting/rule', {
@@ -202,7 +200,7 @@ apiTest.describe(
         expect(attrsBefore.apiKey).toBeDefined();
         expect(attrsBefore.uiamApiKey).toBeDefined();
 
-        await kbnClient.savedObjects.clean({ types: ['api_key_pending_invalidation'] });
+        const since = new Date().toISOString();
 
         const updateApiKeyResponse = await apiClient.post(
           `api/alerting/rule/${ruleId}/_update_api_key`,
@@ -218,16 +216,13 @@ apiTest.describe(
 
         // Exactly the previous ES + UIAM keys should be queued for
         // invalidation: one entry each.
-        const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
-          type: 'api_key_pending_invalidation',
-        });
-        expect(pendingInvalidations).toHaveLength(2);
+        expect(await countApiKeysQueuedForInvalidationSince(esClient, since)).toBe(2);
       }
     );
 
     apiTest(
       'bulk enable preserves existing API keys without invalidation',
-      async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+      async ({ apiClient, esClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
         const createResponse = await apiClient.post('api/alerting/rule', {
@@ -256,7 +251,7 @@ apiTest.describe(
           headers: { ...COMMON_HEADERS, ...cookieHeader },
         });
 
-        await kbnClient.savedObjects.clean({ types: ['api_key_pending_invalidation'] });
+        const since = new Date().toISOString();
 
         const bulkEnableResponse = await apiClient.patch('internal/alerting/rules/_bulk_enable', {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
@@ -265,10 +260,8 @@ apiTest.describe(
         });
         expect(bulkEnableResponse).toHaveStatusCode(200);
 
-        const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
-          type: 'api_key_pending_invalidation',
-        });
-        expect(pendingInvalidations).toHaveLength(0);
+        // Enabling a rule that already has keys reuses them, so it must queue nothing.
+        expect(await countApiKeysQueuedForInvalidationSince(esClient, since)).toBe(0);
 
         const attrsAfter = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(attrsAfter.apiKey).toBeDefined();

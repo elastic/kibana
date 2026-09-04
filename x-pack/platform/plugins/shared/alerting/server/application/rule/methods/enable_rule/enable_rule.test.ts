@@ -9,6 +9,7 @@ import { RulesClient } from '../../../../rules_client/rules_client';
 import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -453,6 +454,49 @@ describe('enable()', () => {
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+    // The rule already had a key, so enable reused it and minted nothing. The stored key is still
+    // in use and must not be queued for invalidation.
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+  });
+
+  test('invalidates the API key it minted when the rule saved object write fails', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRuleWithoutApiKey);
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.create.mockReset();
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail to update'));
+
+    await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Fail to update"`
+    );
+    // The rule never took ownership of the key, so nothing else would ever clean it up.
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw=='] },
+      expect.any(Object),
+      expect.any(Object)
+    );
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+  });
+
+  test('does not invalidate the caller API key when the rule saved object write fails', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRuleWithoutApiKey);
+    // Authenticating with an API key makes the rule borrow the caller's key rather than being
+    // granted one of its own, so it belongs to the user and alerting must never revoke it.
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.create.mockReset();
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail to update'));
+
+    await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Fail to update"`
+    );
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
   test('enables task when scheduledTaskId is defined and task exists', async () => {

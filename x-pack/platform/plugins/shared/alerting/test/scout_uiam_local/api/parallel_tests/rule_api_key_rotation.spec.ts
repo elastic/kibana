@@ -9,7 +9,7 @@ import type { ApiClientFixture } from '@kbn/scout/src/playwright/fixtures/scope/
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, ES_QUERY_RULE_PARAMS } from '../../../scout/api/fixtures/constants';
-import { getRuleSavedObjectAttributes } from '../../../scout/api/lib/rule_saved_object';
+import { getRuleSavedObjectAttributes } from '../../../scout/api/lib/alerting_saved_objects';
 import { waitForSuccessfulEventLogEntry } from '../../../scout/api/lib/wait_for_successful_event_log';
 
 const getRuleBody = (name: string, enabled: boolean) => ({
