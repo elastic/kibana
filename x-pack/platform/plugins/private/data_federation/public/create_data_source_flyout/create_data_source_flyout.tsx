@@ -111,7 +111,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     [saveError]
   );
   const [isSaving, setIsSaving] = useState(false);
-  const [connectionTestResult, setConnectionTestResult] = useState<'success' | 'error'>();
 
   const [dataSourceType, setDataSourceType] = useState<DataSourceType>(
     initialDataSource?.type ?? 's3'
@@ -219,10 +218,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       )
     );
 
-  const onTestConnection = () => {
-    setConnectionTestResult(Math.random() < 0.5 ? 'success' : 'error');
-  };
-
   const onSubmit = async (data: CreateDataSourceFlyoutFormValues) => {
     setSaveError(undefined);
     setIsSaving(true);
@@ -241,26 +236,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   const flyoutTitle = isEditMode
     ? createDataSourceFlyoutStrings.editTitle()
     : createDataSourceFlyoutStrings.createTitle();
-
-  const connectionTestCallout = connectionTestResult ? (
-    <EuiCallOut
-      announceOnMount
-      title={
-        connectionTestResult === 'success'
-          ? createDataSourceFlyoutStrings.testConnectionSuccessTitle()
-          : createDataSourceFlyoutStrings.testConnectionErrorTitle()
-      }
-      color={connectionTestResult === 'success' ? 'success' : 'danger'}
-      iconType={connectionTestResult === 'success' ? 'checkInCircleFilled' : 'errorFilled'}
-      data-test-subj={`createDataSourceFlyoutTestConnectionCallout-${connectionTestResult}`}
-    >
-      <p>
-        {connectionTestResult === 'success'
-          ? createDataSourceFlyoutStrings.testConnectionSuccessMessage()
-          : createDataSourceFlyoutStrings.testConnectionErrorMessage()}
-      </p>
-    </EuiCallOut>
-  ) : null;
 
   return (
     <EuiFlyout
@@ -380,12 +355,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        {connectionTestCallout ? (
-          <>
-            {connectionTestCallout}
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={() => onClose()}>
@@ -393,32 +362,18 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  type="button"
-                  data-test-subj="createDataSourceFlyoutTestConnection"
-                  onClick={onTestConnection}
-                  disabled={isSaving}
-                >
-                  {createDataSourceFlyoutStrings.testConnectionButton()}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  type="button"
-                  data-test-subj="createDataSourceFlyoutSubmit"
-                  onClick={handleSubmit(onSubmit)}
-                  isLoading={isSaving}
-                  disabled={isSaving}
-                >
-                  {isEditMode
-                    ? createDataSourceFlyoutStrings.saveButton()
-                    : createDataSourceFlyoutStrings.connectButton()}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiButton
+              fill
+              type="button"
+              data-test-subj="createDataSourceFlyoutSubmit"
+              onClick={handleSubmit(onSubmit)}
+              isLoading={isSaving}
+              disabled={isSaving}
+            >
+              {isEditMode
+                ? createDataSourceFlyoutStrings.saveAndTestButton()
+                : createDataSourceFlyoutStrings.connectAndTestButton()}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

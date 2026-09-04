@@ -37,20 +37,24 @@ const createDatasetsClientMock = (): DatasetsClient =>
     delete: jest.fn().mockResolvedValue(undefined),
   } as unknown as DatasetsClient);
 
+const createServicesMock = (
+  overrides: Partial<DataFederationKibanaServices> = {}
+): DataFederationKibanaServices =>
+  ({
+    dataSourcesClient: createClientMock(),
+    datasetsClient: createDatasetsClientMock(),
+    toasts: createToastsMock(),
+    featureFlags: {},
+    ...overrides,
+  } as unknown as DataFederationKibanaServices);
+
 describe('CreateDataSourceFlyout', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
   it('renders core actions and disables save while saving', async () => {
-    const toasts = createToastsMock();
-    const client = createClientMock();
-    const services: DataFederationKibanaServices = {
-      dataSourcesClient: client,
-      datasetsClient: createDatasetsClientMock(),
-      toasts,
-      featureFlags: {},
-    };
+    const services = createServicesMock();
     let resolveSave: (value: string | null) => void;
     const savePromise = new Promise<string | null>((resolve) => {
       resolveSave = resolve;
@@ -82,7 +86,7 @@ describe('CreateDataSourceFlyout', () => {
       </EuiProvider>
     );
 
-    expect(getByTestId('createDataSourceFlyoutSubmit')).toBeInTheDocument();
+    expect(getByTestId('createDataSourceFlyoutSubmit')).toHaveTextContent('Save and test');
 
     fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
 
@@ -96,49 +100,22 @@ describe('CreateDataSourceFlyout', () => {
     });
   });
 
-  it('shows a success callout when test connection succeeds', () => {
-    jest.spyOn(Math, 'random').mockReturnValue(0.1);
+  it('offers a single action that saves and checks the connection', () => {
+    const services = createServicesMock();
 
-    const services: DataFederationKibanaServices = {
-      dataSourcesClient: createClientMock(),
-      datasetsClient: createDatasetsClientMock(),
-      toasts: createToastsMock(),
-      featureFlags: {},
-    };
-
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <CreateDataSourceFlyout onClose={jest.fn()} onSave={jest.fn()} existingDataSourceNames={[]} />
+          <CreateDataSourceFlyout
+            onClose={jest.fn()}
+            onSave={jest.fn()}
+            existingDataSourceNames={[]}
+          />
         </KibanaContextProvider>
       </EuiProvider>
     );
 
-    fireEvent.click(getByTestId('createDataSourceFlyoutTestConnection'));
-
-    expect(getByTestId('createDataSourceFlyoutTestConnectionCallout-success')).toBeInTheDocument();
-  });
-
-  it('shows an error callout when test connection fails', () => {
-    jest.spyOn(Math, 'random').mockReturnValue(0.9);
-
-    const services: DataFederationKibanaServices = {
-      dataSourcesClient: createClientMock(),
-      datasetsClient: createDatasetsClientMock(),
-      toasts: createToastsMock(),
-      featureFlags: {},
-    };
-
-    const { getByTestId } = render(
-      <EuiProvider>
-        <KibanaContextProvider services={services}>
-          <CreateDataSourceFlyout onClose={jest.fn()} onSave={jest.fn()} existingDataSourceNames={[]} />
-        </KibanaContextProvider>
-      </EuiProvider>
-    );
-
-    fireEvent.click(getByTestId('createDataSourceFlyoutTestConnection'));
-
-    expect(getByTestId('createDataSourceFlyoutTestConnectionCallout-error')).toBeInTheDocument();
+    expect(getByTestId('createDataSourceFlyoutSubmit')).toHaveTextContent('Connect and test');
+    expect(queryByTestId('createDataSourceFlyoutTestConnection')).toBeNull();
   });
 });

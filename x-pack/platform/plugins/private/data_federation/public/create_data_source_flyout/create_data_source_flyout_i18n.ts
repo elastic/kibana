@@ -82,19 +82,14 @@ export const createDataSourceFlyoutStrings = {
       defaultMessage: 'Cancel',
     }),
 
-  connectButton: () =>
-    i18n.translate('xpack.dataFederation.createFlyout.connectButton', {
-      defaultMessage: 'Connect',
+  connectAndTestButton: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.connectAndTestButton', {
+      defaultMessage: 'Connect and test',
     }),
 
-  saveButton: () =>
-    i18n.translate('xpack.dataFederation.createFlyout.saveButton', {
-      defaultMessage: 'Save',
-    }),
-
-  testConnectionButton: () =>
-    i18n.translate('xpack.dataFederation.createFlyout.testConnectionButton', {
-      defaultMessage: 'Test connection',
+  saveAndTestButton: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.saveAndTestButton', {
+      defaultMessage: 'Save and test',
     }),
 
   testConnectionSuccessTitle: () =>
@@ -110,12 +105,6 @@ export const createDataSourceFlyoutStrings = {
   testConnectionErrorTitle: () =>
     i18n.translate('xpack.dataFederation.createFlyout.testConnectionErrorTitle', {
       defaultMessage: 'Connection failed',
-    }),
-
-  testConnectionErrorMessage: () =>
-    i18n.translate('xpack.dataFederation.createFlyout.testConnectionErrorMessage', {
-      defaultMessage:
-        'Elasticsearch could not connect to this data source. Check your settings and try again.',
     }),
 
   optionalFieldLabel: (label: string) =>

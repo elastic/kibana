@@ -54,6 +54,12 @@ export const mainTranslations = {
       connectionStatusBroken: i18n.translate('xpack.dataFederation.table.connectionStatusBroken', {
         defaultMessage: 'Disconnected',
       }),
+      connectionStatusChecking: i18n.translate(
+        'xpack.dataFederation.table.connectionStatusChecking',
+        {
+          defaultMessage: 'Checking connection…',
+        }
+      ),
       description: i18n.translate('xpack.dataFederation.table.columnDescription', {
         defaultMessage: 'Description',
       }),
@@ -260,6 +266,20 @@ export const mainTranslations = {
         defaultMessage: 'Filter options',
       }
     ),
+  },
+
+  connectionCheck: {
+    successText: (name: string) =>
+      i18n.translate('xpack.dataFederation.connectionCheck.successText', {
+        defaultMessage: 'Elasticsearch can reach {name} with the settings you saved.',
+        values: { name },
+      }),
+    errorText: (name: string) =>
+      i18n.translate('xpack.dataFederation.connectionCheck.errorText', {
+        defaultMessage:
+          'Elasticsearch could not connect to {name}. Edit the data source to check its settings.',
+        values: { name },
+      }),
   },
 
   confirmDeleteDataSource: {

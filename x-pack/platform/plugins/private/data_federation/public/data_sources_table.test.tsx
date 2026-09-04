@@ -78,6 +78,59 @@ describe('DataSourcesTable', () => {
     expect(statuses[1]).toHaveTextContent('Disconnected');
   });
 
+  it('shows a checking state and prefers checked results over the mock status', () => {
+    const { getByTestId, getAllByTestId } = render(
+      <EuiProvider>
+        <DataSourcesTable
+          dataSources={[createDataSource('obs-prod-s3', 's3'), createDataSource('source-b', 's3')]}
+          selectedDataSources={[]}
+          dataSetsCountByDataSource={new Map()}
+          connectionStatuses={new Map([['source-b', 'connected' as const]])}
+          checkingDataSourceNames={new Set(['obs-prod-s3'])}
+          onSelectionChange={jest.fn()}
+          onCreate={jest.fn()}
+          onEdit={jest.fn()}
+          onDelete={jest.fn()}
+          onDeleteSelected={jest.fn()}
+        />
+      </EuiProvider>
+    );
+
+    expect(getByTestId('dataSourceConnectionStatusChecking')).toHaveTextContent(
+      'Checking connection'
+    );
+
+    // "source-b" hashes to a broken mock status, so this can only come from the checked result.
+    const statuses = getAllByTestId('dataSourceConnectionStatus');
+    expect(statuses).toHaveLength(1);
+    expect(statuses[0]).toHaveTextContent('Connected');
+  });
+
+  it('leads the list with the data sources being checked', () => {
+    const { getAllByTestId } = render(
+      <EuiProvider>
+        <DataSourcesTable
+          dataSources={[
+            createDataSource('first-by-name', 's3'),
+            createDataSource('second-by-name', 's3'),
+            createDataSource('just-connected', 's3'),
+          ]}
+          selectedDataSources={[]}
+          dataSetsCountByDataSource={new Map()}
+          checkingDataSourceNames={new Set(['just-connected'])}
+          onSelectionChange={jest.fn()}
+          onCreate={jest.fn()}
+          onEdit={jest.fn()}
+          onDelete={jest.fn()}
+          onDeleteSelected={jest.fn()}
+        />
+      </EuiProvider>
+    );
+
+    const names = getAllByTestId('dataSetsColName').map((cell) => cell.textContent);
+    expect(names).toEqual(['just-connected', 'first-by-name', 'second-by-name']);
+  });
+
   it('links dataset count to the datasets filter when count is greater than zero', () => {
     const onViewDataSetsForDataSource = jest.fn();
     const dataSetsCountByDataSource = new Map<string, number>([

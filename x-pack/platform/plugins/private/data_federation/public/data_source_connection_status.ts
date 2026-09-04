@@ -27,3 +27,21 @@ export const getMockDataSourceConnectionStatus = (
 export const getDataSourceConnectionStatusColor = (
   status: DataSourceConnectionStatus
 ): EuiHealthProps['color'] => (status === 'connected' ? 'success' : 'danger');
+
+/** How long the mock check pretends to talk to the data source. */
+export const MOCK_CONNECTION_CHECK_DELAY_MS = 2000;
+
+/** Share of mock checks that come back connected, so the happy path dominates. */
+const MOCK_CONNECTION_CHECK_SUCCESS_RATE = 0.8;
+
+/**
+ * Temporary mock until Elasticsearch can check a data source connection for us. Unlike
+ * {@link getMockDataSourceConnectionStatus} the result is random, so re-checking a data
+ * source can change its status.
+ */
+export const runMockDataSourceConnectionCheck = (): Promise<DataSourceConnectionStatus> =>
+  new Promise((resolve) => {
+    window.setTimeout(() => {
+      resolve(Math.random() < MOCK_CONNECTION_CHECK_SUCCESS_RATE ? 'connected' : 'broken');
+    }, MOCK_CONNECTION_CHECK_DELAY_MS);
+  });

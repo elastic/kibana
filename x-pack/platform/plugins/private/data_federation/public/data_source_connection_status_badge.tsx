@@ -42,14 +42,20 @@ const getPreserveStatusColorsInSelectableCss = (
 
 export interface DataSourceConnectionStatusHealthProps {
   dataSourceName: string;
+  /** A checked result, which takes precedence over the name-derived mock status. */
+  status?: DataSourceConnectionStatus;
   'data-test-subj'?: string;
 }
 
 export const DataSourceConnectionStatusHealth: FunctionComponent<
   DataSourceConnectionStatusHealthProps
-> = ({ dataSourceName, 'data-test-subj': dataTestSubj = 'dataSourceConnectionStatus' }) => {
+> = ({
+  dataSourceName,
+  status: checkedStatus,
+  'data-test-subj': dataTestSubj = 'dataSourceConnectionStatus',
+}) => {
   const { euiTheme } = useEuiTheme();
-  const status = getMockDataSourceConnectionStatus(dataSourceName);
+  const status = checkedStatus ?? getMockDataSourceConnectionStatus(dataSourceName);
 
   return (
     <EuiHealth
