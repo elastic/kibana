@@ -9,7 +9,36 @@ import type { AppHeaderMenu } from '@kbn/app-header';
 import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { INFRA_EBT_ACTIONS, INFRA_EBT_DETAILS } from '../../../common/ebt_constants';
 import { useMetricsAppHeaderMenu } from './use_metrics_app_header_menu';
+
+interface MenuNode {
+  id: string;
+  ebt?: { action: string; detail?: string };
+  items?: MenuNode[];
+}
+
+function collectEbt(
+  items: AppHeaderMenu['items'] | MenuNode[] | undefined
+): Array<{ id: string; action: string; detail?: string }> {
+  const collected: Array<{ id: string; action: string; detail?: string }> = [];
+
+  for (const item of items ?? []) {
+    if (item.ebt) {
+      collected.push({
+        id: item.id,
+        action: item.ebt.action,
+        ...(item.ebt.detail !== undefined ? { detail: item.ebt.detail } : {}),
+      });
+    }
+
+    if ('items' in item && item.items) {
+      collected.push(...collectEbt(item.items));
+    }
+  }
+
+  return collected;
+}
 
 const mockGetRedirectUrl = jest.fn(() => '/app/observabilityOnboarding');
 const mockInspectorOpen = jest.fn();
@@ -143,6 +172,7 @@ describe('useMetricsAppHeaderMenu', () => {
       expect.objectContaining({
         id: 'anomalyDetection',
         testId: 'openAnomalyFlyoutButton',
+        ebt: { action: INFRA_EBT_ACTIONS.VIEW_ANOMALY_DETECTION },
       })
     );
     expect(findItem(menu.items, 'alerts')).toEqual(
@@ -150,6 +180,7 @@ describe('useMetricsAppHeaderMenu', () => {
         id: 'alerts',
         testId: 'infrastructure-alerts-and-rules',
         popoverTestId: 'metrics-alert-menu',
+        ebt: { action: INFRA_EBT_ACTIONS.OPEN_ALERTS_MENU },
       })
     );
     expect(findItem(menu.items, 'settings')).toEqual(
@@ -157,6 +188,7 @@ describe('useMetricsAppHeaderMenu', () => {
         id: 'settings',
         href: '/app/metrics/settings',
         overflow: true,
+        ebt: { action: INFRA_EBT_ACTIONS.VIEW_SETTINGS },
       })
     );
     expect(findItem(menu.items, 'inspect')).toBeUndefined();
@@ -164,6 +196,10 @@ describe('useMetricsAppHeaderMenu', () => {
       expect.objectContaining({
         id: 'addData',
         href: '/app/observabilityOnboarding',
+        ebt: {
+          action: INFRA_EBT_ACTIONS.ADD_DATA,
+          detail: INFRA_EBT_DETAILS.ADD_DATA_INFRA,
+        },
       })
     );
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({ category: undefined });
@@ -202,6 +238,7 @@ describe('useMetricsAppHeaderMenu', () => {
         id: 'inspect',
         testId: 'infraInspectHeaderLink',
         overflow: true,
+        ebt: { action: INFRA_EBT_ACTIONS.OPEN_INSPECTOR },
       })
     );
     expect(inspect && 'run' in inspect && typeof inspect.run === 'function').toBe(true);
@@ -228,6 +265,50 @@ describe('useMetricsAppHeaderMenu', () => {
     expect(mockAnomalyFlyoutCapture).toEqual({
       hideJobType: true,
       hideSelectGroup: true,
+    });
+  });
+
+  it('sets ebt.action on every Inventory menu item and Add data detail', () => {
+    mockUiSettingsGet.mockReturnValue(true);
+    const { result } = renderMenuHook('/inventory');
+    const { menu } = result.current;
+    const collected = collectEbt(menu.items);
+
+    if (menu.primaryActionItem?.ebt) {
+      collected.push({
+        id: menu.primaryActionItem.id,
+        action: menu.primaryActionItem.ebt.action,
+        ...(menu.primaryActionItem.ebt.detail !== undefined
+          ? { detail: menu.primaryActionItem.ebt.detail }
+          : {}),
+      });
+    }
+
+    expect(collected).toEqual([
+      { id: 'anomalyDetection', action: INFRA_EBT_ACTIONS.VIEW_ANOMALY_DETECTION },
+      { id: 'alerts', action: INFRA_EBT_ACTIONS.OPEN_ALERTS_MENU },
+      { id: 'infrastructureRules', action: INFRA_EBT_ACTIONS.OPEN_INFRASTRUCTURE_RULES_MENU },
+      { id: 'createInventoryRule', action: INFRA_EBT_ACTIONS.CREATE_INVENTORY_RULE },
+      { id: 'metricsRules', action: INFRA_EBT_ACTIONS.OPEN_METRICS_RULES_MENU },
+      { id: 'createThresholdRule', action: INFRA_EBT_ACTIONS.CREATE_METRIC_THRESHOLD_RULE },
+      { id: 'createCustomThresholdRule', action: INFRA_EBT_ACTIONS.CREATE_CUSTOM_THRESHOLD_RULE },
+      { id: 'manageRules', action: INFRA_EBT_ACTIONS.MANAGE_RULES },
+      { id: 'settings', action: INFRA_EBT_ACTIONS.VIEW_SETTINGS },
+      { id: 'inspect', action: INFRA_EBT_ACTIONS.OPEN_INSPECTOR },
+      {
+        id: 'addData',
+        action: INFRA_EBT_ACTIONS.ADD_DATA,
+        detail: INFRA_EBT_DETAILS.ADD_DATA_INFRA,
+      },
+    ]);
+  });
+
+  it('sets Add data ebt.detail to host on Hosts', () => {
+    const { result } = renderMenuHook('/hosts');
+
+    expect(result.current.menu.primaryActionItem?.ebt).toEqual({
+      action: INFRA_EBT_ACTIONS.ADD_DATA,
+      detail: INFRA_EBT_DETAILS.ADD_DATA_HOST,
     });
   });
 
