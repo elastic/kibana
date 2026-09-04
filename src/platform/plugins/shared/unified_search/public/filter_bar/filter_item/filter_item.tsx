@@ -26,13 +26,13 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import { layoutVar } from '@kbn/ui-chrome-layout';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import type { FilterPanelOption } from '../../types';
 import type { WithCloseFilterEditorConfirmModalProps } from '../filter_editor';
 import { withCloseFilterEditorConfirmModal } from '../filter_editor';
 import { getFilterKeys, isFilterApplicable } from './is_filter_applicable';
-import { layoutVar } from '@kbn/ui-chrome-layout';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
@@ -69,8 +69,6 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_OK
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
-
-export const FILTER_EDITOR_WIDTH = 1200;
 
 const FILTER_ITEM_MENU = 'menu';
 const FILTER_ITEM_EDITOR = 'editFilter';
@@ -381,6 +379,14 @@ export function FilterItemComponent(props: FilterItemProps) {
 
 export const FilterItem = withCloseFilterEditorConfirmModal(FilterItemComponent);
 
+export const getFilterItemEditorContainerStyle = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: 1200,
+    maxWidth: '100%',
+    maxHeight: `calc(80vh - max(${layoutVar('application.content.top')}, 80px))`,
+    overflow: 'auto',
+  });
+
 const filterItemStyles = {
   /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
   popoverDragAndDrop: (euiThemeContext: UseEuiTheme) =>
@@ -391,13 +397,7 @@ const filterItemStyles = {
       filter: none !important;
       ${euiShadowMedium(euiThemeContext)}
     `,
-  filterItemEditorContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: FILTER_EDITOR_WIDTH,
-      maxWidth: '100%',
-      maxHeight: `calc(80vh - max(${layoutVar('application.content.top')}, 80px))`,
-      overflow: 'auto',
-    }),
+  filterItemEditorContainer: getFilterItemEditorContainerStyle,
   filterItem: ({ euiTheme }: UseEuiTheme) =>
     css({
       lineHeight: euiTheme.size.base,
