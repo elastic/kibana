@@ -7,9 +7,9 @@
 
 import {
   loadSourceReportStatsByAdapterId,
-  loadSourceForMutationForTest,
-  mapSourceHitForTest,
-  updateSourceBodySchemaForTest,
+  loadSourceForMutation,
+  mapSourceHit,
+  updateSourceBodySchema,
 } from './list_sources';
 
 describe('loadSourceReportStatsByAdapterId', () => {
@@ -155,7 +155,7 @@ describe('loadSourceReportStatsByAdapterId', () => {
 
 describe('mapSourceHit', () => {
   it('returns the catalog URL for a known source id', () => {
-    const mapped = mapSourceHitForTest({
+    const mapped = mapSourceHit({
       _id: 'vendor_api:elastic-security-labs',
       _source: {
         name: 'Elastic Security Labs',
@@ -167,7 +167,7 @@ describe('mapSourceHit', () => {
   });
 
   it('omits the url when the source id is outside the catalog', () => {
-    const mapped = mapSourceHitForTest({
+    const mapped = mapSourceHit({
       _id: 'rss:unknown',
       _source: { name: 'Acme', adapter_type: 'rss' },
     });
@@ -184,7 +184,7 @@ describe('loadSourceForMutation', () => {
   });
 
   it('allows a space to mutate its own source', async () => {
-    const access = await loadSourceForMutationForTest({
+    const access = await loadSourceForMutation({
       esClient: globalSource('space-a') as never,
       sourceId: 'rss:mandiant-research',
       spaceId: 'space-a',
@@ -197,7 +197,7 @@ describe('loadSourceForMutation', () => {
   // is an existence oracle across a boundary the rest of the feature treats as a
   // security boundary. Both outcomes have to look the same.
   it("reports another space's source as simply not found", async () => {
-    const access = await loadSourceForMutationForTest({
+    const access = await loadSourceForMutation({
       esClient: globalSource('space-a') as never,
       sourceId: 'rss:mandiant-research',
       spaceId: 'space-b',
@@ -211,7 +211,7 @@ describe('loadSourceForMutation', () => {
       get: jest.fn().mockRejectedValue(Object.assign(new Error('missing'), { statusCode: 404 })),
     };
 
-    const access = await loadSourceForMutationForTest({
+    const access = await loadSourceForMutation({
       esClient: esClient as never,
       sourceId: 'space-b:rss:nope',
       spaceId: 'space-b',
@@ -226,7 +226,7 @@ describe('loadSourceForMutation', () => {
     };
 
     await expect(
-      loadSourceForMutationForTest({
+      loadSourceForMutation({
         esClient: esClient as never,
         sourceId: 'rss:mandiant-research',
         spaceId: 'default',
@@ -239,12 +239,12 @@ describe('loadSourceForMutation', () => {
 
 describe('update source schema — enable/disable only', () => {
   it('accepts a bare enabled toggle', () => {
-    expect(() => updateSourceBodySchemaForTest.validate({ enabled: true })).not.toThrow();
-    expect(() => updateSourceBodySchemaForTest.validate({ enabled: false })).not.toThrow();
+    expect(() => updateSourceBodySchema.validate({ enabled: true })).not.toThrow();
+    expect(() => updateSourceBodySchema.validate({ enabled: false })).not.toThrow();
   });
 
   it('requires enabled', () => {
-    expect(() => updateSourceBodySchemaForTest.validate({})).toThrow();
+    expect(() => updateSourceBodySchema.validate({})).toThrow();
   });
 
   // The approved catalog is fixed, so an operator can only flip `enabled`. Any
@@ -257,6 +257,6 @@ describe('update source schema — enable/disable only', () => {
     ['vendor', { enabled: true, vendor: 'vendor_api:elastic-security-labs' }],
     ['id', { enabled: true, id: 'rss:injected' }],
   ])('rejects an attempt to change %s', (_field, body) => {
-    expect(() => updateSourceBodySchemaForTest.validate(body)).toThrow();
+    expect(() => updateSourceBodySchema.validate(body)).toThrow();
   });
 });

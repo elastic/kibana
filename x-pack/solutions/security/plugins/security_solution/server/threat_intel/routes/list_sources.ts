@@ -71,7 +71,7 @@ interface SourceReportStats {
   env_hits_total: number;
 }
 
-const mapSourceHit = (hit: {
+export const mapSourceHit = (hit: {
   _id?: string;
   _source?: ThreatIntelSourceDoc;
 }): Omit<ListSourcesItem, 'report_count' | 'last_ingested_at' | 'env_hits_total'> => {
@@ -99,7 +99,7 @@ const emptyStats = (): SourceReportStats => ({
   env_hits_total: 0,
 });
 
-const loadSourceForMutation = async ({
+export const loadSourceForMutation = async ({
   esClient,
   sourceId,
   spaceId,
@@ -144,6 +144,12 @@ const loadSourceForMutation = async ({
  */
 const adapterIdForSource = (adapterType: string | undefined, sourceId: string): string =>
   `${adapterType ?? ''}:${sourceId}`;
+
+/**
+ * Bucket cap for the per-source activity aggregation. Sized well above the fixed
+ * catalog so unexpected legacy documents cannot make this aggregation unbounded.
+ */
+const MAX_STATS_BUCKETS = 500;
 
 /**
  * Aggregate report activity per `source.adapter_id` for list_sources enrichment.
@@ -250,6 +256,16 @@ export const loadSourceReportStatsByAdapterId = async ({
 };
 
 /**
+ * `ensureIndicatorAliasForSpace` is a bootstrap-time ES alias write. Every space
+ * needs it run once (bootstrap covers spaces that already existed; spaces
+ * created afterward need it on their first list_sources call), but re-running it
+ * on every read request adds an ES write to a page-load-level GET. Cache the
+ * space ids already ensured this process lifetime so only the first request per
+ * space pays for it. Lost on restart, but restart re-runs bootstrap anyway.
+ */
+const spacesWithEnsuredAlias = new Set<string>();
+
+/**
  * POST `/internal/threat_intel/sources/list` — source catalog enriched with
  * report counts / last ingest / env hits from `.kibana-threat-reports*`.
  */
@@ -285,13 +301,15 @@ export const registerListSourcesRoute = ({
         const size = request.body.size ?? 500;
 
         try {
-          await ensureIndicatorAliasForSpace({ esClient, spaceId, logger });
+          if (!spacesWithEnsuredAlias.has(spaceId)) {
+            await ensureIndicatorAliasForSpace({ esClient, spaceId, logger });
+            spacesWithEnsuredAlias.add(spaceId);
+          }
           const [searchResponse, reportStatsByAdapterId] = await Promise.all([
             esClient.search<ThreatIntelSourceDoc>({
               index: THREAT_INTEL_SOURCES_INDEX,
               ignore_unavailable: true,
               size,
-              track_total_hits: true,
               sort: [{ name: { order: 'asc' } }],
               query: {
                 bool: {
@@ -341,20 +359,9 @@ export const registerListSourcesRoute = ({
  * fixed, so name, URL, adapter type, tags, and vendor are not mutable — a strict
  * `schema.object` rejects any other key with a 400.
  */
-const updateSourceBodySchema = schema.object({
+export const updateSourceBodySchema = schema.object({
   enabled: schema.boolean(),
 });
-
-/** Exported for unit tests only — not part of the route contract. */
-export const mapSourceHitForTest = mapSourceHit;
-export const loadSourceForMutationForTest = loadSourceForMutation;
-export const updateSourceBodySchemaForTest = updateSourceBodySchema;
-
-/**
- * Bucket cap for the per-source activity aggregation. Sized well above the fixed
- * catalog so unexpected legacy documents cannot make this aggregation unbounded.
- */
-const MAX_STATS_BUCKETS = 500;
 
 const sourceIdParamsSchema = schema.object({
   sourceId: schema.string({ minLength: 1, maxLength: 256 }),
