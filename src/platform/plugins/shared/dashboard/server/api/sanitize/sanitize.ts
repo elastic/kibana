@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { DashboardState, Warnings } from '../types';
 import type { DashboardSanitizeResponseBody } from './types';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
@@ -16,8 +15,7 @@ import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function sanitize(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
-  dashboardState: DashboardState,
-  savedObjectsClient?: SavedObjectsClientContract
+  dashboardState: DashboardState
 ): Promise<DashboardSanitizeResponseBody> {
   const warnings: Warnings = [];
   /**
@@ -29,12 +27,11 @@ export async function sanitize(
    */
   const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
   const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
-    await transformDashboardOut(
+    transformDashboardOut(
       storedDashboardState ?? {},
       references ?? [],
       undefined,
-      dashboardStateSchema,
-      savedObjectsClient ? { savedObjectsClient } : undefined
+      dashboardStateSchema
     );
 
   const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(

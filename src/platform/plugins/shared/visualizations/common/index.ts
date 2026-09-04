@@ -92,4 +92,3 @@ export type {
   VisualizeByValueState,
   VisualizeEmbeddableState,
 } from './embeddable/types';
-export { isVisualizeByReferenceState, isVisualizeByValueState } from './embeddable/type_guards';

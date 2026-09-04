@@ -54,12 +54,12 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     const legacyVegaMigration: PanelTypeMigration = {
       from: LEGACY_VIS_EMBEDDABLE_TYPE,
       to: VEGA_EMBEDDABLE_TYPE,
-      migrateOut: async (panels, { savedObjectsClient }) => {
+      migrateOut: (panels) => {
         if (!this.standaloneEmbeddableEnabled || !this.legacyVegaMigrationEnabled) {
           return [];
         }
 
-        return await migrateLegacyVegaPanels(panels, savedObjectsClient);
+        return migrateLegacyVegaPanels(panels);
       },
     };
 

@@ -57,11 +57,11 @@ describe('transformDashboardOut', () => {
     },
   ];
 
-  test('should supply defaults', async () => {
+  test('should supply defaults', () => {
     const input: Partial<DashboardSavedObjectAttributes> = {
       title: 'my title',
     };
-    expect(await transformDashboardOut(input, undefined, undefined, getDashboardStateSchema(false)))
+    expect(transformDashboardOut(input, undefined, undefined, getDashboardStateSchema(false)))
       .toMatchInlineSnapshot(`
       Object {
         "dashboardState": Object {
@@ -80,7 +80,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
     `);
   });
 
-  test('should transform full attributes correctly', async () => {
+  test('should transform full attributes correctly', () => {
     const input: DashboardSavedObjectAttributes = {
       pinned_panels: {
         panels: {
@@ -127,9 +127,8 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(
-      await transformDashboardOut(input, references, undefined, getDashboardStateSchema(false))
-    ).toMatchInlineSnapshot(`
+    expect(transformDashboardOut(input, references, undefined, getDashboardStateSchema(false)))
+      .toMatchInlineSnapshot(`
       Object {
         "dashboardState": Object {
           "description": "description",
@@ -195,7 +194,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
     `);
   });
 
-  test('should transform <9.4 legacy attributes correctly', async () => {
+  test('should transform <9.4 legacy attributes correctly', () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify({
@@ -230,9 +229,8 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(
-      await transformDashboardOut(input, references, undefined, getDashboardStateSchema(false))
-    ).toMatchInlineSnapshot(`
+    expect(transformDashboardOut(input, references, undefined, getDashboardStateSchema(false)))
+      .toMatchInlineSnapshot(`
       Object {
         "dashboardState": Object {
           "description": "description",
@@ -288,7 +286,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
   });
 
   describe('project_routing', () => {
-    test('should include project_routing when it is a string', async () => {
+    test('should include project_routing when it is a string', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
@@ -297,7 +295,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         description: 'my description',
         projectRouting: '_alias:_origin',
       };
-      const { dashboardState } = await transformDashboardOut(
+      const { dashboardState } = transformDashboardOut(
         input,
         undefined,
         undefined,
@@ -306,7 +304,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
       expect(dashboardState.project_routing).toBe('_alias:_origin');
     });
 
-    test('should not include project_routing when it is undefined', async () => {
+    test('should not include project_routing when it is undefined', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
@@ -315,7 +313,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         description: 'my description',
         // projectRouting is undefined
       };
-      const { dashboardState } = await transformDashboardOut(
+      const { dashboardState } = transformDashboardOut(
         input,
         undefined,
         undefined,
@@ -327,7 +325,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
   });
 
   describe('esql_approximation', () => {
-    test('should map esqlApproximation attribute to esql_approximation in dashboardState', async () => {
+    test('should map esqlApproximation attribute to esql_approximation in dashboardState', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
@@ -336,7 +334,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         description: 'my description',
         esqlApproximation: true,
       };
-      const { dashboardState } = await transformDashboardOut(
+      const { dashboardState } = transformDashboardOut(
         input,
         undefined,
         undefined,
@@ -345,7 +343,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
       expect(dashboardState.esql_approximation).toBe(true);
     });
 
-    test('should not include esql_approximation when esqlApproximation attribute is undefined', async () => {
+    test('should not include esql_approximation when esqlApproximation attribute is undefined', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
@@ -353,7 +351,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         title: 'my title',
         description: 'my description',
       };
-      const { dashboardState } = await transformDashboardOut(
+      const { dashboardState } = transformDashboardOut(
         input,
         undefined,
         undefined,

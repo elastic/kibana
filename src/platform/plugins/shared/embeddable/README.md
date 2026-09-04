@@ -357,7 +357,7 @@ embeddable type to another **at read time**.
 
 - **Registration**: call `embeddable.registerPanelTypeMigration()` during server plugin `setup`.
 - **Keying**: migrations are keyed by a `(from, to)` pair; registering the same pair twice throws.
-- **Batch semantics**: `migrateOut()` receives **all panels of the source type for a single dashboard**
-  plus a request-scoped `savedObjectsClient`, and returns per-panel success or error results.
+- **Batch semantics**: `migrateOut()` synchronously receives **all panels of the source type for a
+  single dashboard** and returns per-panel success or error results.
 - **Matching**: omitting a panel from the results means the migration did not match that panel.
 - **Lookup**: containers can retrieve migrations at runtime using `embeddableStart.getPanelTypeMigrations(from)`.

@@ -8,7 +8,6 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { DASHBOARD_APP_API_PATH } from '../../../../common/constants';
@@ -28,7 +27,7 @@ const DASHBOARD_APP_API_VERSION = '1';
 
 apiTest.describe(
   'dashboards - legacy Vega panel migration',
-  { tag: tags.deploymentAgnostic },
+  { tag: '@local-stateful-classic' },
   () => {
     let viewerCredentials: RoleApiCredentials;
     let viewerCookieHeader: Record<string, string>;
@@ -110,7 +109,7 @@ apiTest.describe(
         });
 
         const response = await apiClient.get(
-          `${DASHBOARD_APP_API_PATH}/${LEGACY_VEGA_DASHBOARD_ID}`,
+          `${DASHBOARD_APP_API_PATH}/${LEGACY_VEGA_BY_VALUE_DASHBOARD_ID}`,
           {
             headers: {
               ...COMMON_HEADERS,
@@ -126,7 +125,7 @@ apiTest.describe(
         expect(response.body.data.panels[0]).toMatchObject({
           type: 'legacy_vis',
           config: {
-            savedObjectId: LEGACY_VEGA_VISUALIZATION_ID,
+            savedVis: { type: 'vega' },
           },
         });
       }

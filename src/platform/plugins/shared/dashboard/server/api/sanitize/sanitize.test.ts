@@ -62,7 +62,7 @@ describe('sanitize', () => {
     };
 
     mockedTransformDashboardIn.mockReturnValue({ attributes: storedAttributes, references: [] });
-    mockedTransformDashboardOut.mockResolvedValue({
+    mockedTransformDashboardOut.mockReturnValue({
       dashboardState: baseDashboardState,
       warnings: [],
     });
@@ -99,7 +99,7 @@ describe('sanitize', () => {
     };
 
     mockedTransformDashboardIn.mockReturnValue({ attributes: storedAttributes, references: [] });
-    mockedTransformDashboardOut.mockResolvedValue({
+    mockedTransformDashboardOut.mockReturnValue({
       dashboardState: baseDashboardState,
       warnings: [transformWarning],
     });

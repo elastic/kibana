@@ -17,13 +17,13 @@ describe('panel type migration registry', () => {
     const aToB: PanelTypeMigration = {
       from: 'a',
       to: 'b',
-      migrateOut: async () => [],
+      migrateOut: () => [],
     };
 
     const aToC: PanelTypeMigration = {
       from: 'a',
       to: 'c',
-      migrateOut: async () => [],
+      migrateOut: () => [],
     };
 
     registry.registerPanelTypeMigration(aToB);
@@ -40,14 +40,14 @@ describe('panel type migration registry', () => {
     registry.registerPanelTypeMigration({
       from: 'a',
       to: 'b',
-      migrateOut: async () => [],
+      migrateOut: () => [],
     });
 
     expect(() =>
       registry.registerPanelTypeMigration({
         from: 'a',
         to: 'b',
-        migrateOut: async () => [],
+        migrateOut: () => [],
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"Panel type migration (\\"a\\" -> \\"b\\") is already registered."`

@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { apiTest as baseApiTest } from '@kbn/scout';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
-
-export { COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES, TEST_DASHBOARD_ID } from './constants';
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

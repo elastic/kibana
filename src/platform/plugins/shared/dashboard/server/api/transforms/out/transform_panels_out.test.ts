@@ -7,11 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import type {
-  PanelTypeMigrationContext,
-  PanelTypeMigrationPanel,
-} from '@kbn/embeddable-plugin/server';
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformPanelsOut } from './transform_panels_out';
 
@@ -33,7 +28,7 @@ beforeEach(() => {
 });
 
 describe('transformPanelsOut', () => {
-  it('should drop panels with missing sectionId', async () => {
+  it('should drop panels with missing sectionId', () => {
     const panelsJSON = JSON.stringify([
       {
         type: 'DASHBOARD_MARKDOWN',
@@ -50,7 +45,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(await transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [],
         "warnings": Array [
@@ -67,7 +62,7 @@ describe('transformPanelsOut', () => {
     `);
   });
 
-  it('should drop panel when panel transform throws', async () => {
+  it('should drop panel when panel transform throws', () => {
     mockGetTransforms.mockImplementation((type: string) => {
       return {
         transformOut: () => {
@@ -90,7 +85,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(await transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [],
         "warnings": Array [
@@ -108,7 +103,7 @@ describe('transformPanelsOut', () => {
     `);
   });
 
-  it('should drop invalid panels', async () => {
+  it('should drop invalid panels', () => {
     mockGetTransforms.mockImplementation((type: string) => {
       if (type === 'DASHBOARD_MARKDOWN') {
         return {
@@ -158,7 +153,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(await transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [
           Object {
@@ -190,7 +185,7 @@ describe('transformPanelsOut', () => {
     `);
   });
 
-  it('should combine panelsJSON and sections', async () => {
+  it('should combine panelsJSON and sections', () => {
     const panelsJSON =
       '[{"type":"DASHBOARD_MARKDOWN","embeddableConfig":{"content":"Markdown panel outside sections"},"panelIndex":"2e814ac0-33c2-4676-9d29-e1f868cddebd","gridData":{"h":15,"i":"2e814ac0-33c2-4676-9d29-e1f868cddebd","w":24,"x":0,"y":0}},{"type":"DASHBOARD_MARKDOWN","embeddableConfig":{"content":"Markdown panel inside section 1"},"panelIndex":"d724d87b-2256-4c8b-8aa3-55bc0b8881c6","gridData":{"h":15,"i":"d724d87b-2256-4c8b-8aa3-55bc0b8881c6","w":24,"x":0,"y":0,"sectionId":"bcebc09a-270f-42ef-8d45-daf5f5f4f511"}}]';
     const sections = [
@@ -203,7 +198,7 @@ describe('transformPanelsOut', () => {
         },
       },
     ];
-    const panelsOut = await transformPanelsOut(panelsJSON, sections, [], false);
+    const panelsOut = transformPanelsOut(panelsJSON, sections, [], false);
     getDashboardStateSchema(true).parse({ title: 'My dashboard', panels: panelsOut.panels });
     expect(panelsOut).toMatchInlineSnapshot(`
       Object {
@@ -251,47 +246,36 @@ describe('transformPanelsOut', () => {
   });
 
   describe('panel type migration pipeline', () => {
-    const savedObjectsClient = savedObjectsClientMock.create();
+    const panelsJSON = JSON.stringify([
+      {
+        type: 'source',
+        embeddableConfig: { foo: 'bar' },
+        panelIndex: 'panel-1',
+        gridData: { h: 10, w: 10, x: 0, y: 0 },
+      },
+    ]);
+    const passthroughTransforms = {
+      transformOut: (value: Record<string, unknown>) => value,
+      schema: { parse: (value: Record<string, unknown>) => value },
+    };
 
     beforeEach(() => {
-      savedObjectsClient.bulkGet.mockReset();
+      mockGetTransforms.mockReturnValue(passthroughTransforms);
     });
 
-    it('replaces type and config when a migration succeeds', async () => {
-      mockGetTransforms.mockImplementation((type: string) => {
-        if (type === 'source' || type === 'target') {
-          return {
-            transformOut: jest.fn().mockImplementation((val) => val),
-            schema: {
-              parse: jest.fn().mockImplementation((val) => val),
-            },
-          };
-        }
-      });
-
+    it('replaces type and config when a migration succeeds', () => {
       mockGetPanelTypeMigrations.mockImplementation((from: string) => {
         if (from !== 'source') return [];
         return [
           {
             from: 'source',
             to: 'target',
-            migrateOut: async () => [{ panelId: 'panel-1', config: { migrated: true } }],
+            migrateOut: () => [{ panelId: 'panel-1', config: { migrated: true } }],
           },
         ];
       });
 
-      const panelsJSON = JSON.stringify([
-        {
-          type: 'source',
-          embeddableConfig: { foo: 'bar' },
-          panelIndex: 'panel-1',
-          gridData: { h: 10, w: 10, x: 0, y: 0 },
-        },
-      ]);
-
-      const result = await transformPanelsOut(panelsJSON, [], [], false, {
-        savedObjectsClient,
-      });
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result).toEqual({
         panels: [
           {
@@ -305,17 +289,8 @@ describe('transformPanelsOut', () => {
       });
     });
 
-    it('drops a migrated panel when target schema validation fails', async () => {
+    it('drops a migrated panel when target schema validation fails', () => {
       mockGetTransforms.mockImplementation((type: string) => {
-        if (type === 'source') {
-          return {
-            transformOut: jest.fn().mockImplementation((val) => val),
-            schema: {
-              parse: jest.fn().mockImplementation((val) => val),
-            },
-          };
-        }
-
         if (type === 'target') {
           return {
             schema: {
@@ -325,96 +300,50 @@ describe('transformPanelsOut', () => {
             },
           };
         }
+        return passthroughTransforms;
       });
 
       mockGetPanelTypeMigrations.mockReturnValue([
         {
           from: 'source',
           to: 'target',
-          migrateOut: async () => [{ panelId: 'panel-1', config: { migrated: true } }],
+          migrateOut: () => [{ panelId: 'panel-1', config: { migrated: true } }],
         },
       ]);
 
-      const panelsJSON = JSON.stringify([
-        {
-          type: 'source',
-          embeddableConfig: { foo: 'bar' },
-          panelIndex: 'panel-1',
-          gridData: { h: 10, w: 10, x: 0, y: 0 },
-        },
-      ]);
-
-      const result = await transformPanelsOut(panelsJSON, [], [], false, {
-        savedObjectsClient,
-      });
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels).toEqual([]);
       expect(result.warnings[0]).toMatchObject({
         type: 'dropped_panel',
         panel_type: 'target',
-        panel_config: { foo: 'bar' },
+        panel_config: { migrated: true },
       });
     });
 
-    it('keeps a panel unchanged when migrations omit it', async () => {
-      mockGetTransforms.mockReturnValue({
-        transformOut: jest.fn().mockImplementation((val) => val),
-        schema: {
-          parse: jest.fn().mockImplementation((val) => val),
-        },
-      });
-
+    it('keeps a panel unchanged when migrations omit it', () => {
       mockGetPanelTypeMigrations.mockReturnValue([
         {
           from: 'source',
           to: 'target',
-          migrateOut: async () => [],
+          migrateOut: () => [],
         },
       ]);
 
-      const panelsJSON = JSON.stringify([
-        {
-          type: 'source',
-          embeddableConfig: { foo: 'bar' },
-          panelIndex: 'panel-1',
-          gridData: { h: 10, w: 10, x: 0, y: 0 },
-        },
-      ]);
-
-      const result = await transformPanelsOut(panelsJSON, [], [], false, {
-        savedObjectsClient,
-      });
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels[0]).toMatchObject({ type: 'source', config: { foo: 'bar' } });
       expect(result.warnings).toEqual([]);
     });
 
-    it('drops a panel when a migration returns a per-panel error', async () => {
-      mockGetTransforms.mockReturnValue({
-        transformOut: jest.fn().mockImplementation((val) => val),
-        schema: {
-          parse: jest.fn().mockImplementation((val) => val),
-        },
-      });
-
+    it('drops a panel when a migration returns a per-panel error', () => {
       mockGetPanelTypeMigrations.mockReturnValue([
         {
           from: 'source',
           to: 'target',
-          migrateOut: async () => [{ panelId: 'panel-1', error: new Error('nope') }],
+          migrateOut: () => [{ panelId: 'panel-1', error: new Error('nope') }],
         },
       ]);
 
-      const panelsJSON = JSON.stringify([
-        {
-          type: 'source',
-          embeddableConfig: { foo: 'bar' },
-          panelIndex: 'panel-1',
-          gridData: { h: 10, w: 10, x: 0, y: 0 },
-        },
-      ]);
-
-      const result = await transformPanelsOut(panelsJSON, [], [], false, {
-        savedObjectsClient,
-      });
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels).toEqual([]);
       expect(result.warnings[0]).toMatchObject({
         type: 'dropped_panel',
@@ -423,157 +352,25 @@ describe('transformPanelsOut', () => {
       expect(result.warnings[0].message).toContain('Unable to migrate panel type');
     });
 
-    it('drops a panel when multiple migrations claim it', async () => {
-      mockGetTransforms.mockImplementation((type: string) => {
-        if (type === 'source') {
-          return {
-            transformOut: jest.fn().mockImplementation((val) => val),
-            schema: {
-              parse: jest.fn().mockImplementation((val) => val),
-            },
-          };
-        }
-        return {
-          schema: {
-            parse: jest.fn().mockImplementation((val) => val),
-          },
-        };
-      });
-
+    it('drops a panel when multiple migrations claim it', () => {
       mockGetPanelTypeMigrations.mockReturnValue([
         {
           from: 'source',
           to: 'target_a',
-          migrateOut: async () => [{ panelId: 'panel-1', config: { a: true } }],
+          migrateOut: () => [{ panelId: 'panel-1', config: { a: true } }],
         },
         {
           from: 'source',
           to: 'target_b',
-          migrateOut: async () => [{ panelId: 'panel-1', config: { b: true } }],
+          migrateOut: () => [{ panelId: 'panel-1', config: { b: true } }],
         },
       ]);
 
-      const panelsJSON = JSON.stringify([
-        {
-          type: 'source',
-          embeddableConfig: { foo: 'bar' },
-          panelIndex: 'panel-1',
-          gridData: { h: 10, w: 10, x: 0, y: 0 },
-        },
-      ]);
-
-      const result = await transformPanelsOut(panelsJSON, [], [], false, {
-        savedObjectsClient,
-      });
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels).toEqual([]);
       expect(result.warnings[0].message).toContain(
         'Multiple panel type migrations claimed this panel'
       );
-    });
-
-    it('supports one bulkGet for multiple panels in a batch', async () => {
-      mockGetTransforms.mockImplementation((type: string) => {
-        if (type === 'source' || type === 'target') {
-          return {
-            transformOut: jest.fn().mockImplementation((val) => val),
-            schema: {
-              parse: jest.fn().mockImplementation((val) => val),
-            },
-          };
-        }
-      });
-
-      mockGetPanelTypeMigrations.mockReturnValue([
-        {
-          from: 'source',
-          to: 'target',
-          migrateOut: async (
-            panels: readonly PanelTypeMigrationPanel[],
-            context: PanelTypeMigrationContext
-          ) => {
-            const savedObjectIds = panels.map(({ config }) => {
-              const { savedObjectId } = config;
-              if (typeof savedObjectId !== 'string') {
-                throw new Error('Expected savedObjectId');
-              }
-              return savedObjectId;
-            });
-            await context.savedObjectsClient.bulkGet(
-              savedObjectIds.map((id) => ({ id, type: 'visualization' }))
-            );
-            return panels.map(({ id }, index) => ({
-              panelId: id,
-              config: { spec: `from:${savedObjectIds[index]}` },
-            }));
-          },
-        },
-      ]);
-
-      const panelsJSON = JSON.stringify([
-        {
-          type: 'source',
-          embeddableConfig: { savedObjectId: 'a' },
-          panelIndex: 'panel-a',
-          gridData: { h: 10, w: 10, x: 0, y: 0 },
-        },
-        {
-          type: 'source',
-          embeddableConfig: { savedObjectId: 'b' },
-          panelIndex: 'panel-b',
-          gridData: { h: 10, w: 10, x: 10, y: 0 },
-        },
-      ]);
-
-      const result = await transformPanelsOut(panelsJSON, [], [], false, {
-        savedObjectsClient,
-      });
-      expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
-      expect(result.panels.map((p) => p.id)).toEqual(['panel-a', 'panel-b']);
-    });
-
-    it('allows a migration result to preserve a source reference identifier', async () => {
-      mockGetTransforms.mockImplementation((type: string) => {
-        if (type === 'source') {
-          return {
-            transformOut: jest.fn().mockImplementation((val) => val),
-            schema: {
-              parse: jest.fn().mockImplementation((val) => val),
-            },
-          };
-        }
-        if (type === 'target') {
-          return {
-            schema: {
-              parse: jest.fn().mockImplementation((val) => val),
-            },
-          };
-        }
-      });
-
-      mockGetPanelTypeMigrations.mockReturnValue([
-        {
-          from: 'source',
-          to: 'target',
-          migrateOut: async () => [{ panelId: 'panel-1', config: { savedObjectId: 'viz-123' } }],
-        },
-      ]);
-
-      const panelsJSON = JSON.stringify([
-        {
-          type: 'source',
-          embeddableConfig: { foo: 'bar' },
-          panelIndex: 'panel-1',
-          gridData: { h: 10, w: 10, x: 0, y: 0 },
-        },
-      ]);
-
-      const result = await transformPanelsOut(panelsJSON, [], [], false, {
-        savedObjectsClient,
-      });
-      expect(result.panels[0]).toMatchObject({
-        type: 'target',
-        config: { savedObjectId: 'viz-123' },
-      });
     });
   });
 });

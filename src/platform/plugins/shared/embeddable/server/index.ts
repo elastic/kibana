@@ -15,7 +15,6 @@ export type { EmbeddableRegistryDefinition } from './types';
 
 export type {
   PanelTypeMigration,
-  PanelTypeMigrationContext,
   PanelTypeMigrationErrorResult,
   PanelTypeMigrationPanel,
   PanelTypeMigrationResult,

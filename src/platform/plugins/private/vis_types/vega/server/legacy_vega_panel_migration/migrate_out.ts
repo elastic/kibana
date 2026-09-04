@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import isPlainObject from 'lodash/isPlainObject';
-import type { VisualizeByValueState } from '@kbn/visualizations-plugin/common';
-import {
-  isVisualizeByReferenceState,
-  isVisualizeByValueState,
+import type {
+  VisualizeByReferenceState,
+  VisualizeByValueState,
 } from '@kbn/visualizations-plugin/common';
 import type {
   PanelTypeMigrationErrorResult,
@@ -34,10 +32,9 @@ const getVegaPanelBaseConfig = (sourceConfig: Record<string, unknown>) => {
   });
 };
 
-export async function migrateLegacyVegaPanels(
-  panels: readonly PanelTypeMigrationPanel[],
-  _savedObjectsClient: SavedObjectsClientContract
-): Promise<readonly PanelTypeMigrationResult[]> {
+export function migrateLegacyVegaPanels(
+  panels: readonly PanelTypeMigrationPanel[]
+): readonly PanelTypeMigrationResult[] {
   const results: Array<PanelTypeMigrationSuccessResult | PanelTypeMigrationErrorResult> = [];
 
   for (const panel of panels) {
@@ -50,6 +47,15 @@ export async function migrateLegacyVegaPanels(
 
   return results;
 }
+
+const isVisualizeByReferenceState = (
+  value: Record<string, unknown>
+): value is Record<string, unknown> & VisualizeByReferenceState & { savedObjectId: string } =>
+  typeof value.savedObjectId === 'string' && value.savedObjectId.length > 0;
+
+const isVisualizeByValueState = (
+  value: Record<string, unknown>
+): value is Record<string, unknown> & VisualizeByValueState => isPlainObject(value.savedVis);
 
 function getByValueVegaResult(
   panelId: string,

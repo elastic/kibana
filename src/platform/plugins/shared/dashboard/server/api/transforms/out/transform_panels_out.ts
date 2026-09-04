@@ -10,10 +10,7 @@
 import { flow } from 'lodash';
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type {
-  PanelTypeMigrationContext,
-  PanelTypeMigrationResult,
-} from '@kbn/embeddable-plugin/server';
+import type { PanelTypeMigrationResult } from '@kbn/embeddable-plugin/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { ZodError } from '@kbn/zod';
@@ -27,21 +24,18 @@ import { panelBwc } from './panel_bwc';
 interface WorkingPanel {
   readonly sectionId?: string;
   readonly references: SavedObjectReference[];
-  readonly sourceType: string;
-  readonly sourceConfig: SavedDashboardPanel['embeddableConfig'];
-  readonly panelId: string;
-  panel: DashboardPanel;
-  migration?: { from: string; to: string };
+  panel: DashboardPanel & { id: string };
+  migratedFrom?: string;
   dropped?: boolean;
 }
 
-export async function transformPanelsOut(
+export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
   containerReferences: SavedObjectReference[] = [],
   isDashboardAppRequest: boolean = false,
-  migrationContext?: PanelTypeMigrationContext
-): Promise<{ panels: DashboardState['panels']; warnings: Warnings }> {
+  migratePanelTypes: boolean = false
+): { panels: DashboardState['panels']; warnings: Warnings } {
   const warnings: Warnings = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
 
@@ -83,9 +77,6 @@ export async function transformPanelsOut(
       workingPanels.push({
         sectionId,
         references: panelReferences,
-        sourceType: panel.type,
-        sourceConfig: panel.embeddableConfig,
-        panelId: panel.panelIndex,
         panel: panelOut,
       });
     } catch (err) {
@@ -99,10 +90,10 @@ export async function transformPanelsOut(
     }
   }
 
-  if (migrationContext) {
+  if (migratePanelTypes) {
     // Order: source transformOut -> batch type migration -> final-type schema validation.
     // Any per-panel failures fall back to dropped_panel warnings.
-    await applyPanelTypeMigrations(workingPanels, migrationContext, warnings);
+    applyPanelTypeMigrations(workingPanels, warnings);
   }
 
   const topLevelPanels: DashboardPanel[] = [];
@@ -110,18 +101,15 @@ export async function transformPanelsOut(
   for (const working of workingPanels) {
     if (working.dropped) continue;
 
-    const { panel, sectionId, references, migration } = working;
+    const { panel, sectionId, references, migratedFrom } = working;
 
-    const schemaErrorOrConfig = validatePanelConfig(panel, isDashboardAppRequest, {
-      migratedFrom: migration?.from,
-      migratedTo: migration?.to,
-    });
+    const schemaErrorOrConfig = validatePanelConfig(panel, isDashboardAppRequest, migratedFrom);
 
     if (schemaErrorOrConfig instanceof Error) {
       warnings.push({
         type: 'dropped_panel',
         panel_type: panel.type,
-        panel_config: working.sourceConfig,
+        panel_config: panel.config,
         panel_references: references,
         message: `Unable to transform panel config. Error: ${formatTransformError(
           schemaErrorOrConfig
@@ -182,7 +170,7 @@ function transformPanelWithoutValidation(
   panelReferences: SavedObjectReference[],
   containerReferences: SavedObjectReference[] = [],
   isDashboardAppRequest: boolean = false
-): DashboardPanel {
+): DashboardPanel & { id: string } {
   const { embeddableConfig, gridData, panelIndex, type } = panel;
   const { i, sectionId, ...restOfGrid } = gridData;
 
@@ -204,7 +192,7 @@ function transformPanelWithoutValidation(
 function validatePanelConfig(
   panel: DashboardPanel,
   isDashboardAppRequest: boolean,
-  options: { migratedFrom?: string; migratedTo?: string }
+  migratedFrom?: string
 ): Record<string, unknown> | Error {
   const transforms = embeddableService?.getTransforms(
     getTransformLookupType(panel.type, isDashboardAppRequest)
@@ -212,9 +200,9 @@ function validatePanelConfig(
   const schema = transforms?.schema;
 
   if (!schema) {
-    if (options.migratedFrom && options.migratedTo) {
+    if (migratedFrom) {
       return new Error(
-        `Panel schema not available for migrated panel type: ${panel.type} (from: ${options.migratedFrom})`
+        `Panel schema not available for migrated panel type: ${panel.type} (from: ${migratedFrom})`
       );
     }
     return panel.config as Record<string, unknown>;
@@ -231,25 +219,21 @@ function toError(err: unknown): Error {
   return err instanceof Error ? err : new Error(String(err));
 }
 
-async function applyPanelTypeMigrations(
-  panels: WorkingPanel[],
-  migrationContext: PanelTypeMigrationContext,
-  warnings: Warnings
-) {
+function applyPanelTypeMigrations(panels: WorkingPanel[], warnings: Warnings) {
   const panelsBySource = new Map<string, WorkingPanel[]>();
   for (const working of panels) {
-    const group = panelsBySource.get(working.sourceType) ?? [];
+    const group = panelsBySource.get(working.panel.type) ?? [];
     group.push(working);
-    panelsBySource.set(working.sourceType, group);
+    panelsBySource.set(working.panel.type, group);
   }
 
   for (const [sourceType, sourcePanels] of panelsBySource.entries()) {
     const migrations = embeddableService?.getPanelTypeMigrations(sourceType) ?? [];
     if (migrations.length === 0) continue;
 
-    const panelIds = new Set(sourcePanels.map((p) => p.panelId));
-    const inputPanels = sourcePanels.map(({ panelId, panel }) => ({
-      id: panelId,
+    const panelIds = new Set(sourcePanels.map(({ panel }) => panel.id));
+    const inputPanels = sourcePanels.map(({ panel }) => ({
+      id: panel.id,
       config: panel.config,
     }));
 
@@ -262,7 +246,7 @@ async function applyPanelTypeMigrations(
     for (const migration of migrations) {
       let results: readonly PanelTypeMigrationResult[];
       try {
-        results = await migration.migrateOut(inputPanels, migrationContext);
+        results = migration.migrateOut(inputPanels);
       } catch (e) {
         const err = toError(e);
         results = inputPanels.map(({ id }) => ({ panelId: id, error: err }));
@@ -284,7 +268,7 @@ async function applyPanelTypeMigrations(
     }
 
     for (const working of sourcePanels) {
-      const panelId = working.panelId;
+      const panelId = working.panel.id;
       const error = errorsByPanelId.get(panelId);
       if (error) {
         warnings.push({
@@ -316,7 +300,7 @@ async function applyPanelTypeMigrations(
       const success = successes[0];
       if (!success) continue;
 
-      working.migration = { from: sourceType, to: success.to };
+      working.migratedFrom = sourceType;
       working.panel = { ...working.panel, type: success.to, config: success.config };
     }
   }

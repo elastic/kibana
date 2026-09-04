@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { apiTest as baseApiTest } from '@kbn/scout';
+import type { ScoutServerConfig } from '../../../../../types';
+import { defaultConfig } from '../../default/stateful/base.config';
 
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
-
-export { COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES, TEST_DASHBOARD_ID } from './constants';
+export const servers: ScoutServerConfig = {
+  ...defaultConfig,
+  kbnTestServer: {
+    ...defaultConfig.kbnTestServer,
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      '--feature_flags.overrides.vega.standaloneEmbeddable=true',
+    ],
+  },
+};

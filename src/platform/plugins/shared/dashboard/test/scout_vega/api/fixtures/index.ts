@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { apiTest as baseApiTest } from '@kbn/scout';
-
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
-
-export { COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES, TEST_DASHBOARD_ID } from './constants';
+export { apiTest } from '../../../scout/api/fixtures';
+export {
+  COMMON_HEADERS,
+  DASHBOARD_API_PATH,
+  KBN_ARCHIVES,
+  LEGACY_VEGA_DASHBOARD_ID,
+  LEGACY_VEGA_BY_VALUE_DASHBOARD_ID,
+  LEGACY_VEGA_HYBRID_DASHBOARD_ID,
+  LEGACY_VEGA_VISUALIZATION_ID,
+} from './constants';
