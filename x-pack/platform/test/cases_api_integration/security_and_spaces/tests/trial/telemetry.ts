@@ -6,8 +6,15 @@
  */
 
 import expect from 'expect';
+import { stringify as yamlStringify } from 'yaml';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import {
+  CASES_URL,
+  CASE_TELEMETRY_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+  OBSERVABLE_TYPE_IPV4,
+} from '@kbn/cases-plugin/common/constants';
 import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../common/lib/mock';
 import {
@@ -231,6 +238,248 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Clean up synthetic index
       await es.indices.delete({ index: alertIndex, ignore_unavailable: true });
+    });
+
+    describe('templates', () => {
+      const TEMPLATES_URL = `${CASES_URL}/templates`;
+      const OWNER = 'securitySolutionFixture';
+
+      // Every field is inline, never a `$ref`. Only then do the declared field count and the
+      // resolved field definitions share a denominator, so the test may assert both.
+      const TEXT = { control: 'INPUT_TEXT', type: 'keyword' };
+      const TOGGLE = { control: 'TOGGLE', type: 'boolean' };
+      const DATE = { control: 'DATE_PICKER', type: 'date' };
+      const NUMBER = { control: 'INPUT_NUMBER', type: 'long' };
+
+      type FieldKind = typeof TEXT;
+
+      const field = (name: string, kind: FieldKind) => ({ name, label: name, ...kind });
+
+      const buildBody = (
+        name: string,
+        fields: Array<ReturnType<typeof field>>,
+        overrides: Record<string, unknown> = {}
+      ) => ({
+        name,
+        owner: OWNER,
+        definition: yamlStringify({ name: `${name} case title`, fields }),
+        ...overrides,
+      });
+
+      const request = (method: 'post' | 'put' | 'delete', path: string) =>
+        supertest[method](path).set('kbn-xsrf', 'true').set('x-elastic-internal-origin', 'foo');
+
+      /**
+       * Drops the stored snapshot, which `deleteAllCaseItems` leaves behind and the collector
+       * serves verbatim. Without this the retry below can pass on the PREVIOUS run's snapshot
+       * before the task overwrites it, so the assertions would hold even against a broken
+       * query. Removing it first means the only payload that can satisfy them is a fresh one.
+       */
+      const deleteTelemetrySnapshot = async () => {
+        await es.deleteByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: `type:${CASE_TELEMETRY_SAVED_OBJECT}`,
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      };
+
+      /**
+       * Removes `isEnabled` from a template document. No API path can produce this shape,
+       * because create and update both write `isEnabled: input.isEnabled ?? true` — hence the
+       * direct write. The shape is real all the same: the attribute is optional in every model
+       * version, nothing backfills it, and the read path treats only an explicit `false` as
+       * disabled, so a deployment can hold such documents.
+       *
+       * This is the only place that can prove the `missing: true` clause on the inventory's
+       * boolean terms aggregation buckets an absent flag as enabled. A mocked client cannot,
+       * and the clause has no precedent in this repository.
+       *
+       * `templateId` is the template's stable identity across versions. The raw document nests
+       * attributes directly under the saved-object type, with no `attributes` level, which is
+       * what the saved-object layer rewrites its own `.attributes.` KQL paths into.
+       */
+      const stripIsEnabled = async (templateId: string) => {
+        const { updated } = await es.updateByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          query: {
+            bool: {
+              filter: [
+                { term: { type: CASE_TEMPLATE_SAVED_OBJECT } },
+                { term: { [`${CASE_TEMPLATE_SAVED_OBJECT}.templateId`]: templateId } },
+              ],
+            },
+          },
+          script: {
+            source: `ctx._source['${CASE_TEMPLATE_SAVED_OBJECT}'].remove('isEnabled')`,
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        });
+
+        // A wrong field path would match nothing and update nothing, leaving the assertion
+        // this exists to support passing for the wrong reason. Fail loudly instead.
+        expect(updated).toBe(1);
+      };
+
+      const createTemplate = async (
+        name: string,
+        fields: Array<ReturnType<typeof field>>,
+        overrides: Record<string, unknown> = {}
+      ) => {
+        const { body } = await request('post', TEMPLATES_URL)
+          .send(buildBody(name, fields, overrides))
+          .expect(200);
+
+        return body;
+      };
+
+      const updateTemplate = async (
+        templateId: string,
+        name: string,
+        fields: Array<ReturnType<typeof field>>
+      ) => {
+        const { body } = await request('put', `${TEMPLATES_URL}/${templateId}`)
+          .send(buildBody(name, fields))
+          .expect(200);
+
+        return body;
+      };
+
+      // Every solution scope stays empty because the fixture owner is not one of the three
+      // real owners. Asserted rather than skipped, so a regression that folded an unknown
+      // owner into a solution scope would fail here.
+      const zeroedScope = {
+        total: 0,
+        totalEnabled: 0,
+        totalDisabled: 0,
+        totalSoftDeleted: 0,
+        totalMigratedFromV1: 0,
+        versionPercentiles: { p50: 0, p90: 0, p99: 0 },
+        fieldCount: { total: 0, max: 0, average: 0 },
+        fieldDefinitions: { totalsByControl: {}, totalsByType: {} },
+        cases: {
+          withTemplate: { total: 0, daily: 0, weekly: 0, monthly: 0 },
+          withoutTemplate: { total: 0, daily: 0, weekly: 0, monthly: 0 },
+        },
+      };
+
+      it('should report the templates snapshot', async () => {
+        /**
+         * Edited twice, so three version documents exist. Each version declares a different
+         * field set on purpose: if the `isLatest` scoping regressed, the superseded versions
+         * would move the field numbers as well as the total, rather than the total alone.
+         */
+        const edited = await createTemplate('Edited Template', [field('a1', TEXT)]);
+        await updateTemplate(edited.templateId, 'Edited Template', [
+          field('a1', TEXT),
+          field('a2', TOGGLE),
+          field('a3', DATE),
+          field('a4', NUMBER),
+        ]);
+        const latest = await updateTemplate(edited.templateId, 'Edited Template', [
+          field('a1', TEXT),
+          field('a2', TOGGLE),
+        ]);
+
+        // Guards the version-distribution expectation below against a change in how an edit
+        // numbers versions.
+        expect(latest.templateVersion).toBe(3);
+
+        const simple = await createTemplate('Simple Template', [field('b1', TEXT)]);
+
+        /**
+         * Left with no `isEnabled` at all. It must still count as enabled, so the numbers below
+         * are unchanged by this — which is the point: if the aggregation stopped bucketing an
+         * absent flag as enabled, `totalEnabled` would drop to 1 and the two counts would no
+         * longer sum to the total.
+         */
+        await stripIsEnabled(simple.templateId);
+
+        await createTemplate(
+          'Disabled Template',
+          [field('d1', TEXT), field('d2', DATE), field('d3', NUMBER)],
+          { isEnabled: false }
+        );
+
+        /**
+         * Edited once before the delete, so it has two version documents and a soft delete
+         * stamps both. It must be counted as ONE deleted template, and must leave the
+         * inventory entirely — its text field must not reach the field totals.
+         */
+        const doomed = await createTemplate('Doomed Template', [field('c1', TEXT)]);
+        await updateTemplate(doomed.templateId, 'Doomed Template', [
+          field('c1', TEXT),
+          field('c2', TOGGLE),
+        ]);
+        await request('delete', `${TEMPLATES_URL}/${doomed.templateId}`).expect(204);
+
+        await createCase(
+          supertest,
+          getPostCaseRequest({ tags: [], template: { id: edited.templateId } })
+        );
+        await createCase(
+          supertest,
+          getPostCaseRequest({ tags: [], template: { id: edited.templateId } })
+        );
+        await createCase(supertest, getPostCaseRequest({ tags: [] }));
+
+        await deleteTelemetrySnapshot();
+        await runTelemetryTask(supertest);
+
+        await retry.try(async () => {
+          const res = await getTelemetry(supertest);
+          const casesTelemetry = getCasesTelemetry(res);
+
+          /**
+           * Checked before the deep assertion below. Collection omits this key when the
+           * templates area fails, and `CasesTelemetry` declares it required, so reading
+           * through it would fail with an opaque `TypeError` instead of a readable diff.
+           */
+          expect(casesTelemetry.templates).toBeDefined();
+
+          /**
+           * Asserted on its own, ahead of the payload comparison, because it is the one figure
+           * a mocked client cannot establish. One of the three live templates carries no
+           * `isEnabled`, so the counts only sum to the total while the aggregation buckets an
+           * absent flag as enabled. On a regression this reports `2 !== 3` rather than burying
+           * the cause in a whole-payload diff.
+           */
+          const { total, totalEnabled, totalDisabled } = casesTelemetry.templates.all;
+          expect(totalEnabled + totalDisabled).toBe(total);
+
+          expect(casesTelemetry.templates).toEqual({
+            featureEnabled: true,
+            all: {
+              // The edited template counts once despite its three versions, and the
+              // soft-deleted one does not count at all.
+              total: 3,
+              totalEnabled: 2,
+              totalDisabled: 1,
+              // One template, not one per version document.
+              totalSoftDeleted: 1,
+              totalMigratedFromV1: 0,
+              // Two templates are on version 1, and the edited template is on version 3.
+              versionPercentiles: { p50: 1, p90: 3, p99: 3 },
+              // 2 + 1 + 3 declared fields across the live templates only.
+              fieldCount: { total: 6, max: 3, average: 2 },
+              // Read from the indexed field definitions, not from a re-parse of the YAML.
+              fieldDefinitions: {
+                totalsByControl: { INPUT_TEXT: 3, TOGGLE: 1, DATE_PICKER: 1, INPUT_NUMBER: 1 },
+                totalsByType: { keyword: 3, boolean: 1, date: 1, long: 1 },
+              },
+              cases: {
+                withTemplate: { total: 2, daily: 2, weekly: 2, monthly: 2 },
+                withoutTemplate: { total: 1, daily: 1, weekly: 1, monthly: 1 },
+              },
+            },
+            sec: zeroedScope,
+            obs: zeroedScope,
+            main: zeroedScope,
+          });
+        });
+      });
     });
   });
 };
