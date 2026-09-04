@@ -16,8 +16,12 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
-import { createToolErrorResult } from '../common/tool_results';
-import { SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID } from './tool_ids';
+import { hasRuleMigrationPrivileges } from '../common/privileges';
+import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
+import {
+  SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
+  SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
+} from './tool_ids';
 
 const schema = z.object({}).describe('No parameters. Lists stats for every rule migration.');
 
@@ -50,6 +54,7 @@ export const getAllRuleMigrationStatsTool = (
     description: `List stats for every Automatic Rule Migration in the current space.
 
 Returns { total, migrations: [{ id, name, status, items: { total, pending, processing, completed, failed }, created_at, last_updated_at, vendor?, last_execution? }] }.
+Migrations are ordered newest-first (most recently created first), matching the Kibana UI.
 
 \`status\` is one of ready|running|stopped|finished|interrupted and drives START vs RESUME vs REPROCESS decisions.
 \`vendor\` is splunk|qradar|microsoft-sentinel.
@@ -57,12 +62,17 @@ Returns { total, migrations: [{ id, name, status, items: { total, pending, proce
 
 Use \`name\` to resolve the user-supplied migration name to \`id\` (names can collide — disambiguate by vendor, then status/created_at/counts; see the active skill for the full hierarchy).
 
-Only migrations with >=1 eligible rule item are returned. If the user names one that is missing, ask them to paste the migration id from the UI and verify it via get_rule_migration.
+Only migrations with >=1 eligible rule item are returned. If the user names one that is missing, ask them to paste the migration id from the UI and verify it via ${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}.
 
 Read-only.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (_input, { request }) => {
+      const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
+      if (!hasPrivilege) {
+        return createMissingPrivilegeError('view rule migration stats');
+      }
+
       const response = await callSelfClient<GetAllStatsRuleMigrationResponse>(
         request,
         SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
@@ -73,12 +83,15 @@ Read-only.`,
         return createToolErrorResult(response, 'Failed to list rule migration stats');
       }
 
+      // Server returns migrations in creation-asc order (terms-agg `order: { createdAt: 'asc' }`).
+      // The Kibana UI reverses this to show newest-first — mirror that here so both surfaces agree.
+      const migrations = response.body.slice().reverse();
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: { total: response.body.length, migrations: response.body },
+            data: { total: migrations.length, migrations },
           },
         ],
       };

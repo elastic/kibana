@@ -105,7 +105,7 @@ export class KibanaPage {
   }) {
     await this.waitForRender({
       expectedItemsCount: count,
-      itemLocator: '[data-rendering-count]',
+      itemLocator: '[data-test-subj="embeddablePanel"]',
       checkAttribute: 'data-render-complete',
       timeout,
     });

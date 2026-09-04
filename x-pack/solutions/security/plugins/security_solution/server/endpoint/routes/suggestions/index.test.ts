@@ -1119,7 +1119,7 @@ describe('when calling the Suggestions route handler', () => {
           },
         });
 
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
 
       it('should respond with forbidden for trusted apps', async () => {
@@ -1136,7 +1136,7 @@ describe('when calling the Suggestions route handler', () => {
           },
         });
 
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
 
       it('should respond with forbidden for trusted devices', async () => {
@@ -1154,7 +1154,7 @@ describe('when calling the Suggestions route handler', () => {
           },
         });
 
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
 
       it('should respond with forbidden for endpoint exceptions', async () => {
@@ -1172,7 +1172,7 @@ describe('when calling the Suggestions route handler', () => {
           },
         });
 
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
 
       it('should respond with forbidden for endpoints', async () => {
@@ -1191,7 +1191,7 @@ describe('when calling the Suggestions route handler', () => {
           },
         });
 
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
     });
 

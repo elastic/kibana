@@ -323,7 +323,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTestId('tableHeaderSortButton'))[0]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toBeCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -389,7 +389,7 @@ describe('AllCasesListGeneric', () => {
       expect(onRowClick).toHaveBeenCalled();
     });
 
-    expect(onRowClick).toBeCalledWith(undefined, isCreateCase);
+    expect(onRowClick).toHaveBeenCalledWith(undefined, isCreateCase);
   });
 
   it('should not render the create new case link when the user does not have create privileges', async () => {
@@ -756,7 +756,7 @@ describe('AllCasesListGeneric', () => {
           }
 
           await waitFor(() => {
-            expect(updateCasesSpy).toBeCalledWith({
+            expect(updateCasesSpy).toHaveBeenCalledWith({
               cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
                 id,
                 version,
@@ -793,7 +793,7 @@ describe('AllCasesListGeneric', () => {
         await userEvent.click(await screen.findByTestId(`cases-bulk-action-severity-${severity}`));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toBeCalledWith({
+          expect(updateCasesSpy).toHaveBeenCalledWith({
             cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
               id,
               version,

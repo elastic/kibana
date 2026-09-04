@@ -1630,6 +1630,12 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.entity.id": Object {
+      "array": true,
+      "ignore_above": 1024,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.flapping": Object {
       "array": false,
       "required": false,
@@ -2934,6 +2940,12 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.entity.id": Object {
+      "array": true,
+      "ignore_above": 1024,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.flapping": Object {
       "array": false,
@@ -4240,6 +4252,12 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.entity.id": Object {
+      "array": true,
+      "ignore_above": 1024,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.flapping": Object {
       "array": false,
       "required": false,
@@ -5545,6 +5563,12 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.entity.id": Object {
+      "array": true,
+      "ignore_above": 1024,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.flapping": Object {
       "array": false,
       "required": false,
@@ -6849,6 +6873,12 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.entity.id": Object {
+      "array": true,
+      "ignore_above": 1024,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.flapping": Object {
       "array": false,
@@ -8161,6 +8191,12 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.entity.id": Object {
+      "array": true,
+      "ignore_above": 1024,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.flapping": Object {
       "array": false,
       "required": false,
@@ -9466,6 +9502,12 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.entity.id": Object {
+      "array": true,
+      "ignore_above": 1024,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.flapping": Object {
       "array": false,
       "required": false,
@@ -10770,6 +10812,12 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.entity.id": Object {
+      "array": true,
+      "ignore_above": 1024,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.flapping": Object {
       "array": false,

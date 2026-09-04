@@ -49,6 +49,6 @@ describe('CloudServiceResponse', () => {
   });
 
   it('toJSON() should throw an error when unconfirmed', () => {
-    expect(() => unconfirmed.toJSON()).toThrowError(`[${cloudName}] is not confirmed`);
+    expect(() => unconfirmed.toJSON()).toThrow(`[${cloudName}] is not confirmed`);
   });
 });

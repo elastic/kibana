@@ -21,6 +21,7 @@ export class Inspector {
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
   public readonly tablePaginationPopoverButton: Locator;
+  public readonly searchSessionId: Locator;
 
   public readonly requests: {
     readonly requestChooser: Locator;
@@ -37,6 +38,7 @@ export class Inspector {
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
     this.tablePaginationPopoverButton = page.testSubj.locator('tablePaginationPopoverButton');
+    this.searchSessionId = page.testSubj.locator('inspectorRequestSearchSessionId');
 
     this.requests = {
       requestChooser: page.testSubj.locator('inspectorRequestChooser'),
@@ -89,6 +91,21 @@ export class Inspector {
 
   async openInspectorRequestsView() {
     await this.openInspectorView('Requests');
+  }
+
+  /**
+   * The search session id surfaced by the open inspector's Requests view.
+   * Switches to the Requests view, reads the id, then closes the inspector.
+   * Throws if no id is present — a missing id means the assertion would be meaningless.
+   */
+  async getSearchSessionId(): Promise<string> {
+    await this.openInspectorRequestsView();
+    const sessionId = await this.searchSessionId.getAttribute('data-search-session-id');
+    await this.close();
+    if (!sessionId) {
+      throw new Error('No search session id exposed by the inspector');
+    }
+    return sessionId;
   }
 
   async openRequestsStatisticsTab() {

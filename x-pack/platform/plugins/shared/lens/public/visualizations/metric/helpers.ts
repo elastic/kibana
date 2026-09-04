@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { CoreTheme } from '@kbn/core/public';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import type {
-  VisualizationDimensionEditorProps,
   MetricVisualizationState,
   SecondaryTrend,
   SecondaryTrendType,
@@ -30,44 +28,6 @@ export function getColorMode(
     return 'static';
   }
   return 'dynamic';
-}
-
-export function getSecondaryLabelSelected(
-  state: VisualizationDimensionEditorProps<MetricVisualizationState>['state'],
-  {
-    defaultSecondaryLabel,
-    colorMode,
-    isPrimaryMetricNumeric,
-  }: {
-    defaultSecondaryLabel: string;
-    colorMode: SecondaryTrendType;
-    isPrimaryMetricNumeric: boolean;
-  }
-): { mode: 'auto' | 'none' } | { mode: 'custom'; label: string } {
-  const isAutoSecondaryLabel = state.secondaryLabel === undefined;
-  const hasSecondaryLabelOverride =
-    isAutoSecondaryLabel &&
-    // use colorMode as gatekeeper to avoid checking the secondaryTrend as dynamic when
-    // it is not enabled due to other conflicts (i.e. primary metric is not numeric)
-    colorMode === 'dynamic' &&
-    state.secondaryTrend?.type === 'dynamic' &&
-    state.secondaryTrend.baselineValue === 'primary' &&
-    isPrimaryMetricNumeric;
-
-  if (isAutoSecondaryLabel) {
-    return hasSecondaryLabelOverride
-      ? {
-          mode: 'custom',
-          label: i18n.translate('xpack.lens.metric.prefixText.labelTrendOverride', {
-            defaultMessage: 'Difference',
-          }),
-        }
-      : { mode: 'auto' };
-  }
-  if (state.secondaryLabel === '') {
-    return { mode: 'none' };
-  }
-  return { mode: 'custom', label: state.secondaryLabel ?? defaultSecondaryLabel };
 }
 
 function resolveDynamicTrendConfig(

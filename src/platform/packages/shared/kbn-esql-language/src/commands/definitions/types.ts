@@ -218,6 +218,7 @@ export interface FunctionFilterPredicates {
 export enum PromQLFunctionDefinitionTypes {
   WITHIN_SERIES = 'within_series',
   ACROSS_SERIES = 'across_series',
+  ACROSS_SERIES_REDUCTION = 'across_series_reduction',
   VALUE_TRANSFORMATION = 'value_transformation',
   VECTOR_CONVERSION = 'vector_conversion',
   SCALAR = 'scalar',

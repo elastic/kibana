@@ -149,7 +149,7 @@ describe('#checkConflicts', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.checkConflicts([obj1], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
     });
 

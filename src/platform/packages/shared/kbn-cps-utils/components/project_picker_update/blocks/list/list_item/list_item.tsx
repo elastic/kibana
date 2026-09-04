@@ -32,6 +32,7 @@ export interface ProjectPickerListItemProps {
   /** True while a filter/selection edit is awaiting server confirmation; disables all row interactions. */
   isInteractionsDisabled?: boolean;
   isOriginProject: boolean;
+  showProjectTags?: boolean;
   toggleDisabledMessage: string;
   project: CPSProject;
   onContextMenu: (project: CPSProject, evt: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -49,6 +50,7 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
   isToggleDisabled = false,
   isInteractionsDisabled = false,
   isOriginProject,
+  showProjectTags = true,
   toggleDisabledMessage,
   project,
   onContextMenu,
@@ -103,7 +105,7 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
                   </EuiBadge>
                 </EuiFlexItem>
               )}
-              {Boolean(projectTags.length) && (
+              {showProjectTags && Boolean(projectTags.length) && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge
                     tabIndex={0}

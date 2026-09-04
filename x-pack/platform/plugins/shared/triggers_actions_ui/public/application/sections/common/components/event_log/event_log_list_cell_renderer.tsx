@@ -78,12 +78,10 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
     if (ruleOnDifferentSpace) {
       const [linkedSpaceId] = spaceIds ?? [];
       const basePath = http.basePath.get();
-      // linkedSpaceId / activeSpace.id come from event metadata and the Spaces plugin
-      // Space.id (both already-validated space ids); trusted re-brand, no throw on render.
       const spacePath = getSpaceUrlPrefix(brandSpaceId(linkedSpaceId));
       const historyPathname = history.location.pathname;
       const newPathname = `${basePath.replace(
-        getSpaceUrlPrefix(brandSpaceId(activeSpace!.id)),
+        getSpaceUrlPrefix(activeSpace!.id),
         ''
       )}${spacePath}${window.location.pathname
         .replace(basePath, '')

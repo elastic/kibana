@@ -106,7 +106,7 @@ describe('Action List Handler', () => {
 
     it('should call `getActionListByStatus` when statuses filter values are provided', async () => {
       await actionListHandler({ ...defaultParams, statuses: ['failed', 'pending'] });
-      expect(mockGetActionListByStatus).toBeCalledWith(
+      expect(mockGetActionListByStatus).toHaveBeenCalledWith(
         expect.objectContaining({ statuses: ['failed', 'pending'] })
       );
     });
@@ -120,7 +120,7 @@ describe('Action List Handler', () => {
         statuses: 'failed',
         userIds: 'userX',
       });
-      expect(mockGetActionListByStatus).toBeCalledWith(
+      expect(mockGetActionListByStatus).toHaveBeenCalledWith(
         expect.objectContaining({
           agentTypes: ['endpoint'],
           withOutputs: ['actionX'],
@@ -140,7 +140,7 @@ describe('Action List Handler', () => {
         commands: ['isolate', 'kill-process'],
         userIds: ['userX', 'userY'],
       });
-      expect(mockGetActionList).toBeCalledWith(
+      expect(mockGetActionList).toHaveBeenCalledWith(
         expect.objectContaining({
           commands: ['isolate', 'kill-process'],
           userIds: ['userX', 'userY'],

@@ -14,6 +14,7 @@ import { Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
+import { registerFatalExitLogging } from './register_fatal_exit_logging';
 
 interface BootstrapArgs {
   configs: string[];
@@ -49,9 +50,18 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
-  const root = new Root(rawConfigService, env, onRootShutdown);
+  const root = new Root(rawConfigService, env, handleRootShutdown);
   const cliLogger = root.logger.get('cli');
   const rootLogger = root.logger.get('root');
+
+  const fatalExitLogging = registerFatalExitLogging({ logger: rootLogger });
+
+  // Every shutdown reported by `Root.shutdown()` ends up here, so the fatal exit guard
+  // only has to speak up for terminations that never reach this path.
+  function handleRootShutdown(error?: any) {
+    fatalExitLogging.markShutdownReasonReported();
+    onRootShutdown(error);
+  }
 
   rootLogger.info('Kibana is starting');
 

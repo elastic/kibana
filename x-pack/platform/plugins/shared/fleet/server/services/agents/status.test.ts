@@ -308,7 +308,7 @@ describe('getIncomingDataByAgentsId', () => {
       dataStreamPattern,
     });
 
-    expect(esClient.security.hasPrivileges).toBeCalledTimes(1);
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
 
     expect(result).toEqual({
       items: [

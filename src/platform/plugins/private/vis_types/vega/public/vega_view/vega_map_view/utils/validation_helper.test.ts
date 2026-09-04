@@ -59,7 +59,7 @@ describe('vega_map_view/validation_helper', () => {
 
       const result = validateZoomSettings(mapConfig, limits, onWarn);
 
-      expect(onWarn).toBeCalledWith('Resetting "maxZoom" to 15');
+      expect(onWarn).toHaveBeenCalledWith('Resetting "maxZoom" to 15');
       expect(result.maxZoom).toEqual(15);
     });
 
@@ -71,7 +71,7 @@ describe('vega_map_view/validation_helper', () => {
 
       const result = validateZoomSettings(mapConfig, limits, onWarn);
 
-      expect(onWarn).toBeCalledWith('Resetting "minZoom" to 2');
+      expect(onWarn).toHaveBeenCalledWith('Resetting "minZoom" to 2');
       expect(result.minZoom).toEqual(2);
     });
 
@@ -83,7 +83,7 @@ describe('vega_map_view/validation_helper', () => {
 
       const result = validateZoomSettings(mapConfig, limits, onWarn);
 
-      expect(onWarn).toBeCalledWith('Resetting "zoom" to 10');
+      expect(onWarn).toHaveBeenCalledWith('Resetting "zoom" to 10');
       expect(result.zoom).toEqual(10);
     });
 
@@ -95,7 +95,7 @@ describe('vega_map_view/validation_helper', () => {
 
       const result = validateZoomSettings(mapConfig, limits, onWarn);
 
-      expect(onWarn).toBeCalledWith('Resetting "zoom" to 5');
+      expect(onWarn).toHaveBeenCalledWith('Resetting "zoom" to 5');
       expect(result.zoom).toEqual(5);
     });
 
@@ -107,7 +107,7 @@ describe('vega_map_view/validation_helper', () => {
 
       const result = validateZoomSettings(mapConfig, limits, onWarn);
 
-      expect(onWarn).toBeCalledWith('"minZoom" and "maxZoom" have been swapped');
+      expect(onWarn).toHaveBeenCalledWith('"minZoom" and "maxZoom" have been swapped');
       expect(result).toEqual({ maxZoom: 15, minZoom: 10, zoom: 10 });
     });
   });

@@ -549,6 +549,7 @@ export const Jenkins: ConnectorSpec = {
   actions: {
     request: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Make an authenticated request to any Jenkins API path. Prefer the typed actions ' +
         '(triggerBuild, getBuild, listJobs, etc.) when they fit. The Groovy script console, ' +
@@ -568,6 +569,7 @@ export const Jenkins: ConnectorSpec = {
 
     triggerBuild: {
       isTool: true,
+      scope: 'write',
       description:
         'Trigger a build of an unparameterized Jenkins job. Returns a queue item id and URL — ' +
         'not a build number yet, since Jenkins queues the build first. Pass the queueId to ' +
@@ -584,6 +586,7 @@ export const Jenkins: ConnectorSpec = {
 
     triggerBuildWithParameters: {
       isTool: true,
+      scope: 'write',
       description:
         'Trigger a build of a parameterized Jenkins job with named build parameters. Use getJob ' +
         'first to see the parameter names and types the job expects. Returns a queue item id and ' +
@@ -602,6 +605,7 @@ export const Jenkins: ConnectorSpec = {
 
     getQueueItem: {
       isTool: true,
+      scope: 'read',
       description:
         'Resolve a queue item (returned by triggerBuild / triggerBuildWithParameters) to its ' +
         'eventual build. Returns `build.number` once Jenkins has started the build, or `blocked` / ' +
@@ -619,6 +623,7 @@ export const Jenkins: ConnectorSpec = {
 
     getBuild: {
       isTool: true,
+      scope: 'read',
       description:
         'Read a specific build of a job: result, whether it is still building, timestamp, and ' +
         'duration. The step a workflow polls to learn whether a triggered build finished and passed.',
@@ -635,6 +640,7 @@ export const Jenkins: ConnectorSpec = {
 
     getConsoleLog: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch the console output of a build, for triage or attaching failure detail to a case. ' +
         `Output is capped to the last ${MAX_CONSOLE_LOG_CHARS} characters.`,
@@ -662,6 +668,7 @@ export const Jenkins: ConnectorSpec = {
 
     stopBuild: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Abort a running build, letting a workflow halt a bad or runaway pipeline. The build ' +
         'transitions to ABORTED asynchronously — poll getBuild afterwards to confirm it stopped.',
@@ -677,6 +684,7 @@ export const Jenkins: ConnectorSpec = {
 
     getLastBuild: {
       isTool: true,
+      scope: 'read',
       description:
         'Read the most recent build of a job (result, number, in-progress flag) — a quick pipeline ' +
         'health check without knowing the build number.',
@@ -693,6 +701,7 @@ export const Jenkins: ConnectorSpec = {
 
     listJobs: {
       isTool: true,
+      scope: 'read',
       description:
         'List the jobs on the Jenkins instance with name, URL, and last-build status. Use this to ' +
         'discover or confirm a job name before acting on it.',
@@ -710,6 +719,7 @@ export const Jenkins: ConnectorSpec = {
 
     getJob: {
       isTool: true,
+      scope: 'read',
       description:
         'Read a single job: description, buildable/status, last/lastSuccessful/lastFailed build ' +
         'pointers, and its build parameter definitions (name, type, default value). Call this ' +
@@ -727,6 +737,7 @@ export const Jenkins: ConnectorSpec = {
 
     listBuilds: {
       isTool: true,
+      scope: 'read',
       description:
         'List recent builds of a job with results and timestamps — used to summarize pipeline ' +
         'health or find a specific run.',
@@ -745,6 +756,7 @@ export const Jenkins: ConnectorSpec = {
 
     getBuildTestReport: {
       isTool: true,
+      scope: 'read',
       description:
         'Read the parsed test report for a build (pass/fail/skip counts and failing test cases), ' +
         `turning a raw pipeline result into structured triage data. Failing tests are capped to ` +
@@ -763,6 +775,7 @@ export const Jenkins: ConnectorSpec = {
 
     disableJob: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Disable a job so no new builds start for it — quarantines a misbehaving pipeline during ' +
         'an incident. Pair with enableJob to recover.',
@@ -778,6 +791,7 @@ export const Jenkins: ConnectorSpec = {
 
     enableJob: {
       isTool: true,
+      scope: 'destroy',
       description: 'Re-enable a previously disabled job so it can run again.',
       input: EnableJobInputSchema,
       handler: async (ctx, input: EnableJobInput) => {
@@ -791,6 +805,7 @@ export const Jenkins: ConnectorSpec = {
 
     getQueue: {
       isTool: true,
+      scope: 'read',
       description:
         'Read the full Jenkins build queue, so a workflow can see pending work and detect backlog ' +
         'before triggering more builds.',
@@ -808,6 +823,7 @@ export const Jenkins: ConnectorSpec = {
 
     quietDown: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Put the whole Jenkins instance in quiet-down mode: no new builds start across any job. ' +
         'A heavy, instance-wide mitigation for freezing all pipelines during an incident — prefer ' +
@@ -821,6 +837,7 @@ export const Jenkins: ConnectorSpec = {
 
     cancelQuietDown: {
       isTool: true,
+      scope: 'destroy',
       description: 'Cancel quiet-down mode so builds can start again across the instance.',
       input: CancelQuietDownInputSchema,
       handler: async (ctx) => {

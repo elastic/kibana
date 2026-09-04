@@ -92,6 +92,37 @@ describe('plugin_discovery', () => {
     });
   });
 
+  describe('discoverPlugins with allowlistPluginGroups', () => {
+    let allPlugins: Awaited<ReturnType<typeof discoverPlugins>>;
+    let platformPlugins: Awaited<ReturnType<typeof discoverPlugins>>;
+
+    beforeAll(async () => {
+      allPlugins = await discoverPlugins({
+        repoRoot: REPO_ROOT,
+        examples: false,
+        testPlugins: false,
+      });
+      platformPlugins = await discoverPlugins({
+        repoRoot: REPO_ROOT,
+        examples: false,
+        testPlugins: false,
+        allowlistPluginGroups: ['platform'],
+      });
+    }, 60000);
+
+    it('discovers fewer plugins when restricted to the platform group', () => {
+      expect(platformPlugins.length).toBeLessThan(allPlugins.length);
+      expect(platformPlugins.length).toBeGreaterThan(0);
+    });
+
+    it('keeps platform plugins and drops solution plugins', () => {
+      const ids = new Set(platformPlugins.map((p) => p.id));
+      expect(ids.has('data')).toBe(true);
+      expect(ids.has('discover')).toBe(true);
+      expect(ids.has('securitySolution')).toBe(false);
+    });
+  });
+
   describe('discoverPlugins with testPlugins', () => {
     let pluginsWithTest: Awaited<ReturnType<typeof discoverPlugins>>;
     let pluginsWithoutTest: Awaited<ReturnType<typeof discoverPlugins>>;
