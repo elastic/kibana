@@ -1,0 +1,23 @@
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{}",
+    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":12,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{},\"savedVis\":{\"title\":\"Legacy Vega by-value\",\"type\":\"vega\",\"params\":{\"spec\":\"{\\\"$schema\\\":\\\"https://vega.github.io/schema/vega/v5.json\\\",\\\"data\\\":[],\\\"marks\\\":[]}\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}}}}}]",
+    "timeRestore": false,
+    "title": "Legacy Vega by-value dashboard",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "legacy_vega_by_value_dashboard",
+  "migrationVersion": {
+    "dashboard": "8.0.0"
+  },
+  "references": [],
+  "type": "dashboard",
+  "updated_at": "2026-08-07T12:00:00.000Z",
+  "version": "WzMsMV0="
+}

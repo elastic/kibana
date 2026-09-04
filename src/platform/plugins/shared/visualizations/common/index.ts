@@ -86,3 +86,9 @@ export type {
 } from './convert_to_lens';
 export { Operations } from './convert_to_lens';
 export { convertToSchemaConfig } from './vis_schemas';
+
+export type {
+  VisualizeByReferenceState,
+  VisualizeByValueState,
+  VisualizeEmbeddableState,
+} from './embeddable/types';
