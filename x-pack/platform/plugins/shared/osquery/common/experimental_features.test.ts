@@ -87,6 +87,7 @@ describe('getExperimentalAllowedValues', () => {
     expect(getExperimentalAllowedValues()).toEqual([
       'exportResults',
       'rruleScheduling',
+      'agentBuilderTools',
       'crossProjectSearch',
     ]);
   });
@@ -97,6 +98,7 @@ describe('allowedExperimentalValues', () => {
     expect(allowedExperimentalValues).toEqual({
       exportResults: true,
       rruleScheduling: true,
+      agentBuilderTools: false,
       crossProjectSearch: false,
     });
   });

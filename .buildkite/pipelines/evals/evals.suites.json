@@ -204,7 +204,7 @@
     },
     {
       "id": "security-persona-matrix-attack-discovery",
-      "name": "Security Persona Matrix — Attack Discovery (Chrysalis kill-chains)",
+      "name": "Security Persona Matrix \u2014 Attack Discovery (Chrysalis kill-chains)",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/attack_discovery.playwright.config.ts",
       "tags": [
@@ -228,6 +228,36 @@
       ],
       "ciLabels": [
         "evals:endpoint"
+      ],
+      "serverConfigSet": "evals_endpoint"
+    },
+    {
+      "id": "endpoint-osquery",
+      "name": "Endpoint (Osquery live state)",
+      "slackChannel": "#security-defend-workflows-tests",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery.config.ts",
+      "tags": [
+        "security",
+        "defend-workflows",
+        "osquery"
+      ],
+      "ciLabels": [
+        "evals:endpoint-osquery"
+      ],
+      "serverConfigSet": "evals_endpoint_osquery"
+    },
+    {
+      "id": "endpoint-osquery-trap",
+      "name": "Endpoint (Osquery capability trap)",
+      "slackChannel": "#security-defend-workflows-tests",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery_trap.config.ts",
+      "tags": [
+        "security",
+        "defend-workflows",
+        "osquery"
+      ],
+      "ciLabels": [
+        "evals:endpoint-osquery-trap"
       ],
       "serverConfigSet": "evals_endpoint"
     },

@@ -26,6 +26,11 @@ export function createSecuritySkillInvocationEvaluator({
     );
   }
 
+  // Tool-call arguments are exported under `attributes.elastic.tool.parameters`
+  // (a JSON string, e.g. {"path":".../SKILL.md"}), NOT
+  // `attributes.gen_ai.tool.call.arguments` — the latter is unmapped on both the
+  // local EDOT trace index and the golden cluster, so any query referencing it
+  // fails with verification_exception and the evaluator scores null/unavailable.
   return createTraceBasedEvaluator({
     traceEsClient,
     log,
@@ -40,11 +45,11 @@ export function createSecuritySkillInvocationEvaluator({
     CASE(
       (
         attributes.gen_ai.tool.name == "filestore.read"
-          AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
+          AND attributes.elastic.tool.parameters LIKE "*/${skillName}/SKILL.md*"
       )
       OR (
         attributes.gen_ai.tool.name == "load_skill"
-          AND attributes.gen_ai.tool.call.arguments LIKE "*${skillName}*"
+          AND attributes.elastic.tool.parameters LIKE "*${skillName}*"
       ),
       1,
       NULL

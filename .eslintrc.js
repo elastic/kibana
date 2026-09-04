@@ -1431,6 +1431,18 @@ module.exports = {
       },
     },
     {
+      // Endpoint evals suite reads Scout config sources from disk to pin the
+      // Osquery isolation contract; Playwright configs export a default.
+      files: [
+        'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/src/osquery_eval_isolation.test.ts',
+        'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.*.config.ts',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'off',
+        'import/no-default-export': 'off',
+      },
+    },
+    {
       // typescript only for front and back end, but excludes the test files.
       // We use this section to add rules in which we do not want to apply to test files.
       // This should be a very small set as most linter rules are useful for tests as well.
