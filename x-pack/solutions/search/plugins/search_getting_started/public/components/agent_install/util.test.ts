@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildPrompt } from './util';
+import { buildPrompt, buildCliConnectCommand } from './util';
 import { INSTALL_LINES_CLI, AGENT_ONBOARDING_MESSAGE } from './constants';
 import type { Environment } from './constants';
 
@@ -28,5 +28,16 @@ describe('buildPrompt', () => {
     expect(() => buildPrompt('unsupported' as Environment)).toThrow(
       'Unsupported environment: unsupported'
     );
+  });
+});
+
+describe('buildCliConnectCommand', () => {
+  it('includes the elasticsearch URL and API key placeholder', () => {
+    const elasticsearchUrl = 'https://my-deployment.es.us-east-1.aws.elastic.cloud:443';
+    const result = buildCliConnectCommand(elasticsearchUrl);
+
+    expect(result).toContain(`--es-url ${elasticsearchUrl}`);
+    expect(result).toContain('--es-api-key <your-api-key>');
+    expect(result).toContain('elastic config context add my-deployment');
   });
 });

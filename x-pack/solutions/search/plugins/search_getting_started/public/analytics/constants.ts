@@ -9,6 +9,7 @@ export enum AnalyticsEvents {
   openedApp = 'opened_app',
   agentBuilderOpened = 'agent_builder_opened',
   claudeCliPromptCopied = 'claude_cli_prompt_copied',
+  cliInstallModalOpened = 'cli_install_modal_opened',
   codeExampleCopied = 'code_example_copied',
   languageSelected = 'language_selected',
   startChat = 'start_chat_gs',
