@@ -8,6 +8,7 @@
 import { firstValueFrom } from 'rxjs';
 
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { uniq, chunk } from 'lodash/fp';
 
@@ -35,7 +36,12 @@ import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_que
 import { MAX_PER_PAGE, getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
-import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
+import {
+  getMaxSignalsWarning,
+  getSafeSortIds,
+  getSafeNanosSortIds,
+  getUnusableCursorWarning,
+} from '../../utils/utils';
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
 import { getDataStreamNamespaceFilter } from '../../utils/get_data_stream_namespace_filter';
 import { getQueryFields } from '../../utils/get_query_fields';
@@ -52,11 +58,13 @@ export const createThreatSignals = async ({
     inputIndex,
     primaryTimestamp,
     secondaryTimestamp,
+    dateNanosTimestampFields,
     exceptionFilter,
     completeRule,
     tuple,
     ruleExecutionLogger,
   } = sharedParams;
+  const hasDateNanosTimestampFields = dateNanosTimestampFields.length > 0;
 
   const {
     alertId,
@@ -194,6 +202,7 @@ export const createThreatSignals = async ({
   }) => {
     let list = await getDocumentList({ searchAfter: undefined });
     let documentCount = totalDocumentCount;
+    let prevSortIds: estypes.SortResults | undefined;
 
     // this is re-assigned depending on max clause count errors
     let chunkPage = itemsPerSearch;
@@ -283,8 +292,33 @@ export const createThreatSignals = async ({
         // re-run search with smaller max clause count;
         list = await getDocumentList({ searchAfter: undefined });
         documentCount = totalDocumentCount;
+        // paging restarts from the first page, so the previous cursor no longer describes the
+        // page before this one and would read as a cursor that stopped advancing
+        prevSortIds = undefined;
       } else {
-        const sortIds = getSafeSortIds(list.hits.hits[list.hits.hits.length - 1].sort);
+        if (hasDateNanosTimestampFields && list.hits.hits.length < perPage) {
+          ruleExecutionLogger.trace(
+            `Last page reached\nFound ${list.hits.hits.length} of the ${perPage} requested documents, so no further pages exist.`
+          );
+          break;
+        }
+
+        const lastHitSort = list.hits.hits[list.hits.hits.length - 1].sort;
+        // with date_nanos, sort values are formatted ISO strings which round-trip exactly;
+        // getSafeSortIds would corrupt them (its null branch produces an out-of-range cursor)
+        const sortIds = hasDateNanosTimestampFields
+          ? getSafeNanosSortIds(lastHitSort)
+          : getSafeSortIds(lastHitSort);
+
+        const cursorWarning = hasDateNanosTimestampFields
+          ? getUnusableCursorWarning(sortIds, prevSortIds)
+          : undefined;
+        if (cursorWarning != null) {
+          results.warningMessages.push(cursorWarning);
+          ruleExecutionLogger.warn(cursorWarning);
+          break;
+        }
+        prevSortIds = sortIds;
 
         // ES can return negative sort id for date field, when sort order set to desc
         // this could happen when event has empty sort field

@@ -86,7 +86,24 @@ function ImportWorkflowsCallouts({
   }
   return (
     <>
-      {hasConflicts ? (
+      {preflightResult.conflictCheckFailed ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('workflows.importFlyout.conflictCheckFailed', {
+              defaultMessage:
+                'Could not check for existing workflow conflicts. The import may fail if any of the workflow IDs are already in use.',
+            })}
+            color="warning"
+            iconType="warning"
+            size="s"
+            data-test-subj="import-workflows-conflict-check-failed"
+          />
+        </>
+      ) : null}
+
+      {!preflightResult.conflictCheckFailed && hasConflicts ? (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
@@ -268,7 +285,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
   const hasWorkflowPreviews = (preflightResult?.workflows?.length ?? 0) > 0;
 
   const conflictIds = useMemo(
-    () => new Set(preflightResult?.conflicts.map((c) => c.id) ?? []),
+    () => new Set(preflightResult?.conflicts ?? []),
     [preflightResult?.conflicts]
   );
 
@@ -369,7 +386,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
             if (status === 'success') {
               return (
                 <EuiIcon
-                  type="checkInCircleFilled"
+                  type="checkCircleFill"
                   color="success"
                   data-test-subj={`import-preview-success-${id}`}
                   aria-label={i18n.translate('workflows.importFlyout.preview.successIcon', {
@@ -381,7 +398,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
             if (status === 'failed') {
               return (
                 <EuiIcon
-                  type="crossInACircleFilled"
+                  type="error"
                   color="danger"
                   data-test-subj={`import-preview-failed-${id}`}
                   aria-label={i18n.translate('workflows.importFlyout.preview.failedIcon', {

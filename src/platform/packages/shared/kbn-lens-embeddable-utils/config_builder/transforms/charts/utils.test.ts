@@ -7,9 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getLegendTruncateAfterLines } from './utils';
+import type { CounterRateIndexPatternColumn, MaxIndexPatternColumn } from '@kbn/lens-common';
+import { getLegendTruncateAfterLines, processMetricColumnsWithReferences } from './utils';
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../columns/utils';
+
+const createCounterRateColumn = (): CounterRateIndexPatternColumn => ({
+  customLabel: false,
+  filter: undefined,
+  operationType: 'counter_rate',
+  label: '',
+  isBucketed: false,
+  dataType: 'number',
+  params: {},
+  references: [],
+});
+
+const createMaxReferenceColumn = (): MaxIndexPatternColumn => ({
+  operationType: 'max',
+  sourceField: 'bytes',
+  label: 'Max of bytes',
+  customLabel: false,
+  isBucketed: false,
+  dataType: 'number',
+  params: { emptyAsNull: LENS_EMPTY_AS_NULL_DEFAULT_VALUE },
+});
 
 describe('utils', () => {
+  describe('processMetricColumnsWithReferences', () => {
+    it('returns visible metrics and references as separate arrays', () => {
+      const mainMetric = createCounterRateColumn();
+      const refMetric = createMaxReferenceColumn();
+
+      const result = processMetricColumnsWithReferences(
+        [[mainMetric, refMetric]],
+        (index) => `metric_${index}`,
+        (index) => `metric_ref_${index}`
+      );
+
+      expect(result.metricColumns).toEqual([{ column: mainMetric, id: 'metric_0' }]);
+      expect(result.referencesColumns).toEqual([{ column: refMetric, id: 'metric_ref_0' }]);
+      expect(mainMetric.references).toEqual(['metric_ref_0']);
+    });
+
+    it('keeps metrics and references in separate arrays (not interleaved)', () => {
+      const counterRate0 = createCounterRateColumn();
+      const counterRate1 = createCounterRateColumn();
+      const maxRef0 = createMaxReferenceColumn();
+      const maxRef1 = createMaxReferenceColumn();
+
+      const { metricColumns, referencesColumns } = processMetricColumnsWithReferences(
+        [
+          [counterRate0, maxRef0],
+          [counterRate1, maxRef1],
+        ],
+        (index) => `metric_${index}`,
+        (index) => `metric_ref_${index}`
+      );
+
+      expect(metricColumns.map(({ id }) => id)).toEqual(['metric_0', 'metric_1']);
+      expect(referencesColumns.map(({ id }) => id)).toEqual(['metric_ref_0', 'metric_ref_1']);
+    });
+  });
+
   describe('getLegendTruncateAfterLines', () => {
     it.each<
       [input: Parameters<typeof getLegendTruncateAfterLines>['0'], expected: number | undefined]

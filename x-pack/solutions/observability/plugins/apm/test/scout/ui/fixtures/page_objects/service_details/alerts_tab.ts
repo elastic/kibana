@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDataGridWrapper, type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import type { EuiDataGridObject, KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
 import { EXTENDED_TIMEOUT } from '../../constants';
@@ -18,7 +18,7 @@ export class AlertsTab extends ServiceDetailsTab {
   public readonly alertsTableEmptyState: Locator;
   public readonly controlTitles: Locator;
 
-  public readonly alertsTable: EuiDataGridWrapper;
+  public readonly alertsTable: EuiDataGridObject;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
@@ -27,7 +27,7 @@ export class AlertsTab extends ServiceDetailsTab {
     this.alertsTableEmptyState = this.page.testSubj.locator('alertsTableEmptyState');
     this.controlTitles = this.page.testSubj.locator('control-frame-title');
 
-    this.alertsTable = new EuiDataGridWrapper(this.page, 'alertsTableIsLoaded');
+    this.alertsTable = this.page.components.dataGrid('alertsTableIsLoaded');
   }
 
   protected async waitForTabLoad() {

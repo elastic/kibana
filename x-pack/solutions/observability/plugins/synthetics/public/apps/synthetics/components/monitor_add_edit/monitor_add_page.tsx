@@ -6,10 +6,10 @@
  */
 
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
-import { Redirect } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import { useCloneMonitor } from './hooks/use_clone_monitor';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { CanUsePublicLocationsCallout } from './steps/can_use_public_locations_callout';
@@ -29,6 +29,7 @@ import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
   const { space } = useKibanaSpace();
+  const { search } = useLocation();
   useTrackPageview({ app: 'synthetics', path: 'add-monitor', delay: 15000 });
   useMonitorAddEditBreadcrumbs();
 
@@ -58,7 +59,7 @@ export const MonitorAddPage = () => {
   }
 
   if (locationsLoaded && locations.length === 0) {
-    return <Redirect to={GETTING_STARTED_ROUTE} />;
+    return <Redirect to={{ pathname: GETTING_STARTED_ROUTE, search }} />;
   }
 
   return (

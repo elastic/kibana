@@ -10,6 +10,7 @@ import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MonitorPageLink } from './monitor_page_link';
 import type { CertMonitor } from '../../../../../common/runtime_types';
+import { getLoadedFromRemoteOriginTooltip } from '../../utils/remote/remote_origin_copy';
 
 const DEFAULT_DISPLAY_COUNT = 10;
 
@@ -27,8 +28,17 @@ export const CertMonitors: React.FC<Props> = ({ monitors }) => {
       {monitorsToDisplay.map((mon: CertMonitor, ind: number) => (
         <span key={mon.id}>
           {ind > 0 && ', '}
-          <EuiToolTip content={mon.url}>
-            <MonitorPageLink configId={mon.configId!}>{mon.name || mon.id}</MonitorPageLink>
+          <EuiToolTip
+            content={mon.url}
+            title={
+              mon.remote?.remoteName
+                ? getLoadedFromRemoteOriginTooltip(mon.remote.remoteName)
+                : undefined
+            }
+          >
+            <MonitorPageLink configId={mon.configId!} remote={mon.remote} spaces={mon.spaces}>
+              {mon.name || mon.id}
+            </MonitorPageLink>
           </EuiToolTip>
         </span>
       ))}

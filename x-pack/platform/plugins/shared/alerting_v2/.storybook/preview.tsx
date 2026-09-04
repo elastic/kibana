@@ -56,7 +56,13 @@ const buildContainer = () => {
     basePath: { prepend: (p: string) => p, get: () => '' },
   } as any);
 
-  container.bind(CoreStart('docLinks')).toConstantValue({ links: {} } as any);
+  container.bind(CoreStart('docLinks')).toConstantValue({
+    links: {
+      alerting: {
+        actionPolicies: 'https://docs.test/action-policies',
+      },
+    },
+  } as any);
 
   container.bind(ActionPoliciesApi).toSelf();
   container.bind(RulesApi).toSelf();
@@ -78,7 +84,7 @@ const buildContainer = () => {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiCallOut title="Storybook stub" color="primary" iconType="iInCircle">
+          <EuiCallOut title="Storybook stub" color="primary" iconType="info">
             <p>Action type: {initialConnector?.actionTypeId ?? 'any'}</p>
           </EuiCallOut>
           <EuiButton

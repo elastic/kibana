@@ -25,11 +25,6 @@ export type MapCenterAndZoom = MapCenter & {
   zoom: number;
 };
 
-export type Goto = {
-  bounds?: MapExtent;
-  center?: MapCenterAndZoom;
-};
-
 export type TooltipFeatureAction = {
   label: string;
   id: string;

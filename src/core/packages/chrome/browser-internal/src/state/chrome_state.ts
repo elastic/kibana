@@ -18,13 +18,14 @@ import type {
   ChromeBreadcrumbsBadge,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  ChromeHelpMenuLink,
   GlobalSearchConfig,
   ChromeNavLink,
   GlobalHeaderAiButton,
   ChromeUserBanner,
-  AppHeaderConfig,
+  ChromeAppHeaderConfig,
 } from '@kbn/core-chrome-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 
 import {
   createState,
@@ -70,8 +71,9 @@ export interface ChromeState {
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
   contextSwitcher: State<ReactNode>;
+  projectPicker: State<ReactNode>;
   inlineAppHeader: State<boolean>;
-  appHeader: State<AppHeaderConfig | undefined>;
+  appHeader: State<ChromeAppHeaderConfig | undefined>;
   userMenu: State<ReactNode>;
 
   /** Help system */
@@ -79,6 +81,7 @@ export interface ChromeState {
     extension: State<ChromeHelpExtension | undefined>;
     supportUrl: State<string>;
     globalMenuLinks: ArrayState<ChromeGlobalHelpExtensionMenuLink>;
+    menuLinks: State<ChromeHelpMenuLink[]>;
   };
 
   /** Feedback handler registered by the feedback plugin */
@@ -126,14 +129,16 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
   const contextSwitcher = createState<ReactNode>(null);
+  const projectPicker = createState<ReactNode>(null);
   const inlineAppHeader = createState<boolean>(false);
-  const appHeader = createState<AppHeaderConfig | undefined>(undefined);
+  const appHeader = createState<ChromeAppHeaderConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
   const helpSupportUrl = createState<string>(docLinks.links.kibana.askElastic);
   const globalHelpMenuLinks = createArrayState<ChromeGlobalHelpExtensionMenuLink>();
+  const helpMenuLinks = createState<ChromeHelpMenuLink[]>([]);
 
   // Feedback
   const feedbackHandler = createState<(() => void) | undefined>(undefined);
@@ -169,8 +174,10 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       extension: helpExtension,
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
+      menuLinks: helpMenuLinks,
     },
     contextSwitcher,
+    projectPicker,
     userMenu,
     feedbackHandler,
     newsfeedHandler,

@@ -11,6 +11,7 @@ import * as Rx from 'rxjs';
 import { fork, type ChildProcess } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import type { ThemeTag } from './types';
 import { getInspectExecArgv } from './utils/inspect';
 
@@ -23,6 +24,12 @@ export interface RspackOptimizerOptions {
   dist?: boolean;
   examples?: boolean;
   themeTags?: ThemeTag[];
+  /** Explicit plugin paths passed via --plugin-path */
+  pluginPaths?: string[];
+  /** Directories scanned for plugins */
+  pluginScanDirs?: string[];
+  /** Restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
   /** Enable HMR in watch mode (undefined = auto-detect) */
   hmr?: boolean;
   /** Dev server base path (e.g. "/abc") for HMR auto-reload on server restart */
@@ -80,12 +87,11 @@ export class RspackOptimizer {
       // Use require.resolve to find the worker file
       const workerPath = require.resolve('./worker');
 
-      // Use @kbn/babel-register to enable TypeScript support in the worker
-      // This is exactly how @kbn/optimizer does it (see observe_worker.ts)
+      // Use @kbn/swc-register to enable TypeScript support in the worker
       this.worker = fork(workerPath, [], {
         stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
         execArgv: [
-          '--require=@kbn/babel-register/install',
+          '--require=@kbn/swc-register/install',
           ...getInspectExecArgv(this.options.inspectWorkers ?? true),
         ],
         env: {
@@ -130,6 +136,9 @@ export class RspackOptimizer {
                 examples: this.options.examples,
                 themeTags: this.options.themeTags ?? [...DEFAULT_THEME_TAGS],
                 hmr: this.options.hmr,
+                pluginPaths: this.options.pluginPaths,
+                pluginScanDirs: this.options.pluginScanDirs,
+                allowlistPluginGroups: this.options.allowlistPluginGroups,
                 basePath: this.options.basePath,
               },
             });

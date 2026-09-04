@@ -26,21 +26,11 @@ import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableByValueState,
 } from '../../../common/embeddable/types';
-import type { DiscoverServices } from '../../build_services';
 
 describe('Serialization utils', () => {
   const uuid = 'mySearchEmbeddable';
 
   const dataViewId = dataViewMock.id ?? 'test-id';
-
-  const discoverServicesLegacy = {
-    ...discoverServiceMock,
-    discoverFeatureFlags: {
-      getCascadeLayoutEnabled: jest.fn(() => false),
-      getIsEsqlDefault: jest.fn(() => false),
-      getEmbeddableTransformsEnabled: jest.fn(() => false),
-    },
-  } satisfies DiscoverServices;
 
   const mockedSavedSearchAttributes: SearchEmbeddableByValueState['attributes'] = {
     kibanaSavedObjectMeta: {
@@ -301,6 +291,58 @@ describe('Serialization utils', () => {
       expect(deserializedState.columns).toEqual(['custom-col']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
     });
+
+    test('by reference - partial jsonModeSettings override deep-merges with the source', async () => {
+      const sessionTabs = [
+        mockTab('tab-1', 'Tab 1', { jsonModeSettings: { hideNulls: true, wrapLines: true } }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+
+      const serializedState: DiscoverSessionEmbeddableByReferenceState = {
+        title: 'test panel title',
+        ref_id: 'savedSearch',
+        selected_tab_id: undefined,
+        overrides: { json_mode_settings: { wrap_lines: false } },
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+
+      // jsonModeSettings partial-merges: wrap_lines is overridden while hide_nulls is preserved
+      // from the source (a shallow replace dropped it).
+      expect(deserializedState.jsonModeSettings).toEqual({ hideNulls: true, wrapLines: false });
+    });
+
+    test('by reference - grid override replaces wholesale so removed columns are not resurrected', async () => {
+      const sessionTabs = [
+        mockTab('tab-1', 'Tab 1', {
+          grid: { columns: { A: { width: 100 }, B: { width: 200 } } },
+        }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+
+      const serializedState: DiscoverSessionEmbeddableByReferenceState = {
+        title: 'test panel title',
+        ref_id: 'savedSearch',
+        selected_tab_id: undefined,
+        // Column B's width was reset, so the stored override only carries A.
+        overrides: { column_settings: { A: { width: 100 } } },
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+
+      // Unlike jsonModeSettings, grid must replace wholesale: B stays dropped, not merged back in.
+      expect(deserializedState.grid).toEqual({ columns: { A: { width: 100 } } });
+    });
   });
 
   describe('serialize state', () => {
@@ -333,7 +375,6 @@ describe('Serialization utils', () => {
         serializeTitles: jest.fn().mockReturnValue({ title: 'test1', description: 'description' }),
         serializeTimeRange: jest.fn(),
         serializeDynamicActions: jest.fn(),
-        embeddableTransformsEnabled: true,
       });
 
       expect(serializedState).toMatchObject({
@@ -344,7 +385,6 @@ describe('Serialization utils', () => {
             column_order: ['_source'],
             sort: [{ name: 'order_date', direction: 'desc' }],
             view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-            density: DataGridDensity.COMPACT,
             data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: dataViewId },
           }),
         ],
@@ -381,7 +421,6 @@ describe('Serialization utils', () => {
           serializeTimeRange: jest.fn(),
           serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
-          embeddableTransformsEnabled: true,
         });
 
         expect(serializedState).toMatchObject({
@@ -399,6 +438,7 @@ describe('Serialization utils', () => {
           },
           savedSearch: {
             ...savedSearch,
+            grid: { columns: { _source: { width: 250 } } },
             sampleSize: 500,
             sort: sortOverride,
           } as Parameters<typeof serializeState>[0]['savedSearch'],
@@ -407,13 +447,17 @@ describe('Serialization utils', () => {
           serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
           selectedTabId: 'tab-1',
-          embeddableTransformsEnabled: true,
         });
 
         // By-reference API shape includes ref_id; panel overrides (sampleSize, sort)
         // are stored in the dashboard document but not part of the simplified by-ref schema
         expect(serializedState).toMatchObject({
           ref_id: 'test-id',
+          overrides: {
+            column_settings: { _source: { width: 250 } },
+            sample_size: 500,
+            sort: [{ name: 'order_date', direction: 'asc' }],
+          },
         });
       });
 
@@ -429,7 +473,6 @@ describe('Serialization utils', () => {
           serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
           selectedTabId: 'tab-2',
-          embeddableTransformsEnabled: true,
         });
 
         expect(serializedState).toMatchObject({
@@ -450,7 +493,6 @@ describe('Serialization utils', () => {
           serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
           selectedTabId: undefined,
-          embeddableTransformsEnabled: true,
         });
 
         expect(serializedState).toMatchObject({
@@ -460,10 +502,10 @@ describe('Serialization utils', () => {
     });
   });
 
-  describe('legacy panel state (embeddable transforms disabled)', () => {
+  describe('legacy panel state (BWC)', () => {
     test('deserialize by-ref uses savedObjectId', async () => {
       const sessionTabs = [mockTab('tab-1', 'Tab 1')];
-      discoverServicesLegacy.savedSearch.getDiscoverSession = jest
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
@@ -474,55 +516,13 @@ describe('Serialization utils', () => {
 
       const deserialized = await deserializeState({
         serializedState: legacyByRef,
-        discoverServices: discoverServicesLegacy,
+        discoverServices: discoverServiceMock,
       });
 
       expect(deserialized.savedObjectId).toBe('legacy-session-id');
-      expect(discoverServicesLegacy.savedSearch.getDiscoverSession).toHaveBeenCalledWith(
+      expect(discoverServiceMock.savedSearch.getDiscoverSession).toHaveBeenCalledWith(
         'legacy-session-id'
       );
-    });
-
-    test('deserialize Discover session by-value when transforms disabled (add-to-dashboard)', async () => {
-      const deserializedState = await deserializeState({
-        serializedState: apiStateByValue,
-        discoverServices: discoverServicesLegacy,
-      });
-
-      expect(discoverServicesLegacy.savedSearch.byValueToSavedSearch).toHaveBeenCalled();
-      expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
-      expect(deserializedState.title).toEqual('test panel title');
-    });
-
-    test('serialize by-ref returns savedObjectId (not ref_id)', () => {
-      const sort: SortOrder[] = [['order_date', 'desc']];
-      const searchSource = createSearchSourceMock({ index: dataViewMock });
-      const savedSearch = {
-        title: 'test1',
-        description: 'description',
-        columns: ['_source'],
-        sort,
-        grid: {},
-        hideChart: false,
-        sampleSize: 100,
-        isTextBasedQuery: false,
-        managed: false,
-        searchSource,
-      };
-
-      const serialized = serializeState({
-        uuid,
-        initialState: { tabs: [mockTab('tab-1', 'Tab 1')] },
-        savedSearch: savedSearch as Parameters<typeof serializeState>[0]['savedSearch'],
-        serializeTitles: jest.fn(),
-        serializeTimeRange: jest.fn(),
-        serializeDynamicActions: jest.fn(),
-        savedObjectId: 'legacy-id',
-        embeddableTransformsEnabled: false,
-      });
-
-      expect(serialized).toMatchObject({ savedObjectId: 'legacy-id' });
-      expect(serialized).not.toHaveProperty('ref_id');
     });
   });
 });

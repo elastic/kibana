@@ -160,5 +160,12 @@ export const attackDiscoverySearchTool = (
       }
     },
     tags: ['security', 'attack-discovery', 'search'],
+    annotations: {
+      title: 'Search Attack Discoveries',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };

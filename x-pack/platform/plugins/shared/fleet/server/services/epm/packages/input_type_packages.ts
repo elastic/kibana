@@ -7,21 +7,27 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
-import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesDataStream, IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
+  InstallablePackage,
+  Installation,
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicy,
   RegistryDataStream,
 } from '../../../types';
+import { ElasticsearchAssetType } from '../../../../common';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
+
+import { appContextService } from '../../app_context';
 
 import { dataStreamService } from '../..';
 
@@ -54,20 +60,25 @@ interface CustomDatasetStream {
 
 export const getCustomDatasetStreams = (
   packagePolicy: NewPackagePolicy | PackagePolicy,
-  pkgInfo: PackageInfo
+  pkgInfo: Pick<PackageInfo, 'type' | 'data_streams' | 'policy_templates'>
 ): CustomDatasetStream[] => {
   if (pkgInfo.type === 'input') {
     const datasetName = getDatasetName(packagePolicy.inputs);
     if (!datasetName) return [];
 
     const isDynamicSignalTypes = hasDynamicSignalTypes(pkgInfo);
-    const signalTypes: string[] = isDynamicSignalTypes
-      ? ['logs', 'metrics', 'traces']
-      : [
-          packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
-            packagePolicy.inputs[0].streams[0].data_stream?.type ||
-            'logs',
-        ];
+    const signalTypes: string[] = (
+      isDynamicSignalTypes
+        ? ['logs', 'metrics', 'traces']
+        : [
+            packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+              packagePolicy.inputs[0].streams[0].data_stream?.type ||
+              'logs',
+          ]
+    )
+      // Fleet does not create data streams for unmanaged signal types (e.g. profiles);
+      // those are owned by the producer/exporter (see FLEET_UNMANAGED_DATA_STREAM_TYPES).
+      .filter((type) => !FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(type));
 
     return signalTypes.map((type) => ({
       datasetName,
@@ -116,6 +127,17 @@ export const getCustomDatasetStreams = (
   return results;
 };
 
+export const getNormalizedDataStreamsFromPackagePolicy = (
+  packagePolicy: NewPackagePolicy | PackagePolicy,
+  packageInfo: PackageInfo | InstallablePackage
+): RegistryDataStream[] =>
+  getCustomDatasetStreams(packagePolicy, packageInfo).flatMap(({ datasetName, dataStreamType }) =>
+    getNormalizedDataStreams(packageInfo, datasetName, dataStreamType)
+      .filter((ds): ds is RegistryDataStream => !!ds.type)
+      .slice(0, 1)
+      .map((ds) => ({ ...ds, path: datasetName }))
+  );
+
 export const findDataStreamsFromDifferentPackages = async (
   datasetName: string,
   pkgInfo: PackageInfo,
@@ -141,6 +163,67 @@ export const checkExistingDataStreamsAreFromDifferentPackage = (
     (ds) => ds._meta?.package?.name && ds._meta.package.name !== pkgInfo.name
   );
 };
+
+function hasUncorroboratedUploadAssets(
+  installation: Pick<Installation, 'name' | 'install_source' | 'installed_es'>,
+  existingDataStreams: IndicesDataStream[],
+  existingIndexTemplate: IndicesIndexTemplate | null,
+  dataStreamType: string,
+  datasetName: string
+): boolean {
+  // Same escape hatch as the upload validator: flagged deployments opt out of
+  // the upload takeover protections entirely.
+  if (appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
+    return false;
+  }
+
+  if (installation.install_source !== 'upload') {
+    return false;
+  }
+
+  const hasUncorroboratedStream = existingDataStreams.some(
+    (liveStream) =>
+      !isAssetCorroboratedByUpload(
+        installation,
+        liveStream._meta?.package?.name,
+        dataStreamType,
+        datasetName
+      )
+  );
+  if (hasUncorroboratedStream) {
+    return true;
+  }
+
+  return Boolean(
+    existingIndexTemplate &&
+      !isAssetCorroboratedByUpload(
+        installation,
+        existingIndexTemplate._meta?.package?.name,
+        dataStreamType,
+        datasetName
+      )
+  );
+}
+
+function isAssetCorroboratedByUpload(
+  installation: Pick<Installation, 'name' | 'installed_es'>,
+  owner: string | undefined,
+  dataStreamType: string,
+  datasetName: string
+): boolean {
+  if (owner !== installation.name) {
+    return false;
+  }
+
+  const expected = `${dataStreamType}-${datasetName}`;
+  return (installation.installed_es ?? []).some((asset) => {
+    if (asset.type !== ElasticsearchAssetType.indexTemplate) {
+      return false;
+    }
+    const base = asset.id.split('@')[0];
+    return base === expected || base.startsWith(`${expected}.`) || expected.startsWith(`${base}.`);
+  });
+}
 
 export const isInputPackageDatasetUsedByMultiplePolicies = (
   packagePolicies: PackagePolicy[],
@@ -336,6 +419,21 @@ async function installAssetsForDataStreamType(opts: {
       `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
     );
   }
+
+  if (
+    hasUncorroboratedUploadAssets(
+      installedPkgWithAssets.installation,
+      existingDataStreams,
+      existingIndexTemplate,
+      dataStream.type,
+      datasetName
+    )
+  ) {
+    throw new PackagePolicyValidationError(
+      `Data stream or index template for dataset "${datasetName}" already exists and its ownership cannot be verified for this uploaded package. Remove the existing assets or reinstall the package before reusing the dataset.`
+    );
+  }
+
   try {
     if (installedPkgWithAssets.installation.version !== pkgInfo.version) {
       const pkg = await Registry.getPackage(pkgInfo.name, pkgInfo.version, {
@@ -374,7 +472,7 @@ async function installAssetsForDataStreamType(opts: {
       soClient,
       installedPkgWithAssets.installation.name,
       [],
-      generateESIndexPatterns([{ ...dataStream, path: datasetName }])
+      generateESIndexPatterns([{ ...dataStream, path: datasetName }], pkgInfo)
     );
   } catch (error) {
     logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);

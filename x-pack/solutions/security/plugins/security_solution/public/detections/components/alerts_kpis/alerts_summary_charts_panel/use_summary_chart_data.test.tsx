@@ -104,7 +104,7 @@ describe('get summary charts data', () => {
       updatedAt: dateNow,
     });
 
-    expect(mockUseQueryAlerts).toBeCalledWith({
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith({
       query: severityMock.query,
       indexName: 'signal-alerts',
       skip: false,
@@ -149,7 +149,7 @@ describe('get summary charts data', () => {
   it('should skip the query', () => {
     const { result } = renderUseSummaryChartData({ skip: true });
 
-    expect(mockUseQueryAlerts).toBeCalledWith({
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith({
       query: severityMock.query,
       indexName: 'signal-alerts',
       skip: true,
@@ -181,7 +181,7 @@ describe('get summary charts data', () => {
         updatedAt: dateNow,
       });
 
-      expect(mockUseQueryAlerts).toBeCalledWith({
+      expect(mockUseQueryAlerts).toHaveBeenCalledWith({
         query: alertRuleMock.query,
         indexName: 'signal-alerts',
         skip: false,
@@ -223,7 +223,7 @@ describe('get summary charts data', () => {
         updatedAt: dateNow,
       });
 
-      expect(mockUseQueryAlerts).toBeCalledWith({
+      expect(mockUseQueryAlerts).toHaveBeenCalledWith({
         query: alertsGroupingMock.query,
         indexName: 'signal-alerts',
         skip: false,

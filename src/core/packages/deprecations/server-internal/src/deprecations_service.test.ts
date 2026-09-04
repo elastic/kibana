@@ -55,7 +55,7 @@ describe('DeprecationsService', () => {
       const deprecationsService = new DeprecationsService(coreContext);
       await deprecationsService.setup(deprecationsCoreSetupDeps);
       // registers correct base api path
-      expect(http.createRouter).toBeCalledWith('/api/deprecations');
+      expect(http.createRouter).toHaveBeenCalledWith('/api/deprecations');
       // registers get route '/'
       expect(router.get).toHaveBeenCalledTimes(1);
       expect(router.get).toHaveBeenCalledWith(
@@ -77,14 +77,14 @@ describe('DeprecationsService', () => {
     it('calls registerConfigDeprecationsInfo', async () => {
       const deprecationsService = new DeprecationsService(coreContext);
       await deprecationsService.setup(deprecationsCoreSetupDeps);
-      expect(registerConfigDeprecationsInfoMock).toBeCalledTimes(1);
+      expect(registerConfigDeprecationsInfoMock).toHaveBeenCalledTimes(1);
     });
 
     describe('logging.configure tests', () => {
       it('calls logging.configure without enable_http_debug_logs', async () => {
         const deprecationsService = new DeprecationsService(coreContext);
         await deprecationsService.setup(deprecationsCoreSetupDeps);
-        expect(loggingMock.configure).toBeCalledTimes(1);
+        expect(loggingMock.configure).toHaveBeenCalledTimes(1);
         const config$ = loggingMock.configure.mock.calls[0][1];
         expect(await firstValueFrom(config$)).toStrictEqual({
           loggers: [{ name: 'http', level: 'off', appenders: [] }],
@@ -98,7 +98,7 @@ describe('DeprecationsService', () => {
         coreContext = mockCoreContext.create({ configService });
         const deprecationsService = new DeprecationsService(coreContext);
         await deprecationsService.setup(deprecationsCoreSetupDeps);
-        expect(loggingMock.configure).toBeCalledTimes(1);
+        expect(loggingMock.configure).toHaveBeenCalledTimes(1);
         const config$ = loggingMock.configure.mock.calls[0][1];
         expect(await firstValueFrom(config$)).toStrictEqual({
           loggers: [{ name: 'http', level: 'debug', appenders: [] }],

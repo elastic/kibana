@@ -8,9 +8,11 @@
 import type { EuiMarkdownAstNodePosition } from '@elastic/eui';
 import { useCallback, useEffect, useState } from 'react';
 import { first } from 'rxjs';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 import { VISUALIZATION } from './translations';
+import { getPendingLensAttach } from '../../../attachments/lens/lens_return/storage';
 import type { MarkdownEditorRef } from '../../types';
 
 interface DraftComment {
@@ -38,12 +40,23 @@ export const useLensDraftComment = () => {
         return;
       }
 
+      // A pending SO-attach marker means the incoming Lens package belongs to
+      // the "Open in Lens -> Save and return -> auto attach" round trip, not
+      // the markdown editor. Ignore it here so the markdown flow doesn't claim
+      // the package (which would reopen the "Add visualization" modal and race
+      // the SO-attach consumer for the same package).
+      if (getPendingLensAttach(storage)) {
+        return;
+      }
+
       const incomingEmbeddablePackage = embeddable
         ?.getStateTransfer()
-        .getIncomingEmbeddablePackage(currentAppId);
+        .getIncomingEmbeddablePackage(currentAppId, false);
       const storageDraftComment = storage.get(DRAFT_COMMENT_STORAGE_ID);
 
-      setHasIncomingLensState(!!incomingEmbeddablePackage);
+      setHasIncomingLensState(
+        incomingEmbeddablePackage?.some((pkg) => pkg.type === LENS_EMBEDDABLE_TYPE) ?? false
+      );
 
       if (storageDraftComment) {
         setDraftComment(storageDraftComment);

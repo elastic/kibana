@@ -5,81 +5,176 @@
  * 2.0.
  */
 
-import { containsVectorField } from './deployment_stats';
+import type { RequestHandlerContext } from '@kbn/core/server';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
+import { fetchDashboardsCount } from '../lib/dashboards';
+import {
+  fetchApiKeysStats,
+  fetchIndexStats,
+  fetchMonitorPrivileges,
+} from '../lib/deployment_stats';
+import { registerDeploymentStatsRoute } from './deployment_stats';
 
-describe('containsVectorField', () => {
-  it('returns false for undefined properties', () => {
-    expect(containsVectorField(undefined)).toBe(false);
+jest.mock('../lib/dashboards');
+jest.mock('../lib/deployment_stats');
+
+const mockFetchIndexStats = fetchIndexStats as jest.MockedFunction<typeof fetchIndexStats>;
+const mockFetchDashboardsCount = fetchDashboardsCount as jest.MockedFunction<
+  typeof fetchDashboardsCount
+>;
+const mockFetchApiKeysStats = fetchApiKeysStats as jest.MockedFunction<typeof fetchApiKeysStats>;
+const mockFetchMonitorPrivileges = fetchMonitorPrivileges as jest.MockedFunction<
+  typeof fetchMonitorPrivileges
+>;
+
+describe('registerDeploymentStatsRoute', () => {
+  let router: ReturnType<typeof httpServiceMock.createRouter>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+  let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    router = httpServiceMock.createRouter();
+    logger = loggingSystemMock.createLogger();
+    esClient = elasticsearchServiceMock.createScopedClusterClient();
+    soClient = savedObjectsClientMock.create();
+    mockFetchMonitorPrivileges.mockResolvedValue({
+      canMonitorAllIndices: true,
+      canMonitorCluster: true,
+    });
+    mockFetchApiKeysStats.mockResolvedValue({ total: null, expiring: null });
+
+    registerDeploymentStatsRoute(router, logger);
   });
 
-  it('returns false for an empty properties map', () => {
-    expect(containsVectorField({})).toBe(false);
+  const getHandler = () => router.get.mock.calls[0][1];
+
+  const createContext = (coreOverride?: Promise<never>) =>
+    ({
+      core:
+        coreOverride ??
+        Promise.resolve({
+          elasticsearch: { client: esClient },
+          savedObjects: { getClient: () => soClient },
+        }),
+    } as unknown as RequestHandlerContext);
+
+  it('returns index stats, dashboard count and api key stats combined in a single body', async () => {
+    mockFetchIndexStats.mockResolvedValue({
+      indicesCount: 3,
+      storeSizeBytes: 1024,
+      vectorCount: 5,
+      documentsCount: 4,
+      newIndex: null,
+    });
+    mockFetchDashboardsCount.mockResolvedValue(2);
+    mockFetchApiKeysStats.mockResolvedValue({ total: 6, expiring: 1 });
+
+    const request = httpServerMock.createKibanaRequest();
+    const response = httpServerMock.createResponseFactory();
+
+    await getHandler()(createContext(), request, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        indicesCount: 3,
+        storeSizeBytes: 1024,
+        vectorCount: 5,
+        documentsCount: 4,
+        dashboardsCount: 2,
+        apiKeysCount: 6,
+        expiringApiKeysCount: 1,
+        newIndex: null,
+      },
+    });
   });
 
-  it('returns true when a top-level field is dense_vector', () => {
-    expect(containsVectorField({ embedding: { type: 'dense_vector' } })).toBe(true);
+  it('surfaces null values (unavailable) without failing the response', async () => {
+    mockFetchIndexStats.mockResolvedValue({
+      indicesCount: null,
+      storeSizeBytes: null,
+      vectorCount: null,
+      documentsCount: null,
+      newIndex: null,
+    });
+    mockFetchDashboardsCount.mockResolvedValue(null);
+
+    const request = httpServerMock.createKibanaRequest();
+    const response = httpServerMock.createResponseFactory();
+
+    await getHandler()(createContext(), request, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        indicesCount: null,
+        storeSizeBytes: null,
+        vectorCount: null,
+        documentsCount: null,
+        dashboardsCount: null,
+        apiKeysCount: null,
+        expiringApiKeysCount: null,
+        newIndex: null,
+      },
+    });
+    expect(response.customError).not.toHaveBeenCalled();
   });
 
-  it('returns true when a top-level field is semantic_text', () => {
-    expect(containsVectorField({ body: { type: 'semantic_text' } })).toBe(true);
+  it('forwards the resolved monitor privileges to the index stats lookup', async () => {
+    mockFetchMonitorPrivileges.mockResolvedValue({
+      canMonitorAllIndices: false,
+      canMonitorCluster: true,
+    });
+    mockFetchIndexStats.mockResolvedValue({
+      indicesCount: 3,
+      storeSizeBytes: 1024,
+      vectorCount: null,
+      documentsCount: 4,
+      newIndex: null,
+    });
+    mockFetchDashboardsCount.mockResolvedValue(2);
+
+    const request = httpServerMock.createKibanaRequest();
+    const response = httpServerMock.createResponseFactory();
+
+    await getHandler()(createContext(), request, response);
+
+    expect(mockFetchIndexStats).toHaveBeenCalledWith(esClient, logger, {
+      canMonitorAllIndices: false,
+      canMonitorCluster: true,
+    });
+    expect(response.forbidden).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        indicesCount: 3,
+        storeSizeBytes: 1024,
+        vectorCount: null,
+        documentsCount: 4,
+        dashboardsCount: 2,
+        apiKeysCount: null,
+        expiringApiKeysCount: null,
+        newIndex: null,
+      },
+    });
   });
 
-  it('returns false when no vector fields are present', () => {
-    expect(
-      containsVectorField({
-        title: { type: 'text' },
-        count: { type: 'integer' },
-      })
-    ).toBe(false);
-  });
+  it('returns a custom error when resolving the core context throws', async () => {
+    const request = httpServerMock.createKibanaRequest();
+    const response = httpServerMock.createResponseFactory();
 
-  it('returns true when a vector field is nested inside an object', () => {
-    expect(
-      containsVectorField({
-        metadata: {
-          properties: {
-            embedding: { type: 'dense_vector' },
-          },
-        },
-      })
-    ).toBe(true);
-  });
+    await getHandler()(
+      createContext(Promise.reject(new Error('core unavailable')) as Promise<never>),
+      request,
+      response
+    );
 
-  it('returns true when a vector field is deeply nested', () => {
-    expect(
-      containsVectorField({
-        level1: {
-          properties: {
-            level2: {
-              properties: {
-                vector: { type: 'dense_vector' },
-              },
-            },
-          },
-        },
-      })
-    ).toBe(true);
-  });
-
-  it('returns false when nested properties contain no vector fields', () => {
-    expect(
-      containsVectorField({
-        metadata: {
-          properties: {
-            author: { type: 'keyword' },
-          },
-        },
-      })
-    ).toBe(false);
-  });
-
-  it('returns true on first match and short-circuits', () => {
-    expect(
-      containsVectorField({
-        title: { type: 'text' },
-        embedding: { type: 'dense_vector' },
-        body: { type: 'text' },
-      })
-    ).toBe(true);
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(logger.warn).toHaveBeenCalled();
   });
 });

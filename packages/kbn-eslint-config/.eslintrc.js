@@ -74,6 +74,8 @@ module.exports = {
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
+    '@kbn/eslint-plugin-alerting-v2',
+    '@kbn/eslint-plugin-kbn-ui',
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
@@ -223,6 +225,12 @@ module.exports = {
           to: false,
           exclude: USES_ELASTIC_APM_AGENT,
           disallowedMessage: `Do not use 'elastic-apm-node' for new instrumentation. Use withActiveSpan from @kbn/tracing-utils instead.`,
+        },
+        {
+          from: 'js-yaml',
+          to: false,
+          disallowedMessage:
+            "Use the `yaml` package instead of js-yaml (e.g. `import yaml from 'yaml'`).",
         },
       ],
     ],
@@ -384,9 +392,28 @@ module.exports = {
     'no-prototype-builtins': 'error',
 
     /**
+     * kbn-ui rules
+     */
+    '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
+    '@kbn/kbn-ui/prefer_kbn_ui_callout': 'warn',
+    '@kbn/kbn-ui/no_restricted_package_imports': 'error',
+
+    /**
      * EUI Team rules
      */
 
+    '@elastic/eui/callout-prefer-props-for-content': [
+      'warn',
+      {
+        components: [
+          'EuiCallOut',
+          'KbnInfoCallout',
+          'KbnSuccessCallout',
+          'KbnWarningCallout',
+          'KbnDangerCallout',
+        ],
+      },
+    ],
     '@elastic/eui/no-restricted-eui-imports': [
       'warn',
       {
@@ -399,14 +426,49 @@ module.exports = {
      * a11y-related rules:
      * all existing violations were fixed; keep this as error to prevent new ones.
      */
+    '@elastic/eui/callout-announce-on-mount': 'error',
     '@elastic/eui/prefer-eui-icon-tip': 'error',
     '@elastic/eui/sr-output-disabled-tooltip': 'error',
     '@elastic/eui/badge-accessibility-rules': 'error',
+    '@elastic/eui/no-unnamed-interactive-element': 'error',
     '@elastic/eui/consistent-is-invalid-props': 'error',
     '@elastic/eui/tooltip-no-interactive-content': 'error',
+    '@elastic/eui/require-table-caption': 'error',
+    '@elastic/eui/accessible-interactive-element': 'error',
+    '@elastic/eui/icon-accessibility-rules': 'error',
+    '@elastic/eui/tooltip-button-icon-wrap': 'error',
+    '@elastic/eui/tooltip-focusable-anchor': 'error',
+    '@elastic/eui/no-unnamed-radio-group': 'error',
+    '@elastic/eui/require-aria-label-for-modals': 'error',
   },
 
   overrides: [
+    {
+      files: [
+        'src/platform/plugins/private/event_annotation/**/*',
+        'src/platform/plugins/private/event_annotation_listing/**/*',
+        'src/platform/plugins/private/vis_default_editor/**/*',
+        'src/platform/plugins/private/vis_types/**/*',
+        'src/platform/plugins/shared/chart_expressions/**/*',
+        'src/platform/plugins/shared/charts/**/*',
+        'src/platform/plugins/shared/expressions/**/*',
+        'src/platform/plugins/shared/vis_types/**/*',
+        'src/platform/plugins/shared/visualization_listing/**/*',
+        'src/platform/plugins/shared/visualizations/**/*',
+        'x-pack/platform/plugins/shared/lens/**/*',
+        'x-pack/platform/plugins/private/graph/**/*',
+        'src/platform/packages/private/kbn-lens-formula-docs/**/*',
+        'src/platform/packages/shared/kbn-lens-common/**/*',
+        'src/platform/packages/shared/kbn-lens-common-2/**/*',
+        'src/platform/packages/shared/kbn-coloring/**/*',
+        'src/platform/packages/shared/kbn-chart-icons/**/*',
+        'src/platform/packages/shared/kbn-event-annotation-common/**/*',
+        'src/platform/packages/shared/kbn-event-annotation-components/**/*',
+      ],
+      rules: {
+        '@kbn/eslint/no_viz_naming': 'error',
+      },
+    },
     {
       files: [
         'src/platform/plugins/**/server/index.ts',

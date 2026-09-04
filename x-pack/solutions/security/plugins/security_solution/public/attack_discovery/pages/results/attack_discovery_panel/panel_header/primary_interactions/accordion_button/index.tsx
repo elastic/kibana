@@ -22,6 +22,7 @@ interface Props {
   replacements?: Replacements;
   showAnonymized?: boolean;
   title: string;
+  titleId: string;
 }
 
 const AccordionButtonComponent: React.FC<Props> = ({
@@ -30,6 +31,7 @@ const AccordionButtonComponent: React.FC<Props> = ({
   replacements,
   showAnonymized = false,
   title,
+  titleId,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -79,6 +81,7 @@ const AccordionButtonComponent: React.FC<Props> = ({
           replacements={replacements}
           showAnonymized={showAnonymized}
           title={title}
+          titleId={titleId}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

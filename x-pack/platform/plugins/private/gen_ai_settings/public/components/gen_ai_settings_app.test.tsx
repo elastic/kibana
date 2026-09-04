@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -36,6 +38,7 @@ const mockProductDocBase = {
     }),
     install: jest.fn().mockResolvedValue({}),
     uninstall: jest.fn().mockResolvedValue({}),
+    getDefaultInferenceId: jest.fn().mockResolvedValue('.elser-2-elasticsearch'),
   },
 };
 
@@ -131,13 +134,15 @@ describe('GenAiSettingsApp', () => {
       ...servicesOverrides,
     };
     return renderWithI18n(
-      <QueryClientProvider client={new QueryClient()}>
-        <KibanaContextProvider services={services}>
-          <SettingsContextProvider>
-            <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
-          </SettingsContextProvider>
-        </KibanaContextProvider>
-      </QueryClientProvider>
+      <MockAppHeaderProvider>
+        <QueryClientProvider client={new QueryClient()}>
+          <KibanaContextProvider services={services}>
+            <SettingsContextProvider>
+              <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
+            </SettingsContextProvider>
+          </KibanaContextProvider>
+        </QueryClientProvider>
+      </MockAppHeaderProvider>
     );
   };
 
@@ -174,7 +179,9 @@ describe('GenAiSettingsApp', () => {
 
       // Main page section
       expect(screen.getByTestId('genAiSettingsPage')).toBeInTheDocument();
-      expect(screen.getByTestId('genAiSettingsTitle')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'GenAI Settings'
+      );
 
       // Feature visibility section (with default settings)
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();

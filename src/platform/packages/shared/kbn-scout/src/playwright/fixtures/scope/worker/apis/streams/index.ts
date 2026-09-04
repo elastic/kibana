@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 import type { ScoutSpaceParallelFixture } from '../../scout_space';
@@ -19,6 +18,7 @@ import {
   type StreamsIngestGetResponse,
   isClassicStreamDefinition,
   isWiredStreamDefinition,
+  stripProcessingUpdatedAt,
 } from './types';
 
 export interface StreamsApiService {
@@ -141,7 +141,7 @@ export const getStreamsApiService = ({
           const ingestForPut = rawProcessing
             ? {
                 ...rawIngest,
-                processing: omit(rawProcessing, 'updated_at'),
+                processing: stripProcessingUpdatedAt(rawProcessing),
               }
             : rawIngest;
           await kbnClient.request({
@@ -155,7 +155,6 @@ export const getStreamsApiService = ({
               },
               dashboards: current.stream.dashboards ?? [],
               rules: current.stream.rules ?? [],
-              queries: current.stream.queries ?? [],
             },
           });
         } else {
@@ -184,7 +183,7 @@ export const getStreamsApiService = ({
           await service.updateStream(streamName, {
             ingest: {
               ...definition.stream.ingest,
-              processing: omit(definition.stream.ingest.processing, 'updated_at'),
+              processing: stripProcessingUpdatedAt(definition.stream.ingest.processing),
               wired: {
                 ...definition.stream.ingest.wired,
                 fields: {},
@@ -195,7 +194,7 @@ export const getStreamsApiService = ({
           await service.updateStream(streamName, {
             ingest: {
               ...definition.stream.ingest,
-              processing: omit(definition.stream.ingest.processing, 'updated_at'),
+              processing: stripProcessingUpdatedAt(definition.stream.ingest.processing),
               classic: {
                 ...definition.stream.ingest.classic,
                 field_overrides: {},
@@ -228,9 +227,12 @@ export const getStreamsApiService = ({
     ) => {
       await measurePerformanceAsync(log, 'streamsApi.updateStreamProcessors', async () => {
         const definition = await service.getStreamDefinition(streamName);
+        const previousProcessing = definition.stream.ingest.processing;
+        const previousStreamlangProcessing =
+          'steps' in previousProcessing ? previousProcessing : { steps: [] };
         const processing = !(typeof getProcessors === 'function')
           ? getProcessors
-          : getProcessors(definition.stream.ingest.processing);
+          : getProcessors(previousStreamlangProcessing);
         await service.updateStream(streamName, {
           ingest: {
             ...definition.stream.ingest,

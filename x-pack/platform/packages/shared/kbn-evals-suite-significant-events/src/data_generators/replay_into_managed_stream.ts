@@ -9,14 +9,18 @@ import type { Client } from '@elastic/elasticsearch';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createGcsRepository } from '@kbn/es-snapshot-loader';
+import type { KbnClient } from '@kbn/test';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 import { ensureLogsIndexTemplate } from './logs_index_template';
+import { SIGNIFICANT_EVENTS_MEMORIES_DATA_STREAM } from './snapshot_indices';
 
 const LOGS_STREAM_NAME = 'logs';
 const REPLAY_TEMP_PREFIX = 'sigevents-replay-temp-';
 const REINDEX_REQUEST_TIMEOUT_MS = 30 * 60 * 1000;
 const MAX_LOGGED_REINDEX_FAILURES = 5;
+
+const replayTempPrefix = (runId: number): string => `${REPLAY_TEMP_PREFIX}${runId}-`;
 
 const TIMESTAMP_TRANSFORM_SCRIPT = `
   // Reset the _id field to null to avoid conflicts with subsequent reindex operations
@@ -25,7 +29,7 @@ const TIMESTAMP_TRANSFORM_SCRIPT = `
     Instant maxTime = Instant.parse(params.max_timestamp);
     Instant originalTime = Instant.parse(ctx['@timestamp'].toString());
     long deltaMillis = maxTime.toEpochMilli() - originalTime.toEpochMilli();
-    Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
+    Instant now = Instant.parse(params.replay_now);
     ctx['@timestamp'] = now.minusMillis(deltaMillis).toString();
   }
 `;
@@ -34,9 +38,32 @@ export interface ReplayStats {
   total: number;
   created: number;
   skipped: number;
+  /** Snapshot-time max `@timestamp` across the replayed logs indices. */
+  maxTimestamp: string;
+  /** Wall-clock instant the snapshot max was shifted onto — the fixed `now` used by the transform. */
+  replayNow: string;
 }
 
+/**
+ * Maps a snapshot-time timestamp onto the replayed timeline using the same shift the
+ * replay pipeline applied to every log document: `replayNow - (maxTimestamp - timestamp)`.
+ */
+export const shiftSnapshotTimestamp = ({
+  timestamp,
+  maxTimestamp,
+  replayNow,
+}: {
+  timestamp: string;
+  maxTimestamp: string;
+  replayNow: string;
+}): string =>
+  new Date(
+    Date.parse(replayNow) - (Date.parse(maxTimestamp) - Date.parse(timestamp))
+  ).toISOString();
+
 interface ReplayArtifacts {
+  runId: number;
+  tempPrefix: string;
   repoName: string;
   pipelineName: string;
   tempIndices: string[];
@@ -51,6 +78,8 @@ interface LogsDataStream {
 const createReplayArtifacts = (): ReplayArtifacts => {
   const runId = Date.now();
   return {
+    runId,
+    tempPrefix: replayTempPrefix(runId),
     repoName: `sigevents-replay-${runId}`,
     pipelineName: `sigevents-ts-transform-${runId}`,
     tempIndices: [],
@@ -76,8 +105,12 @@ const getLogsIndicesFromSnapshot = async ({
     throw new Error(`Snapshot "${snapshotName}" not found in repository "${repoName}"`);
   }
 
+  // Restrict to the `logs` data stream's own backing indices (`.ds-logs-<date>-<gen>`). The hyphen
+  // matters: `.startsWith('.ds-logs')` would also match sibling streams like `logs.ecs`
+  // (`.ds-logs.ecs-…`), which the discovery eval does not target — and restoring those extra backing
+  // indices is what trips `index_not_found` at reindex. The agent reads `FROM logs`, so only `logs`.
   const logsIndices = (snapshot.indices ?? []).filter(
-    (indexName) => indexName.startsWith('.ds-logs') || indexName === LOGS_STREAM_NAME
+    (indexName) => indexName.startsWith('.ds-logs-') || indexName === LOGS_STREAM_NAME
   );
   if (logsIndices.length === 0) {
     throw new Error(`No logs indices found in snapshot "${snapshotName}"`);
@@ -91,12 +124,14 @@ const restoreLogsIndicesToTemp = async ({
   repoName,
   snapshotName,
   logsIndices,
+  tempPrefix,
   log,
 }: {
   esClient: Client;
   repoName: string;
   snapshotName: string;
   logsIndices: string[];
+  tempPrefix: string;
   log: ToolingLog;
 }): Promise<string[]> => {
   log.debug(`Restoring ${logsIndices.length} indices to temp location`);
@@ -108,10 +143,15 @@ const restoreLogsIndicesToTemp = async ({
     indices: logsIndices.join(','),
     include_global_state: false,
     rename_pattern: '(.+)',
-    rename_replacement: `${REPLAY_TEMP_PREFIX}$1`,
+    rename_replacement: `${tempPrefix}$1`,
+    // The snapshot's backing indices carry `index.lifecycle.*`; if restored intact, the cluster's
+    // lifecycle sweep reaps the temp index (its origination date is already past the delete age)
+    // before we can reindex from it — surfacing as `index_not_found` mid-replay on serverless.
+    // Strip lifecycle so the temp index stays inert until cleanup deletes it.
+    ignore_index_settings: ['index.lifecycle.name', 'index.lifecycle.prefer_ilm'],
   });
 
-  return logsIndices.map((indexName) => `${REPLAY_TEMP_PREFIX}${indexName}`);
+  return logsIndices.map((indexName) => `${tempPrefix}${indexName}`);
 };
 
 const getMaxTimestampFromTempIndices = async ({
@@ -228,11 +268,13 @@ const createReplayPipeline = async ({
   esClient,
   pipelineName,
   maxTimestamp,
+  replayNow,
   chainedPipelineName,
 }: {
   esClient: Client;
   pipelineName: string;
   maxTimestamp: string;
+  replayNow: string;
   chainedPipelineName?: string;
 }): Promise<void> => {
   await esClient.ingest.putPipeline({
@@ -241,7 +283,7 @@ const createReplayPipeline = async ({
       {
         script: {
           lang: 'painless',
-          params: { max_timestamp: maxTimestamp },
+          params: { max_timestamp: maxTimestamp, replay_now: replayNow },
           source: TIMESTAMP_TRANSFORM_SCRIPT,
         },
       },
@@ -304,7 +346,7 @@ const reindexTempIndicesIntoManagedStream = async ({
   esClient: Client;
   tempIndices: string[];
   log: ToolingLog;
-}): Promise<ReplayStats> => {
+}): Promise<Omit<ReplayStats, 'maxTimestamp' | 'replayNow'>> => {
   log.debug('Reindexing into managed logs stream via default_pipeline');
   const reindexResult = await esClient.reindex(
     {
@@ -338,17 +380,19 @@ const cleanupReplayArtifacts = async ({
   log: ToolingLog;
   artifacts: ReplayArtifacts;
 }): Promise<void> => {
-  const { writeIndexName, previousDefaultPipeline, tempIndices, pipelineName, repoName } =
-    artifacts;
+  const { writeIndexName, tempIndices, pipelineName, repoName } = artifacts;
 
-  if (writeIndexName && previousDefaultPipeline !== undefined) {
+  if (writeIndexName) {
     try {
+      // Reset to _none rather than restoring the streams pipeline so that
+      // streams.disable() can delete the pipeline without ES rejecting it due
+      // to an active index reference. streams.enable() will re-apply it.
       await esClient.indices.putSettings({
         index: writeIndexName,
-        settings: { 'index.default_pipeline': previousDefaultPipeline },
+        settings: { 'index.default_pipeline': '_none' },
       });
     } catch {
-      log.debug('Failed to restore default_pipeline');
+      log.warning('Failed to clear default_pipeline on write index');
     }
   }
 
@@ -356,20 +400,49 @@ const cleanupReplayArtifacts = async ({
     try {
       await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
     } catch {
-      log.debug(`Failed to delete temp index: ${indexName}`);
+      log.warning(`Failed to delete temp index: ${indexName}`);
     }
   }
 
   try {
     await esClient.ingest.deletePipeline({ id: pipelineName });
   } catch {
-    log.debug('Failed to delete timestamp pipeline');
+    log.warning('Failed to delete timestamp pipeline');
   }
 
   try {
     await esClient.snapshot.deleteRepository({ name: repoName });
   } catch {
-    log.debug('Failed to delete snapshot repository');
+    log.warning('Failed to delete snapshot repository');
+  }
+};
+
+export const deleteTemporaryReplayIndices = async (
+  esClient: Client,
+  log: ToolingLog,
+  prefix: string = REPLAY_TEMP_PREFIX
+): Promise<void> => {
+  try {
+    const resolved = await esClient.indices.get({
+      index: `${prefix}*`,
+      expand_wildcards: 'all',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    const indexNames = Object.keys(resolved);
+    if (indexNames.length === 0) return;
+    await esClient.indices.delete({
+      index: indexNames,
+      expand_wildcards: 'all',
+      ignore_unavailable: true,
+    });
+    log.debug(`Deleted ${indexNames.length} temporary replay indices`);
+  } catch (error) {
+    log.warning(
+      `Failed to delete temporary replay indices: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 };
 
@@ -403,6 +476,11 @@ export async function replayIntoManagedStream(
     await repository.register({ esClient, log, repoName: artifacts.repoName });
 
     log.info('Step 2/4: Restoring logs snapshot indices into temporary indices...');
+    // A previously killed run may have left temp indices behind (the cleanup
+    // `finally` never ran), which would collide with `restore` ("an open index
+    // with same name already exists"). Delete any stale temp indices first.
+    await deleteTemporaryReplayIndices(esClient, log);
+
     const logsIndices = await getLogsIndicesFromSnapshot({
       esClient,
       repoName: artifacts.repoName,
@@ -413,8 +491,28 @@ export async function replayIntoManagedStream(
       repoName: artifacts.repoName,
       snapshotName,
       logsIndices,
+      tempPrefix: artifacts.tempPrefix,
       log,
     });
+
+    // Temp indices inherit default_pipeline from the snapshot, which points to the
+    // Streams ingest pipeline. Clear it now so streams.disable() can delete that
+    // pipeline without ES rejecting it due to an active index reference.
+    if (artifacts.tempIndices.length > 0) {
+      try {
+        await esClient.indices.putSettings({
+          index: artifacts.tempIndices,
+          settings: { 'index.default_pipeline': '_none' },
+        });
+        log.debug('Cleared default_pipeline on temporary replay indices');
+      } catch (clearError) {
+        log.warning(
+          `Failed to clear default_pipeline on temp indices: ${
+            clearError instanceof Error ? clearError.message : String(clearError)
+          }`
+        );
+      }
+    }
 
     log.info('Step 3/4: Preparing replay pipeline and managed stream write index...');
     const maxTimestamp = await getMaxTimestampFromTempIndices({
@@ -424,7 +522,6 @@ export async function replayIntoManagedStream(
     });
     const { writeIndexName, previousDefaultPipeline } = await getWriteIndexInfo({ esClient, log });
     artifacts.writeIndexName = writeIndexName;
-    artifacts.previousDefaultPipeline = previousDefaultPipeline;
 
     const chainedPipelineName = await getReplayChainPipeline({
       esClient,
@@ -432,10 +529,12 @@ export async function replayIntoManagedStream(
       previousDefaultPipeline,
     });
 
+    const replayNow = new Date().toISOString();
     await createReplayPipeline({
       esClient,
       pipelineName: artifacts.pipelineName,
       maxTimestamp,
+      replayNow,
       chainedPipelineName,
     });
 
@@ -456,8 +555,54 @@ export async function replayIntoManagedStream(
     log.info(
       `Replay complete: ${stats.created}/${stats.total} docs indexed, ${stats.skipped} skipped`
     );
-    return stats;
+    return { ...stats, maxTimestamp, replayNow };
   } finally {
     await cleanupReplayArtifacts({ esClient, log, artifacts });
   }
 }
+
+export const resetMemoryPages = async ({
+  esClient,
+  log,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+}): Promise<void> => {
+  // Delete the data stream instead of deleting through its write alias. The memory stream is
+  // versioned and stale documents in older backing indices can otherwise remain searchable.
+  await esClient.indices
+    .deleteDataStream({ name: SIGNIFICANT_EVENTS_MEMORIES_DATA_STREAM })
+    .catch((error: unknown) => {
+      if (!isNotFoundError(error)) throw error;
+    });
+  log.debug('Reset significant events memory data stream');
+};
+
+export const replayIntoMemoryPages = async ({
+  log,
+  memoryPages,
+  kbnClient,
+}: {
+  log: ToolingLog;
+  kbnClient: KbnClient;
+  memoryPages: Array<{ name: string; content: string }>;
+}): Promise<void> => {
+  // Seed through the memory API so the data stream is provisioned and each page
+  // is embedded (with lexical fallback) exactly as production pages are.
+  await Promise.all(
+    memoryPages.map(async (page) => {
+      const response = await kbnClient.request<{
+        id: string;
+        name: string;
+      }>({
+        path: '/internal/streams/memory/entries',
+        method: 'POST',
+        body: page,
+      });
+      if (response.data.name !== page.name || !response.data.id) {
+        throw new Error(`Memory seed returned an invalid page for "${page.name}"`);
+      }
+      log.info(`Seeded memory page "${page.name}"`);
+    })
+  );
+};

@@ -13,6 +13,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { PluginContext } from '../../context/plugin_context/plugin_context';
 import { HasDataContextProvider } from '../../context/has_data_context/has_data_context';
 import {
@@ -74,6 +75,15 @@ const withCore = makeDecorator({
       usageCollection: {
         reportUiCounter: () => {},
       },
+      share: {
+        url: {
+          locators: {
+            get: () => ({
+              useUrl: () => '/app/observabilityOnboarding',
+            }),
+          },
+        },
+      },
     } as unknown as Partial<CoreStart>);
 
     const config: ConfigSchema = {
@@ -89,18 +99,20 @@ const withCore = makeDecorator({
     return (
       <MemoryRouter>
         <KibanaReactContext.Provider>
-          <PluginContext.Provider
-            value={{
-              appMountParameters: {
-                setHeaderActionMenu: () => {},
-              } as unknown as AppMountParameters,
-              config,
-              observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-              ObservabilityPageTemplate: KibanaPageTemplate,
-            }}
-          >
-            <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>
-          </PluginContext.Provider>
+          <MockAppHeaderProvider>
+            <PluginContext.Provider
+              value={{
+                appMountParameters: {
+                  setHeaderActionMenu: () => {},
+                } as unknown as AppMountParameters,
+                config,
+                observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+                ObservabilityPageTemplate: KibanaPageTemplate,
+              }}
+            >
+              <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>
+            </PluginContext.Provider>
+          </MockAppHeaderProvider>
         </KibanaReactContext.Provider>
       </MemoryRouter>
     );

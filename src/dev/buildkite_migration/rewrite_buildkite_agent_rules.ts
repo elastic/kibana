@@ -11,7 +11,7 @@ import fs from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { resolve } from 'path';
 
-import globby from 'globby';
+import { globby } from 'globby';
 import { parse, stringify } from 'yaml';
 
 import { run } from '@kbn/dev-cli-runner';

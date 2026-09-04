@@ -7,7 +7,7 @@
 
 import { get, has, isObject, omit, toString as fpToString } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set/fp';
-import type { Action, Middleware } from 'redux';
+import type { Action, Middleware } from 'redux-v4';
 import type { CoreStart } from '@kbn/core/public';
 import type { Filter, MatchAllFilter } from '@kbn/es-query';
 import {
@@ -22,7 +22,7 @@ import {
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PageScope } from '../../../data_view_manager/constants';
-import { sourcererAdapterSelector } from '../../../data_view_manager/redux/selectors';
+import { scopedDataViewSelector } from '../../../data_view_manager/redux/selectors';
 import {
   endTimelineSaving,
   saveTimeline,
@@ -68,9 +68,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
 
     const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
 
-    const { dataViewId: reduxDataViewId } = sourcererAdapterSelector(PageScope.timeline)(
-      storeState
-    );
+    const { dataViewId: reduxDataViewId } = scopedDataViewSelector(PageScope.timeline)(storeState);
 
     let dataViewId: string | null = null;
     let indexNames: string[] = [];

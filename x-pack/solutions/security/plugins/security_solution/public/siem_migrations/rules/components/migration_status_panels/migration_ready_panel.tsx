@@ -21,18 +21,12 @@ import { useGetMissingResources } from '../../../common/hooks/use_get_missing_re
 import { StartTranslationButton } from '../../../common/components/start_translation_button';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
-import { MigrationSource } from '../../../common/types';
 import { useMissingResources } from '../../../common/hooks/use_missing_resources';
+import { useRuleMigrationVendorCopy } from '../../hooks/use_rule_migration_vendor_copy';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
 }
-
-const RULE_MIGRATION_READY_MISSING_RESOURCES_DESCRIPTION: Record<MigrationSource, string> = {
-  [MigrationSource.SPLUNK]: i18n.RULE_MIGRATION_READY_MISSING_RESOURCES_SPLUNK,
-  [MigrationSource.QRADAR]: i18n.RULE_MIGRATION_READY_MISSING_RESOURCES_QRADAR,
-  [MigrationSource.SENTINEL]: i18n.RULE_MIGRATION_READY_MISSING_RESOURCES_SENTINEL,
-};
 
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
   const { openFlyout, isFlyoutOpen } = useMigrationDataInputContext();
@@ -48,6 +42,9 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   const { getMissingResources, isLoading: isLoadingMissingResources } = useGetMissingResources(
     'rule',
     onMissingResourcesFetched
+  );
+  const { missingResources: missingResourcesCopy } = useRuleMigrationVendorCopy(
+    migrationStats.vendor
   );
 
   useEffect(() => {
@@ -111,10 +108,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
                 <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
                   <span>{migrationPanelDescription}</span>
                   {!isLoadingMissingResources && missingResourceCount > 0 && (
-                    <span>
-                      {' '}
-                      {RULE_MIGRATION_READY_MISSING_RESOURCES_DESCRIPTION[migrationStats.vendor]}
-                    </span>
+                    <span> {missingResourcesCopy.readyDescription}</span>
                   )}
                 </PanelText>
               </EuiFlexItem>
@@ -124,7 +118,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="ruleMigrationMissingResourcesButton"
-                aria-label={i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_SPLUNK_TITLE}
+                aria-label={missingResourcesCopy.uploadTitle}
                 iconType="download"
                 iconSide="right"
                 onClick={onOpenFlyout}

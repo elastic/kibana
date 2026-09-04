@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
 import type { QueryExecutionResult } from './use_query_execution';
@@ -32,8 +33,22 @@ jest.mock('./use_query_execution', () => ({
   useQueryExecution: () => mockExecutionResult,
 }));
 
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../../form/hooks/use_data_fields', () => ({
-  useDataFields: () => ({ data: {} }),
+  useDataFields: () => ({
+    data: {
+      '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
+    },
+    isLoading: false,
+  }),
+}));
+
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
 }));
 
 jest.mock('../../form/contexts/rule_form_context', () => ({
@@ -41,6 +56,7 @@ jest.mock('../../form/contexts/rule_form_context', () => ({
     http: {},
     data: { search: { search: jest.fn() } },
     dataViews: {},
+    notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
     lens: { EmbeddableComponent: () => null, stateHelperApi: jest.fn() },
   }),
 }));
@@ -49,17 +65,20 @@ jest.mock('./compose_discover_chart', () => ({
   ComposeDiscoverChart: () => <div data-test-subj="mockComposeDiscoverChart" />,
 }));
 
-jest.mock('./compose_discover_tabs', () => ({
-  ComposeDiscoverTabs: () => <div data-test-subj="mockComposeDiscoverTabs" />,
-  TAB_DEFINITIONS: [
-    { id: 'base', label: 'Base' },
-    { id: 'alert', label: 'Alert' },
-    { id: 'recovery', label: 'Recovery' },
-  ],
-}));
+jest.mock('./compose_discover_tabs', () => {
+  const actual = jest.requireActual('./compose_discover_tabs');
+  return {
+    ...actual,
+    ComposeDiscoverTabs: () => <div data-test-subj="mockComposeDiscoverTabs" />,
+  };
+});
 
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="mockCodeEditor">{value}</pre>,
+  CodeEditor: ({ value, options }: { value: string; options?: { theme?: string } }) => (
+    <pre data-test-subj="mockCodeEditor" data-theme={options?.theme}>
+      {value}
+    </pre>
+  ),
   ESQL_LANG_ID: 'esql',
 }));
 
@@ -70,11 +89,17 @@ const defaultProps: QuerySandboxProps = {
   onDateRangeChange: jest.fn(),
 };
 
+const testQueryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
 const renderSandbox = (overrides: Partial<QuerySandboxProps> = {}) =>
   render(
-    <I18nProvider>
-      <QuerySandbox {...defaultProps} {...overrides} />
-    </I18nProvider>
+    <QueryClientProvider client={testQueryClient}>
+      <I18nProvider>
+        <QuerySandbox {...defaultProps} {...overrides} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
 
 describe('QuerySandbox', () => {
@@ -87,6 +112,13 @@ describe('QuerySandbox', () => {
   it('renders the sandbox container', () => {
     renderSandbox();
     expect(screen.getByTestId('querySandbox')).toBeInTheDocument();
+  });
+
+  it('renders the editor and results panels', () => {
+    renderSandbox();
+    expect(screen.getByTestId('querySandboxEditorPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxResultsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxEditorResizeHandle')).toBeInTheDocument();
   });
 
   it('renders the search button', () => {
@@ -105,6 +137,7 @@ describe('QuerySandbox', () => {
     expect(screen.getByTestId('mockCodeEditor')).toHaveTextContent(
       'FROM logs-* | STATS count() BY host.name'
     );
+    expect(screen.getByTestId('mockCodeEditor')).toHaveAttribute('data-theme', 'esql');
     expect(screen.queryByTestId('mockComposeDiscoverTabs')).not.toBeInTheDocument();
   });
 
@@ -140,8 +173,8 @@ describe('QuerySandbox', () => {
         onRecoveryBlockChange: jest.fn(),
       },
     });
-    expect(screen.getByText('Base')).toBeInTheDocument();
-    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxTab-base')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxTab-alert')).toBeInTheDocument();
   });
 
   it('shows "Run your query" prompt when hasRun is false', () => {
@@ -149,9 +182,11 @@ describe('QuerySandbox', () => {
     expect(screen.getByText('Run your query to see results')).toBeInTheDocument();
   });
 
-  it('calls run on mount when autoRun is true', () => {
+  it('calls run on mount when autoRun is true', async () => {
     renderSandbox({ autoRun: true });
-    expect(mockRun).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockRun).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('does not call run on mount when autoRun is false', () => {
@@ -160,7 +195,12 @@ describe('QuerySandbox', () => {
   });
 
   it('shows loading spinner when loading after a run', () => {
-    mockExecutionResult = { ...defaultExecutionResult, hasRun: true, isLoading: true };
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      isLoading: true,
+      lastExecutedQuery: defaultProps.query,
+    };
     renderSandbox();
     const spinners = screen.getAllByRole('progressbar');
     expect(spinners.length).toBeGreaterThanOrEqual(2);
@@ -172,14 +212,51 @@ describe('QuerySandbox', () => {
       hasRun: true,
       isError: true,
       error: 'Something went wrong',
+      lastExecutedQuery: defaultProps.query,
     };
     renderSandbox();
     expect(screen.getByText('Query error')).toBeInTheDocument();
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });
 
+  it('keeps showing an error after the query is edited, until the next run', () => {
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      isError: true,
+      error: 'Something went wrong',
+      /*
+       * The executed query differs from the current query prop, matching Discover's
+       * behavior of leaving the error up until the user re-runs the query.
+       */
+      lastExecutedQuery: 'FROM logs-* | STATS count() BY host.name (edited)',
+    };
+    renderSandbox();
+    expect(screen.getByText('Query error')).toBeInTheDocument();
+    expect(screen.queryByText('Run your query to see results')).not.toBeInTheDocument();
+  });
+
+  it('hides the stale execution error callout when a validation error is also showing', () => {
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      isError: true,
+      error: 'Something went wrong',
+      lastExecutedQuery: defaultProps.query,
+    };
+    renderSandbox({ validationError: ['bad query'] });
+    expect(screen.getByTestId('querySandboxValidationError')).toBeInTheDocument();
+    expect(screen.queryByText('Query error')).not.toBeInTheDocument();
+    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+  });
+
   it('shows "No results" when query returns empty rows', () => {
-    mockExecutionResult = { ...defaultExecutionResult, hasRun: true, rows: [] };
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      rows: [],
+      lastExecutedQuery: defaultProps.query,
+    };
     renderSandbox();
     expect(screen.getByText('No results')).toBeInTheDocument();
   });
@@ -191,7 +268,7 @@ describe('QuerySandbox', () => {
       columns: [{ id: 'host.name', displayAsText: 'host.name', esType: 'keyword' }],
       rows: [{ 'host.name': 'server-01' }],
       totalRowCount: 1,
-      lastExecutedQuery: 'FROM logs-*',
+      lastExecutedQuery: defaultProps.query,
     };
     renderSandbox();
     expect(screen.getByTestId('mockComposeDiscoverChart')).toBeInTheDocument();
@@ -205,7 +282,7 @@ describe('QuerySandbox', () => {
       columns: [{ id: 'host.name', displayAsText: 'host.name', esType: 'keyword' }],
       rows: [{ 'host.name': 'server-01' }, { 'host.name': 'server-02' }],
       totalRowCount: 2,
-      lastExecutedQuery: 'FROM logs-*',
+      lastExecutedQuery: defaultProps.query,
     };
     renderSandbox();
     expect(screen.getByText('2 results')).toBeInTheDocument();
@@ -219,5 +296,74 @@ describe('QuerySandbox', () => {
   it('enables time field selector when onTimeFieldChange is provided', () => {
     renderSandbox({ onTimeFieldChange: jest.fn() });
     expect(screen.getByTestId('querySandboxTimeField')).not.toBeDisabled();
+  });
+
+  describe('alert query tab', () => {
+    const tabPropsBase = {
+      tabs: ['base', 'alert'] as const,
+      onTabChange: jest.fn(),
+      alertBlock: '',
+      recoveryBlock: '',
+      onBaseQueryChange: jest.fn(),
+      onAlertBlockChange: jest.fn(),
+      onRecoveryBlockChange: jest.fn(),
+    };
+
+    it('disables the alert tab when the base query is empty', () => {
+      renderSandbox({
+        tabProps: {
+          ...tabPropsBase,
+          tabs: ['base', 'alert'],
+          activeTab: 'base',
+          baseQuery: '',
+        },
+      });
+
+      expect(screen.getByTestId('querySandboxTab-alert')).toBeDisabled();
+      expect(screen.getByTestId('querySandboxTab-base')).not.toBeDisabled();
+    });
+
+    it('enables the alert tab when the base query is populated', () => {
+      renderSandbox({
+        tabProps: {
+          ...tabPropsBase,
+          tabs: ['base', 'alert'],
+          activeTab: 'base',
+          baseQuery: 'FROM logs-*',
+        },
+      });
+
+      expect(screen.getByTestId('querySandboxTab-alert')).not.toBeDisabled();
+    });
+
+    it('switches to the base tab when alert is active without a base query', () => {
+      const onTabChange = jest.fn();
+
+      renderSandbox({
+        tabProps: {
+          ...tabPropsBase,
+          tabs: ['base', 'alert'],
+          activeTab: 'alert',
+          baseQuery: '',
+          onTabChange,
+        },
+      });
+
+      expect(onTabChange).toHaveBeenCalledWith('base');
+    });
+  });
+
+  describe('headerActions', () => {
+    it('renders headerActions in the in-editor toolbar when provided', () => {
+      renderSandbox({
+        headerActions: <button data-test-subj="customHeaderAction">Split</button>,
+      });
+      expect(screen.getByTestId('customHeaderAction')).toBeInTheDocument();
+    });
+
+    it('does not render a headerActions slot when absent', () => {
+      renderSandbox({});
+      expect(screen.queryByTestId('customHeaderAction')).not.toBeInTheDocument();
+    });
   });
 });

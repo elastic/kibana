@@ -235,6 +235,7 @@ export interface LensSharedProps {
   viewMode?: ViewMode;
   forceDSL?: boolean;
   esqlVariables?: ESQLControlVariable[];
+  isApproximate?: boolean;
 }
 
 export interface LensRequestHandlersProps {
@@ -295,17 +296,13 @@ export type LensComponentProps = Simplify<
        */
       disabledActions?: string[];
       /**
-       * Toggles the inspector
-       */
-      showInspector?: boolean;
-      /**
        * Toggle inline editing feature
        */
       canEditInline?: boolean;
       /**
-       * Optional search term to highlight in the panel title
+       * Optional search terms to highlight in the panel title
        */
-      titleHighlight?: string;
+      titleHighlight?: string | string[];
     }
 >;
 
@@ -389,8 +386,8 @@ export type LensInternalApi = Simplify<
       updateDataLoading: (newDataLoading: boolean | undefined) => void;
       expressionParams$: PublishingSubject<ExpressionWrapperProps | null>;
       updateExpressionParams: (newParams: ExpressionWrapperProps | null) => void;
-      expressionAbortController$: PublishingSubject<AbortController | undefined>;
-      updateAbortController: (newAbortController: AbortController | undefined) => void;
+      expressionAbortController$: PublishingSubject<AbortController>;
+      updateAbortController: (newAbortController: AbortController) => void;
       renderCount$: PublishingSubject<number>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
       updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) => void;

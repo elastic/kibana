@@ -18,10 +18,10 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiAvatar,
-  EuiCallOut,
   EuiCopy,
   EuiDescriptionList,
 } from '@elastic/eui';
+import { KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GoogleUserInfo } from '../../../common';
 import { EarsOAuthProvider } from '../../../common';
@@ -393,7 +393,7 @@ export const EarsConnectionsSection: React.FC = () => {
                 )}
                 {accessToken && (
                   <EuiFlexItem>
-                    <EuiCallOut
+                    <KbnSuccessCallout
                       announceOnMount={false}
                       title={
                         <FormattedMessage
@@ -401,8 +401,6 @@ export const EarsConnectionsSection: React.FC = () => {
                           defaultMessage="Got a token"
                         />
                       }
-                      color="success"
-                      iconType="check"
                     >
                       <EuiFlexGroup alignItems="center" gutterSize="m">
                         <EuiFlexItem grow={false}>
@@ -437,7 +435,7 @@ export const EarsConnectionsSection: React.FC = () => {
                           </EuiCopy>
                         </EuiFlexItem>
                       </EuiFlexGroup>
-                    </EuiCallOut>
+                    </KbnSuccessCallout>
                   </EuiFlexItem>
                 )}
                 {(code || accessToken) && (
@@ -465,7 +463,7 @@ export const EarsConnectionsSection: React.FC = () => {
             {earsError && (
               <>
                 <EuiSpacer size="m" />
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
                   title={
                     <FormattedMessage
@@ -473,11 +471,8 @@ export const EarsConnectionsSection: React.FC = () => {
                       defaultMessage="Failed to execute EARS call"
                     />
                   }
-                  color="warning"
-                  iconType="warning"
-                >
-                  {earsError}
-                </EuiCallOut>
+                  text={earsError}
+                />
               </>
             )}
           </EuiFlexGroup>
@@ -495,7 +490,7 @@ export const EarsConnectionsSection: React.FC = () => {
               </EuiButton>
             </EuiFlexItem>
             {userInfo && (
-              <EuiCallOut
+              <KbnSuccessCallout
                 announceOnMount
                 title={
                   <FormattedMessage
@@ -503,8 +498,6 @@ export const EarsConnectionsSection: React.FC = () => {
                     defaultMessage="Successfully connected!"
                   />
                 }
-                color="success"
-                iconType="check"
               >
                 <EuiSpacer size="s" />
                 <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -531,12 +524,12 @@ export const EarsConnectionsSection: React.FC = () => {
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiCallOut>
+              </KbnSuccessCallout>
             )}
             {userInfoError && (
               <>
                 <EuiSpacer size="m" />
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
                   title={
                     <FormattedMessage
@@ -544,11 +537,8 @@ export const EarsConnectionsSection: React.FC = () => {
                       defaultMessage="Failed to fetch user info"
                     />
                   }
-                  color="warning"
-                  iconType="warning"
-                >
-                  {userInfoError}
-                </EuiCallOut>
+                  text={userInfoError}
+                />
               </>
             )}
           </EuiFlexGroup>

@@ -1,5 +1,8 @@
 {
-  "sha1": "583820c80b76088375faa39fa902fe190edb096d",
+  "sha1": "5ae814a07c714add80860b8b3bc829d02d1b106f",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "6f0ad80c78092f7-cdf015ba5f44d6f",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing_delete.spec.ts",
-        "line": 36,
-        "column": 14
+        "line": 32,
+        "column": 42
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 41,
-        "column": 12
+        "line": 37,
+        "column": 59
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 39,
+        "column": 5
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 47,
+        "column": 13
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 65,
+        "column": 18
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 77,
+        "column": 18
       }
     }
   ]

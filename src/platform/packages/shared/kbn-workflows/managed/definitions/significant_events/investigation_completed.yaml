@@ -1,0 +1,44 @@
+version: '1'
+name: Significant Events Investigation Completed
+description: >
+  Attaches completed Nightshift investigations to their Significant Event and applies
+  investigation trigger feedback.
+enabled: true
+tags:
+  - observability
+  - streams
+  - significant-events
+  - investigation
+
+triggers:
+  - type: nightshift-investigations.completed
+    on:
+      condition: 'event.subject.type: "significant_event"'
+
+steps:
+  - name: get_investigation
+    type: kibana.request
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ event.investigation_id }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      continue: true
+
+  - name: attach_completed_investigation
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events/{{ event.subject.id }}/investigations'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        workflow_execution_id: '{{ event.investigation_id }}'
+        started_at: '{{ event.started_at }}'
+        completed_at: '{{ event.completed_at }}'
+        trigger_feedback: '${{ steps.get_investigation.output.trigger_feedback | default: [] }}'
+    # Completion feedback is best effort. The investigation result and trigger event must not be
+    # retried or queued again just because this source-owned write-back cannot be applied.
+    on-failure:
+      continue: true

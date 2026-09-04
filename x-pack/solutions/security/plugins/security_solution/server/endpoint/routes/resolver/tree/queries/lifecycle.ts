@@ -107,7 +107,9 @@ export class LifecycleQuery extends BaseResolverQuery {
      *
      * So the schema fields are flattened ('process.parent.entity_id')
      */
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    return body.hits.hits.map((hit) => hit.fields);
+    return body.hits.hits.map((hit) => ({
+      ...(hit.fields ?? {}),
+      ...(hit._index ? { _index: hit._index } : {}),
+    }));
   }
 }

@@ -55,9 +55,11 @@ describe('createAlertEventLogRecordObject', () => {
         ],
         spaceId: 'default',
         maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
+        ruleTags: ['tag-1', 'tag-2'],
       })
     ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
+      tags: ['tag-1', 'tag-2'],
       event: {
         action: 'execute-start',
         category: ['alerts'],
@@ -128,8 +130,10 @@ describe('createAlertEventLogRecordObject', () => {
         ],
         spaceId: 'default',
         maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
+        ruleTags: ['tag-1', 'tag-2'],
       })
     ).toStrictEqual({
+      tags: ['tag-1', 'tag-2'],
       event: {
         action: 'recovered-instance',
         category: ['alerts'],
@@ -215,8 +219,10 @@ describe('createAlertEventLogRecordObject', () => {
           recovered: 1,
         },
         maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
+        ruleTags: ['tag-1', 'tag-2'],
       })
     ).toStrictEqual({
+      tags: ['tag-1', 'tag-2'],
       event: {
         action: 'execute-action',
         category: ['alerts'],

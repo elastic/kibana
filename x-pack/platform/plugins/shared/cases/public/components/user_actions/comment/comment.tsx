@@ -9,18 +9,19 @@ import type { EuiCommentProps } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
-import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
+import { UserActionActions } from '../../../../common/types/domain';
 import { type AttachmentTypeRegistry } from '../../../../common/registry';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import * as i18n from './translations';
 import { createUnifiedAttachmentUserActionBuilder } from './unified_attachment';
-import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import {
+  getReferenceAttachmentId,
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
+  resolveUnifiedAttachmentType,
   toUnifiedAttachmentType,
 } from '../../../../common/utils/attachments';
 
@@ -29,47 +30,28 @@ const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCa
 interface DeleteLabelTitle {
   userAction: SnakeToCamelCase<CommentUserAction>;
   caseData: UserActionBuilderArgs['caseData'];
-  externalReferenceAttachmentTypeRegistry: UserActionBuilderArgs['externalReferenceAttachmentTypeRegistry'];
   unifiedAttachmentTypeRegistry: UserActionBuilderArgs['unifiedAttachmentTypeRegistry'];
 }
 
 const getDeleteLabelTitle = ({
   userAction,
   caseData,
-  externalReferenceAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
 }: DeleteLabelTitle) => {
   const { comment } = userAction.payload;
   const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
-  if (isLegacyAttachmentRequest(comment)) {
-    if (comment.type === AttachmentType.externalReference) {
-      return getDeleteLabelFromRegistry({
-        caseData,
-        registry: externalReferenceAttachmentTypeRegistry,
-        getId: () => comment.externalReferenceAttachmentTypeId,
-        getAttachmentProps: () => ({
-          externalReferenceId: comment.externalReferenceId,
-          externalReferenceMetadata: comment.externalReferenceMetadata,
-        }),
-      });
-    }
-  }
-  if (isUnifiedAttachmentRequest(comment)) {
-    return getDeleteLabelFromRegistry({
-      caseData,
-      registry: unifiedAttachmentTypeRegistry,
-      getId: () => toUnifiedAttachmentType(comment.type, owner),
-      getAttachmentProps: () => ({
-        attachmentId: 'attachmentId' in comment ? comment.attachmentId : undefined,
-        metadata: comment.metadata,
-      }),
-    });
-  }
-
-  return `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
+  return getDeleteLabelFromRegistry({
+    caseData,
+    registry: unifiedAttachmentTypeRegistry,
+    getId: () => resolveUnifiedAttachmentType(comment, owner),
+    getAttachmentProps: () => ({
+      attachmentId: getReferenceAttachmentId(comment),
+      metadata: 'metadata' in comment ? comment.metadata : undefined,
+    }),
+  });
 };
 
-interface GetDeleteLabelFromRegistryArgs<R> {
+interface GetDeleteLabelFromRegistryArgs {
   caseData: UserActionBuilderArgs['caseData'];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   registry: AttachmentTypeRegistry<AttachmentFrameworkAttachmentType<any>>;
@@ -77,12 +59,12 @@ interface GetDeleteLabelFromRegistryArgs<R> {
   getAttachmentProps: () => object;
 }
 
-const getDeleteLabelFromRegistry = <R,>({
+const getDeleteLabelFromRegistry = ({
   caseData,
   registry,
   getId,
   getAttachmentProps,
-}: GetDeleteLabelFromRegistryArgs<R>) => {
+}: GetDeleteLabelFromRegistryArgs) => {
   const registeredAttachmentCommonLabel = `${i18n.REMOVED_FIELD} ${i18n.ATTACHMENT.toLowerCase()}`;
   const attachmentTypeId: string = getId();
   const isTypeRegistered = registry.has(attachmentTypeId);
@@ -97,7 +79,7 @@ const getDeleteLabelFromRegistry = <R,>({
   };
 
   const attachmentType = registry.get(attachmentTypeId);
-  const attachmentLabel = attachmentType.getAttachmentRemovalObject?.(props).event ?? null;
+  const attachmentLabel = attachmentType.getRemovalActivity?.(props).event ?? null;
 
   return attachmentLabel != null ? attachmentLabel : registeredAttachmentCommonLabel;
 };
@@ -106,23 +88,17 @@ const getDeleteCommentUserAction = ({
   userAction,
   userProfiles,
   caseData,
-  externalReferenceAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   handleOutlineComment,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
 } & Pick<
   UserActionBuilderArgs,
-  | 'handleOutlineComment'
-  | 'userProfiles'
-  | 'externalReferenceAttachmentTypeRegistry'
-  | 'unifiedAttachmentTypeRegistry'
-  | 'caseData'
+  'handleOutlineComment' | 'userProfiles' | 'unifiedAttachmentTypeRegistry' | 'caseData'
 >): EuiCommentProps[] => {
   const label = getDeleteLabelTitle({
     userAction,
     caseData,
-    externalReferenceAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
   });
 
@@ -142,8 +118,8 @@ const getCreateCommentUserAction = ({
   userAction,
   userProfiles,
   caseData,
-  externalReferenceAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
+  permissions,
   attachment,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -155,30 +131,12 @@ const getCreateCommentUserAction = ({
   attachment: AttachmentUIV2;
 } & Omit<
   UserActionBuilderArgs,
-  | 'comments'
-  | 'index'
-  | 'handleOutlineComment'
-  | 'currentUserProfile'
-  | 'persistableStateAttachmentTypeRegistry'
+  'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
+  // Migrated external-reference / `actions` attachments are projected to their unified
+  // shape by the cases server before reaching the client (UI reads always use
+  // `mode: 'unified'`), so legacy-shaped attachments have no client-side renderer.
   if (isLegacyAttachmentRequest(attachment)) {
-    // Legacy `actions` attachments are projected to the unified `security.endpoint`
-    // type by the cases server before reaching the client (UI reads always use
-    // `mode: 'unified'`), so they fall through to the unified branch below
-    // rather than needing a dedicated cases-side renderer.
-    if (attachment.type === AttachmentType.externalReference) {
-      const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
-        userAction,
-        userProfiles,
-        attachment,
-        externalReferenceAttachmentTypeRegistry,
-        caseData,
-        isLoading: loadingCommentIds.includes(attachment.id),
-        handleDeleteComment,
-      });
-
-      return externalReferenceBuilder.build();
-    }
     return [];
   }
 
@@ -195,6 +153,7 @@ const getCreateCommentUserAction = ({
       userProfiles,
       attachment,
       unifiedAttachmentTypeRegistry,
+      permissions,
       caseData,
       isLoading: loadingCommentIds.includes(attachment.id),
       handleDeleteComment,
@@ -216,8 +175,8 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   caseData,
   casesConfiguration,
   userProfiles,
-  externalReferenceAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
+  permissions,
   userAction,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -237,7 +196,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         caseData,
         handleOutlineComment,
         userProfiles,
-        externalReferenceAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
       });
     }
@@ -254,8 +212,8 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         casesConfiguration,
         userProfiles,
         userAction: attachmentUserAction,
-        externalReferenceAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
+        permissions,
         attachment,
         manageMarkdownEditIds,
         selectedOutlineCommentId,

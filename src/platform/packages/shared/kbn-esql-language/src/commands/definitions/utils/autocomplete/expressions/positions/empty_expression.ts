@@ -9,7 +9,11 @@
 
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { isEqual, uniq, uniqWith } from 'lodash';
-import { matchesSpecialFunction, normalizePreferredExpressionTypes } from '../utils';
+import {
+  isTupleExpression,
+  matchesSpecialFunction,
+  normalizePreferredExpressionTypes,
+} from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
 import {
   hasArbitraryExpressionSignature,
@@ -18,7 +22,7 @@ import {
   getAcceptedParamTypes,
   isAtRepeatingValuePosition,
   isAmbiguousPosition,
-  pairKeywordAndTextTypes,
+  isConstantParameter,
 } from '../../../signatures';
 import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
@@ -35,10 +39,9 @@ import { type ISuggestionItem } from '../../../../../registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
 import {
   allStarConstant,
+  commaWithAutoSuggestCompleteItem,
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
-  buildAddValuePlaceholder,
-  findConstantPlaceholderType,
 } from '../../../../../registry/complete_items';
 import { parametersFromHintsResolvers } from '../../parameters_from_hints';
 
@@ -166,15 +169,19 @@ function buildLiteralSuggestions(
 
   const { hasMoreMandatoryArgs } = functionParamContext;
   const suggestions: ISuggestionItem[] = [];
-  const hasConstantOnlyParams = paramDefinitions.some(({ constantOnly }) => constantOnly);
+  const hasConstantOnlyParams = paramDefinitions.some(isConstantParameter);
 
   // Constant-only literals (true, false, null, string/number literals)
-  const constantOnlySuggestions = buildConstantOnlyLiteralSuggestions(
-    paramDefinitions,
-    ctx,
-    config.shouldAddComma,
-    hasMoreMandatoryArgs
-  );
+  const constantOnlySuggestions = new SuggestionBuilder(ctx)
+    .addConstants({
+      paramDefinitions,
+      shouldAddComma: config.shouldAddComma,
+      hasMoreMandatoryArgs,
+      preferredPlaceholderType: functionParamContext.firstArgumentType,
+      includeValuesControl: ctx.options.controlType === ESQLVariableType.VALUES,
+    })
+    .build();
+
   suggestions.push(...constantOnlySuggestions);
 
   // Date literals (now(), 1 hour, 2 days, ?_tstart, ?_tend) - only add if not already added by constantOnly path
@@ -221,7 +228,7 @@ async function buildFieldAndFunctionSuggestions(
   // - there is at least one non-constant parameter, OR
   // - param definitions are empty (variadic/unknown position, e.g., CONCAT third+ arg)
 
-  const hasConstantOnlyParam = paramDefinitions.some(({ constantOnly }) => constantOnly);
+  const hasConstantOnlyParam = paramDefinitions.some(isConstantParameter);
   const hasFieldsOnlyParam = paramDefinitions.some(({ fieldsOnly }) => fieldsOnly);
 
   // constantOnly params require literal values, not fields
@@ -313,6 +320,19 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
     suggestions.push(...controlSuggestions);
   }
 
+  // Keep expression suggestions while offering the separator for the next tuple value.
+  if (
+    isTupleExpression(ctx.expressionRoot) &&
+    shouldSuggestComma({
+      position: 'inside_list',
+      innerText: ctx.innerText,
+      listHasValues: ctx.expressionRoot.values.length > 0,
+      isCursorFollowedByComma: options.isCursorFollowedByComma,
+    })
+  ) {
+    suggestions.push(commaWithAutoSuggestCompleteItem);
+  }
+
   return suggestions;
 }
 
@@ -320,16 +340,9 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
 function collectSuggestedValues(paramDefinitions: FunctionParameter[]): string[] {
   return uniq(
     paramDefinitions
-      .map(({ suggestedValues }) => suggestedValues)
+      .map(({ hint }) => hint?.allowedValues)
       .filter((values): values is string[] => Boolean(values))
       .flat()
-  );
-}
-
-/** Filters parameters that only accept constant values (literals or duration types) */
-function getConstantOnlyParams(paramDefinitions: FunctionParameter[]): FunctionParameter[] {
-  return paramDefinitions.filter(
-    ({ constantOnly, type }) => constantOnly || /_duration/.test(String(type))
   );
 }
 
@@ -426,50 +439,4 @@ function buildSuggestionsFromHints(
   });
 
   return results.flat();
-}
-
-/** Builds suggestions for constant-only literal parameters */
-function buildConstantOnlyLiteralSuggestions(
-  paramDefinitions: FunctionParameter[],
-  ctx: ExpressionContext,
-  shouldAddComma: boolean,
-  hasMoreMandatoryArgs: boolean
-): ISuggestionItem[] {
-  const constantOnlyParams = getConstantOnlyParams(paramDefinitions);
-  if (!constantOnlyParams.length) {
-    return [];
-  }
-
-  const types = pairKeywordAndTextTypes(constantOnlyParams.map(({ type }) => type));
-
-  const builder = new SuggestionBuilder(ctx);
-
-  builder.addLiterals({
-    types,
-    addComma: shouldAddComma,
-    advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-    includeDateLiterals: false, // Date literals are added separately in buildLiteralSuggestions
-    includeCompatibleLiterals: true,
-  });
-
-  builder.addFunctions({
-    types,
-    addComma: shouldAddComma,
-    constantGeneratingOnly: true,
-  });
-
-  const suggestions = builder.build();
-
-  // Add placeholder hint ONLY for explicit constantOnly parameters
-  const hasExplicitConstantOnly = paramDefinitions.some(({ constantOnly }) => constantOnly);
-
-  if (hasExplicitConstantOnly) {
-    const placeholderType = findConstantPlaceholderType(types);
-
-    if (placeholderType) {
-      suggestions.push(buildAddValuePlaceholder(placeholderType));
-    }
-  }
-
-  return suggestions;
 }

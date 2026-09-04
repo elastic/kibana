@@ -5,6 +5,10 @@
  * 2.0.
  */
 export const TASK_MANAGER_INDEX = '.kibana_task_manager';
+
+// Well-known id of the single saved object that stores the runtime task
+// execution control (pause/resume) state. Fetched by id only, never searched.
+export const TASK_EXECUTION_CONTROL_SO_ID = 'task-execution-control';
 export const CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: string[] = [
   // for testing
   'sampleTaskWithSingleConcurrency',
@@ -22,6 +26,7 @@ export const CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: string[] = [
 
 export const EVENT_LOG_PROVIDER = 'taskManager';
 export const EVENT_LOG_ACTIONS = {
+  taskRunStart: 'task-run-start',
   taskRun: 'task-run',
   taskCancel: 'task-cancel',
 };

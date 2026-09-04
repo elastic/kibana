@@ -12,18 +12,20 @@ import {
   buildExperimentFilterQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
+  buildEvaluatorModelsAggregation,
+  parseEvaluatorModelsAggregation,
   buildModelDisplayId,
   GetEvaluationExperimentRequestParams,
   GetEvaluationExperimentRequestQuery,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 interface EvalDocSource {
   experiment_name?: string;
   task?: { model?: { id?: string; family?: string; provider?: string } };
-  evaluator?: { model?: { id?: string; family?: string; provider?: string } };
   metadata?: {
     execution_id?: string;
     suite_id?: string;
@@ -45,7 +47,7 @@ interface EvalDocSource {
   '@timestamp'?: string;
 }
 
-export const registerGetExperimentRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_EXPERIMENT_URL,
@@ -70,6 +72,7 @@ export const registerGetExperimentRoute = ({ router, logger }: RouteDependencies
           const { experimentId } = request.params;
           const { suite_id: suiteId, model_id: modelId, execution_id: executionId } = request.query;
           const evalsContext = await context.evals;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const filterId = executionId ?? experimentId;
           const filterField = executionId ? 'metadata.execution_id' : 'experiment_id';
@@ -77,6 +80,7 @@ export const registerGetExperimentRoute = ({ router, logger }: RouteDependencies
             suiteId,
             modelId,
             filterField,
+            spaceId,
           });
 
           const metadataResponse = await evalsContext.evaluationScoreService.search({
@@ -95,12 +99,18 @@ export const registerGetExperimentRoute = ({ router, logger }: RouteDependencies
           const aggResponse = await evalsContext.evaluationScoreService.search({
             size: 0,
             query,
-            aggs: buildStatsAggregation(),
+            aggs: {
+              ...buildStatsAggregation(),
+              evaluator_models: buildEvaluatorModelsAggregation(),
+            },
           });
 
-          const stats = parseStatsAggregationResponse(
-            aggResponse.aggregations as Record<string, unknown> | undefined
-          );
+          const aggregations = aggResponse.aggregations as Record<string, unknown> | undefined;
+          const stats = parseStatsAggregationResponse(aggregations);
+          // Every distinct judge, most scores first; empty when only code evaluators ran. Derived
+          // from the same aggregation as the listing so both agree on the predominant judge,
+          // unlike `firstDoc`, which reflects whichever judge the unsorted search happens to hit.
+          const evaluatorModels = parseEvaluatorModelsAggregation(aggregations);
 
           const toModelDisplay = (model?: { id?: string; family?: string; provider?: string }) => {
             if (!model) return undefined;
@@ -119,7 +129,8 @@ export const registerGetExperimentRoute = ({ router, logger }: RouteDependencies
               suite_id: firstDoc.metadata?.suite_id ?? null,
               timestamp: firstDoc['@timestamp'],
               task_model: toModelDisplay(firstDoc.task?.model),
-              evaluator_model: toModelDisplay(firstDoc.evaluator?.model),
+              evaluator_model: evaluatorModels[0],
+              evaluator_models: evaluatorModels,
               git_branch: firstDoc.metadata?.git?.branch ?? null,
               git_commit_sha: firstDoc.metadata?.git?.commit_sha ?? null,
               ci: firstDoc.metadata?.ci,

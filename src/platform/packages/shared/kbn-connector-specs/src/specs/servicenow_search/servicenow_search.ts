@@ -52,16 +52,20 @@ export const ServicenowSearch: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
       {
-        type: 'oauth_client_credentials',
+        type: 'oauth_authorization_code',
+        isRecommended: true,
         defaults: {},
         overrides: {
           meta: {
+            authorizationUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_auth.do',
+            },
             tokenUrl: {
               placeholder: 'https://your-instance.service-now.com/oauth_token.do',
             },
@@ -70,13 +74,10 @@ export const ServicenowSearch: ConnectorSpec = {
         },
       },
       {
-        type: 'oauth_authorization_code',
+        type: 'oauth_client_credentials',
         defaults: {},
         overrides: {
           meta: {
-            authorizationUrl: {
-              placeholder: 'https://your-instance.service-now.com/oauth_auth.do',
-            },
             tokenUrl: {
               placeholder: 'https://your-instance.service-now.com/oauth_token.do',
             },
@@ -104,6 +105,7 @@ export const ServicenowSearch: ConnectorSpec = {
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description: 'Search ServiceNow records using full-text search across a given table',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
@@ -132,6 +134,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     getRecord: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve a specific ServiceNow record by its sys_id. Works for any table. ' +
         'For knowledge articles (kb_knowledge table), request fields: sys_id,number,short_description,text,topic,category,author,sys_created_on,sys_updated_on,workflow_state,kb_knowledge_base,kb_category',
@@ -153,6 +156,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     listRecords: {
       isTool: true,
+      scope: 'read',
       description: 'List records from a ServiceNow table with optional encoded query filter',
       input: ListRecordsInputSchema,
       handler: async (ctx, input: ListRecordsInput) => {
@@ -177,6 +181,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     listTables: {
       isTool: true,
+      scope: 'read',
       description:
         'List available ServiceNow tables with their labels and descriptions. Use this to discover what tables exist in the instance before querying them.',
       input: ListTablesInputSchema,
@@ -203,6 +208,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     listKnowledgeBases: {
       isTool: true,
+      scope: 'read',
       description:
         'List available ServiceNow knowledge bases with their titles and descriptions. Use this to discover what knowledge bases exist before searching for articles.',
       input: ListKnowledgeBasesInputSchema,
@@ -227,6 +233,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     getComments: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve comments and work notes for a ServiceNow record (e.g., an incident or change request). ' +
         'Returns journal entries in chronological order. Call this after retrieving a record to understand its history.',
@@ -252,6 +259,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     getAttachment: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a ServiceNow attachment as base64-encoded content by its attachment sys_id. ' +
         'Attachment sys_ids can be found by querying the sys_attachment table: ' +
@@ -291,6 +299,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     describeTable: {
       isTool: true,
+      scope: 'read',
       description:
         'Describe the schema of a ServiceNow table by listing all its fields (including inherited fields), ' +
         'their types, labels, and constraints. Use this to understand the structure of a table before ' +
@@ -333,32 +342,24 @@ export const ServicenowSearch: ConnectorSpec = {
       defaultMessage: 'Verifies ServiceNow connection by fetching the current user record',
     }),
     handler: async (ctx) => {
-      try {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
-        // Fetch the authenticated user's own record — readable by any authenticated user
-        // regardless of role. Avoids relying on admin-only tables like sys_properties.
-        const response = await ctx.client.get(`${instanceUrl}/api/now/table/sys_user`, {
-          params: {
-            sysparm_query: 'sys_created_on!=NULL',
-            sysparm_limit: 1,
-            sysparm_fields: 'sys_id',
-          },
-        });
-        const results = response.data?.result ?? [];
-        if (results.length > 0) {
-          return {
-            ok: true,
-            message: 'Successfully connected to ServiceNow',
-          };
-        }
-        return {
-          ok: true,
-          message: 'Successfully connected to ServiceNow (no user records visible)',
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
+      const { instanceUrl } = ctx.config as { instanceUrl: string };
+      // Fetch a minimal record from sys_user — readable by any authenticated user
+      // regardless of role. Avoids relying on admin-only tables like sys_properties.
+      const response = await ctx.client.get(`${instanceUrl}/api/now/table/sys_user`, {
+        params: {
+          sysparm_query: 'sys_created_on!=NULL',
+          sysparm_limit: 1,
+          sysparm_fields: 'sys_id',
+        },
+      });
+      const results = response.data?.result ?? [];
+      if (results.length === 0) {
+        throw new Error(
+          'Connected to ServiceNow but no user records are visible — verify that the connector has the required role permissions.'
+        );
       }
+      return {};
     },
+    enabled: true,
   },
 };

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, act } from '@testing-library/react';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyCanvasContent } from './action_policy_canvas_content';
 
 const flushPromises = async () => {
@@ -72,7 +73,6 @@ jest.mock('../../components/action_policy/details_flyout/action_policy_definitio
 
 const defaultData = {
   name: 'My Policy',
-  type: 'global' as const,
   description: 'A test policy',
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: 'rule.id: "abc"',
@@ -86,7 +86,7 @@ const createAttachment = ({
   data,
 }: { origin?: string; data?: Record<string, unknown> } = {}) => ({
   id: 'att-1',
-  type: 'action_policy' as const,
+  type: ACTION_POLICY_ATTACHMENT_TYPE,
   versions: [],
   current_version: 1,
   origin,
@@ -344,21 +344,12 @@ describe('ActionPolicyCanvasContent', () => {
       expect(mockGetRule).not.toHaveBeenCalled();
     });
 
-    it('uses data.ruleId directly for single_rule policies instead of parsing matcher', async () => {
+    it('extracts the rule id from the matcher rule.id clause', async () => {
       await renderCanvas({
-        data: { type: 'single_rule', ruleId: 'direct-rule-id', matcher: null },
+        data: { matcher: 'rule.id: "from-matcher"' },
       });
 
-      expect(mockGetRule).toHaveBeenCalledWith('direct-rule-id', expect.any(AbortSignal));
-      expect(mockGetRule).toHaveBeenCalledTimes(1);
-    });
-
-    it('prefers data.ruleId over matcher when both are present', async () => {
-      await renderCanvas({
-        data: { ruleId: 'from-ruleId', matcher: 'rule.id: "from-matcher"' },
-      });
-
-      expect(mockGetRule).toHaveBeenCalledWith('from-ruleId', expect.any(AbortSignal));
+      expect(mockGetRule).toHaveBeenCalledWith('from-matcher', expect.any(AbortSignal));
       expect(mockGetRule).toHaveBeenCalledTimes(1);
     });
   });

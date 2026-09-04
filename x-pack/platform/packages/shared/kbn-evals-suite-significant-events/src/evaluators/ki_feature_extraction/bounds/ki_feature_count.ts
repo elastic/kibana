@@ -15,6 +15,7 @@ import { getFeaturesFromOutput } from '../types';
 export const kiFeatureCountEvaluator = {
   name: 'ki_feature_count',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const count = getFeaturesFromOutput(output).length;
     const { min_features = -Infinity, max_features = Infinity } = expected;
@@ -37,7 +38,7 @@ export const kiFeatureCountEvaluator = {
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
           : `KI feature count ${count} is within bounds [${min_features}, ${max_features}]`,
-      details: { count, min_features, max_features },
+      metadata: { count, min_features, max_features },
     };
   },
 } satisfies KIFeatureExtractionEvaluator;

@@ -45,7 +45,6 @@
     "@kbn/inference-plugin",
     "@kbn/actions-plugin",
     "@kbn/core-http-server",
-    "@kbn/es-types",
     "@kbn/controls-constants",
     "@kbn/logging",
     "@kbn/logging-mocks",
@@ -53,6 +52,9 @@
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/code-editor",
+    "@kbn/management-settings-ids",
+    "@kbn/core-ui-settings-server",
+    "@kbn/es-errors",
   ],
   "exclude": [
     "target/**/*",

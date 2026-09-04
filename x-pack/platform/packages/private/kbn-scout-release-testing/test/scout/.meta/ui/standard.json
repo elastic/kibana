@@ -1,5 +1,8 @@
 {
-  "sha1": "88db9edd41fae7dccafb69cae7a7a869b8ee8fbb",
+  "sha1": "8b1d032a075e1d6aa943b5022369fc7fa53614ad",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "709f30ae5fb788f-58e2a4254283ea3",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 49,
-        "column": 7
+        "line": 27,
+        "column": 27
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 82,
-        "column": 7
+        "line": 55,
+        "column": 24
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 105,
-        "column": 7
+        "line": 77,
+        "column": 24
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 132,
-        "column": 7
+        "line": 97,
+        "column": 23
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 159,
-        "column": 7
+        "line": 121,
+        "column": 70
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 183,
-        "column": 7
+        "line": 147,
+        "column": 38
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 223,
-        "column": 7
+        "line": 180,
+        "column": 11
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 240,
-        "column": 7
+        "line": 199,
+        "column": 13
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 297,
-        "column": 7
+        "line": 251,
+        "column": 13
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 334,
-        "column": 7
+        "line": 285,
+        "column": 11
       }
     },
     {
@@ -151,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 371,
-        "column": 7
+        "line": 321,
+        "column": 79
       }
     },
     {
@@ -165,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 384,
-        "column": 7
+        "line": 330,
+        "column": 18
       }
     },
     {
@@ -179,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 415,
-        "column": 7
+        "line": 358,
+        "column": 50
       }
     },
     {
@@ -193,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 447,
-        "column": 7
+        "line": 397,
+        "column": 13
       }
     },
     {
@@ -202,13 +205,12 @@
       "title": "Discover app should display selected time range in date picker and matching docs in table",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 58,
-        "column": 7
+        "line": 51,
+        "column": 26
       }
     },
     {
@@ -216,13 +218,12 @@
       "title": "Discover app save query should show toast message and display query name",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 73,
-        "column": 7
+        "line": 56,
+        "column": 5
       }
     },
     {
@@ -230,13 +231,12 @@
       "title": "Discover app should refetch when autofresh is enabled",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 79,
-        "column": 7
+        "line": 62,
+        "column": 21
       }
     },
     {
@@ -244,13 +244,12 @@
       "title": "Discover app load query should show query name",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 100,
-        "column": 7
+        "line": 78,
+        "column": 5
       }
     },
     {
@@ -258,13 +257,12 @@
       "title": "Discover app should show the correct hit count",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 108,
-        "column": 7
+        "line": 86,
+        "column": 21
       }
     },
     {
@@ -272,13 +270,12 @@
       "title": "Discover app should show correct time range string in chart",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 112,
-        "column": 7
+        "line": 89,
+        "column": 55
       }
     },
     {
@@ -286,13 +283,12 @@
       "title": "Discover app should modify the time range when a bar is clicked",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 118,
-        "column": 7
+        "line": 90,
+        "column": 77
       }
     },
     {
@@ -300,13 +296,12 @@
       "title": "Discover app should show correct initial chart interval of Auto",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 101,
+        "column": 72
       }
     },
     {
@@ -314,13 +309,12 @@
       "title": "Discover app should show \"no results\"",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 144,
-        "column": 7
+        "line": 106,
+        "column": 11
       }
     },
     {
@@ -328,13 +322,12 @@
       "title": "Discover app should suggest a new time range is picked",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 152,
-        "column": 7
+        "line": 112,
+        "column": 11
       }
     },
     {
@@ -342,13 +335,12 @@
       "title": "Discover app should show matches when time range is expanded",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 161,
-        "column": 7
+        "line": 124,
+        "column": 75
       }
     },
     {
@@ -356,13 +348,12 @@
       "title": "Discover app should hide and show the histogram chart when toggle is clicked",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 177,
-        "column": 7
+        "line": 132,
+        "column": 11
       }
     },
     {
@@ -370,13 +361,12 @@
       "title": "Discover app should navigate to Lens editor when edit visualization is clicked",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 192,
-        "column": 7
+        "line": 140,
+        "column": 21
       }
     },
     {
@@ -384,13 +374,12 @@
       "title": "Discover app drag and drop fields to grid",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 202,
-        "column": 7
+        "line": 144,
+        "column": 62
       }
     },
     {
@@ -398,13 +387,12 @@
       "title": "Discover app type a search query and execute a search",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 218,
-        "column": 7
+        "line": 162,
+        "column": 5
       }
     },
     {
@@ -412,13 +400,12 @@
       "title": "Discover app click Field Stats button and validate Document Stats is present",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 226,
-        "column": 7
+        "line": 171,
+        "column": 11
       }
     },
     {
@@ -426,13 +413,12 @@
       "title": "Discover app navigate to Lens from field statistics",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 233,
-        "column": 7
+        "line": 177,
+        "column": 5
       }
     },
     {
@@ -440,13 +426,12 @@
       "title": "Discover app download CSV report and validate row length",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
-        "line": 243,
-        "column": 7
+        "line": 187,
+        "column": 5
       }
     },
     {
@@ -454,13 +439,12 @@
       "title": "Discover ES|QL should switch the query bar to ES|QL and display the default sample query",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 55,
+        "column": 5
       }
     },
     {
@@ -468,13 +452,12 @@
       "title": "Discover ES|QL should create an ES|QL value variable control from the Discover editor",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 89,
-        "column": 7
+        "line": 71,
+        "column": 13
       }
     },
     {
@@ -482,13 +465,12 @@
       "title": "Discover ES|QL should display a metric visualization for ES|QL STATS queries (count and sum)",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 140,
-        "column": 7
+        "line": 113,
+        "column": 13
       }
     },
     {
@@ -496,13 +478,12 @@
       "title": "Discover ES|QL should open the inline edit visualization flyout for an ES|QL chart",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 155,
-        "column": 7
+        "line": 127,
+        "column": 8
       }
     },
     {
@@ -510,13 +491,12 @@
       "title": "Discover ES|QL should save an ES|QL visualization to a new dashboard from Discover",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 176,
-        "column": 7
+        "line": 143,
+        "column": 9
       }
     },
     {
@@ -524,13 +504,12 @@
       "title": "Discover ES|QL should edit, explore in Discover, and copy an ES|QL panel from a dashboard",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 195,
-        "column": 7
+        "line": 165,
+        "column": 9
       }
     },
     {
@@ -538,13 +517,12 @@
       "title": "Discover ES|QL should restrict sidebar fields and grid columns to KEEP-listed fields",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 249,
-        "column": 7
+        "line": 205,
+        "column": 13
       }
     },
     {
@@ -552,13 +530,12 @@
       "title": "Discover ES|QL should embed a saved ES|QL Discover session on a dashboard and interact with its table",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 269,
-        "column": 7
+        "line": 228,
+        "column": 13
       }
     },
     {
@@ -566,12 +543,11 @@
       "title": "Discover ES|QL should save an ES|QL bar histogram to a dashboard and edit it inline",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 311,
+        "line": 267,
         "column": 7
       }
     },
@@ -585,8 +561,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 26,
+        "column": 5
       }
     },
     {
@@ -599,8 +575,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 68,
-        "column": 7
+        "line": 44,
+        "column": 11
       }
     },
     {
@@ -613,8 +589,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 92,
-        "column": 7
+        "line": 64,
+        "column": 9
       }
     },
     {
@@ -627,8 +603,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 112,
-        "column": 7
+        "line": 78,
+        "column": 13
       }
     },
     {
@@ -641,8 +617,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 132,
-        "column": 7
+        "line": 95,
+        "column": 79
       }
     },
     {
@@ -655,8 +631,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 160,
-        "column": 7
+        "line": 123,
+        "column": 13
       }
     },
     {
@@ -669,8 +645,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
-        "line": 197,
-        "column": 7
+        "line": 160,
+        "column": 88
       }
     }
   ]

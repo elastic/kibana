@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import {
+  DASHBOARD_KI_TYPE,
+  VISUALIZATION_KI_TYPE,
+} from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
 
 export interface BuildOSSFeaturesParams {
@@ -228,6 +232,7 @@ export const buildOSSFeatures = ({
         },
       },
     },
+
     {
       id: 'filesSharedImage',
       name: i18n.translate('xpack.features.filesSharedImagesFeatureName', {
@@ -522,6 +527,7 @@ const getBaseVisualizeFeature = ({
         app: ['visualize', 'lens', 'kibana'],
         api: apiAllPrivileges,
         catalogue: ['visualize'],
+        aiIndex: { read: [VISUALIZATION_KI_TYPE] },
         savedObject: {
           all: savedObjectAllPrivileges,
           read: ['index-pattern', 'search', 'tag'],
@@ -544,6 +550,7 @@ const getBaseVisualizeFeature = ({
         app: ['visualize', 'lens', 'kibana'],
         api: apiReadPrivileges,
         catalogue: ['visualize'],
+        aiIndex: { read: [VISUALIZATION_KI_TYPE] },
         savedObject: {
           all: [],
           read: savedObjectReadPrivileges,
@@ -607,7 +614,7 @@ const getBaseDashboardFeature = ({
   version: 'v1' | 'v2';
 }): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
   const apiAllPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
-  const savedObjectAllPrivileges = ['dashboard', 'markdown'];
+  const savedObjectAllPrivileges = ['dashboard', 'links', 'markdown'];
   const uiAllPrivileges = ['createNew', 'show', 'showWriteControls'];
   const apiReadPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
   const savedObjectReadPrivileges = [
@@ -647,6 +654,7 @@ const getBaseDashboardFeature = ({
       all: {
         app: ['dashboards', 'kibana'],
         catalogue: ['dashboard'],
+        aiIndex: { read: [DASHBOARD_KI_TYPE] },
         savedObject: {
           all: savedObjectAllPrivileges,
           read: [
@@ -656,7 +664,6 @@ const getBaseDashboardFeature = ({
             'canvas-workpad',
             'event-annotation-group',
             'lens',
-            'links',
             'map',
             'tag',
           ],
@@ -679,6 +686,7 @@ const getBaseDashboardFeature = ({
       read: {
         app: ['dashboards', 'kibana'],
         catalogue: ['dashboard'],
+        aiIndex: { read: [DASHBOARD_KI_TYPE] },
         savedObject: {
           all: [],
           read: savedObjectReadPrivileges,

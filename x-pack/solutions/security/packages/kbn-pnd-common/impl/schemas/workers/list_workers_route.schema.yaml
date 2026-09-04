@@ -1,0 +1,28 @@
+openapi: 3.0.0
+info:
+  title: List PND Workers API endpoint
+  version: '1'
+paths:
+  /internal/pnd/workers:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ListWorkers
+      description: List live registered Workers with Watch membership, enablement, settings, and revision
+      summary: List workers
+      tags:
+        - PND API
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workers:
+                    type: array
+                    items:
+                      $ref: '../components/watch_settings.schema.yaml#/components/schemas/Worker'
+                required:
+                  - workers

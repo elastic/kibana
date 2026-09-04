@@ -5,16 +5,27 @@
  * 2.0.
  */
 
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   convertSOQueriesToPack,
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
+  fetchAllPackagePolicies,
+  groupAgentPolicyIdsByPackagePolicy,
+  resolveSharedPackagePolicyShard,
+  DEFAULT_PACK_SHARD,
   validatePackScheduleFields,
   validateRruleConfig,
   isValidRfc3339,
   resolvePackScheduleForUpdate,
   stripPerQueryRruleFields,
   stripPriorModePerQueryFields,
+  resolvePreservedQueries,
+  hasQueries,
+  START_DATE_EPOCH_FALLBACK,
+  convergePerQueryIntervals,
 } from './utils';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
@@ -44,7 +55,8 @@ const getTestQueries = (additionalFields?: Record<string, unknown>, packName = '
 const getOneLiner = (additionParams: Record<string, unknown>) => ({
   default: {
     interval: 3600,
-    query: `select u.username, p.pid, p.name, pos.local_address, pos.local_port, p.path, p.cmdline, pos.remote_address, pos.remote_port from processes as p join users as u on u.uid=p.uid join process_open_sockets as pos on pos.pid=p.pid where pos.remote_port !='0' limit 1000;`,
+    query:
+      "select u.username, p.pid, p.name, pos.local_address, pos.local_port, p.path, p.cmdline, pos.remote_address, pos.remote_port from processes as p join users as u on u.uid=p.uid join process_open_sockets as pos on pos.pid=p.pid where pos.remote_port !='0' limit 1000;",
     ...additionParams,
   },
 });
@@ -81,32 +93,37 @@ describe('Pack utils', () => {
   });
 
   describe('convertSOQueriesToPackConfig (legacy / no packSchedule)', () => {
+    const FIXED_FALLBACK = '2026-01-01T00:00:00.000Z';
+
     test('converts to pack with converting query to single line', () => {
       const { queries } = convertSOQueriesToPackConfig(getTestQueries(), {
         isRruleFeatureEnabled: true,
+        fallbackStartDate: FIXED_FALLBACK,
       });
-      expect(queries).toStrictEqual(getOneLiner({}));
+      expect(queries).toStrictEqual(getOneLiner({ start_date: FIXED_FALLBACK }));
     });
 
     test('snapshot true / removed true → result type omitted from output', () => {
       const { queries } = convertSOQueriesToPackConfig(
         getTestQueries({ snapshot: true, removed: true }),
-        { isRruleFeatureEnabled: true }
+        { isRruleFeatureEnabled: true, fallbackStartDate: FIXED_FALLBACK }
       );
-      expect(queries).toStrictEqual(getOneLiner({}));
+      expect(queries).toStrictEqual(getOneLiner({ start_date: FIXED_FALLBACK }));
     });
     test('converts with results snapshot set false', () => {
       const { queries } = convertSOQueriesToPackConfig(
         getTestQueries({ snapshot: false, removed: true }),
-        { isRruleFeatureEnabled: true }
+        { isRruleFeatureEnabled: true, fallbackStartDate: FIXED_FALLBACK }
       );
-      expect(queries).toStrictEqual(getOneLiner({ snapshot: false, removed: true }));
+      expect(queries).toStrictEqual(
+        getOneLiner({ snapshot: false, removed: true, start_date: FIXED_FALLBACK })
+      );
     });
 
     test('passes through schedule_id and start_date', () => {
       const { queries } = convertSOQueriesToPackConfig(
         getTestQueries({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' }),
-        { isRruleFeatureEnabled: true }
+        { isRruleFeatureEnabled: true, fallbackStartDate: FIXED_FALLBACK }
       );
       expect(queries).toStrictEqual(
         getOneLiner({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' })
@@ -117,14 +134,17 @@ describe('Pack utils', () => {
       const output = convertSOQueriesToPackConfig(getTestQueries(), {
         spaceId: 'my-space',
         isRruleFeatureEnabled: true,
+        fallbackStartDate: FIXED_FALLBACK,
       });
       expect(output.default_space_id).toBe('my-space');
-      expect(output.queries).toStrictEqual(getOneLiner({ space_id: 'my-space' }));
+      expect(output.queries).toStrictEqual(
+        getOneLiner({ space_id: 'my-space', start_date: FIXED_FALLBACK })
+      );
     });
   });
 
-  // 3.1.5 — fan-out behavior under the new signature + wire-boundary gate.
-  describe('convertSOQueriesToPackConfig — fan-out (PR C)', () => {
+  // Fan-out behavior under the new signature + wire-boundary gate.
+  describe('convertSOQueriesToPackConfig — fan-out', () => {
     const rrule = {
       rrule: 'FREQ=DAILY',
       start_date: '2024-01-01T00:00:00.000Z',
@@ -182,20 +202,48 @@ describe('Pack utils', () => {
       expect(out.queries.q1).not.toHaveProperty('interval');
     });
 
-    test('per-query interval override (same mode, different value) — emitted on the query', () => {
+    // Regression guard for #279946: a stale bare per-query interval (no
+    // schedule_type marker) must not shadow default_native_schedule; only an
+    // explicit flyout override does. Values 80/100 under 120 keep divergence visible.
+    test('stale marker-less per-query interval — NOT emitted, query inherits pack default', () => {
       const out = convertSOQueriesToPackConfig(
         [
-          { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 },
-          { id: 'q2', name: 'q2', query: 'SELECT 2', interval: 120 },
+          { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 80 },
+          { id: 'q2', name: 'q2', query: 'SELECT 2', interval: 100 },
         ],
         {
-          packSchedule: { schedule_type: 'interval', interval: 60 },
+          packSchedule: { schedule_type: 'interval', interval: 120 },
           isRruleFeatureEnabled: true,
         }
       );
-      expect(out.default_native_schedule).toEqual({ interval: 60 });
+      expect(out.default_native_schedule).toEqual({ interval: 120 });
+      // q1 has a stale interval (80) without schedule_type — must NOT reach the wire.
       expect(out.queries.q1).not.toHaveProperty('interval');
-      expect(out.queries.q2.interval).toBe(120);
+      // q2 has a stale interval (100) without schedule_type — also must NOT be emitted.
+      expect(out.queries.q2).not.toHaveProperty('interval');
+    });
+
+    test('explicit per-query interval override (schedule_type: interval) — emitted on the query', () => {
+      const out = convertSOQueriesToPackConfig(
+        [
+          { id: 'q1', name: 'q1', query: 'SELECT 1' },
+          {
+            id: 'q2',
+            name: 'q2',
+            query: 'SELECT 2',
+            schedule_type: 'interval' as const,
+            interval: 80,
+          },
+        ],
+        {
+          packSchedule: { schedule_type: 'interval', interval: 120 },
+          isRruleFeatureEnabled: true,
+        }
+      );
+      expect(out.default_native_schedule).toEqual({ interval: 120 });
+      expect(out.queries.q1).not.toHaveProperty('interval');
+      // q2 has an explicit flyout override — must reach the wire.
+      expect(out.queries.q2.interval).toBe(80);
     });
 
     test('legacy pack (no schedule_type) — per-query interval only, no default_*_schedule', () => {
@@ -226,6 +274,178 @@ describe('Pack utils', () => {
       );
       expect(out.queries.q1).not.toHaveProperty('interval');
       expect(out.queries.q1).not.toHaveProperty('rrule_schedule');
+    });
+
+    // Stale per-query start_date must not shadow the user's chosen rrule start_date.
+    test('per-query rrule override — no top-level start_date emitted (shadowing fix)', () => {
+      const overrideRrule = {
+        rrule: 'FREQ=DAILY',
+        start_date: '2026-06-18T13:38:00.000Z',
+      };
+      const out = convertSOQueriesToPackConfig(
+        [
+          {
+            id: 'uptime',
+            name: 'uptime',
+            query: 'select * from uptime;',
+            schedule_type: 'rrule',
+            rrule_schedule: overrideRrule,
+            schedule_id: 'cffd6216-09d7-43c3-8c90-0cc61bab38bc',
+            start_date: '2026-06-18T11:37:48.355Z', // stale create-time value
+          },
+        ],
+        {
+          packSchedule: {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-06-18T11:37:48.355Z' },
+          },
+          isRruleFeatureEnabled: true,
+        }
+      );
+      expect(out.queries.uptime).not.toHaveProperty('start_date');
+      expect(out.queries.uptime.rrule_schedule).toEqual(overrideRrule);
+    });
+
+    // Pack default_rrule_schedule is the authoritative time source, not the stale SO start_date.
+    test('pack-inheriting rrule query — no top-level start_date emitted', () => {
+      const out = convertSOQueriesToPackConfig(
+        [
+          {
+            id: 'q1',
+            name: 'q1',
+            query: 'SELECT 1',
+            schedule_id: 'sid-1',
+            start_date: '2026-06-18T11:37:48.355Z', // stale create-time value
+          },
+        ],
+        {
+          packSchedule: {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-06-18T13:38:00.000Z' },
+          },
+          isRruleFeatureEnabled: true,
+        }
+      );
+      expect(out.queries.q1).not.toHaveProperty('start_date');
+      expect(out.queries.q1).not.toHaveProperty('rrule_schedule');
+    });
+
+    // Legacy / interval mode must still emit top-level start_date (unchanged behaviour).
+    test('legacy query — top-level start_date preserved (interval mode)', () => {
+      const out = convertSOQueriesToPackConfig(
+        [
+          {
+            id: 'q1',
+            name: 'q1',
+            query: 'SELECT 1',
+            interval: 3600,
+            schedule_id: 'sid-1',
+            start_date: '2026-06-18T11:37:48.355Z',
+          },
+        ],
+        { isRruleFeatureEnabled: true }
+      );
+      expect(out.queries.q1.start_date).toBe('2026-06-18T11:37:48.355Z');
+    });
+
+    // The V4 backfill stamps START_DATE_EPOCH_FALLBACK on docs lacking
+    // created_at. That meaningless 1970 value must not be projected onto the
+    // interval-mode wire — it is replaced by the pack's created_at (fallback).
+    test('interval mode — epoch-fallback start_date replaced with pack created_at, real start_date emitted', () => {
+      const packCreatedAt = '2026-05-01T08:00:00.000Z';
+      const out = convertSOQueriesToPackConfig(
+        [
+          {
+            id: 'epoch',
+            name: 'epoch',
+            query: 'SELECT 1',
+            interval: 3600,
+            schedule_id: 'sid-epoch',
+            start_date: START_DATE_EPOCH_FALLBACK,
+          },
+          {
+            id: 'real',
+            name: 'real',
+            query: 'SELECT 2',
+            interval: 3600,
+            schedule_id: 'sid-real',
+            start_date: '2026-06-18T11:37:48.355Z',
+          },
+        ],
+        { isRruleFeatureEnabled: true, fallbackStartDate: packCreatedAt }
+      );
+
+      // The epoch sentinel is replaced with the pack's created_at.
+      expect(out.queries.epoch.start_date).toBe(packCreatedAt);
+      // A genuine start_date on a sibling still reaches the wire unchanged.
+      expect(out.queries.real.start_date).toBe('2026-06-18T11:37:48.355Z');
+    });
+
+    // Packs predating created_at have no anchor. The value must be STABLE: a
+    // time-of-write now() defeats the reconciler's isEqual gate, rewriting the
+    // policy and re-anchoring execution numbering on every restart.
+    test('interval mode — deterministic epoch anchor when there is no fallbackStartDate either', () => {
+      const build = () =>
+        convertSOQueriesToPackConfig(
+          [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sid-1' }],
+          { isRruleFeatureEnabled: true }
+        );
+
+      const first = build();
+      const second = build();
+
+      expect(first.queries.q1.start_date).toBe(START_DATE_EPOCH_FALLBACK);
+      expect(first.queries.q1.start_date).toBe(second.queries.q1.start_date);
+    });
+
+    // `created_at` is `schema.maybe(schema.string())`, so it can be '' (which
+    // `??` misses) or malformed — and an unparseable anchor makes the agent
+    // report execution count 0, the very bug this fallback exists to fix.
+    test.each([
+      ['empty string', ''],
+      ['not a date', 'not-a-date'],
+      ['date only, no time', '2026-05-01'],
+      ['calendar-invalid', '2026-02-30T00:00:00.000Z'],
+    ])(
+      'interval mode — %s fallbackStartDate falls through to the epoch sentinel',
+      (_label, bad) => {
+        const out = convertSOQueriesToPackConfig(
+          [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sid-1' }],
+          { isRruleFeatureEnabled: true, fallbackStartDate: bad }
+        );
+
+        expect(out.queries.q1.start_date).toBe(START_DATE_EPOCH_FALLBACK);
+      }
+    );
+
+    // Absent start_date (pre-backfill packs) falls back to pack created_at.
+    test('interval mode — absent start_date replaced with fallbackStartDate', () => {
+      const packCreatedAt = '2026-04-15T12:00:00.000Z';
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sid-1' }],
+        { isRruleFeatureEnabled: true, fallbackStartDate: packCreatedAt }
+      );
+
+      expect(out.queries.q1.start_date).toBe(packCreatedAt);
+    });
+
+    // The wire gate enforces this even if the SO already has RRULE state.
+    test('wire-gate off — top-level start_date preserved on rrule SO query (legacy fallback)', () => {
+      const out = convertSOQueriesToPackConfig(
+        [
+          {
+            id: 'q1',
+            name: 'q1',
+            query: 'SELECT 1',
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-06-18T13:38:00.000Z' },
+            interval: 3600,
+            start_date: '2026-06-18T11:37:48.355Z',
+          },
+        ],
+        { isRruleFeatureEnabled: false }
+      );
+      expect(out.queries.q1.start_date).toBe('2026-06-18T11:37:48.355Z');
     });
 
     test('wire-gate off — RRULE on SO is ignored, legacy interval emission', () => {
@@ -290,12 +510,7 @@ describe('Pack utils', () => {
       expect(out.queries.q1).not.toHaveProperty('rrule_schedule');
     });
 
-    // Rollback symmetry: a pack SO planted with `schedule_type:'interval'`
-    // and a pack-level interval (i.e. a pack written during a flag-on era)
-    // MUST also fall back to the pre-rrule wire shape when the flag is off —
-    // no `default_native_schedule`. The per-query `interval` is the legacy
-    // signal and survives. Locks the fix for the gating bug at the packMode
-    // ternary that previously let `'interval'` mode escape the rollback gate.
+    // Interval-mode packs must also fall back to the legacy shape when the flag is off.
     test('defense in depth: pack SO carries interval mode + flag off → no default_native_schedule', () => {
       const out = convertSOQueriesToPackConfig(
         [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
@@ -309,12 +524,8 @@ describe('Pack utils', () => {
       expect(out.queries.q1.interval).toBe(60);
     });
 
-    // Rollback sub-cases — guard rails on pack-level emission.
+    // Guards against malformed/partial pack-level schedule state leaking to the wire.
 
-    // Sub-case 1: malformed SO where schedule_type is 'rrule' but rrule_schedule
-    // is missing. The L341 guard (`packSchedule?.rrule_schedule` truthy) must
-    // prevent emitting a `default_rrule_schedule` of undefined, and no
-    // `default_native_schedule` should appear either.
     test('flag on + malformed SO (schedule_type rrule, missing rrule_schedule) — no default_rrule_schedule emitted', () => {
       const out = convertSOQueriesToPackConfig([{ id: 'q1', name: 'q1', query: 'SELECT 1' }], {
         packSchedule: { schedule_type: 'rrule', rrule_schedule: undefined },
@@ -324,11 +535,6 @@ describe('Pack utils', () => {
       expect(out.default_native_schedule).toBeUndefined();
     });
 
-    // Sub-case 2: no pack-level schedule_type at all, but a query SO carries
-    // per-query rrule fields. With packMode === undefined the per-query loop
-    // falls into the legacy `else` branch (utils.ts:312-318), so per-query
-    // rrule_schedule is NOT emitted to the wire — only per-query interval if
-    // present.
     test('flag on + no pack-level schedule_type + per-query rrule_schedule on SO — emits legacy per-query path', () => {
       const perQueryRrule = {
         rrule: 'FREQ=DAILY',
@@ -381,6 +587,64 @@ describe('Pack utils', () => {
         'start_date',
         'timeout',
       ]);
+    });
+  });
+
+  describe('convertSOQueriesToPackConfig — schedule_id reaches the wire explicitly', () => {
+    test('emits schedule_id with the RRULE flag OFF (backport-critical path)', () => {
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-1' }],
+        { isRruleFeatureEnabled: false }
+      );
+
+      expect(out.queries.q1.schedule_id).toBe('sched-1');
+    });
+
+    test('emits schedule_id with the RRULE flag ON', () => {
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-1' }],
+        { isRruleFeatureEnabled: true }
+      );
+
+      expect(out.queries.q1.schedule_id).toBe('sched-1');
+    });
+
+    test('emits schedule_id for every query (multi-query, flag off)', () => {
+      const out = convertSOQueriesToPackConfig(
+        [
+          { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-1' },
+          { id: 'q2', name: 'q2', query: 'SELECT 2', interval: 120, schedule_id: 'sched-2' },
+        ],
+        { isRruleFeatureEnabled: false }
+      );
+
+      expect(out.queries.q1.schedule_id).toBe('sched-1');
+      expect(out.queries.q2.schedule_id).toBe('sched-2');
+    });
+
+    test('omits schedule_id when the stored query has none (no empty key leaked)', () => {
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
+        { isRruleFeatureEnabled: false }
+      );
+
+      expect(out.queries.q1).not.toHaveProperty('schedule_id');
+    });
+
+    test('does not regress other field shapes when schedule_id is present (flag off)', () => {
+      const fallback = '2026-03-01T00:00:00.000Z';
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-1' }],
+        { isRruleFeatureEnabled: false, fallbackStartDate: fallback }
+      );
+
+      expect(out.queries.q1).toEqual({
+        name: 'q1',
+        query: 'SELECT 1',
+        interval: 60,
+        schedule_id: 'sched-1',
+        start_date: fallback,
+      });
     });
   });
 
@@ -519,6 +783,23 @@ describe('Pack utils', () => {
       ).toEqual({ query: 'SELECT 1', interval: 30, schedule_type: 'interval' });
     });
 
+    // strip is only responsible for cross-mode fields; a bare interval is left
+    // alone (convergePerQueryIntervals drops stale prebuilt-pack copies separately).
+    test('interval mode — bare interval and explicit override both pass through', () => {
+      expect(stripPriorModePerQueryFields({ query: 'SELECT 1', interval: 80 }, 'interval')).toEqual(
+        {
+          query: 'SELECT 1',
+          interval: 80,
+        }
+      );
+      expect(
+        stripPriorModePerQueryFields(
+          { query: 'SELECT 1', interval: 80, schedule_type: 'interval' },
+          'interval'
+        )
+      ).toEqual({ query: 'SELECT 1', interval: 80, schedule_type: 'interval' });
+    });
+
     test('mode cleared — drops both override flavours and interval', () => {
       expect(
         stripPriorModePerQueryFields(
@@ -543,6 +824,49 @@ describe('Pack utils', () => {
     });
   });
 
+  describe('convergePerQueryIntervals', () => {
+    test('drops marker-less bare interval in interval-mode pack', () => {
+      const result = convergePerQueryIntervals(
+        { q1: { query: 'SELECT 1', interval: 80 } },
+        'interval'
+      );
+      expect(result.q1).not.toHaveProperty('interval');
+    });
+
+    test('preserves explicit schedule_type: interval override', () => {
+      const result = convergePerQueryIntervals(
+        { q1: { query: 'SELECT 1', interval: 100, schedule_type: 'interval' } },
+        'interval'
+      );
+      expect(result.q1).toMatchObject({ interval: 100, schedule_type: 'interval' });
+    });
+
+    test('leaves rrule-override query untouched in interval-mode pack', () => {
+      const rruleQuery = {
+        query: 'SELECT 1',
+        schedule_type: 'rrule' as const,
+        rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+      };
+      const result = convergePerQueryIntervals({ q1: rruleQuery }, 'interval');
+      expect(result.q1).toEqual(rruleQuery);
+    });
+
+    test('no-op in legacy mode (packScheduleType undefined)', () => {
+      const queries = { q1: { query: 'SELECT 1', interval: 80 } };
+      expect(convergePerQueryIntervals(queries, undefined)).toBe(queries);
+    });
+
+    test('no-op in rrule-mode pack', () => {
+      const queries = { q1: { query: 'SELECT 1', interval: 80 } };
+      expect(convergePerQueryIntervals(queries, 'rrule')).toBe(queries);
+    });
+
+    test('query without interval is untouched', () => {
+      const result = convergePerQueryIntervals({ q1: { query: 'SELECT 1' } }, 'interval');
+      expect(result.q1).toEqual({ query: 'SELECT 1' });
+    });
+  });
+
   describe('convertPackQueriesToSO', () => {
     test('preserves schedule_id and start_date in converted queries', () => {
       const packQueries = getOneLiner({
@@ -559,12 +883,8 @@ describe('Pack utils', () => {
       });
     });
 
-    // Verifies the "inert under flag-off" claim of PR A: every existing pack
-    // write predates PR C wiring the new routes, so `schedule_type` is always
-    // undefined on input. The default-pick path MUST produce byte-identical
-    // output to its pre-PR-A shape.
     describe('byte-identical default pick-list (no schedule_type on input)', () => {
-      test('emits the canonical pre-PR-A pick-list shape', () => {
+      test('emits the canonical default pick-list shape', () => {
         const result = convertPackQueriesToSO({
           q1: {
             name: 'q1',
@@ -618,7 +938,7 @@ describe('Pack utils', () => {
       });
     });
 
-    describe('per-query schedule_type override (PR C will exercise this)', () => {
+    describe('per-query schedule_type override', () => {
       test('schedule_type:"rrule" drops interval, keeps rrule_schedule', () => {
         const result = convertPackQueriesToSO({
           q1: {
@@ -651,10 +971,7 @@ describe('Pack utils', () => {
       });
     });
 
-    // Defense in depth: query carries rrule_schedule without
-    // schedule_type. Route validator rejects earlier; here we ensure the
-    // utility drops the field so no RRULE state lands on the SO without
-    // its discriminator.
+    // Route validator rejects this earlier; here we check the utility also drops the field.
     describe('defense in depth', () => {
       test('drops rrule_schedule when schedule_type is missing', () => {
         const result = convertPackQueriesToSO({
@@ -1205,5 +1522,249 @@ describe('Pack utils', () => {
         transitioned: false,
       });
     });
+  });
+});
+
+describe('resolvePreservedQueries', () => {
+  const existing = {
+    q1: { schedule_id: 'sid-q1', start_date: 'd1' },
+    q2: { schedule_id: 'sid-q2', start_date: 'd2' },
+  };
+
+  it('matches each query to its own stored row by map key', () => {
+    const result = resolvePreservedQueries(
+      { q1: { id: 'q1', query: 'a' }, q2: { id: 'q2', query: 'b' } },
+      existing
+    );
+    expect(result).toEqual({
+      q1: { schedule_id: 'sid-q1', start_date: 'd1' },
+      q2: { schedule_id: 'sid-q2', start_date: 'd2' },
+    });
+  });
+
+  it('re-pairs a renamed query (changed map key) via the incoming `id`', () => {
+    const result = resolvePreservedQueries({ q1_renamed: { id: 'q1', query: 'a' } }, existing);
+    expect(result.q1_renamed).toEqual({ schedule_id: 'sid-q1', start_date: 'd1' });
+  });
+
+  it('consumes each stored row at most once — a duplicate `id` claim only wins once', () => {
+    // q1 wins stored q1 first; q2's stale claim on the same id falls through to its own map key.
+    const result = resolvePreservedQueries(
+      { q1: { id: 'q1', query: 'a' }, q2: { id: 'q1', query: 'b' } },
+      existing
+    );
+    expect(result.q1).toEqual({ schedule_id: 'sid-q1', start_date: 'd1' });
+    expect(result.q2).toEqual({ schedule_id: 'sid-q2', start_date: 'd2' });
+    expect(result.q1).not.toEqual(result.q2);
+  });
+
+  it('an explicit `id` claim wins even when the claiming query has no stored row of its own', () => {
+    // `extra` wins stored q1; the genuine q1 finds its row already consumed.
+    const result = resolvePreservedQueries(
+      { extra: { id: 'q1', query: 'b' }, q1: { id: 'q1', query: 'a' } },
+      existing
+    );
+    expect(result.extra).toEqual({ schedule_id: 'sid-q1', start_date: 'd1' });
+    expect(result.q1).toBeUndefined();
+  });
+
+  it('honors explicit rename intent regardless of key order — the id-claimant wins even if it comes first', () => {
+    const result = resolvePreservedQueries(
+      { other: { id: 'q1', query: 'b' }, q1: { id: 'q1', query: 'a' } },
+      existing
+    );
+    expect(result.other).toEqual({ schedule_id: 'sid-q1', start_date: 'd1' });
+    expect(result.q1).toBeUndefined();
+  });
+
+  it('leaves a brand-new query unmatched', () => {
+    const result = resolvePreservedQueries({ fresh: { query: 'x' } }, existing);
+    expect(result.fresh).toBeUndefined();
+  });
+
+  it('rename plus name reuse does not misattribute schedule_id (regression)', () => {
+    // Explicit rename intent must win over a new query reusing the freed map key.
+    const result = resolvePreservedQueries(
+      { q1: { query: 'new query reusing the freed name' }, q2: { id: 'q1', query: 'renamed' } },
+      { q1: { schedule_id: 'S1', start_date: 'd1' } }
+    );
+    expect(result.q2).toEqual({ schedule_id: 'S1', start_date: 'd1' });
+    expect(result.q1).toBeUndefined();
+  });
+});
+
+describe('fetchAllPackagePolicies (shared keyset drain for create/delete/update/reconciler)', () => {
+  const soClient = {} as SavedObjectsClientContract;
+
+  const serviceYielding = (batches: unknown[][]) =>
+    ({
+      fetchAllItems: jest.fn().mockImplementation(async function* asyncGenerator() {
+        for (const batch of batches) {
+          yield batch;
+        }
+      }),
+    } as unknown as PackagePolicyClient);
+
+  it('drains ALL batches (not just the first ≤1000 offset page)', async () => {
+    const service = serviceYielding([[{ id: 'pp-1' }, { id: 'pp-2' }], [{ id: 'pp-3' }]]);
+
+    const result = await fetchAllPackagePolicies(service, soClient);
+
+    // A policy on the second page must survive — the offset-capped
+    // list({ perPage: 1000 }) pattern this replaces would have dropped it.
+    expect(result.map((p) => p.id)).toEqual(['pp-1', 'pp-2', 'pp-3']);
+  });
+
+  it('returns an empty array when the service is undefined', async () => {
+    expect(await fetchAllPackagePolicies(undefined, soClient)).toEqual([]);
+  });
+
+  it('scopes the drain with the default osquery kuery', async () => {
+    const service = serviceYielding([[]]);
+
+    await fetchAllPackagePolicies(service, soClient);
+
+    expect(service.fetchAllItems).toHaveBeenCalledWith(
+      soClient,
+      expect.objectContaining({
+        kuery: expect.stringContaining('package.name:osquery_manager'),
+      })
+    );
+  });
+
+  it('forwards a caller-supplied kuery unchanged', async () => {
+    const service = serviceYielding([[]]);
+
+    await fetchAllPackagePolicies(service, soClient, 'custom-kuery');
+
+    expect(service.fetchAllItems).toHaveBeenCalledWith(soClient, { kuery: 'custom-kuery' });
+  });
+});
+
+// Shared by the V4 mint guard and the reconcile filter; pinning its verdict
+// here pins mint-guard ≡ reconcile-filter parity so the two can't drift.
+describe('hasQueries (shared mint/reconcile emptiness predicate)', () => {
+  it.each([
+    ['non-empty array', [{ query: 'SELECT 1' }], true],
+    ['non-empty record', { q1: { query: 'SELECT 1' } }, true],
+    ['empty array', [], false],
+    ['empty record', {}, false],
+    ['null', null, false],
+    ['undefined', undefined, false],
+  ])('returns %s → %s', (_label, input, expected) => {
+    expect(hasQueries(input as Parameters<typeof hasQueries>[0])).toBe(expected);
+  });
+
+  // Mint guard (`!hasQueries` → skip) and reconcile filter (`hasQueries` →
+  // include) must reach the same verdict for every shape.
+  it('mint guard and reconcile filter agree on the same verdict for each shape', () => {
+    const cases: Array<Parameters<typeof hasQueries>[0]> = [
+      [{ query: 'SELECT 1' }],
+      { q1: { query: 'SELECT 1' } },
+      [],
+      {},
+      undefined,
+    ];
+
+    for (const queries of cases) {
+      const nonEmpty = hasQueries(queries);
+      // Mint guard skips (returns empty patch) exactly when queries are empty.
+      const mintGuardSkips = !hasQueries(queries);
+      // Reconcile filter includes an enabled pack exactly when queries are non-empty.
+      const reconcileIncludes = true && hasQueries(queries);
+
+      expect(mintGuardSkips).toBe(!nonEmpty);
+      expect(reconcileIncludes).toBe(nonEmpty);
+    }
+  });
+});
+
+// Fixes the duplicate-schedule race (elastic/kibana#269475): a Fleet package
+// policy's `policy_ids` can span multiple of a pack's agent policies, so
+// resolving per-agent-policy-id and writing without deduping issues
+// concurrent updates against the same package-policy id from a stale base.
+describe('groupAgentPolicyIdsByPackagePolicy (dedup write targets)', () => {
+  const packagePolicy = (id: string, policyIds: string[]): PackagePolicy =>
+    ({ id, policy_ids: policyIds } as PackagePolicy);
+
+  it('groups two agent policy ids that resolve to the same package policy into one entry', () => {
+    const sharedPolicy = packagePolicy('pp-shared', ['agent-a', 'agent-b']);
+
+    const groups = groupAgentPolicyIdsByPackagePolicy(['agent-a', 'agent-b'], [sharedPolicy]);
+
+    expect(groups.size).toBe(1);
+    const target = groups.get('pp-shared');
+    expect(target?.packagePolicy).toBe(sharedPolicy);
+    expect(target?.agentPolicyIds).toEqual(['agent-a', 'agent-b']);
+  });
+
+  it('keeps distinct package policies as separate entries (regression: common 1:1 case)', () => {
+    const policyA = packagePolicy('pp-a', ['agent-a']);
+    const policyB = packagePolicy('pp-b', ['agent-b']);
+
+    const groups = groupAgentPolicyIdsByPackagePolicy(['agent-a', 'agent-b'], [policyA, policyB]);
+
+    expect(groups.size).toBe(2);
+    expect(groups.get('pp-a')?.agentPolicyIds).toEqual(['agent-a']);
+    expect(groups.get('pp-b')?.agentPolicyIds).toEqual(['agent-b']);
+  });
+
+  it('skips an agent policy id that resolves to no package policy', () => {
+    const policyA = packagePolicy('pp-a', ['agent-a']);
+
+    const groups = groupAgentPolicyIdsByPackagePolicy(['agent-a', 'agent-unknown'], [policyA]);
+
+    expect(groups.size).toBe(1);
+    expect(groups.has('pp-a')).toBe(true);
+  });
+
+  it('returns an empty map for an empty agent-policy-id list', () => {
+    const groups = groupAgentPolicyIdsByPackagePolicy([], [packagePolicy('pp-a', ['agent-a'])]);
+
+    expect(groups.size).toBe(0);
+  });
+});
+
+describe('resolveSharedPackagePolicyShard (deterministic shard for a shared package policy)', () => {
+  it('returns the single agent policy shard unchanged for 1:1 targeting (no behavior change)', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], { 'agent-a': 42 })).toBe(42);
+  });
+
+  it('falls back to DEFAULT_PACK_SHARD when no shard is set', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], {})).toBe(DEFAULT_PACK_SHARD);
+  });
+
+  it('preserves a single negative shard (no clamping to 0 — parity with the pre-dedup path)', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], { 'agent-a': -5 })).toBe(-5);
+  });
+
+  it('returns DEFAULT_PACK_SHARD for an empty agent-policy-id list', () => {
+    expect(resolveSharedPackagePolicyShard([], { 'agent-a': 25 })).toBe(DEFAULT_PACK_SHARD);
+  });
+
+  it('returns the shared shard value when every targeting agent policy agrees', () => {
+    expect(
+      resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 30, 'agent-b': 30 })
+    ).toBe(30);
+  });
+
+  it('resolves differing shards deterministically via the max rule', () => {
+    expect(
+      resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 25, 'agent-b': 75 })
+    ).toBe(75);
+  });
+
+  it('is independent of agent-policy-id ordering (repeat operations agree)', () => {
+    const shards = { 'agent-a': 25, 'agent-b': 75, 'agent-c': 50 };
+    const forward = resolveSharedPackagePolicyShard(['agent-a', 'agent-b', 'agent-c'], shards);
+    const reversed = resolveSharedPackagePolicyShard(['agent-c', 'agent-b', 'agent-a'], shards);
+
+    expect(forward).toBe(75);
+    expect(reversed).toBe(forward);
+  });
+
+  it('mixes explicit and default-shard agent policies using the max rule', () => {
+    // agent-b has no explicit shard (defaults to 100), which wins over agent-a's 40.
+    expect(resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 40 })).toBe(100);
   });
 });

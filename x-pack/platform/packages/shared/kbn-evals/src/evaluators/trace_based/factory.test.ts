@@ -18,6 +18,7 @@ describe('createTraceBasedEvaluator', () => {
   let mockEsClient: jest.Mocked<EsClient>;
   let mockLog: jest.Mocked<ToolingLog>;
   let mockConfig: TraceBasedEvaluatorConfig;
+  let exhaustRetries: () => Promise<void>;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -35,8 +36,12 @@ describe('createTraceBasedEvaluator', () => {
       debug: jest.fn(),
     } as any;
 
+    // Longer than the factory's full 62s backoff, so the retry budget is always drained.
+    exhaustRetries = () => jest.advanceTimersByTimeAsync(300_000);
+
     mockConfig = {
       name: 'Test Evaluator',
+      direction: 'maximize',
       buildQuery: (traceId: string) => `FROM traces-* | WHERE trace.id == "${traceId}"`,
       extractResult: (response) => response.values[0][0] as number | null,
     };
@@ -82,6 +87,46 @@ describe('createTraceBasedEvaluator', () => {
     expect(result.score).toBe(100);
   });
 
+  it('should return an unscored result without retrying when the metric is not reported', async () => {
+    const evaluator = createTraceBasedEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      config: { ...mockConfig, isNotReported: () => true },
+    });
+
+    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      columns: [{ name: 'result', type: 'number' }],
+      values: [[null]],
+    } as any);
+
+    const result = await evaluateWith(evaluator, VALID_TRACE_ID);
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('unavailable');
+    expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(mockLog.error).not.toHaveBeenCalled();
+    expect(mockLog.warning).not.toHaveBeenCalled();
+  });
+
+  it('should still retry when the metric is reported but the value looks incomplete', async () => {
+    const evaluator = createTraceBasedEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      config: { ...mockConfig, isNotReported: () => false },
+    });
+
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce({ columns: [{ name: 'result', type: 'number' }], values: [[null]] })
+      .mockResolvedValueOnce({ columns: [{ name: 'result', type: 'number' }], values: [[7]] });
+
+    const promise = evaluateWith(evaluator, VALID_TRACE_ID);
+    await exhaustRetries();
+    const result = await promise;
+
+    expect(result.score).toBe(7);
+    expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(2);
+  });
+
   it('should return error for invalid trace ID', async () => {
     const evaluator = createTraceBasedEvaluator({
       traceEsClient: mockEsClient,
@@ -108,7 +153,7 @@ describe('createTraceBasedEvaluator', () => {
     });
 
     const promise = evaluateWith(evaluator, VALID_TRACE_ID);
-    await jest.advanceTimersByTimeAsync(60_000);
+    await exhaustRetries();
     const result = await promise;
 
     expect(result.score).toBe(42);
@@ -131,7 +176,7 @@ describe('createTraceBasedEvaluator', () => {
     });
 
     const promise = evaluateWith(evaluator, VALID_TRACE_ID);
-    await jest.advanceTimersByTimeAsync(60_000);
+    await exhaustRetries();
     const result = await promise;
 
     expect(result.score).toBe(150);
@@ -152,12 +197,35 @@ describe('createTraceBasedEvaluator', () => {
     });
 
     const promise = evaluateWith(evaluator, VALID_TRACE_ID);
-    await jest.advanceTimersByTimeAsync(300_000);
+    await exhaustRetries();
     const result = await promise;
 
     expect(result.score).toBeNull();
     expect(result.label).toBe('potentially_incomplete');
     expect(result.metadata).toEqual({ incomplete: true });
+  });
+
+  it('should not log an error when a usable result is still returned', async () => {
+    const query = mockEsClient.esql.query as jest.Mock;
+    query.mockResolvedValue({
+      columns: [{ name: 'r', type: 'number' }],
+      values: [[null]],
+    });
+
+    const evaluator = createTraceBasedEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      config: mockConfig,
+    });
+
+    const promise = evaluateWith(evaluator, VALID_TRACE_ID);
+    await exhaustRetries();
+    await promise;
+
+    expect(mockLog.error).not.toHaveBeenCalled();
+    expect(mockLog.warning).toHaveBeenCalledWith(
+      expect.stringContaining('returning potentially incomplete result')
+    );
   });
 
   it('should return error when retries exhaust with no data at all', async () => {
@@ -174,7 +242,7 @@ describe('createTraceBasedEvaluator', () => {
     });
 
     const promise = evaluateWith(evaluator, VALID_TRACE_ID);
-    await jest.advanceTimersByTimeAsync(300_000);
+    await exhaustRetries();
     const result = await promise;
 
     expect(result.label).toBe('error');

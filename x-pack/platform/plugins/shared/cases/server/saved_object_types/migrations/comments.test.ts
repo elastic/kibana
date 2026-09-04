@@ -32,7 +32,6 @@ import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { omit, partition } from 'lodash';
 import gte from 'semver/functions/gte';
 import type {
@@ -245,7 +244,6 @@ describe('comments migrations', () => {
 
       it('should remove time zone param from date histogram', () => {
         const migrations = createCommentsMigrations({
-          persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
           lensEmbeddableFactory: makeLensEmbeddableFactory(
             () => ({}),
             () => ({}),
@@ -305,7 +303,6 @@ describe('comments migrations', () => {
       );
 
       const migrations = createCommentsMigrations({
-        persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
         lensEmbeddableFactory: () => ({
           id: 'test',
           migrations: lensMigrationObjectWithFakeMigration,
@@ -349,7 +346,6 @@ describe('comments migrations', () => {
         const migrateFunction = jest.fn().mockReturnValue(migratedPersistableAttachmentState);
 
         const migrations = createCommentsMigrations({
-          persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
           lensEmbeddableFactory: () => ({
             id: 'test',
             migrations: { '8.9.0': migrateFunction },
@@ -379,7 +375,6 @@ describe('comments migrations', () => {
         });
 
         const migrations = createCommentsMigrations({
-          persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
           lensEmbeddableFactory: () => ({
             id: 'test',
             migrations: { '8.9.0': migrateFunction },

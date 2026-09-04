@@ -11,13 +11,13 @@ import styled from 'styled-components';
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import {
   EuiButton,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -104,11 +104,9 @@ export const GenerateServiceTokenComponent: React.FunctionComponent<{
         </EuiFlexGroup>
       ) : (
         <>
-          <EuiCallOut
+          <KbnSuccessCallout
             announceOnMount
-            iconType="check"
             size="s"
-            color="success"
             title={
               <FormattedMessage
                 id="xpack.fleet.fleetServerSetup.saveServiceTokenDescription"

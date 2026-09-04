@@ -37,7 +37,6 @@ import {
   getLayerListConfigOnly,
 } from '../../../selectors/map_selectors';
 import {
-  setGotoWithCenter,
   setMapSettings,
   replaceLayerList,
   setIsLayerTOCOpen,
@@ -72,6 +71,7 @@ import type {
   MapByValueState,
   MapEmbeddableState,
 } from '../../../../common/embeddable/types';
+import { jumpTo } from '../../../reducers/non_serializable_instances';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -143,9 +143,67 @@ export class SavedMap {
     return this._store;
   }
 
-  public async reset(mapEmbeddableState: MapEmbeddableState) {
+  public reset(mapEmbeddableState: MapEmbeddableState) {
     this._mapEmbeddableState = mapEmbeddableState;
-    await this.whenReady();
+    this.initializeStore();
+  }
+
+  private initializeStore() {
+    if (this._mapEmbeddableState?.mapSettings !== undefined) {
+      this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableState.mapSettings));
+    } else if (this._attributes?.settings) {
+      this._store.dispatch(setMapSettingsFromEncodedState(this._attributes.settings));
+    }
+
+    let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
+    if (this._mapEmbeddableState?.isLayerTOCOpen !== undefined) {
+      isLayerTOCOpen = this._mapEmbeddableState.isLayerTOCOpen;
+    } else if (this._attributes?.isLayerTOCOpen !== undefined) {
+      isLayerTOCOpen = this._attributes.isLayerTOCOpen;
+    }
+    this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
+
+    let openTOCDetails: string[] = [];
+    if (this._mapEmbeddableState?.openTOCDetails !== undefined) {
+      openTOCDetails = this._mapEmbeddableState.openTOCDetails;
+    } else if (this._attributes?.openTOCDetails !== undefined) {
+      openTOCDetails = this._attributes.openTOCDetails;
+    }
+    this._store.dispatch(setOpenTOCDetails(openTOCDetails));
+
+    if (this._mapEmbeddableState?.mapCenter !== undefined) {
+      this._store.dispatch<any>(
+        jumpTo({
+          lat: this._mapEmbeddableState.mapCenter.lat,
+          lon: this._mapEmbeddableState.mapCenter.lon,
+          zoom: this._mapEmbeddableState.mapCenter.zoom,
+        })
+      );
+    } else if (this._attributes?.center) {
+      this._store.dispatch<any>(
+        jumpTo({
+          lat: this._attributes.center.lat,
+          lon: this._attributes.center.lon,
+          zoom: this._attributes.zoom ?? 1,
+        })
+      );
+    }
+
+    const layerList: LayerDescriptor[] = (this._attributes?.layers as LayerDescriptor[]) ?? [];
+    if (layerList.length === 0) {
+      const basemapLayerDescriptor = createBasemapLayerDescriptor();
+      if (basemapLayerDescriptor) {
+        layerList.push(basemapLayerDescriptor);
+      }
+      if (this._defaultLayers.length) {
+        layerList.push(...this._defaultLayers);
+      }
+    }
+    this._store.dispatch<any>(replaceLayerList(layerList));
+    if (this._mapEmbeddableState?.hiddenLayers !== undefined) {
+      this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableState.hiddenLayers));
+    }
+    this._initialLayerListConfig = copyPersistentState(layerList);
   }
 
   async whenReady() {
@@ -182,61 +240,7 @@ export class SavedMap {
       await Promise.all(promises);
     }
 
-    if (this._mapEmbeddableState?.mapSettings !== undefined) {
-      this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableState.mapSettings));
-    } else if (this._attributes?.settings) {
-      this._store.dispatch(setMapSettingsFromEncodedState(this._attributes.settings));
-    }
-
-    let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
-    if (this._mapEmbeddableState?.isLayerTOCOpen !== undefined) {
-      isLayerTOCOpen = this._mapEmbeddableState.isLayerTOCOpen;
-    } else if (this._attributes?.isLayerTOCOpen !== undefined) {
-      isLayerTOCOpen = this._attributes.isLayerTOCOpen;
-    }
-    this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
-
-    let openTOCDetails: string[] = [];
-    if (this._mapEmbeddableState?.openTOCDetails !== undefined) {
-      openTOCDetails = this._mapEmbeddableState.openTOCDetails;
-    } else if (this._attributes?.openTOCDetails !== undefined) {
-      openTOCDetails = this._attributes.openTOCDetails;
-    }
-    this._store.dispatch(setOpenTOCDetails(openTOCDetails));
-
-    if (this._mapEmbeddableState?.mapCenter !== undefined) {
-      this._store.dispatch(
-        setGotoWithCenter({
-          lat: this._mapEmbeddableState.mapCenter.lat,
-          lon: this._mapEmbeddableState.mapCenter.lon,
-          zoom: this._mapEmbeddableState.mapCenter.zoom,
-        })
-      );
-    } else if (this._attributes?.center) {
-      this._store.dispatch(
-        setGotoWithCenter({
-          lat: this._attributes.center.lat,
-          lon: this._attributes.center.lon,
-          zoom: this._attributes.zoom ?? 1,
-        })
-      );
-    }
-
-    const layerList: LayerDescriptor[] = (this._attributes.layers as LayerDescriptor[]) ?? [];
-    if (layerList.length === 0) {
-      const basemapLayerDescriptor = createBasemapLayerDescriptor();
-      if (basemapLayerDescriptor) {
-        layerList.push(basemapLayerDescriptor);
-      }
-      if (this._defaultLayers.length) {
-        layerList.push(...this._defaultLayers);
-      }
-    }
-    this._store.dispatch<any>(replaceLayerList(layerList));
-    if (this._mapEmbeddableState?.hiddenLayers !== undefined) {
-      this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableState.hiddenLayers));
-    }
-    this._initialLayerListConfig = copyPersistentState(layerList);
+    this.initializeStore();
 
     if (this._defaultLayerWizard) {
       this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
@@ -326,10 +330,7 @@ export class SavedMap {
         pageTitle: this._getPageTitle(),
         isByValue: this.isByValue(),
         getHasUnsavedChanges: this.hasUnsavedChanges,
-        originatingApp:
-          this.hasOriginatingApp() || this._isFromDashboardListing()
-            ? this._originatingApp
-            : undefined,
+        originatingApp: this.hasSaveAndReturnConfig() ? this._originatingApp : undefined,
         incomingBreadcrumbs: this._breadcrumbs,
         getAppNameFromId: this._getStateTransfer().getAppNameFromId,
         history,
@@ -352,16 +353,6 @@ export class SavedMap {
     return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
   }
 
-  private _isFromDashboardListing(): boolean {
-    return (
-      this._originatingApp === 'dashboards' && Boolean(this._originatingPath?.includes('/list/'))
-    );
-  }
-
-  public hasOriginatingApp(): boolean {
-    return !!this._originatingApp && !this._isFromDashboardListing();
-  }
-
   public getOriginatingPath(): string | undefined {
     return this._originatingPath;
   }
@@ -374,9 +365,14 @@ export class SavedMap {
     return this._tags;
   }
 
-  public hasSaveAndReturnConfig() {
-    const hasOriginatingApp = this.hasOriginatingApp();
-    return hasOriginatingApp;
+  public hasSaveAndReturnConfig(): boolean {
+    return Boolean(
+      this._originatingApp &&
+        this._originatingPath &&
+        // TODO remove this check in editors (lens does this too)
+        // instead, embeddable state transform should provide hasSaveAndReturnConfig
+        !this._originatingPath.includes('/list/')
+    );
   }
 
   public getTitle(): string {
@@ -410,7 +406,7 @@ export class SavedMap {
 
   public isByValue(): boolean {
     const hasSavedObjectId = !!this.getSavedObjectId();
-    return this.hasOriginatingApp() && !hasSavedObjectId;
+    return this.hasSaveAndReturnConfig() && !hasSavedObjectId;
   }
 
   public async save({

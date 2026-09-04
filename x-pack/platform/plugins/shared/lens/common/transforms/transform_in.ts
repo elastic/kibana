@@ -11,6 +11,7 @@ import {
   type LensConfigBuilder,
 } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { withLegacyAggregateQuerySlot } from '@kbn/lens-common';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';
 import type {
@@ -52,7 +53,11 @@ export const getTransformIn = (
     if (isDashboardAppRequest && !builder.isEnabled) {
       const { state, references } = extractLensReferences(storedConfig as LensSerializedState);
       return {
-        state,
+        state: {
+          ...state,
+          // mixed-version compat: mirror the ES|QL layer query into the legacy slot
+          attributes: state.attributes && withLegacyAggregateQuerySlot(state.attributes),
+        },
         references: [...references, ...drilldownReferences],
       } satisfies LensByValueTransformInResult;
     }
@@ -82,7 +87,11 @@ export const getTransformIn = (
     });
 
     return {
-      state,
+      state: {
+        ...state,
+        // mixed-version compat: mirror the ES|QL layer query into the legacy slot
+        attributes: state.attributes && withLegacyAggregateQuerySlot(state.attributes),
+      },
       references: [...references, ...drilldownReferences],
     } satisfies LensByValueTransformInResult;
   };

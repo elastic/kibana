@@ -85,7 +85,7 @@ export interface QueryRuleListItemContentProps {
   order?: React.ReactNode;
   isDraggable?: boolean;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
-  tourTargetRef?: React.RefObject<HTMLDivElement>;
+  tourTargetRef?: React.Ref<HTMLDivElement>;
 }
 
 export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> = ({
@@ -149,7 +149,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                   }
                 )}
               >
-                <EuiIcon type="dragVertical" aria-hidden={true} />
+                <EuiIcon type="dragVertical" aria-hidden />
               </EuiPanel>
             ) : (
               <EuiPanel

@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
 
 interface ScheduledResponsesQueryOptions {
   cursor?: string;
@@ -17,6 +18,7 @@ interface ScheduledResponsesQueryOptions {
   startDate?: string;
   endDate?: string;
   sortDirection?: 'asc' | 'desc';
+  cpsEnabled?: boolean;
 }
 
 export const buildScheduledResponsesQuery = ({
@@ -29,23 +31,19 @@ export const buildScheduledResponsesQuery = ({
   startDate,
   endDate,
   sortDirection = 'desc',
+  cpsEnabled = false,
 }: ScheduledResponsesQueryOptions): {
   body: Record<string, unknown>;
 } => {
-  const filters: estypes.QueryDslQueryContainer[] = [{ exists: { field: 'schedule_id' } }];
-
-  if (spaceId === 'default') {
-    filters.push({
-      bool: {
-        should: [
-          { term: { space_id: 'default' } },
-          { bool: { must_not: { exists: { field: 'space_id' } } } },
-        ],
-      },
-    });
-  } else {
-    filters.push({ term: { space_id: spaceId } });
-  }
+  // Unlike every other osquery read, this aggregation is not bound to an action
+  // or schedule id the caller already had access to, so it is the one query
+  // where a field-less document fanned in from a linked project could surface.
+  const filters: estypes.QueryDslQueryContainer[] = [
+    { exists: { field: 'schedule_id' } },
+    buildSpaceIdFilter(spaceId, {
+      matchMissingSpaceId: !cpsEnabled,
+    }),
+  ];
 
   if (packIds !== undefined || scheduleIds !== undefined) {
     const hasPackIds = packIds && packIds.length > 0;
@@ -103,17 +101,31 @@ export const buildScheduledResponsesQuery = ({
           aggs: {
             planned_time: { max: { field: 'planned_schedule_time' } },
             max_timestamp: { max: { field: '@timestamp' } },
+            // ES-default precision required: this agg fans out over 10k+ buckets and
+            // `precision_threshold: 40000` here trips the request circuit breaker.
             agent_count: { cardinality: { field: 'agent_id' } },
+            // Constant within a schedule bucket; lets rows whose pack saved object is not
+            // in this space (cross-project reads) still resolve their labels.
+            pack_id: { terms: { field: 'pack_id', size: 1 } },
+            pack_name: { terms: { field: 'pack_name', size: 1 } },
+            query_name: { terms: { field: 'query_name', size: 1 } },
             total_rows: {
               sum: { field: 'action_response.osquery.count' },
             },
+            // Per-outcome agent cardinality; the filters' `doc_count` counts documents.
             success_count: {
               filter: {
                 bool: { must_not: { exists: { field: 'error' } } },
               },
+              aggs: {
+                agents: { cardinality: { field: 'agent_id' } },
+              },
             },
             error_count: {
               filter: { exists: { field: 'error' } },
+              aggs: {
+                agents: { cardinality: { field: 'agent_id' } },
+              },
             },
           },
         },

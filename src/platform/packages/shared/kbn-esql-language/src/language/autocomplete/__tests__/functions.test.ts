@@ -17,6 +17,7 @@ import {
   arithmeticOperators,
   comparisonFunctions,
   logicalOperators,
+  matchOperators,
   nullCheckOperators,
   inOperators,
   patternMatchOperators,
@@ -25,6 +26,7 @@ import {
 const arithmeticSymbols = arithmeticOperators.map(({ name }) => name);
 const comparisonSymbols = comparisonFunctions.map(({ name }) => name);
 const logicalSymbols = logicalOperators.map(({ name }) => name.toUpperCase());
+const matchSymbols = matchOperators.map(({ name }) => name);
 const nullCheckSymbols = nullCheckOperators.map(({ name }) => name.toUpperCase());
 const inSymbols = inOperators.map(({ name }) => name.toUpperCase());
 const patternMatchSymbols = patternMatchOperators.map(({ name }) => name.toUpperCase());
@@ -47,8 +49,10 @@ describe('functions arg suggestions', () => {
                 {
                   name: 'unit',
                   type: 'keyword',
-                  constantOnly: true,
-                  suggestedValues: ['year', 'month', 'day', 'hour', 'minute'],
+                  hint: {
+                    kind: 'constant',
+                    allowedValues: ['year', 'month', 'day', 'hour', 'minute'],
+                  },
                 },
                 { name: 'left', type: 'date' },
                 { name: 'right', type: 'date' },
@@ -80,7 +84,7 @@ describe('functions arg suggestions', () => {
             {
               params: [
                 { name: 'field', type: 'double' },
-                { name: 'percent', type: 'double', constantOnly: true },
+                { name: 'percent', type: 'double', hint: { kind: 'constant' } },
               ],
               returnType: 'double',
             },
@@ -107,12 +111,11 @@ describe('functions arg suggestions', () => {
             {
               params: [
                 { name: 'field', type: 'keyword' },
-                { name: 'limit', type: 'integer', constantOnly: true },
+                { name: 'limit', type: 'integer', hint: { kind: 'constant' } },
                 {
                   name: 'order',
                   type: 'keyword',
-                  constantOnly: true,
-                  suggestedValues: ['asc', 'desc'],
+                  hint: { kind: 'constant', allowedValues: ['asc', 'desc'] },
                 },
               ],
               returnType: 'keyword',
@@ -139,9 +142,9 @@ describe('functions arg suggestions', () => {
             {
               params: [
                 { name: 'field', type: 'double', optional: false },
-                { name: 'buckets', type: 'integer', optional: false, constantOnly: true },
-                { name: 'from', type: 'double', optional: true, constantOnly: true },
-                { name: 'to', type: 'double', optional: true, constantOnly: true },
+                { name: 'buckets', type: 'integer', optional: false, hint: { kind: 'constant' } },
+                { name: 'from', type: 'double', optional: true, hint: { kind: 'constant' } },
+                { name: 'to', type: 'double', optional: true, hint: { kind: 'constant' } },
               ],
               returnType: 'double',
             },
@@ -417,6 +420,14 @@ describe('functions arg suggestions', () => {
       expect(labels).toEqual(expect.arrayContaining(['CONCAT', 'SUBSTRING']));
     });
 
+    it('homogeneous function: suggests fields when first argument is a named parameter (?var)', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE MV_CONTAINS(?values, /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(['textField', 'keywordField']));
+    });
+
     it('after unknown-type field: suggests type-compatible fields/functions based on function param type', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = ABS(unknownField /)');
@@ -437,6 +448,14 @@ describe('functions arg suggestions', () => {
       comparison.forEach((op) => {
         expect(labels).not.toContain(op);
       });
+    });
+
+    it('suggests the match operator after a string-returning primary expression', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE CONCAT(textField, keywordField) /');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(matchSymbols));
     });
 
     it('IN operator: suggests opening parenthesis for list', async () => {
@@ -509,6 +528,32 @@ describe('functions arg suggestions', () => {
         scalar: true,
       }).map(({ label }) => label);
       expect(labels).toEqual(expect.arrayContaining(booleanFunctions));
+    });
+
+    it('unary NOT operator after AND in WHERE: suggests CONTAINS', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE textField == "foo" AND NOT /');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toContain('CONTAINS');
+    });
+
+    it('CONTAINS after unary NOT operator: suggests fields for its first argument', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | WHERE textField == "foo" AND NOT CONTAINS(/)'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(['textField', 'keywordField']));
+    });
+
+    it('CONTAINS after binary operator: suggests fields for its first argument', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE textField == "foo" AND CONTAINS(/)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(['textField', 'keywordField']));
     });
 
     it('unary NOT operator in EVAL: suggests boolean fields and boolean-returning functions', async () => {
@@ -666,7 +711,7 @@ describe('functions arg suggestions', () => {
               {
                 name: 'arg',
                 type: 'keyword',
-                suggestedValues: ['value1', 'value2', 'value3'],
+                hint: { kind: 'constant', allowedValues: ['value1', 'value2', 'value3'] },
               },
             ],
             returnType: 'double',
@@ -697,12 +742,11 @@ describe('functions arg suggestions', () => {
               {
                 name: 'arg',
                 type: 'keyword',
-                constantOnly: true,
+                hint: { kind: 'constant' },
               },
               {
                 name: 'arg2',
                 type: 'keyword',
-                constantOnly: false,
               },
             ],
             returnType: 'double',
@@ -1163,6 +1207,14 @@ describe('functions arg suggestions', () => {
           expect(labels).not.toContain(',');
         }
       });
+    });
+
+    it('preserves comparison suggestions after a parenthesized boolean function', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE (CASE(booleanField, true, false)) /');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(['==', '!=']));
     });
 
     it('COALESCE return type matches first parameter - accepts type-compatible expressions', async () => {

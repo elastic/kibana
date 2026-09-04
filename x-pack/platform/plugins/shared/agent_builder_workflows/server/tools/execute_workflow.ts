@@ -11,9 +11,13 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/workflow_id_schema';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import {
+  executeWorkflow,
+  hasWorkflowExecutePrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 
 const executeWorkflowSchema = z.object({
   workflowId: workflowIdSchema.optional().describe('ID of a persisted workflow to execute.'),
@@ -35,15 +39,16 @@ const executeWorkflowSchema = z.object({
 
 export const executeWorkflowTool = ({
   workflowsManagement,
+  getSecurity,
 }: {
   workflowsManagement: WorkflowsServerPluginSetup;
+  getSecurity: () => SecurityPluginStart | undefined;
 }): BuiltinToolDefinition<typeof executeWorkflowSchema> => {
   const { management: workflowApi } = workflowsManagement;
 
   return {
     id: platformCoreTools.executeWorkflow,
     type: ToolType.builtin,
-    experimental: true,
     description: cleanPrompt(`Execute an Elastic workflow.
 
 Use this tool when:
@@ -72,8 +77,19 @@ If set to false, or if the workflow does not complete within the timeout, the to
 
 - If the returned execution status is \`waiting_for_input\`, the workflow is paused; resume it with \`${platformCoreTools.resumeWorkflowExecution}\`.
 - If the status is not terminal (still running), call \`${platformCoreTools.getWorkflowExecutionStatus}\` later to get the final outcome.
+
+## API documentation
+- Workflows guide: https://www.elastic.co/docs/explore-analyze/workflows
+- Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows
 `),
     schema: executeWorkflowSchema,
+    annotations: {
+      title: 'Execute Workflow',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     handler: async ({ workflowId, yaml, attachmentId, inputs, waitForCompletion }, toolContext) => {
       const providedModes = [workflowId, yaml, attachmentId].filter((v) => v !== undefined).length;
       if (providedModes !== 1) {
@@ -120,6 +136,26 @@ If set to false, or if the workflow does not complete within the timeout, the to
       const { request, spaceId } = toolContext;
       const workflowParams = inputs ?? {};
       const wait = waitForCompletion ?? true;
+
+      // Executing an existing persisted workflow by id runs under the caller's
+      // identity, so require the same Workflows privileges the direct run API
+      // enforces. Inline YAML runs the caller's own definition and is not gated.
+      if (!resolvedYaml) {
+        const canExecute = await hasWorkflowExecutePrivilege({
+          security: getSecurity(),
+          request,
+          spaceId,
+        });
+        if (!canExecute) {
+          return {
+            results: [
+              errorResult(
+                `Unauthorized to execute workflow '${resolvedWorkflowId}'. The 'workflowsManagement' execute privilege is required.`
+              ),
+            ],
+          };
+        }
+      }
 
       const result = resolvedYaml
         ? await executeWorkflow({

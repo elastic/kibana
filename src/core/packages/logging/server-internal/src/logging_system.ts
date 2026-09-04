@@ -15,10 +15,10 @@ import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
-import type { LoggingConfigType, LoggerContextConfigType } from './logging_config';
+import type { LoggingConfigType, LoggerContextPluginConfigType } from './logging_config';
 import {
   LoggingConfig,
-  loggerContextConfigSchema,
+  loggerContextPluginConfigSchema,
   config as loggingConfig,
 } from './logging_config';
 
@@ -43,7 +43,7 @@ export class LoggingSystem implements ILoggingSystem {
   private readonly appenders: Map<string, DisposableAppender> = new Map();
   private readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
-  private readonly contextConfigs = new Map<string, LoggerContextConfigType>();
+  private readonly contextConfigs = new Map<string, LoggerContextPluginConfigType>();
   private globalContext: Partial<LogMeta> = {};
 
   constructor() {}
@@ -103,7 +103,8 @@ export class LoggingSystem implements ILoggingSystem {
    */
   public async setContextConfig(baseContextParts: string[], rawConfig: LoggerContextConfigInput) {
     const context = LoggingConfig.getLoggerContext(baseContextParts);
-    const contextConfig = loggerContextConfigSchema.validate(rawConfig);
+    // Fails fast, before any appender is recreated.
+    const contextConfig = loggerContextPluginConfigSchema.validate(rawConfig);
     this.contextConfigs.set(context, {
       ...contextConfig,
       // Automatically prepend the base context to the logger sub-contexts
@@ -158,11 +159,17 @@ export class LoggingSystem implements ILoggingSystem {
       return new BaseLogger(context, LogLevel.All, [this.bufferAppender], this.asLoggerFactory());
     }
 
-    const { level, appenders } = this.getLoggerConfigByContext(config, context);
+    const { level, appenders, filters } = this.getLoggerConfigByContext(config, context);
     const loggerLevel = LogLevel.fromId(level);
     const loggerAppenders = appenders.map((appenderKey) => this.appenders.get(appenderKey)!);
 
-    return new BaseLogger(context, loggerLevel, loggerAppenders, this.asLoggerFactory());
+    return new BaseLogger(
+      context,
+      loggerLevel,
+      loggerAppenders,
+      this.asLoggerFactory(),
+      filters ?? []
+    );
   }
 
   private getLoggerConfigByContext(config: LoggingConfig, context: string): LoggerConfigType {

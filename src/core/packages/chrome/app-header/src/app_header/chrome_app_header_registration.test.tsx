@@ -11,13 +11,13 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import type { AppHeaderConfig } from '@kbn/core-chrome-browser';
+import type { ChromeAppHeaderConfig } from '@kbn/core-chrome-browser';
 import {
   ChromeAppHeaderRegistration,
   useChromeAppHeaderRegistration,
 } from './chrome_app_header_registration';
 
-const Registration = ({ config }: { config: AppHeaderConfig }) => {
+const Registration = ({ config }: { config: ChromeAppHeaderConfig }) => {
   useChromeAppHeaderRegistration(config);
   return null;
 };
@@ -25,7 +25,6 @@ const Registration = ({ config }: { config: AppHeaderConfig }) => {
 describe('useChromeAppHeaderRegistration', () => {
   it('unregisters the previous config before registering an update', () => {
     const chrome = chromeServiceMock.createStartContract();
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
     chrome.getChromeStyle.mockReturnValue('project');
 
     const firstUnregister = jest.fn();
@@ -58,7 +57,6 @@ describe('useChromeAppHeaderRegistration', () => {
 
   it('registers metadata updates from component props', () => {
     const chrome = chromeServiceMock.createStartContract();
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.next.appHeader.set.mockReturnValue(jest.fn());
 
@@ -81,7 +79,9 @@ describe('useChromeAppHeaderRegistration', () => {
       badges: undefined,
       menu: undefined,
       favorite: undefined,
+      share: undefined,
       metadata: [{ type: 'text', label: 'Updated by: analyst' }],
+      spacing: undefined,
     });
   });
 });

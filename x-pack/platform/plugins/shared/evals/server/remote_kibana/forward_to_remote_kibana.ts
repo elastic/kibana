@@ -10,6 +10,7 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { API_VERSIONS } from '@kbn/evals-common';
 import type { KibanaRequest } from '@kbn/core/server';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import {
   EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
   type EvalsRemoteKibanaConfigAttributes,
@@ -80,7 +81,10 @@ const toRemoteUrl = ({
 }): string => {
   const remote = new URL(remoteBaseUrl);
   const basePath = remote.pathname === '/' ? '' : remote.pathname.replace(/\/$/, '');
-  remote.pathname = `${basePath}${requestPathname}`;
+  // The remote's spaces are its own, so a local `/s/<id>` prefix would name an
+  // unrelated space there. Same reason the assignment is dropped from the body.
+  const { pathname } = getSpaceIdFromPath(requestPathname);
+  remote.pathname = `${basePath}${pathname}`;
   remote.search = searchParams.toString();
   return remote.toString();
 };

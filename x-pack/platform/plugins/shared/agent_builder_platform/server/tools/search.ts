@@ -73,10 +73,25 @@ Note:
 - It is perfectly fine not to specify the 'index' parameter. It should only be specified when you already
  know about the index and fields you want to search on, e.g. if the user explicitly specified it.
     `,
+    annotations: {
+      title: 'Search for Elasticsearch Documents',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: searchSchema,
     handler: async (
       { query: nlQuery, index, time_range: explicitTimeRange },
-      { esClient, modelProvider, logger, events, attachments, savedObjectsClient }
+      {
+        esClient,
+        modelProvider,
+        logger,
+        events,
+        attachments,
+        savedObjectsClient,
+        experimentalFeatures,
+      }
     ) => {
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
@@ -106,10 +121,11 @@ Note:
         allowPatternTarget: true,
         timeRange,
         esClient: esClient.asCurrentUser,
-        model: await modelProvider.getDefaultModel(),
+        modelProvider,
         events,
         logger,
         topSnippetsConfig,
+        includeDatasets: experimentalFeatures.datasets,
         rowLimit: 100,
       });
       return { results };

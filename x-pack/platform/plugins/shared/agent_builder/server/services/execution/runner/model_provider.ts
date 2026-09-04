@@ -20,9 +20,9 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
@@ -36,19 +36,41 @@ export interface CreateModelProviderOpts {
   savedObjects: SavedObjectsServiceStart;
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
+  maxContentLength?: number;
 }
 
 export type CreateModelProviderFactoryFn = (
-  opts: Omit<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
+  opts: Omit<
+    CreateModelProviderOpts,
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength'
+  >
 ) => ModelProviderFactoryFn;
 
 export type ModelProviderFactoryFn = (
-  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
+  opts: Pick<
+    CreateModelProviderOpts,
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength'
+  >
 ) => ModelProvider;
 
 const memoizeAsync = <T>(fn: () => Promise<T>): (() => Promise<T>) => {
   let cached: Promise<T> | undefined;
   return () => (cached ??= fn());
+};
+
+const memoizeAsyncByKey = <K, T>(fn: (key: K) => Promise<T>): ((key: K) => Promise<T>) => {
+  const cache = new Map<K, Promise<T>>();
+  return (key: K) => {
+    if (!cache.has(key)) {
+      const pending = fn(key).catch((err) => {
+        cache.delete(key);
+        throw err;
+      });
+      cache.set(key, pending);
+    }
+    return cache.get(key)!;
+  };
 };
 
 /**
@@ -73,7 +95,10 @@ export const createModelProvider = ({
   savedObjects,
   searchInferenceEndpoints,
   logger,
+  telemetryMetadata,
+  maxContentLength,
 }: CreateModelProviderOpts): ModelProvider => {
+  const resolvedTelemetryMetadata = telemetryMetadata ?? MODEL_TELEMETRY_METADATA;
   const getDefaultConnectorId = memoizeAsync(async () => {
     const resolvedConnectorId = await resolveSelectedConnectorId({
       uiSettings,
@@ -92,36 +117,22 @@ export const createModelProvider = ({
   });
 
   const getFastModelConnectorId = memoizeAsync(async () => {
-    const fastModelEnabled = await uiSettings
-      .asScopedToClient(savedObjects.getScopedClient(request))
-      .get(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-
-    let connectorId: string | undefined;
-
-    if (fastModelEnabled) {
-      const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-        AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
-        request
-      );
-
-      const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
-      if (recommendedEndpoint.length > 0) {
-        connectorId = recommendedEndpoint[0].connectorId;
-      }
-    }
-
-    if (!connectorId) {
-      connectorId = await getDefaultConnectorId();
-    }
-
-    logger.debug(
-      `[getFastModelConnectorId] Using connectorId: ${connectorId} (fastModelEnabled: ${fastModelEnabled})`
+    const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+      AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
+      request
     );
 
-    return connectorId;
-  });
+    const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
+    if (recommendedEndpoint.length > 0) {
+      return recommendedEndpoint[0].connectorId;
+    }
 
-  getFastModelConnectorId().catch(() => undefined);
+    const fallbackId = await getDefaultConnectorId();
+    logger.debug(
+      `[model_provider] No dedicated fast inference endpoint found for feature "${AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID}" — falling back to default connector: ${fallbackId}. Fast model and default model are the SAME.`
+    );
+    return fallbackId;
+  });
 
   const selectModelId = async (opts: ModelSelectionPreferences): Promise<string> => {
     const { effortLevel = EffortLevels.medium } = opts;
@@ -140,7 +151,7 @@ export const createModelProvider = ({
     };
   };
 
-  const getModelById = async (connectorId: string): Promise<ScopedModel> => {
+  const getModelById = memoizeAsyncByKey(async (connectorId: string): Promise<ScopedModel> => {
     const completionCallback: InferenceCompleteCallbackHandler = (event) => {
       // Prefer model from provider response, fallback to connector-based model
       let modelName: string | undefined = event.model;
@@ -175,13 +186,17 @@ export const createModelProvider = ({
         complete: [completionCallback],
       },
       chatModelOptions: {
-        telemetryMetadata: MODEL_TELEMETRY_METADATA,
+        telemetryMetadata: resolvedTelemetryMetadata,
+        ...(maxContentLength !== undefined ? { maxContentLength } : {}),
       },
     });
 
     const inferenceClient = inference.getClient({
       request,
-      bindTo: { connectorId },
+      bindTo: {
+        connectorId,
+        ...(telemetryMetadata ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
+      },
       callbacks: {
         complete: [completionCallback],
       },
@@ -193,12 +208,23 @@ export const createModelProvider = ({
       chatModel,
       inferenceClient,
     };
-  };
+  });
+
+  const hasFastModel = memoizeAsync(async () => {
+    const [fastConnectorId, resolvedDefaultConnectorId] = await Promise.all([
+      getFastModelConnectorId(),
+      getDefaultConnectorId(),
+    ]);
+    // getFastModelConnectorId falls back to the default connector when no recommended fast endpoint
+    // is configured, so a distinct id means a genuinely dedicated (cheaper) fast model exists.
+    return fastConnectorId !== resolvedDefaultConnectorId;
+  });
 
   return {
     selectModel: async (opts) => getModelById(await selectModelId(opts)),
     getDefaultModel: async () => getModelById(await getDefaultConnectorId()),
     getModelById: ({ connectorId }) => getModelById(connectorId),
+    hasFastModel,
     getUsageStats,
   };
 };

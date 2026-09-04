@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defineAssembly } from '@kbn/content-list-assembly';
+import { defineAssembly } from '@kbn/ui-react-assembly';
 
 /** Assembly definition for the content list toolbar. */
 export const toolbar = defineAssembly({ name: 'ContentListToolbar' });

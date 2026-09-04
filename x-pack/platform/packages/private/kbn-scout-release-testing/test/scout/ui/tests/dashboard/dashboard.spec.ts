@@ -6,29 +6,16 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import fs from 'fs';
 import os from 'os';
-import {
-  SavedObjectsTracker,
-  cleanupDownloadedFile,
-  installLogsSampleData,
-  removeLogsSampleData,
-} from '../../helpers';
-
-const defaultSettings = {
-  defaultIndex: 'kibana_sample_data_logs',
-  'dateFormat:tz': 'UTC',
-};
+import { test } from '../../fixtures';
+import { SavedObjectsTracker, cleanupDownloadedFile } from '../../helpers';
 
 const tracker = new SavedObjectsTracker();
 let downloadedFilePath: string | null = null;
 
 test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
     await uiSettings.set({
@@ -40,10 +27,6 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
   test.afterEach(async ({ kbnClient }) => {
     downloadedFilePath = cleanupDownloadedFile(downloadedFilePath);
     await tracker.cleanup(kbnClient);
-  });
-
-  test.afterAll(async ({ kbnClient, apiServices }) => {
-    await removeLogsSampleData({ apiServices, kbnClient });
   });
 
   test('should create dashboard with ES|QL, Lens, and Vega panels', async ({
@@ -70,7 +53,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
 
     await test.step('add Vega panel', async () => {
       await pageObjects.dashboard.addNewPanel('Vega');
-      await pageObjects.dashboard.clickVisualizeSaveAndReturn();
+      await page.testSubj.locator('vegaEditorFlyoutSaveButton').click();
       await pageObjects.dashboard.expectPanelCount(3);
     });
 
@@ -79,7 +62,10 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await expect(heading).toHaveText('Editing ' + dashboardName);
   });
 
-  test('should edit existing dashboard and add map and Vega panels', async ({ pageObjects }) => {
+  test('should edit existing dashboard and add map and Vega panels', async ({
+    page,
+    pageObjects,
+  }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
@@ -95,7 +81,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
 
     await test.step('add a Vega panel', async () => {
       await pageObjects.dashboard.addNewPanel('Vega');
-      await pageObjects.dashboard.clickVisualizeSaveAndReturn();
+      await page.testSubj.locator('vegaEditorFlyoutSaveButton').click();
       await pageObjects.dashboard.expectPanelCount(14);
     });
 
@@ -234,6 +220,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       await pageObjects.dashboard.exitFullscreen();
     });
 
+    await page.testSubj.click('app-menu-overflow-button');
     await expect(page.testSubj.locator('dashboardFullScreenMode')).toBeVisible();
   });
 

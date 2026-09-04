@@ -6,7 +6,11 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { actionTaskParamsSchemaV1, actionTaskParamsSchemaV2 } from '../schemas/action_task_params';
+import {
+  actionTaskParamsSchemaV1,
+  actionTaskParamsSchemaV2,
+  actionTaskParamsSchemaV3,
+} from '../schemas/action_task_params';
 
 export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -28,6 +32,13 @@ export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: actionTaskParamsSchemaV2.extends({}, { unknowns: 'ignore' }),
       create: actionTaskParamsSchemaV2,
+    },
+  },
+  '3': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: actionTaskParamsSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: actionTaskParamsSchemaV3,
     },
   },
 };

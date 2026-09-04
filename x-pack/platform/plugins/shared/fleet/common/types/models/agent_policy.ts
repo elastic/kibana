@@ -44,7 +44,7 @@ export interface NewAgentPolicy {
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
-  agentless?: AgentlessPolicy;
+  agentless?: AgentlessAgentPolicyConfig;
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
     enabled?: boolean;
@@ -79,7 +79,8 @@ export interface CloudConnectors {
   target_csp?: CloudProvider;
   enabled?: boolean;
 }
-export interface AgentlessPolicy {
+/** Agentless-specific configuration embedded in an AgentPolicy (cloud connectors, resources). */
+export interface AgentlessAgentPolicyConfig {
   cloud_connectors?: CloudConnectors;
   resources?: {
     requests?: {
@@ -88,14 +89,6 @@ export interface AgentlessPolicy {
     };
   };
   cluster_id?: string;
-}
-
-/**
- * An agentless policy with cloud_connectors guaranteed to be present and enabled.
- * Used by verifier agent policies that target a specific cloud provider.
- */
-export interface VerifierAgentlessPolicy extends AgentlessPolicy {
-  cloud_connectors: Required<CloudConnectors> & { enabled: true };
 }
 
 export interface GlobalDataTag {
@@ -177,12 +170,15 @@ export interface FullAgentPolicyAddFields {
 
 export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
 
-export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
+export interface FullAgentPolicyOutput {
+  type: Output['type'];
+  hosts?: string[];
+  ca_sha256?: string | null;
   proxy_url?: string;
   proxy_headers?: any;
   ssl?: BaseSSLConfig;
   [key: string]: any;
-};
+}
 
 export interface FullAgentPolicyMonitoring {
   namespace?: string;
@@ -321,6 +317,10 @@ export interface FleetServerPolicy {
    * The ID of the policy
    */
   policy_id: string;
+  /**
+   * The base policy ID (policy_id without version suffix) for efficient querying.
+   */
+  policy_base_id?: string;
   /**
    * The revision index of the policy
    */

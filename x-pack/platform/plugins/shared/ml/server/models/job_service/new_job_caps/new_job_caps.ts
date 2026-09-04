@@ -19,9 +19,16 @@ export function newJobCapsProvider(client: IScopedClusterClient) {
   async function newJobCaps(
     indexPattern: string,
     isRollup: boolean = false,
-    dataViewsService: DataViewsService
+    dataViewsService: DataViewsService,
+    projectRouting?: string
   ): Promise<NewJobCapsResponse> {
-    const fieldService = fieldServiceProvider(indexPattern, isRollup, client, dataViewsService);
+    const fieldService = fieldServiceProvider(
+      indexPattern,
+      isRollup,
+      client,
+      dataViewsService,
+      projectRouting
+    );
     const { aggs, fields } = await fieldService.getData();
     convertForStringify(aggs, fields);
 

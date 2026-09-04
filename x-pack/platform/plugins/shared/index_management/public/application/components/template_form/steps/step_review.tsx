@@ -17,10 +17,9 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiText,
-  EuiCallOut,
-  EuiLink,
   EuiCodeBlock,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataStreamOptions } from '../../../../../common/types/data_streams';
 import { indexModeLabels } from '../../../lib/index_mode_labels';
@@ -31,11 +30,10 @@ import { serializeLegacyTemplate, serializeTemplate } from '../../../../../commo
 import type { TemplateDeserialized, Aliases } from '../../../../../common';
 import { getTemplateParameter } from '../../../../../common';
 import { SimulateTemplate } from '../../index_templates';
-import { getLifecycleValue } from '../../../lib/data_streams';
 import type { WizardSection } from '../template_form';
-
+import { formatDlmLifecycleSummary, resolveLifecycleForSummary } from '../../../lib/data_streams';
+import { useAppContext } from '../../../app_context';
 const { stripEmptyFields } = serializers;
-const INFINITE_AS_ICON = true;
 
 const NoneDescriptionText = () => (
   <FormattedMessage
@@ -90,6 +88,10 @@ const PreviewTab = ({ template }: { template: { [key: string]: any } }) => {
 export const StepReview: React.FunctionComponent<Props> = React.memo(
   ({ template, navigateToStep, dataStreamOptions }) => {
     const {
+      config: { isServerless },
+    } = useAppContext();
+    const dlmTiersLayoutEnabled = !isServerless;
+    const {
       name,
       indexPatterns,
       indexMode,
@@ -100,7 +102,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       allowAutoCreate,
       composedOf,
       _meta,
-      _kbnMeta: { isLegacy },
+      _kbnMeta: { isLegacy, hasDatastream },
     } = template!;
 
     const serializedTemplate = isLegacy
@@ -119,7 +121,11 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     const serializedMappings = getTemplateParameter(serializedTemplate, 'mappings');
     const serializedSettings = getTemplateParameter(serializedTemplate, 'settings');
     const serializedAliases = getTemplateParameter(serializedTemplate, 'aliases');
-    const serializedLifecycle = (indexTemplate as TemplateDeserialized)?.lifecycle;
+    const serializedLifecycle = isLegacy
+      ? undefined
+      : resolveLifecycleForSummary(indexTemplate?.lifecycle, {
+          hasDataStream: hasDatastream ?? Boolean(template?.dataStream),
+        });
 
     const numIndexPatterns = indexPatterns!.length;
 
@@ -316,11 +322,13 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                   <EuiDescriptionListTitle data-test-subj="lifecycleTitle">
                     <FormattedMessage
                       id="xpack.idxMgmt.templateForm.stepReview.summaryTab.lifecycleLabel"
-                      defaultMessage="Data retention"
+                      defaultMessage="Data lifecycle"
                     />
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription data-test-subj="lifecycleValue">
-                    {getLifecycleValue(serializedLifecycle, INFINITE_AS_ICON)}
+                    {formatDlmLifecycleSummary(serializedLifecycle, {
+                      includePhaseCount: dlmTiersLayoutEnabled,
+                    })}
                   </EuiDescriptionListDescription>
                 </>
               )}
@@ -422,7 +430,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
 
         {hasWildCardIndexPattern ? (
           <Fragment>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -430,24 +438,27 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                   defaultMessage="This template uses a wildcard (*) as an index pattern."
                 />
               }
-              color="warning"
-              iconType="question"
               data-test-subj="indexPatternsWarning"
-            >
-              <p data-test-subj="indexPatternsWarningDescription">
-                <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningDescription"
-                  defaultMessage="All new indices that you create will use this template."
-                />{' '}
-                {/* Edit link navigates back to step 1 (logistics) */}
-                <EuiLink onClick={navigateToStep.bind(null, 'logistics')}>
+              text={
+                <p data-test-subj="indexPatternsWarningDescription">
                   <FormattedMessage
-                    id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningLinkText"
-                    defaultMessage="Edit index patterns."
+                    id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningDescription"
+                    defaultMessage="All new indices that you create will use this template."
                   />
-                </EuiLink>
-              </p>
-            </EuiCallOut>
+                </p>
+              }
+              actionProps={{
+                primary: {
+                  onClick: navigateToStep.bind(null, 'logistics'),
+                  children: (
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningLinkText"
+                      defaultMessage="Edit index patterns."
+                    />
+                  ),
+                },
+              }}
+            />
             <EuiSpacer size="m" />
           </Fragment>
         ) : null}

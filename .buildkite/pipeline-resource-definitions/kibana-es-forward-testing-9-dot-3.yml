@@ -5,7 +5,7 @@ metadata:
   name: bk-kibana-es-forward-compatibility-testing-9-dot-3
   description: Forward compatibility testing between Kibana 8.19 and ES 9+
   links:
-    - url: 'https://buildkite.com/elastic/kibana-es-forward-compatibility-testing-9-dot-3'
+    - url: 'https://buildkite.com/elastic/kibana-es-forward-compatibility-testing-9-dot-x'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -15,19 +15,25 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / ES Forward Compatibility Testing 9.3
+      name: kibana / ES Forward Compatibility Testing 9.x
       description: Forward compatibility testing between Kibana 8.19 and ES 9+
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
-        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'false'
+        SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/es_forward_9_dot_3.yml
+      pipeline_file: .buildkite/pipelines/es_forward_9_dot_x.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/es_forward_9_dot_x.yml
+            cleanup_sparse_state: true
       skip_intermediate_builds: false
       provider_settings:
         prefix_pull_request_fork_branch_names: false

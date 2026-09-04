@@ -5,26 +5,20 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useRef, useState } from 'react';
 import type { FC } from 'react';
 
+import {
+  AppHeader,
+  type AppHeaderBadge,
+  type AppHeaderMenu,
+  type AppHeaderTab,
+} from '@kbn/app-header';
 import type { ScopedHistory } from '@kbn/core/public';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
@@ -33,12 +27,25 @@ import { useTabs } from './hooks/use_tabs';
 import { useEditSpaceServices, useEditSpaceStore } from './provider';
 import { ENTER_SPACE_PATH, type Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
-import { getSpaceAvatarComponent } from '../../space_avatar';
-import { SpaceSolutionBadge } from '../../space_solution_badge';
+import { getSpaceSolutionBadgeLabel, SpaceSolutionBadge } from '../../space_solution_badge';
 
-// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
-const LazySpaceAvatar = lazy(() =>
-  getSpaceAvatarComponent().then((component) => ({ default: component }))
+const spacesListTitle = i18n.translate('xpack.spaces.management.spacesGridPage.spacesTitle', {
+  defaultMessage: 'Spaces',
+});
+
+const editSpaceFallbackTitle = i18n.translate(
+  'xpack.spaces.management.spaceDetails.editSpaceTitle',
+  { defaultMessage: 'Edit space' }
+);
+
+const switchToSpaceButtonLabel = i18n.translate(
+  'xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label',
+  { defaultMessage: 'Switch to this space' }
+);
+
+const currentSpaceBadgeLabel = i18n.translate(
+  'xpack.spaces.management.spaceDetails.space.badge.isCurrent',
+  { defaultMessage: 'Current' }
 );
 
 const getSelectedTabId = (canUserViewRoles: boolean, selectedTabId?: string) => {
@@ -92,7 +99,6 @@ export const EditSpace: FC<PageProps> = ({
     space,
     features,
     isRoleManagementEnabled,
-    rolesCount: state.roles.size,
     capabilities,
     history,
     currentSelectedTabId: selectedTabId,
@@ -181,123 +187,99 @@ export const EditSpace: FC<PageProps> = ({
     }
   }, [onLoadSpace, space]);
 
-  if (!space) {
-    return null;
-  }
+  const isPageReady =
+    Boolean(space) &&
+    !isLoadingSpace &&
+    !isLoadingFeatures &&
+    (!isRoleManagementEnabled || !isLoadingRoles);
 
-  if (isLoadingSpace || isLoadingFeatures || (isRoleManagementEnabled && isLoadingRoles)) {
-    return (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xxl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  const HeaderAvatar = () => {
-    return (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazySpaceAvatar space={space} size="xl" />
-      </Suspense>
-    );
-  };
-
-  const { id, solution: spaceSolution } = space;
-  const solution = spaceSolution ?? SOLUTION_VIEW_CLASSIC;
+  const title = space?.name ?? editSpaceFallbackTitle;
+  const solution = space?.solution ?? SOLUTION_VIEW_CLASSIC;
   const shouldShowSolutionBadge =
-    props.allowSolutionVisibility || solution !== SOLUTION_VIEW_CLASSIC;
+    Boolean(space) && (props.allowSolutionVisibility || solution !== SOLUTION_VIEW_CLASSIC);
+  const isCurrentSpace = Boolean(space && userActiveSpace?.id === space.id);
+  const switchHref = space
+    ? addSpaceIdToPath(
+        serverBasePath,
+        space.id,
+        `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/edit/${space.id}`
+      )
+    : undefined;
+
+  const badges: AppHeaderBadge[] = [];
+  if (shouldShowSolutionBadge) {
+    badges.push({
+      label: getSpaceSolutionBadgeLabel(solution),
+      renderCustomBadge: () => (
+        <SpaceSolutionBadge
+          solution={solution}
+          data-test-subj={`space-solution-badge-${solution}`}
+        />
+      ),
+    });
+  }
+  if (isCurrentSpace) {
+    badges.push({
+      label: currentSpaceBadgeLabel,
+      color: 'primary',
+      'data-test-subj': 'space-current-badge',
+    });
+  }
+
+  const headerTabs: AppHeaderTab[] | undefined =
+    space && isPageReady
+      ? tabs.map((tab) => {
+          const pathname = `/edit/${encodeURIComponent(space.id)}/${tab.id}`;
+          return {
+            id: tab.id,
+            label: tab.name,
+            isSelected: tab.id === selectedTabId,
+            href: history.createHref({ pathname }),
+            onClick: () => history.push(pathname),
+            badge: tab.id === TAB_ID_ROLES ? state.roles.size : undefined,
+          };
+        })
+      : undefined;
+
+  const menu: AppHeaderMenu | undefined =
+    space && !isCurrentSpace && switchHref
+      ? {
+          primaryActionItem: {
+            id: 'switchSpace',
+            label: switchToSpaceButtonLabel,
+            iconType: 'merge',
+            testId: 'spaces-view-page-switcher-button',
+            href: switchHref,
+          },
+        }
+      : undefined;
 
   return (
-    <div data-test-subj="spaces-view-page">
-      <EuiFlexGroup
-        data-test-subj="space-view-page-details-header"
-        alignItems="flexStart"
-        direction="column"
-      >
-        <EuiFlexItem grow={true} css={{ flexBasis: '100%', width: '100%' }}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false} css={{ marginTop: '4px' }}>
-              <HeaderAvatar />
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem grow={true}>
-                  <EuiFlexGroup justifyContent="spaceBetween">
-                    <EuiFlexItem grow={true}>
-                      <EuiTitle size="l">
-                        <h1 data-test-subj="spaces-view-page-title">{space.name}</h1>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <React.Fragment>
-                        {userActiveSpace?.id !== id ? (
-                          <EuiButton
-                            iconType="merge"
-                            href={addSpaceIdToPath(
-                              serverBasePath,
-                              id,
-                              `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/edit/${id}`
-                            )}
-                            data-test-subj="spaces-view-page-switcher-button"
-                          >
-                            <FormattedMessage
-                              id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
-                              defaultMessage="Switch to this space"
-                            />
-                          </EuiButton>
-                        ) : null}
-                      </React.Fragment>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} css={{ marginTop: '4px' }}>
-                  <div>
-                    {shouldShowSolutionBadge ? (
-                      <SpaceSolutionBadge
-                        solution={solution}
-                        data-test-subj={`space-solution-badge-${solution}`}
-                      />
-                    ) : null}
-                    {userActiveSpace?.id === id ? (
-                      <EuiBadge color="primary">
-                        <FormattedMessage
-                          id="xpack.spaces.management.spaceDetails.space.badge.isCurrent"
-                          description="Text for a badge shown in the Space details page when the particular Space currently active."
-                          defaultMessage="Current"
-                        />
-                      </EuiBadge>
-                    ) : null}
-                  </div>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">
-            <p>{space.description}</p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiTabs>
-            {tabs.map((tab, index) => (
-              <EuiTab
-                key={index}
-                isSelected={tab.id === selectedTabId}
-                append={tab.append}
-                {...reactRouterNavigate(history, `/edit/${encodeURIComponent(id)}/${tab.id}`)}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-        </EuiFlexItem>
-        <EuiFlexItem>{selectedTabContent ?? null}</EuiFlexItem>
-      </EuiFlexGroup>
+    <div data-test-subj={space ? 'spaces-view-page' : undefined}>
+      <div data-test-subj={space ? 'space-view-page-details-header' : undefined}>
+        <AppHeader
+          title={title}
+          description={space?.description || undefined}
+          badges={badges.length ? badges : undefined}
+          tabs={headerTabs}
+          menu={menu}
+          back={{
+            href: history.createHref({ pathname: '/' }),
+            label: spacesListTitle,
+          }}
+          spacing="bleed"
+        />
+      </div>
+      <EuiSpacer size="l" />
+      {!isPageReady ? (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xxl" data-test-subj="editSpacePageLoading" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        selectedTabContent ?? null
+      )}
     </div>
   );
 };

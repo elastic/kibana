@@ -52,8 +52,9 @@ test.describe('Create Data View wizard', { tag: tags.stateful.classic }, () => {
 
     await test.step('wizard auto-detects the timestamp field from the data stream mapping', async () => {
       await pageObjects.dataViewEditor.setTitle(DATA_STREAM_NAME);
-      const timestampValue = await pageObjects.dataViewEditor.getTimestampFieldValue();
-      expect(timestampValue).toBe('@timestamp');
+      await expect
+        .poll(() => pageObjects.dataViewEditor.getTimestampFieldValue())
+        .toBe('@timestamp');
     });
 
     await test.step('saving navigates to the data view detail page', async () => {

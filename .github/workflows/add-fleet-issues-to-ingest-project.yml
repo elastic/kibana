@@ -1,15 +1,15 @@
-name: Add Fleet issue to Platform Ingest - UI & Integrations project
+name: Add Streams UI issue to Platform Ingest - UI & Integrations project
 
 on:
   issues:
     types:
       - labeled
-      
+
 env:
   INGEST_PROJECT_ID: 'PVT_kwDOAGc3Zs4AogrP'
-  FLEET_LABEL: 'Team:Fleet'
+  STREAMS_UI_LABEL: 'Team:streams-ui'
   AREA_FIELD_ID: 'PVTSSF_lADOAGc3Zs4AogrPzggEiBs'
-  FLEET_UI_OPTION_ID: '411a7b86'
+  STREAMS_UI_OPTION_ID: 'cabff016'
 
 jobs:
   add_to_ingest_project:
@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: octokit/graphql-action@ddde8ebb2493e79f390e6449c725c21663a67505 # v3.0.2
         id: add_to_project
-        if: ${{ github.event.label.name == env.FLEET_LABEL }}
+        if: ${{ github.event.label.name == env.STREAMS_UI_LABEL }}
         with:
           query: |
             # Variables have to be snake cased because of https://github.com/octokit/graphql-action/issues/164
@@ -33,8 +33,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.FLEET_PROJECT_TOKEN }}
       - uses: octokit/graphql-action@ddde8ebb2493e79f390e6449c725c21663a67505 # v3.0.2
-        id: set_fleet_ui_area
-        if: github.event.label.name == env.FLEET_LABEL
+        id: set_streams_ui_area
+        if: github.event.label.name == env.STREAMS_UI_LABEL
         with:
           query: |
             mutation updateIngestArea($item_id: ID!, $project_id: ID!, $area_field_id: ID!, $area_id: String) {
@@ -46,6 +46,6 @@ jobs:
           item_id: ${{ fromJSON(steps.add_to_project.outputs.data).addProjectV2ItemById.item.id }}
           project_id: ${{ env.INGEST_PROJECT_ID }}
           area_field_id: ${{ env.AREA_FIELD_ID }}
-          area_id: ${{ env.FLEET_UI_OPTION_ID }}
+          area_id: ${{ env.STREAMS_UI_OPTION_ID }}
         env:
           GITHUB_TOKEN: ${{ secrets.FLEET_PROJECT_TOKEN }}

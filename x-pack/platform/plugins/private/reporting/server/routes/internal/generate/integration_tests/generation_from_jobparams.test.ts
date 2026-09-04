@@ -182,17 +182,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`
-          "invalid params: [
-            {
-              \\"code\\": \\"custom\\",
-              \\"path\\": [
-                \\"browserTimezone\\"
-              ],
-              \\"message\\": \\"Invalid timezone\\"
-            }
-          ]"
-        `)
+        expect(body.message).toEqual('invalid params: browserTimezone: Invalid timezone')
       );
   });
 
@@ -240,7 +230,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
               },
               objectType: 'canvas workpad',
               title: 'abc',
-              version: '7.14.0',
+              version: 'version',
             },
             status: 'pending',
           },

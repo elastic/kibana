@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { allCasesPermissions, noCasesPermissions } from '@kbn/observability-shared-plugin/public';
 
 import { render } from '../../../utils/test_helper';
 import { useKibana } from '../../../utils/kibana_react';
@@ -16,21 +17,61 @@ import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { createTelemetryClientMock } from '../../../services/telemetry/telemetry_client.mock';
 import { alertWithGroupsAndTags, mockAlertUuid, untrackedAlert } from '../mock/alert';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
+import { useAlertSnoozeState } from '../hooks/use_alert_snooze_state';
 
 import { HeaderActions } from './header_actions';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
+import { useAlertSnooze } from '@kbn/response-ops-alert-snooze';
 import { paths } from '../../../../common/locators/paths';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../hooks/use_fetch_rule');
+jest.mock('../hooks/use_alert_snooze_state');
+const mockUseInvestigationAvailability = jest.fn(() => true);
+jest.mock('../../../hooks/use_investigation_availability', () => ({
+  useInvestigationAvailability: () => mockUseInvestigationAvailability(),
+}));
+
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => ({
+  useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
+}));
+
+jest.mock('@kbn/response-ops-alert-snooze', () => ({
+  useAlertSnooze: jest.fn(),
+  AlertSnoozePanelInline: jest.fn(({ onApply, onBack }) => (
+    <div data-test-subj="alertSnoozePanelInlineMock">
+      <button
+        type="button"
+        data-test-subj="applySnoozeMock"
+        onClick={() => onApply({ expiresAt: '2021-10-10T00:00:00.000Z' })}
+      >
+        apply
+      </button>
+      <button type="button" data-test-subj="backSnoozeMock" onClick={onBack}>
+        back
+      </button>
+    </div>
+  )),
+}));
+
+const mockUseGetRuleTypesPermissions = jest.fn(() => ({
+  authorizedToReadRuleType: (): boolean => true,
+}));
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
+  useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+}));
 
 const useKibanaMock = useKibana as jest.Mock;
 const useFetchRuleMock = useFetchRule as jest.Mock;
+const useAlertSnoozeStateMock = useAlertSnoozeState as jest.Mock;
+const useAlertSnoozeMock = useAlertSnooze as jest.Mock;
 const mockCases = casesPluginMock.createStartContract();
 
 const mockHttp = {
+  post: jest.fn(),
   basePath: {
     prepend: (url: string) => `wow${url}`,
   },
@@ -38,6 +79,7 @@ const mockHttp = {
 
 const mockNavigateToApp = {
   mockNavigateToApp: jest.fn(),
+  capabilities: { agentBuilder: { write: true } },
 };
 
 jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
@@ -45,6 +87,7 @@ jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
 }));
 
 const mockKibana = () => {
+  mockCases.helpers.canUseCases = jest.fn().mockReturnValue(allCasesPermissions());
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract(),
@@ -81,9 +124,32 @@ const mockUseFetchRuleWithoutData = () => {
 
 const mockOnUntrackAlert = () => {};
 
+const snoozeStateWithoutInstance = {
+  ruleId: undefined,
+  instanceId: undefined,
+  isMuted: false,
+  isSnoozed: false,
+  snoozedInstance: undefined,
+  refetch: jest.fn(),
+  isLoading: false,
+};
+
 describe('Header Actions', () => {
+  beforeEach(() => {
+    mockUseInvestigationAvailability.mockReturnValue(true);
+    useAlertSnoozeStateMock.mockReturnValue(snoozeStateWithoutInstance);
+    useAlertSnoozeMock.mockReturnValue({
+      snoozeAlert: jest.fn().mockResolvedValue(true),
+      unsnoozeAlert: jest.fn().mockResolvedValue(true),
+    });
+  });
+
   afterAll(() => {
     jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => true });
   });
 
   describe('Header Actions - Enabled', () => {
@@ -102,7 +168,7 @@ describe('Header Actions', () => {
 
       mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
 
-      const { getByTestId } = render(
+      const { getByTestId, findByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}
           alertIndex={'alert-index'}
@@ -118,6 +184,7 @@ describe('Header Actions', () => {
         />
       );
 
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
       fireEvent.click(getByTestId(`add-to-cases-button-mocked-type-id`));
 
       expect(attachments).toEqual([
@@ -133,6 +200,86 @@ describe('Header Actions', () => {
           },
         },
       ]);
+    });
+
+    it('starts an investigation from the alert details menu', async () => {
+      mockHttp.post.mockResolvedValue({ investigation_id: 'investigation-1' });
+      const { findByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex="alert-index"
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+      fireEvent.click(await findByTestId('alertDetailsInvestigate'));
+
+      await waitFor(() => {
+        expect(mockHttp.post).toHaveBeenCalledWith(
+          `/internal/observability/alerts/${mockAlertUuid}/investigate`
+        );
+      });
+    });
+
+    it('hides the investigate action when no investigation connector is available', async () => {
+      mockUseInvestigationAvailability.mockReturnValue(false);
+      const { findByTestId, queryByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex="alert-index"
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+      expect(queryByTestId('alertDetailsInvestigate')).not.toBeInTheDocument();
+    });
+
+    it('disables the investigate action while the request is in flight', async () => {
+      mockHttp.post.mockReturnValue(new Promise(() => {}));
+      const { findByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex="alert-index"
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+      fireEvent.click(await findByTestId('alertDetailsInvestigate'));
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+
+      expect(await findByTestId('alertDetailsInvestigate')).toBeDisabled();
+    });
+
+    it('should NOT offer an "Add to case" button without cases privileges', async () => {
+      mockCases.helpers.canUseCases = jest.fn().mockReturnValue(noCasesPermissions());
+
+      const { queryByTestId, findByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex={'alert-index'}
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+          // @ts-expect-error partial implementation for testing
+          rule={{
+            id: mockRuleId,
+            name: mockRuleName,
+            ruleTypeId: mockRuleTypeId,
+          }}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+      expect(queryByTestId(`add-to-cases-button-${mockRuleTypeId}`)).not.toBeInTheDocument();
     });
 
     it('should not offer a "Snooze the rule" button', async () => {
@@ -247,6 +394,26 @@ describe('Header Actions', () => {
         );
         expect(queryByTestId('view-rule-details-button')).toHaveProperty('target', '_blank');
       });
+
+      it('should NOT offer a "Go to rule details" button when unauthorized to read the rule type', async () => {
+        mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => false });
+        const { queryByTestId, findByTestId } = render(
+          <HeaderActions
+            alert={alertWithGroupsAndTags}
+            alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+            onUntrackAlert={mockOnUntrackAlert}
+            refetch={jest.fn()}
+            // @ts-expect-error partial implementation for testing
+            rule={{
+              id: mockRuleId,
+              name: mockRuleName,
+            }}
+          />
+        );
+
+        fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+        expect(queryByTestId('view-rule-details-button')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -295,6 +462,107 @@ describe('Header Actions', () => {
       );
       fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
       expect(queryByTestId('view-rule-details-button')).toHaveAttribute('disabled');
+    });
+  });
+
+  describe('per-alert snooze', () => {
+    const snoozedState = {
+      ruleId: mockRuleId,
+      instanceId: '*',
+      isMuted: false,
+      isSnoozed: false,
+      snoozedInstance: undefined,
+      refetch: jest.fn(),
+      isLoading: false,
+    };
+
+    beforeEach(() => {
+      mockKibana();
+      mockUseFetchRuleWithData();
+    });
+
+    const renderHeaderActions = () =>
+      render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+          // @ts-expect-error partial implementation for testing
+          rule={{
+            id: mockRuleId,
+            name: mockRuleName,
+          }}
+        />
+      );
+
+    it('offers a "Snooze the alert" button when the alert is neither muted nor snoozed', async () => {
+      useAlertSnoozeStateMock.mockReturnValue(snoozedState);
+
+      const { findByTestId, queryByTestId } = renderHeaderActions();
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+
+      expect(await findByTestId('snooze-alert-button')).toBeInTheDocument();
+      expect(queryByTestId('unsnooze-alert-button')).toBeNull();
+    });
+
+    it('opens the inline snooze form and applies the snooze payload', async () => {
+      const snoozeAlert = jest.fn().mockResolvedValue(true);
+      useAlertSnoozeMock.mockReturnValue({ snoozeAlert, unsnoozeAlert: jest.fn() });
+      useAlertSnoozeStateMock.mockReturnValue(snoozedState);
+
+      const { findByTestId } = renderHeaderActions();
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+      fireEvent.click(await findByTestId('snooze-alert-button'));
+      fireEvent.click(await findByTestId('applySnoozeMock'));
+
+      await waitFor(() =>
+        expect(snoozeAlert).toHaveBeenCalledWith({ expiresAt: '2021-10-10T00:00:00.000Z' })
+      );
+    });
+
+    it('offers an "Unsnooze the alert" button when the alert is snoozed and unsnoozes it on click', async () => {
+      const unsnoozeAlert = jest.fn().mockResolvedValue(true);
+      useAlertSnoozeMock.mockReturnValue({ snoozeAlert: jest.fn(), unsnoozeAlert });
+      useAlertSnoozeStateMock.mockReturnValue({
+        ...snoozedState,
+        isSnoozed: true,
+        snoozedInstance: { instanceId: '*' },
+      });
+
+      const { findByTestId, queryByTestId } = renderHeaderActions();
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+
+      expect(await findByTestId('unsnooze-alert-button')).toBeInTheDocument();
+      expect(queryByTestId('snooze-alert-button')).toBeNull();
+
+      fireEvent.click(await findByTestId('unsnooze-alert-button'));
+
+      await waitFor(() => expect(unsnoozeAlert).toHaveBeenCalled());
+    });
+
+    it('offers the "Unsnooze the alert" button when the alert is muted', async () => {
+      useAlertSnoozeStateMock.mockReturnValue({ ...snoozedState, isMuted: true });
+
+      const { findByTestId } = renderHeaderActions();
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+
+      expect(await findByTestId('unsnooze-alert-button')).toBeInTheDocument();
+    });
+
+    it('does not offer snooze/unsnooze alert buttons when rule or instance id is missing', async () => {
+      useAlertSnoozeStateMock.mockReturnValue(snoozeStateWithoutInstance);
+
+      const { findByTestId, queryByTestId } = renderHeaderActions();
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+
+      expect(queryByTestId('snooze-alert-button')).toBeNull();
+      expect(queryByTestId('unsnooze-alert-button')).toBeNull();
     });
   });
 });

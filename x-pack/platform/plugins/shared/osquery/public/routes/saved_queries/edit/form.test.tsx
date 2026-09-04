@@ -66,7 +66,6 @@ jest.mock('../../../saved_queries/form/use_saved_query_form', () => ({
     trigger: jest.fn(),
     control: {},
   })),
-  savedQueryDataSerializer: jest.fn((data: unknown) => data),
 }));
 
 jest.mock('../../../saved_queries/form', () => ({

@@ -24,4 +24,10 @@ describe('getDefaultSecurityImplementation', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"No authenticated user"`);
     });
   });
+
+  describe('serviceAccounts.isEnabled', () => {
+    it('returns false', () => {
+      expect(implementation.serviceAccounts.isEnabled()).toBe(false);
+    });
+  });
 });

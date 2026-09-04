@@ -17,7 +17,9 @@ project:
   owner: '@elastic/rna-project-team'
   sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui
 dependsOn:
+  - '@kbn/alerting-v2-common-queries'
   - '@kbn/alerting-v2-schemas'
+  - '@kbn/alerting-v2-utils'
   - '@kbn/datemath'
   - '@kbn/core'
   - '@kbn/core-application-browser'
@@ -41,6 +43,7 @@ dependsOn:
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/react-kibana-mount'
   - '@kbn/react-query'
+  - '@kbn/router-utils'
   - '@kbn/response-ops-alert-snooze'
   - '@kbn/data-plugin'
   - '@kbn/discover-utils'
@@ -49,6 +52,7 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/react-hooks'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-rule-form'
   - '@kbn/es-types'
   - '@kbn/kibana-react-plugin'
   - '@kbn/search-types'
@@ -61,6 +65,7 @@ dependsOn:
   - '@kbn/charts-plugin'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

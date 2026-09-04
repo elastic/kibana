@@ -7,6 +7,7 @@
 
 import { isPlainObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { hasMustacheTemplate } from '@kbn/actions-plugin/common';
 
 interface ValidateJSONArgs {
   value?: string | null | Record<string, unknown>;
@@ -37,6 +38,12 @@ export const validateJSON = ({ value, maxProperties }: ValidateJSONArgs) => {
     }
 
     if (value) {
+      // Values containing mustache templates cannot be validated as JSON here:
+      // they only become valid JSON after the templates are rendered on the server
+      if (hasMustacheTemplate(value)) {
+        return;
+      }
+
       const parsedOtherFields = JSON.parse(value);
 
       if (maxProperties && Object.keys(parsedOtherFields).length > maxProperties) {

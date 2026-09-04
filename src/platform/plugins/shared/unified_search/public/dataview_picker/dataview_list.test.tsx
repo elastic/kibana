@@ -86,10 +86,10 @@ describe('DataView list component', () => {
 
     // Find the dataview option and click it
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'dataview-2' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /^dataview-2 / })).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole('option', { name: 'dataview-2' }));
+    await user.click(screen.getByRole('option', { name: /^dataview-2 / }));
 
     expect(changeDataViewSpy).toHaveBeenCalledWith('dataview-2');
   });
@@ -100,8 +100,8 @@ describe('DataView list component', () => {
     // Verify both dataviews are visible as options
     await waitFor(() => {
       expect(screen.getAllByRole('option')).toHaveLength(2);
-      expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
-      expect(screen.getByRole('option', { name: 'dataview-2' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /^dataview-1 / })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /^dataview-2 / })).toBeInTheDocument();
     });
   });
 
@@ -122,9 +122,9 @@ describe('DataView list component', () => {
       // Verify the expected dataviews are visible as options
       await waitFor(() => {
         expect(screen.getAllByRole('option')).toHaveLength(3);
-        expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
-        expect(screen.getByRole('option', { name: 'dataview-2' })).toBeInTheDocument();
-        expect(screen.getByRole('option', { name: 'dataview-3' })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /^dataview-1 / })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /^dataview-2 / })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /^dataview-3 / })).toBeInTheDocument();
       });
     };
 
@@ -157,13 +157,31 @@ describe('DataView list component', () => {
       await waitFor(() => {
         // Regular dataviews should be visible
         expect(screen.getAllByRole('option')).toHaveLength(3);
-        expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
-        expect(screen.getByRole('option', { name: 'dataview-2' })).toBeInTheDocument();
-        expect(screen.getByRole('option', { name: 'dataview-3' })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /^dataview-1 / })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /^dataview-2 / })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /^dataview-3 / })).toBeInTheDocument();
 
         // ES|QL dataview should not be visible (filtered out)
-        expect(screen.queryByRole('option', { name: 'dataview-4' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('option', { name: /^dataview-4 / })).not.toBeInTheDocument();
       });
+    });
+  });
+
+  it('should render the items when dataViewsList arrives after the initial render', async () => {
+    const wrap = (element: React.ReactElement) => (
+      <div style={{ width: '400px', height: '300px' }}>{element}</div>
+    );
+    const { rerender } = render(wrap(<DataViewsList {...props} dataViewsList={[]} />));
+
+    expect(screen.queryAllByRole('option')).toHaveLength(0);
+
+    // The list is fetched asynchronously, so it can arrive as a prop update after mount
+    rerender(wrap(<DataViewsList {...props} dataViewsList={list} />));
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('option')).toHaveLength(2);
+      expect(screen.getByRole('option', { name: /^dataview-1 / })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /^dataview-2 / })).toBeInTheDocument();
     });
   });
 
@@ -175,8 +193,8 @@ describe('DataView list component', () => {
     expect(searchInput).toBeInTheDocument();
 
     // The component should render even with empty list
-    expect(screen.queryByRole('option', { name: 'dataview-1' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('option', { name: 'dataview-2' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /^dataview-1 / })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /^dataview-2 / })).not.toBeInTheDocument();
 
     // Should show "No options available" message - use getAllByText since there are multiple instances
     const noOptionsMessages = screen.getAllByText('No options available');
@@ -190,8 +208,8 @@ describe('DataView list component', () => {
     // Verify both options are initially visible
     await waitFor(() => {
       expect(screen.getAllByRole('option')).toHaveLength(2);
-      expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
-      expect(screen.getByRole('option', { name: 'dataview-2' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /^dataview-1 / })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /^dataview-2 / })).toBeInTheDocument();
     });
 
     // When the list has items, the input has role "combobox" (not "searchbox")
@@ -203,8 +221,8 @@ describe('DataView list component', () => {
 
     await waitFor(() => {
       // Only matching dataview should be visible
-      expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
-      expect(screen.queryByRole('option', { name: 'dataview-2' })).not.toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /^dataview-1 / })).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: /^dataview-2 / })).not.toBeInTheDocument();
     });
   });
 });

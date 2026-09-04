@@ -67,8 +67,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('newPlaygroundButton');
 
         await retry.waitFor(
-          'playground docs link',
-          async () => await testSubjects.exists('playground-documentation-link')
+          'playground header menu',
+          async () => await testSubjects.exists('app-menu')
         );
         await a11y.testAppSnapshot();
       });

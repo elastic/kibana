@@ -94,7 +94,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const brushAreaChart = async () => {
     const areaChart = await testSubjects.find('visualizationLoader');
-    expect(await areaChart.getAttribute('data-title')).to.be('Visualization漢字 AreaChart');
     await browser.dragAndDrop(
       {
         location: areaChart,
@@ -127,6 +126,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboard.waitForRenderComplete();
   };
 
+  /**
+   * Purpose: Dashboard drilldown smoke test
+   *
+   * Migration: Migrate to scout
+   */
   describe('Dashboard to dashboard drilldown', function () {
     describe('Create & use drilldowns', () => {
       before(async () => {

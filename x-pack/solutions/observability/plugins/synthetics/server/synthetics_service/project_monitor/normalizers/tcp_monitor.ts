@@ -30,6 +30,7 @@ export const getNormalizeTCPFields = ({
   projectId,
   namespace,
   version,
+  maintenanceWindows,
 }: NormalizedProjectProps): NormalizerResult<TCPFields> => {
   const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.TCP];
   const errors = [];
@@ -42,6 +43,7 @@ export const getNormalizeTCPFields = ({
     projectId,
     namespace,
     version,
+    maintenanceWindows,
   });
 
   // Add common erros to errors arary

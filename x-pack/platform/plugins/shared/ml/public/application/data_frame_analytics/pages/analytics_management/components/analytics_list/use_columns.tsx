@@ -257,7 +257,7 @@ export const useColumns = (
       render: (id: string) => {
         return (
           <EuiToolTip content={id}>
-            <span>{id}</span>
+            <span tabIndex={0}>{id}</span>
           </EuiToolTip>
         );
       },
@@ -273,7 +273,7 @@ export const useColumns = (
       render: (description: string) => {
         return (
           <EuiToolTip content={description}>
-            <span>{description}</span>
+            <span tabIndex={0}>{description}</span>
           </EuiToolTip>
         );
       },

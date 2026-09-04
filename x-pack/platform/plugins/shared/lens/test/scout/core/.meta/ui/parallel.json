@@ -1,0 +1,1618 @@
+{
+  "sha1": "7e980ff78ae4ff28cda153d3f20ccd32223d09e0",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "2e3eea5b16bd75a-04de5a79d29d1c0",
+      "title": "Setup environment for Lens tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "8475c8479450621-e22d49720eca493",
+      "title": "Lens ad hoc data view should allow building a chart based on ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 51,
+        "column": 22
+      }
+    },
+    {
+      "id": "8475c8479450621-42d7700c605e8ce",
+      "title": "Lens ad hoc data view should allow managing runtime fields on an ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 85,
+        "column": 16
+      }
+    },
+    {
+      "id": "8475c8479450621-3e851f8fb452c95",
+      "title": "Lens ad hoc data view should allow adding an ad-hoc chart to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 134,
+        "column": 31
+      }
+    },
+    {
+      "id": "8475c8479450621-08429a5fe9cf2a5",
+      "title": "Lens ad hoc data view should allow saving the ad-hoc chart into a saved object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 178,
+        "column": 57
+      }
+    },
+    {
+      "id": "8475c8479450621-b09942a2f451ee7",
+      "title": "Lens ad hoc data view should be possible to share a URL of a visualization with ad hoc data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 213,
+        "column": 31
+      }
+    },
+    {
+      "id": "8475c8479450621-5a6b2e6ecddce29",
+      "title": "Lens ad hoc data view should be possible to download a visualization with ad hoc data views as CSV",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 243,
+        "column": 18
+      }
+    },
+    {
+      "id": "8475c8479450621-39ba1618903f884",
+      "title": "Lens ad hoc data view should navigate to Discover correctly from Lens with an ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 294,
+        "column": 5
+      }
+    },
+    {
+      "id": "8475c8479450621-d34e6a66c086509",
+      "title": "Lens ad hoc data view should navigate to Discover correctly from a dashboard embeddable and persist ad hoc data view after refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 347,
+        "column": 26
+      }
+    },
+    {
+      "id": "5a841cd6f28dcc7-da6b00b8c6b96fb",
+      "title": "Lens heatmap add to dashboard adds a heatmap with number-based palette ranges to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/heatmap.spec.ts",
+        "line": 15,
+        "column": 13
+      }
+    },
+    {
+      "id": "012cbc5ba575506-b64600cbb04eebe",
+      "title": "Lens add to dashboard capabilities without dashboard access hides the dashboard flow prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/rbac.spec.ts",
+        "line": 127,
+        "column": 25
+      }
+    },
+    {
+      "id": "012cbc5ba575506-2ac66bd16b9bca0",
+      "title": "Lens add to dashboard capabilities without dashboard access hides add-to-dashboard save options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/rbac.spec.ts",
+        "line": 138,
+        "column": 3
+      }
+    },
+    {
+      "id": "012cbc5ba575506-b31633919f2b1a9",
+      "title": "Lens add to dashboard capabilities with read-only dashboard access hides the dashboard flow prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/rbac.spec.ts",
+        "line": 127,
+        "column": 25
+      }
+    },
+    {
+      "id": "012cbc5ba575506-1cf689144927af2",
+      "title": "Lens add to dashboard capabilities with read-only dashboard access hides add-to-dashboard save options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/rbac.spec.ts",
+        "line": 138,
+        "column": 3
+      }
+    },
+    {
+      "id": "9eea4d29244ea83-12f50a2f95d2b42",
+      "title": "Lens add to dashboard save by reference should allow new lens by reference to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_reference.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "9eea4d29244ea83-fb57df281d9d3d5",
+      "title": "Lens add to dashboard save by reference should allow existing lens by reference to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_reference.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "9eea4d29244ea83-7e8ce5109926531",
+      "title": "Lens add to dashboard save by reference should allow new lens by reference to an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_reference.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "9eea4d29244ea83-39ff9017c018f20",
+      "title": "Lens add to dashboard save by reference should allow existing lens by reference to an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_reference.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "3748864bf7b4bf3-1dcb7e4de5bae57",
+      "title": "Lens add to dashboard save by value should allow new lens by value to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_value.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "3748864bf7b4bf3-bf566bf2c9e6e1f",
+      "title": "Lens add to dashboard save by value should allow existing lens by value to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_value.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "3748864bf7b4bf3-7a6ef00d5e53000",
+      "title": "Lens add to dashboard save by value should allow new lens by value to an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_value.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "3748864bf7b4bf3-5dcf5262495fad6",
+      "title": "Lens add to dashboard save by value should allow existing lens by value to an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_value.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "e3d1082f6648510-a83c30b89cc839e",
+      "title": "Lens XY annotation layers adds, edits and duplicates manual and query-based annotations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_layers.spec.ts",
+        "line": 16,
+        "column": 13
+      }
+    },
+    {
+      "id": "10e89b7d2459195-cc2bbb39100dadc",
+      "title": "Lens annotation library saves an annotation group to the library, syncs edits across dashboard panels, and propagates deletion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_library.spec.ts",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": "d2815d5da13fdd6-60b241ddf218024",
+      "title": "Lens chart data across visualization types renders the same terms + average config across chart types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_data.spec.ts",
+        "line": 57,
+        "column": 16
+      }
+    },
+    {
+      "id": "a98509752460b09-8fdb2307aa8c94d",
+      "title": "Lens editor from dashboard shows a request per layer in the dashboard inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/editor_from_dashboard.spec.ts",
+        "line": 108,
+        "column": 46
+      }
+    },
+    {
+      "id": "a98509752460b09-0d4eef6bf7eb102",
+      "title": "Lens editor from dashboard disables Save and return when the visualization has a validation error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/editor_from_dashboard.spec.ts",
+        "line": 134,
+        "column": 20
+      }
+    },
+    {
+      "id": "a98509752460b09-7b73e15ea5b5609",
+      "title": "Lens editor from dashboard opens a by-value Lens chart from its share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/editor_from_dashboard.spec.ts",
+        "line": 157,
+        "column": 8
+      }
+    },
+    {
+      "id": "b890c97561d2fbd-aad56fc3409c6fa",
+      "title": "Lens dashboard filters and query does not carry unpinned filters into a new Lens visualization from Dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/filters_and_query.spec.ts",
+        "line": 31,
+        "column": 44
+      }
+    },
+    {
+      "id": "b890c97561d2fbd-132f3e50b1fad2a",
+      "title": "Lens dashboard filters and query recovers a Lens panel after an invalid search query is cleared",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/filters_and_query.spec.ts",
+        "line": 50,
+        "column": 51
+      }
+    },
+    {
+      "id": "534131325e916d6-d69a151238d8f62",
+      "title": "Lens dashboard library and panel actions embeds a legacy metric visualization from the library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/library_and_panel_actions.spec.ts",
+        "line": 45,
+        "column": 46
+      }
+    },
+    {
+      "id": "534131325e916d6-0a7598711f695b7",
+      "title": "Lens dashboard library and panel actions hides the old explore underlying data panel action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/library_and_panel_actions.spec.ts",
+        "line": 55,
+        "column": 15
+      }
+    },
+    {
+      "id": "534131325e916d6-d736ef98926e018",
+      "title": "Lens dashboard library and panel actions shows CSV export in the Lens panel context menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/library_and_panel_actions.spec.ts",
+        "line": 65,
+        "column": 22
+      }
+    },
+    {
+      "id": "534131325e916d6-c477d1a9dc85619",
+      "title": "Lens dashboard library and panel actions unlinks a Lens panel from the library and saves a copy back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/library_and_panel_actions.spec.ts",
+        "line": 75,
+        "column": 29
+      }
+    },
+    {
+      "id": "d596cece8728565-8db1b50d7f65797",
+      "title": "Lens dashboard pie chart interactions adds a filter by clicking",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/pie_chart_interactions.spec.ts",
+        "line": 38,
+        "column": 25
+      }
+    },
+    {
+      "id": "d596cece8728565-9231c9a1a7c47af",
+      "title": "Lens dashboard pie chart interactions adds a Discover drilldown to a Lens panel and keeps it after reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/pie_chart_interactions.spec.ts",
+        "line": 54,
+        "column": 54
+      }
+    },
+    {
+      "id": "8d7329bc2223979-c2dde73dd33221b",
+      "title": "Lens dashboard XY chart interactions adds filters and time range by clicking",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
+        "line": 42,
+        "column": 29
+      }
+    },
+    {
+      "id": "8d7329bc2223979-b4300a9893a2e26",
+      "title": "Lens dashboard XY chart interactions adds an ip filter by right-clicking a series",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
+        "line": 63,
+        "column": 31
+      }
+    },
+    {
+      "id": "8d7329bc2223979-22d88e781e04786",
+      "title": "Lens dashboard XY chart interactions adds a time range by right-clicking",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
+        "line": 81,
+        "column": 96
+      }
+    },
+    {
+      "id": "de2b68c54d50c62-298c268164f0fcf",
+      "title": "Lens dashboard inline editing - layers adds a by-value annotation layer inline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_layers.spec.ts",
+        "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "id": "de2b68c54d50c62-91ec3e2c92640aa",
+      "title": "Lens dashboard inline editing - layers adds a by-reference annotation layer inline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_layers.spec.ts",
+        "line": 67,
+        "column": 13
+      }
+    },
+    {
+      "id": "de2b68c54d50c62-6d9aba1eaac29ff",
+      "title": "Lens dashboard inline editing - layers adds a reference line layer inline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_layers.spec.ts",
+        "line": 98,
+        "column": 25
+      }
+    },
+    {
+      "id": "7e1ff40c3589a68-705f5220d63b1ff",
+      "title": "Lens dashboard inline editing - metric panels applies inline edits to a by-value panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_metric.spec.ts",
+        "line": 56,
+        "column": 10
+      }
+    },
+    {
+      "id": "7e1ff40c3589a68-3d08636d98b25a1",
+      "title": "Lens dashboard inline editing - metric panels cancel discards inline edits on a by-value panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_metric.spec.ts",
+        "line": 96,
+        "column": 94
+      }
+    },
+    {
+      "id": "f7ba571e9be6f00-091ac2ab4dc63b0",
+      "title": "Lens dashboard inline editing - show config RBAC hides the show-config action for a user with write access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_rbac.spec.ts",
+        "line": 73,
+        "column": 27
+      }
+    },
+    {
+      "id": "f7ba571e9be6f00-e95ea839be0b249",
+      "title": "Lens dashboard inline editing - show config RBAC shows the show-config action for a read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_rbac.spec.ts",
+        "line": 95,
+        "column": 11
+      }
+    },
+    {
+      "id": "76b713bc6c47f03-a074768ec31ddbb",
+      "title": "Lens dashboard inline editing - XY panels applies inline edits to a by-reference panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_xy.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "76b713bc6c47f03-ab102a200e4ff32",
+      "title": "Lens dashboard inline editing - XY panels cancel discards inline edits on a panel with an ad-hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_xy.spec.ts",
+        "line": 100,
+        "column": 64
+      }
+    },
+    {
+      "id": "76b713bc6c47f03-7e034e6376a2599",
+      "title": "Lens dashboard inline editing - XY panels cancel then apply inline edits on a panel created from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_xy.spec.ts",
+        "line": 132,
+        "column": 55
+      }
+    },
+    {
+      "id": "823e45959c149e9-2d55f331fb0e19b",
+      "title": "Lens disable auto-apply toggles auto-apply and applies changes on demand",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/disable_auto_apply.spec.ts",
+        "line": 14,
+        "column": 13
+      }
+    },
+    {
+      "id": "8ac20fcc04f381f-65fa3b45204f767",
+      "title": "Lens drag and drop duplicate swap and combine duplicates and swaps via secondary drop targets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/drag_and_drop/dimension_swap_and_combine.spec.ts",
+        "line": 19,
+        "column": 24
+      }
+    },
+    {
+      "id": "8ac20fcc04f381f-359724ec6be847e",
+      "title": "Lens drag and drop duplicate swap and combine combines breakdown with horizontal dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/drag_and_drop/dimension_swap_and_combine.spec.ts",
+        "line": 31,
+        "column": 18
+      }
+    },
+    {
+      "id": "8ac20fcc04f381f-076c3d08def1960",
+      "title": "Lens drag and drop duplicate swap and combine combines field onto existing horizontal dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/drag_and_drop/dimension_swap_and_combine.spec.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "id": "8ac20fcc04f381f-168c9169929041c",
+      "title": "Lens drag and drop duplicate swap and combine combines two multi-terms dimensions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/drag_and_drop/dimension_swap_and_combine.spec.ts",
+        "line": 61,
+        "column": 35
+      }
+    },
+    {
+      "id": "a953b4a80bf78c0-c03fd3ad6b42b1e",
+      "title": "Lens drag and drop table and bar moves drops fields onto table dimensions, reorders, and moves across bar groups",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/drag_and_drop/dimension_table_and_bar.spec.ts",
+        "line": 20,
+        "column": 24
+      }
+    },
+    {
+      "id": "17ef3013b5dd40a-453033f02a915d2",
+      "title": "Lens drag and drop field to workspace builds a bar chart when dropping a categorical field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/drag_and_drop/field_to_workspace.spec.ts",
+        "line": 20,
+        "column": 24
+      }
+    },
+    {
+      "id": "17ef3013b5dd40a-c64f8acf0404a26",
+      "title": "Lens drag and drop field to workspace builds a line chart when dropping a time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/drag_and_drop/field_to_workspace.spec.ts",
+        "line": 28,
+        "column": 98
+      }
+    },
+    {
+      "id": "17ef3013b5dd40a-d60ad79bb188342",
+      "title": "Lens drag and drop field to workspace nests time under categorical breakdown and overwrites existing time dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/drag_and_drop/field_to_workspace.spec.ts",
+        "line": 35,
+        "column": 20
+      }
+    },
+    {
+      "id": "a5a4341a4750abc-a48864b093d6c6b",
+      "title": "Lens keyboard drag and drop moves fields and dimensions with keyboard drag and drop",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/drag_and_drop/keyboard_drag_and_drop.spec.ts",
+        "line": 15,
+        "column": 22
+      }
+    },
+    {
+      "id": "a67f0ea6f9cf137-1e72371abd9e4eb",
+      "title": "Dashboard with ES|QL Lens panel cancels the search request when navigating away cancels the ES|QL request when navigating away from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
+        "line": 88,
+        "column": 20
+      }
+    },
+    {
+      "id": "7d8101c6e65d69b-a2f17ede9b95bc3",
+      "title": "Lens ESQL dashboard inline editing should keep the table type when the user adds a limit via Try ESQL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
+        "line": 37,
+        "column": 13
+      }
+    },
+    {
+      "id": "7d8101c6e65d69b-4fdca52ef98396c",
+      "title": "Lens ESQL dashboard inline editing should add a limit without changing the chart type or the color",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
+        "line": 61,
+        "column": 30
+      }
+    },
+    {
+      "id": "19db52c9b83cb21-00047d302ca0c1c",
+      "title": "Lens ES|QL filter data view selector dashboard add filter from ES|QL panel should not show duplicate data view names",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
+        "line": 46,
+        "column": 46
+      }
+    },
+    {
+      "id": "19db52c9b83cb21-d35e8ca1522ac6f",
+      "title": "Lens ES|QL filter data view selector filter fields should be available after changing ES|QL query source",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
+        "line": 113,
+        "column": 31
+      }
+    },
+    {
+      "id": "1a094d41f7eaebe-860bfc39e7dc7d8",
+      "title": "Lens ES|QL timeseries via dashboard API renders a time-scaled x-axis for TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
+        "line": 142,
+        "column": 24
+      }
+    },
+    {
+      "id": "1a094d41f7eaebe-f45a8d1af623cbf",
+      "title": "Lens ES|QL timeseries via dashboard API renders a time-scaled x-axis for BUCKET on timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
+        "line": 148,
+        "column": 29
+      }
+    },
+    {
+      "id": "1a094d41f7eaebe-fb36f233d1a3e49",
+      "title": "Lens ES|QL timeseries via dashboard API renders a time-scaled x-axis for DATE_TRUNC on timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
+        "line": 168,
+        "column": 39
+      }
+    },
+    {
+      "id": "c2e8c8eb4b64fa0-82872025a1893a5",
+      "title": "Lens formula KQL escaping escapes KQL string values with apostrophes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/kql_escaping.spec.ts",
+        "line": 16,
+        "column": 13
+      }
+    },
+    {
+      "id": "c2e8c8eb4b64fa0-a3c31c2c062333c",
+      "title": "Lens formula KQL escaping escapes field names that contain quotes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/kql_escaping.spec.ts",
+        "line": 41,
+        "column": 62
+      }
+    },
+    {
+      "id": "f6822a566288659-dde8b1a21fbd7f0",
+      "title": "Lens formula layers and filters duplicates a moving average formula with conditional coloring",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/layers_and_filters.spec.ts",
+        "line": 14,
+        "column": 13
+      }
+    },
+    {
+      "id": "f6822a566288659-fa444f7071db0fb",
+      "title": "Lens formula layers and filters keeps formula when user does not fully transition to a quick function",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/layers_and_filters.spec.ts",
+        "line": 55,
+        "column": 11
+      }
+    },
+    {
+      "id": "f6822a566288659-4957b4cd23d31ae",
+      "title": "Lens formula layers and filters keeps formula when user does not fully transition to a static value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/layers_and_filters.spec.ts",
+        "line": 72,
+        "column": 20
+      }
+    },
+    {
+      "id": "f6822a566288659-6e51f7a37a3bb3a",
+      "title": "Lens formula layers and filters allows numeric-only formulas",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/layers_and_filters.spec.ts",
+        "line": 97,
+        "column": 29
+      }
+    },
+    {
+      "id": "f6822a566288659-413e1fdd779132c",
+      "title": "Lens formula layers and filters applies a global filter to the current formula",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/layers_and_filters.spec.ts",
+        "line": 116,
+        "column": 4
+      }
+    },
+    {
+      "id": "cd07091922ab586-038daa90b214e6b",
+      "title": "Lens formula transition and CRUD transitions from count to formula on saved XY vis",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/transition_and_crud.spec.ts",
+        "line": 19,
+        "column": 13
+      }
+    },
+    {
+      "id": "cd07091922ab586-a4e2f57f6bdf3b4",
+      "title": "Lens formula transition and CRUD updates a formula via autocomplete completion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/transition_and_crud.spec.ts",
+        "line": 40,
+        "column": 13
+      }
+    },
+    {
+      "id": "cd07091922ab586-34fe7c11fbbc783",
+      "title": "Lens formula transition and CRUD persists a broken formula on close",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/transition_and_crud.spec.ts",
+        "line": 55,
+        "column": 16
+      }
+    },
+    {
+      "id": "cd07091922ab586-8bac05e32e9f74c",
+      "title": "Lens formula transition and CRUD keeps formula text when entering expanded mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/transition_and_crud.spec.ts",
+        "line": 67,
+        "column": 5
+      }
+    },
+    {
+      "id": "cd07091922ab586-729709aa56b4fd0",
+      "title": "Lens formula transition and CRUD allows an empty formula combined with a valid formula",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/formula/transition_and_crud.spec.ts",
+        "line": 80,
+        "column": 18
+      }
+    },
+    {
+      "id": "a6cd224de5959e6-d203133326b2df6",
+      "title": "Lens gauge shapes switches to gauge, edits dimensions/styles, and falls back to table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/gauge_shapes.spec.ts",
+        "line": 21,
+        "column": 13
+      }
+    },
+    {
+      "id": "c84b7e463b9c83a-45108530c596b7f",
+      "title": "Lens visualize geo field visualizes geo fields in Maps with a document-count tooltip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/geo_field.spec.ts",
+        "line": 20,
+        "column": 13
+      }
+    },
+    {
+      "id": "9cbcc2f21a52cc1-fc459225709c98c",
+      "title": "Lens heatmap palette edits temperature palette stops, range types, and axis rotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/heatmap_palette.spec.ts",
+        "line": 21,
+        "column": 29
+      }
+    },
+    {
+      "id": "0bbdc57875eb64d-a6ebcaecfc66cff",
+      "title": "Lens inspector pagination should allow switching between inspector table pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/inspector_pagination.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "4d5b0779ff1240c-4d5121513305eb0",
+      "title": "Lens legacy metric renders, filters and dynamically colors a legacy metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/legacy_metric.spec.ts",
+        "line": 31,
+        "column": 11
+      }
+    },
+    {
+      "id": "54fc49cce77bf4b-32e907ff9427175",
+      "title": "Lens metric primary and breakdown configures primary/secondary/breakdown metrics, trendlines, colors and formatting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_primary_and_breakdown.spec.ts",
+        "line": 51,
+        "column": 44
+      }
+    },
+    {
+      "id": "09dfad59b4d88f9-62679370e15b14d",
+      "title": "Lens metric progress bar in Lens editor uses default progress bar fill color when no custom color is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_progress_bar_lens_editor.spec.ts",
+        "line": 102,
+        "column": 24
+      }
+    },
+    {
+      "id": "09dfad59b4d88f9-82e19c1faf5a3c8",
+      "title": "Lens metric progress bar in Lens editor applies static color to progress bar fill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_progress_bar_lens_editor.spec.ts",
+        "line": 106,
+        "column": 7
+      }
+    },
+    {
+      "id": "09dfad59b4d88f9-76f9da3b700bc06",
+      "title": "Lens metric progress bar in Lens editor applies dynamic color to progress bar fill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_progress_bar_lens_editor.spec.ts",
+        "line": 118,
+        "column": 27
+      }
+    },
+    {
+      "id": "5f4f29d1eac330a-95153a994012fd9",
+      "title": "Lens metric progress bar on dashboard (DSL) renders vertical progress bar on dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_progress_bar.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "5f4f29d1eac330a-bdb86154af9030f",
+      "title": "Lens metric progress bar on dashboard (DSL) renders horizontal progress bar on dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_progress_bar.spec.ts",
+        "line": 73,
+        "column": 22
+      }
+    },
+    {
+      "id": "5f4f29d1eac330a-560cf5301485b87",
+      "title": "Lens metric progress bar on dashboard (DSL) does not render progress bar when max value is not configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_progress_bar.spec.ts",
+        "line": 124,
+        "column": 71
+      }
+    },
+    {
+      "id": "20f54b9a7292df7-8fc72c41bb5fec9",
+      "title": "Lens metric secondary shows a badge for the secondary metric and caches static/dynamic configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
+        "line": 36,
+        "column": 79
+      }
+    },
+    {
+      "id": "20f54b9a7292df7-8206ad37605204f",
+      "title": "Lens metric secondary disables collapse-by aggregation when the primary metric is not numeric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
+        "line": 76,
+        "column": 19
+      }
+    },
+    {
+      "id": "20f54b9a7292df7-5321a3b4bfa89d2",
+      "title": "Lens metric secondary shows and hides the secondary metric name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
+        "line": 118,
+        "column": 30
+      }
+    },
+    {
+      "id": "20f54b9a7292df7-4cabdf7b76e2cf1",
+      "title": "Lens metric secondary keeps the secondary metric name and resets the badge when the primary metric becomes non-numeric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
+        "line": 133,
+        "column": 9
+      }
+    },
+    {
+      "id": "a16fbb825b008d7-ebf2b94c7596db4",
+      "title": "Lens metric trendline conversion to ES|QL trendline persists after converting form-based metric to ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_conversion.spec.ts",
+        "line": 75,
+        "column": 24
+      }
+    },
+    {
+      "id": "e427f09410fb7e8-bfcc34bcd13d7aa",
+      "title": "Lens ES|QL metric trendline editor interactions toggling background chart to None keeps Color set to Panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
+        "line": 66,
+        "column": 50
+      }
+    },
+    {
+      "id": "e427f09410fb7e8-9ee0e661893bb00",
+      "title": "Lens ES|QL metric trendline editor interactions changing ES|QL query updates the trendline background chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
+        "line": 106,
+        "column": 72
+      }
+    },
+    {
+      "id": "1d882a8b1b4e702-34dc6b0faaa6156",
+      "title": "Lens ES|QL table to metric trendline editing switches an ESQL table with timestamp rows to a metric trendline without stale breakdowns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_table_switch.spec.ts",
+        "line": 75,
+        "column": 24
+      }
+    },
+    {
+      "id": "6a4b2b00d7dee86-1ce08ed477ebd63",
+      "title": "Lens ES|QL metric trendline toggle can enable and disable trendline via dimension editor with persistence",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_toggle.spec.ts",
+        "line": 65,
+        "column": 31
+      }
+    },
+    {
+      "id": "8bc1e11a382d9d0-918e80b53ac532a",
+      "title": "Lens aliased TBUCKET metric trendline enables and persists the trendline through the dimension editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_ts_toggle.spec.ts",
+        "line": 67,
+        "column": 33
+      }
+    },
+    {
+      "id": "79b736095ef203d-c2bc83c3f83f983",
+      "title": "Lens metric trendline on dashboard (ES|QL) renders trendline with ES|QL data source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "79b736095ef203d-7fdeecc1c091f44",
+      "title": "Lens metric trendline on dashboard (ES|QL) renders trendline for a TS query with TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
+        "line": 55,
+        "column": 15
+      }
+    },
+    {
+      "id": "5dffcb3ca98df72-085afac13830272",
+      "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses inline data view spec",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "5dffcb3ca98df72-1fa09f3d15077a3",
+      "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses stored data view reference",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline.spec.ts",
+        "line": 67,
+        "column": 37
+      }
+    },
+    {
+      "id": "de7715ff17615b5-38dae6b1e652db6",
+      "title": "Lens with multiple data views should allow building a multi-data-view chart and applying global filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/multiple_data_views.spec.ts",
+        "line": 54,
+        "column": 42
+      }
+    },
+    {
+      "id": "e97cb405298c2ea-004fc5174a88a75",
+      "title": "Lens palette and color mapping picks a legacy palette on an XY split dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 21,
+        "column": 13
+      }
+    },
+    {
+      "id": "e97cb405298c2ea-2f7704d5e1102fd",
+      "title": "Lens palette and color mapping picks a color-mapping palette and carries it across pie and bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 44,
+        "column": 38
+      }
+    },
+    {
+      "id": "e97cb405298c2ea-cbc552dbee08aee",
+      "title": "Lens palette and color mapping renders legend colors from color mapping and categorical overrides",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 82,
+        "column": 31
+      }
+    },
+    {
+      "id": "3a650e99e12dfc9-f94217f88e11f64",
+      "title": "Lens reference lines creates, styles and duplicates reference lines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/reference_lines.spec.ts",
+        "line": 17,
+        "column": 13
+      }
+    },
+    {
+      "id": "8d65d9b5ef715f9-8fb400fe599f775",
+      "title": "Lens runtime fields creates, filters, edits, and removes a runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/runtime_fields.spec.ts",
+        "line": 23,
+        "column": 13
+      }
+    },
+    {
+      "id": "baf8a89526bac91-5065d73fcf0283a",
+      "title": "Lens share and CSV export enables share/export for a valid config and preserves filters in the shared URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/share.spec.ts",
+        "line": 23,
+        "column": 13
+      }
+    },
+    {
+      "id": "c3c5a4dff951829-0e6d6168c3907cb",
+      "title": "Lens show underlying data from dashboard brings dashboard and visualization context to Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/dashboard.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "c334832918cc1c3-8c781937f72a9fe",
+      "title": "Lens show underlying data opens Discover with columns from a compatible saved visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 42,
+        "column": 14
+      }
+    },
+    {
+      "id": "c334832918cc1c3-6e6d7b171a56f64",
+      "title": "Lens show underlying data opens Discover when the visualization has an annotation layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
+    {
+      "id": "c334832918cc1c3-dd1d532280a5bba",
+      "title": "Lens show underlying data opens Discover when the visualization has a reference line layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 84,
+        "column": 18
+      }
+    },
+    {
+      "id": "c334832918cc1c3-94a29e9ef0a338a",
+      "title": "Lens show underlying data disables Open in Discover when the visualization has multiple data layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 110,
+        "column": 9
+      }
+    },
+    {
+      "id": "c334832918cc1c3-0f814bf75cea388",
+      "title": "Lens show underlying data omits terms from the Discover query when Other is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 132,
+        "column": 4
+      }
+    },
+    {
+      "id": "c334832918cc1c3-2c55a18f106ff59",
+      "title": "Lens show underlying data opens Discover with a Lucene dimension filter as a filter pill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 158,
+        "column": 25
+      }
+    },
+    {
+      "id": "c334832918cc1c3-b190ca2e89c0931",
+      "title": "Lens show underlying data extracts formula KQL filters and columns into Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 187,
+        "column": 25
+      }
+    },
+    {
+      "id": "c334832918cc1c3-cf0dce8b54a312a",
+      "title": "Lens show underlying data extracts a formula global filter into Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 231,
+        "column": 31
+      }
+    },
+    {
+      "id": "90a36ca62c33696-d99c41830e18b70",
+      "title": "Lens show underlying data from ES|QL dashboard panel opens Discover with the Lens ES|QL panel query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/esql_dashboard.spec.ts",
+        "line": 33,
+        "column": 23
+      }
+    },
+    {
+      "id": "b40d2b710de93c1-6951abc44e2fa95",
+      "title": "Lens tag cloud filter renders tags, filters from a tag click, and narrows the cloud",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/tagcloud_filter.spec.ts",
+        "line": 14,
+        "column": 13
+      }
+    },
+    {
+      "id": "d6d882085a838db-0726e0abd3eb5c7",
+      "title": "Lens time shift configures time-shifted metrics and applies terms fix actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/time_shift.spec.ts",
+        "line": 18,
+        "column": 13
+      }
+    }
+  ]
+}

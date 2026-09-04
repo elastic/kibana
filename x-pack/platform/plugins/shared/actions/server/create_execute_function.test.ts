@@ -129,6 +129,62 @@ describe('bulkExecute()', () => {
     });
   });
 
+  test('persists uiamApiKeyExternal on the action task params when provided', async () => {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry,
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: { actionTypeId: 'mock-action' },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '234',
+          type: 'action_task_params',
+          attributes: { actionId: '123' },
+          references: [],
+        },
+      ],
+    });
+    await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
+      },
+    ]);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          type: 'action_task_params',
+          attributes: expect.objectContaining({
+            apiKey: 'essu_user_created_key',
+            uiamApiKeyExternal: true,
+          }),
+        }),
+      ],
+      { refresh: false }
+    );
+  });
+
   test('schedules the action with all given parameters and consumer', async () => {
     const actionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createBulkExecutionEnqueuerFunction({
@@ -1205,7 +1261,7 @@ describe('bulkExecute()', () => {
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
           actionTypeId: 'mock-action',
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
         },
         {
           id: '123',

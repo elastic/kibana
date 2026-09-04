@@ -8,4 +8,5 @@
  */
 
 export { DocViewer, type DocViewerProps, type DocViewerApi } from './doc_viewer';
+export { DOC_VIEWER_TABS_EBT_ELEMENT } from './get_doc_view_tab_ebt_props';
 export type { DocViewerRestorableState } from '../../types';

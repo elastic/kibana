@@ -6,41 +6,53 @@
  */
 
 import type React from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
-import type { ComposeFormValues } from './compose_form_types';
-import type { BuilderState, RuleBuilderRecoveryProps } from './rule_builder/types';
+import type { FormValues, RecoveryStrategy } from '../../form/types';
+import type { BuilderState } from './rule_builder/types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
-
-export type RecoveryType = 'default' | 'custom';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
 export type StepId =
   | 'alertCondition'
   | 'builderCondition'
-  | 'recoveryCondition'
+  | 'outcome'
   | 'details'
   | 'notifications';
+
+export const isAlertConditionStepId = (id: StepId): boolean =>
+  id === 'alertCondition' || id === 'builderCondition';
+
+export const isBuilderConditionStepId = (id: StepId): boolean => id === 'builderCondition';
+
+export interface CustomRecoveryRenderProps {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+}
 
 export interface StepRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  onRecoveryTypeChange: (type: RecoveryType) => void;
+  onRecoveryTypeChange: (strategy: RecoveryStrategy) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   ruleId?: string;
-  renderBuilderRecovery?: (props: RuleBuilderRecoveryProps) => React.ReactNode;
+  renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
 }
 
 export interface StepDefinition {
   id: StepId;
   title: string;
+  /** RHF field paths validated via `trigger()` when no custom `validate` is set. */
+  fields?: Array<FieldPath<FormValues>>;
+  /** UI-state precondition that must pass before field validation runs. */
+  meetsPrecondition?: (state: ComposeDiscoverState) => boolean;
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
-    methods: UseFormReturn<ComposeFormValues>,
+    methods: UseFormReturn<FormValues>,
     state: ComposeDiscoverState,
     services?: RuleFormServices,
     builderState?: BuilderState
@@ -58,27 +70,30 @@ export interface StepDefinition {
  * mirrored here. Pass `isAlert` explicitly to any reducer action or helper that needs it.
  */
 export interface ComposeDiscoverState {
-  mode: ComposeDiscoverMode;
   step: number;
-  /** How recovery is detected. 'default' = invert alert block; 'custom' = separate recovery block. */
-  recoveryType: RecoveryType;
   activeTab: QueryTab;
   childOpen: boolean;
   queryCommitted: boolean;
   /** When true the stepped form is replaced by a full YAML editor. */
   yamlMode: boolean;
+  /**
+   * When true the sandbox shows separate base/alert tabs and the heuristic
+   * auto-split on Apply is disabled. The user opted in from the unified editor.
+   */
+  manualSplitEnabled: boolean;
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isBuilderMode?: boolean }
   | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
-  | { type: 'GO_NEXT'; isAlert: boolean }
-  | { type: 'GO_BACK' }
-  | { type: 'OPEN_CHILD'; isAlert: boolean }
-  | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean }
+  | { type: 'GO_NEXT'; isAlert: boolean; isBuilderMode?: boolean }
+  | { type: 'GO_BACK'; isBuilderMode?: boolean }
+  | { type: 'OPEN_CHILD'; isAlert: boolean; focusedTab?: QueryTab }
+  | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean; focusedTab?: QueryTab }
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_QUERY' }
   | { type: 'INVALIDATE_QUERY' }
-  | { type: 'SET_YAML_MODE'; enabled: boolean };
+  | { type: 'SET_YAML_MODE'; enabled: boolean }
+  | { type: 'ENABLE_MANUAL_SPLIT' }
+  | { type: 'DISABLE_MANUAL_SPLIT' };

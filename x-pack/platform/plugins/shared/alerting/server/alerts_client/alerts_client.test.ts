@@ -37,9 +37,11 @@ import {
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_SEVERITY_IMPROVING,
+  ALERT_SNOOZED,
   ALERT_START,
   ALERT_STATE_NAMESPACE,
   ALERT_STATUS,
+  ALERT_STATUS_DELAYED,
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
   ALERT_UUID,
@@ -86,6 +88,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { rule } from './lib/test_fixtures';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 import { DEFAULT_MAX_ALERTS } from '../config';
+import * as RetryTransientEsErrorsModule from '../lib/retry_transient_es_errors';
 
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
@@ -182,6 +185,7 @@ const fetchedAlert1 = {
   [ALERT_RULE_TYPE_ID]: 'test.rule-type',
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
+  [ALERT_SNOOZED]: false,
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
@@ -216,6 +220,7 @@ const fetchedAlert2 = {
   [ALERT_RULE_TYPE_ID]: 'test.rule-type',
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
+  [ALERT_SNOOZED]: false,
   [ALERT_START]: '2023-03-28T02:27:28.159Z',
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
@@ -260,6 +265,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
   [ALERT_SEVERITY_IMPROVING]: false,
+  [ALERT_SNOOZED]: false,
   [ALERT_START]: date,
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: date },
@@ -272,14 +278,14 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
 });
 
 const getOngoingIndexedAlertDoc = (overrides = {}) => ({
-  ...getNewIndexedAlertDoc(),
+  ...omit(getNewIndexedAlertDoc(), ALERT_SEVERITY_IMPROVING),
   [EVENT_ACTION]: 'active',
   [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
-  [ALERT_SEVERITY_IMPROVING]: undefined,
+  [ALERT_SNOOZED]: false,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
@@ -655,6 +661,20 @@ describe('Alerts Client', () => {
 
           spy.mockRestore();
         });
+
+        test('should call retryTransientEsErrors when querying for tracked alerts', async () => {
+          const retrySpy = jest
+            .spyOn(RetryTransientEsErrorsModule, 'retryTransientEsErrors')
+            .mockImplementationOnce((esCall) => esCall());
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          expect(retrySpy).toHaveBeenCalled();
+
+          retrySpy.mockRestore();
+        });
       });
 
       describe('persistAlerts()', () => {
@@ -948,6 +968,7 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_SNOOZED]: false,
                 [ALERT_STATUS]: 'active',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
                 [ALERT_WORKFLOW_STATUS]: 'open',
@@ -1280,6 +1301,7 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_SNOOZED]: false,
                 [ALERT_STATUS]: 'active',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
                 [ALERT_WORKFLOW_STATUS]: 'open',
@@ -1327,6 +1349,7 @@ describe('Alerts Client', () => {
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_SEVERITY_IMPROVING]: true,
+                [ALERT_SNOOZED]: false,
                 [ALERT_START]: '2023-03-28T12:27:28.159Z',
                 [ALERT_END]: date,
                 [ALERT_STATUS]: 'recovered',
@@ -1909,8 +1932,299 @@ describe('Alerts Client', () => {
           alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
-          await expect(alertsClient.persistAlerts()).rejects.toThrowError(
+          await expect(alertsClient.persistAlerts()).rejects.toThrow(
             'index [.internal.alerts-default.alerts-default-000001] blocked by: [FORBIDDEN/8/index write (api)];'
+          );
+        });
+      });
+
+      describe('getBuiltActiveAlertDataByInstanceId()', () => {
+        test('returns undefined before persistAlerts() has been called', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeUndefined();
+        });
+
+        test('returns built alert document by instance ID after persistAlerts()', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const doc1 = alertsClient.getBuiltActiveAlertDataByInstanceId('1');
+          const doc2 = alertsClient.getBuiltActiveAlertDataByInstanceId('2');
+
+          expect(doc1).toEqual(expect.objectContaining({ [ALERT_INSTANCE_ID]: '1' }));
+          expect(doc2).toEqual(expect.objectContaining({ [ALERT_INSTANCE_ID]: '2' }));
+        });
+
+        test('returns undefined for an instance ID not present in the built alerts', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('unknown-id')).toBeUndefined();
+        });
+
+        test('does not cache recovered alerts', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          // Seed a tracked ongoing alert so it can recover this run
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': {
+                state: {},
+                meta: {
+                  uuid: 'uuid-1',
+                  flappingHistory: [],
+                  flapping: false,
+                  pendingRecoveredCount: 0,
+                  activeCount: 1,
+                },
+              },
+            },
+          });
+          // Do not schedule any actions → alert '1' recovers
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // Recovered alerts are not in the cache — only active alerts matter for
+          // condition-based snooze evaluation.
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeUndefined();
+        });
+
+        test('caches only active alert when both active and recovered alerts exist in the same execution', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          // Seed alert '1' as tracked so it can recover, alert '2' will be new/active
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': {
+                state: {},
+                meta: {
+                  uuid: 'uuid-1',
+                  flappingHistory: [],
+                  flapping: false,
+                  pendingRecoveredCount: 0,
+                  activeCount: 1,
+                },
+              },
+            },
+          });
+          // '1' is not re-scheduled → it recovers; '2' fires for the first time
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // '1' is recovered — must not be in the cache
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeUndefined();
+          // '2' is active — must be in the cache
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('2')).toBeDefined();
+        });
+
+        test('cache is cleared and repopulated on each persistAlerts() call', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeDefined();
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('2')).toBeDefined();
+
+          // Simulate a second execution where the cache is reset
+          await alertsClient.persistAlerts();
+          // Cache still has both (same alerts were re-built)
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeDefined();
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('2')).toBeDefined();
+        });
+      });
+
+      describe('clearSnoozedStatusForAlerts()', () => {
+        const snoozedInstanceId = '1';
+        const snoozedRuleData = {
+          ...alertRuleData,
+          snoozedInstances: [
+            {
+              instanceId: snoozedInstanceId,
+              snoozedAt: '2024-01-01T00:00:00.000Z',
+              snoozedBy: 'test_user',
+            },
+          ],
+        };
+
+        const setupAndPersist = async (ruleData = snoozedRuleData) => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            rule: ruleData,
+          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create(snoozedInstanceId).scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+          await alertsClient.persistAlerts();
+          return alertsClient;
+        };
+
+        test('calls updateByQuery to set kibana.alert.snoozed=false for condition-expired instances', async () => {
+          clusterClient.updateByQuery.mockResolvedValueOnce({
+            failures: [],
+            updated: 1,
+            total: 1,
+          });
+          const alertsClient = await setupAndPersist();
+
+          const doc = alertsClient.getBuiltActiveAlertDataByInstanceId(snoozedInstanceId);
+          expect(doc).toBeDefined();
+          expect(doc![ALERT_SNOOZED]).toBe(true);
+
+          const uuid = doc![ALERT_UUID] as string;
+          await alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId]);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            conflicts: 'proceed',
+            index: '.alerts-test.alerts-default',
+            query: { terms: { _id: [uuid] } },
+            refresh: true,
+            script: {
+              lang: 'painless',
+              source: `ctx._source['${ALERT_SNOOZED}'] = false;`,
+            },
+          });
+        });
+
+        test('updates the in-memory cache to reflect the cleared snooze status', async () => {
+          clusterClient.updateByQuery.mockResolvedValueOnce({
+            failures: [],
+            updated: 1,
+            total: 1,
+          });
+          const alertsClient = await setupAndPersist();
+
+          expect(
+            alertsClient.getBuiltActiveAlertDataByInstanceId(snoozedInstanceId)![ALERT_SNOOZED]
+          ).toBe(true);
+
+          await alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId]);
+
+          expect(
+            alertsClient.getBuiltActiveAlertDataByInstanceId(snoozedInstanceId)![ALERT_SNOOZED]
+          ).toBe(false);
+        });
+
+        test('does nothing when conditionExpiredInstanceIds is empty', async () => {
+          const alertsClient = await setupAndPersist();
+
+          await alertsClient.clearSnoozedStatusForAlerts([]);
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('does nothing when ruleType.alerts.shouldWrite is false', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            rule: snoozedRuleData,
+            ruleType: { ...ruleType, alerts: { ...ruleType.alerts!, shouldWrite: false } },
+          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create(snoozedInstanceId).scheduleActions('default');
+          await alertsClient.processAlerts();
+          // persistAlerts() short-circuits when shouldWrite is false, so cache is empty
+          await alertsClient.persistAlerts();
+
+          await alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId]);
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('skips instance IDs not present in the built alert cache', async () => {
+          clusterClient.updateByQuery.mockResolvedValueOnce({
+            failures: [],
+            updated: 1,
+            total: 1,
+          });
+          const alertsClient = await setupAndPersist();
+
+          // 'unknown-id' was never built, 'snoozedInstanceId' was
+          await alertsClient.clearSnoozedStatusForAlerts(['unknown-id', snoozedInstanceId]);
+
+          const callArgs = clusterClient.updateByQuery.mock.calls[0][0] as unknown as {
+            query: { terms: { _id: string[] } };
+          };
+          // Only the known instance's UUID should be in the query
+          expect(callArgs.query.terms._id).toHaveLength(1);
+        });
+
+        test('does nothing when no cached instance matches any of the provided IDs', async () => {
+          const alertsClient = await setupAndPersist();
+
+          await alertsClient.clearSnoozedStatusForAlerts(['unknown-id-1', 'unknown-id-2']);
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('logs error and swallows when updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES unavailable'));
+          const alertsClient = await setupAndPersist();
+
+          await expect(
+            alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId])
+          ).resolves.toBeUndefined();
+
+          expect(logger.error).toHaveBeenCalledWith(
+            expect.stringContaining('Error clearing snoozed status for condition-expired alerts'),
+            logTags
           );
         });
       });
@@ -2403,7 +2717,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutRuleId as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
+            ).rejects.toThrow(`Must specify both rule ID and space ID for AAD alert query.`);
           });
 
           test('if spaceId is not specified', async () => {
@@ -2411,7 +2725,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutSpaceId as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
+            ).rejects.toThrow(`Must specify both rule ID and space ID for AAD alert query.`);
           });
 
           test('if executionUuid or start date are not specified', async () => {
@@ -2421,7 +2735,7 @@ describe('Alerts Client', () => {
               alertsClient.getSummarizedAlerts(
                 paramsWithoutExecutionUuid as GetSummarizedAlertsParams
               )
-            ).rejects.toThrowError(
+            ).rejects.toThrow(
               'Must specify either execution UUID or time range for AAD alert query.'
             );
           });
@@ -2431,7 +2745,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutStart as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(
+            ).rejects.toThrow(
               'Must specify either execution UUID or time range for AAD alert query.'
             );
           });
@@ -2441,7 +2755,7 @@ describe('Alerts Client', () => {
 
             await expect(
               alertsClient.getSummarizedAlerts(paramsWithoutEnd as GetSummarizedAlertsParams)
-            ).rejects.toThrowError(
+            ).rejects.toThrow(
               'Must specify either execution UUID or time range for AAD alert query.'
             );
           });
@@ -2549,7 +2863,7 @@ describe('Alerts Client', () => {
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
           );
         });
@@ -2563,7 +2877,7 @@ describe('Alerts Client', () => {
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
           );
         });
@@ -2577,7 +2891,7 @@ describe('Alerts Client', () => {
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
           );
         });
@@ -3745,10 +4059,15 @@ describe('Alerts Client', () => {
       });
 
       describe('isTrackedAlert()', () => {
-        test('should return true if alert was active in a previous execution, false otherwise', async () => {
+        test('should return true for active or delayed alerts, false otherwise', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
+
+          const delayedAlert = {
+            ...fetchedAlert2,
+            [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+          };
 
           clusterClient.search.mockResolvedValue({
             took: 10,
@@ -3769,7 +4088,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
-                  _source: fetchedAlert2,
+                  _source: delayedAlert,
                 },
               ],
             },
@@ -3780,8 +4099,8 @@ describe('Alerts Client', () => {
             activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
           });
 
-          expect(alertsClient.isTrackedAlert('1')).toBe(true);
-          expect(alertsClient.isTrackedAlert('2')).toBe(true);
+          expect(alertsClient.isTrackedAlert('1')).toBe(true); // active
+          expect(alertsClient.isTrackedAlert('2')).toBe(true); // delayed
           expect(alertsClient.isTrackedAlert('3')).toBe(false);
         });
       });

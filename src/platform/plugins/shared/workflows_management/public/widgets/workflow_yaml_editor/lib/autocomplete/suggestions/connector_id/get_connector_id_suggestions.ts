@@ -8,6 +8,10 @@
  */
 
 import { getConnectorIdSuggestionsItems } from './get_connector_id_suggestions_items';
+import {
+  resolveConnectorIdStepType,
+  resolveConnectorIdTriggerType,
+} from './resolve_connector_id_step_type';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 export function getConnectorIdSuggestions({
@@ -15,9 +19,14 @@ export function getConnectorIdSuggestions({
   lineParseResult,
   range,
   focusedStepInfo,
+  focusedYamlPair,
+  path,
+  yamlDocument,
   dynamicConnectorTypes,
 }: AutocompleteContext) {
-  const stepConnectorType = focusedStepInfo?.stepType ?? null;
+  const stepConnectorType =
+    resolveConnectorIdStepType(focusedStepInfo, path, focusedYamlPair) ??
+    resolveConnectorIdTriggerType(path, yamlDocument);
 
   if (
     !stepConnectorType ||

@@ -64,7 +64,7 @@ export const ActionPolicyCanvasContent = ({
       );
     }
 
-    const linkedRuleId = data.ruleId ?? extractRuleIdFromMatcher(data.matcher);
+    const linkedRuleId = extractRuleIdFromMatcher(data.matcher);
     if (linkedRuleId) {
       checks.push(
         rulesApi
@@ -90,7 +90,7 @@ export const ActionPolicyCanvasContent = ({
     return () => {
       abortController.abort();
     };
-  }, [workflowApi, rulesApi, data.destinations, data.ruleId, data.matcher]);
+  }, [workflowApi, rulesApi, data.destinations, data.matcher]);
 
   const hasDraftDependencies = dependenciesReady !== true;
 
@@ -184,7 +184,7 @@ export const ActionPolicyCanvasContent = ({
         label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.viewInPolicies', {
           defaultMessage: 'View in Policies',
         }),
-        icon: 'popout',
+        icon: 'external',
         type: ActionButtonType.OVERFLOW,
         handler: () => {
           application.navigateToUrl(basePath.prepend(paths.actionPolicyEdit(data.id)));

@@ -33,6 +33,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       enabledEmailServices: ['*'],
       isEarsEnabled: false,
       isEarsExperimentalEnabled: false,
+      isInboundEventsEnabled: false,
     },
     ruleTypeRegistry: {
       has: jest.fn(),
@@ -76,7 +77,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     lens: lensPluginMock.createStartContract(),
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
-    security: securityMock.createStart(),
+    security: { ...core.security, ...securityMock.createStart() },
   } as TriggersAndActionsUiServices;
 };
 

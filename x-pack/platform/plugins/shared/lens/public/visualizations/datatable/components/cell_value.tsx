@@ -7,14 +7,26 @@
 
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { MeterFillStyle } from '@elastic/charts';
+import { getFallbackDataBounds } from '@kbn/coloring';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
-import type { PaletteOutput } from '@kbn/coloring';
+import type { MeterFill } from '@elastic/charts';
+import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
+import { getOriginalId } from '@kbn/transpose-utils';
+import type { DataGridDensity } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import {
+  getProgressBarDomain,
+  getProgressBarPaletteStops,
+  getSolidProgressBarPaletteState,
+  DEFAULT_PROGRESS_BAR_COLOR,
+} from '../utils';
+import { parseCellDecorationFillConfig } from '../cell_decoration';
 import {
   buildColumnConfigLookup,
   getRenderMode,
@@ -24,9 +36,25 @@ import {
   LinkCell,
   BadgeCell,
 } from './cell_value_helpers';
+import {
+  ProgressBarCell,
+  getMeterFill,
+  getProgressBarLabelWidthCh,
+  getProgressBarSize,
+  getProgressBarStyle,
+  toMeterColorStops,
+} from './progress_bar_cell';
+
+interface ProgressBarRenderProps {
+  value: number;
+  domain: [number, number];
+  fill: MeterFill;
+  labelWidthCh: number;
+  baseline: number | undefined;
+}
 
 export const createGridCell = (
-  formatters: Record<string, ReturnType<FormatFactory>>,
+  formatters: { [columnId: string]: ReturnType<FormatFactory> },
   columnConfig: DatatableColumnConfig,
   DataContext: React.Context<DataContextType>,
   isDarkMode: boolean,
@@ -35,12 +63,16 @@ export const createGridCell = (
     palette?: PaletteOutput<CustomPaletteState>,
     colorMapping?: string
   ) => CellColorFn,
-  fitRowToContent?: boolean
+  paletteService: PaletteRegistry,
+  fitRowToContent?: boolean,
+  density?: DataGridDensity
 ) => {
   const columnConfigLookup = buildColumnConfigLookup(columnConfig.columns);
+  const progressBarSize = getProgressBarSize(density);
+  const progressBarStyle = getProgressBarStyle(density);
 
   return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
-    const { table, alignments, handleFilterClick } = useContext(DataContext);
+    const { table, alignments, handleFilterClick, minMaxByColumnId } = useContext(DataContext);
     const { euiTheme } = useEuiTheme();
     const hasColorStyleRef = useRef(false);
 
@@ -48,7 +80,13 @@ export const createGridCell = (
     const formatter = formatters[columnId];
     const currentColumnConfig = columnConfigLookup.get(columnId);
     const colIndex = currentColumnConfig?.colIndex ?? -1;
-    const { oneClickFilter, colorMode = 'none', palette, colorMapping } = currentColumnConfig ?? {};
+    const {
+      oneClickFilter,
+      colorMode = 'none',
+      palette,
+      colorMapping,
+      fillStyle: rawFillStyle,
+    } = currentColumnConfig ?? {};
 
     const isClickable = Boolean(oneClickFilter && handleFilterClick);
     const isNonColorable = isEmptyValue(rawValue);
@@ -73,6 +111,71 @@ export const createGridCell = (
         }),
       [colorMode, columnId, palette, colorMapping, rawValue]
     );
+
+    const fillStyle = useMemo(() => parseCellDecorationFillConfig(rawFillStyle), [rawFillStyle]);
+
+    const progressBarProps = useMemo<ProgressBarRenderProps | null>(() => {
+      if (renderMode !== 'progress' || !fillStyle || typeof rawValue !== 'number') {
+        return null;
+      }
+      const dataBounds = minMaxByColumnId?.get(getOriginalId(columnId)) ?? getFallbackDataBounds();
+      const { min, max } = getProgressBarDomain({ fillStyle, palette }, dataBounds);
+      const resolvedPaletteStops =
+        fillStyle.fillMode !== 'single'
+          ? getProgressBarPaletteStops(
+              paletteService,
+              { min, max },
+              palette,
+              palette?.params?.colors,
+              palette?.params?.stops
+            )
+          : [];
+      const solidPaletteState =
+        fillStyle.fillMode === 'solid'
+          ? getSolidProgressBarPaletteState(
+              paletteService,
+              { min, max },
+              palette,
+              palette?.params?.colors,
+              palette?.params?.stops
+            )
+          : undefined;
+      const solidProgressColor =
+        fillStyle.fillMode === 'solid'
+          ? paletteService
+              .get('custom')
+              .getColorForValue?.(rawValue, solidPaletteState, { min, max }) ??
+            DEFAULT_PROGRESS_BAR_COLOR
+          : undefined;
+      const fill: MeterFill =
+        fillStyle.fillMode === 'solid'
+          ? {
+              // Solid progress bars should reuse the stepped palette lookup used by
+              // the other by-value decorations, but against the active bar domain.
+              type: MeterFillStyle.Single,
+              color: solidProgressColor ?? DEFAULT_PROGRESS_BAR_COLOR,
+            }
+          : getMeterFill(
+              fillStyle,
+              toMeterColorStops(
+                // Recompute default-palette stops when the serialized palette omits them,
+                // so gradient bars preserve the selected palette rather than falling back.
+                resolvedPaletteStops.map(({ color }) => color),
+                resolvedPaletteStops.map(({ stop }) => stop)
+              ),
+              DEFAULT_PROGRESS_BAR_COLOR
+            );
+      // Size the value gutter to the column's widest formatted bound so every
+      // row's bar shares the same edge regardless of digit count.
+      const labelWidthCh = getProgressBarLabelWidthCh(formatter, dataBounds.min, dataBounds.max);
+      return {
+        value: rawValue,
+        domain: [min, max],
+        fill,
+        labelWidthCh,
+        baseline: fillStyle.baseline,
+      };
+    }, [renderMode, fillStyle, rawValue, minMaxByColumnId, columnId, palette, formatter]);
 
     const badgeColor = useMemo(() => {
       if (renderMode !== 'badge') return null;
@@ -121,6 +224,34 @@ export const createGridCell = (
             isDarkMode={isDarkMode}
             alignment={alignment}
             fitRowToContent={fitRowToContent}
+          />
+        );
+
+      case 'progress':
+        // Fall back to a formatted cell when the domain/fill cannot be resolved.
+        if (!progressBarProps) {
+          return (
+            <FormattedCell
+              content={formatter?.convertToReact(rawValue) ?? fallbackText}
+              alignment={alignment}
+              fitRowToContent={fitRowToContent}
+              isColored={false}
+            />
+          );
+        }
+        return (
+          <ProgressBarCell
+            value={progressBarProps.value}
+            label={formatter?.convertToReact(rawValue) ?? fallbackText}
+            domain={progressBarProps.domain}
+            fill={progressBarProps.fill}
+            size={progressBarSize}
+            meterStyle={progressBarStyle}
+            alignment={alignment}
+            labelWidthCh={progressBarProps.labelWidthCh}
+            baseline={progressBarProps.baseline}
+            ariaLabel={formatter?.convertToText(rawValue) ?? fallbackText}
+            onLabelClick={isClickable ? onFilter : undefined}
           />
         );
 

@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  EuiCallOut,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -26,6 +25,7 @@ import {
   EuiContextMenu,
 } from '@elastic/eui';
 
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import {
   UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_SUMMARY_TAB,
@@ -191,7 +191,7 @@ export const TemplateDetailsContent = ({
 
       const managedTemplateCallout = isCloudManaged && (
         <>
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -199,14 +199,14 @@ export const TemplateDetailsContent = ({
                 defaultMessage="Editing a cloud-managed template is not permitted."
               />
             }
-            color="primary"
             size="s"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.templateDetails.cloudManagedTemplateInfoDescription"
-              defaultMessage="Cloud-managed templates are critical for internal operations."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.idxMgmt.templateDetails.cloudManagedTemplateInfoDescription"
+                defaultMessage="Cloud-managed templates are critical for internal operations."
+              />
+            }
+          />
           <EuiSpacer size="m" />
         </>
       );

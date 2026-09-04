@@ -1,0 +1,449 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/core/server';
+import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
+import {
+  buildLensConfig,
+  buildVegaConfig,
+  selectDefaultTimeRange,
+} from '@kbn/agent-builder-visualizations-server';
+import { createVisualizationTool } from './create_visualization';
+
+jest.mock('@kbn/agent-builder-visualizations-server', () => ({
+  buildLensConfig: jest.fn(),
+  buildVegaConfig: jest.fn(),
+  selectDefaultTimeRange: jest.fn(),
+}));
+
+const mockBuildLens = buildLensConfig as jest.Mock;
+const mockBuildVega = buildVegaConfig as jest.Mock;
+const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
+
+const createLogger = (): Logger =>
+  ({
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger);
+
+interface MockAttachments {
+  getAttachmentRecord: jest.Mock;
+  add: jest.Mock;
+  update: jest.Mock;
+}
+
+const createAttachments = (): MockAttachments => ({
+  getAttachmentRecord: jest.fn().mockReturnValue(undefined),
+  add: jest.fn().mockResolvedValue({ id: 'att-new', current_version: 1 }),
+  update: jest.fn().mockResolvedValue({ current_version: 2 }),
+});
+
+const runHandler = async (
+  params: Record<string, unknown>,
+  overrides: { logger?: Logger; attachments?: MockAttachments } = {}
+) => {
+  const logger = overrides.logger ?? createLogger();
+  const attachments = overrides.attachments ?? createAttachments();
+  const tool = createVisualizationTool();
+  const result = (await tool.handler(
+    params as never,
+    {
+      esClient: {} as never,
+      modelProvider: {} as never,
+      logger,
+      events: {} as never,
+      attachments: attachments as never,
+    } as never
+  )) as { results: Array<{ type: string; data: any }> };
+  return { result, logger, attachments };
+};
+
+describe('createVisualizationTool schema', () => {
+  const schema = createVisualizationTool().schema;
+
+  it('requires chartType for a new Lens visualization', () => {
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+      }).success
+    ).toBe(true);
+
+    expect(schema.safeParse({ query: 'errors over time' }).success).toBe(false);
+  });
+
+  it('allows a new Vega visualization without chartType', () => {
+    expect(schema.safeParse({ query: 'small multiples by host', renderer: 'vega' }).success).toBe(
+      true
+    );
+  });
+
+  it('allows an attachment update without chartType', () => {
+    expect(
+      schema.safeParse({ query: 'use a clearer title', attachment_id: 'existing' }).success
+    ).toBe(true);
+  });
+
+  it('rejects renderer when updating an existing attachment', () => {
+    expect(
+      schema.safeParse({
+        query: 'use a clearer title',
+        attachment_id: 'existing',
+        renderer: 'lens',
+      }).success
+    ).toBe(false);
+  });
+
+  it('accepts an optional time_range and rejects a partial one', () => {
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+      }).success
+    ).toBe(true);
+
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+        time_range: { from: 'now-7d', to: 'now' },
+      }).success
+    ).toBe(true);
+
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+        time_range: { from: 'now-7d' },
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects a time_range whose endpoints are not valid Kibana date math', () => {
+    const base = { query: 'errors over time', chartType: SupportedChartType.XY };
+
+    expect(schema.safeParse({ ...base, time_range: { from: '', to: 'not-a-date' } }).success).toBe(
+      false
+    );
+    expect(
+      schema.safeParse({ ...base, time_range: { from: 'yesterday', to: 'today' } }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        ...base,
+        time_range: { from: '2026-01-02T00:00:00.000Z', to: '2026-01-01T00:00:00.000Z' },
+      }).success
+    ).toBe(false);
+
+    expect(schema.safeParse({ ...base, time_range: { from: 'now-7d', to: 'now' } }).success).toBe(
+      true
+    );
+    expect(
+      schema.safeParse({
+        ...base,
+        time_range: { from: '2024-05-20T00:00:00.000Z', to: '2024-05-24T23:59:59.999Z' },
+      }).success
+    ).toBe(true);
+  });
+});
+
+describe('createVisualizationTool handler', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockBuildLens.mockResolvedValue({
+      selectedChartType: SupportedChartType.XY,
+      validatedConfig: { title: 'Errors over time' },
+      esqlQuery: 'FROM logs | STATS count() BY @timestamp',
+    });
+    mockBuildVega.mockResolvedValue({
+      spec: '{"$schema":"vega-lite"}',
+      esqlQuery: 'FROM logs | STATS count() BY host',
+    });
+    mockSelectDefaultTimeRange.mockResolvedValue({
+      from: 'now-15m',
+      to: 'now',
+      mode: 'relative',
+    });
+  });
+
+  it('builds a Lens visualization by default and persists it', async () => {
+    const { result, attachments } = await runHandler({
+      query: 'errors over time',
+      chartType: SupportedChartType.XY,
+    });
+
+    expect(mockBuildLens).toHaveBeenCalledTimes(1);
+    expect(mockBuildVega).not.toHaveBeenCalled();
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({ type: VISUALIZATION_ATTACHMENT_TYPE })
+    );
+
+    expect(result.results).toHaveLength(1);
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.visualization);
+    expect(data.renderer).toBe('lens');
+    expect(data.visualization).toEqual({ title: 'Errors over time' });
+    expect(data.chart_type).toBe(SupportedChartType.XY);
+    expect(data.esql).toBe('FROM logs | STATS count() BY @timestamp');
+    expect(data.time_range).toEqual({ from: 'now-15m', to: 'now' });
+    expect(data.attachment_id).toBe('att-new');
+    expect(data.version).toBe(1);
+    // The natural-language query is not echoed back in the result.
+    expect(data.query).toBeUndefined();
+  });
+
+  it('builds a Vega visualization when the renderer is "vega"', async () => {
+    const { result } = await runHandler({ query: 'flows by host', renderer: 'vega' });
+
+    expect(mockBuildVega).toHaveBeenCalledTimes(1);
+    expect(mockBuildLens).not.toHaveBeenCalled();
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.visualization);
+    expect(data.renderer).toBe('vega');
+    expect(data.visualization).toEqual({ spec: '{"$schema":"vega-lite"}' });
+    expect(data.esql).toBe('FROM logs | STATS count() BY host');
+    expect(data.chart_type).toBeUndefined();
+    expect(data.time_range).toEqual({ from: 'now-15m', to: 'now' });
+    expect(data.query).toBeUndefined();
+  });
+
+  it('omits time_range when selectDefaultTimeRange returns undefined', async () => {
+    mockSelectDefaultTimeRange.mockResolvedValue(undefined);
+
+    const { result, attachments } = await runHandler({
+      query: 'errors over time',
+      chartType: SupportedChartType.XY,
+    });
+
+    expect(result.results[0].data.time_range).toBeUndefined();
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ time_range: expect.anything() }),
+      })
+    );
+  });
+
+  it('keeps the existing renderer when updating by attachment id', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'vega',
+            query: 'old query',
+            visualization: { spec: '{"old":true}' },
+            esql: 'FROM old',
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      { query: 'tweak it', attachment_id: 'existing' },
+      { attachments }
+    );
+
+    expect(mockBuildVega).toHaveBeenCalledTimes(1);
+    expect(mockBuildLens).not.toHaveBeenCalled();
+    // The prior spec is reused as the edit baseline.
+    expect(mockBuildVega).toHaveBeenCalledWith(
+      expect.objectContaining({ existingSpec: '{"old":true}' })
+    );
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(attachments.update).toHaveBeenCalledWith(
+      'existing',
+      expect.objectContaining({ data: expect.objectContaining({ renderer: 'vega' }) })
+    );
+    expect(attachments.add).not.toHaveBeenCalled();
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.visualization);
+    expect(data.renderer).toBe('vega');
+    expect(data.attachment_id).toBe('existing');
+    expect(data.version).toBe(2);
+    expect(data.time_range).toBeUndefined();
+  });
+
+  it('reuses the existing time_range on edit instead of probing', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'lens',
+            query: 'errors over time',
+            visualization: { title: 'Errors' },
+            esql: 'FROM logs | STATS count() BY @timestamp',
+            time_range: { from: 'now-7d', to: 'now' },
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      { query: 'make it a line chart', attachment_id: 'existing' },
+      { attachments }
+    );
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(attachments.update).toHaveBeenCalledWith(
+      'existing',
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }),
+      })
+    );
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-7d', to: 'now' });
+  });
+
+  it('uses an explicit time_range on create and skips the data-aware probe', async () => {
+    const { result, attachments } = await runHandler({
+      query: 'errors over the last 7 days',
+      chartType: SupportedChartType.XY,
+      time_range: { from: 'now-7d', to: 'now' },
+    });
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-7d', to: 'now' });
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }),
+      })
+    );
+  });
+
+  it('uses an explicit time_range on edit instead of the stored range', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'lens',
+            query: 'errors over time',
+            visualization: { title: 'Errors' },
+            esql: 'FROM logs | STATS count() BY @timestamp',
+            time_range: { from: 'now-24h', to: 'now' },
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      {
+        query: 'show the last 30 days',
+        attachment_id: 'existing',
+        time_range: { from: 'now-30d', to: 'now' },
+      },
+      { attachments }
+    );
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-30d', to: 'now' });
+    expect(attachments.update).toHaveBeenCalledWith(
+      'existing',
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-30d', to: 'now' } }),
+      })
+    );
+  });
+
+  it('returns an error when the attachment to update does not exist', async () => {
+    const { result, attachments } = await runHandler({
+      query: 'tweak it',
+      attachment_id: 'missing',
+    });
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('Visualization attachment "missing" not found');
+    expect(mockBuildLens).not.toHaveBeenCalled();
+    expect(mockBuildVega).not.toHaveBeenCalled();
+    expect(attachments.add).not.toHaveBeenCalled();
+    expect(attachments.update).not.toHaveBeenCalled();
+  });
+
+  it('surfaces an error result when persistence fails instead of silently succeeding', async () => {
+    const attachments = createAttachments();
+    attachments.add.mockRejectedValue(new Error('index_not_found'));
+
+    const { result, logger } = await runHandler(
+      { query: 'errors over time', chartType: SupportedChartType.XY },
+      { attachments }
+    );
+
+    expect(result.results).toHaveLength(1);
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('index_not_found');
+    expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('returns an error result when spec generation throws', async () => {
+    mockBuildLens.mockRejectedValue(new Error('esql_generation_failed'));
+
+    const { result } = await runHandler({
+      query: 'broken',
+      chartType: SupportedChartType.Metric,
+    });
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('esql_generation_failed');
+  });
+
+  it('gives an actionable hint when index auto-discovery fails and no index was passed', async () => {
+    // The deeply-nested error surfaced when the referenced fields are ungrounded.
+    mockBuildLens.mockRejectedValue(
+      new Error(
+        'Failed to generate a valid Vega specification. Last error: Could not resolve a valid ' +
+          'ES|QL query for the visualization: Could not generate ESQL query: Could not discover a ' +
+          'suitable index for the query. Please specify an index explicitly.'
+      )
+    );
+
+    const { result } = await runHandler({
+      query: 'cpu by host',
+      chartType: SupportedChartType.XY,
+    });
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('Could not find an index matching the requested fields');
+    expect(data.message).toContain('retry create_visualization with an explicit "index"');
+  });
+
+  it('does not add the index hint when an explicit index was provided', async () => {
+    mockBuildLens.mockRejectedValue(
+      new Error('Could not discover a suitable index for the query.')
+    );
+
+    const { result } = await runHandler({
+      query: 'cpu by host',
+      index: 'metrics-*',
+      chartType: SupportedChartType.XY,
+    });
+
+    const [{ data }] = result.results;
+    expect(data.message).toContain('Failed to create visualization:');
+    expect(data.message).not.toContain('Could not find an index matching');
+  });
+});

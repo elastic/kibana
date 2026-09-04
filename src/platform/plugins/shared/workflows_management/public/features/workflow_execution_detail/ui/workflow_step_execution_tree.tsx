@@ -25,7 +25,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -49,18 +49,28 @@ import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 const TRIGGER_BOLT_ICON_SVG =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="%23535966" d="M7.04 13.274a.5.5 0 1 0 .892.453l3.014-5.931a.5.5 0 0 0-.445-.727H5.316L8.03 1.727a.5.5 0 1 0-.892-.453L4.055 7.343a.5.5 0 0 0 .446.726h5.185L7.04 13.274Z"/></svg>';
 
+const COLLAPSED_BY_DEFAULT_STEP_TYPES = [
+  'foreach-iteration',
+  'while-iteration',
+  'parallel-branch',
+  'enter-case-branch',
+  'enter-default-branch',
+];
+
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
   euiTheme: EuiThemeComputed,
   selectedId: string | null,
-  onSelectStepExecution: (stepExecutionId: string) => void
+  onSelectStepExecution: (stepExecutionId: string) => void,
+  onStepExpanded: (stepType: string) => void
 ): EuiTreeViewProps['items'] {
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
@@ -68,6 +78,9 @@ function convertTreeToEuiTreeViewItems(
     const selected = selectedId === stepExecution?.id;
 
     const stepId = stepExecution?.stepId ?? item.stepId;
+    // Prefer a resolved display label (e.g. a static parallel branch name) over
+    // the raw stepId, which for parallel/foreach scope nodes is the bare index.
+    const displayLabel = item.displayLabel ?? stepId;
     const stepType = stepExecution?.stepType ?? item.stepType;
 
     // Check if this is a skeleton step (not yet received from server) or a loading placeholder
@@ -89,6 +102,8 @@ function convertTreeToEuiTreeViewItems(
 
     return {
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
+      isExpanded:
+        item.children.length > 0 && !COLLAPSED_BY_DEFAULT_STEP_TYPES.includes(item.stepType),
       css: [
         getStatusCss({ status, selected }, euiTheme),
         // Don't allow selecting skeleton steps using css, as we don't have a 'disabled' prop on the tree view item
@@ -120,10 +135,11 @@ function convertTreeToEuiTreeViewItems(
       ),
       label: (
         <StepExecutionTreeItemLabel
-          stepId={stepId}
+          stepId={displayLabel}
           selected={selected}
           status={status}
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
+          usage={stepExecution?.usage}
           onClick={selectStepExecution}
         />
       ),
@@ -134,12 +150,14 @@ function convertTreeToEuiTreeViewItems(
               stepExecutionMap,
               euiTheme,
               selectedId,
-              onSelectStepExecution
+              onSelectStepExecution,
+              onStepExpanded
             )
           : undefined,
       callback:
         // collapse/expand the tree view item when the button is clicked
         () => {
+          onStepExpanded(stepType);
           let toOpen = item.stepExecutionId;
           if (!toOpen && item.children.length) {
             toOpen = item.children[0].stepExecutionId;
@@ -176,6 +194,14 @@ export const WorkflowStepExecutionTree = ({
 }: WorkflowStepExecutionTreeProps) => {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
+  const telemetry = useTelemetry();
+
+  const handleStepExpanded = useCallback(
+    (stepType: string) => {
+      telemetry.reportWorkflowExecutionsStepExpanded({ stepType });
+    },
+    [telemetry]
+  );
 
   const failedBeforeSteps =
     execution != null && isFailedBeforeSteps(execution.status, execution.stepExecutions);
@@ -219,7 +245,7 @@ export const WorkflowStepExecutionTree = ({
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        icon={<EuiIcon type="listBullet" size="l" />}
+        icon={<EuiIcon type="listBullet" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -286,16 +312,15 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap.set('__overview', executionOverview);
     }
 
-    const triggerPseudoStep =
+    const triggerTreeItem =
       stepExecutionsTree.find((item) => item.stepType === '__trigger') ??
       stepExecutionsTree.find((item) => item.stepType === '__inputs');
-
-    if (triggerPseudoStep && execution.context) {
+    if (triggerTreeItem && execution.context) {
       const triggerExecution = buildTriggerStepExecutionFromContext(execution);
       if (triggerExecution) {
         stepExecutionMap.set(triggerExecution.id, triggerExecution);
-        triggerPseudoStep.stepExecutionId = triggerExecution.id;
-        triggerPseudoStep.stepType = triggerExecution.stepType ?? '';
+        triggerTreeItem.stepExecutionId = triggerExecution.id;
+        triggerTreeItem.stepType = triggerExecution.stepType ?? '';
       }
     }
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
@@ -303,7 +328,8 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap,
       euiTheme,
       selectedId,
-      onStepExecutionClick
+      onStepExecutionClick,
+      handleStepExpanded
     );
 
     const overviewItem = items.find(
@@ -341,7 +367,6 @@ export const WorkflowStepExecutionTree = ({
             <EuiTreeView
               data-test-subj="workflowStepExecutionTree"
               showExpansionArrows
-              expandByDefault
               items={regularItems}
               aria-label={i18n.translate(
                 'workflows.WorkflowStepExecutionTree.workflowStepExecutionTreeAriaLabel',
@@ -359,7 +384,7 @@ export const WorkflowStepExecutionTree = ({
   return (
     <EuiEmptyPrompt
       {...emptyPromptCommonProps}
-      icon={<EuiIcon type="error" size="l" />}
+      icon={<EuiIcon type="error" size="l" aria-hidden={true} />}
       title={
         <h2>
           <FormattedMessage

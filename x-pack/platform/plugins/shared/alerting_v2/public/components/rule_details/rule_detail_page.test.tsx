@@ -6,12 +6,18 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { RuleDetailPage } from './rule_detail_page';
 import { RuleProvider } from './rule_context';
+import { paths } from '../../constants';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { useRuleAutoAttach } from '../../agent_builder/use_rule_auto_attach';
 
 const mockHistoryPush = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -19,15 +25,31 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => ({ push: mockHistoryPush }),
 }));
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'http') {
-      return { basePath: { prepend: (p: string) => p } };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
+let mockCanWriteRules = true;
+
+jest.mock('../../agent_builder/use_rule_auto_attach', () => ({
+  useRuleAutoAttach: jest.fn(),
 }));
+
+jest.mock('@kbn/core-di-browser', () => {
+  return {
+    useService: (token: unknown) => {
+      if (token === 'http') {
+        return { basePath: { prepend: (p: string) => p } };
+      }
+      if (typeof token === 'function') {
+        // UserCapabilities service token
+        return {
+          canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+          canRead: () => true,
+          can: () => mockCanWriteRules,
+        };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 const mockUseBreadcrumbs = jest.fn();
 jest.mock('../../hooks/use_breadcrumbs', () => ({
@@ -39,27 +61,67 @@ jest.mock('../../hooks/use_delete_rule', () => ({
   useDeleteRule: () => ({ mutate: mockDeleteRule, isLoading: false }),
 }));
 
+const mockToggleRuleEnabled = jest.fn();
+let mockIsToggling = false;
+jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
+  useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled, isLoading: mockIsToggling }),
+}));
+
+const mockUpdateRuleApiKey = jest.fn();
+jest.mock('../../hooks/use_bulk_update_rule_api_key', () => ({
+  useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateRuleApiKey, isLoading: false }),
+}));
+
+const mockRunRule = jest.fn();
+jest.mock('../../hooks/use_run_rule', () => ({
+  useRunRule: () => ({ mutate: mockRunRule, isLoading: false }),
+}));
+
 const mockOpenEditFlyout = jest.fn();
 const mockOpenCloneFlyout = jest.fn();
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({
   useComposeDiscoverFlyout: () => ({
     flyout: null,
+    confirmationModal: null,
     openCreateFlyout: jest.fn(),
     openEditFlyout: mockOpenEditFlyout,
     openCloneFlyout: mockOpenCloneFlyout,
   }),
 }));
 
-jest.mock('./rule_header_description', () => ({
-  RuleTitleWithBadges: () => <div data-test-subj="ruleTitleWithBadges">mocked-title</div>,
-  RuleHeaderDescription: () => <div data-test-subj="ruleHeaderDescription" />,
+const mockUseRuleAuditMetadata = jest.fn();
+jest.mock('../../hooks/use_rule_audit_metadata', () => ({
+  useRuleAuditMetadata: () => mockUseRuleAuditMetadata(),
 }));
+
+const mockAppHeaderRender = jest.fn();
+jest.mock('@kbn/app-header', () => {
+  const actual = jest.requireActual('@kbn/app-header');
+  return {
+    ...actual,
+    AppHeader: (props: React.ComponentProps<typeof actual.AppHeader>) => {
+      mockAppHeaderRender(props.menu);
+      return <actual.AppHeader {...props} />;
+    },
+  };
+});
+
+const mockRuleKindBadgeRender = jest.fn();
+jest.mock('./rule_summary_header', () => {
+  const actual = jest.requireActual('./rule_summary_header');
+  return {
+    ...actual,
+    RuleKindBadge: (props: { kind: string }) => {
+      mockRuleKindBadgeRender();
+      return <actual.RuleKindBadge {...props} />;
+    },
+  };
+});
 
 jest.mock('./sidebar/rule_sidebar', () => ({
   RuleSidebar: () => (
     <div>
       <div data-test-subj="ruleConditionsSection">conditions</div>
-      <div data-test-subj="ruleMetadataSection">metadata</div>
     </div>
   ),
 }));
@@ -68,42 +130,39 @@ jest.mock('./overview', () => ({
   RuleOverviewSection: () => <div data-test-subj="ruleOverviewSectionMock">overview</div>,
 }));
 
-jest.mock('./rule_details_actions_menu', () => ({
-  RuleDetailsActionsMenu: ({ showDeleteConfirmation }: { showDeleteConfirmation: () => void }) => (
-    <button
-      data-test-subj="ruleDetailsActionsButton"
-      onClick={showDeleteConfirmation}
-      type="button"
-    >
-      Actions
-    </button>
-  ),
-}));
-
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule', tags: ['prod', 'infra'] },
+  metadata: {
+    name: 'Test Events Rule',
+    version: 1,
+    description: 'Test rule description',
+    tags: ['prod', 'infra'],
+  },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: {
     format: 'standalone',
     breach: { query: 'FROM logs-* | STATS count() BY host.name' },
   },
-  createdBy: 'alice@example.com',
-  createdAt: '2026-03-01T12:00:00.000Z',
-  updatedBy: 'bob@example.com',
-  updatedAt: '2026-03-04T12:00:00.000Z',
+  created_by: 'alice@example.com',
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: 'bob@example.com',
+  updated_at: '2026-03-04T12:00:00.000Z',
 };
+
+const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
 
 const renderPage = (rule: RuleApiResponse) =>
   render(
     <MemoryRouter>
       <I18nProvider>
-        <RuleProvider rule={rule}>
-          <RuleDetailPage />
-        </RuleProvider>
+        <MockChromeContextProvider>
+          <RuleProvider rule={rule}>
+            <RuleDetailPage />
+          </RuleProvider>
+        </MockChromeContextProvider>
       </I18nProvider>
     </MemoryRouter>
   );
@@ -111,23 +170,92 @@ const renderPage = (rule: RuleApiResponse) =>
 describe('RuleDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsToggling = false;
+    mockUseRuleAuditMetadata.mockReturnValue({
+      createdByDisplay: 'Alice Example',
+      createdAtFormatted: 'Mar 1, 2026',
+      updatedByDisplay: 'Bob Example',
+      updatedAtFormatted: 'Mar 4, 2026',
+    });
+    mockCanWriteRules = true;
   });
 
   it('wires breadcrumbs with the rule name', () => {
     renderPage(baseRule);
     expect(mockUseBreadcrumbs).toHaveBeenCalledWith('rule_details', {
-      ruleName: 'Test Signal Rule',
+      ruleName: 'Test Events Rule',
     });
   });
 
-  it('renders core page sections and actions', () => {
+  it('renders the app header title and sidebar sections', async () => {
     renderPage(baseRule);
-    expect(screen.getByTestId('ruleTitleWithBadges')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleHeaderDescription')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Test Events Rule'
+    );
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleTags')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleConditionsSection')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleMetadataSection')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleDetailsActionsButton')).toBeInTheDocument();
-    expect(screen.getByTestId('openEditRuleFlyoutButton')).toBeInTheDocument();
+    expect(await screen.findByTestId('ruleDetailsEnabledSwitch')).toBeInTheDocument();
+  });
+
+  it('renders header metadata with resolved created-by and updated-by info', () => {
+    renderPage(baseRule);
+    const metadataSection = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata);
+    expect(metadataSection).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDetailsCreatedByMetadata')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDetailsUpdatedByMetadata')).toBeInTheDocument();
+    expect(metadataSection).toHaveTextContent('Alice Example');
+    expect(metadataSection).toHaveTextContent('Mar 1, 2026');
+    expect(metadataSection).toHaveTextContent('Bob Example');
+    expect(metadataSection).toHaveTextContent('Mar 4, 2026');
+  });
+
+  it('handles missing audit values gracefully', () => {
+    mockUseRuleAuditMetadata.mockReturnValue({
+      createdByDisplay: '-',
+      createdAtFormatted: '-',
+      updatedByDisplay: '-',
+      updatedAtFormatted: '-',
+    });
+    renderPage(baseRule);
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDetailsCreatedByMetadata')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDetailsUpdatedByMetadata')).toBeInTheDocument();
+  });
+
+  it('renders a back link to the rules list', () => {
+    renderPage(baseRule);
+    const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+    expect(backButton).toHaveAttribute('href', expect.stringContaining(paths.ruleList));
+  });
+
+  it('renders native kind, status, and tag badges in the app header', () => {
+    renderPage(baseRule);
+    const kindBadge = screen.getByTestId('kindBadge');
+    expect(kindBadge).toHaveTextContent('Events');
+    expect(kindBadge.querySelector('[data-euiicon-type="chartBarVertical"]')).toBeInTheDocument();
+    expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
+    expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('+2'));
+    expect(screen.getByText('prod')).toBeInTheDocument();
+    expect(screen.getByText('infra')).toBeInTheDocument();
+  });
+
+  it('renders Alerts kind badge with its icon and disabled status badge', () => {
+    renderPage({ ...baseRule, kind: 'alert', enabled: false });
+    const kindBadge = screen.getByTestId('kindBadge');
+    expect(kindBadge).toHaveTextContent('Alerts');
+    expect(kindBadge.querySelector('[data-euiicon-type="bell"]')).toBeInTheDocument();
+    expect(screen.getByTestId('disabledBadge')).toHaveTextContent('Disabled');
+    expect(screen.queryByTestId('enabledBadge')).not.toBeInTheDocument();
+  });
+
+  it('renders kind-specific tooltip on the kind badge', async () => {
+    renderPage(baseRule);
+    fireEvent.mouseOver(screen.getByTestId('kindBadge'));
+    await waitFor(() => {
+      expect(screen.getByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
+    });
   });
 
   it('opens the edit flyout when edit button is clicked', () => {
@@ -136,19 +264,63 @@ describe('RuleDetailPage', () => {
     expect(mockOpenEditFlyout).toHaveBeenCalledWith(baseRule);
   });
 
-  it('opens delete confirmation from actions menu', () => {
+  it('does not render enable/disable options in the overflow menu', async () => {
     renderPage(baseRule);
-    fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
+    await openAppMenuOverflow();
+    expect(screen.queryByTestId('ruleDetailsDisableButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleDetailsEnableButton')).not.toBeInTheDocument();
+  });
+
+  it('renders a checked enabled switch for enabled rules and disables the rule when toggled off', async () => {
+    renderPage(baseRule);
+    const toggle = await screen.findByTestId('ruleDetailsEnabledSwitch');
+    expect(toggle).toBeChecked();
+    fireEvent.click(toggle);
+    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({
+      id: 'rule-1',
+      enabled: false,
+    });
+  });
+
+  it('renders an unchecked enabled switch for disabled rules and enables the rule when toggled on', async () => {
+    renderPage({ ...baseRule, enabled: false });
+    const toggle = await screen.findByTestId('ruleDetailsEnabledSwitch');
+    expect(toggle).not.toBeChecked();
+    fireEvent.click(toggle);
+    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({
+      id: 'rule-1',
+      enabled: true,
+    });
+  });
+
+  it('disables the switch while the toggle mutation is in flight', async () => {
+    mockIsToggling = true;
+    renderPage(baseRule);
+    expect(await screen.findByTestId('ruleDetailsEnabledSwitch')).toBeDisabled();
+  });
+
+  it('opens the clone flyout when clone is clicked', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsCloneButton'));
+    expect(mockOpenCloneFlyout).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('opens delete confirmation from the overflow menu', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsDeleteButton'));
     expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
   });
 
-  it('calls delete mutation and navigates on successful confirm', () => {
+  it('calls delete mutation and navigates on successful confirm', async () => {
     renderPage(baseRule);
-    fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsDeleteButton'));
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockDeleteRule).toHaveBeenCalledWith(
-      { id: 'rule-1', name: 'Test Signal Rule' },
+      { id: 'rule-1', name: 'Test Events Rule' },
       expect.objectContaining({
         onSuccess: expect.any(Function),
       })
@@ -159,10 +331,145 @@ describe('RuleDetailPage', () => {
     expect(mockHistoryPush).toHaveBeenCalledWith('/');
   });
 
-  it('closes delete modal when cancel is clicked', () => {
+  it('closes delete modal when cancel is clicked', async () => {
     renderPage(baseRule);
-    fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsDeleteButton'));
     fireEvent.click(screen.getByText('Cancel'));
     expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
+  });
+
+  it('opens the update API key confirmation from the overflow menu', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsUpdateApiKeyButton'));
+    expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+  });
+
+  it('calls the update API key mutation with the rule id on confirm', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsUpdateApiKeyButton'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    expect(mockUpdateRuleApiKey).toHaveBeenCalledWith(
+      { mode: 'by_ids', ids: ['rule-1'] },
+      expect.objectContaining({ onSettled: expect.any(Function) })
+    );
+
+    // The modal closes once the mutation settles.
+    const [, options] = mockUpdateRuleApiKey.mock.calls[0];
+    options.onSettled();
+    await waitFor(() =>
+      expect(screen.queryByTestId('updateApiKeyConfirmationModal')).not.toBeInTheDocument()
+    );
+  });
+
+  it('closes the update API key modal when cancel is clicked', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsUpdateApiKeyButton'));
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(screen.queryByTestId('updateApiKeyConfirmationModal')).not.toBeInTheDocument();
+    expect(mockUpdateRuleApiKey).not.toHaveBeenCalled();
+  });
+
+  it('disables the update API key action for a disabled rule', async () => {
+    renderPage({ ...baseRule, enabled: false });
+    await openAppMenuOverflow();
+    // The action is shown but disabled — a disabled rule has no key to rotate.
+    expect(await screen.findByTestId('ruleDetailsUpdateApiKeyButton')).toBeDisabled();
+  });
+
+  describe('when the user only has read privilege', () => {
+    beforeEach(() => {
+      mockCanWriteRules = false;
+    });
+
+    it('hides the edit button, enabled switch, and overflow write actions', async () => {
+      renderPage(baseRule);
+
+      expect(screen.queryByTestId('openEditRuleFlyoutButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsEnabledSwitch')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsCloneButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsUpdateApiKeyButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsDeleteButton')).not.toBeInTheDocument();
+    });
+
+    it('still shows View change history (a read action) in the overflow menu', async () => {
+      renderPage(baseRule);
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('ruleDetailsViewChangeHistoryButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsRunButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsCloneButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsDeleteButton')).not.toBeInTheDocument();
+    });
+
+    it('still shows the read-only enabled status badge', () => {
+      renderPage(baseRule);
+
+      expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
+    });
+  });
+
+  it('does not re-render the header badges when the delete modal opens and closes', async () => {
+    renderPage(baseRule);
+    const renderCountBeforeToggle = mockRuleKindBadgeRender.mock.calls.length;
+    const menuBeforeToggle =
+      mockAppHeaderRender.mock.calls[mockAppHeaderRender.mock.calls.length - 1][0];
+
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsDeleteButton'));
+    expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
+
+    expect(mockRuleKindBadgeRender.mock.calls.length).toBe(renderCountBeforeToggle);
+    const menuAfterToggle =
+      mockAppHeaderRender.mock.calls[mockAppHeaderRender.mock.calls.length - 1][0];
+    expect(menuAfterToggle).toBe(menuBeforeToggle);
+  });
+
+  describe('Agent Builder auto-attach', () => {
+    it('passes the loaded rule to useRuleAutoAttach', () => {
+      renderPage(baseRule);
+
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('passes the new rule to useRuleAutoAttach when the rule id changes', () => {
+      const { rerender } = render(
+        <MemoryRouter>
+          <I18nProvider>
+            <MockChromeContextProvider>
+              <RuleProvider rule={baseRule}>
+                <RuleDetailPage />
+              </RuleProvider>
+            </MockChromeContextProvider>
+          </I18nProvider>
+        </MemoryRouter>
+      );
+
+      const nextRule = {
+        ...baseRule,
+        id: 'rule-2',
+        metadata: { ...baseRule.metadata, name: 'Next' },
+      };
+
+      rerender(
+        <MemoryRouter>
+          <I18nProvider>
+            <MockChromeContextProvider>
+              <RuleProvider rule={nextRule}>
+                <RuleDetailPage />
+              </RuleProvider>
+            </MockChromeContextProvider>
+          </I18nProvider>
+        </MemoryRouter>
+      );
+
+      expect(mockUseRuleAutoAttach).toHaveBeenLastCalledWith(nextRule);
+    });
   });
 });

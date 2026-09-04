@@ -111,6 +111,30 @@ export const dataTypes = {
 // currently identical but may be a subset or otherwise different some day
 export const monitoringTypes = Object.values(dataTypes);
 
+/** Dedicated indices Universal Profiling reads from and the Elasticsearch exporter writes to. */
+export const UNIVERSAL_PROFILING_INDEX_PATTERNS = ['profiling-*', 'profiles-*'] as const;
+
+/** Index pattern matching concrete symbolization queue indices used by delete-by-query. */
+export const UNIVERSAL_PROFILING_QUEUE_INDEX_PATTERNS = ['.profiling-sq-*'] as const;
+
+/**
+ * Data stream types that Fleet must not manage (OTel or dedicated input): no routing transform,
+ * no dataset index templates/data streams, no `<type>-<dataset>-<namespace>` write permissions.
+ * Each maps to the index patterns the data is actually written to.
+ *
+ * `profiles` is owned end-to-end by Universal Profiling — Fleet stamping `data_stream.*` would
+ * misroute data and collapse its streams. See https://github.com/elastic/package-spec/issues/1191.
+ */
+export const FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS: Readonly<
+  Record<string, readonly string[]>
+> = {
+  profiles: UNIVERSAL_PROFILING_INDEX_PATTERNS,
+};
+
+export const FLEET_UNMANAGED_DATA_STREAM_TYPES: readonly string[] = Object.keys(
+  FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS
+);
+
 export const installationStatuses = {
   Installed: 'installed',
   Installing: 'installing',
@@ -128,3 +152,6 @@ export const displayedAssetTypes: DisplayedAssetTypes = [
 export const displayedAssetTypesLookup = new Set<string>(displayedAssetTypes);
 
 export const OTEL_COLLECTOR_INPUT_TYPE = 'otelcol';
+
+/** Observability catalogue filters. Fleet's serverless default and Add Data Browse all both use this list. */
+export const OBLT_DEFAULT_CATEGORIES: readonly string[] = ['opentelemetry', 'observability'];

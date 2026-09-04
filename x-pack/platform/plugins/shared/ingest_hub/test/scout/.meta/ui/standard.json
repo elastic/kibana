@@ -1,60 +1,21 @@
 {
-  "sha1": "ebe85ea280aca1fb833ea8fa7b265bb8af6d25e6",
+  "sha1": "2b3d9c8c65acb650e2488a4a3d662134d8ab1768",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
-      "id": "2f88d785c412e06-9e9bcc234fbcf5f",
-      "title": "Onboarding connect step static keys path — form enables Next when credentials are filled",
+      "id": "a002a5dadd7e00b-8a982de270c8a77",
+      "title": "Onboarding Authenticate and Deploy step deploy fires POST /api/fleet/managed_integrations and shows success state",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
-        "line": 45,
-        "column": 7
-      }
-    },
-    {
-      "id": "2f88d785c412e06-6f25f6af6aac93b",
-      "title": "Onboarding connect step identity federation create — New Identity tab active when no connectors exist",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
-        "line": 66,
-        "column": 7
-      }
-    },
-    {
-      "id": "2f88d785c412e06-252523a854117d9",
-      "title": "Onboarding connect step temporary keys path — form enables Next when access key and secret are filled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
-        "line": 103,
-        "column": 7
-      }
-    },
-    {
-      "id": "2f88d785c412e06-71f5ed0a35a0c8f",
-      "title": "Onboarding connect step identity federation reuse — shows connector selector on Existing Identity tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
-        "line": 131,
-        "column": 7
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
+        "line": 108,
+        "column": 30
       }
     },
     {
@@ -67,36 +28,330 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ff_enabled.spec.ts",
-        "line": 45,
+        "line": 35,
+        "column": 23
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-579fcdc671b7aba",
+      "title": "Onboarding Service Settings step renders table with Service Name, Collects, Category, Region columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 225,
+        "column": 11
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-f72710f03cf24bd",
+      "title": "Onboarding Service Settings step service count reflects selected services",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 251,
+        "column": 11
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-b378a963c4df4ed",
+      "title": "Onboarding Service Settings step search bar filters table rows by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 256,
+        "column": 13
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-2956b459ec7c36e",
+      "title": "Onboarding Service Settings step signal filter narrows table rows by signal type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 268,
+        "column": 5
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-818859b95953429",
+      "title": "Onboarding Service Settings step global region shown in Region column; per-service override takes precedence",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 281,
+        "column": 11
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-ed15c4a849cdb2f",
+      "title": "Onboarding Service Settings step Continue is disabled without global region",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 314,
         "column": 7
       }
     },
     {
-      "id": "b0669359ac1acfc-0e3d67be95f42a3",
-      "title": "Onboarding connect step IAM permissions viewer shows the aggregated IAM policy for the selected services",
+      "id": "f11cb343b6e8637-460531c01d3b8a9",
+      "title": "Onboarding Service Settings step region error shown only after touching and clearing the global region field",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_permissions_viewer.spec.ts",
-        "line": 68,
-        "column": 9
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 325,
+        "column": 5
       }
     },
     {
-      "id": "b0669359ac1acfc-de90b35ab9eb820",
-      "title": "Onboarding connect step IAM permissions viewer narrows the policy when a single integration is selected",
+      "id": "f11cb343b6e8637-bcb6047dcce319c",
+      "title": "Onboarding Service Settings step attention callout and badge shown when required flyout fields are empty",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_permissions_viewer.spec.ts",
-        "line": 99,
-        "column": 9
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 339,
+        "column": 7
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-f4a4ac0be8cbc8a",
+      "title": "Onboarding Service Settings step service with no required text vars shows no attention badge and does not block Continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 364,
+        "column": 20
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-1ed6de8ec7eda25",
+      "title": "Onboarding Service Settings step expand icon opens flyout for the correct service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 370,
+        "column": 7
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-4b70180c407b02e",
+      "title": "Onboarding Service Settings step service name link also opens flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 394,
+        "column": 5
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-d7e7468ab70dac2",
+      "title": "Onboarding Service Settings step flyout shows transport toggle and required fields for dual-transport service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 402,
+        "column": 11
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-1a46305fd2e1c43",
+      "title": "Onboarding Service Settings step flyout no longer shows AWS Region override field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 435,
+        "column": 8
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-4d4709f0beee0fa",
+      "title": "Onboarding Service Settings step filling required field in flyout and saving unblocks Continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 447,
+        "column": 11
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-9057d3c5bb0a6fc",
+      "title": "Onboarding Service Settings step duplicate modal opens with correct service name in body copy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 484,
+        "column": 8
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-8ae52c79d80cb5b",
+      "title": "Onboarding Service Settings step duplicate modal pre-fills name as \"Service [Duplicate]\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 493,
+        "column": 30
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-25d437bc50c6719",
+      "title": "Onboarding Service Settings step Cancel discards without adding a row or changing session storage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 501,
+        "column": 24
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-ed1a6f74eb9d373",
+      "title": "Onboarding Service Settings step Add inserts a new row with the chosen name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 514,
+        "column": 100
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-c914c823c45f006",
+      "title": "Onboarding Service Settings step duplicate row's config is independent from the original",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 548,
+        "column": 24
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-23966c6fe70d11e",
+      "title": "Onboarding Service Settings step duplicate row participates in attention callout and Continue readiness",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 576,
+        "column": 17
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-1c09b598260d274",
+      "title": "Onboarding Service Settings step Remove action is visible only on duplicate rows and removes the row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 640,
+        "column": 11
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-87e5e55984bdd07",
+      "title": "Onboarding Service Settings step duplicate modal — Add is disabled until required fields are filled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 715,
+        "column": 24
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-c59947b71a66577",
+      "title": "Onboarding Service Settings step duplicate modal — name collision shows error and blocks Add",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 743,
+        "column": 24
       }
     },
     {
@@ -109,13 +364,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 50,
-        "column": 7
+        "line": 38,
+        "column": 52
       }
     },
     {
-      "id": "240d7a094dcfd2b-7495eeb4b6af77d",
-      "title": "Onboarding services step deselect and reselect a service",
+      "id": "240d7a094dcfd2b-50a7d6b646f4edf",
+      "title": "Onboarding services step select and deselect a service",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -123,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 68,
-        "column": 7
+        "line": 49,
+        "column": 79
       }
     },
     {
@@ -137,13 +392,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 81,
-        "column": 7
+        "line": 61,
+        "column": 11
       }
     },
     {
-      "id": "240d7a094dcfd2b-215fb10fa4ca864",
-      "title": "Onboarding services step Next is disabled when no services are selected",
+      "id": "240d7a094dcfd2b-3cf6363f59cca14",
+      "title": "Onboarding services step Continue is disabled when no services are selected",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -151,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 104,
-        "column": 7
+        "line": 77,
+        "column": 11
       }
     },
     {
@@ -165,8 +420,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 130,
-        "column": 7
+        "line": 85,
+        "column": 5
+      }
+    },
+    {
+      "id": "987d8f3ed53a350-aabe85f3646586c",
+      "title": "Onboarding — downstream step invalidation path 1 — service-settings indicator loses checkmark when selection changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_step_invalidation.spec.ts",
+        "line": 62,
+        "column": 8
       }
     },
     {
@@ -179,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding.spec.ts",
-        "line": 13,
-        "column": 7
+        "line": 12,
+        "column": 14
       }
     }
   ]

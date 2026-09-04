@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { serviceRt, settingsRt, agentConfigurationIntakeRt } from '@kbn/apm-common';
+export { serviceSchema, settingsSchema, agentConfigurationIntakeSchema } from '@kbn/apm-common';

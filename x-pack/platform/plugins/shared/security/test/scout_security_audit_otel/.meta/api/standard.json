@@ -1,0 +1,106 @@
+{
+  "sha1": "3d12d1c19ccfbc61072ccdb9c91ae0efde7fb920",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "552663f99e10481-87a55de9629ed77",
+      "title": "Audit log — OTel appender on traditional (no Serverless transforms) user_login: raw ECS field names, no Serverless renames or drops",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log_traditional.spec.ts",
+        "line": 53,
+        "column": 13
+      }
+    },
+    {
+      "id": "552663f99e10481-e9875ef784a2783",
+      "title": "Audit log — OTel appender on traditional (no Serverless transforms) http_request: lowercase method, split url.* fields, no url.original",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log_traditional.spec.ts",
+        "line": 88,
+        "column": 18
+      }
+    },
+    {
+      "id": "a5ae4211fe333e4-02c2e3935b6dce3",
+      "title": "Audit log — OTel field shape (Serverless) user_login success: renamed OTel fields, event.type default applied",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
+        "line": 79,
+        "column": 23
+      }
+    },
+    {
+      "id": "a5ae4211fe333e4-136147aaa73e024",
+      "title": "Audit log — OTel field shape (Serverless) user_login failure: outcome=failure, no user fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
+        "line": 144,
+        "column": 18
+      }
+    },
+    {
+      "id": "a5ae4211fe333e4-fe0786e0ff717d4",
+      "title": "Audit log — OTel field shape (Serverless) http_request: http.request.id present (not trace.id), HTTP method uppercase",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
+        "line": 188,
+        "column": 18
+      }
+    },
+    {
+      "id": "a5ae4211fe333e4-81d579acad1e750",
+      "title": "Audit log — OTel field shape (Serverless) saved_object_find: kibana.space.id present (not kibana.space_id)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
+        "line": 236,
+        "column": 24
+      }
+    },
+    {
+      "id": "a5ae4211fe333e4-77ba3af0e9e9fbb",
+      "title": "Audit log — OTel field shape (Serverless) user_logout: event.type default applied, authentication.type present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
+        "line": 285,
+        "column": 20
+      }
+    }
+  ]
+}

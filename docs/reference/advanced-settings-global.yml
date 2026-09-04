@@ -49,20 +49,20 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
+          serverless: ga
 
       - setting: "xpackCustomBranding:customizedLogo"
         id: organization-name
         description: |
           The custom image that replaces the text next to the logo in the header of all {{product.kibana}} pages. Images look best when they are no larger than 200 x 84 pixels and have a transparent background.
-        datatype: string
+        datatype: image
         applies_to:
           stack: ga
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
+          serverless: ga
 
       - setting: "xpackCustomBranding:pageTitle"
         id: page-title
@@ -88,7 +88,7 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
+          serverless: ga
 
       - setting: "xpackCustomBranding:faviconPNG"
         id: favicon-png
@@ -101,4 +101,4 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
+          serverless: ga

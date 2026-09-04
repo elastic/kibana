@@ -113,6 +113,9 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
     }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    // No dedicated docs page yet; empty string resolves to the connectors index via the
+    // doc-links service (see getDocsUrlFromSpec), so it stays correct if the docs move.
+    docsUrl: '',
   },
 
   auth: {
@@ -160,6 +163,7 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
   actions: {
     invoke: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Invoke a GCP Cloud Function or Cloud Run function by name using its HTTP trigger URL. Use this when you need to run a known function with an optional JSON payload and return the function response.',
       input: lazySchema(() =>
@@ -212,6 +216,7 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
     listFunctions: {
       isTool: true,
+      scope: 'read',
       description:
         'List GCP Cloud Functions and Cloud Run functions in the configured project and region. Use this to discover available function names before invoking or inspecting a function.',
       input: lazySchema(() =>
@@ -280,6 +285,7 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
     getFunction: {
       isTool: true,
+      scope: 'read',
       description:
         'Get details for a single GCP Cloud Function or Cloud Run function by name. Use this when you already know the function name and need its endpoint or deployment configuration before deciding what to invoke.',
       input: lazySchema(() =>
@@ -327,28 +333,16 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        const { projectId, region } = ctx.config as { projectId: string; region: string };
-        const parent = buildParentPath(projectId, region);
-
-        await callGcpApi(ctx, 'GET', `${CLOUD_RUN_API_BASE}/${parent}/services`, {
-          pageSize: '1',
-        });
-
-        return {
-          ok: true,
-          message: 'Successfully connected to GCP Cloud Run API',
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          ok: false,
-          message: `Failed to connect: ${errorMessage}`,
-        };
-      }
+      const { projectId, region } = ctx.config as { projectId: string; region: string };
+      const parent = buildParentPath(projectId, region);
+      await callGcpApi(ctx, 'GET', `${CLOUD_RUN_API_BASE}/${parent}/services`, {
+        pageSize: '1',
+      });
+      return {};
     },
     description: i18n.translate('connectorSpecs.gcpCloudFunctions.test.description', {
       defaultMessage: 'Verifies GCP Cloud Functions API credentials and project access',
     }),
+    enabled: true,
   },
 };

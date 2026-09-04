@@ -96,11 +96,11 @@ const PolicyCell = React.memo<{
 );
 
 const CpuCell = React.memo<{ agent: Agent; agentPolicy: AgentPolicy | undefined }>(
-  ({ agent, agentPolicy }) => <>{formatAgentCPU(agent.metrics, agentPolicy)}</>
+  ({ agent, agentPolicy }) => <>{formatAgentCPU(agent.metrics, agentPolicy, agent)}</>
 );
 
 const MemoryCell = React.memo<{ agent: Agent; agentPolicy: AgentPolicy | undefined }>(
-  ({ agent, agentPolicy }) => <>{formatAgentMemory(agent.metrics, agentPolicy)}</>
+  ({ agent, agentPolicy }) => <>{formatAgentMemory(agent.metrics, agentPolicy, agent)}</>
 );
 
 const LastCheckinCell = React.memo<{ lastCheckin: string | undefined }>(({ lastCheckin }) =>
@@ -313,7 +313,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           content={
             <FormattedMessage
               id="xpack.fleet.agentList.cpuTooltip"
-              defaultMessage="Average CPU usage in the last 5 minutes. This includes usage from the Agent and the component it supervises. Possible value ranges from 0 to (number of available CPU cores * 100)"
+              defaultMessage="Average CPU usage by Elastic Agent and reported Agent component processes over the last 5 minutes. This is process-level Agent/component CPU usage, not total host CPU usage. Values are not normalized by CPU core count and can exceed 100% on multi-core hosts."
             />
           }
         >
@@ -432,11 +432,12 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           if (!agent.active) {
             return 'This agent is not active';
           }
-          if (
-            agent.policy_id &&
-            agentPoliciesIndexedById[agent.policy_id].is_managed &&
-            agent.type !== 'OPAMP'
-          ) {
+          // `agentPoliciesIndexedById` is keyed by base policy id; strip the version suffix so
+          // agents on a version-specific variant (`my-policy#9.2`) resolve correctly.
+          const agentPolicy = agent.policy_id
+            ? agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]
+            : undefined;
+          if (agentPolicy?.is_managed && agent.type !== 'OPAMP') {
             return 'This action is not available for agents enrolled in an externally managed agent policy';
           }
           return '';

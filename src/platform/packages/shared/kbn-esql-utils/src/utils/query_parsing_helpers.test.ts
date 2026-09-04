@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { ESQLColumn } from '@elastic/esql/types';
 import { Parser, walk } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
@@ -16,7 +16,7 @@ import {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
   prettifyQuery,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
@@ -126,32 +126,32 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('getTimeFieldFromESQLQuery', () => {
+  describe('parseTimeFieldFromESQLQuery', () => {
     it('should return undefined if there are no time params', () => {
-      expect(getTimeFieldFromESQLQuery('from a | eval b = 1')).toBeUndefined();
+      expect(parseTimeFieldFromESQLQuery('from a | eval b = 1')).toBeUndefined();
     });
 
     it('should return the time field if there is at least one time param', () => {
-      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?_tstart')).toBe(
+      expect(parseTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?_tstart')).toBe(
         'time'
       );
     });
 
     it('should return undefined if there is one named param but is not ?_tstart or ?_tend', () => {
       expect(
-        getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
+        parseTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
       ).toBeUndefined();
     });
 
     it('should return undefined if there is one named param but is used without a time field', () => {
       expect(
-        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?_tstart)')
+        parseTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?_tstart)')
       ).toBeUndefined();
     });
 
     it('should return the time field if there is at least one time param in the bucket function', () => {
       expect(
-        getTimeFieldFromESQLQuery(
+        parseTimeFieldFromESQLQuery(
           'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?_tstart, ?_tend)'
         )
       ).toBe('event.timefield');
@@ -159,7 +159,7 @@ describe('esql query helpers', () => {
 
     it('should return the time field if the column is casted', () => {
       expect(
-        getTimeFieldFromESQLQuery(
+        parseTimeFieldFromESQLQuery(
           'from a | WHERE date_nanos::date >= ?_tstart AND date_nanos::date <= ?_tend'
         )
       ).toBe('date_nanos');
@@ -167,14 +167,14 @@ describe('esql query helpers', () => {
 
     it('should return @timestamp for PromQL if there is at least one time param', () => {
       expect(
-        getTimeFieldFromESQLQuery(
+        parseTimeFieldFromESQLQuery(
           'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
         )
       ).toBe('@timestamp');
     });
 
     it('should return @timestamp for PromQL if there is no time param', () => {
-      expect(getTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBe('@timestamp');
+      expect(parseTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBe('@timestamp');
     });
   });
 
@@ -230,6 +230,42 @@ describe('esql query helpers', () => {
       );
       expect(code).toEqual(
         'FROM index1 /* cmt */\n  | KEEP field1, field2 /* cmt */\n  | SORT field1 /* cmt */'
+      );
+    });
+
+    it.each([
+      [
+        'stats and sort grouping',
+        'FROM kibana_sample_data_ecommerce | WHERE taxful_total_price > 50 AND total_quantity >= 1 AND (customer_gender == "FEMALE" OR customer_gender == "MALE") AND (`geoip.country_iso_code` == "US" OR `geoip.country_iso_code` == "GB") | STATS total_revenue = SUM((taxful_total_price)), avg_order = AVG((taxful_total_price)) BY day = DATE_TRUNC(1 day, order_date), country = (`geoip.country_iso_code`), gender = (customer_gender) | SORT (day) DESC',
+        [
+          'SUM((taxful_total_price))',
+          'AVG((taxful_total_price))',
+          'country = (`geoip.country_iso_code`)',
+          'gender = (customer_gender)',
+          'SORT (day) DESC',
+        ],
+      ],
+      [
+        'nested eval and where grouping',
+        'FROM kibana_sample_data_ecommerce | EVAL revenue_bucket = ROUND(((taxful_total_price + taxless_total_price) / 2)) | WHERE ((revenue_bucket > 50) AND (total_quantity >= 1)) | STATS count = COUNT(*) BY bucket = (revenue_bucket) | SORT (bucket) ASC',
+        [
+          'ROUND(((taxful_total_price + taxless_total_price) / 2))',
+          'WHERE ((revenue_bucket > 50) AND (total_quantity >= 1))',
+          'bucket = (revenue_bucket)',
+          'SORT (bucket) ASC',
+        ],
+      ],
+    ])('should preserve redundant expression parentheses for %s', function (_, query, fragments) {
+      const code = prettifyQuery(query);
+
+      for (const fragment of fragments) {
+        expect(code).toContain(fragment);
+      }
+    });
+
+    it('should preserve final own-line comments', function () {
+      expect(prettifyQuery('FROM logs* | WHERE KQL("term")\n// KEEP meow')).toEqual(
+        'FROM logs*\n  | WHERE KQL("term")\n  // KEEP meow'
       );
     });
 

@@ -97,3 +97,10 @@ export const SHOW_ATTACKS_ONLY_LABEL = i18n.translate(
     defaultMessage: 'Show attacks only',
   }
 );
+
+export const ANONYMIZATION_SETTINGS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.tableSection.anonymizationSettingsLabel',
+  {
+    defaultMessage: 'Anonymization settings',
+  }
+);

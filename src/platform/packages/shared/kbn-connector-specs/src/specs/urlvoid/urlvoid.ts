@@ -42,6 +42,7 @@ export const URLVoidConnector: ConnectorSpec = {
   actions: {
     scanDomain: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           domain: z.string().describe('Domain name to scan'),
@@ -64,6 +65,7 @@ export const URLVoidConnector: ConnectorSpec = {
 
     checkUrl: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           url: z.url().describe('URL to check'),
@@ -88,6 +90,7 @@ export const URLVoidConnector: ConnectorSpec = {
 
     getDomainInfo: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           domain: z.string().describe('Domain name'),
@@ -113,6 +116,7 @@ export const URLVoidConnector: ConnectorSpec = {
 
     scanDomainStats: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
@@ -130,22 +134,13 @@ export const URLVoidConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        await ctx.client.get(`https://api.urlvoid.com/api1000/${apiKey}/stats/remained`);
-        return {
-          ok: true,
-          message: 'Successfully connected to URLVoid API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
+      await ctx.client.get(`https://api.urlvoid.com/api1000/${apiKey}/stats/remained`);
+      return {};
     },
     description: i18n.translate('connectorSpecs.urlvoid.test.description', {
       defaultMessage: 'Verifies URLVoid API key',
     }),
+    enabled: true,
   },
 };

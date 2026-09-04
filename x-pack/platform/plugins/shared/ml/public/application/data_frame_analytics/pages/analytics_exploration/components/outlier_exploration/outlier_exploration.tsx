@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 
-import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { isOutlierAnalysis, FEATURE_INFLUENCE } from '@kbn/ml-data-frame-analytics-utils';
@@ -98,19 +99,15 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   if (dataViewErrorMessage !== undefined) {
     return (
       <EuiPanel grow={false} hasShadow={false} hasBorder>
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
             defaultMessage: 'An error occurred loading the index data.',
           })}
-          color="danger"
-          iconType="cross"
+          text={dataViewErrorMessage}
         >
-          <p>
-            {dataViewErrorMessage}
-            {needsDestDataView ? <DataViewPrompt destIndex={destIndex} color="text" /> : null}
-          </p>
-        </EuiCallOut>
+          {needsDestDataView ? <DataViewPrompt destIndex={destIndex} color="text" /> : null}
+        </KbnDangerCallout>
       </EuiPanel>
     );
   }
@@ -146,7 +143,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
       )}
       {showLegacyFeatureInfluenceFormatCallout && (
         <>
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             size="s"
             title={i18n.translate(
@@ -156,7 +153,6 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
                   'Color coded table cells based on feature influence are not available because the results index uses an unsupported legacy format. Please clone and rerun the job.',
               }
             )}
-            iconType="pin"
           />
           <EuiSpacer size="m" />
         </>

@@ -12,7 +12,7 @@ import type {
 } from '@kbn/actions-plugin/common/routes/connector/response';
 import type { CreateConnectorRequestBodyV1 } from '@kbn/actions-plugin/common/routes/connector/apis/create';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 
 /**
  * Retrieve list of configured Connectors
@@ -26,7 +26,7 @@ export const fetchConnectorsList = async (
       path: '/api/actions/connectors',
       method: 'GET',
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 };
 
@@ -63,6 +63,6 @@ export const createConnector = async (
       method: 'POST',
       body: createPayload,
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 };

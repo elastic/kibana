@@ -13,6 +13,7 @@ import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-p
 import apm from 'elastic-apm-node';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { syntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
 import { SyntheticsEsClient } from '../../lib';
 import type { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
 import type { StatusRuleExecutorOptions } from './types';
@@ -78,6 +79,8 @@ export const registerSyntheticsStatusCheckRule = (
         scopedClusterClient.asCurrentUser,
         {
           heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+          uiSettingsClient,
+          ...(server.isCpsEnabled ? { projectRouting: PROJECT_ROUTING_ORIGIN } : {}),
         }
       );
 

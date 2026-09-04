@@ -155,7 +155,7 @@ describe('CheckStatus', () => {
       </TestExternalProviders>
     );
 
-    expect(setLastChecked).toBeCalledWith(date);
+    expect(setLastChecked).toHaveBeenCalledWith(date);
     jest.useRealTimers();
   });
 

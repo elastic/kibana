@@ -23,11 +23,11 @@ describe(`user activity service`, () => {
     getDashboardUserActivityService(api);
     api.userActivity$.next({ type: 'view', start: 1777676707154 });
     await new Promise<void>((resolve) => setTimeout(() => resolve(), 10));
-    expect(coreServices.http.post).not.toBeCalled();
+    expect(coreServices.http.post).not.toHaveBeenCalled();
 
     api.userActivity$.next({ type: 'view', end: 1777676707204 });
     await waitFor(() => {
-      expect(coreServices.http.post).toBeCalledWith(
+      expect(coreServices.http.post).toHaveBeenCalledWith(
         expect.stringContaining('/internal/dashboard/user_activity/view/'),
         {
           keepalive: true,
@@ -48,11 +48,11 @@ describe(`user activity service`, () => {
     getDashboardUserActivityService(api);
     api.userActivity$.next({ type: 'refresh', start: 1777676707154 });
     await new Promise<void>((resolve) => setTimeout(() => resolve(), 10));
-    expect(coreServices.http.post).not.toBeCalled();
+    expect(coreServices.http.post).not.toHaveBeenCalled();
 
     api.userActivity$.next({ type: 'refresh', end: 1777676707204 });
     await waitFor(() => {
-      expect(coreServices.http.post).toBeCalledWith(
+      expect(coreServices.http.post).toHaveBeenCalledWith(
         expect.stringContaining('/internal/dashboard/user_activity/refresh/'),
         {
           method: 'POST',
@@ -82,11 +82,11 @@ describe(`user activity service`, () => {
     api.userActivity$.next({ type: 'view', start: 1777676707154 });
     api.userActivity$.next({ type: 'refresh', start: 1777676707160 });
     await new Promise<void>((resolve) => setTimeout(() => resolve(), 10));
-    expect(coreServices.http.post).not.toBeCalled();
+    expect(coreServices.http.post).not.toHaveBeenCalled();
 
     api.userActivity$.next({ type: 'refresh', end: 1777676707204 });
     await waitFor(() => {
-      expect(coreServices.http.post).nthCalledWith(
+      expect(coreServices.http.post).toHaveBeenNthCalledWith(
         1,
         expect.stringContaining('/internal/dashboard/user_activity/refresh/'),
         expect.objectContaining({
@@ -97,7 +97,7 @@ describe(`user activity service`, () => {
 
     api.userActivity$.next({ type: 'view', end: 1777676707210 });
     await waitFor(() => {
-      expect(coreServices.http.post).nthCalledWith(
+      expect(coreServices.http.post).toHaveBeenNthCalledWith(
         2,
         expect.stringContaining('/internal/dashboard/user_activity/view/'),
         expect.objectContaining({
@@ -116,9 +116,9 @@ describe(`user activity service`, () => {
 
     api.userActivity$.next({ type: 'view', end: 1777676707204 });
     await waitFor(() => {
-      expect(coreServices.http.post).toBeCalledTimes(1);
+      expect(coreServices.http.post).toHaveBeenCalledTimes(1);
     });
-    expect(coreServices.http.post).toBeCalledWith(
+    expect(coreServices.http.post).toHaveBeenCalledWith(
       expect.stringContaining('/internal/dashboard/user_activity/view/'),
       expect.objectContaining({
         body: expect.stringContaining(`\"start\":1777676707154,\"end\":1777676707204`),
@@ -133,20 +133,20 @@ describe(`user activity service`, () => {
     api.userActivity$.next({ type: 'refresh', start: 1777676707160 });
     api.userActivity$.next({ type: 'refresh', end: 1777676707204 });
     await waitFor(() => {
-      expect(coreServices.http.post).toBeCalledTimes(1);
+      expect(coreServices.http.post).toHaveBeenCalledTimes(1);
     });
     api.userActivity$.next({ type: 'refresh', end: 1777676707209 });
     await waitFor(() => {
-      expect(coreServices.http.post).toBeCalledTimes(2);
+      expect(coreServices.http.post).toHaveBeenCalledTimes(2);
     });
-    expect(coreServices.http.post).nthCalledWith(
+    expect(coreServices.http.post).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('/internal/dashboard/user_activity/refresh/'),
       expect.objectContaining({
         body: expect.stringContaining(`\"start\":1777676707154,\"end\":1777676707204`),
       })
     );
-    expect(coreServices.http.post).nthCalledWith(
+    expect(coreServices.http.post).toHaveBeenNthCalledWith(
       2,
       expect.stringContaining('/internal/dashboard/user_activity/refresh/'),
       expect.objectContaining({
@@ -159,7 +159,7 @@ describe(`user activity service`, () => {
     const { api } = buildMockDashboardApi();
     getDashboardUserActivityService(api);
     api.userActivity$.next({ type: 'view', end: 1777676707204 });
-    expect(coreServices.http.post).not.toBeCalled();
+    expect(coreServices.http.post).not.toHaveBeenCalled();
   });
 
   it('reports panel errors for refresh events', async () => {
@@ -174,9 +174,9 @@ describe(`user activity service`, () => {
     api.userActivity$.next({ type: 'refresh', start: 1777676707154 });
     api.userActivity$.next({ type: 'refresh', end: 1777676707204 });
     await waitFor(() => {
-      expect(coreServices.http.post).toBeCalled();
+      expect(coreServices.http.post).toHaveBeenCalled();
     });
-    expect(coreServices.http.post).toBeCalledWith(
+    expect(coreServices.http.post).toHaveBeenCalledWith(
       expect.stringContaining('/internal/dashboard/user_activity/refresh/'),
       expect.objectContaining({
         body: JSON.stringify({
@@ -196,5 +196,39 @@ describe(`user activity service`, () => {
         }),
       })
     );
+  });
+
+  it('reports time range when `timeRestore` is false', async () => {
+    const { api } = buildMockDashboardApi();
+    api.setSettings({ time_restore: false });
+
+    getDashboardUserActivityService(api);
+    api.userActivity$.next({ type: 'refresh', start: 1777676707154 });
+    await new Promise<void>((resolve) => setTimeout(() => resolve(), 10));
+    api.userActivity$.next({ type: 'refresh', end: 1777676707204 });
+
+    await waitFor(() => {
+      expect(coreServices.http.post).toHaveBeenCalledWith(
+        expect.stringContaining('/internal/dashboard/user_activity/refresh/'),
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            title: 'My Dashboard',
+            start: 1777676707154,
+            end: 1777676707204,
+            tags: [],
+            meta: {
+              time_range: {
+                from: 'now-15m',
+                to: 'now',
+              },
+              query: { expression: 'hi', language: 'kql' },
+              panel_count: 0,
+              errors: [],
+            },
+          }),
+        }
+      );
+    });
   });
 });

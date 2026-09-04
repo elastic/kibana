@@ -1,0 +1,106 @@
+{
+  "sha1": "c234945a8494ae4c78ccd8addb100f6bfe141cb9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "63efaa26fd4cace-bfaf39504738628",
+      "title": "Reindex service batch API reindexes a batch and reports queue state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/batch_reindexing.spec.ts",
+        "line": 67,
+        "column": 11
+      }
+    },
+    {
+      "id": "6ef58acff7c309a-5d1013f8d80c139",
+      "title": "Reindex service API creates a new index with the same documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
+        "line": 43,
+        "column": 11
+      }
+    },
+    {
+      "id": "6ef58acff7c309a-6828ed69e496209",
+      "title": "Reindex service API preserves the original index settings after reindex",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
+        "line": 79,
+        "column": 39
+      }
+    },
+    {
+      "id": "6ef58acff7c309a-9b88778801b1961",
+      "title": "Reindex service API can resume a paused reindex operation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
+        "line": 109,
+        "column": 16
+      }
+    },
+    {
+      "id": "6ef58acff7c309a-e9e93f2d8c3073a",
+      "title": "Reindex service API updates any aliases pointing at the reindexed index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
+        "line": 138,
+        "column": 21
+      }
+    },
+    {
+      "id": "6ef58acff7c309a-78f7cb641d58f79",
+      "title": "Reindex service API creates a new lookup index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
+        "line": 179,
+        "column": 45
+      }
+    },
+    {
+      "id": "6ef58acff7c309a-1883514d81fcc82",
+      "title": "Reindex service API refrains from deleting the old index when not requested",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
+        "line": 214,
+        "column": 19
+      }
+    }
+  ]
+}

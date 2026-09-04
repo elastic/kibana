@@ -20,9 +20,11 @@ import { isTransformStats } from '../../../../../../common/types/transform_stats
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import type { TransformListRow } from '../../../../common';
+import { useAppDependencies } from '../../../../app_dependencies';
 import { useEnabledFeatures } from '../../../../serverless_context';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { useGetTransformStats } from '../../../../hooks';
+import { useTransformHasLinkedProjects } from '../../../../hooks/use_transform_has_linked_projects';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import type { SectionConfig, SectionItem } from './expanded_row_column_view';
@@ -102,6 +104,8 @@ export const SourceIndexDescription: FC<{ index: string | string[] }> = ({ index
 
 export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, onAlertEdit }) => {
   const { data: fullStats, isError, isLoading } = useGetTransformStats(item.id, false, true);
+  const { cps } = useAppDependencies();
+  const { hasLinkedProjects } = useTransformHasLinkedProjects(cps?.cpsManager);
 
   let displayStats = {};
 
@@ -143,6 +147,14 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
         title: 'source_index',
         description: <SourceIndexDescription index={item.config.source.index} />,
       },
+      ...(hasLinkedProjects !== false && isDefined(item.config.source.project_routing)
+        ? [
+            {
+              title: 'project_routing',
+              description: item.config.source.project_routing,
+            },
+          ]
+        : []),
       {
         title: 'destination_index',
         description: item.config.dest.index,
@@ -161,7 +173,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
     return configs;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item?.config]);
+  }, [item?.config, hasLinkedProjects]);
 
   const checkpointingItems: SectionItem[] = [];
   if (isTransformStats(displayStats)) {

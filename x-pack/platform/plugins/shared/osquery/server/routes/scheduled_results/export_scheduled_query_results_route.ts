@@ -102,6 +102,7 @@ export const exportScheduledQueryResultsRoute = (
           },
           fileNamePrefix: `osquery-scheduled-results-${scheduleId}-${executionCount}`,
           ecsMapping,
+          ...(osqueryContext.cpsEnabled ? { matchMissingSpaceId: false } : {}),
         });
       }
     );

@@ -7,6 +7,8 @@
 
 import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { Transaction } from '@kbn/apm-types';
+import type { ErrorSampleDetailsResponse } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { maybe } from '../../../../common/utils/maybe';
 import {
@@ -44,22 +46,6 @@ import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../../transactions/get_transaction';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import type { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-
-export interface ErrorSampleDetailsResponse {
-  transaction: Transaction | undefined;
-  error: Omit<APMError, 'transaction' | 'error'> & {
-    transaction?: { id?: string; type?: string };
-    user_agent?: { name?: string; version?: string };
-    error: {
-      id: string;
-    } & Omit<APMError['error'], 'exception' | 'log'> & {
-        exception?: APMError['error']['exception'];
-        log?: APMError['error']['log'];
-      };
-  };
-}
 
 export async function getErrorSampleDetails({
   environment,

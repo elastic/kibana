@@ -6,21 +6,21 @@
  */
 
 import { hostname as osHostname } from 'os';
-import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
-import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
+import { execFileSync } from 'child_process';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test-es-server';
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { KibanaEvalsClient } from './kibana_evals_executor/client';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
 import { getEvaluationsKbnClient } from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import { getGitMetadata } from './utils/git_metadata';
+import { buildExecutionId } from './utils/build_execution_id';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
+import { createAgentBuilderClient } from './utils/agent_builder_client';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
@@ -32,28 +32,18 @@ import {
 } from './evaluators/trace_based';
 import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
 import { EvalsClient } from './utils/evals_client';
+import { EvaluatorApiClient } from './utils/evaluator_api_client';
 import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
-import { buildIngestRequest } from './utils/build_ingest_request';
+import { getSpaceIdsFromEnv } from './utils/space_ids';
+import { buildIngestRequest, toScoreModel } from './utils/build_ingest_request';
+import { buildModelFromConnector } from './utils/build_model_from_connector';
 import type {
   DefaultEvaluators,
   EvaluationDataset,
   EvaluationSpecificWorkerFixtures,
   Example,
 } from './types';
-
-function isElasticCloudEsUrl(esUrl: string): boolean {
-  try {
-    const withProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(esUrl) ? esUrl : `https://${esUrl}`;
-    const hostname = new URL(withProtocol).hostname.replace(/\.$/, '').toLowerCase();
-    return (
-      hostname === 'elastic-cloud.com' ||
-      hostname.endsWith('.elastic-cloud.com') ||
-      hostname.endsWith('elastic.cloud')
-    );
-  } catch {
-    return false;
-  }
-}
+import { isElasticCloudEsUrl } from './utils/es_url';
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -93,9 +83,20 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   evalsClient: [
     async ({ kbnClient, log }, use) => {
       const evaluationsKbnClient = getEvaluationsKbnClient({ kbnClient, log });
-      const evalsClient = new EvalsClient(evaluationsKbnClient, log);
+      const evalsClient = new EvalsClient(evaluationsKbnClient, log, {
+        spaceIds: getSpaceIdsFromEnv(),
+      });
       await evalsClient.assertPluginEnabled();
+      await evalsClient.assertSpacesExist();
       await use(evalsClient);
+    },
+    { scope: 'worker' },
+  ],
+  evaluatorClient: [
+    async ({ kbnClient, log }, use) => {
+      const evaluationsKbnClient = getEvaluationsKbnClient({ kbnClient, log });
+      const evaluatorClient = new EvaluatorApiClient(evaluationsKbnClient, log);
+      await use(evaluatorClient);
     },
     { scope: 'worker' },
   ],
@@ -177,6 +178,21 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     { scope: 'worker' },
   ],
 
+  agentBuilderClient: [
+    async ({ fetch, log, connector }, use) => {
+      const agentBuilderClient = createAgentBuilderClient({
+        fetch,
+        log,
+        connectorId: connector.id,
+      });
+
+      log.serviceLoaded?.('agentBuilderClient');
+
+      await use(agentBuilderClient);
+    },
+    { scope: 'worker' },
+  ],
+
   reportDisplayOptions: [
     async ({ evaluators }, use) => {
       const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
@@ -252,36 +268,17 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       },
       use
     ) => {
-      function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Model {
-        const inferenceConnector: InferenceConnector = {
-          type: connectorWithId.actionTypeId as InferenceConnectorType,
-          config: connectorWithId.config,
-          connectorId: connectorWithId.id,
-          name: connectorWithId.name,
-          isPreconfigured: false,
-          isInferenceEndpoint: false,
-          capabilities: {
-            contextWindowSize: 32000,
-          },
-        };
-
-        const model: Model = {
-          family: getConnectorFamily(inferenceConnector),
-          provider: getConnectorProvider(inferenceConnector),
-          id: getConnectorModel(inferenceConnector) ?? connectorWithId.name,
-        };
-
-        return model;
-      }
-
       const model = buildModelFromConnector(connector);
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
       const suiteId = process.env.EVAL_SUITE_ID;
       const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
+      const spaceIds = getSpaceIdsFromEnv();
 
-      const baseExecutionId = process.env.TEST_RUN_ID;
-      const executionId =
-        baseExecutionId && model.id ? `${baseExecutionId}::${model.id}` : baseExecutionId;
+      const executionId = buildExecutionId({
+        baseExecutionId: process.env.TEST_RUN_ID,
+        suiteId,
+        modelId: model.id,
+      });
 
       workerExecutionId.current = executionId;
 
@@ -293,13 +290,15 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         model,
         executionId,
         repetitions,
-        upsertDataset: async (dataset: EvaluationDataset) => {
-          await evalsClient.upsertDataset({
+        upsertDataset: async (dataset: EvaluationDataset) =>
+          evalsClient.upsertDataset({
             name: dataset.name,
             description: dataset.description,
+            tags: dataset.tags,
+            maturity: dataset.maturity,
+            spaceIds,
             examples: dataset.examples.map(toDatasetRouteExample),
-          });
-        },
+          }),
         getDatasetByName: (datasetName: string) => evalsClient.getDatasetByName(datasetName),
         onExperimentStart: async ({ experimentId }) => {
           workerExperimentId.current = experimentId;
@@ -315,6 +314,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               suiteId,
               executionId,
               buildkiteMetadata,
+              spaceIds,
               source: { kind: 'event', event },
               log,
             });
@@ -353,6 +353,31 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           });
         }
       }
+
+      // Publish the full composite execution ID to Buildkite metadata so the
+      // post-comparison step can retrieve it without querying the experiments API.
+      // Per-connector key (kbn-evals:execution-id:<suite>:<connector>) is the primary
+      // path for multi-model fanout builds; the per-suite key is a fallback for single
+      // runs where EVAL_PROJECT is not set.
+      if (executionId && suiteId && process.env.BUILDKITE_BUILD_ID) {
+        const connectorId = process.env.EVAL_PROJECT;
+        try {
+          if (connectorId) {
+            execFileSync(
+              'buildkite-agent',
+              ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}:${connectorId}`, executionId],
+              { stdio: 'ignore' }
+            );
+          }
+          execFileSync(
+            'buildkite-agent',
+            ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}`, executionId],
+            { stdio: 'ignore' }
+          );
+        } catch {
+          // Not running inside Buildkite; skip silently.
+        }
+      }
     },
     {
       scope: 'worker',
@@ -364,25 +389,39 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         connectorId: evaluationConnector.id,
       });
 
+      // These judges run in-process against `evaluationConnector`, so unlike the
+      // `_evaluate`-backed ones they know their model up front.
+      const evaluationModel = toScoreModel(buildModelFromConnector(evaluationConnector));
+      const getModel = () => evaluationModel;
+
       const evaluators: DefaultEvaluators = {
         criteria: (criteria) => {
-          return createCriteriaEvaluator({
-            inferenceClient: evaluatorInferenceClient,
-            criteria,
-            log,
-          });
+          return {
+            ...createCriteriaEvaluator({
+              inferenceClient: evaluatorInferenceClient,
+              criteria,
+              log,
+            }),
+            getModel,
+          };
         },
         correctnessAnalysis: () => {
-          return createCorrectnessAnalysisEvaluator({
-            inferenceClient: evaluatorInferenceClient,
-            log,
-          });
+          return {
+            ...createCorrectnessAnalysisEvaluator({
+              inferenceClient: evaluatorInferenceClient,
+              log,
+            }),
+            getModel,
+          };
         },
         groundednessAnalysis: () => {
-          return createGroundednessAnalysisEvaluator({
-            inferenceClient: evaluatorInferenceClient,
-            log,
-          });
+          return {
+            ...createGroundednessAnalysisEvaluator({
+              inferenceClient: evaluatorInferenceClient,
+              log,
+            }),
+            getModel,
+          };
         },
         traceBasedEvaluators: {
           inputTokens: createInputTokensEvaluator({

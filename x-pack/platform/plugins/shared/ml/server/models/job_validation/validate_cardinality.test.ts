@@ -180,6 +180,30 @@ describe('ML - validateCardinality', () => {
     });
   });
 
+  it('forwards datafeed project_routing to fieldCaps and still validates cardinality', async () => {
+    const fieldCaps = jest.fn().mockResolvedValue(mockFieldCaps);
+    const client = {
+      asCurrentUser: {
+        search: () => Promise.resolve(mockFareQuoteCardinality),
+        fieldCaps,
+      },
+      asInternalUser: {},
+    } as unknown as IScopedClusterClient;
+    const job = getJobConfig('partition_field_name') as unknown as CombinedJob;
+    job.datafeed_config.project_routing = '_alias:linked';
+
+    const messages = await validateCardinality(client, job);
+
+    expect(messages.map((m) => m.id)).toStrictEqual(['success_cardinality']);
+    expect(fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: ['airline'],
+        project_routing: '_alias:linked',
+      }),
+      { maxRetries: 0 }
+    );
+  });
+
   it('field not aggregatable', () => {
     const job = getJobConfig('partition_field_name');
     return validateCardinality(mlClusterClientFactory({}), job as unknown as CombinedJob).then(

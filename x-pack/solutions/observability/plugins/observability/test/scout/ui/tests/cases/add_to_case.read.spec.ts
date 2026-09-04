@@ -16,7 +16,7 @@ import { CASES_READ_WITH_ALERTS_ROLE } from '../../fixtures/roles';
 // see the add-to-case row actions.
 test.describe(
   'Observability alerts - add to case (read-only)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient }) => {
       await generateObservabilityAlerts(esClient);

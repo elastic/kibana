@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export type { ProcessedAttachment, ProcessedRoundInput } from './processed_input';
+export type {
+  ProcessedAttachment,
+  ProcessedAttachmentType,
+  ProcessedRoundInput,
+} from './processed_input';
 export type {
   ToolProvider,
   ToolProviderHasOptions,
@@ -23,7 +27,9 @@ export type {
   ScopedRunnerRunToolsParams,
   RunContext,
   RunContextStackEntry,
+  RunApprovals,
   RunToolParams,
+  RequestBoundRunToolParams,
   RunToolFn,
   Runner,
   RunToolReturn,
@@ -39,9 +45,11 @@ export { getAgentFromRunContext } from './runner';
 export type {
   ToolHandlerFn,
   ToolHandlerReturn,
+  ToolHandlerStandardReturn,
   ToolHandlerContext,
   ToolHandlerResult,
   BuiltinToolDefinition,
+  InternalBuiltinToolDefinition,
   StaticToolRegistration,
   StaticEsqlTool,
   StaticWorkflowTool,
@@ -58,7 +66,13 @@ export type {
   ToolCreateParams,
   ToolUpdateParams,
 } from './tools';
-export { getToolResultId, createErrorResult, createOtherResult, isToolResultId } from './tools';
+export {
+  getToolResultId,
+  createErrorResult,
+  createOtherResult,
+  isToolResultId,
+  isToolHandlerStandardReturn,
+} from './tools';
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
@@ -75,6 +89,7 @@ export type {
   ExperimentalFeatures,
   SubAgentExecutor,
   SubAgentExecution,
+  ConversationClient,
 } from './agents';
 export type {
   AgentBuilderHooks,
@@ -99,6 +114,7 @@ export {
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
 export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './telemetry';
+export { toHashedId } from './telemetry';
 export type {
   BuiltInPluginDefinition,
   PluginCreateRequest,
@@ -119,8 +135,11 @@ export type {
   InternalAgentDefinition,
   InternalAgentDefinitionAvailabilityHandler,
   AgentRegistry,
+  AiIndexDetail,
+  AiIndexResolver,
 } from './agents';
 export type { SkillRegistry } from './skills';
+export type { RendererTypeDefinition } from './renderers';
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -128,6 +147,7 @@ export type {
   ToolsSetup,
   ToolsStart,
   AttachmentsSetup,
+  RenderersSetup,
   SkillsSetup,
   SkillsStart,
   AgentsSetup,
@@ -136,7 +156,15 @@ export type {
   PluginsSetup,
   PluginsStart,
   RuntimeStart,
-  ReadOnlyConversationClient,
   ConversationsStart,
+  ConversationTemplatesSetup,
+  ConversationTemplatesStart,
 } from './plugin_contract';
+export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
+export type {
+  AvailabilityContext,
+  AvailabilityResult,
+  AvailabilityHandler,
+  AvailabilityConfig,
+} from './availability';

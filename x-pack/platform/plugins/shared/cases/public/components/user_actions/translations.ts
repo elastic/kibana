@@ -60,6 +60,13 @@ export const UNSAVED_DRAFT_DESCRIPTION = i18n.translate(
   }
 );
 
+export const RESUME_EDITING_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.description.resumeEditing',
+  {
+    defaultMessage: 'Resume editing',
+  }
+);
+
 export const SHOW_MORE = i18n.translate('xpack.cases.caseView.userActions.showMore', {
   defaultMessage: 'Show more',
 });
@@ -133,6 +140,12 @@ export const APPLIED_TEMPLATE_LABEL = i18n.translate(
   'xpack.cases.caseView.userActions.appliedTemplateLabel',
   { defaultMessage: 'applied template' }
 );
+
+export const APPLIED_NAMED_TEMPLATE_LABEL = (name: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.appliedNamedTemplateLabel', {
+    values: { name },
+    defaultMessage: 'applied {name} template',
+  });
 
 export const REMOVED_TEMPLATE_LABEL = i18n.translate(
   'xpack.cases.caseView.userActions.removedTemplateLabel',

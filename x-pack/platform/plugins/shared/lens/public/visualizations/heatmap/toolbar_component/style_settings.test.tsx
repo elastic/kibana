@@ -105,8 +105,8 @@ describe('heatmap style settings', () => {
 
     const orientationGroup = screen.getByRole('group', { name: 'Orientation' });
     await clickButtonByName(/vertical/i, orientationGroup);
-    expect(defaultProps.setState).toBeCalledTimes(1);
-    expect(defaultProps.setState).toBeCalledWith({
+    expect(defaultProps.setState).toHaveBeenCalledTimes(1);
+    expect(defaultProps.setState).toHaveBeenCalledWith({
       ...defaultProps.state,
       gridConfig: { ...defaultProps.state.gridConfig, xAxisLabelRotation: -90 },
     });

@@ -4,17 +4,57 @@ env:
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
+    key: pre_build
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
+      diskSizeGb: 130
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
-  - wait
+
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
+    agents:
+      provider: k8s
+      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
+      imageUID: 1000
+    timeout_in_minutes: 15
+    env:
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      FTR_CONFIGS_DEPS: 'build'
+      FTR_TEST_CHANNELS: ci-on-commit
+    plugins:
+      - sparse-checkout#v1.6.0:
+          no_cone: true
+          paths:
+            - '/.buildkite/'
+            - '/.node-version'
+            - '/package.json'
+            - '/tsconfig.base.json'
+            - '/versions.json'
+            - '**/jest.config.js'
+            - '**/jest.integration.config.js'
+            - '**/*.test.js'
+            - '**/*.test.mjs'
+            - '**/*.test.ts'
+            - '**/*.test.tsx'
+          cleanup_sparse_state: true
+          post_checkout:
+            unshallow: true
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - wait: ~
+    depends_on: pre_build
 
   - command: .buildkite/scripts/steps/store_cache.sh
     label: Store Cache for build
@@ -28,18 +68,19 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highcpu-8
-      diskSizeGb: 95
+      diskSizeGb: 130
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
-      zones: us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 200
+      diskSizeGb: 50
+      buildDirectory: /dev/shm/bk
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d
     key: build
     timeout_in_minutes: 60
     retry:
@@ -56,7 +97,7 @@ steps:
       machineType: n2d-standard-8
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: quick_checks
     timeout_in_minutes: 60
     retry:
@@ -73,7 +114,7 @@ steps:
       machineType: n2d-standard-2
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: checks
     timeout_in_minutes: 60
     retry:
@@ -91,7 +132,7 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -109,7 +150,7 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: linting_with_types
     timeout_in_minutes: 60
     retry:
@@ -127,7 +168,7 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: linting_with_oxlint
     timeout_in_minutes: 60
     retry:
@@ -141,11 +182,11 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c4-standard-8-lssd
+      machineType: n4-highcpu-32
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: check_types
     timeout_in_minutes: 60
     env:
@@ -164,7 +205,7 @@ steps:
       machineType: n2d-highmem-4
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: check_oas_snapshot
     timeout_in_minutes: 60
     retry:
@@ -197,7 +238,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 105
+      diskSizeGb: 130
     timeout_in_minutes: 15
     retry:
       automatic:
@@ -213,30 +254,11 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 105
+      diskSizeGb: 130
     timeout_in_minutes: 10
     depends_on:
       - build
       - report_package_metrics
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    label: 'Pick Test Group Run Order'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      diskSizeGb: 105
-    timeout_in_minutes: 15
-    env:
-      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
-      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
-      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      FTR_CONFIGS_DEPS: 'build'
     retry:
       automatic:
         - exit_status: '*'
@@ -249,12 +271,13 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2d-standard-8
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: build_scout_tests
     timeout_in_minutes: 20
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
       SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_CHANNELS: ci-on-commit
       SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS: 300
       SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES: 5
       SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES: 20
@@ -263,18 +286,17 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - label: 'Upload on-merge fanout'
-    command: buildkite-agent pipeline upload .buildkite/pipelines/on_merge_fanout.yml
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-    timeout_in_minutes: 10
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+  - label: 'Trigger Security Solution on-merge tests'
+    trigger: kibana-security-solution-on-merge
+    async: false
+    soft_fail: true
+    depends_on:
+      - build
+    build:
+      branch: '${BUILDKITE_BRANCH}'
+      commit: '${BUILDKITE_COMMIT}'
+      env:
+        KIBANA_BUILD_ID: '${BUILDKITE_BUILD_ID}'
 
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
@@ -286,7 +308,7 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: storybooks
     depends_on:
       - build
@@ -305,6 +327,7 @@ steps:
       machineType: n2-standard-2
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -323,6 +346,7 @@ steps:
       machineType: n2-standard-4
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 130
     artifact_paths: 'target/plugin_so_types_snapshot.json'
     depends_on:
       - build
@@ -343,6 +367,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
+      diskSizeGb: 130
 
   - wait
 

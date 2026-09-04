@@ -12,16 +12,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiText,
-  EuiButton,
   EuiSpacer,
   EuiIcon,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCode,
   EuiLink,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import type { DocLinksStart } from '@kbn/core/public';
@@ -131,7 +130,7 @@ const i18nTexts = {
   migrationFailedBody: (features: SystemIndicesMigrationFeature[]) => {
     const failureCauses = getFailureCauses(features);
     return (
-      <EuiText size="s">
+      <>
         <FormattedMessage
           id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBodyFirstParagraph"
           defaultMessage="Errors occurred while migrating system indices:"
@@ -143,7 +142,7 @@ const i18nTexts = {
           defaultMessage="Check migration details for more information."
           tagName="p"
         />
-      </EuiText>
+      </>
     );
   },
 };
@@ -160,25 +159,24 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
 
   if (migrationStatus.error) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount={false}
         title={i18nTexts.loadingError}
-        color="danger"
-        iconType="warning"
         data-test-subj="systemIndicesStatusErrorCallout"
-      >
-        <p>
-          {migrationStatus.error.statusCode} - {migrationStatus.error.message as string}
-        </p>
-        <EuiButton
-          color="danger"
-          isLoading={migrationStatus.isLoading}
-          onClick={migrationStatus.resendRequest}
-          data-test-subj="systemIndicesStatusRetryButton"
-        >
-          {i18nTexts.retryButtonLabel}
-        </EuiButton>
-      </EuiCallOut>
+        text={
+          <p>
+            {migrationStatus.error.statusCode} - {migrationStatus.error.message as string}
+          </p>
+        }
+        actionProps={{
+          primary: {
+            children: i18nTexts.retryButtonLabel,
+            onClick: migrationStatus.resendRequest,
+            'data-test-subj': 'systemIndicesStatusRetryButton',
+            isLoading: migrationStatus.isLoading,
+          },
+        }}
+      />
     );
   }
 
@@ -204,11 +202,9 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
     <>
       {startMigrationStatus.statusType === 'error' && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             size="s"
-            color="danger"
-            iconType="warning"
             title={`${startMigrationStatus.error!.statusCode} - ${
               startMigrationStatus.error!.message
             }`}
@@ -220,16 +216,13 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
 
       {migrationStatus.data?.migration_status === 'ERROR' && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount={false}
             size="s"
-            color="danger"
-            iconType="warning"
             title={i18nTexts.migrationFailedTitle}
             data-test-subj="migrationFailedCallout"
-          >
-            {i18nTexts.migrationFailedBody(migrationStatus.data?.features)}
-          </EuiCallOut>
+            text={i18nTexts.migrationFailedBody(migrationStatus.data?.features)}
+          />
           <EuiSpacer size="m" />
         </>
       )}

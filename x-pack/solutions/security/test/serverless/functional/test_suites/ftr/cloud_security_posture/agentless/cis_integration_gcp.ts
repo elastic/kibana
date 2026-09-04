@@ -30,18 +30,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const mockAgentlessApiService = setupMockServer();
       mockApiServer = mockAgentlessApiService.listen(8089);
 
+      // Ensure CSP is installed — prior suites in this FTR config (e.g. cis_integration_aws)
+      // delete the package in their after hook, so we can't rely on the server-args preinstall.
+      await supertest
+        .post('/api/fleet/epm/packages/cloud_security_posture')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/fleet/epm/packages/cloud_security_posture`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
-        .expect(200);
-      mockApiServer.close();
+      try {
+        await supertest
+          .delete(`/api/fleet/epm/packages/cloud_security_posture`)
+          .set('kbn-xsrf', 'xxxx')
+          .query({ force: true })
+          .expect(200);
+      } finally {
+        await new Promise<void>((resolve) => mockApiServer.close(() => resolve()));
+      }
     });
 
     describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {
@@ -84,8 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // credentials_json field component changed, getFieldAttributeValue returns [object Object]
-    describe.skip('Serverless - Agentless CIS_GCP edit flow', () => {
+    describe('Serverless - Agentless CIS_GCP edit flow', () => {
       it(`user should save and edit agentless integration policy`, async () => {
         const newCredentialsJSON = 'newJson';
         await cisIntegration.createAgentlessIntegration({
@@ -96,19 +105,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           newCredentialsJSON
         );
 
-        // assert the form values are saved
+        // Project ID is frozen on edit. Credentials JSON is a secret, so after save the
+        // plaintext is hidden and a Replace button is shown instead of the field value.
         expect(
           await cisIntegration.getFieldAttributeValue(
             GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID,
             'disabled'
           )
         ).to.be('true');
-        expect(
-          await cisIntegration.getFieldAttributeValue(
-            GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON,
-            'value'
-          )
-        ).to.be(newCredentialsJSON);
+        expect(await cisIntegration.showCredentialJsonSecretPanel()).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('credentials-json')).to.not.be(null);
+        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
       });
     });
   });

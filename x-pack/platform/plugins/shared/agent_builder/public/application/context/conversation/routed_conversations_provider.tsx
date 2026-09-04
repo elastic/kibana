@@ -45,7 +45,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   const agentIdFromPath = agentIdParam;
 
   const location = useLocation<LocationState>();
-  const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
   const initialMessage = location.state?.initialMessage;
   // Defaults to true so existing deep-link auto-send keeps working; the abort bounce-back
   // passes false to prefill the input without sending.
@@ -70,13 +69,27 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     ({ isCurrentConversation }: { isCurrentConversation: boolean }) => {
       if (isCurrentConversation) {
         // If deleting current conversation, navigate to root (redirects to last used agent)
-        navigateToAgentBuilderUrl(appPaths.root, undefined, { shouldStickToBottom: true });
+        navigateToAgentBuilderUrl(appPaths.root);
       }
     },
     [navigateToAgentBuilderUrl]
   );
 
-  const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(undefined);
+  const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(
+    location.state?.attachments
+  );
+
+  // Clear attachments when navigating to a different conversation, but not on initial mount.
+  // Skipping initial mount prevents the parent effect from racing with child effects (e.g.
+  // stale-attachments checks in conversation.tsx) that set attachments during the same render.
+  const hasMountedRef = useRef(false);
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    setAttachments(undefined);
+  }, [conversationId]);
 
   const conversationActions = useConversationActions({
     conversationId,
@@ -106,7 +119,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   const contextValue = useMemo(
     () => ({
       conversationId,
-      shouldStickToBottom,
       isEmbeddedContext: false,
       conversationActions,
       initialMessage,
@@ -119,7 +131,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     }),
     [
       conversationId,
-      shouldStickToBottom,
       conversationActions,
       initialMessage,
       autoSendInitialMessage,

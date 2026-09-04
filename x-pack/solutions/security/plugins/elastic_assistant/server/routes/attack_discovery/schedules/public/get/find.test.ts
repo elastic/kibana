@@ -16,7 +16,7 @@ import {
   getAttackDiscoveryScheduleMock,
   getFindAttackDiscoverySchedulesMock,
 } from '../../../../../__mocks__/attack_discovery_schedules.mock';
-import type { AttackDiscoveryScheduleDataClient } from '../../../../../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 import { performChecks } from '../../../../helpers';
 
 jest.mock('../../../../helpers', () => ({

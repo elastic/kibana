@@ -113,6 +113,6 @@ describe('createFieldUpgradeSpecifier', () => {
           fields: { machine_learning_job_id: { pick_version: PickVersionValuesEnum.CURRENT } },
         },
       })
-    ).toThrowError(`machine_learning_job_id is not a valid upgradeable field for type 'eql'`);
+    ).toThrow(`machine_learning_job_id is not a valid upgradeable field for type 'eql'`);
   });
 });

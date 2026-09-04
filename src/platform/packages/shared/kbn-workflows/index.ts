@@ -15,12 +15,24 @@ export { getElasticsearchConnectors } from './spec/elasticsearch';
 export { getKibanaConnectors } from './spec/kibana';
 export { resolveKibanaStepTypeAlias } from './spec/kibana/aliases';
 export * from './spec/schema';
-export { builtInStepDefinitions, getBuiltInStepDefinition } from './spec/builtin_step_definitions';
+export {
+  builtInStepDefinitions,
+  getBuiltInStepDefinition,
+  hitlAuditOutputFields,
+} from './spec/builtin_step_definitions';
 export type { BuiltInStepDefinition } from './spec/builtin_step_definitions';
 export {
   builtInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
+export {
+  builtinWorkflowInputDefinitions,
+  builtinWorkflowInputDefinitionRefValuesForZod,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
+} from './spec/builtin_workflow_input_definitions';
+export type { JsonSchema } from './spec/schema/common/json_model_shape_schema';
 export type {
   BaseTriggerDefinition,
   TriggerDocumentation,
@@ -39,6 +51,7 @@ export * from './spec/deprecated_step_metadata';
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
+export * from './common/validate_step_names';
 export * from './common/workflows_events';
 export type * from './common/event_trigger_replay';
 export * from './common/well_known_trigger_sources';
@@ -46,7 +59,25 @@ export type { WorkflowExecutionEventDispatchMetadata } from './common/workflow_e
 export * from './common/privileges';
 export * from './common/utils';
 export * from './common/step_types';
+export * from './common/hitl';
+export * from './common/wait_for_approval';
+export {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+  getManagedWorkflowVisibilityContexts,
+  MANAGED_WORKFLOW_SELECTORS,
+  MANAGED_WORKFLOW_SOLUTIONS,
+} from './managed/types';
+export type {
+  ManagedWorkflowSelector,
+  ManagedWorkflowSelectorVisibilityContext,
+  ManagedWorkflowSolution,
+  ManagedWorkflowSolutionVisibilityContext,
+  ManagedWorkflowVisibility,
+  ManagedWorkflowVisibilityContext,
+} from './managed/types';
 export * from './definition';
+export * from './graph_layout';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
 export * from './server/constants';
@@ -60,13 +91,30 @@ export {
   SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
   TriggerSchema,
+  getCustomTriggerZodSchema,
   getTriggerSchema,
+  toCustomTriggerSchemaConfigs,
   TriggerTypes,
   WORKFLOW_EVENTS_VALUES_SET,
   WorkflowEventsSchema,
+  type CustomTrigger,
+  type CustomTriggerOn,
+  type CustomTriggerSchemaConfig,
+  type CustomTriggerSchemaInput,
   type TriggerType,
   type WorkflowEventsValue,
 } from './spec/schema/triggers';
 
 // Export specific types that are commonly used
 export type { BuiltInStepType } from './spec/schema';
+
+export {
+  isWorkflowValidationRuleId,
+  WORKFLOW_VALIDATION_RULE_IDS,
+  WORKFLOW_VALIDATION_RULES,
+} from './validation/rules';
+export type {
+  WorkflowValidationRuleId,
+  WorkflowValidationRuleOwner,
+  WorkflowValidationRules,
+} from './validation/rules';

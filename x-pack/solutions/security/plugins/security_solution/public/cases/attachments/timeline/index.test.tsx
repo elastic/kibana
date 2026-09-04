@@ -27,6 +27,10 @@ jest.mock('./timeline_link', () => ({
   ),
 }));
 
+jest.mock('./case_view_timelines', () => ({
+  CaseViewTimelines: () => <div data-test-subj="case-view-timelines-mock" />,
+}));
+
 const baseProps = {
   savedObjectId: 'saved-object-id-1',
   caseData: { id: 'case-1', title: 'Case 1' },
@@ -38,15 +42,15 @@ describe('Timeline attachment', () => {
   it('registers under the security.timeline id with the timeline icon', () => {
     const attachmentType = getTimelineAttachment();
     expect(attachmentType.id).toBe(SECURITY_TIMELINE_ATTACHMENT_TYPE);
-    expect(attachmentType.icon).toBe('timeline');
-    expect(attachmentType.displayName).toBe(TIMELINE_DISPLAY_NAME);
+    expect(attachmentType.getIcon(baseProps)).toBe('timeline');
+    expect(attachmentType.getLabel()).toBe(TIMELINE_DISPLAY_NAME);
   });
 
   it('renders the timeline link with title and id', async () => {
     const attachmentType = getTimelineAttachment();
-    const attachmentViewObject = attachmentType.getAttachmentViewObject(baseProps);
+    const creationActivity = attachmentType.getCreationActivity(baseProps);
 
-    render(<>{attachmentViewObject.event}</>);
+    render(<>{creationActivity.event}</>);
 
     expect(await screen.findByTestId('timeline-link-mock-saved-object-id-1')).toHaveTextContent(
       'My investigation'
@@ -55,8 +59,24 @@ describe('Timeline attachment', () => {
 
   it('returns the removal label', () => {
     const attachmentType = getTimelineAttachment();
-    expect(attachmentType.getAttachmentRemovalObject?.(baseProps)).toEqual({
+    expect(attachmentType.getRemovalActivity?.(baseProps)).toEqual({
       event: REMOVED_TIMELINE_LABEL,
     });
+  });
+
+  it('exposes the case view timelines tab via getAttachmentList', async () => {
+    const attachmentType = getTimelineAttachment();
+    const attachmentList = attachmentType.getAttachmentList?.();
+    expect(attachmentList?.children).toBeDefined();
+
+    const Tab = attachmentList!.children!;
+    render(
+      <Tab
+        caseData={{ id: 'case-1', title: 'Case 1', comments: [] } as never}
+        searchTerm={undefined}
+      />
+    );
+
+    expect(await screen.findByTestId('case-view-timelines-mock')).toBeInTheDocument();
   });
 });

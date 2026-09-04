@@ -22,6 +22,8 @@ import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { isConnectorAuthorizationError } from '@kbn/connector-specs';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -342,6 +344,7 @@ export class ActionExecutor {
         secrets: inMemoryAction.secrets,
         actionId,
         isInMemory: true,
+        connectorVersion: IN_MEMORY_CONNECTOR_REVISION,
         rawAction: { ...inMemoryAction, isMissingSecrets: false },
       };
     }
@@ -373,6 +376,7 @@ export class ActionExecutor {
         config,
         secrets,
         actionId,
+        connectorVersion: rawAction.version,
         rawAction: rawAction.attributes,
       };
     } catch (e) {
@@ -423,7 +427,8 @@ export class ActionExecutor {
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
-        const { actionTypeId, name, config, secrets, rawAction } = actionInfo;
+        const { actionTypeId, name, config, secrets, rawAction, connectorVersion, isInMemory } =
+          actionInfo;
         const authMode = rawAction.authMode;
         const profileUid = providedProfileUid || currentUser?.profile_uid;
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
@@ -474,28 +479,6 @@ export class ActionExecutor {
           );
         }
 
-        let validatedParams: Record<string, unknown>;
-        let validatedConfig;
-        let validatedSecrets;
-        try {
-          const validationResult = validateAction(
-            {
-              actionId,
-              actionType,
-              params,
-              config,
-              secrets,
-              taskInfo,
-            },
-            { configurationUtilities }
-          );
-          validatedParams = validationResult.validatedParams;
-          validatedConfig = validationResult.validatedConfig;
-          validatedSecrets = validationResult.validatedSecrets;
-        } catch (err) {
-          return err.result;
-        }
-
         if (span) {
           span.name = `${executeLabel} ${actionTypeId}`;
           addSpanLabels({
@@ -504,7 +487,14 @@ export class ActionExecutor {
         }
 
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
-        logger.debug(`executing action ${actionLabel}`);
+        logger.debug(`executing action ${actionLabel}`, {
+          labels: {
+            actionLabel,
+            actionTypeId,
+            actionId,
+            spaceId,
+          },
+        });
 
         const task = taskInfo
           ? {
@@ -552,6 +542,43 @@ export class ActionExecutor {
 
         eventLogger.logEvent(startEvent);
 
+        let validatedParams: Record<string, unknown>;
+        let validatedConfig;
+        let validatedSecrets;
+        try {
+          const validationResult = validateAction(
+            {
+              actionId,
+              actionType,
+              params,
+              config,
+              secrets,
+              taskInfo,
+            },
+            { configurationUtilities }
+          );
+          validatedParams = validationResult.validatedParams;
+          validatedConfig = validationResult.validatedConfig;
+          validatedSecrets = validationResult.validatedSecrets;
+        } catch (err) {
+          eventLogger.stopTiming(event);
+          span?.setOutcome('failure');
+          event.event!.outcome = 'failure';
+          event.message = `action execution failure: ${actionLabel}`;
+          event.error = { message: err.message };
+          logger.warn(`action execution failure: ${actionLabel}: ${err.message}`, {
+            labels: {
+              actionTypeId,
+              actionLabel,
+              actionId,
+              spaceId,
+              name,
+            },
+          });
+          eventLogger.logEvent(event);
+          return err.result;
+        }
+
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
           if (checkCanExecuteFn) {
@@ -575,6 +602,11 @@ export class ActionExecutor {
             signal,
             authMode,
             profileUid,
+            ...(actionType.source === ACTION_TYPE_SOURCES.spec
+              ? {
+                  connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
+                }
+              : {}),
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -656,11 +688,32 @@ export class ActionExecutor {
             event.error.message = actionErrorToMessage(result);
             if (result.error) {
               logger.error(result.error, {
-                tags: [actionTypeId, actionId, 'action-run-failed', `${result.errorSource}-error`],
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                  ruleId: validatedParams.ruleId,
+                },
+                tags: ['action-run-failed', `${result.errorSource}-error`],
                 error: { stack_trace: result.error.stack },
               });
             }
-            logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
+            logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`, {
+              labels: {
+                actionLabel,
+                actionTypeId,
+                actionId,
+                spaceId,
+                name,
+                alertId: validatedParams.alertId,
+                alertExecutionId: validatedParams.alertExecutionId,
+                ruleId: validatedParams.ruleId,
+              },
+            });
           } else {
             span?.setOutcome('failure');
             event.event!.outcome = 'failure';
@@ -668,7 +721,19 @@ export class ActionExecutor {
             event.error = event.error || {};
             event.error.message = 'action execution returned unexpected result';
             logger.warn(
-              `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
+              `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`,
+              {
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                  ruleId: validatedParams.ruleId,
+                },
+              }
             );
           }
 
@@ -709,8 +774,29 @@ export class ActionExecutor {
               }
             })
             .catch((err) => {
-              logger.error('Failed to calculate tokens from streaming response');
-              logger.error(err);
+              logger.error('Failed to calculate tokens from streaming response', {
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                },
+              });
+              logger.error(err, {
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                  ruleId: validatedParams.ruleId,
+                },
+              });
             })
             .finally(() => {
               completeEventLogging();
@@ -734,6 +820,7 @@ export interface ActionInfo {
   secrets: ActionTypeSecrets;
   actionId: string;
   isInMemory?: boolean;
+  connectorVersion?: string;
   rawAction: RawAction;
 }
 

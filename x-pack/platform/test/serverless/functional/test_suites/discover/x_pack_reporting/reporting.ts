@@ -5,9 +5,17 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): x-pack/platform/test/functional/apps/discover/group1/reporting.ts
 import expect from '@kbn/expect';
 import moment from 'moment';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+/**
+ * Migration recommendation: MIXED. Subset of
+ * x-pack/platform/test/functional/apps/discover/group1/reporting.ts.
+ * See individual tests. Merge into one Scout spec with deployment tags rather than keeping a
+ * serverless mirror.
+ */
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingAPI = getService('reporting');
@@ -97,6 +105,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.exports.closeExportFlyout();
       });
 
+      /**
+       * Migration recommendation: DELETE. CSV share-menu availability is covered in
+       * src/platform/plugins/shared/discover/public/application/main/components/top_nav/use_top_nav_links.test.tsx.
+       */
       it('is available if new', async () => {
         await PageObjects.reporting.openExportPopover();
         await retry.waitFor('the popover to be opened', async () => {
@@ -105,6 +117,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
       });
 
+      /**
+       * Migration recommendation: DELETE. Same as above — saving a session does not change CSV
+       * availability, and both tests assert the same popover item.
+       */
       it('becomes available when saved', async () => {
         await PageObjects.discover.saveSearch(
           'my search - expectEnabledGenerateReportButton',
@@ -120,6 +136,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Generate CSV: new search', () => {
+      /**
+       * Migration recommendation: MIXED. CSV contents belong in reporting API tests. Keep a short
+       * Scout smoke that the Discover export flyout produces a downloadable CSV.
+       */
       it('generates a report from a new search with data: default', async () => {
         await PageObjects.discover.clickNewSearchButton({ isInOverflowMenu: true });
         await PageObjects.discover.waitUntilTabIsLoaded();
@@ -140,6 +160,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile).toMatch();
       });
 
+      /**
+       * Migration recommendation: DELETE. Empty CSV is covered in
+       * src/platform/packages/private/kbn-generate-csv/src/generate_csv.test.ts.
+       */
       it('generates a report with no data', async () => {
         await PageObjects.reporting.setTimepickerInEcommerceNoDataRange();
         await PageObjects.discover.waitUntilTabIsLoaded();
@@ -152,6 +176,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(res.text).to.be(`\n`);
       });
 
+      /**
+       * Migration recommendation: DELETE. Large/truncated exports are covered by generate_csv_discover.ts.
+       * Exact file length is data-correctness, not UI.
+       */
       it('generates a large export', async () => {
         await PageObjects.discover.clickNewSearchButton({ isInOverflowMenu: true });
         await PageObjects.discover.waitUntilTabIsLoaded();
@@ -270,6 +298,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: DELETE. Formatting a column that is missing on some hits belongs
+       * in src/platform/packages/private/kbn-generate-csv/src/generate_csv.test.ts, not a browser
+       * test.
+       */
       it(`handles field formatting for a field that doesn't exist initially`, async () => {
         const res = await getReport();
         expect(res.status).to.equal(200);
@@ -308,6 +341,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         checkForReportingToasts = true;
       });
 
+      /**
+       * Migration recommendation: MIXED. Saved-search CSV is covered by csv_v2.ts. Keep one Scout
+       * smoke for exporting a saved Discover session; drop the snapshot.
+       */
       it('generates a report with data', async () => {
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
         await PageObjects.discover.waitUntilTabIsLoaded();
@@ -319,6 +356,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile).toMatch();
       });
 
+      /**
+       * Migration recommendation: MIXED. Filtered CSV contents are covered by generate_csv_discover.ts.
+       * Keep a short Scout smoke that Discover filters flow into the export.
+       */
       it('generates a report with filtered data', async () => {
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
         await PageObjects.discover.waitUntilTabIsLoaded();

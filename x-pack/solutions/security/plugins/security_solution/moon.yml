@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/timelines-plugin'
   - '@kbn/es-query'
+  - '@kbn/es-errors'
   - '@kbn/as-code-shared-transforms'
   - '@kbn/utility-types'
   - '@kbn/securitysolution-list-utils'
@@ -84,6 +85,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/datemath'
   - '@kbn/ui-theme'
+  - '@kbn/ui-callout'
   - '@kbn/securitysolution-list-api'
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'
@@ -91,6 +93,7 @@ dependsOn:
   - '@kbn/securitysolution-exception-list-components'
   - '@kbn/securitysolution-exceptions-common'
   - '@kbn/rison'
+  - '@kbn/announcement-banner'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/securitysolution-hook-utils'
   - '@kbn/test-jest-helpers'
@@ -113,6 +116,7 @@ dependsOn:
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/apm-utils'
+  - '@kbn/tracing-utils'
   - '@kbn/core-saved-objects-server'
   - '@kbn/es-types'
   - '@kbn/utils'
@@ -209,8 +213,6 @@ dependsOn:
   - '@kbn/siem-readiness'
   - '@kbn/presentation-publishing'
   - '@kbn/entity-store'
-  - '@kbn/entityManager-plugin'
-  - '@kbn/entities-schema'
   - '@kbn/inference-plugin'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/core-security-server-mocks'
@@ -218,6 +220,8 @@ dependsOn:
   - '@kbn/data-stream-adapter'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-user-profile-common'
+  - '@kbn/core-user-profile-server'
+  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/langchain'
   - '@kbn/discover-shared-plugin'
   - '@kbn/react-hooks'
@@ -255,7 +259,6 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/core-metrics-server'
   - '@kbn/core-elasticsearch-server-utils'
-  - '@kbn/rrule'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
   - '@kbn/object-utils'
@@ -276,7 +279,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
   - '@kbn/kql'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/core-security-common'
   - '@kbn/entity-store'
   - '@kbn/as-code-filters-transforms'
@@ -285,13 +288,12 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/workflows-ui'
   - '@kbn/workflows'
-  - '@kbn/deeplinks-workflows'
-  - '@kbn/core-rendering-browser'
   - '@kbn/controls-constants'
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'
   - '@kbn/workflows-extensions'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/shared-ux-markdown'
   - '@kbn/controls-schemas'
   - '@kbn/search-inference-endpoints'
   - '@kbn/evals-plugin'
@@ -299,6 +301,13 @@ dependsOn:
   - '@kbn/core-overlays-browser'
   - '@kbn/workflows-management-plugin'
   - '@kbn/core-application-browser-mocks'
+  - '@kbn/date-range-picker'
+  - '@kbn/esql-types'
+  - '@kbn/discoveries-schemas'
+  - '@kbn/chart-icons'
+  - '@kbn/core-mount-utils-browser'
+  - '@kbn/ui-callout'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod
@@ -311,6 +320,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - test/scout/**/*
+    - test/scout_ai_value_report/**/*
     - test/scout_cps_local/**/*
     - test/scout_security_attacks_alignment/**/*
     - common/**/*.json

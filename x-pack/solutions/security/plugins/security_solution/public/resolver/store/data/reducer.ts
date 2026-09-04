@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Draft } from 'immer';
+import type { Draft } from 'immer-v9';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import type { DataState } from '../../types';
 import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
@@ -39,13 +39,22 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
       appReceivedNewExternalProperties,
       (
         draft,
-        { id, resolverComponentInstanceID, locationSearch, databaseDocumentID, indices, filters }
+        {
+          id,
+          resolverComponentInstanceID,
+          locationSearch,
+          databaseDocumentID,
+          databaseDocumentTimestamp,
+          indices,
+          filters,
+        }
       ) => {
         const state: Draft<DataState> = draft[id]?.data;
         state.tree = {
           ...state.tree,
           currentParameters: {
             databaseDocumentID,
+            databaseDocumentTimestamp,
             indices,
             filters,
             agentId: state.tree?.lastResponse?.parameters?.agentId || '',

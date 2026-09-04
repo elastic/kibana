@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -53,8 +53,8 @@ const TEST_SUBJ = {
   flyout: 'actionPolicyDetailsFlyout',
   title: 'actionPolicyDetailsFlyoutTitle',
   closeButton: 'detailsFlyoutCloseButton',
-  editButton: 'detailsFlyoutEditButton',
-  actionsMenuButton: 'detailsFlyoutActionsMenuButton',
+  closeIcon: 'detailsFlyoutCloseIcon',
+  takeActionButton: 'detailsFlyoutTakeActionButton',
 } as const;
 
 const futureIso = (): string => new Date(Date.now() + 1000 * 60 * 60).toISOString();
@@ -64,24 +64,22 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   version: 'v1',
   name: 'Critical alerts policy',
   description: 'Routes critical alerts to the oncall workflow',
-  type: 'global',
-  ruleId: null,
   enabled: true,
   destinations: [
     { type: 'workflow', id: 'wf-1' },
     { type: 'workflow', id: 'wf-2' },
   ],
   matcher: 'data.severity : "critical"',
-  groupBy: ['host.name', 'service.name'],
+  group_by: ['host.name', 'service.name'],
   tags: ['production', 'oncall'],
-  groupingMode: 'per_field',
+  grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozedUntil: null,
-  auth: { owner: 'elastic', createdByUser: true },
-  createdBy: ELASTIC_UID,
-  createdAt: '2026-03-01T10:00:00.000Z',
-  updatedBy: ELASTIC_UID,
-  updatedAt: '2026-03-02T11:00:00.000Z',
+  snoozed_until: null,
+  auth: { owner: 'elastic', created_by_user: true },
+  created_by: ELASTIC_UID,
+  created_at: '2026-03-01T10:00:00.000Z',
+  updated_by: ELASTIC_UID,
+  updated_at: '2026-03-02T11:00:00.000Z',
   ...overrides,
 });
 
@@ -94,6 +92,7 @@ const createQueryClient = () =>
 
 interface RenderProps {
   policy?: ActionPolicyResponse;
+  canWrite?: boolean;
   onClose?: jest.Mock;
   onEdit?: jest.Mock;
   onClone?: jest.Mock;
@@ -122,7 +121,11 @@ const renderFlyout = (props: RenderProps = {}) => {
   render(
     <QueryClientProvider client={createQueryClient()}>
       <I18nProvider>
-        <ActionPolicyDetailsFlyout policy={policy} {...handlers} />
+        <ActionPolicyDetailsFlyout
+          policy={policy}
+          canWrite={props.canWrite ?? true}
+          {...handlers}
+        />
       </I18nProvider>
     </QueryClientProvider>
   );
@@ -153,32 +156,38 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('Disabled')).toBeInTheDocument();
     });
 
-    it('renders a snoozed-until chip when the policy is actively snoozed', () => {
-      renderFlyout({ policy: createPolicy({ snoozedUntil: futureIso() }) });
+    it('renders a snoozed-until chip when the policy is actively snoozed (regardless of canWrite)', () => {
+      renderFlyout({ policy: createPolicy({ snoozed_until: futureIso() }) });
+      expect(screen.getByText(/Snoozed until/i)).toBeInTheDocument();
+    });
 
+    it('renders a snoozed-until chip for readers when the policy is actively snoozed', () => {
+      renderFlyout({ canWrite: false, policy: createPolicy({ snoozed_until: futureIso() }) });
       expect(screen.getByText(/Snoozed until/i)).toBeInTheDocument();
     });
 
     it('does not render a snoozed-until chip when snoozedUntil is null or in the past', () => {
-      renderFlyout({ policy: createPolicy({ snoozedUntil: null }) });
+      renderFlyout({ canWrite: false, policy: createPolicy({ snoozed_until: null }) });
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
     });
 
-    it('renders a "Global" badge for global policies', () => {
-      renderFlyout({ policy: createPolicy({ type: 'global', ruleId: null }) });
+    it('does not render the snooze bell or the header kebab menu', () => {
+      renderFlyout();
 
-      expect(screen.getByText('Global')).toBeInTheDocument();
-      expect(screen.queryByText('Single rule')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('actionPolicySnoozeButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('actionPolicyUnsnoozeButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('detailsFlyoutActionsMenuButton')).not.toBeInTheDocument();
     });
 
-    it('renders a "Single rule" badge and a link to the rule details for single_rule policies', () => {
-      renderFlyout({
-        policy: createPolicy({ type: 'single_rule', ruleId: 'rule-42' }),
-      });
+    it('keeps the close icon in the header', () => {
+      renderFlyout();
+      expect(screen.getByTestId(TEST_SUBJ.closeIcon)).toBeInTheDocument();
+    });
 
-      expect(screen.getByText('Single rule')).toBeInTheDocument();
-      const link = screen.getByTestId('actionPolicyDefinitionLinkedRuleLink');
-      expect(link).toHaveAttribute('href', expect.stringContaining('rule-42'));
+    it('calls onClose when the close icon is clicked', () => {
+      const { handlers } = renderFlyout();
+      fireEvent.click(screen.getByTestId(TEST_SUBJ.closeIcon));
+      expect(handlers.onClose).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -188,6 +197,21 @@ describe('ActionPolicyDetailsFlyout', () => {
 
       expect(screen.getByText('Routes critical alerts to the oncall workflow')).toBeInTheDocument();
       expect(screen.getByText('production')).toBeInTheDocument();
+    });
+
+    it('renders a expandable list of tags when there are more than one', () => {
+      renderFlyout();
+
+      expect(screen.getByText('production')).toBeInTheDocument();
+      expect(screen.getByText('+1')).toBeInTheDocument();
+    });
+
+    it('opens the tags popover when the "+N" button is clicked', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      await user.click(screen.getByText('+1'));
+
       expect(screen.getByText('oncall')).toBeInTheDocument();
     });
 
@@ -215,8 +239,8 @@ describe('ActionPolicyDetailsFlyout', () => {
     it('does not render the group-by row when grouping mode is per_episode', () => {
       renderFlyout({
         policy: createPolicy({
-          groupingMode: 'per_episode',
-          groupBy: null,
+          grouping_mode: 'per_episode',
+          group_by: null,
           throttle: { strategy: 'on_status_change', interval: null },
         }),
       });
@@ -258,7 +282,7 @@ describe('ActionPolicyDetailsFlyout', () => {
     });
   });
 
-  describe('footer actions', () => {
+  describe('footer', () => {
     it('calls onClose when the Close button is clicked', async () => {
       const user = userEvent.setup();
       const { handlers } = renderFlyout();
@@ -268,77 +292,118 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(handlers.onClose).toHaveBeenCalledTimes(1);
     });
 
-    it('closes the flyout and calls onEdit when Edit is clicked', async () => {
-      const user = userEvent.setup();
+    it('renders the Take action button for writers', () => {
+      renderFlyout();
+      expect(screen.getByTestId(TEST_SUBJ.takeActionButton)).toBeInTheDocument();
+    });
+
+    it('closes the flyout and calls onEdit when Edit is clicked in the Take action menu', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.editButton));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('editActionPolicy-policy-1'));
 
       expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onEdit).toHaveBeenCalledWith('policy-1');
     });
-  });
 
-  describe('actions menu', () => {
-    it('renders the actions menu trigger next to the close icon', () => {
-      renderFlyout();
-
-      expect(screen.getByTestId(TEST_SUBJ.actionsMenuButton)).toBeInTheDocument();
-    });
-
-    it('calls onClone without closing the flyout', async () => {
+    it('calls onClone when Clone is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Clone'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('cloneActionPolicy-policy-1'));
 
       expect(handlers.onClone).toHaveBeenCalledWith(policy);
-      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onDelete without closing the flyout', async () => {
+    it('calls onDisable when Disable is clicked in the Take action menu on an enabled policy', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const { handlers } = renderFlyout();
+
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('toggleEnabledActionPolicy-policy-1'));
+
+      expect(handlers.onDisable).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('calls onEnable when Enable is clicked in the Take action menu on a disabled policy', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const { handlers } = renderFlyout({ policy: createPolicy({ enabled: false }) });
+
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('toggleEnabledActionPolicy-policy-1'));
+
+      expect(handlers.onEnable).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('calls onUpdateApiKey when Update API key is clicked in the Take action menu', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const { handlers } = renderFlyout();
+
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('updateApiKeyActionPolicy-policy-1'));
+
+      expect(handlers.onUpdateApiKey).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('calls onDelete when Delete is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Delete'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('deleteActionPolicy-policy-1'));
 
       expect(handlers.onDelete).toHaveBeenCalledWith(policy);
-      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onDisable without closing the flyout when Disable is selected on an enabled policy', async () => {
+    it('opens the snooze modal when Snooze is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const { handlers, policy } = renderFlyout();
+      renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Disable'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('snoozeActionPolicy-policy-1'));
 
-      expect(handlers.onDisable).toHaveBeenCalledWith(policy.id);
-      expect(handlers.onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('actionPolicySnoozeModal')).toBeInTheDocument();
     });
 
-    it('calls onEnable without closing the flyout when Enable is selected on a disabled policy', async () => {
+    it('calls onSnooze when the snooze modal is applied', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const { handlers, policy } = renderFlyout({ policy: createPolicy({ enabled: false }) });
+      const { handlers } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Enable'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('snoozeActionPolicy-policy-1'));
+      await user.click(screen.getByTestId('actionPolicySnoozeModalApply'));
 
-      expect(handlers.onEnable).toHaveBeenCalledWith(policy.id);
-      expect(handlers.onClose).not.toHaveBeenCalled();
+      expect(handlers.onSnooze).toHaveBeenCalledTimes(1);
+      expect(handlers.onSnooze.mock.calls[0][0]).toBe('policy-1');
     });
 
-    it('calls onUpdateApiKey without closing the flyout', async () => {
+    it('calls onCancelSnooze when Unsnooze is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const { handlers, policy } = renderFlyout();
+      const { handlers } = renderFlyout({ policy: createPolicy({ snoozed_until: futureIso() }) });
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Update API key'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('unsnoozeActionPolicy-policy-1'));
 
-      expect(handlers.onUpdateApiKey).toHaveBeenCalledWith(policy.id);
-      expect(handlers.onClose).not.toHaveBeenCalled();
+      expect(handlers.onCancelSnooze).toHaveBeenCalledWith('policy-1');
+    });
+  });
+
+  describe('when the user only has read privilege', () => {
+    it('hides the Take action button but keeps Close', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.queryByTestId(TEST_SUBJ.takeActionButton)).not.toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.closeButton)).toBeInTheDocument();
+    });
+
+    it('still renders the policy details', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Critical alerts policy');
+      expect(screen.getByText('data.severity : "critical"')).toBeInTheDocument();
     });
   });
 });

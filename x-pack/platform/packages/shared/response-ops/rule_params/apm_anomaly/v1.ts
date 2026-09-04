@@ -13,12 +13,14 @@ export enum AnomalyDetectorType {
   txLatency = 'txLatency',
   txThroughput = 'txThroughput',
   txFailureRate = 'txFailureRate',
+  txLowCount = 'txLowCount',
 }
 
 const detectorsSchema = schema.oneOf([
   schema.literal(AnomalyDetectorType.txLatency),
   schema.literal(AnomalyDetectorType.txThroughput),
   schema.literal(AnomalyDetectorType.txFailureRate),
+  schema.literal(AnomalyDetectorType.txLowCount),
 ]);
 
 export const anomalyParamsSchema = schema.object(
@@ -58,7 +60,7 @@ export const anomalyParamsSchema = schema.object(
         minSize: 1,
         meta: {
           description:
-            'The types of anomalies that are detected. For example, detect abnormal latency, throughput, or failed transaction rates.',
+            'The types of anomalies that are detected. For example, detect abnormal latency, throughput, failed transaction rates, or low transaction count.',
         },
       })
     ),

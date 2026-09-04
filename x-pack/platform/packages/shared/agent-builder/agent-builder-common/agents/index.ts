@@ -7,49 +7,45 @@
 
 export {
   AgentType,
+  chatAgentTypeId,
   agentBuilderDefaultAgentId,
+  agentBuilderDefaultAiIndexId,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
   type RuntimeAgentConfigurationOverrides,
-  type AgentResearchStepConfiguration,
-  type AgentAnswerStepConfiguration,
 } from './definition';
-export { VISIBILITY_ICON, VISIBILITY_BADGE_COLOR, AgentVisibility } from './visibility';
 export {
-  canCurrentUserEditAgent,
-  isAgentOwner,
-  canChangeAgentVisibility,
-  hasAgentReadAccess,
-  hasAgentUseAccess,
-  hasAgentWriteAccess,
-  canDeleteAgent,
-  canManageAgentAcl,
-  getEffectiveAgentRole,
-  type EffectiveAgentRole,
-  type AgentAuthzArgs,
+  ACCESS_CONTROL_MODE_ICON,
+  ACCESS_CONTROL_MODE_BADGE_COLOR,
+  AgentAccessControlMode,
+  AgentAccessControlRole,
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH,
+  isAgentAccessControlRole,
+  accessControlRoleMeets,
+  maxAccessControlRole,
+  getDefaultAgentAccessControl,
+  type AgentAccessControl,
+  type AgentAccessControlEntry,
+  type AgentAccessControlPrincipalType,
 } from './access_control';
-export {
-  AgentAclRole,
-  AGENT_ACL_MAX_ENTRIES,
-  AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH,
-  isAgentAclRole,
-  aclRoleMeets,
-  maxAclRole,
-  getEmptyAgentAcl,
-  type AgentAcl,
-  type AgentAclEntry,
-  type AgentAclPrincipalType,
-} from './acl';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
-export {
-  type AgentCapabilities,
-  type ResolvedAgentCapabilities,
-  getKibanaDefaultAgentCapabilities,
-} from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
 export { AgentExecutionMode, SubagentExecutionMode } from './execution_mode';
 export { ExecutionStatus, type SerializedExecutionError } from './execution_status';
+export type {
+  AutoApprovedApi,
+  InteractivityConfig,
+  InteractivityConfigInput,
+} from './interactivity';
+export {
+  createNonInteractiveConfig,
+  isApiAutoApproved,
+  normalizeInteractive,
+  toAutoApprovedApis,
+} from './interactivity';
+export { SubagentMode } from './subagent_mode';
 export type {
   AgentListOptions,
   AgentCreateRequest,
@@ -65,8 +61,13 @@ export {
   type AuthorizationPrompt,
   type AuthorizationPromptResponse,
   type AuthorizationMethod,
-  AUTHORIZATION_METHODS,
-  isAuthorizationMethod,
+  type AskUserQuestionOption,
+  type AskUserQuestionItem,
+  type AskUserQuestionAnswer,
+  type AskUserQuestionPromptDefinition,
+  type AskUserQuestionPrompt,
+  type AskUserQuestionPromptResponse,
+  type AskUserQuestionPromptResponseState,
   type PromptResponse,
   type PromptRequest,
   type ToolCallPromptRequestSource,
@@ -74,13 +75,17 @@ export {
   type ConfirmationPromptResponseState,
   type AuthorizationPromptResponseState,
   type PromptResponseState,
+  AUTHORIZATION_METHODS,
+  isAuthorizationMethod,
   ConfirmationStatus,
   AuthorizationStatus,
   AgentPromptType,
   AgentPromptRequestSourceType,
   isConfirmationPrompt,
   isAuthorizationPrompt,
+  isAskUserQuestionPrompt,
   isConfirmationPromptResponse,
   isAuthorizationPromptResponse,
+  isAskUserQuestionPromptResponse,
   type PromptStorageState,
 } from './prompts';

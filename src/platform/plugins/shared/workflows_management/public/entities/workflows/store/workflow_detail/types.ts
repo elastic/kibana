@@ -17,6 +17,11 @@ import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../connectors/model/types';
 import type { WorkflowsResponse } from '../../model/types';
 
+export type ConnectorsLoadState =
+  | { status: 'loading' }
+  | { status: 'ready' }
+  | { status: 'failed'; error: string };
+
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
   yamlString: string;
@@ -40,6 +45,11 @@ export interface WorkflowDetailState {
   cursorPosition?: LineColumnPosition;
   /** The step id that is focused in the workflow yaml editor */
   focusedStepId?: string;
+  /**
+   * Set when the cursor is inside the triggers block (holds `HIGHLIGHTED_STEP_TRIGGER`).
+   * At most one of `focusedStepId` / `focusedTriggerId` is non-null at any time.
+   */
+  focusedTriggerId?: string;
   /** The step id that is highlighted in the workflow yaml editor */
   highlightedStepId?: string;
   /** The modal to test the workflow is open */
@@ -53,6 +63,8 @@ export interface WorkflowDetailState {
   };
   /** The connectors data */
   connectors?: ConnectorsResponse;
+  /** Whether connector metadata is available for connector-dependent validation. */
+  connectorsLoadState: ConnectorsLoadState;
   /** The workflows data for lookup by ID (always present, empty if not loaded yet) */
   workflows: WorkflowsResponse;
   /** The schema for the workflow, depends on the connectors available */
@@ -81,6 +93,22 @@ export interface ComputedData {
   workflowLookup?: WorkflowLookup;
   workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
   workflowDefinition?: WorkflowYaml | null;
+  /**
+   * Set when the workflow definition parsed but compiling it into an execution
+   * graph failed (e.g. an unsupported construct inside a parallel branch).
+   * Graph-dependent computation is skipped (`workflowGraph` is undefined) but
+   * the rest of the computed data stays intact so YAML-only validators keep
+   * working and the editor can surface a precise, step-anchored error instead
+   * of a generic "document not loaded" message.
+   */
+  graphBuildError?: GraphBuildErrorInfo;
+}
+
+/** Serializable details of a graph-build failure (see {@link ComputedData}). */
+export interface GraphBuildErrorInfo {
+  message: string;
+  /** Step id (workflow `name`) the error relates to, when the builder knew it. */
+  stepId?: string;
 }
 
 /**

@@ -9,8 +9,8 @@ import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
+import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
@@ -19,7 +19,9 @@ import {
   createToolCallMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import { isSubagentRosterUpdatedStep, type SubagentRosterEntry } from '@kbn/agent-builder-common';
 import type { ResolvedConfiguration } from './types';
+import type { ResearchAgentAction } from './actions';
 import { convertError, isRecoverableError } from './utils/errors';
 import type { PromptFactory } from './prompts';
 import { getRandomThinkingMessage } from './i18n';
@@ -33,12 +35,14 @@ import {
   errorAction,
   handoverAction,
   backgroundExecutionCompleteAction,
+  subagentRosterUpdatedAction,
   isAgentErrorAction,
   isHandoverAction,
   isStructuredAnswerAction,
   isToolCallAction,
   isToolPromptAction,
 } from './actions';
+import type { SubagentTracker } from './subagent_tracker';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 
 // number of successive recoverable errors we try to recover from before throwing
@@ -48,7 +52,6 @@ export const createAgentGraph = ({
   chatModel,
   toolManager,
   configuration,
-  capabilities,
   logger,
   events,
   structuredOutput = false,
@@ -56,11 +59,13 @@ export const createAgentGraph = ({
   processedConversation,
   promptFactory,
   backgroundExecutionService,
+  subagentTracker,
   roundId,
+  sessionId,
+  cacheControl,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
-  capabilities: ResolvedAgentCapabilities;
   configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;
@@ -69,7 +74,11 @@ export const createAgentGraph = ({
   processedConversation: ProcessedConversation;
   promptFactory: PromptFactory;
   backgroundExecutionService?: BackgroundExecutionService;
+  subagentTracker?: SubagentTracker;
   roundId: string;
+  /** Optional session ID forwarded to EIS for prompt-cache scoping. Non-EIS endpoints ignore it. */
+  sessionId?: string;
+  cacheControl?: ChatCompleteCacheControl;
 }) => {
   const init = async () => {
     return {};
@@ -108,6 +117,8 @@ export const createAgentGraph = ({
   const researchAgent = async (state: StateType) => {
     const researcherModel = chatModel.bindTools(toolManager.list()).withConfig({
       tags: [tags.agent, tags.researchAgent],
+      sessionId,
+      cacheControl,
     });
 
     if (state.mainActions.length === 0 && state.errorCount === 0) {
@@ -127,7 +138,9 @@ export const createAgentGraph = ({
       return {
         mainActions: [action],
         currentCycle,
-        errorCount: 0,
+        // Successful inference calls can still produce recoverable error actions,
+        // which must count toward the retry limit.
+        errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
       };
     } catch (error) {
       const executionError = convertError(error);
@@ -185,9 +198,19 @@ export const createAgentGraph = ({
 
     lastAction.tool_calls.forEach((toolCall) => toolManager.recordToolUse(toolCall.toolName));
 
+    // Snapshot the tracker's creation counter before executing the batch.
+    const creationsBefore = subagentTracker?.creationCount() ?? 0;
+
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
-    const actions = processToolNodeResponse(toolNodeResult, { cycle: state.currentCycle });
+    const actions: ResearchAgentAction[] = processToolNodeResponse(toolNodeResult, {
+      cycle: state.currentCycle,
+    });
+
+    if (subagentTracker && subagentTracker.creationCount() > creationsBefore) {
+      const roster = subagentTracker.activeRoster(getPriorPurposes(processedConversation));
+      actions.push(subagentRosterUpdatedAction(roster));
+    }
 
     return {
       mainActions: actions,
@@ -313,6 +336,25 @@ export const createAgentGraph = ({
   }
 
   return graphBuilder.compile();
+};
+
+/**
+ * Purpose lookup for entries created in prior rounds (persistent sub-agents
+ * whose purpose isn't in this round's tracker). Sourced from the most recent
+ * SubagentRosterUpdatedStep across previous rounds.
+ */
+const getPriorPurposes = (processedConversation: ProcessedConversation): Record<string, string> => {
+  const step = processedConversation.previousRounds
+    .flatMap((round) => round.steps)
+    .findLast(isSubagentRosterUpdatedStep);
+
+  if (!step) return {};
+
+  return Object.fromEntries(
+    step.roster
+      .filter((e: SubagentRosterEntry) => e.purpose !== undefined)
+      .map((e: SubagentRosterEntry) => [e.name, e.purpose as string])
+  );
 };
 
 const invalidState = (message: string) => {

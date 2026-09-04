@@ -94,10 +94,18 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   });
 
   lifecycle.beforeEachTest.add(async () => {
+    if (lifecycle.isAborting) {
+      return;
+    }
     await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
   lifecycle.afterTestSuite.add(async () => {
+    // skip WebDriver calls that could themselves hang against a dead browser/session
+    if (lifecycle.isAborting) {
+      windowSizeStack.shift();
+      return;
+    }
     await tryWebDriverCall(async () => {
       // ChromeDriver 148+ throws InvalidArgumentError on any command when a
       // beforeunload dialog is already open, even with unhandledPromptBehavior:

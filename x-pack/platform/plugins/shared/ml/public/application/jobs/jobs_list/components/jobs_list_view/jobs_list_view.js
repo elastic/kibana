@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana, context } from '@kbn/kibana-react-plugin/public';
 
 import { filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
@@ -41,11 +41,12 @@ import { jobCloningService } from '../../../../services/job_cloning_service';
 import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
 import { DatePicker } from '../../../../components/ml_page/date_picker';
-import { CPSUnsupportedWarning } from '../../../../components/cps_unsupported_warning';
 
 let blockingJobsRefreshTimeout = null;
 
 export class JobsListViewUI extends Component {
+  static contextType = context;
+
   constructor(props) {
     super(props);
 
@@ -450,8 +451,6 @@ export class JobsListViewUI extends Component {
         />
 
         <UpgradeWarning />
-
-        <CPSUnsupportedWarning />
 
         <>
           <SpaceManagementContextWrapper>

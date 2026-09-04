@@ -7,18 +7,9 @@
 
 import React, { PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiInMemoryTableProps, EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import {
-  EuiInMemoryTable,
-  EuiButton,
-  EuiLink,
-  EuiLoadingLogo,
-  EuiOverlayMask,
-  EuiHealth,
-} from '@elastic/eui';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { EuiInMemoryTable, EuiLink, EuiLoadingLogo, EuiOverlayMask, EuiHealth } from '@elastic/eui';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import {
   AutoFollowPatternDeleteProvider,
@@ -310,7 +301,6 @@ export class AutoFollowPatternTable extends PureComponent<
 
   render() {
     const { selectedItems, filteredAutoFollowPatterns } = this.state;
-    const reactRouter = routing.reactRouterOrThrow;
 
     const sorting = {
       sort: {
@@ -339,19 +329,6 @@ export class AutoFollowPatternTable extends PureComponent<
             .filter((p): p is ParsedAutoFollowPattern => p !== undefined)}
         />
       ) : undefined,
-      toolsRight: (
-        <EuiButton
-          {...reactRouterNavigate(reactRouter.history, `/auto_follow_patterns/add`)}
-          fill
-          iconType="plusCircle"
-          data-test-subj="createAutoFollowPatternButton"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
-            defaultMessage="Create an auto-follow pattern"
-          />
-        </EuiButton>
-      ),
       onChange: this.onSearch,
       box: {
         incremental: true,

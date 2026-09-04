@@ -238,7 +238,7 @@ export const CascadeMultipleStatsPerRow: StoryObj<
     >(
       () => [
         {
-          iconType: 'arrowDown',
+          iconType: 'chevronSingleDown',
           iconSide: 'right',
           onClick: () => {
             /** Noop click handler */

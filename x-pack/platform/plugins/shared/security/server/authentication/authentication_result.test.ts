@@ -33,7 +33,7 @@ describe('AuthenticationResult', () => {
 
   describe('failed', () => {
     it('fails if error is not specified.', () => {
-      expect(() => AuthenticationResult.failed(undefined as any)).toThrowError(
+      expect(() => AuthenticationResult.failed(undefined as any)).toThrow(
         'Error should be specified.'
       );
     });
@@ -79,7 +79,7 @@ describe('AuthenticationResult', () => {
 
   describe('succeeded', () => {
     it('fails if user is not specified.', () => {
-      expect(() => AuthenticationResult.succeeded(undefined as any)).toThrowError(
+      expect(() => AuthenticationResult.succeeded(undefined as any)).toThrow(
         'User should be specified.'
       );
     });
@@ -204,7 +204,7 @@ describe('AuthenticationResult', () => {
 
   describe('redirectTo', () => {
     it('fails if redirect URL is not specified.', () => {
-      expect(() => AuthenticationResult.redirectTo(undefined as any)).toThrowError(
+      expect(() => AuthenticationResult.redirectTo(undefined as any)).toThrow(
         'Redirect URL must be specified.'
       );
     });

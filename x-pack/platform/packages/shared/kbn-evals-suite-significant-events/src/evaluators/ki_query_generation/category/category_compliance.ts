@@ -15,6 +15,7 @@ import { ALLOWED_CATEGORIES, getQueriesFromOutput } from '../types';
 export const categoryComplianceEvaluator: KIQueryGenerationEvaluator = {
   name: 'category_compliance',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const queries = getQueriesFromOutput(output);
     if (queries.length === 0) {
@@ -32,7 +33,7 @@ export const categoryComplianceEvaluator: KIQueryGenerationEvaluator = {
               .map((q) => `"${q.title}" has category "${q.category}"`)
               .join('; ')}`
           : `All ${queries.length} queries use valid categories`,
-      details: {
+      metadata: {
         total: queries.length,
         invalidQueries: invalidQueries.map((q) => ({
           title: q.title,

@@ -1,0 +1,316 @@
+{
+  "sha1": "1daeef4ecbb0a7f4baaa0b099f37dfe6087aebc7",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "9f547028a12316e-09381f597be5a4a",
+      "title": "Edit Rule Flow Edit from rules list: navigate, cancel, and save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/edit_rule_flow.spec.ts",
+        "line": 31,
+        "column": 5
+      }
+    },
+    {
+      "id": "9f547028a12316e-445383c24546a8b",
+      "title": "Edit Rule Flow Edit from rule details page: navigate, cancel, and save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/edit_rule_flow.spec.ts",
+        "line": 69,
+        "column": 13
+      }
+    },
+    {
+      "id": "48f80921d4d0c78-67579dfbe38a40b",
+      "title": "Rule action alerts filter saves a rule with an is-one-of conditional action filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rule_action_alerts_filter.spec.ts",
+        "line": 151,
+        "column": 86
+      }
+    },
+    {
+      "id": "814251c01b60c34-e8dfa7be3731465",
+      "title": "Rule logs \"show all spaces\" switch hides the switch when only the default space exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rule_logs_spaces_switch.spec.ts",
+        "line": 23,
+        "column": 8
+      }
+    },
+    {
+      "id": "814251c01b60c34-5a271ef4519f6c6",
+      "title": "Rule logs \"show all spaces\" switch shows the switch and toggles it when multiple spaces are accessible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rule_logs_spaces_switch.spec.ts",
+        "line": 27,
+        "column": 83
+      }
+    },
+    {
+      "id": "814251c01b60c34-bec0e1b69570809",
+      "title": "Rule logs \"show all spaces\" switch hides the switch when the user can only access one space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rule_logs_spaces_switch.spec.ts",
+        "line": 40,
+        "column": 23
+      }
+    },
+    {
+      "id": "8499e906bef6459-26ee1dab0262b36",
+      "title": "Rule snooze scheduler legacy theme independence keeps the scheduler stable without legacy theme CSS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rule_snooze_scheduler_legacy_theme.spec.ts",
+        "line": 52,
+        "column": 12
+      }
+    },
+    {
+      "id": "9e84916151d018d-9a8d3eed27e7927",
+      "title": "Rules list bulk actions should allow rules to be snoozed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 19,
+        "column": 45
+      }
+    },
+    {
+      "id": "9e84916151d018d-28ce0cfc904342d",
+      "title": "Rules list bulk actions should allow rules to be unsnoozed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 52,
+        "column": 13
+      }
+    },
+    {
+      "id": "9e84916151d018d-b5c23b139eef4dd",
+      "title": "Rules list bulk actions should allow rule snooze to be scheduled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 89,
+        "column": 85
+      }
+    },
+    {
+      "id": "9e84916151d018d-f228e2b6d4265cd",
+      "title": "Rules list bulk actions should allow rule schedule to be removed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 124,
+        "column": 24
+      }
+    },
+    {
+      "id": "9e84916151d018d-1eb09ecdd07e4e8",
+      "title": "Rules list bulk actions can bulk update API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 164,
+        "column": 24
+      }
+    },
+    {
+      "id": "9e84916151d018d-061248a113b22aa",
+      "title": "Rules list bulk actions should apply filters to bulk actions when using the select all button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 193,
+        "column": 5
+      }
+    },
+    {
+      "id": "0c4f47adf651dc1-73fc6642f1d9bb6",
+      "title": "Rules create flow opens the rule type modal and the rule form when a rule type is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_flow.spec.ts",
+        "line": 52,
+        "column": 26
+      }
+    },
+    {
+      "id": "0c4f47adf651dc1-c2973d4795705a5",
+      "title": "Rules create flow creates a rule, redirects to details, and shows it in the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_flow.spec.ts",
+        "line": 66,
+        "column": 11
+      }
+    },
+    {
+      "id": "19312e1cea88533-a76523058bbc608",
+      "title": "Rules home page loads the Rules page with alerts-and-actions role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
+        "line": 65,
+        "column": 5
+      }
+    },
+    {
+      "id": "19312e1cea88533-a3844c4ca73888c",
+      "title": "Rules home page shows the no-permission prompt when the user has actions but no alerting privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
+        "line": 68,
+        "column": 23
+      }
+    },
+    {
+      "id": "19312e1cea88533-324663b1eec2a0e",
+      "title": "Rules home page loads the Rules page as admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
+        "line": 75,
+        "column": 16
+      }
+    },
+    {
+      "id": "19312e1cea88533-ef8cea9df03567e",
+      "title": "Rules home page renders a newly-created rule and opens its details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
+        "line": 82,
+        "column": 20
+      }
+    },
+    {
+      "id": "03978358df368fa-3e48a64dc4d9cf8",
+      "title": "Rules page navigation and loading loads the Stack Management rules page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_navigation.spec.ts",
+        "line": 24,
+        "column": 8
+      }
+    },
+    {
+      "id": "c7ce1e38cc7f5ad-e228a5356e5c28a",
+      "title": "Rules page tab functionality navigate to the Rules and Logs tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs.spec.ts",
+        "line": 29,
+        "column": 8
+      }
+    },
+    {
+      "id": "62e8d809df42e39-70e582e72ffdc19",
+      "title": "Rules settings flyout opens, shows configured values, and persists changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_settings.spec.ts",
+        "line": 36,
+        "column": 65
+      }
+    }
+  ]
+}

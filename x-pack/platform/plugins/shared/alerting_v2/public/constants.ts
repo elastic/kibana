@@ -6,29 +6,44 @@
  */
 
 import { encode as encodeRison } from '@kbn/rison';
-
-export const ALERTING_V2_SECTION_ID = 'alertingV2';
-export const ALERTING_V2_RULES_APP_ID = 'rules';
-export const ALERTING_V2_ACTION_POLICIES_APP_ID = 'action_policies';
-export const ALERTING_V2_EPISODES_APP_ID = 'episodes';
-export const ALERTING_V2_EXECUTION_HISTORY_APP_ID = 'execution_history';
+import {
+  ALERTING_V2_SECTION_ID,
+  ALERTING_V2_RULES_APP_ID,
+  ALERTING_V2_RULE_LIBRARY_APP_ID,
+  ALERTING_V2_ACTION_POLICIES_APP_ID,
+  ALERTING_V2_EPISODES_APP_ID,
+  ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+} from '@kbn/alerting-v2-constants';
 
 export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
+export const ALERTING_V2_RULE_LIBRARY_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULE_LIBRARY_APP_ID}`;
 export const ALERTING_V2_ACTION_POLICIES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_ACTION_POLICIES_APP_ID}`;
 export const ALERTING_V2_EPISODES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 export const ALERTING_V2_EXECUTION_HISTORY_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EXECUTION_HISTORY_APP_ID}`;
 
 export const ALERTING_V2_RULES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
+export const ALERTING_V2_RULE_LIBRARY_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULE_LIBRARY_APP_ID}`;
 export const ALERTING_V2_ACTION_POLICIES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_ACTION_POLICIES_APP_ID}`;
 export const ALERTING_V2_EPISODES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 export const ALERTING_V2_EXECUTION_HISTORY_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EXECUTION_HISTORY_APP_ID}`;
 
 export const MANAGEMENT_APP_ID = 'management';
+
+/** Stable Content List `id` / query-key scope for the rules list page. */
+export const RULES_CONTENT_LIST_ID = 'alerting-v2-rules';
+
+/** Stable Content List `id` / query-key scope for the rule library page. */
+export const RULE_TEMPLATES_CONTENT_LIST_ID = 'alerting-v2-rule-templates';
+
 export {
   ALERTING_V2_RULE_API_PATH,
+  ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH,
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
-  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+  ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH,
+  CREATE_WITH_AGENT_INITIAL_PROMPT,
+  CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT,
 } from '@kbn/alerting-v2-constants';
 
 export interface AlertEpisodesListLinkOptions {
@@ -48,14 +63,16 @@ export interface AlertEpisodesListLinkOptions {
   timeRange?: { from: string; to: string };
 }
 
-export const CREATE_WITH_AGENT_INITIAL_PROMPT =
-  'Load the rule-management skill and help me create a new alerting v2 rule. Ask me what I want to monitor and guide me through the setup.';
-
 export const AGENT_BUILDER_NEW_CONVERSATION_PATH = '/agents/elastic-ai-agent/conversations/new';
 
 export const paths = {
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
+  ruleListCreateFromTemplate: (templateId: string) =>
+    `${ALERTING_V2_RULES_BASE_PATH}?templateId=${encodeURIComponent(templateId)}`,
+  ruleLibraryCreateFromTemplate: (templateId: string) =>
+    `${ALERTING_V2_RULE_LIBRARY_BASE_PATH}?templateId=${encodeURIComponent(templateId)}`,
+  sequenceRuleCreate: `${ALERTING_V2_RULES_BASE_PATH}/sequence/create`,
   actionPolicyCreate: `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/create`,
   actionPolicyEdit: (id: string) =>
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
@@ -100,4 +117,5 @@ export const paths = {
   alertEpisodeDetails: (episodeId: string) =>
     `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`,
   executionHistoryList: ALERTING_V2_EXECUTION_HISTORY_BASE_PATH,
+  ruleLibraryList: ALERTING_V2_RULE_LIBRARY_BASE_PATH,
 };

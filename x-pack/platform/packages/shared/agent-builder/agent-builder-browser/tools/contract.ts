@@ -27,6 +27,7 @@ export interface WorkflowListItem {
   id: string;
   name: string;
   description?: string;
+  enabled: boolean;
 }
 
 export interface ListWorkflowsResponse {

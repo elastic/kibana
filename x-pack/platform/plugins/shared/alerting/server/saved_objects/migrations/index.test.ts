@@ -2488,7 +2488,7 @@ describe('successful migrations', () => {
       );
       const mutedAlert = getMockData({}, true);
       expect(mutedAlert.attributes.isSnoozedUntil).toBeFalsy();
-      expect(() => migration841(mutedAlert, migrationContext)).not.toThrowError();
+      expect(() => migration841(mutedAlert, migrationContext)).not.toThrow();
     });
   });
 
@@ -2993,7 +2993,7 @@ describe('handles errors during migrations', () => {
       });
       expect(() => {
         migration710(alert, migrationContext);
-      }).toThrowError(`Can't migrate!`);
+      }).toThrow(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.10.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
         {
@@ -3020,7 +3020,7 @@ describe('handles errors during migrations', () => {
       });
       expect(() => {
         migration711(alert, migrationContext);
-      }).toThrowError(`Can't migrate!`);
+      }).toThrow(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.11.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
         {
@@ -3047,7 +3047,7 @@ describe('handles errors during migrations', () => {
       });
       expect(() => {
         migration7112(alert, migrationContext);
-      }).toThrowError(`Can't migrate!`);
+      }).toThrow(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.11.2 migration failed for alert ${alert.id} with error: Can't migrate!`,
         {
@@ -3074,7 +3074,7 @@ describe('handles errors during migrations', () => {
       });
       expect(() => {
         migration7130(alert, migrationContext);
-      }).toThrowError(`Can't migrate!`);
+      }).toThrow(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.13.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
         {
@@ -3099,7 +3099,7 @@ describe('handles errors during migrations', () => {
       const rule = getMockData();
       expect(() => {
         migration7160(rule, migrationContext);
-      }).toThrowError(`Can't migrate!`);
+      }).toThrow(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.16.0 migration failed for alert ${rule.id} with error: Can't migrate!`,
         {
@@ -3148,7 +3148,7 @@ describe('handles errors during migrations', () => {
 
       expect(() => {
         migration830(rule, migrationContext);
-      }).toThrowError(`Can't migrate search source!`);
+      }).toThrow(`Can't migrate search source!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject ${versionToTest} migration failed for alert ${rule.id} with error: Can't migrate search source!`,
         {

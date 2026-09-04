@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEsQueryFromSavedSearch } from './saved_search_utils';
+import { filtersNotAlreadyPresent, getEsQueryFromSavedSearch } from './saved_search_utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -315,5 +315,259 @@ describe('getEsQueryFromSavedSearch()', () => {
 
     expect(queryTestFn).not.toThrow();
     expect(queryTestFn()).toBeUndefined();
+  });
+
+  it('should apply a negated filter-manager copy of a saved keyed filter without stacking both', () => {
+    const phraseFilter = (negate: boolean, disabled = false): Filter => ({
+      meta: {
+        alias: null,
+        disabled,
+        negate,
+        type: 'phrase',
+        key: 'airline',
+        params: { query: 'ACA' },
+        index: mockDataView.id,
+      },
+      query: { match_phrase: { airline: 'ACA' } },
+      $state: { store: FilterStateStore.APP_STATE },
+    });
+
+    const savedSearch: SavedSearch = {
+      title: 'keyed_phrase',
+      searchSource: createSearchSourceMock({
+        index: mockDataView,
+        query: { query: '*', language: 'kuery' } as Query,
+        filter: [phraseFilter(false)],
+      }),
+    } as unknown as SavedSearch;
+
+    const filterManager = createMockFilterManager();
+    filterManager.addFilters([phraseFilter(true)]);
+
+    expect(
+      getEsQueryFromSavedSearch({
+        dataView: mockDataView,
+        savedSearch,
+        uiSettings: mockUiSettings,
+        filterManager,
+      })
+    ).toEqual({
+      queryLanguage: 'kuery',
+      queryOrAggregateQuery: { language: 'kuery', query: '*' },
+      searchQuery: {
+        bool: {
+          filter: [{ query_string: { query: '*' } }],
+          must: [],
+          must_not: [{ match_phrase: { airline: 'ACA' } }],
+          should: [],
+        },
+      },
+      searchString: '*',
+    });
+  });
+
+  it('should drop a saved keyed filter when the filter-manager copy is disabled', () => {
+    const phraseFilter = (disabled: boolean): Filter => ({
+      meta: {
+        alias: null,
+        disabled,
+        negate: false,
+        type: 'phrase',
+        key: 'airline',
+        params: { query: 'ACA' },
+        index: mockDataView.id,
+      },
+      query: { match_phrase: { airline: 'ACA' } },
+      $state: { store: FilterStateStore.APP_STATE },
+    });
+
+    const savedSearch: SavedSearch = {
+      title: 'keyed_phrase_disabled',
+      searchSource: createSearchSourceMock({
+        index: mockDataView,
+        query: { query: '*', language: 'kuery' } as Query,
+        filter: [phraseFilter(false)],
+      }),
+    } as unknown as SavedSearch;
+
+    const filterManager = createMockFilterManager();
+    filterManager.addFilters([phraseFilter(true)]);
+
+    expect(
+      getEsQueryFromSavedSearch({
+        dataView: mockDataView,
+        savedSearch,
+        uiSettings: mockUiSettings,
+        filterManager,
+      })
+    ).toEqual({
+      queryLanguage: 'kuery',
+      queryOrAggregateQuery: { language: 'kuery', query: '*' },
+      searchQuery: {
+        bool: {
+          filter: [{ query_string: { query: '*' } }],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      },
+      searchString: '*',
+    });
+  });
+
+  it('should not double a saved keyed filter that was hydrated into the filter manager', () => {
+    const phraseFilter: Filter = {
+      meta: {
+        alias: null,
+        disabled: false,
+        negate: false,
+        type: 'phrase',
+        key: 'airline',
+        params: { query: 'ACA' },
+        index: mockDataView.id,
+      },
+      query: { match_phrase: { airline: 'ACA' } },
+      $state: { store: FilterStateStore.APP_STATE },
+    };
+
+    const savedSearch: SavedSearch = {
+      title: 'keyed_phrase_hydrated',
+      searchSource: createSearchSourceMock({
+        index: mockDataView,
+        query: { query: '*', language: 'kuery' } as Query,
+        filter: [phraseFilter],
+      }),
+    } as unknown as SavedSearch;
+
+    const filterManager = createMockFilterManager();
+    filterManager.addFilters([phraseFilter]);
+
+    expect(
+      getEsQueryFromSavedSearch({
+        dataView: mockDataView,
+        savedSearch,
+        uiSettings: mockUiSettings,
+        filterManager,
+      })
+    ).toEqual({
+      queryLanguage: 'kuery',
+      queryOrAggregateQuery: { language: 'kuery', query: '*' },
+      searchQuery: {
+        bool: {
+          filter: [{ query_string: { query: '*' } }, { match_phrase: { airline: 'ACA' } }],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      },
+      searchString: '*',
+    });
+  });
+
+  it('should apply a negated filter-manager copy of a saved keyless filter without stacking both', () => {
+    const customFilter = (negate: boolean): Filter => ({
+      meta: {
+        alias: null,
+        disabled: false,
+        negate,
+        type: 'custom',
+        index: mockDataView.id,
+      },
+      query: { match: { message: 'error' } },
+      $state: { store: FilterStateStore.APP_STATE },
+    });
+
+    const savedSearch: SavedSearch = {
+      title: 'keyless_custom',
+      searchSource: createSearchSourceMock({
+        index: mockDataView,
+        query: { query: '*', language: 'kuery' } as Query,
+        filter: [customFilter(false)],
+      }),
+    } as unknown as SavedSearch;
+
+    const filterManager = createMockFilterManager();
+    filterManager.addFilters([customFilter(true)]);
+
+    expect(
+      getEsQueryFromSavedSearch({
+        dataView: mockDataView,
+        savedSearch,
+        uiSettings: mockUiSettings,
+        filterManager,
+      })
+    ).toEqual({
+      queryLanguage: 'kuery',
+      queryOrAggregateQuery: { language: 'kuery', query: '*' },
+      searchQuery: {
+        bool: {
+          filter: [{ query_string: { query: '*' } }],
+          must: [],
+          must_not: [{ match: { message: 'error' } }],
+          should: [],
+        },
+      },
+      searchString: '*',
+    });
+  });
+});
+
+describe('filtersNotAlreadyPresent()', () => {
+  const keyedFilter = (overrides: Partial<Filter['meta']> = {}): Filter => ({
+    meta: {
+      alias: null,
+      disabled: false,
+      negate: false,
+      type: 'phrase',
+      key: 'airline',
+      params: { query: 'ACA' },
+      index: 'test-index',
+      ...overrides,
+    },
+    query: { match_phrase: { airline: 'ACA' } },
+  });
+
+  const keylessFilter = (overrides: Partial<Filter['meta']> = {}): Filter => ({
+    meta: {
+      alias: null,
+      disabled: false,
+      negate: false,
+      type: 'custom',
+      index: 'test-index',
+      ...overrides,
+    },
+    query: { bool: { must: [{ match: { message: 'error' } }] } },
+  });
+
+  it('treats keyed filters with the same key/params as duplicates', () => {
+    expect(filtersNotAlreadyPresent([keyedFilter()], [keyedFilter()])).toEqual([]);
+  });
+
+  it('does not treat a negated keyed filter as a duplicate of the original', () => {
+    expect(filtersNotAlreadyPresent([keyedFilter()], [keyedFilter({ negate: true })])).toEqual([
+      keyedFilter({ negate: true }),
+    ]);
+  });
+
+  it('does not treat a disabled keyed filter as a duplicate of the original', () => {
+    expect(filtersNotAlreadyPresent([keyedFilter()], [keyedFilter({ disabled: true })])).toEqual([
+      keyedFilter({ disabled: true }),
+    ]);
+  });
+
+  it('treats keyless filters with the same query as duplicates', () => {
+    expect(filtersNotAlreadyPresent([keylessFilter()], [keylessFilter()])).toEqual([]);
+  });
+
+  it('does not treat a negated keyless filter as a duplicate of the original', () => {
+    expect(filtersNotAlreadyPresent([keylessFilter()], [keylessFilter({ negate: true })])).toEqual([
+      keylessFilter({ negate: true }),
+    ]);
+  });
+
+  it('does not treat a disabled keyless filter as a duplicate of the original', () => {
+    expect(
+      filtersNotAlreadyPresent([keylessFilter()], [keylessFilter({ disabled: true })])
+    ).toEqual([keylessFilter({ disabled: true })]);
   });
 });

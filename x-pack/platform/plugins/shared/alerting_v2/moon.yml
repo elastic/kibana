@@ -17,6 +17,7 @@ project:
   owner: '@elastic/rna-project-team'
   sourceRoot: x-pack/platform/plugins/shared/alerting_v2
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/task-manager-plugin'
   - '@kbn/features-plugin'
@@ -80,14 +81,17 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/scout'
   - '@kbn/object-utils'
+  - '@kbn/alerting-v2-browser-shared'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-common-queries'
+  - '@kbn/alerting-v2-utils'
   - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/response-ops-alert-snooze'
   - '@kbn/kibana-react-plugin'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/expressions-plugin'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/dashboard-plugin'
   - '@kbn/field-formats-plugin'
   - '@kbn/charts-plugin'
   - '@kbn/unified-data-table'
@@ -111,15 +115,37 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/agent-builder-sml-plugin'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-user-profile-browser'
   - '@kbn/workflows-ui'
   - '@kbn/core-spaces-common'
   - '@kbn/datemath'
+  - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/css-utils'
+  - '@kbn/dashboard-plugin'
   - '@kbn/cps'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/management-settings-ids'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-application-browser-mocks'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/es-types'
+  - '@kbn/announcement-banner'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/change-history'
+  - '@kbn/change-history-ui'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
+  - '@kbn/es'
+  - '@kbn/test-es-server'
+  - '@kbn/security-authorization-core'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/core-test-helpers-model-versions'
+  - '@kbn/content-list-common'
 tags:
   - plugin
   - prod
@@ -133,6 +159,7 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - public/**/*
+    - test/scout/**/*
     - test/scout_alerting_v2/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'

@@ -16,7 +16,7 @@ permissions:
 # github/gh-aw-actions/setup entry in .github/aw/actions-lock.json;
 # the verify step below enforces that.
 env:
-  GH_AW_VERSION: v0.76.1
+  GH_AW_VERSION: v0.86.2
 
 concurrency:
   group: validate-agentic-workflow-locks-${{ github.event.pull_request.number || github.ref }}
@@ -30,7 +30,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -47,11 +47,12 @@ jobs:
           echo "Pinned gh-aw version: ${version}"
           if [[ "${version}" != "${GH_AW_VERSION}" ]]; then
             echo "::error::actions-lock.json pins gh-aw ${version} but this workflow installs gh-aw ${GH_AW_VERSION} (set via GH_AW_VERSION). Update one of them so they match."
+            echo "To install the repo-pinned gh-aw locally, run: node scripts/ensure_gh_aw_version.js"
             exit 1
           fi
 
       - name: Install gh-aw CLI
-        uses: github/gh-aw/actions/setup-cli@58d1bedbb7200f59c2d224151339e38fd8687d05 # v0.76.1
+        uses: github/gh-aw/actions/setup-cli@d7426cced84ccaedbcd1fa17aaf421d87513d74c # v0.87.7
         with:
           version: ${{ env.GH_AW_VERSION }}
 

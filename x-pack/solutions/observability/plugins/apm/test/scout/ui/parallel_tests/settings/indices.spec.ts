@@ -8,9 +8,21 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
-import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { waitForApmAppMenuReady } from '../../fixtures/page_helpers';
+
+const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';
+const APM_INDICES_SAVED_OBJECT_ID = 'apm-indices';
 
 test.describe('Indices', { tag: tags.stateful.classic }, () => {
+  test.afterAll(async ({ kbnClient }) => {
+    // The settings are persisted as the `apm-indices` saved object. Deleting it
+    // reverts APM back to its default indices so the shared lane isn't polluted.
+    // 404 is expected when no test persisted a change.
+    await kbnClient.savedObjects
+      .delete({ type: APM_INDICES_SAVED_OBJECT_TYPE, id: APM_INDICES_SAVED_OBJECT_ID })
+      .catch(() => {});
+  });
+
   test('Viewer should not be able to modify settings', async ({
     pageObjects: { indicesPage },
     browserAuth,
@@ -43,7 +55,7 @@ test.describe('Indices', { tag: tags.stateful.classic }, () => {
     await expect(applyButton).toBeEnabled();
 
     await indicesPage.clickApplyChanges();
-    await waitForApmSettingsHeaderLink(page);
+    await waitForApmAppMenuReady(page);
 
     await expect(await indicesPage.getErrorIndexInput()).toHaveValue(newErrorIndex);
   });

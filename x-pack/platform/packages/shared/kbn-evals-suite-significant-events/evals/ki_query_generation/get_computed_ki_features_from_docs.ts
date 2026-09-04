@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
+import type { Feature, FeatureUpsert } from '@kbn/significant-events-schema';
+import { computeFeatureUuid } from '@kbn/significant-events-schema';
 import { selectLogPatternsForLlm } from '@kbn/streams-ai/src/features/computed/log_patterns';
-import { CANONICAL_LAST_SEEN } from '../../src/data_generators/canonical_ki_features';
+import { pickErrorLogFields } from '@kbn/streams-ai/src/features/computed/error_logs';
 
 const ERROR_KEYWORDS = ['error', 'exception', 'fatal', 'fail', 'panic', 'timeout', 'traceback'];
 const MAX_FIELD_VALUE_SAMPLES = 5;
@@ -75,7 +76,7 @@ const docToSampleFormat = (doc: Record<string, unknown>): Record<string, unknown
 const buildDatasetAnalysis = (
   streamName: string,
   flatDocs: Array<Record<string, unknown>>
-): Feature => {
+): FeatureUpsert => {
   const fieldValueCounts: Record<string, Map<string, number>> = {};
 
   for (const doc of flatDocs) {
@@ -110,9 +111,6 @@ const buildDatasetAnalysis = (
 
   return {
     id: 'dataset_analysis',
-    uuid: 'canonical-dataset-analysis',
-    status: 'active',
-    last_seen: CANONICAL_LAST_SEEN,
     stream_name: streamName,
     type: 'dataset_analysis',
     description: 'Dataset schema and field analysis including value distributions and coverage',
@@ -121,14 +119,14 @@ const buildDatasetAnalysis = (
   };
 };
 
-const buildLogSamples = (streamName: string, flatDocs: Array<Record<string, unknown>>): Feature => {
+const buildLogSamples = (
+  streamName: string,
+  flatDocs: Array<Record<string, unknown>>
+): FeatureUpsert => {
   const samples = pickDiverseSamples(flatDocs, MAX_SAMPLE_DOCS).map(docToSampleFormat);
 
   return {
     id: 'log_samples',
-    uuid: 'canonical-log-samples',
-    status: 'active',
-    last_seen: CANONICAL_LAST_SEEN,
     stream_name: streamName,
     type: 'log_samples',
     description: 'Raw sample log documents from the stream',
@@ -140,7 +138,7 @@ const buildLogSamples = (streamName: string, flatDocs: Array<Record<string, unkn
 const buildLogPatterns = (
   streamName: string,
   flatDocs: Array<Record<string, unknown>>
-): Feature => {
+): FeatureUpsert => {
   const bodyTexts = flatDocs
     .map((doc) => String(doc['body.text'] ?? doc.message ?? ''))
     .filter(Boolean);
@@ -175,9 +173,6 @@ const buildLogPatterns = (
 
   return {
     id: 'log_patterns',
-    uuid: 'canonical-log-patterns',
-    status: 'active',
-    last_seen: CANONICAL_LAST_SEEN,
     stream_name: streamName,
     type: 'log_patterns',
     description: 'Log message patterns identified through categorization analysis',
@@ -186,19 +181,21 @@ const buildLogPatterns = (
   };
 };
 
-const buildErrorLogs = (streamName: string, flatDocs: Array<Record<string, unknown>>): Feature => {
+const buildErrorLogs = (
+  streamName: string,
+  flatDocs: Array<Record<string, unknown>>
+): FeatureUpsert => {
   const errorDocs = flatDocs.filter((doc) => {
     const text = String(doc['body.text'] ?? doc.message ?? '').toLowerCase();
     return ERROR_KEYWORDS.some((kw) => text.includes(kw));
   });
 
-  const samples = pickDiverseSamples(errorDocs, MAX_ERROR_SAMPLES).map(docToSampleFormat);
+  const samples = pickDiverseSamples(errorDocs, MAX_ERROR_SAMPLES)
+    .map(pickErrorLogFields)
+    .map(docToSampleFormat);
 
   return {
     id: 'error_logs',
-    uuid: 'canonical-error-logs',
-    status: 'active',
-    last_seen: CANONICAL_LAST_SEEN,
     stream_name: streamName,
     type: 'error_logs',
     description: 'Sample error logs extracted from the stream',
@@ -227,5 +224,5 @@ export const getComputedKIFeaturesFromDocs = ({
     buildLogSamples(streamName, flatDocs),
     buildLogPatterns(streamName, flatDocs),
     buildErrorLogs(streamName, flatDocs),
-  ];
+  ].map((feature) => ({ ...feature, uuid: computeFeatureUuid(feature) }));
 };

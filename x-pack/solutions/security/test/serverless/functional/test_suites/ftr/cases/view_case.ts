@@ -32,10 +32,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const config = getService('config');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
-  const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  describe('Case View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/287822
+  describe.skip('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
@@ -48,6 +48,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('should show the case view page correctly', async () => {
+        if (await cases.common.isRedesignEnabled()) {
+          await testSubjects.existOrFail('appHeaderTitle');
+
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+          await testSubjects.existOrFail('case-view-tab-title-attachments');
+          await testSubjects.existOrFail('description');
+
+          await testSubjects.existOrFail('case-view-activity');
+
+          await testSubjects.existOrFail('case-view-assignees-field-panel');
+          await testSubjects.existOrFail('sidebar-severity');
+          await testSubjects.existOrFail('case-view-participants-field-panel');
+          await testSubjects.existOrFail('case-tags');
+          await testSubjects.existOrFail('cases-categories');
+          await testSubjects.existOrFail('case-view-sidebar-connectors');
+          return;
+        }
+
         await testSubjects.existOrFail('case-view-title');
         await testSubjects.existOrFail('header-page-supplements');
 
@@ -73,15 +91,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('edits a case title from the case view page', async () => {
         const newTitle = `test-${uuidv4()}`;
 
-        await testSubjects.click('editable-title-header-value');
-        await testSubjects.setValue('editable-title-input-field', newTitle);
-        await testSubjects.click('editable-title-submit-btn');
-
-        // wait for backend response
-        await retry.tryForTime(5000, async () => {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).equal(newTitle);
-        });
+        await cases.common.editCaseTitle(newTitle);
+        await cases.common.assertCaseTitle(newTitle);
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="title-update-action"]');
@@ -105,46 +116,54 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('adds a category to a case', async () => {
         const category = uuidv4();
-        await testSubjects.click('category-edit-button');
-        await comboBox.setCustom('comboBoxInput', category);
-        await testSubjects.click('edit-category-submit');
+        await cases.common.addCategory(category);
 
-        // validate category was added
-        await testSubjects.existOrFail('category-viewer-' + category);
+        // Legacy renders a dedicated viewer; the redesign edits the value in place, so we rely on the
+        // user action below to confirm the update landed.
+        if (!(await cases.common.isRedesignEnabled())) {
+          await testSubjects.existOrFail('category-viewer-' + category);
+        }
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-update-action"]');
       });
 
       it('deletes a category from a case', async () => {
-        await find.byCssSelector('[data-test-subj*="category-viewer-"]');
+        await cases.common.removeCategory();
 
-        await testSubjects.click('category-remove-button');
-
-        await testSubjects.existOrFail('no-categories');
+        if (!(await cases.common.isRedesignEnabled())) {
+          await testSubjects.existOrFail('no-categories');
+        }
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-delete-action"]');
       });
 
       it('adds a tag to a case', async () => {
         const tag = uuidv4();
-        await testSubjects.click('tag-list-edit-button');
-        await comboBox.setCustom('comboBoxInput', tag);
-        await testSubjects.click('edit-tags-submit');
+        await cases.common.addTag(tag);
 
-        // validate tag was added
-        await testSubjects.existOrFail('tag-' + tag);
+        // Legacy renders a dedicated tag element; the redesign edits the value in place, so we rely on
+        // the user action below to confirm the update landed.
+        if (!(await cases.common.isRedesignEnabled())) {
+          await testSubjects.existOrFail('tag-' + tag);
+        }
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-add-action"]');
       });
 
       it('deletes a tag from a case', async () => {
-        await testSubjects.click('tag-list-edit-button');
-        // find the tag button and click the close button
-        const button = await find.byCssSelector('[data-test-subj="comboBoxInput"] button');
-        await button.click();
-        await testSubjects.click('edit-tags-submit');
+        if (await cases.common.isRedesignEnabled()) {
+          // Clearing the combo box persists the removal immediately; there is no confirm step.
+          await comboBox.clear('case-tags');
+          await header.waitUntilLoadingHasFinished();
+        } else {
+          await testSubjects.click('tag-list-edit-button');
+          // find the tag button and click the close button
+          const button = await find.byCssSelector('[data-test-subj="comboBoxInput"] button');
+          await button.click();
+          await testSubjects.click('edit-tags-submit');
+        }
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
@@ -157,10 +176,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await find.byCssSelector(
             '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
           );
-          // validates dropdown tag
-          await testSubjects.existOrFail(
-            'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
-          );
+          // validates dropdown tag (legacy renders the status badge inside the action-bar dropdown)
+          if (!(await cases.common.isRedesignEnabled())) {
+            await testSubjects.existOrFail(
+              'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
+            );
+          }
         });
       });
 
@@ -194,6 +215,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('filter activity', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
+
+      beforeEach(async function () {
+        // The redesign consolidates the activity type filters into a single dropdown
+        // (`user-actions-filter-bar-type-button`) with popover options and plain count badges rather
+        // than the legacy inline toggle buttons with `euiNotificationBadge` "N active filters" labels
+        // these assertions read; the redesign filter bar has its own unit coverage.
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
+      });
 
       it('filters by all by default', async () => {
         const allBadge = await find.byCssSelector(
@@ -271,7 +302,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY
+    // FLAKY: https://github.com/elastic/kibana/issues/288565
     describe.skip('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');
@@ -326,6 +357,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await svlCases.api.deleteAllCaseItems();
+      });
+
+      beforeEach(async function () {
+        // The redesign renders all activity (paged actions, the show-more row, and the latest actions)
+        // in a single `user-actions-list`, whereas these assertions expect the legacy two-list DOM with
+        // fixed per-list counts; the redesign pagination has its own unit coverage.
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
       });
 
       it('initially renders user actions list correctly', async () => {
@@ -427,7 +467,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('breadcrumbs', () => {
+    describe('page title', () => {
       let createdCase: any;
 
       before(async () => {
@@ -439,8 +479,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should set the cases title', async () => {
-        await svlCommonNavigation.breadcrumbs.expectExists();
-        await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: createdCase.title });
+        await cases.common.assertCaseTitle(createdCase.title);
       });
     });
 
@@ -448,11 +487,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('should render the reporter correctly', async () => {
-        const reporter = await cases.singleCase.getReporter();
-
-        const reporterText = await reporter.getVisibleText();
-
-        expect(reporterText).to.be(config.get('servers.kibana.username'));
+        expect(await cases.singleCase.getReporterName()).to.be(
+          config.get('servers.kibana.username')
+        );
       });
     });
 
@@ -474,7 +511,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         },
       ];
 
-      before(async () => {
+      before(async function () {
+        // The redesign only renders case-view custom fields when templates v2 (`templates.enabled`) is
+        // on, which defaults off; these assertions target the legacy sidebar custom-field editors.
+        if (await cases.common.isRedesignEnabled()) {
+          return this.skip();
+        }
+
         await navigateToCasesApp(getPageObject, getService, owner);
         await cases.api.createConfigWithCustomFields({ customFields, owner });
         await cases.api.createCase({

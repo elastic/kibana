@@ -8,15 +8,16 @@
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
+import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { EsqlResponse } from './utils/esql';
 import { generateEsql } from './generate_esql';
 
 export interface NaturalLanguageSearchResponse {
   /**
-   * The ES|QL query which was generated based on the provided NL query, index and context
+   * The ES|QL query which was generated based on the provided NL query, index and context.
+   * May be undefined if the LLM failed to produce a query.
    */
-  generatedQuery: string;
+  generatedQuery: string | undefined;
   /**
    * The ES|QL data which was returned by executing the query.
    */
@@ -30,35 +31,38 @@ export interface NaturalLanguageSearchResponse {
 export const naturalLanguageSearch = async ({
   nlQuery,
   target,
-  model,
+  modelProvider,
   esClient,
   logger,
   events,
   rowLimit,
   customInstructions,
   timeRange,
+  includeDatasets = false,
 }: {
   nlQuery: string;
   target: string;
-  model: ScopedModel;
+  modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   rowLimit?: number;
   customInstructions?: string;
   timeRange?: TimeRange;
+  includeDatasets?: boolean;
 }): Promise<NaturalLanguageSearchResponse> => {
   const queryGenResponse = await generateEsql({
     nlQuery,
     index: target,
     executeQuery: true,
-    model,
+    modelProvider,
     esClient,
     logger,
     events,
     rowLimit,
     additionalInstructions: customInstructions,
     timeRange,
+    includeDatasets,
   });
 
   return {

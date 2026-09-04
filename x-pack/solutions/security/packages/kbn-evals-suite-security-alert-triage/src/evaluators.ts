@@ -17,6 +17,7 @@ import { attachmentTools } from '@kbn/agent-builder-common';
 export const attachmentReadCompliance = {
   name: 'AttachmentReadCompliance',
   kind: 'CODE' as const,
+  direction: 'maximize' as const,
   evaluate: async ({ output, metadata }: { output: unknown; metadata: unknown }) => {
     const expectedReads = (metadata as { expectedAttachmentReads?: number } | undefined)
       ?.expectedAttachmentReads;

@@ -69,7 +69,7 @@ export function AlertEpisodesRuleFilter({
       aria-label={i18n.RULE_FILTER_ARIA_LABEL}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
           isSelected={isOpen}

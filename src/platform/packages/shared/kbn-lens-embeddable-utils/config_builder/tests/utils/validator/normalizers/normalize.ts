@@ -80,13 +80,37 @@ export function ignorePaths<T extends Record<string, unknown>>(obj: T, paths: st
     if (path.includes('*')) {
       for (const resolved of resolveWildcardPath(result, path.split('.'))) {
         unset(result, resolved);
+        pruneEmptyPlainObjectAncestors(result, resolved);
       }
     } else {
-      unset(result, path);
+      const resolved = path.split('.');
+      unset(result, resolved);
+      pruneEmptyPlainObjectAncestors(result, resolved);
     }
   }
 
   return result;
+}
+
+/**
+ * After unsetting a leaf, delete ancestor plain objects that became `{}`.
+ * Without this, ignoring `….params.sortField` leaves `params: {}`, which still fails a strict
+ * compare against a side that omitted `params` entirely.
+ */
+function pruneEmptyPlainObjectAncestors(obj: Record<string, unknown>, path: string[]): void {
+  for (let i = path.length - 1; i > 0; i--) {
+    const ancestorPath = path.slice(0, i);
+    const ancestor = get(obj, ancestorPath);
+    if (
+      ancestor == null ||
+      typeof ancestor !== 'object' ||
+      Array.isArray(ancestor) ||
+      Object.keys(ancestor).length > 0
+    ) {
+      break;
+    }
+    unset(obj, ancestorPath);
+  }
 }
 
 function resolveWildcardPath(

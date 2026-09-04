@@ -9,6 +9,7 @@ export type {
   AttachmentTypeDefinition,
   AttachmentRepresentation,
   TextAttachmentRepresentation,
+  ImageAttachmentRepresentation,
   AttachmentValidationResult,
   AgentFormattedAttachment,
   AttachmentFormatContext,

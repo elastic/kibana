@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { lazy } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import {
   type AppMountParameters,
@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
 import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import { createAppService } from '@kbn/ai-assistant';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { observabilityAppId } from '@kbn/observability-plugin/common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -32,7 +31,6 @@ import type {
 } from './types';
 import { getObsAIAssistantConnectorType } from './rule_connector';
 import { NavControlInitiator } from './components/nav_control/lazy_nav_control';
-import { SharedProviders } from './utils/shared_providers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConfigSchema {}
@@ -146,17 +144,6 @@ export class ObservabilityAIAssistantAppPlugin
         };
       };
 
-      coreStart.chrome.navControls.registerRight({
-        mount: mountObsAiAssistant,
-        // right before the user profile
-        order: 1001,
-      });
-
-      // Chrome Next transition: also expose this control as an AI button so it renders in the
-      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
-      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
-      // Remove the `registerRight` registration once Chrome Next is the only chrome.
-      // See https://github.com/elastic/kibana/issues/260010
       coreStart.chrome.next.aiButton.register({
         content: mountObsAiAssistant,
       });
@@ -169,28 +156,6 @@ export class ObservabilityAIAssistantAppPlugin
 
       await registerFunctions({ pluginsStart, registerRenderFunction });
     });
-
-    const withProviders = <P extends {}, R = {}>(Component: React.ComponentType<P>) =>
-      React.forwardRef((props: P, ref: React.Ref<R>) => (
-        <SharedProviders
-          coreStart={coreStart}
-          pluginsStart={pluginsStart}
-          service={service}
-          theme$={coreStart.theme.theme$}
-        >
-          <Component {...props} ref={ref} />
-        </SharedProviders>
-      ));
-
-    const LazilyLoadedRootCauseAnalysisContainer = withSuspense(
-      withProviders(
-        lazy(() =>
-          import('./components/rca/rca_container').then((m) => ({
-            default: m.RootCauseAnalysisContainer,
-          }))
-        )
-      )
-    );
 
     const chatExperience = coreStart.settings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
     const getHideInUi = () => chatExperience !== AIChatExperience.Classic;
@@ -206,8 +171,6 @@ export class ObservabilityAIAssistantAppPlugin
       );
     }
 
-    return {
-      RootCauseAnalysisContainer: LazilyLoadedRootCauseAnalysisContainer,
-    };
+    return {};
   }
 }

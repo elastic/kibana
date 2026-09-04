@@ -14,7 +14,7 @@ import type {
 } from 'react';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { pick } from 'lodash';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -87,7 +87,15 @@ export type InputCaptureProps = PropsWithChildren<{
     /** Keyboard control keys from the keyboard event */
     eventDetails: Pick<
       KeyboardEvent,
-      'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey' | 'code'
+      | 'key'
+      | 'altKey'
+      | 'ctrlKey'
+      | 'keyCode'
+      | 'metaKey'
+      | 'repeat'
+      | 'shiftKey'
+      | 'code'
+      | 'preventDefault'
     >;
   }) => void;
   /** Sets an interface that allows interactions with this component's focus/blur states */
@@ -179,16 +187,19 @@ export const InputCapture = memo<InputCaptureProps>(
 
         const currentTextSelection = getTextSelection();
 
-        const eventDetails = pick(ev, [
-          'key',
-          'altKey',
-          'ctrlKey',
-          'keyCode',
-          'metaKey',
-          'repeat',
-          'shiftKey',
-          'code',
-        ]);
+        const eventDetails = {
+          ...pick(ev, [
+            'key',
+            'altKey',
+            'ctrlKey',
+            'keyCode',
+            'metaKey',
+            'repeat',
+            'shiftKey',
+            'code',
+          ]),
+          preventDefault: ev.preventDefault.bind(ev),
+        };
 
         onCapture({
           value: newValue,
@@ -227,6 +238,7 @@ export const InputCapture = memo<InputCaptureProps>(
           repeat: false,
           shiftKey: false,
           code: 'MetaLeft',
+          preventDefault: ev.preventDefault.bind(ev),
         };
 
         onCapture({

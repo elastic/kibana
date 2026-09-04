@@ -10,6 +10,7 @@
 import { renderHook } from '@testing-library/react';
 import type { MetricUnit, NullableMetricUnit } from '../../../types';
 import { useChartLayers } from './use_chart_layers';
+import { createMetricAggregation } from '../../../common/utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../../common/utils', () => ({
@@ -122,7 +123,7 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].format).toBe('bytes');
   });
 
-  it('should not include format options if the metric has no unit', () => {
+  it('should format a metric with no unit as a compact whole number', () => {
     const metricWithoutUnit: MetricItemInput = { ...mockMetric, units: [] as MetricUnit[] };
     const { result } = renderHook(() =>
       useChartLayers({
@@ -131,9 +132,38 @@ describe('useChartLayers', () => {
       })
     );
     const [layer] = result.current;
-    expect(layer.yAxis[0]).not.toHaveProperty('format');
-    expect(layer.yAxis[0]).not.toHaveProperty('formatString');
+    expect(layer.yAxis[0]).toEqual(
+      expect.objectContaining({
+        format: 'number',
+        decimals: 0,
+        compactValues: true,
+      })
+    );
   });
+
+  it.each(['1', 'count', '{request}'])(
+    'should format the %s unit as a compact whole number',
+    (unit) => {
+      const metricWithCountUnit: MetricItemInput = {
+        ...mockMetric,
+        units: [unit] as unknown as NullableMetricUnit[],
+      };
+      const { result } = renderHook(() =>
+        useChartLayers({
+          metricItem: metricWithCountUnit,
+          dimensions: [],
+        })
+      );
+      const [layer] = result.current;
+      expect(layer.yAxis[0]).toEqual(
+        expect.objectContaining({
+          format: 'number',
+          decimals: 0,
+          compactValues: true,
+        })
+      );
+    }
+  );
 
   describe('when type or instrument is null or undefined', () => {
     it('should return empty layers when fieldTypes is empty', () => {
@@ -157,5 +187,25 @@ describe('useChartLayers', () => {
       );
       expect(result.current).toEqual([]);
     });
+  });
+
+  it('forwards gridSettings to createMetricAggregation', () => {
+    const gridSettings = {
+      counterAggregation: 'max' as const,
+      gaugeAggregation: 'avg' as const,
+      histogramPercentile: 'p95' as const,
+      dimensions: [],
+      searchTerm: '',
+    };
+
+    renderHook(() =>
+      useChartLayers({
+        metricItem: mockMetric,
+        dimensions: [],
+        gridSettings,
+      })
+    );
+
+    expect(createMetricAggregation).toHaveBeenCalledWith(expect.objectContaining({ gridSettings }));
   });
 });

@@ -241,22 +241,30 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_logs', { agentId, tabId: 'logs' }),
         isSelected: tabId === 'logs',
       },
-      {
-        id: 'diagnostics',
-        name: i18n.translate('xpack.fleet.agentDetails.subTabs.diagnosticsTab', {
-          defaultMessage: 'Diagnostics',
-        }),
-        href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
-        isSelected: tabId === 'diagnostics',
-      },
-      {
-        id: 'settings',
-        name: i18n.translate('xpack.fleet.agentDetails.subTabs.settingsTab', {
-          defaultMessage: 'Settings',
-        }),
-        href: getHref('agent_details_settings', { agentId, tabId: 'settings' }),
-        isSelected: tabId === 'settings',
-      },
+      ...(!isCollector
+        ? [
+            {
+              id: 'diagnostics',
+              name: i18n.translate('xpack.fleet.agentDetails.subTabs.diagnosticsTab', {
+                defaultMessage: 'Diagnostics',
+              }),
+              href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
+              isSelected: tabId === 'diagnostics',
+            },
+          ]
+        : []),
+      ...(!isCollector
+        ? [
+            {
+              id: 'settings',
+              name: i18n.translate('xpack.fleet.agentDetails.subTabs.settingsTab', {
+                defaultMessage: 'Settings',
+              }),
+              href: getHref('agent_details_settings', { agentId, tabId: 'settings' }),
+              isSelected: tabId === 'settings',
+            },
+          ]
+        : []),
     ];
   }, [getHref, agentId, tabId, isCollector]);
 
@@ -355,18 +363,22 @@ const AgentDetailsPageContent: React.FunctionComponent<{
           return <AgentLogs agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
-      <Route
-        path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
-        render={() => {
-          return <AgentDiagnosticsTab agent={agent} />;
-        }}
-      />
-      <Route
-        path={FLEET_ROUTING_PATHS.agent_details_settings}
-        render={() => {
-          return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
-        }}
-      />
+      {!isCollector && (
+        <Route
+          path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
+          render={() => {
+            return <AgentDiagnosticsTab agent={agent} />;
+          }}
+        />
+      )}
+      {!isCollector && (
+        <Route
+          path={FLEET_ROUTING_PATHS.agent_details_settings}
+          render={() => {
+            return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
+          }}
+        />
+      )}
       <Route
         path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {

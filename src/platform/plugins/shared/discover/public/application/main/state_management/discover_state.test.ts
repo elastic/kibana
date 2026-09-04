@@ -51,7 +51,33 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { getTabStateMock } from './redux/__mocks__/internal_state.mocks';
+import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
+import {
+  ProfileStateType,
+  type ProfileStateDefinition,
+} from '../../../../common/context_awareness';
+
+interface MultiUrlProfileState extends SerializableRecord {
+  firstUrlValue: string;
+  secondUrlValue: string;
+  persistentValue: string;
+}
+
+const MULTI_URL_PROFILE_STATE_DEF: ProfileStateDefinition<MultiUrlProfileState> = {
+  key: 'multiUrlProfileState',
+  descriptor: {
+    firstUrlValue: { type: ProfileStateType.Url },
+    secondUrlValue: { type: ProfileStateType.Url },
+    persistentValue: { type: ProfileStateType.Persistent },
+  },
+  defaultState: {
+    firstUrlValue: 'defaultFirstUrl',
+    secondUrlValue: 'defaultSecondUrl',
+    persistentValue: 'defaultPersistent',
+  },
+};
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -308,6 +334,126 @@ describe('Discover state', () => {
     });
   });
 
+  describe('Test discover initial profile state handling', () => {
+    test('URL profile state defaults override locally persisted profile state before stripping', async () => {
+      const services = createDiscoverServicesMock();
+      services.profileStateRegistry.registerDefinition(MULTI_URL_PROFILE_STATE_DEF);
+      const {
+        internalState,
+        stateStorageContainer,
+        initializeTabs,
+        initializeSingleTab,
+        getCurrentTab,
+        injectCurrentTab,
+      } = getDiscoverInternalStateMock({
+        persistedDataViews: [dataViewMock],
+        services,
+      });
+
+      await initializeTabs();
+      const tab = getCurrentTab();
+
+      internalState.dispatch(
+        internalStateActions.setTabs({
+          allTabs: [
+            {
+              ...tab,
+              profileState: {
+                [MULTI_URL_PROFILE_STATE_DEF.key]: {
+                  firstUrlValue: 'localFirstUrl',
+                  persistentValue: 'localPersistent',
+                },
+              },
+            },
+          ],
+          selectedTabId: tab.id,
+          recentlyClosedTabs: [],
+        })
+      );
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, {
+        [MULTI_URL_PROFILE_STATE_DEF.key]: {
+          firstUrlValue: MULTI_URL_PROFILE_STATE_DEF.defaultState.firstUrlValue,
+          secondUrlValue: 'urlSecondUrl',
+        },
+      });
+
+      await initializeSingleTab({ tabId: tab.id, skipWaitForDataFetching: true });
+
+      expect(getCurrentTab().profileState).toEqual({
+        [MULTI_URL_PROFILE_STATE_DEF.key]: {
+          secondUrlValue: 'urlSecondUrl',
+          persistentValue: 'localPersistent',
+        },
+      });
+      internalState.dispatch(injectCurrentTab(internalStateActions.stopSyncing)({}));
+    });
+
+    test('restores profile state with tab, locator Persistent, and URL precedence', async () => {
+      const services = createDiscoverServicesMock();
+      services.profileStateRegistry.registerDefinition(MULTI_URL_PROFILE_STATE_DEF);
+      const {
+        internalState,
+        stateStorageContainer,
+        initializeTabs,
+        initializeSingleTab,
+        getCurrentTab,
+        injectCurrentTab,
+      } = getDiscoverInternalStateMock({
+        persistedDataViews: [dataViewMock],
+        services,
+      });
+
+      await initializeTabs();
+      const tab = getCurrentTab();
+
+      internalState.dispatch(
+        internalStateActions.setTabs({
+          allTabs: [
+            {
+              ...tab,
+              profileState: {
+                [MULTI_URL_PROFILE_STATE_DEF.key]: {
+                  firstUrlValue: 'localFirstUrl',
+                  persistentValue: 'localPersistent',
+                },
+              },
+            },
+          ],
+          selectedTabId: tab.id,
+          recentlyClosedTabs: [],
+        })
+      );
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, {
+        [MULTI_URL_PROFILE_STATE_DEF.key]: {
+          firstUrlValue: MULTI_URL_PROFILE_STATE_DEF.defaultState.firstUrlValue,
+          secondUrlValue: 'urlSecondUrl',
+        },
+      });
+
+      await initializeSingleTab({
+        tabId: tab.id,
+        skipWaitForDataFetching: true,
+        profileState: {
+          [MULTI_URL_PROFILE_STATE_DEF.key]: {
+            firstUrlValue: 'ignoredLocatorUrl',
+            persistentValue: 'locatorPersistent',
+          },
+          unknownProfileState: {
+            persistentValue: 'ignored',
+          },
+        },
+      });
+
+      expect(getCurrentTab().profileState).toEqual({
+        [MULTI_URL_PROFILE_STATE_DEF.key]: {
+          secondUrlValue: 'urlSecondUrl',
+          persistentValue: 'locatorPersistent',
+        },
+      });
+      internalState.dispatch(injectCurrentTab(internalStateActions.stopSyncing)({}));
+    });
+  });
+
   describe('Test discover state with legacy migration', () => {
     test('migration of legacy query ', async () => {
       const { state } = await getState(
@@ -338,6 +484,7 @@ describe('Discover state', () => {
       persistedDataViews?: DataView[];
       services?: DiscoverServices;
     } = {}) => {
+      services.profileStateRegistry.registerDefinition(MULTI_URL_PROFILE_STATE_DEF);
       const {
         internalState,
         runtimeStateManager,
@@ -352,12 +499,38 @@ describe('Discover state', () => {
       await initializeTabs({ persistedDiscoverSession });
       await initializeSingleTab({ tabId: getCurrentTab().id });
 
+      const currentTab = getCurrentTab();
+      const scopedProfilesManager = selectTabRuntimeState(
+        runtimeStateManager,
+        currentTab.id
+      ).scopedProfilesManager$.getValue();
+      const contexts = scopedProfilesManager.getContexts();
+      jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+        ...contexts,
+        dataSourceContext: {
+          ...contexts.dataSourceContext,
+          profileState: MULTI_URL_PROFILE_STATE_DEF,
+        },
+      });
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId: currentTab.id,
+          profileStateDefinition: MULTI_URL_PROFILE_STATE_DEF,
+          profileState: {
+            ...MULTI_URL_PROFILE_STATE_DEF.defaultState,
+            firstUrlValue: 'customFirstUrl',
+          },
+        })
+      );
+
       return createSearchSessionRestorationDataProvider({
         data: services.data,
         getPersistedDiscoverSession: () => internalState.getState().persistedDiscoverSession,
         getCurrentTab,
         getCurrentTabRuntimeState: () =>
           selectTabRuntimeState(runtimeStateManager, getCurrentTab().id),
+        profileStateRegistry: services.profileStateRegistry,
+        runtimeStateManager,
       });
     };
 
@@ -425,6 +598,21 @@ describe('Discover state', () => {
         });
       });
 
+      test('both states include expanded active profile locator state', async () => {
+        const searchSessionInfoProvider = await setupSearchSessionInfoProvider();
+        const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
+        const expectedProfileState = {
+          [MULTI_URL_PROFILE_STATE_DEF.key]: {
+            firstUrlValue: 'customFirstUrl',
+            secondUrlValue: 'defaultSecondUrl',
+            persistentValue: 'defaultPersistent',
+          },
+        };
+
+        expect(initialState.profileState).toEqual(expectedProfileState);
+        expect(restoreState.profileState).toEqual(expectedProfileState);
+      });
+
       test('restoreState has persisted data view', async () => {
         const services = createDiscoverServicesMock();
         const persistedDiscoverSession = createDiscoverSessionMock({
@@ -439,6 +627,7 @@ describe('Discover state', () => {
               }),
               services,
               currentDataView: undefined,
+              tabType: undefined,
             }),
           ],
         });
@@ -467,6 +656,7 @@ describe('Discover state', () => {
               }),
               services,
               currentDataView: undefined,
+              tabType: undefined,
             }),
           ],
         });
@@ -579,6 +769,7 @@ describe('Discover state', () => {
           "controlGroupJson": undefined,
           "density": undefined,
           "description": undefined,
+          "documentsDisplayMode": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -586,6 +777,7 @@ describe('Discover state', () => {
           "hideTable": false,
           "id": undefined,
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "managed": false,
           "references": undefined,
           "refreshInterval": undefined,

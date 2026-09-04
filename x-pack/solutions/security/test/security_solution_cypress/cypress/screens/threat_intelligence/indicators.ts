@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelector } from '../../helpers/common';
+import {
+  getDataTestSubjectSelector,
+  getDataTestSubjectSelectorStartWith,
+} from '../../helpers/common';
 
 /* Indicators Table */
 
@@ -49,7 +52,7 @@ export const INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON = getDataTestSubjectSelect
 
 export const TOGGLE_FLYOUT_BUTTON = getDataTestSubjectSelector('tiToggleIndicatorFlyoutButton');
 export const FLYOUT_CLOSE_BUTTON = getDataTestSubjectSelector('euiFlyoutCloseButton');
-export const FLYOUT_TITLE = getDataTestSubjectSelector('securitySolutionFlyoutIOCDetailsTitle');
+export const FLYOUT_TITLE = getDataTestSubjectSelector('securitySolutionFlyoutIOCDetailsTitleText');
 export const FLYOUT_OVERVIEW_TAB = getDataTestSubjectSelector(
   'securitySolutionFlyoutIOCDetailsOverviewTab'
 );
@@ -69,6 +72,8 @@ export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON = getDataTestSubjec
 );
 export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM =
   getDataTestSubjectSelector('iocHeaderBlockItem');
+export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK =
+  getDataTestSubjectSelectorStartWith('iocHeaderBlock-');
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON = getDataTestSubjectSelector(
   'actionItem-security-default-cellActions-filterIn'
 );

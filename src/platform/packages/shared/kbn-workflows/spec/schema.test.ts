@@ -11,7 +11,24 @@ import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
+  DataSetStepSchema,
+  DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  ElasticsearchStepSchema,
   EventTimestampSchema,
+  IfStepSchema,
+  KibanaStepSchema,
+  LIQUID_MEMORY_LIMIT_MAX,
+  LIQUID_PARSE_LIMIT_MAX,
+  LIQUID_RENDER_LIMIT_MAX,
+  MergeStepSchema,
+  PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE,
+  PARALLEL_MODE_REFINEMENT_MESSAGE,
+  ParallelStepSchema,
+  WaitForApprovalStepSchema,
+  WaitForInputStepSchema,
+  WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
   WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
@@ -20,6 +37,8 @@ import {
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
+import { IF_CONDITION_MAX_LENGTH } from '../common/constants';
+import { getShape } from '../common/utils/zod';
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {
@@ -392,7 +411,7 @@ describe('ConcurrencySettingsSchema', () => {
 
   describe('strategy', () => {
     it('should accept valid strategy values', () => {
-      const strategies = ['cancel-in-progress', 'drop'] as const;
+      const strategies = ['cancel-in-progress', 'drop', 'queue'] as const;
       strategies.forEach((strategy) => {
         const result = ConcurrencySettingsSchema.safeParse({
           strategy,
@@ -471,6 +490,56 @@ describe('ConcurrencySettingsSchema', () => {
     });
   });
 
+  describe('queue-size', () => {
+    it('should accept optional queue-size when strategy is queue', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+        'queue-size': 10,
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data['queue-size']).toBe(10);
+      }
+    });
+
+    it('should allow queue-size to be omitted', () => {
+      const result = ConcurrencySettingsSchema.safeParse({ strategy: 'queue' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data['queue-size']).toBeUndefined();
+      }
+    });
+
+    it('should reject queue-size less than 1', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+        'queue-size': 0,
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('queue-ttl', () => {
+    it('should accept optional queue-ttl duration', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+        'queue-ttl': '24h',
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data['queue-ttl']).toBe('24h');
+      }
+    });
+
+    it('should reject invalid queue-ttl format', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+        'queue-ttl': 'not-a-duration',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
   it('should export ConcurrencySettings type that matches schema inference', () => {
     // Verify the type can be used and matches the schema inference
     const testSettings: ConcurrencySettings = {
@@ -538,11 +607,57 @@ describe('WorkflowSettingsSchema', () => {
     });
   });
 
+  describe('liquid', () => {
+    const validLiquidSettings = {
+      parseLimit: 200_000,
+      renderLimit: 2_000,
+      memoryLimit: 30_000_000,
+    };
+
+    it('should accept valid liquid limit settings', () => {
+      const result = WorkflowSettingsSchema.safeParse({
+        liquid: validLiquidSettings,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.liquid).toEqual(validLiquidSettings);
+      }
+    });
+
+    it.each([
+      ['parseLimit below minimum', { ...validLiquidSettings, parseLimit: 0 }],
+      ['parseLimit not integer', { ...validLiquidSettings, parseLimit: 1.5 }],
+      [
+        'parseLimit above maximum',
+        { ...validLiquidSettings, parseLimit: LIQUID_PARSE_LIMIT_MAX + 1 },
+      ],
+      ['renderLimit below minimum', { ...validLiquidSettings, renderLimit: 0 }],
+      ['renderLimit not integer', { ...validLiquidSettings, renderLimit: 1.5 }],
+      [
+        'renderLimit above maximum',
+        { ...validLiquidSettings, renderLimit: LIQUID_RENDER_LIMIT_MAX + 1 },
+      ],
+      ['memoryLimit below minimum', { ...validLiquidSettings, memoryLimit: 0 }],
+      ['memoryLimit not integer', { ...validLiquidSettings, memoryLimit: 1.5 }],
+      [
+        'memoryLimit above maximum',
+        { ...validLiquidSettings, memoryLimit: LIQUID_MEMORY_LIMIT_MAX + 1 },
+      ],
+    ])('should reject liquid settings with %s', (_, liquid) => {
+      const result = WorkflowSettingsSchema.safeParse({
+        liquid,
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe('CollisionStrategySchema', () => {
     it('should accept all valid strategy values', () => {
       expect(CollisionStrategySchema.safeParse('cancel-in-progress').success).toBe(true);
       expect(CollisionStrategySchema.safeParse('drop').success).toBe(true);
-      expect(CollisionStrategySchema.safeParse('queue').success).toBe(false);
+      expect(CollisionStrategySchema.safeParse('queue').success).toBe(true);
     });
 
     it('should reject invalid strategy values', () => {
@@ -553,7 +668,7 @@ describe('WorkflowSettingsSchema', () => {
 
     it('should export CollisionStrategy type that matches valid values', () => {
       // Verify the type can be used and matches the schema values
-      const validStrategies: CollisionStrategy[] = ['cancel-in-progress', 'drop'];
+      const validStrategies: CollisionStrategy[] = ['cancel-in-progress', 'drop', 'queue'];
       validStrategies.forEach((strategy) => {
         const result = CollisionStrategySchema.safeParse(strategy);
         expect(result.success).toBe(true);
@@ -837,5 +952,312 @@ describe('EventTimestampSchema', () => {
   it('should reject missing timestamp', () => {
     const result = EventTimestampSchema.safeParse({});
     expect(result.success).toBe(false);
+  });
+});
+
+describe('ParallelStepSchema', () => {
+  const baseParallel = {
+    name: 'fan-out',
+    type: 'parallel',
+    foreach: '{{ steps.list.output }}',
+    steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+  };
+
+  it('accepts a dynamic parallel step with a foreach and single branch step', () => {
+    expect(ParallelStepSchema.safeParse(baseParallel).success).toBe(true);
+  });
+
+  it('accepts a bare-number concurrency shorthand within the ceiling', () => {
+    const result = ParallelStepSchema.safeParse({ ...baseParallel, concurrency: 3 });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a concurrency object with max and count-waiting', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...baseParallel,
+      concurrency: { max: 4, 'count-waiting': false },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a bare-number concurrency above the ceiling', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...baseParallel,
+      concurrency: DEFAULT_PARALLEL_MAX_CONCURRENCY + 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a concurrency.max above the ceiling', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...baseParallel,
+      concurrency: { max: DEFAULT_PARALLEL_MAX_CONCURRENCY + 1 },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an empty branch body', () => {
+    const result = ParallelStepSchema.safeParse({ ...baseParallel, steps: [] });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts fail-fast and settled modes and rejects others', () => {
+    expect(ParallelStepSchema.safeParse({ ...baseParallel, mode: 'fail-fast' }).success).toBe(true);
+    expect(ParallelStepSchema.safeParse({ ...baseParallel, mode: 'settled' }).success).toBe(true);
+    expect(ParallelStepSchema.safeParse({ ...baseParallel, mode: 'whatever' }).success).toBe(false);
+  });
+
+  it('accepts overall and per-branch timeouts in duration format', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...baseParallel,
+      timeout: '5m',
+      'branch-timeout': '30s',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an invalid branch-timeout duration', () => {
+    const result = ParallelStepSchema.safeParse({ ...baseParallel, 'branch-timeout': 'soon' });
+    expect(result.success).toBe(false);
+  });
+
+  const staticParallel = {
+    name: 'fan-out',
+    type: 'parallel',
+    branches: [
+      { name: 'a', steps: [{ name: 'sa', type: 'console', with: { message: 'a' } }] },
+      { name: 'b', steps: [{ name: 'sb', type: 'console', with: { message: 'b' } }] },
+    ],
+  };
+
+  it('accepts a static parallel step with named branches', () => {
+    expect(ParallelStepSchema.safeParse(staticParallel).success).toBe(true);
+  });
+
+  it('rejects a static branch with an empty body', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...staticParallel,
+      branches: [
+        { name: 'a', steps: [] },
+        { name: 'b', steps: [{ name: 'sb', type: 'console', with: { message: 'b' } }] },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a static parallel with a single branch (requires >= 2)', () => {
+    const result = ParallelStepSchema.safeParse({
+      name: 'fan-out',
+      type: 'parallel',
+      branches: [{ name: 'only', steps: [{ name: 's', type: 'console', with: { message: 'x' } }] }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects duplicate static branch names (name doubles as the aggregate key)', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...staticParallel,
+      branches: [
+        { name: 'dup', steps: [{ name: 's1', type: 'console', with: { message: '1' } }] },
+        { name: 'dup', steps: [{ name: 's2', type: 'console', with: { message: '2' } }] },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts distinct static branch names', () => {
+    expect(ParallelStepSchema.safeParse(staticParallel).success).toBe(true);
+  });
+
+  // Returns true when the parse failed specifically on the mode refinement,
+  // so we don't accidentally accept a rejection that fired for another reason.
+  const failedWithModeMessage = (value: unknown): boolean => {
+    const result = ParallelStepSchema.safeParse(value);
+    return (
+      !result.success &&
+      result.error.issues.some((issue) => issue.message === PARALLEL_MODE_REFINEMENT_MESSAGE)
+    );
+  };
+
+  it('rejects mixing foreach and branches (with steps) via the mode refinement', () => {
+    expect(
+      failedWithModeMessage({
+        name: 'fan-out',
+        type: 'parallel',
+        foreach: '{{ steps.list.output }}',
+        steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+        branches: staticParallel.branches,
+      })
+    ).toBe(true);
+  });
+
+  it('rejects mixing foreach and branches even when no top-level steps are given', () => {
+    expect(
+      failedWithModeMessage({
+        name: 'fan-out',
+        type: 'parallel',
+        foreach: '{{ steps.list.output }}',
+        branches: staticParallel.branches,
+      })
+    ).toBe(true);
+  });
+
+  it('rejects mixing foreach (with empty steps) and branches', () => {
+    expect(
+      failedWithModeMessage({
+        name: 'fan-out',
+        type: 'parallel',
+        foreach: '{{ steps.list.output }}',
+        steps: [],
+        branches: staticParallel.branches,
+      })
+    ).toBe(true);
+  });
+
+  it('rejects a step with neither foreach nor branches via the mode refinement', () => {
+    expect(failedWithModeMessage({ name: 'fan-out', type: 'parallel' })).toBe(true);
+  });
+
+  it('rejects foreach without steps via the mode refinement', () => {
+    expect(
+      failedWithModeMessage({
+        name: 'fan-out',
+        type: 'parallel',
+        foreach: '{{ steps.list.output }}',
+      })
+    ).toBe(true);
+  });
+
+  it('rejects top-level steps alongside branches (static mode must omit steps)', () => {
+    expect(
+      failedWithModeMessage({
+        ...staticParallel,
+        steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+      })
+    ).toBe(true);
+  });
+
+  it('reports duplicate static branch names via the branch-names refinement', () => {
+    const result = ParallelStepSchema.safeParse({
+      name: 'fan-out',
+      type: 'parallel',
+      branches: [
+        { name: 'dup', steps: [{ name: 'a', type: 'console', with: { message: 'x' } }] },
+        { name: 'dup', steps: [{ name: 'b', type: 'console', with: { message: 'y' } }] },
+      ],
+    });
+    expect(result.success).toBe(false);
+    expect(
+      !result.success &&
+        result.error.issues.some((issue) => issue.message === PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE)
+    ).toBe(true);
+  });
+});
+
+describe('`if` condition on step schemas', () => {
+  // `if` comes from `BaseStepSchema`, but a schema can drop it by overriding the key.
+  const cases = [
+    {
+      name: 'wait',
+      schema: WaitStepSchema,
+      step: { name: 's', type: 'wait', with: { duration: '5s' } },
+    },
+    {
+      name: 'waitForInput',
+      schema: WaitForInputStepSchema,
+      step: { name: 's', type: 'waitForInput', with: { message: 'input?' } },
+    },
+    {
+      name: 'waitForApproval',
+      schema: WaitForApprovalStepSchema,
+      step: { name: 's', type: 'waitForApproval', with: { message: 'approve?' } },
+    },
+    {
+      name: 'data.set',
+      schema: DataSetStepSchema,
+      step: { name: 's', type: 'data.set', with: { key: 'value' } },
+    },
+    {
+      name: 'elasticsearch.*',
+      schema: ElasticsearchStepSchema,
+      step: { name: 's', type: 'elasticsearch.search', with: { index: 'x' } },
+    },
+    {
+      name: 'kibana.*',
+      schema: KibanaStepSchema,
+      step: {
+        name: 's',
+        type: 'kibana.request',
+        with: { request: { method: 'GET', path: '/api/status' } },
+      },
+    },
+    {
+      name: 'parallel',
+      // The refined export, not the object schema, so this matches what callers use.
+      schema: ParallelStepSchema,
+      step: {
+        name: 's',
+        type: 'parallel',
+        foreach: '{{ items }}',
+        steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+      },
+    },
+    {
+      name: 'merge',
+      schema: MergeStepSchema,
+      step: {
+        name: 's',
+        type: 'merge',
+        sources: ['a', 'b'],
+        steps: [{ name: 'after', type: 'console', with: { message: 'hi' } }],
+      },
+    },
+    {
+      name: 'workflow.execute',
+      schema: WorkflowExecuteStepSchema,
+      step: { name: 's', type: 'workflow.execute', with: { 'workflow-id': 'child' } },
+    },
+    {
+      name: 'workflow.executeAsync',
+      schema: WorkflowExecuteAsyncStepSchema,
+      step: { name: 's', type: 'workflow.executeAsync', with: { 'workflow-id': 'child' } },
+    },
+  ];
+
+  it.each(cases)('accepts an `if` condition on the $name step', ({ schema, step }) => {
+    expect(getShape(schema)).toHaveProperty('if');
+    expect(schema.parse({ ...step, if: '{{ inputs.enabled }}' }).if).toBe('{{ inputs.enabled }}');
+  });
+
+  it('rejects a step-level `if` on the `if` step, which gates on `condition`', () => {
+    const ifStep = {
+      name: 's',
+      type: 'if',
+      condition: 'inputs.enabled : true',
+      steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+    };
+
+    expect(IfStepSchema.safeParse(ifStep).success).toBe(true);
+
+    const result = IfStepSchema.safeParse({ ...ifStep, if: '{{ inputs.enabled }}' });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].path).toEqual(['if']);
+  });
+
+  it("bounds the condition length on both `if` and the `if` step's `condition`", () => {
+    const atLimit = 'a'.repeat(IF_CONDITION_MAX_LENGTH);
+    const overLimit = 'a'.repeat(IF_CONDITION_MAX_LENGTH + 1);
+    const waitStep = { name: 's', type: 'wait', with: { duration: '5s' } };
+    const ifStep = {
+      name: 's',
+      type: 'if',
+      steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+    };
+
+    expect(WaitStepSchema.safeParse({ ...waitStep, if: atLimit }).success).toBe(true);
+    expect(WaitStepSchema.safeParse({ ...waitStep, if: overLimit }).success).toBe(false);
+
+    expect(IfStepSchema.safeParse({ ...ifStep, condition: atLimit }).success).toBe(true);
+    expect(IfStepSchema.safeParse({ ...ifStep, condition: overLimit }).success).toBe(false);
   });
 });

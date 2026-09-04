@@ -22,23 +22,20 @@ export class RenderablePage {
 
 const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 const RENDER_COMPLETE_PENDING_SELECTOR = '[data-render-complete="false"]';
-const DATA_LOADING_SELECTOR = '[data-loading]';
 
 async function renderWait(count: number, page: ScoutPage) {
   const renderCompleteLocator = page.locator(RENDER_COMPLETE_SELECTOR);
   const renderPendingDataTitleLocator = page
     .locator(RENDER_COMPLETE_PENDING_SELECTOR)
     .and(page.locator('data-title'));
-  const loadingLocator = page.locator(DATA_LOADING_SELECTOR);
 
-  await renderCompleteLocator.waitFor({ timeout: 1000 });
+  // `.count()`, not `.waitFor()`: each panel can match 2 elements (wrapper + inner
+  // viz), which would violate Playwright's strict mode. `expect(...).toPass()` above
+  // already retries until `count()` reaches the expected total.
   const completedElementsCount = await renderCompleteLocator.count();
 
   if (completedElementsCount < count)
     throw new Error(
       `${completedElementsCount} elements completed rendering, still waiting on a total of ${count} - ${await renderPendingDataTitleLocator.all()}`
     );
-
-  const loadingCount = await loadingLocator.count();
-  if (loadingCount > 0) throw new Error(`${loadingCount} elements still loading contents`);
 }

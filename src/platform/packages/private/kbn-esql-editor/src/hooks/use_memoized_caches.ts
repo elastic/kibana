@@ -9,7 +9,7 @@
 
 import { useCallback, useMemo, useRef } from 'react';
 import { memoize } from 'lodash';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { ILicense } from '@kbn/licensing-types';
 import type { ESQLCallbacks, ESQLControlVariable, ESQLSourceResult } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -20,11 +20,19 @@ import {
   getESQLSources,
   getEsqlColumns,
   getJoinIndices,
+  getTimeseriesIndices,
   getProjectRoutingFromEsqlQuery,
+  getRemoteClustersFromESQLQuery,
 } from '@kbn/esql-utils';
 import type { getHistoryItems } from '../history_local_storage';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
-import { DATA_SOURCES_CACHE_KEY, HISTORY_STARRED_ITEMS_CACHE_KEY } from '../helpers';
+import {
+  DATA_SOURCES_CACHE_KEY,
+  HISTORY_STARRED_ITEMS_CACHE_KEY,
+  JOIN_INDICES_CACHE_KEY,
+  TIMESERIES_INDICES_CACHE_KEY,
+  clearCacheWhenOld,
+} from '../helpers';
 
 interface UseMemoizedCachesParams {
   code: string;
@@ -74,16 +82,51 @@ export const useMemoizedCaches = ({
         ...args: [
           CoreStart,
           (() => Promise<ILicense | undefined>) | undefined,
-          ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+          ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
+          AbortSignal | undefined
         ]
       ) => ({
         timestamp: Date.now(),
-        result: getESQLSources(...args, undefined, effectiveProjectRouting),
+        result: getESQLSources(...args, effectiveProjectRouting),
       }),
       () => DATA_SOURCES_CACHE_KEY
     );
 
     return { cache: fn.cache, memoizedSources: fn };
+  }, [effectiveProjectRouting]);
+
+  // React-level cache for join indices — recreated when effectiveProjectRouting changes,
+  // which discards the old cache entries and forces a fresh fetch with the new routing.
+  const { cache: joinIndicesCache, memoizedJoinIndices } = useMemo(() => {
+    const fn = memoize(
+      (query: string, http: HttpStart) => {
+        const result = getJoinIndices(query, http, effectiveProjectRouting);
+        const key = getRemoteClustersFromESQLQuery(query)?.join(',') ?? JOIN_INDICES_CACHE_KEY;
+        result.catch(() => {
+          if (fn.cache.get(key)?.result === result) fn.cache.delete(key);
+        });
+        return { timestamp: Date.now(), result };
+      },
+      (query: string) => getRemoteClustersFromESQLQuery(query)?.join(',') ?? JOIN_INDICES_CACHE_KEY
+    );
+    return { cache: fn.cache, memoizedJoinIndices: fn };
+  }, [effectiveProjectRouting]);
+
+  // React-level cache for timeseries indices — recreated when effectiveProjectRouting changes.
+  // On rejection the cache entry is removed so the next call retries.
+  const { cache: timeseriesIndicesCache, memoizedTimeseriesIndices } = useMemo(() => {
+    const fn = memoize(
+      (http: HttpStart, signal?: AbortSignal) => {
+        const result = getTimeseriesIndices(http, effectiveProjectRouting, signal);
+        result.catch(() => {
+          if (fn.cache.get(TIMESERIES_INDICES_CACHE_KEY)?.result === result)
+            fn.cache.delete(TIMESERIES_INDICES_CACHE_KEY);
+        });
+        return { timestamp: Date.now(), result };
+      },
+      () => TIMESERIES_INDICES_CACHE_KEY
+    );
+    return { cache: fn.cache, memoizedTimeseriesIndices: fn };
   }, [effectiveProjectRouting]);
 
   const { cache: historyStarredItemsCache, memoizedHistoryStarredItems } = useMemo(() => {
@@ -136,10 +179,18 @@ export const useMemoizedCaches = ({
 
   const getJoinIndicesCallback = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
     async (cacheOptions) => {
-      const result = await getJoinIndices(minimalQueryRef.current, core.http, cacheOptions);
+      const cacheKey =
+        getRemoteClustersFromESQLQuery(minimalQueryRef.current)?.join(',') ??
+        JOIN_INDICES_CACHE_KEY;
+      if (cacheOptions?.forceRefresh) {
+        joinIndicesCache.delete(cacheKey);
+      } else {
+        clearCacheWhenOld(joinIndicesCache, cacheKey);
+      }
+      const result = await memoizedJoinIndices(minimalQueryRef.current, core.http).result;
       return result;
     },
-    [core.http]
+    [core.http, joinIndicesCache, memoizedJoinIndices]
   );
 
   return {
@@ -147,6 +198,10 @@ export const useMemoizedCaches = ({
     memoizedFieldsFromESQL,
     dataSourcesCache,
     memoizedSources,
+    joinIndicesCache,
+    memoizedJoinIndices,
+    timeseriesIndicesCache,
+    memoizedTimeseriesIndices,
     historyStarredItemsCache,
     memoizedHistoryStarredItems,
     minimalQuery,

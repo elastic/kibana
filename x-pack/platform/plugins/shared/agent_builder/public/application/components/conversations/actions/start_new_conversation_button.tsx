@@ -25,24 +25,35 @@ const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
 
 export const StartNewConversationButton: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const { isEmbeddedContext, setConversationId } = useConversationContext();
+  const { isEmbeddedContext, setConversationId, resetAttachments } = useConversationContext();
   const { removeError } = useConversationStream();
-  const lastAgentId = useLastAgentId();
+  const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
 
   const handleClick = useCallback(() => {
     if (isEmbeddedContext) {
       removeError();
       setConversationId?.(undefined);
+      resetAttachments?.();
     } else {
       navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: lastAgentId }));
     }
-  }, [isEmbeddedContext, removeError, setConversationId, navigateToAgentBuilderUrl, lastAgentId]);
+  }, [
+    isEmbeddedContext,
+    removeError,
+    setConversationId,
+    resetAttachments,
+    navigateToAgentBuilderUrl,
+    lastAgentId,
+  ]);
+
+  const isDisabled = !isEmbeddedContext && !isLastAgentIdReady;
 
   return (
     <EuiButton
       color="primary"
       fill
       onClick={handleClick}
+      isDisabled={isDisabled}
       data-test-subj="startNewConversationButton"
       {...getEbtProps({
         element: AGENT_BUILDER_UI_EBT.element.pageContent,

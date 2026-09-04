@@ -25,11 +25,7 @@ spec:
       initial_step_plugins:
         - sparse-checkout#v1.6.0:
             paths:
-              - .buildkite
-              - .node-version
-              - package.json
-              - tsconfig.base.json
-              - versions.json
+              - .buildkite/pipelines/version_bump.yml
             cleanup_sparse_state: true
       provider_settings:
         trigger_mode: none

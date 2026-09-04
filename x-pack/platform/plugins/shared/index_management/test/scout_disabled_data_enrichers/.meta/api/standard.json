@@ -1,0 +1,22 @@
+{
+  "sha1": "7f79b66b995c8d70929961566675aaa9f5540707",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "700816fda8ae7b7-2fe56af9827e423",
+      "title": "Indices API with disabled data enrichers doesn't send ILM, CCR and Rollups requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout_disabled_data_enrichers/api/tests/indices.spec.ts",
+        "line": 52,
+        "column": 35
+      }
+    }
+  ]
+}

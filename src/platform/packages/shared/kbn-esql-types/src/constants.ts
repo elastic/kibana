@@ -9,6 +9,9 @@
 
 export const REGISTRY_EXTENSIONS_ROUTE = '/internal/esql_registry/extensions/';
 export const SOURCES_AUTOCOMPLETE_ROUTE = '/internal/esql/autocomplete/sources/';
+export const JOIN_INDICES_AUTOCOMPLETE_ROUTE = '/internal/esql/autocomplete/join/indices';
+export const TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE =
+  '/internal/esql/autocomplete/timeseries/indices';
 export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield';
 export const VIEWS_ROUTE = '/internal/esql/views';
 export const DATASETS_ROUTE = '/internal/esql/datasets';
@@ -33,4 +36,5 @@ export enum SOURCES_TYPES {
   WIRED_STREAM = 'Wired Stream',
   CLASSIC_STREAM = 'Classic Stream',
   QUERY_STREAM = 'Query Stream',
+  EXTERNAL = 'External data',
 }

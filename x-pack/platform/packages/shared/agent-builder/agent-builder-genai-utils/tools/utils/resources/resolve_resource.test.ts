@@ -245,7 +245,7 @@ describe('resolveResource', () => {
 
       await expect(
         resolveResourceForEsql({ resourceName: 'no-match-*', esClient })
-      ).rejects.toThrow('No resource found for pattern no-match-*');
+      ).rejects.toThrow("No resource found for 'no-match-*'");
     });
 
     it('maps not_found from resolveIndex to a clear error', async () => {
@@ -256,6 +256,70 @@ describe('resolveResource', () => {
       await expect(
         resolveResourceForEsql({ resourceName: 'missing-index', esClient })
       ).rejects.toThrow("No resource found for 'missing-index'");
+    });
+
+    it('falls back to an external ES|QL dataset when resolveIndex throws not_found', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+      esClient.transport.request.mockResolvedValue({
+        datasets: [
+          { name: 'employees', data_source: 'local_minio', resource: 's3://my-bucket/*.csv' },
+        ],
+      });
+      esClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'emp_no', type: 'integer' },
+          { name: 'department', type: 'keyword' },
+        ],
+        values: [],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'employees',
+        esClient,
+        includeDatasets: true,
+      });
+
+      expect(esClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'FROM employees | LIMIT 0' }),
+        expect.anything()
+      );
+      expect(result).toEqual({
+        name: 'employees',
+        type: EsResourceType.dataset,
+        fields: [
+          { path: 'emp_no', type: 'integer', meta: {} },
+          { path: 'department', type: 'keyword', meta: {} },
+        ],
+        isTsdb: false,
+      });
+    });
+
+    it('falls back to an external ES|QL dataset when resolveIndex finds no resources', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.transport.request.mockResolvedValue({
+        datasets: [
+          { name: 'employees', data_source: 'local_minio', resource: 's3://my-bucket/*.csv' },
+        ],
+      });
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: 'emp_no', type: 'integer' }],
+        values: [],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'employees',
+        esClient,
+        includeDatasets: true,
+      });
+
+      expect(result.type).toBe(EsResourceType.dataset);
+      expect(result.fields).toEqual([{ path: 'emp_no', type: 'integer', meta: {} }]);
     });
 
     it('uses field caps with index pattern type when multiple aliases match and no indices', async () => {
@@ -289,6 +353,67 @@ describe('resolveResource', () => {
         ]),
         isTsdb: false,
       });
+    });
+
+    it('bypasses _resolve/index for a named-cluster CCS pattern and uses _field_caps', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({
+          statusCode: 403,
+          body: { error: { type: 'security_exception' } },
+        } as any)
+      );
+
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['remote_cluster:logs-1'],
+        fields: {
+          '@timestamp': { date: { type: 'date', searchable: true, aggregatable: true } },
+          message: { text: { type: 'text', searchable: true, aggregatable: false } },
+        },
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'remote_cluster:logs-*',
+        esClient,
+      });
+
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(esClient.fieldCaps).toHaveBeenCalledWith({
+        index: 'remote_cluster:logs-*',
+        fields: ['*'],
+      });
+      expect(result.name).toBe('remote_cluster:logs-*');
+      expect(result.type).toBe(EsResourceType.indexPattern);
+      expect(result.fields).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ path: '@timestamp', type: 'date' }),
+          expect.objectContaining({ path: 'message', type: 'text' }),
+        ])
+      );
+    });
+
+    it('bypasses _resolve/index for a wildcard-cluster CCS pattern and uses _field_caps', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({
+          statusCode: 403,
+          body: { error: { type: 'security_exception' } },
+        } as any)
+      );
+
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['cluster_a:logs-1', 'cluster_b:logs-1'],
+        fields: {
+          level: { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+        },
+      });
+
+      const result = await resolveResourceForEsql({ resourceName: '*:logs-*', esClient });
+
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(result.name).toBe('*:logs-*');
+      expect(result.type).toBe(EsResourceType.indexPattern);
+      expect(result.fields).toEqual(
+        expect.arrayContaining([expect.objectContaining({ path: 'level', type: 'keyword' })])
+      );
     });
 
     it('uses field caps with index pattern type when multiple data streams match', async () => {

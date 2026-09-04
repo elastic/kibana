@@ -10,34 +10,25 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { useKibana } from '../../../hooks/use_kibana';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchCompositeSlo } from './use_fetch_composite_slo';
 
-jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../hooks/use_plugin_context');
 
-const mockGet = jest.fn();
-const useKibanaMock = useKibana as jest.Mock;
+const GET_COMPOSITE_DEFINITION =
+  'GET /api/observability/slo_composites/_definitions/{id} 2023-10-31';
+const GET_SLO = 'GET /api/observability/slos/{id} 2023-10-31';
+
+const mockFetch = jest.fn();
+const usePluginContextMock = usePluginContext as jest.Mock;
 
 const compositeSloResponse = {
   id: 'composite-id',
   name: 'My Composite SLO',
   description: 'desc',
   members: [
-    {
-      sloId: 'slo-1',
-      name: 'Availability SLO',
-      instanceId: 'FEMALE',
-      weight: 2,
-      normalisedWeight: 0.67,
-      sliValue: 0.99,
-    },
-    {
-      sloId: 'slo-2',
-      name: 'Latency SLO',
-      weight: 1,
-      normalisedWeight: 0.33,
-      sliValue: 0.98,
-    },
+    { sloId: 'slo-1', instanceId: 'FEMALE', weight: 2 },
+    { sloId: 'slo-2', weight: 1 },
   ],
   timeWindow: { duration: '30d', type: 'rolling' },
   objective: { target: 0.99 },
@@ -75,7 +66,7 @@ function createWrapper(): FC<PropsWithChildren<{}>> {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  useKibanaMock.mockReturnValue({ services: { http: { get: mockGet } } });
+  usePluginContextMock.mockReturnValue({ sloClient: { fetch: mockFetch } });
 });
 
 describe('useFetchCompositeSlo', () => {
@@ -85,11 +76,11 @@ describe('useFetchCompositeSlo', () => {
     });
 
     expect(result.current.data).toBeUndefined();
-    expect(mockGet).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('returns loading state while fetching', () => {
-    mockGet.mockReturnValue(new Promise(() => {}));
+    mockFetch.mockReturnValue(new Promise(() => {}));
 
     const { result } = renderHook(() => useFetchCompositeSlo('composite-id'), {
       wrapper: createWrapper(),
@@ -100,10 +91,12 @@ describe('useFetchCompositeSlo', () => {
   });
 
   it('maps composite SLO response to form values', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url.includes('slo_composites')) return Promise.resolve(compositeSloResponse);
-      if (url.includes('/slos/slo-1')) return Promise.resolve(slo1Definition);
-      if (url.includes('/slos/slo-2')) return Promise.resolve(slo2Definition);
+    mockFetch.mockImplementation((endpoint: string, opts) => {
+      if (endpoint === GET_COMPOSITE_DEFINITION) return Promise.resolve(compositeSloResponse);
+      if (endpoint === GET_SLO && opts.params.path.id === 'slo-1')
+        return Promise.resolve(slo1Definition);
+      if (endpoint === GET_SLO && opts.params.path.id === 'slo-2')
+        return Promise.resolve(slo2Definition);
     });
 
     const { result } = renderHook(() => useFetchCompositeSlo('composite-id'), {
@@ -122,8 +115,8 @@ describe('useFetchCompositeSlo', () => {
   });
 
   it('converts objective.target from fraction to percentage', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url.includes('slo_composites')) return Promise.resolve(compositeSloResponse);
+    mockFetch.mockImplementation((endpoint: string) => {
+      if (endpoint === GET_COMPOSITE_DEFINITION) return Promise.resolve(compositeSloResponse);
       return Promise.resolve(slo1Definition);
     });
 
@@ -136,10 +129,12 @@ describe('useFetchCompositeSlo', () => {
   });
 
   it('enriches members with sloName and groupBy from SLO definitions', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url.includes('slo_composites')) return Promise.resolve(compositeSloResponse);
-      if (url.includes('/slos/slo-1')) return Promise.resolve(slo1Definition);
-      if (url.includes('/slos/slo-2')) return Promise.resolve(slo2Definition);
+    mockFetch.mockImplementation((endpoint: string, opts) => {
+      if (endpoint === GET_COMPOSITE_DEFINITION) return Promise.resolve(compositeSloResponse);
+      if (endpoint === GET_SLO && opts.params.path.id === 'slo-1')
+        return Promise.resolve(slo1Definition);
+      if (endpoint === GET_SLO && opts.params.path.id === 'slo-2')
+        return Promise.resolve(slo2Definition);
     });
 
     const { result } = renderHook(() => useFetchCompositeSlo('composite-id'), {
@@ -166,8 +161,8 @@ describe('useFetchCompositeSlo', () => {
   });
 
   it('falls back to sloId as name and ALL_VALUE as groupBy when member SLO fetch fails', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url.includes('slo_composites')) return Promise.resolve(compositeSloResponse);
+    mockFetch.mockImplementation((endpoint: string) => {
+      if (endpoint === GET_COMPOSITE_DEFINITION) return Promise.resolve(compositeSloResponse);
       return Promise.reject(new Error('not found'));
     });
 
@@ -185,9 +180,10 @@ describe('useFetchCompositeSlo', () => {
   });
 
   it('maps undefined instanceId to ALL_VALUE', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url.includes('slo_composites')) return Promise.resolve(compositeSloResponse);
-      if (url.includes('/slos/slo-2')) return Promise.resolve(slo2Definition);
+    mockFetch.mockImplementation((endpoint: string, opts) => {
+      if (endpoint === GET_COMPOSITE_DEFINITION) return Promise.resolve(compositeSloResponse);
+      if (endpoint === GET_SLO && opts.params.path.id === 'slo-2')
+        return Promise.resolve(slo2Definition);
       return Promise.resolve(slo1Definition);
     });
 
@@ -205,27 +201,13 @@ describe('useFetchCompositeSlo', () => {
     const responseWithDuplicateSlo = {
       ...compositeSloResponse,
       members: [
-        {
-          sloId: 'slo-1',
-          name: 'Availability SLO',
-          instanceId: 'FEMALE',
-          weight: 1,
-          normalisedWeight: 0.5,
-          sliValue: 0.99,
-        },
-        {
-          sloId: 'slo-1',
-          name: 'Availability SLO',
-          instanceId: 'MALE',
-          weight: 1,
-          normalisedWeight: 0.5,
-          sliValue: 0.99,
-        },
+        { sloId: 'slo-1', instanceId: 'FEMALE', weight: 1 },
+        { sloId: 'slo-1', instanceId: 'MALE', weight: 1 },
       ],
     };
 
-    mockGet.mockImplementation((url: string) => {
-      if (url.includes('slo_composites')) return Promise.resolve(responseWithDuplicateSlo);
+    mockFetch.mockImplementation((endpoint: string) => {
+      if (endpoint === GET_COMPOSITE_DEFINITION) return Promise.resolve(responseWithDuplicateSlo);
       return Promise.resolve(slo1Definition);
     });
 
@@ -235,9 +217,7 @@ describe('useFetchCompositeSlo', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    const sloDefinitionCalls = mockGet.mock.calls.filter((call) =>
-      call[0].includes('/api/observability/slos/')
-    );
+    const sloDefinitionCalls = mockFetch.mock.calls.filter((call) => call[0] === GET_SLO);
     expect(sloDefinitionCalls).toHaveLength(1);
   });
 });

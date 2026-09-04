@@ -573,4 +573,186 @@ describe('create_signals', () => {
       ],
     });
   });
+
+  describe('dateNanosTimestampFields', () => {
+    test('it adds sort format and asc missing value to both sort clauses', () => {
+      const query = buildEventsSearchQuery({
+        aggregations: undefined,
+        index: ['auditbeat-*'],
+        from: 'now-5m',
+        to: 'today',
+        filter: {},
+        size: 100,
+        searchAfterSortIds: undefined,
+        primaryTimestamp: 'event.ingested',
+        secondaryTimestamp: '@timestamp',
+        runtimeMappings: undefined,
+        dateNanosTimestampFields: ['event.ingested', '@timestamp'],
+      });
+      expect(query?.sort).toEqual([
+        {
+          'event.ingested': {
+            order: 'asc',
+            unmapped_type: 'date_nanos',
+            format: 'strict_date_optional_time_nanos',
+            missing: '9223372036854775806',
+          },
+        },
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date_nanos',
+            format: 'strict_date_optional_time_nanos',
+            missing: '9223372036854775806',
+          },
+        },
+      ]);
+    });
+
+    test('it treats indices missing a date_nanos field as date_nanos rather than date', () => {
+      const query = buildEventsSearchQuery({
+        aggregations: undefined,
+        index: ['auditbeat-*'],
+        from: 'now-5m',
+        to: 'today',
+        filter: {},
+        size: 100,
+        searchAfterSortIds: undefined,
+        primaryTimestamp: 'event.ingested',
+        secondaryTimestamp: undefined,
+        runtimeMappings: undefined,
+        dateNanosTimestampFields: ['event.ingested'],
+        mixedTimestampFields: [],
+      });
+      expect(query?.sort).toEqual([
+        {
+          'event.ingested': {
+            order: 'asc',
+            unmapped_type: 'date_nanos',
+            format: 'strict_date_optional_time_nanos',
+            missing: '9223372036854775806',
+          },
+        },
+      ]);
+    });
+
+    test('it leaves a date-only secondary timestamp on millisecond sort options', () => {
+      const query = buildEventsSearchQuery({
+        aggregations: undefined,
+        index: ['auditbeat-*'],
+        from: 'now-5m',
+        to: 'today',
+        filter: {},
+        size: 100,
+        searchAfterSortIds: undefined,
+        primaryTimestamp: 'event.ingested',
+        secondaryTimestamp: '@timestamp',
+        runtimeMappings: undefined,
+        dateNanosTimestampFields: ['event.ingested'],
+      });
+      expect(query?.sort).toEqual([
+        {
+          'event.ingested': {
+            order: 'asc',
+            unmapped_type: 'date_nanos',
+            format: 'strict_date_optional_time_nanos',
+            missing: '9223372036854775806',
+          },
+        },
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
+          },
+        },
+      ]);
+    });
+
+    test('it normalizes only timestamp fields with mixed date resolutions', () => {
+      const query = buildEventsSearchQuery({
+        aggregations: undefined,
+        index: ['auditbeat-*'],
+        from: 'now-5m',
+        to: 'today',
+        filter: {},
+        size: 100,
+        searchAfterSortIds: undefined,
+        primaryTimestamp: 'event.ingested',
+        secondaryTimestamp: '@timestamp',
+        runtimeMappings: undefined,
+        dateNanosTimestampFields: ['event.ingested', '@timestamp'],
+        mixedTimestampFields: ['event.ingested'],
+      });
+      expect(query?.sort).toEqual([
+        {
+          'event.ingested': {
+            order: 'asc',
+            unmapped_type: 'date_nanos',
+            format: 'strict_date_optional_time_nanos',
+            missing: '9223372036854775806',
+            numeric_type: 'date_nanos',
+          },
+        },
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date_nanos',
+            format: 'strict_date_optional_time_nanos',
+            missing: '9223372036854775806',
+          },
+        },
+      ]);
+    });
+
+    test('it uses epoch missing value for desc sort', () => {
+      const query = buildEventsSearchQuery({
+        aggregations: undefined,
+        index: ['auditbeat-*'],
+        from: 'now-5m',
+        to: 'today',
+        filter: {},
+        size: 100,
+        searchAfterSortIds: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+        sortOrder: 'desc',
+        runtimeMappings: undefined,
+        dateNanosTimestampFields: ['@timestamp'],
+      });
+      expect(query?.sort).toEqual([
+        {
+          '@timestamp': {
+            order: 'desc',
+            unmapped_type: 'date_nanos',
+            format: 'strict_date_optional_time_nanos',
+            missing: '0',
+          },
+        },
+      ]);
+    });
+
+    test('it does not add format or missing when no timestamp field is date_nanos', () => {
+      const query = buildEventsSearchQuery({
+        aggregations: undefined,
+        index: ['auditbeat-*'],
+        from: 'now-5m',
+        to: 'today',
+        filter: {},
+        size: 100,
+        searchAfterSortIds: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+        runtimeMappings: undefined,
+        dateNanosTimestampFields: [],
+      });
+      expect(query?.sort).toEqual([
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
+          },
+        },
+      ]);
+    });
+  });
 });

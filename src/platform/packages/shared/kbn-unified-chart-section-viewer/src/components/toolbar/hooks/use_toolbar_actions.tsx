@@ -8,14 +8,22 @@
  */
 
 import React, { useMemo } from 'react';
-import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { CHARTS_TOOLBAR_EBT_ELEMENT, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { css } from '@emotion/react';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
+import { METRICS_EBT_CLICK_ACTIONS } from '../../../analytics/ebt_constants';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
-import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
+import { SortSelector } from '../sort_selector';
+import {
+  MAX_DIMENSIONS_SELECTIONS,
+  FEATURE_FLAGS,
+  FEATURE_FLAG_DEFAULTS,
+} from '../../../common/constants';
+import { useFeatureFlag } from '../../../hooks';
+import { useSearchAction } from '../right_side_actions/use_search_action';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
   allDimensions: Dimension[];
@@ -25,6 +33,7 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
   isLoading?: boolean;
   /** Forwarded to {@link DimensionsSelector}; see its prop docs. */
   metricItems?: ParsedMetricItem[];
+  onOpenGridSettings: () => void;
 }
 
 export const useToolbarActions = ({
@@ -35,12 +44,34 @@ export const useToolbarActions = ({
   hideRightSideActions = false,
   isLoading = false,
   metricItems,
+  onOpenGridSettings,
 }: UseToolbarActionsProps) => {
-  const { selectedDimensions, onDimensionsChange, isFullscreen, onToggleFullscreen } =
-    useMetricsExperienceState();
+  const {
+    selectedDimensions,
+    onDimensionsChange,
+    isFullscreen,
+    onToggleFullscreen,
+    metricsSort,
+    onMetricsSortChange,
+    searchTerm,
+    onSearchTermChange,
+  } = useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
 
-  const { euiTheme } = useEuiTheme();
+  const { searchButton, searchInput } = useSearchAction({
+    value: searchTerm,
+    isFullscreen,
+    onSearchTermChange,
+  });
+
+  const isEditGridEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]
+  );
+  const isSortingEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_SORTING_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_SORTING_ENABLED]
+  );
 
   const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 
@@ -62,6 +93,9 @@ export const useToolbarActions = ({
           metricItems={metricItems}
         />
       ),
+      isSortingEnabled ? (
+        <SortSelector sort={metricsSort} onChange={onMetricsSortChange} fullWidth={isSmallScreen} />
+      ) : null,
     ],
     [
       isSmallScreen,
@@ -71,6 +105,9 @@ export const useToolbarActions = ({
       hideDimensionsSelector,
       isLoading,
       metricItems,
+      metricsSort,
+      onMetricsSortChange,
+      isSortingEnabled,
     ]
   );
 
@@ -78,6 +115,10 @@ export const useToolbarActions = ({
     if (hideRightSideActions) {
       return [];
     }
+
+    const editGridLabel = i18n.translate('metricsExperience.editGridButton', {
+      defaultMessage: 'Edit grid of metrics',
+    });
 
     const fullscreenButtonLabel = isFullscreen
       ? i18n.translate('metricsExperience.fullScreenExitButton', {
@@ -88,27 +129,43 @@ export const useToolbarActions = ({
         });
 
     return [
+      ...(searchButton ? [searchButton] : []),
+      ...(isEditGridEnabled
+        ? [
+            {
+              iconType: 'pencil',
+              label: editGridLabel,
+              toolTipContent: editGridLabel,
+              onClick: onOpenGridSettings,
+              'data-test-subj': 'metricsExperienceEditGridButton',
+              ...getEbtProps({
+                action: METRICS_EBT_CLICK_ACTIONS.EDIT_GRID_SETTINGS,
+                element: CHARTS_TOOLBAR_EBT_ELEMENT,
+              }),
+            },
+          ]
+        : []),
       {
         iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
         label: fullscreenButtonLabel,
         toolTipContent: fullscreenButtonLabel,
         onClick: onToggleFullscreen,
         'data-test-subj': 'metricsExperienceToolbarFullScreen',
-        css: css`
-          &.euiButtonGroupButton:first-of-type {
-            border: ${euiTheme.border.thin} !important;
-            border-left: none !important;
-            border-top-left-radius: 0px !important;
-            border-bottom-left-radius: 0px !important;
-          }
-        `,
       },
     ];
-  }, [isFullscreen, hideRightSideActions, onToggleFullscreen, euiTheme.border.thin]);
+  }, [
+    isFullscreen,
+    hideRightSideActions,
+    onToggleFullscreen,
+    onOpenGridSettings,
+    isEditGridEnabled,
+    searchButton,
+  ]);
 
   return {
     toggleActions,
     leftSideActions,
     rightSideActions,
+    searchInput: hideRightSideActions ? undefined : searchInput,
   };
 };

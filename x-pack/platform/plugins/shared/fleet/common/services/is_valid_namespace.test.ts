@@ -44,6 +44,14 @@ describe('Fleet - isValidNamespace', () => {
     expect(isValidNamespace('default', false, ['prod', 'qa']).valid).toBe(false);
   });
 
+  it('returns false for whitespace-only namespaces, even when blank namespaces are allowed', () => {
+    // Regression test for https://github.com/elastic/kibana/issues/276589 - a whitespace-only
+    // namespace (e.g. " ") must not be treated the same as a genuinely blank namespace.
+    expect(isValidNamespace(' ', true).valid).toBe(false);
+    expect(isValidNamespace('   ', true).valid).toBe(false);
+    expect(isValidNamespace(' ', true, ['test']).valid).toBe(false);
+  });
+
   it('accepts a namespace matching any of multiple allowed prefixes', () => {
     expect(isValidNamespace('prod', false, ['prod', 'qa']).valid).toBe(true);
     expect(isValidNamespace('qa', false, ['prod', 'qa']).valid).toBe(true);
@@ -58,13 +66,14 @@ describe('Fleet - isValidDataStreamType', () => {
     expect(isValidDataStreamType('metrics').valid).toBe(true);
     expect(isValidDataStreamType('traces').valid).toBe(true);
     expect(isValidDataStreamType('synthetics').valid).toBe(true);
-    expect(isValidDataStreamType('profiling').valid).toBe(true);
+    expect(isValidDataStreamType('profiles').valid).toBe(true);
   });
 
   it('returns false for unknown types', () => {
     expect(isValidDataStreamType('bogus').valid).toBe(false);
     expect(isValidDataStreamType('LOGS').valid).toBe(false);
     expect(isValidDataStreamType('').valid).toBe(false);
+    expect(isValidDataStreamType('profiling').valid).toBe(false);
   });
 
   it('returns true for blank when allowBlank is true', () => {

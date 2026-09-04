@@ -41,7 +41,8 @@
     "@kbn/code-editor-mock",
     "@kbn/react-kibana-context-render",
     "@kbn/licensing-types",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

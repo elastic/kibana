@@ -38,11 +38,12 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     cascadedDocumentsMap: {},
   },
   esqlVariables: [],
-  defaultProfileState: {
+  profileAppStateDefaults: {
     resetId: '',
     fieldsToReset: 'none',
     snapshotsByProfileId: {},
   },
+  profileState: {},
   expandedDoc: undefined,
   expandedDocOwner: undefined,
   renderDocumentViewMeta: undefined,

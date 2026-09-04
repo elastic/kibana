@@ -17,10 +17,12 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import { getActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { configSchema as actionsConfigSchema } from '@kbn/actions-plugin/server/config';
 import {
+  NOTIFICATIONS_REQUESTER_ID,
   validateConfig,
   validateConnector,
   validateParams,
   validateSecrets,
+  WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from '@kbn/actions-plugin/server/lib';
 
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -31,7 +33,7 @@ import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
 } from '@kbn/connector-schemas/email';
-import { getConnectorType } from '.';
+import { getConnectorType, ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX } from '.';
 import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AdditionalEmailServices } from '../../../common';
@@ -156,6 +158,39 @@ describe('config validation', () => {
       tenantId: null,
       oauthTokenUrl: null,
     });
+  });
+
+  test('config validation succeeds when HTML is explicitly allowed for non-Elastic Cloud service', () => {
+    const config: Record<string, unknown> = {
+      service: 'gmail',
+      from: 'bob@example.com',
+      hasAuth: true,
+      allowHtml: true,
+    };
+    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
+      ...config,
+      host: null,
+      port: null,
+      secure: null,
+      clientId: null,
+      tenantId: null,
+      oauthTokenUrl: null,
+    });
+  });
+
+  test('config validation fails when HTML is allowed for elastic_cloud service', () => {
+    const config: Record<string, unknown> = {
+      service: 'elastic_cloud',
+      from: 'bob@example.com',
+      hasAuth: true,
+      allowHtml: true,
+    };
+
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: [allowHtml]: cannot be true when [service] is \\"elastic_cloud\\""`
+    );
   });
 
   test('config validation fails when config is not valid', () => {
@@ -564,7 +599,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has invalid format (leading hyphen in domain)', () => {
@@ -581,7 +616,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has invalid format (trailing hyphen in domain)', () => {
@@ -598,7 +633,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email starts with @ sign', () => {
@@ -615,7 +650,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has double @ sign', () => {
@@ -632,7 +667,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has double dots in domain', () => {
@@ -649,7 +684,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation fails when email has space in domain', () => {
@@ -666,7 +701,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation accepts email with single-label domain (on-prem MTA)', () => {
@@ -683,7 +718,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('params validation fails when email has path traversal characters', () => {
@@ -700,7 +735,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).toThrow(/not valid emails/);
   });
 
   test('params validation succeeds for valid email with hyphens and subdomains', () => {
@@ -775,7 +810,7 @@ describe('params validation', () => {
         }),
         { configurationUtilities }
       );
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('error when using a service that is not enabled', async () => {
@@ -818,7 +853,7 @@ describe('params validation', () => {
         }),
         { configurationUtilities: configUtils }
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test('does not throw when fetching service enabled in config', () => {
@@ -838,7 +873,7 @@ describe('params validation', () => {
         }),
         { configurationUtilities: configUtils }
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test('throws for too long "to" address ', async () => {
@@ -1164,12 +1199,15 @@ describe('execute()', () => {
     `);
   });
 
-  test('ensure parameters are as expected with HTML message with source NOTIFICATION', async () => {
+  test('ensure parameters are as expected with HTML message from trusted notifications source', async () => {
     sendEmailMock.mockReset();
 
     const executorOptionsWithHTML = {
       ...executorOptions,
-      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
+      source: {
+        type: ActionExecutionSourceType.NOTIFICATION,
+        source: { requesterId: NOTIFICATIONS_REQUESTER_ID, connectorId: actionId },
+      },
       params: {
         ...executorOptions.params,
         messageHTML: '<html><body><span>My HTML message</span></body></html>',
@@ -1221,6 +1259,59 @@ describe('execute()', () => {
     `);
   });
 
+  test('ensure parameters are as expected with HTML message from serialized notifications source', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('ensure parameters are as expected with HTML message when connector allows HTML', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      config: {
+        ...executorOptions.config,
+        allowHtml: true,
+      },
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
+    expect(sendEmailMock.mock.calls[0][1].content.messageHTML).toBe(
+      '<html><body><span>My HTML message</span></body></html>'
+    );
+  });
+
   test('ensure error when using HTML message with no source', async () => {
     sendEmailMock.mockReset();
 
@@ -1236,7 +1327,8 @@ describe('execute()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
-        "message": "HTML email can only be sent via notifications",
+        "errorSource": "user",
+        "message": "HTML email can only be sent when the connector is configured to allow HTML",
         "status": "error",
       }
     `);
@@ -1258,7 +1350,8 @@ describe('execute()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
-        "message": "HTML email can only be sent via notifications",
+        "errorSource": "user",
+        "message": "HTML email can only be sent when the connector is configured to allow HTML",
         "status": "error",
       }
     `);
@@ -1269,7 +1362,10 @@ describe('execute()', () => {
 
     const executorOptionsWithHTML = {
       ...executorOptions,
-      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      source: {
+        type: ActionExecutionSourceType.SAVED_OBJECT,
+        source: { type: 'alert', id: 'rule-id' },
+      },
       params: {
         ...executorOptions.params,
         messageHTML: '<html><body><span>My HTML message</span></body></html>',
@@ -1280,10 +1376,96 @@ describe('execute()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
-        "message": "HTML email can only be sent via notifications",
+        "errorSource": "user",
+        "message": "HTML email can only be sent when the connector is configured to allow HTML",
         "status": "error",
       }
     `);
+  });
+
+  test('ensure error when using HTML message with source BACKGROUND_TASK', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: {
+        type: ActionExecutionSourceType.BACKGROUND_TASK,
+        source: { taskId: 'task-id', taskType: 'background-task' },
+      },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "HTML email can only be sent when the connector is configured to allow HTML",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('ensure error when using HTML message with workflows notification source by default', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: {
+        type: ActionExecutionSourceType.NOTIFICATION,
+        source: { requesterId: WORKFLOWS_NOTIFICATION_REQUESTER_ID, connectorId: actionId },
+      },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "HTML email can only be sent when the connector is configured to allow HTML",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('ensure parameters are as expected with workflows notification source when connector allows HTML', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      config: {
+        ...executorOptions.config,
+        allowHtml: true,
+      },
+      source: {
+        type: ActionExecutionSourceType.NOTIFICATION,
+        source: { requesterId: WORKFLOWS_NOTIFICATION_REQUESTER_ID, connectorId: actionId },
+      },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
+    expect(sendEmailMock.mock.calls[0][1].content.messageHTML).toBe(
+      '<html><body><span>My HTML message</span></body></html>'
+    );
   });
 
   test('ensure parameters are as expected with attachments with source NOTIFICATION', async () => {
@@ -1419,7 +1601,10 @@ describe('execute()', () => {
 
     const executorOptionsWithHTML = {
       ...executorOptions,
-      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      source: {
+        type: ActionExecutionSourceType.SAVED_OBJECT,
+        source: { type: 'alert', id: 'rule-id' },
+      },
       params: {
         ...executorOptions.params,
         attachments: [
@@ -1960,7 +2145,10 @@ describe('execute()', () => {
         message: LongString,
       },
       configurationUtilities: mockedActionsConfig,
-      config,
+      config: {
+        ...config,
+        allowHtml: true,
+      },
       secrets,
     };
 
@@ -1973,7 +2161,7 @@ describe('execute()', () => {
     );
 
     const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('message parameter is trimmed to 0 length if configured', async () => {
@@ -1986,7 +2174,10 @@ describe('execute()', () => {
         message: LongString,
       },
       configurationUtilities: mockedActionsConfig,
-      config,
+      config: {
+        ...config,
+        allowHtml: true,
+      },
       secrets,
     };
 
@@ -1997,7 +2188,7 @@ describe('execute()', () => {
     expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(additionalTextWeAdded);
 
     const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('messageHTML parameter is trimmed to the maximum allowed length', async () => {
@@ -2025,7 +2216,7 @@ describe('execute()', () => {
     );
 
     const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('messageHTML parameter is trimmed to 0 length if configured', async () => {
@@ -2051,7 +2242,7 @@ describe('execute()', () => {
     expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(additionalTextWeAdded);
 
     const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
-    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(expectedMessage);
   });
 
   test('includes replyTo in routing when provided', async () => {
@@ -2076,6 +2267,116 @@ describe('execute()', () => {
 
     const routing = sendEmailMock.mock.calls[0][1].routing;
     expect(routing).not.toHaveProperty('replyTo');
+  });
+});
+
+describe('execute() Elastic Cloud trial subject prefix', () => {
+  const secrets: ConnectorTypeSecretsType = {
+    user: 'bob',
+    password: 'supersecret',
+    clientSecret: null,
+  };
+  const params: ActionParamsType = {
+    to: ['jim@example.com'],
+    cc: [],
+    bcc: [],
+    subject: 'the subject',
+    message: 'a message to you',
+    messageHTML: null,
+    kibanaFooterLink: {
+      path: '/',
+      text: 'Go to Elastic',
+    },
+  };
+  const connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
+
+  const buildExecutorOptions = (
+    config: ConnectorTypeConfigType
+  ): EmailConnectorTypeExecutorOptions => ({
+    actionId: 'some-id',
+    config,
+    params,
+    secrets,
+    services,
+    configurationUtilities: actionsConfigMock.create(),
+    logger: mockedLogger,
+    connectorUsageCollector,
+  });
+
+  const elasticCloudConfig: ConnectorTypeConfigType = {
+    service: AdditionalEmailServices.ELASTIC_CLOUD,
+    host: null,
+    port: null,
+    secure: null,
+    from: 'bob@example.com',
+    hasAuth: true,
+    clientId: null,
+    tenantId: null,
+    oauthTokenUrl: null,
+  };
+
+  beforeEach(() => {
+    sendEmailMock.mockReset();
+  });
+
+  test('prefixes the subject when the deployment is a trial and service is elastic_cloud', async () => {
+    const trialConnectorType = getConnectorType({
+      isElasticCloudTrial: () => Promise.resolve(true),
+    });
+
+    await trialConnectorType.executor(buildExecutorOptions(elasticCloudConfig));
+
+    expect(sendEmailMock.mock.calls[0][1].content.subject).toBe(
+      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} the subject`
+    );
+  });
+
+  test('does not prefix the subject when the deployment is not a trial', async () => {
+    const nonTrialConnectorType = getConnectorType({
+      isElasticCloudTrial: () => Promise.resolve(false),
+    });
+
+    await nonTrialConnectorType.executor(buildExecutorOptions(elasticCloudConfig));
+
+    expect(sendEmailMock.mock.calls[0][1].content.subject).toBe('the subject');
+  });
+
+  test('does not prefix the subject for non elastic_cloud services even on a trial', async () => {
+    const trialConnectorType = getConnectorType({
+      isElasticCloudTrial: () => Promise.resolve(true),
+    });
+
+    await trialConnectorType.executor(
+      buildExecutorOptions({ ...elasticCloudConfig, service: '__json' })
+    );
+
+    expect(sendEmailMock.mock.calls[0][1].content.subject).toBe('the subject');
+  });
+
+  test('does not prefix the subject when trial detection is unavailable (self-managed)', async () => {
+    const selfManagedConnectorType = getConnectorType({});
+
+    await selfManagedConnectorType.executor(buildExecutorOptions(elasticCloudConfig));
+
+    expect(sendEmailMock.mock.calls[0][1].content.subject).toBe('the subject');
+  });
+
+  test('does not add a duplicate prefix when the subject already carries it', async () => {
+    const trialConnectorType = getConnectorType({
+      isElasticCloudTrial: () => Promise.resolve(true),
+    });
+
+    await trialConnectorType.executor({
+      ...buildExecutorOptions(elasticCloudConfig),
+      params: { ...params, subject: `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} the subject` },
+    });
+
+    expect(sendEmailMock.mock.calls[0][1].content.subject).toBe(
+      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} the subject`
+    );
   });
 });
 

@@ -9,10 +9,17 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { MetricsTelemetry } from '../types';
-import { METRICS_INFO_EVENT_TYPE } from '../components/observability/metrics/telemetry';
+import {
+  MAX_DIMENSIONS_REACHED_EVENT_TYPE,
+  METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE,
+  METRICS_INFO_EVENT_TYPE,
+  type MetricAggregationConfigChangedEvent,
+} from '../components/observability/metrics/telemetry';
 
 export interface UnifiedChartSectionViewerTelemetry {
   trackMetricsInfo: (telemetryPayload: MetricsTelemetry) => void;
+  trackMaxDimensionsReached: (maxDimensions: number) => void;
+  trackAggregationConfigChanged: (event: MetricAggregationConfigChangedEvent) => void;
 }
 
 export const createUnifiedChartSectionViewerTelemetry = (
@@ -23,5 +30,19 @@ export const createUnifiedChartSectionViewerTelemetry = (
       return;
     }
     analytics.reportEvent(METRICS_INFO_EVENT_TYPE, telemetryPayload);
+  },
+  trackMaxDimensionsReached: (maxDimensions: number) => {
+    if (!analytics) {
+      return;
+    }
+    analytics.reportEvent(MAX_DIMENSIONS_REACHED_EVENT_TYPE, {
+      max_dimensions: maxDimensions,
+    });
+  },
+  trackAggregationConfigChanged: (event: MetricAggregationConfigChangedEvent) => {
+    if (!analytics) {
+      return;
+    }
+    analytics.reportEvent(METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE, event);
   },
 });

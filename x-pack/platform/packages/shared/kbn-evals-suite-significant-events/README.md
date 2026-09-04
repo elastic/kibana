@@ -142,9 +142,13 @@ node scripts/evals run \
 
 | Variable                                | Description                                                                 | Default                    |
 | --------------------------------------- | --------------------------------------------------------------------------- | -------------------------- |
-| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-02-25`               |
+| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-03-27`               |
 | `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `all`                      |
-| `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `both`                     |
+| `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `canonical`                |
+| `KI_QUERY_GENERATION_SCENARIOS`         | Comma-separated KI query generation scenario ids to run (focused local runs); unset runs every scenario | `all`                      |
+| `SELECTED_EVALUATORS`                   | Shared permissive evaluator filter used across the suite, including evaluator-name patterns. The empty-stream safety canary always runs its mandatory evaluator. | all evaluators when unset       |
+| `KI_QUERY_GENERATION_EVALUATORS`        | Strict comma-separated exact evaluator names for the configurable main query-generation experiment. Unknown, empty, or trailing-comma selections fail fast. | falls back to `SELECTED_EVALUATORS` |
+| `KI_QUERY_GENERATION_MAX_STEPS`         | Optional max reasoning steps override for KI query generation (integer 2-20) | suite default               |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |
 | `SIGEVENTS_TRUST_UPSTREAM`              | When `true`, use dataset examples from the golden cluster instead of upserting from code | `false`                    |
 | `TRACING_ES_URL`                        | Elasticsearch URL for trace queries (if traces are in a separate cluster)   | Falls back to test cluster |
@@ -165,6 +169,9 @@ node scripts/evals run \
 | **filter_grounding**                   | KI feature extraction    | Entity filter equality pairs are grounded in input sample documents                       |
 | **ki_query_generation_code_evaluator** | KI query generation      | ES\|QL syntax validity, category/severity compliance, and execution hit rate              |
 | **tool_usage_validation**              | KI query generation      | Validates `get_stream_features` and `add_queries` tool calls were invoked correctly       |
+| **initial_feature_count**              | KI feature exclusion     | How many features the initial identification returned, before any exclusion is in play    |
+| **follow_up_returned_count**           | KI feature exclusion     | Raw features the model returned under exclusion instructions (median across follow-up runs) |
+| **follow_up_retained_count**           | KI feature exclusion     | Features retained after code strips exclusion leakers (median across follow-up runs)      |
 
 ### LLM-as-a-judge evaluators
 

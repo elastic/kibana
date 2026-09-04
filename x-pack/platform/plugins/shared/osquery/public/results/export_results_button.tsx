@@ -74,18 +74,13 @@ const ExportResultsButtonComponent: React.FC<ExportResultsButtonProps> = ({
     return null;
   }
 
-  // Strict `=== 0` so unknown counts (publisher hasn't mounted, error
-  // response, or a collapsed pack row where the store entry was cleared) do
-  // not disable the button. Only a successfully-fetched zero-row result
-  // disables it; `undefined` during the publisher's initial fetch is
-  // represented as `isLoading` instead, to avoid flashing the disabled state.
   const isEmpty = total === 0;
   const isInitialLoading = total === undefined;
 
   const button = (
     <EuiButtonEmpty
       size="m"
-      iconType="exportAction"
+      iconType="upload"
       onClick={openModal}
       isLoading={isExporting || isInitialLoading}
       isDisabled={isEmpty}

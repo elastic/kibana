@@ -6,7 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
 import { InlineFieldActions } from './inline_field_actions';
@@ -17,9 +17,12 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type CheckboxGroupProps = z.infer<typeof CheckboxGroupFieldSchema> & ConditionRenderProps;
+type CheckboxGroupProps = z.infer<typeof CheckboxGroupFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 const toStringArray = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
@@ -43,10 +46,13 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
+  onEditCancel,
 }) => {
   const { control, resetField } = useFormContext();
-  const [hasPendingChange, setHasPendingChange] = useState(false);
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const options = useMemo(
@@ -65,58 +71,57 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
     };
   }, [isRequired]);
 
-  const showInlineActions = hasPendingChange && onConfirm != null;
+  const handleCancel = useCallback(() => {
+    resetField(path);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
-    <>
-      <Controller
-        key={name}
-        name={path}
-        control={control}
-        rules={rules}
-        defaultValue={defaultValue}
-        render={({ field, fieldState }) => {
-          const selected = toArray(field.value);
-          const handleChange = (id: string) => {
-            const next = selected.includes(id)
-              ? selected.filter((s) => s !== id)
-              : [...selected, id];
-            field.onChange(JSON.stringify(next));
-            field.onBlur();
-            setHasPendingChange(true);
-          };
+    <Controller
+      key={name}
+      name={path}
+      control={control}
+      rules={rules}
+      defaultValue={defaultValue}
+      render={({ field, fieldState }) => {
+        const selected = toArray(field.value);
+        const handleChange = (id: string) => {
+          const next = selected.includes(id)
+            ? selected.filter((selectedId) => selectedId !== id)
+            : [...selected, id];
+          field.onChange(JSON.stringify(next));
+          field.onBlur();
+        };
 
-          return (
+        return (
+          <>
             <EuiFormRow
               label={label}
-              labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
               error={fieldState.error?.message}
-              isInvalid={!!fieldState.error}
+              isInvalid={Boolean(fieldState.error)}
               fullWidth
             >
               <EuiCheckboxGroup
                 options={options}
                 idToSelectedMap={Object.fromEntries(selected.map((id) => [id, true]))}
                 onChange={handleChange}
+                disabled={isSaving}
               />
             </EuiFormRow>
-          );
-        }}
-      />
-      {showInlineActions && (
-        <InlineFieldActions
-          name={name}
-          onConfirm={() => {
-            setHasPendingChange(false);
-            onConfirm();
-          }}
-          onCancel={() => {
-            setHasPendingChange(false);
-            resetField(path);
-          }}
-        />
-      )}
-    </>
+            {fieldState.isDirty && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
+        );
+      }}
+    />
   );
 };
 CheckboxGroup.displayName = 'CheckboxGroup';

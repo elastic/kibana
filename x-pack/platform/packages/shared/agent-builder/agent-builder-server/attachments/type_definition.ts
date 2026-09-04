@@ -95,9 +95,8 @@ export interface AttachmentFormatContext {
 export interface AttachmentResolveContext extends AttachmentFormatContext {
   /**
    * Saved objects client scoped to the current user.
-   * Optional to keep the core attachment contract generic and allow non-Kibana environments.
    */
-  savedObjectsClient?: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**
@@ -123,11 +122,18 @@ export interface TextAttachmentRepresentation {
 }
 
 /**
- * Representation of an attachment when exposed to the LLM.
- *
- * Only plain text (inlined into the message) is supported for now.
+ * Image representation of an attachment when exposed to the LLM.
  */
-export type AttachmentRepresentation = TextAttachmentRepresentation;
+export interface ImageAttachmentRepresentation {
+  type: 'image';
+  mimeType: string;
+  getBase64: () => MaybePromise<string>;
+}
+
+/**
+ * Representation of an attachment when exposed to the LLM.
+ */
+export type AttachmentRepresentation = TextAttachmentRepresentation | ImageAttachmentRepresentation;
 
 /**
  * Structure containing all methods which will be used to present the attachment to the agent.

@@ -41,6 +41,7 @@ describe('DatastreamInitializer', () => {
     esClient.indices.getIndexTemplate.mockResolvedValue({ index_templates: [] });
     esClient.indices.putIndexTemplate.mockResolvedValue({ acknowledged: true });
     esClient.indices.createDataStream.mockResolvedValue({ acknowledged: true });
+    esClient.indices.putSettings.mockResolvedValue({ acknowledged: true });
   });
 
   it('installs the index template with DSL lifecycle, then creates the data stream', async () => {
@@ -71,6 +72,7 @@ describe('DatastreamInitializer', () => {
       expect.objectContaining({
         template: expect.objectContaining({
           settings: expect.objectContaining({
+            'index.auto_expand_replicas': '0-1',
             'index.mapping.total_fields.limit': 2500,
             'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             'index.lifecycle.prefer_ilm': false,
@@ -121,5 +123,56 @@ describe('DatastreamInitializer', () => {
 
     const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
     await expect(initializer.initialize()).rejects.toThrow();
+  });
+
+  it('applies auto_expand_replicas to existing backing indices', async () => {
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+    await initializer.initialize();
+
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith({
+      index: resourceDefinition.dataStreamName,
+      settings: { 'index.auto_expand_replicas': '0-1' },
+    });
+  });
+
+  it('applies auto_expand_replicas to existing backing indices when the data stream already exists', async () => {
+    esClient.indices.createDataStream.mockRejectedValueOnce(
+      new errors.ResponseError({ statusCode: 409 } as DiagnosticResult)
+    );
+
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    await initializer.initialize();
+
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith({
+      index: resourceDefinition.dataStreamName,
+      settings: { 'index.auto_expand_replicas': '0-1' },
+    });
+  });
+
+  it('does not fail initialization when updating existing backing indices settings fails', async () => {
+    esClient.indices.putSettings.mockRejectedValueOnce(
+      new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
+    );
+
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+    await expect(initializer.initialize()).resolves.toBeUndefined();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to update auto_expand_replicas')
+    );
+  });
+
+  it('installs the index template with the max priority so it wins over overlapping user templates', async () => {
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+    await initializer.initialize();
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // Max Java long value, serialized as a string to avoid JS number precision loss.
+        priority: '9223372036854775807',
+      })
+    );
   });
 });

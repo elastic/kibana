@@ -8,7 +8,6 @@
 import {
   actionPolicyResponseSchema,
   findActionPoliciesResponseSchema,
-  bulkActionActionPoliciesResponseSchema,
 } from './action_policy_response_schema';
 
 const validResponse = {
@@ -16,21 +15,19 @@ const validResponse = {
   version: 'WzEsMV0=',
   name: 'My Policy',
   description: 'A test policy',
-  type: 'global' as const,
-  ruleId: null,
   enabled: true,
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: 'host.name: "server-1"',
-  groupBy: ['host.name'],
+  group_by: ['host.name'],
   tags: ['production'],
-  groupingMode: 'per_episode' as const,
+  grouping_mode: 'per_episode' as const,
   throttle: { strategy: 'on_status_change' as const, interval: null },
-  snoozedUntil: null,
-  auth: { owner: 'user-1', createdByUser: true },
-  createdBy: 'user-1',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'user-1',
-  updatedAt: '2026-01-01T00:00:00.000Z',
+  snoozed_until: null,
+  auth: { owner: 'user-1', created_by_user: true },
+  created_by: 'user-1',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_by: 'user-1',
+  updated_at: '2026-01-01T00:00:00.000Z',
 };
 
 describe('actionPolicyResponseSchema', () => {
@@ -44,18 +41,18 @@ describe('actionPolicyResponseSchema', () => {
       ...validResponse,
       version: undefined,
       matcher: null,
-      groupBy: null,
+      group_by: null,
       tags: null,
-      groupingMode: null,
+      grouping_mode: null,
       throttle: null,
-      snoozedUntil: null,
-      createdBy: null,
-      updatedBy: null,
+      snoozed_until: null,
+      created_by: null,
+      updated_by: null,
     });
     expect(result.matcher).toBeNull();
-    expect(result.groupBy).toBeNull();
+    expect(result.group_by).toBeNull();
     expect(result.tags).toBeNull();
-    expect(result.groupingMode).toBeNull();
+    expect(result.grouping_mode).toBeNull();
     expect(result.throttle).toBeNull();
   });
 
@@ -66,28 +63,6 @@ describe('actionPolicyResponseSchema', () => {
   it('rejects invalid enabled type', () => {
     expect(() => actionPolicyResponseSchema.parse({ ...validResponse, enabled: 'yes' })).toThrow();
   });
-
-  it('accepts a single_rule policy with a non-null ruleId', () => {
-    const result = actionPolicyResponseSchema.parse({
-      ...validResponse,
-      type: 'single_rule',
-      ruleId: 'rule-1',
-    });
-
-    expect(result.type).toBe('single_rule');
-    expect(result.ruleId).toBe('rule-1');
-  });
-
-  it('rejects a missing type', () => {
-    const { type: _type, ...rest } = validResponse;
-    expect(() => actionPolicyResponseSchema.parse(rest)).toThrow();
-  });
-
-  it('rejects an unknown type value', () => {
-    expect(() =>
-      actionPolicyResponseSchema.parse({ ...validResponse, type: 'team_rule' })
-    ).toThrow();
-  });
 });
 
 describe('findActionPoliciesResponseSchema', () => {
@@ -96,7 +71,7 @@ describe('findActionPoliciesResponseSchema', () => {
       items: [validResponse],
       total: 1,
       page: 1,
-      perPage: 10,
+      per_page: 10,
     });
     expect(result.items).toHaveLength(1);
     expect(result.total).toBe(1);
@@ -107,7 +82,7 @@ describe('findActionPoliciesResponseSchema', () => {
       items: [],
       total: 0,
       page: 1,
-      perPage: 10,
+      per_page: 10,
     });
     expect(result.items).toHaveLength(0);
   });
@@ -117,37 +92,7 @@ describe('findActionPoliciesResponseSchema', () => {
       findActionPoliciesResponseSchema.parse({
         items: [],
         page: 1,
-        perPage: 10,
-      })
-    ).toThrow();
-  });
-});
-
-describe('bulkActionActionPoliciesResponseSchema', () => {
-  it('accepts a valid bulk response', () => {
-    const result = bulkActionActionPoliciesResponseSchema.parse({
-      processed: 5,
-      total: 6,
-      errors: [{ id: 'np-2', message: 'Not found' }],
-    });
-    expect(result.processed).toBe(5);
-    expect(result.errors).toHaveLength(1);
-  });
-
-  it('accepts empty errors', () => {
-    const result = bulkActionActionPoliciesResponseSchema.parse({
-      processed: 3,
-      total: 3,
-      errors: [],
-    });
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('rejects missing processed', () => {
-    expect(() =>
-      bulkActionActionPoliciesResponseSchema.parse({
-        total: 3,
-        errors: [],
+        per_page: 10,
       })
     ).toThrow();
   });

@@ -16,7 +16,7 @@ jest.mock('@kbn/workflows', () => ({
   getBuiltInStepDefinition: jest.fn(() => undefined),
 }));
 
-jest.mock('../../shared/ui/step_icons/get_base_connector_type', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
   getBaseConnectorType: jest.fn((type: string) => {
     if (type.startsWith('elasticsearch.')) {
       return 'elasticsearch';

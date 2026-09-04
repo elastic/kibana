@@ -16,13 +16,10 @@ import {
   ClassicHeader,
   ChromeNextGlobalHeader,
   ChromeAppHeaderRenderer,
-  ProjectHeader,
   GridLayoutProjectSideNav,
   HeaderTopBanner,
   ChromelessHeader,
-  AppMenuBar,
   Sidebar,
-  useHasAppMenu,
   useHasChromeAppHeaderContent,
   useHasInlineAppHeader,
 } from '@kbn/core-chrome-browser-components';
@@ -33,20 +30,18 @@ import {
   useSidebarWidth,
   useSideNavWidth,
 } from '@kbn/core-chrome-browser-hooks';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
-import { GridLayoutGlobalStyles } from '@kbn/ui-chrome-layout';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
+import { KibanaGridLayoutGlobalStyles } from './kibana_grid_global_styles';
 
 const layoutConfigs: {
   classic: ChromeLayoutConfig;
   project: ChromeLayoutConfig;
-  projectNext: ChromeLayoutConfig;
 } = {
   classic: {
-    chromeStyle: 'classic',
+    appearance: 'plain',
     headerHeight: 96,
     bannerHeight: 32,
     sidebarWidth: 0,
@@ -54,23 +49,10 @@ const layoutConfigs: {
     navigationWidth: 0,
   },
   project: {
-    chromeStyle: 'project',
+    appearance: 'framed',
     headerHeight: 48,
     bannerHeight: 32,
-
-    /** Project style renders the app-specific menu in a separate top bar. */
-    applicationTopBarHeight: 48,
-    applicationMarginRight: 8,
-    applicationMarginBottom: 8,
-    sidebarWidth: 0,
-    footerHeight: 0,
-    navigationWidth: 0,
-  },
-  projectNext: {
-    chromeStyle: 'project',
-    headerHeight: 48,
-    bannerHeight: 32,
-    /** Chrome Next folds app-level header controls into the new header surface. */
+    /** Start at 0; ChromeAppHeaderRenderer measures and updates this when the slot is used. */
     applicationTopBarHeight: 0,
     applicationMarginRight: 8,
     applicationMarginBottom: 8,
@@ -90,11 +72,10 @@ export class GridLayout implements LayoutService {
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, overlays, http, docLinks, customBranding, featureFlags } = this.deps;
+    const { application, overlays, http, docLinks, customBranding } = this.deps;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
-    const nextChrome = isNextChrome(featureFlags);
 
     const componentDeps: ChromeComponentsDeps = {
       application,
@@ -107,15 +88,13 @@ export class GridLayout implements LayoutService {
       const chromeVisible = useIsChromeVisible();
       const hasHeaderBanner = useHasHeaderBanner();
       const chromeStyle = useChromeStyle();
-      const hasAppMenu = useHasAppMenu();
       const hasInlineAppHeader = useHasInlineAppHeader();
       const hasChromeAppHeaderContent = useHasChromeAppHeaderContent();
       const footer = useGlobalFooter();
       const sidebarWidth = useSidebarWidth();
       const navigationWidth = useSideNavWidth();
 
-      const layoutConfigKey =
-        chromeStyle === 'classic' ? 'classic' : nextChrome ? 'projectNext' : 'project';
+      const layoutConfigKey = chromeStyle === 'classic' ? 'classic' : 'project';
 
       const layoutConfig = {
         ...layoutConfigs[layoutConfigKey],
@@ -133,13 +112,9 @@ export class GridLayout implements LayoutService {
         if (chromeStyle === 'classic') {
           header = <ClassicHeader />;
         } else {
-          header = nextChrome ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
-          if (nextChrome) {
-            if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
-              applicationTopBar = <ChromeAppHeaderRenderer />;
-            }
-          } else if (hasAppMenu) {
-            applicationTopBar = <AppMenuBar />;
+          header = <ChromeNextGlobalHeader />;
+          if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
+            applicationTopBar = <ChromeAppHeaderRenderer />;
           }
 
           navigation = <GridLayoutProjectSideNav />;
@@ -152,7 +127,7 @@ export class GridLayout implements LayoutService {
 
       return (
         <>
-          <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
+          <KibanaGridLayoutGlobalStyles appearance={layoutConfig.appearance ?? 'plain'} />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}

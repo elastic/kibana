@@ -24,8 +24,8 @@ import {
   EuiButtonEmpty,
   EuiCheckbox,
   EuiAccordion,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -418,17 +418,17 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
       {state === STATE.SAVE_FAILED && createError !== null ? (
         <>
           <EuiSpacer />
-          <EuiCallOut announceOnMount color="danger" title={createError.text}>
-            {createError.errorText}
-          </EuiCallOut>
+          <KbnDangerCallout announceOnMount title={createError.text} text={createError.errorText} />
         </>
       ) : null}
       {incomingCreateError ? (
         <>
           <EuiSpacer />
-          <EuiCallOut announceOnMount color="danger" title={incomingCreateError.text}>
-            {incomingCreateError.errorText}
-          </EuiCallOut>
+          <KbnDangerCallout
+            announceOnMount
+            title={incomingCreateError.text}
+            text={incomingCreateError.errorText}
+          />
         </>
       ) : null}
     </>

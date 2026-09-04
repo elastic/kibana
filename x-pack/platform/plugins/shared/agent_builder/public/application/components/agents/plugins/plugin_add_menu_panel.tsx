@@ -36,7 +36,7 @@ export const PluginAddMenuPanel: React.FC<PluginAddMenuPanelProps> = ({
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="fromLibrary"
-        icon="importAction"
+        icon="download"
         onClick={onAddFromLibrary}
         {...getEbtProps({
           element: AGENT_BUILDER_UI_EBT.element.pageContent,

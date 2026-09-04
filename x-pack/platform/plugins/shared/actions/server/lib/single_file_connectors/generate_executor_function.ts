@@ -7,16 +7,24 @@
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
+  getAuthModeForAuthTypeId,
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
+  clientTypes as defaultClientTypes,
 } from '@kbn/connector-specs';
+import type { ActionContext, ClientTypeSpec, ConnectorNetworkSettings } from '@kbn/connector-specs';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '../../types';
-import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
+import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
+import type { LeasePool } from '../lease_pool';
+import { buildClientLeaseKey } from './build_client_lease_key';
+import { AllowlistDeniedError } from './connector_network_errors';
 
 type RecordUnknown = Record<string, unknown>;
 interface FetchOptions {
@@ -62,12 +70,28 @@ const getErrorMeta = ({
   return Object.keys(errorMeta).length > 0 ? errorMeta : undefined;
 };
 
+const isClientUserError = (error: unknown, clientType: ClientTypeSpec<unknown>): boolean => {
+  return (
+    error instanceof AllowlistDeniedError ||
+    (error instanceof Error && isUserError(error)) ||
+    (clientType.isUserError?.(error) ?? false)
+  );
+};
+
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
+  getCredential,
+  getClientLeasePool,
+  networkSettings,
+  clientTypes = defaultClientTypes,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
+  getCredential: GetCredentialFn;
+  getClientLeasePool: () => LeasePool<unknown>;
+  networkSettings: ConnectorNetworkSettings;
+  clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -83,6 +107,7 @@ export const generateExecutorFunction = ({
       signal,
       authMode,
       profileUid,
+      connectorVersion,
     } = execOptions;
     const { subAction, subActionParams, fetchOptions } = params as ExecutorParams & {
       fetchOptions?: FetchOptions;
@@ -107,11 +132,78 @@ export const generateExecutorFunction = ({
       throw new Error(errorMessage);
     }
 
+    const pool = getClientLeasePool();
+    const getClient = async (id: string): Promise<unknown> => {
+      const clientType = clientTypes[id];
+      if (!clientType) {
+        throw new Error(`[Action][ExternalService] Unknown client type ${id}.`);
+      }
+      // The lease key is derived from the auth type in `secrets` rather than the connector's
+      // persisted `authMode`. A per-user credential leased under a `shared` identity would serve
+      // one user's warm client, and its captured credential accessor, to every other user.
+      // `authMode` is inferred once when the connector is created, so it can be absent (no
+      // `authType` field, an auth type unknown at creation time, or an in-memory connector) and
+      // would then fall back to `shared`.
+      const authTypeId = (secrets as { authType?: string }).authType ?? 'none';
+      const derivedAuthMode = getAuthModeForAuthTypeId(authTypeId);
+
+      if (derivedAuthMode === 'per-user' && authMode !== 'per-user') {
+        throw createTaskRunError(
+          new Error(
+            `[Action][ExternalService] Refusing to lease a pooled client: auth type "${authTypeId}" is per-user but connector "${connectorId}" resolved to "${
+              authMode ?? 'shared'
+            }".`
+          ),
+          TaskErrorSource.FRAMEWORK
+        );
+      }
+
+      if (derivedAuthMode === 'per-user' && !profileUid) {
+        throw createTaskRunError(
+          new Error('A profile UID is required to lease a per-user connector client.'),
+          TaskErrorSource.USER
+        );
+      }
+      try {
+        if (!connectorVersion) {
+          throw new Error(`Missing saved-object version for persisted connector "${connectorId}".`);
+        }
+        return await pool.lease(
+          buildClientLeaseKey({
+            connectorId,
+            clientTypeId: id,
+            authMode: derivedAuthMode,
+            profileUid,
+            connectorVersion,
+          }),
+          () =>
+            clientType.build({
+              logger,
+              config,
+              networkSettings,
+              credential: getCredential({
+                connectorId,
+                secrets,
+                connectorTokenClient,
+                authMode,
+                profileUid,
+              }),
+            }),
+          (client) => clientType.terminate(client)
+        );
+      } catch (err) {
+        const isUser = isClientUserError(err, clientType);
+        const error = err instanceof Error ? err : new Error(String(err));
+        throw createTaskRunError(error, isUser ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK);
+      }
+    };
+
     const actionContext = {
       log: logger,
       client: axiosInstance,
       secrets,
       config,
+      getClient: getClient as ActionContext['getClient'],
     };
 
     try {
@@ -124,6 +216,8 @@ export const generateExecutorFunction = ({
 
       return { status: 'ok', data, actionId: connectorId };
     } catch (error) {
+      const errorSource = error instanceof Error ? getErrorSource(error) : undefined;
+      if (errorSource === TaskErrorSource.FRAMEWORK) throw error;
       const errorMessage = error instanceof Error ? error.message : String(error);
       const contentLengthBytes = getResponseSizeHeaderBytes({
         error,
@@ -136,6 +230,9 @@ export const generateExecutorFunction = ({
         message: errorMessage,
         actionId: connectorId,
         ...(errorMeta ? { errorMeta } : {}),
+        ...(errorSource === TaskErrorSource.USER
+          ? { retry: false, errorSource: TaskErrorSource.USER }
+          : {}),
       };
     }
   };

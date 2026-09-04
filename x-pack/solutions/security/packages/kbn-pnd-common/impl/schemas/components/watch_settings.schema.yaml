@@ -1,0 +1,305 @@
+openapi: 3.0.0
+info:
+  title: PND Watch settings component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    WatchAutonomyLevel:
+      type: string
+      enum: [manual, assisted, supervised]
+      description: >-
+        Autonomy dial levels per programme decision D15 (2026-07-28). Manual is the MVP default.
+        There is deliberately no mapping from the legacy 1–5 AutonomyLevel scale — see
+        https://github.com/elastic/security-team/issues/18718.
+
+    WorkerRunState:
+      type: string
+      enum: [ok, paused, degraded, unavailable]
+      description: >-
+        Run health of a long-running worker, shown instead of a timestamp when not ok. Workers only —
+        a skill is invoked rather than run continuously, so it has no health of its own.
+
+    WatchWorker:
+      type: object
+      description: A worker in the global worker catalog.
+      required:
+        - id
+        - watchIds
+        - lastRun
+        - enabled
+        - state
+      properties:
+        id:
+          type: string
+          description: >-
+            Copy key — the UI resolves name and description from this id. Unique among workers only;
+            Containment and Case assembly each exist as both a worker and a skill.
+        watchIds:
+          type: array
+          items:
+            type: string
+          description: Watches this worker is attached to
+        lastRun:
+          type: string
+          nullable: true
+          description: ISO 8601 timestamp of last invocation, or null when never run or not running
+        enabled:
+          type: boolean
+          description: Global flag. Effective enablement is this AND the per-watch attachment flag.
+        state:
+          $ref: '#/components/schemas/WorkerRunState'
+        stateReason:
+          type: string
+          description: >-
+            Why the worker is not in the ok state, e.g. which dependency is unavailable. Free prose
+            rather than a copy key because it names runtime specifics, like WatchLedgerEntry.event.
+        lifecycle:
+          $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
+          description: Omitted for generally available workers; badge shown otherwise
+
+    WatchSkill:
+      type: object
+      description: A skill in the global skill catalog.
+      required:
+        - id
+        - watchIds
+        - lastRun
+      properties:
+        id:
+          type: string
+          description: >-
+            Copy key — the UI resolves name and description from this id. Unique among skills only.
+        name:
+          type: string
+          description: >-
+            Display name resolved from the Agent Builder registry at projection time.
+        watchIds:
+          type: array
+          items:
+            type: string
+          description: Watches whose workers may call this skill
+        summary:
+          type: string
+          description: >-
+            Summary of the skill's purpose
+        lastRun:
+          type: string
+          nullable: true
+          description: ISO 8601 timestamp of last invocation, or null when never invoked
+        lifecycle:
+          $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
+          description: Omitted for generally available skills; badge shown otherwise
+
+    WatchWorkerAttachment:
+      type: object
+      description: Per-watch enablement of a worker, ANDed with the worker's global flag
+      required:
+        - workerId
+        - enabled
+      properties:
+        workerId:
+          type: string
+        enabled:
+          type: boolean
+
+    WatchSkillAttachment:
+      type: object
+      description: Per-watch enablement of a skill, ANDed with the skill's global flag
+      required:
+        - skillId
+        - enabled
+      properties:
+        skillId:
+          type: string
+        enabled:
+          type: boolean
+
+    WatchSelectSetting:
+      type: object
+      description: A single-choice setting. Both ids resolve to copy in the UI.
+      required:
+        - optionIds
+        - selectedId
+      properties:
+        optionIds:
+          type: array
+          items:
+            type: string
+        selectedId:
+          type: string
+
+    WatchTriggersSettings:
+      type: object
+      required:
+        - sharedWithAttackDiscovery
+        - schedule
+        - allowManualRun
+      properties:
+        sharedWithAttackDiscovery:
+          type: boolean
+          description: >-
+            Renders the "Shared with Attack Discovery" callout. Mocked — not wired to the real
+            Attack Discovery API. Contested in the field, see programme decision D12.
+        schedule:
+          $ref: '#/components/schemas/WatchSelectSetting'
+        allowManualRun:
+          type: boolean
+
+    WatchScopeRoutingSettings:
+      type: object
+      description: >-
+        The data-boundary chips the design shows in this section are rendered from the watch's own
+        `scopes`, which already carry a name and an access level, so they are not duplicated here.
+      required:
+        - dataSources
+        - assigneeQueue
+        - escalationContact
+      properties:
+        dataSources:
+          $ref: '#/components/schemas/WatchSelectSetting'
+        assigneeQueue:
+          $ref: '#/components/schemas/WatchSelectSetting'
+        escalationContact:
+          $ref: '#/components/schemas/WatchSelectSetting'
+
+    ApprovalRequirement:
+      type: string
+      enum: [always, high-impact, in-scope]
+      description: >-
+        always and high-impact require a named approver; in-scope is informational (the action has
+        no side effects and runs within the watch's scope)
+
+    WatchApprovalGate:
+      type: object
+      required:
+        - id
+        - requirement
+        - requirementLocked
+        - approverRoleId
+      properties:
+        id:
+          type: string
+          description: Copy key for the action type and its qualifier line
+        requirement:
+          $ref: '#/components/schemas/ApprovalRequirement'
+        requirementLocked:
+          type: boolean
+          description: True renders static text instead of a select — consequential actions always gate
+        approverRoleId:
+          type: string
+          nullable: true
+          description: Null renders an em dash, used for gates that need no approver
+        approverRoleOptionIds:
+          type: array
+          items:
+            type: string
+          description: Omitted when approverRoleId is null
+
+    WatchRunOutcome:
+      type: string
+      enum: [awaiting-review, accepted, dismissed, executed, completed]
+
+    WatchLedgerEntry:
+      type: object
+      description: One row of the per-watch run ledger
+      required:
+        - id
+        - time
+        - callableId
+        - action
+        - event
+        - outcome
+      properties:
+        id:
+          type: string
+        time:
+          type: string
+          description: ISO 8601 timestamp
+        callableId:
+          type: string
+          description: Copy key for the workflow or skill that ran
+        action:
+          $ref: './watch.schema.yaml#/components/schemas/WatchRunAction'
+        event:
+          type: string
+          description: >-
+            Run-generated headline, e.g. "Drafted a case — mailbox rules are good". Free prose
+            rather than a copy key because it is produced per run, matching WatchRecentRun.summary.
+        outcome:
+          $ref: '#/components/schemas/WatchRunOutcome'
+
+    WatchSettings:
+      type: object
+      description: >-
+        Legacy per-watch settings projection. Watches are grouping-only; durable settings live on
+        WorkerSettings. Kept so unused mock fixtures continue to parse.
+      required:
+        - watchId
+        - autonomy
+      properties:
+        watchId:
+          type: string
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+
+    WorkerSettings:
+      type: object
+      description: Durable per-Worker settings stored as managed template values.
+      required:
+        - workerId
+        - autonomy
+      properties:
+        workerId:
+          type: string
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+
+    Worker:
+      type: object
+      description: A live registered Worker with Watch membership and durable settings.
+      required:
+        - id
+        - name
+        - watchIds
+        - enabled
+        - lastRun
+        - state
+        - settings
+        - settingsRevision
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        watchIds:
+          type: array
+          items:
+            type: string
+          description: Catalog Watch ids this Worker belongs to, derived from YAML tags
+        enabled:
+          type: boolean
+        lastRun:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/WorkerRunState'
+        stateReason:
+          type: string
+        lifecycle:
+          $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
+        settings:
+          $ref: '#/components/schemas/WorkerSettings'
+        settingsRevision:
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
+          description: >-
+            Logical workflow version for best-effort stale settings detection. Null when the
+            per-space managed Worker has not been installed yet.
+        skills:
+          type: array
+          items:
+            $ref: './watch.schema.yaml#/components/schemas/WatchCallableRef'

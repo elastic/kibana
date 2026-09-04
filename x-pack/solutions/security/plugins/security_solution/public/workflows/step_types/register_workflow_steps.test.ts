@@ -5,84 +5,82 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
-import {
-  REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-  REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
-} from '../../../common/constants';
+import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
+import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
+import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
+import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
+import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
+import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_tags_step';
+import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
+import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
+import { createRuleExceptionStepDefinition } from './create_rule_exception_step/create_rule_exception_step';
+import { createExceptionListItemStepDefinition } from './create_exception_list_item_step/create_exception_list_item_step';
+import { createNoteStepDefinition } from './create_note_step/create_note_step';
+import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
+import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
+import { updateNoteStepDefinition } from './update_note_step/update_note_step';
+import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
 describe('registerWorkflowSteps (public)', () => {
-  const buildCoreMock = (featureFlagEnabled: boolean) => {
-    const core = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue.mockReturnValue(featureFlagEnabled);
-    core.getStartServices.mockResolvedValue([coreStart, {}, {}]);
-    return { core, coreStart };
-  };
-
-  it('calls registerStepDefinition synchronously for both steps', () => {
-    const { core } = buildCoreMock(true);
+  it('calls registerStepDefinition synchronously for all steps', () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, core);
+    registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(2);
-    // getStartServices is called once eagerly to create the shared memoized promise
-    expect(core.getStartServices).toHaveBeenCalledTimes(1);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(17);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  it('async loader returns step definitions when feature flag is enabled', async () => {
-    const { core } = buildCoreMock(true);
+  it('async loaders resolve to each step definition', async () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, core);
+    registerWorkflowSteps(workflowsExtensions);
 
-    const [loader1, loader2] = workflowsExtensions.registerStepDefinition.mock.calls.map(
-      ([arg]) => arg as StepLoader
-    );
+    const [
+      loader1,
+      loader2,
+      loader3,
+      loader4,
+      loader5,
+      loader6,
+      loader7,
+      loader8,
+      loader9,
+      loader10,
+      loader11,
+      loader12,
+      loader13,
+      loader14,
+      loader15,
+      loader16,
+      loader17,
+    ] = workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
 
     await expect(loader1()).resolves.toBe(renderAlertNarrativeStepDefinition);
     await expect(loader2()).resolves.toBe(buildAlertEntityGraphStepDefinition);
-  });
-
-  it('async loader returns undefined when feature flag is disabled', async () => {
-    const { core } = buildCoreMock(false);
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerWorkflowSteps(workflowsExtensions, core);
-
-    const [loader1, loader2] = workflowsExtensions.registerStepDefinition.mock.calls.map(
-      ([arg]) => arg as StepLoader
-    );
-
-    await expect(loader1()).resolves.toBeUndefined();
-    await expect(loader2()).resolves.toBeUndefined();
-  });
-
-  it('checks the feature flag exactly once even when both loaders resolve', async () => {
-    const { core, coreStart } = buildCoreMock(true);
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerWorkflowSteps(workflowsExtensions, core);
-
-    const [loader1, loader2] = workflowsExtensions.registerStepDefinition.mock.calls.map(
-      ([arg]) => arg as StepLoader
-    );
-    await Promise.all([loader1(), loader2()]);
-
-    expect(coreStart.featureFlags.getBooleanValue).toHaveBeenCalledTimes(1);
-    expect(coreStart.featureFlags.getBooleanValue).toHaveBeenCalledWith(
-      REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-      REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
-    );
+    await expect(loader3()).resolves.toBe(assignAlertStepDefinition);
+    await expect(loader4()).resolves.toBe(setAlertStatusStepDefinition);
+    await expect(loader5()).resolves.toBe(setAlertTagsStepDefinition);
+    await expect(loader6()).resolves.toBe(assignAttackStepDefinition);
+    await expect(loader7()).resolves.toBe(setAttackStatusStepDefinition);
+    await expect(loader8()).resolves.toBe(setAttackTagsStepDefinition);
+    await expect(loader9()).resolves.toBe(enableRuleStepDefinition);
+    await expect(loader10()).resolves.toBe(disableRuleStepDefinition);
+    await expect(loader11()).resolves.toBe(createRuleExceptionStepDefinition);
+    await expect(loader12()).resolves.toBe(createExceptionListItemStepDefinition);
+    await expect(loader13()).resolves.toBe(createNoteStepDefinition);
+    await expect(loader14()).resolves.toBe(deleteNoteStepDefinition);
+    await expect(loader15()).resolves.toBe(getNotesStepDefinition);
+    await expect(loader16()).resolves.toBe(updateNoteStepDefinition);
+    await expect(loader17()).resolves.toBe(createRuleStepDefinition);
   });
 });

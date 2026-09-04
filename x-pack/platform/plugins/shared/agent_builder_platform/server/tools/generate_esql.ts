@@ -7,11 +7,26 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import {
+  generateEsql,
+  GenerateEsqlNoDataError,
+  setDefaultEsqlCacheKey,
+} from '@kbn/agent-builder-genai-utils';
+import { toHashedId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
+
+const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
+  try {
+    return { response: await generateEsql(params), noDataError: undefined };
+  } catch (err) {
+    if (err instanceof GenerateEsqlNoDataError) {
+      return { response: undefined, noDataError: err };
+    }
+    throw err;
+  }
+};
 
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('A natural language query to generate an ES|QL query from.'),
@@ -56,11 +71,27 @@ const nlToEsqlToolSchema = z.object({
     ),
 });
 
-export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+export const generateEsqlTool = ({
+  organizationId,
+}: {
+  /** Raw organization id used to derive a stable EIS session id for prompt-cache stickiness. */
+  organizationId?: string;
+} = {}): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+  if (organizationId) {
+    setDefaultEsqlCacheKey(toHashedId(organizationId));
+  }
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
-    description: 'Generate an ES|QL query from a natural language query.',
+    description:
+      'Generate an ES|QL query from a natural language query. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
+    annotations: {
+      title: 'Generate ES|QL',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: nlToEsqlToolSchema,
     handler: async (
       {
@@ -71,24 +102,28 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
       },
-      { esClient, modelProvider, logger, events, attachments }
+      { esClient, experimentalFeatures, modelProvider, logger, events, attachments }
     ) => {
-      const model = await modelProvider.getDefaultModel();
-
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
-      const esqlResponse = await generateEsql({
+      const { response: esqlResponse, noDataError } = await callGenerateEsql({
         nlQuery,
         index,
         additionalContext: context,
         executeQuery,
         disableNamedParams,
         timeRange,
-        model,
+        includeDatasets: experimentalFeatures.datasets,
+        modelProvider,
         esClient: esClient.asCurrentUser,
         logger,
         events,
       });
+      if (noDataError) {
+        return {
+          results: [{ type: ToolResultType.error, data: { message: noDataError.message } }],
+        };
+      }
 
       const toolResults: ToolHandlerResult[] = [];
 

@@ -27,9 +27,10 @@ groups:
         datatype: string
         default: "`['message', '@message']`"
         applies_to:
-          stack: ga
+          stack: deprecated 8.18
           self: ga
           ech: unavailable
+        deprecation_details: "Deprecated in 8.18."
 
       - setting: xpack.infra.alerting.inventory_threshold.group_by_page_size
         description: |

@@ -16,8 +16,11 @@ import {
   FLEET_CONNECTORS_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
+  FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS,
   OTEL_COLLECTOR_INPUT_TYPE,
   OTEL_TEMPLATE_SUFFIX,
+  UNIVERSAL_PROFILING_INDEX_PATTERNS,
+  UNIVERSAL_PROFILING_QUEUE_INDEX_PATTERNS,
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
 
@@ -42,6 +45,8 @@ import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_datas
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
+export const PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES = new Set(['monitor']);
+
 export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'auto_configure',
   'read',
@@ -51,6 +56,8 @@ export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'index',
   'view_index_metadata',
 ];
+
+export const UNIVERSAL_PROFILING_QUEUE_PERMISSIONS = ['read', 'write', 'maintenance'];
 
 export const ELASTIC_CONNECTORS_INDEX_PERMISSIONS = [
   'read',
@@ -129,13 +136,18 @@ export function storedPackagePoliciesToAgentPermissions(
       );
     }
 
-    // Special handling for Universal Profiling packages, as it does not use data streams _only_,
-    // but also indices that do not adhere to the convention.
+    // Special handling for Universal Profiling packages: they are `integration` packages with no
+    // data streams, so the generic `profiles` -> UNIVERSAL_PROFILING_INDEX_PATTERNS path in
+    // getDataStreamPrivileges never runs (the empty-data-streams gate below short-circuits first).
+    // Migrating them to `input` packages with a `profiles` template would remove this special case.
     if (
       pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE ||
       pkg.name === FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE
     ) {
-      return universalProfilingPermissions(packagePolicy.id);
+      return universalProfilingPermissions(
+        packagePolicy.id,
+        pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE
+      );
     }
 
     if (pkg.name === FLEET_APM_PACKAGE) {
@@ -318,9 +330,18 @@ export function storedPackagePoliciesToAgentPermissions(
 
     let clusterRoleDescriptor = {};
     const cluster = packagePolicy?.elasticsearch?.privileges?.cluster ?? [];
-    if (cluster.length > 0) {
+    const validCluster = cluster.filter((p) => PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES.has(p));
+    const invalidCluster = cluster.filter((p) => !PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES.has(p));
+    if (invalidCluster.length) {
+      appContextService
+        .getLogger()
+        .warn(
+          `Ignoring invalid or forbidden cluster privilege(s) in package policy "${packagePolicy.id}": ${invalidCluster}`
+        );
+    }
+    if (validCluster.length > 0) {
       clusterRoleDescriptor = {
-        cluster,
+        cluster: validCluster,
       };
     }
     // namespace is either the package policy's or the agent policy one
@@ -376,6 +397,18 @@ export function getDataStreamPrivileges(
   dataStream: DataStreamMeta,
   namespace: string = '*'
 ): SecurityIndicesPrivileges {
+  // Fleet-unmanaged signals (e.g. profiles) are routed by their producer/exporter; grant write
+  // permissions to the known destination patterns instead of `<type>-<dataset>-<namespace>`.
+  const unmanagedIndexPatterns = FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS[dataStream.type];
+  if (unmanagedIndexPatterns) {
+    return {
+      names: [...unmanagedIndexPatterns],
+      privileges: dataStream?.elasticsearch?.privileges?.indices?.length
+        ? dataStream.elasticsearch.privileges.indices
+        : UNIVERSAL_PROFILING_PERMISSIONS,
+    };
+  }
+
   let index = dataStream.hidden ? `.${dataStream.type}-` : `${dataStream.type}-`;
 
   // Determine dataset
@@ -404,17 +437,27 @@ export function getDataStreamPrivileges(
   };
 }
 
-function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
-  const profilingIndexPattern = 'profiling-*';
+function universalProfilingPermissions(
+  packagePolicyId: string,
+  includeSymbolizationQueues: boolean
+): [string, SecurityRoleDescriptor] {
+  const indices: SecurityIndicesPrivileges[] = [
+    {
+      names: [...UNIVERSAL_PROFILING_INDEX_PATTERNS],
+      privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+    },
+  ];
+  if (includeSymbolizationQueues) {
+    indices.push({
+      names: [...UNIVERSAL_PROFILING_QUEUE_INDEX_PATTERNS],
+      privileges: UNIVERSAL_PROFILING_QUEUE_PERMISSIONS,
+    });
+  }
+
   return [
     packagePolicyId,
     {
-      indices: [
-        {
-          names: [profilingIndexPattern],
-          privileges: UNIVERSAL_PROFILING_PERMISSIONS,
-        },
-      ],
+      indices,
     },
   ];
 }

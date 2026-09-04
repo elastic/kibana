@@ -6,7 +6,7 @@
  */
 
 import type { KbnClient } from '@kbn/test';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
@@ -74,7 +74,7 @@ export const createRule = async (
       },
       headers: { 'elastic-api-version': '2023-10-31' },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 };
 
@@ -94,6 +94,6 @@ export const findRules = async (
       headers: { 'elastic-api-version': '2023-10-31' },
       query,
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 };

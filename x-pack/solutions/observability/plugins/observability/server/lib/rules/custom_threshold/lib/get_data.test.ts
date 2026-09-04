@@ -66,6 +66,7 @@ const expectedNoDataResponse = {
   [UNGROUPED_FACTORY_KEY]: {
     value: null,
     trigger: false,
+    warn: false,
     bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
   },
 };
@@ -150,9 +151,134 @@ describe('getData', () => {
     expect(response).toEqual(expectedNoDataResponse);
   });
 
+  it('returns a fresh object for each no-data call so in-place mutation cannot leak across rules', async () => {
+    const search = jest.fn().mockResolvedValue({
+      aggregations: { groupings: { buckets: [] } },
+      _shards: { successful: 1 },
+    });
+
+    const first = await callGetData(search, 'host.name');
+    const second = await callGetData(search, 'host.name');
+
+    expect(first).toEqual(expectedNoDataResponse);
+    expect(second).toEqual(expectedNoDataResponse);
+    expect(first).not.toBe(second);
+
+    first[UNGROUPED_FACTORY_KEY].value = 42;
+    expect(second[UNGROUPED_FACTORY_KEY].value).toBeNull();
+  });
+
   it('throws other Elasticsearch errors', async () => {
     const error = new Error('Elasticsearch failed for another reason');
 
     await expect(callGetData(jest.fn().mockRejectedValue(error))).rejects.toThrow(error);
+  });
+
+  it('unflattens flat dotted additional context from top_hits _source', async () => {
+    const response = await callGetData(
+      jest.fn().mockResolvedValue({
+        aggregations: {
+          groupings: {
+            buckets: [
+              {
+                key: { groupBy0: 'host1' },
+                shouldWarn: { value: 0 },
+                shouldTrigger: { value: 1 },
+                currentPeriod: {
+                  buckets: {
+                    all: {
+                      aggregatedValue: { value: 100 },
+                    },
+                  },
+                },
+                additionalContext: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          'host.hostname': 'host1',
+                          'host.name': 'host1-name',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+        _shards: {
+          successful: 1,
+        },
+      }),
+      'host.hostname'
+    );
+
+    expect(response.host1).toEqual(
+      expect.objectContaining({
+        trigger: true,
+        value: 100,
+        flattenGrouping: { 'host.hostname': 'host1' },
+        host: {
+          hostname: 'host1',
+          name: 'host1-name',
+        },
+      })
+    );
+  });
+
+  it('keeps already-nested additional context from top_hits _source', async () => {
+    const response = await callGetData(
+      jest.fn().mockResolvedValue({
+        aggregations: {
+          groupings: {
+            buckets: [
+              {
+                key: { groupBy0: 'host1' },
+                shouldWarn: { value: 0 },
+                shouldTrigger: { value: 1 },
+                currentPeriod: {
+                  buckets: {
+                    all: {
+                      aggregatedValue: { value: 100 },
+                    },
+                  },
+                },
+                additionalContext: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          host: {
+                            hostname: 'host1',
+                            name: 'host1-name',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+        _shards: {
+          successful: 1,
+        },
+      }),
+      'host.hostname'
+    );
+
+    expect(response.host1).toEqual(
+      expect.objectContaining({
+        trigger: true,
+        value: 100,
+        flattenGrouping: { 'host.hostname': 'host1' },
+        host: {
+          hostname: 'host1',
+          name: 'host1-name',
+        },
+      })
+    );
   });
 });

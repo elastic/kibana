@@ -9,6 +9,10 @@ import omit from 'lodash/omit';
 
 import type { AgentPolicy, Output, DownloadSource, PackageInfo } from '../../types';
 import {
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+} from '../../../common/constants';
+import {
   createAppContextStartContractMock,
   createMessageSigningServiceMock,
   createSavedObjectClientMock,
@@ -119,6 +123,28 @@ jest.mock('../output', () => {
       type: 'elasticsearch',
       hosts: ['http://127.0.0.1:9201'],
       write_to_logs_streams: true,
+    },
+    'es-managed-bulk-agentless-output': {
+      id: 'es-managed-bulk-agentless-output',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Bulk output for managed integrations',
+      // @ts-ignore
+      type: 'elasticsearch',
+      hosts: ['https://managed-otlp.example.invalid:443/_es'],
+      is_internal: true,
+      is_preconfigured: true,
+    },
+    'es-managed-bulk-agentless-output-internal': {
+      id: 'es-managed-bulk-agentless-output-internal',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Bulk output for managed integrations (serverless)',
+      // @ts-ignore
+      type: 'elasticsearch',
+      hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+      is_internal: true,
+      is_preconfigured: true,
     },
   };
   return {
@@ -1668,6 +1694,128 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should emit only the apm applications block for the ECH managed bulk output', async () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    } as any);
+
+    const bulkOutput = {
+      id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Bulk output for managed integrations',
+      type: 'elasticsearch' as const,
+      hosts: ['https://managed-otlp.example.invalid:443/_es'],
+    };
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [bulkOutput],
+      proxies: [],
+      dataOutput: bulkOutput,
+      monitoringOutput: bulkOutput,
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
+    mockAgentPolicy({
+      supports_agentless: true,
+      data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+    });
+
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy?.output_permissions).toEqual({
+      [ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID]: {
+        _managed_bulk_apm: {
+          applications: [{ application: 'apm', privileges: ['event:write'], resources: ['*'] }],
+        },
+      },
+    });
+    expect(
+      agentPolicy?.output_permissions?.[ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID]?._managed_bulk_apm
+    ).not.toHaveProperty('indices');
+  });
+
+  it('should emit only the apm applications block for the serverless managed bulk output, matched via the config-injected endpoint', async () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      outputs: [
+        {
+          id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+          name: 'Bulk output for managed integrations (serverless)',
+          type: 'elasticsearch' as const,
+          hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+          is_default: false,
+          is_default_monitoring: false,
+          is_preconfigured: true,
+        },
+      ],
+    } as any);
+
+    const bulkOutput = {
+      id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Bulk output for managed integrations (serverless)',
+      type: 'elasticsearch' as const,
+      hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+    };
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [bulkOutput],
+      proxies: [],
+      dataOutput: bulkOutput,
+      monitoringOutput: bulkOutput,
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
+    mockAgentPolicy({
+      supports_agentless: true,
+      data_output_id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+    });
+
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy?.output_permissions).toEqual({
+      [SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID]: {
+        _managed_bulk_apm: {
+          applications: [{ application: 'apm', privileges: ['event:write'], resources: ['*'] }],
+        },
+      },
+    });
+    expect(
+      agentPolicy?.output_permissions?.[SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID]
+        ?._managed_bulk_apm
+    ).not.toHaveProperty('indices');
+  });
+
   it('should return a policy with advanced settings', async () => {
     mockAgentPolicy({
       advanced_settings: {
@@ -1689,6 +1837,25 @@ describe('getFullAgentPolicy', () => {
           level: 'debug',
           to_files: true,
           files: { rotateeverybytes: 10000, keepfiles: 10, interval: '7h' },
+        },
+      },
+    });
+  });
+
+  it('should set agent.features.include_tags_in_events.enabled from advanced_settings', async () => {
+    mockAgentPolicy({
+      advanced_settings: {
+        agent_features_include_tags_in_events_enabled: true,
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      agent: {
+        features: {
+          include_tags_in_events: {
+            enabled: true,
+          },
         },
       },
     });
@@ -2297,6 +2464,123 @@ describe('getFullAgentPolicy', () => {
       expect((callArgs.packageOutputs as Map<string, Output>).size).toBe(0);
     });
   });
+
+  describe('secret_references reconciliation', () => {
+    const buildPolicyWithSecretRef = (id: string, compiledInputValue: string | null) => ({
+      id: `pp-${id}`,
+      name: `policy-${id}`,
+      namespace: 'default',
+      enabled: true,
+      package: { name: 'test', version: '1.0.0', title: 'Test' },
+      secret_references: [{ id }],
+      inputs: compiledInputValue
+        ? [
+            {
+              id: `input-${id}`,
+              type: 'logfile',
+              enabled: true,
+              streams: [
+                {
+                  id: `stream-${id}`,
+                  enabled: true,
+                  compiled_stream: { paths: [`$co.elastic.secret{${id}}`] },
+                  data_stream: { type: 'logs', dataset: 'test' },
+                },
+              ],
+            },
+          ]
+        : [{ id: `input-${id}`, type: 'logfile', enabled: true, streams: [] }],
+      created_at: '',
+      updated_at: '',
+      created_by: '',
+      updated_by: '',
+      revision: 1,
+      policy_id: '',
+      policy_ids: ['agent-policy'],
+    });
+
+    it('prunes a package policy secret reference not present in any compiled input', async () => {
+      mockAgentPolicy({ package_policies: [buildPolicyWithSecretRef('stale-id', null)] });
+
+      const policy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(policy!.secret_references).toEqual([]);
+    });
+
+    it('keeps a reference whose placeholder appears in a compiled stream', async () => {
+      mockAgentPolicy({ package_policies: [buildPolicyWithSecretRef('live-id', 'present')] });
+
+      const policy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(policy!.secret_references).toEqual([{ id: 'live-id' }]);
+    });
+
+    it('keeps a reference whose placeholder appears only in otelcolConfig', async () => {
+      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableOtelIntegrations: true,
+      } as any);
+
+      mockAgentPolicy({
+        package_policies: [
+          {
+            ...buildPolicyWithSecretRef('otel-id', null),
+            inputs: [],
+          },
+        ],
+      });
+
+      mockedGenerateOtelcolConfig.mockReturnValue({
+        receivers: { 'otlp/test': { endpoint: `$co.elastic.secret{otel-id}` } },
+      } as any);
+
+      const policy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(policy!.secret_references).toEqual([{ id: 'otel-id' }]);
+    });
+
+    it('deduplicates an id shared by two package policies', async () => {
+      mockAgentPolicy({
+        package_policies: [
+          buildPolicyWithSecretRef('shared-id', 'present'),
+          buildPolicyWithSecretRef('shared-id', 'present'),
+        ],
+      });
+
+      const policy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(policy!.secret_references).toEqual([{ id: 'shared-id' }]);
+    });
+
+    it('keeps every reference when the compiled policy cannot be serialized (fail open)', async () => {
+      mockAgentPolicy({
+        package_policies: [
+          {
+            ...buildPolicyWithSecretRef('safe-id', null),
+            // BigInt in compiled_stream makes JSON.stringify throw
+            inputs: [
+              {
+                id: 'input-1',
+                type: 'logfile',
+                enabled: true,
+                streams: [
+                  {
+                    id: 's1',
+                    enabled: true,
+                    compiled_stream: { val: BigInt(1) as any },
+                    data_stream: { type: 'logs', dataset: 'test' },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      const policy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(policy!.secret_references).toEqual([{ id: 'safe-id' }]);
+    });
+  });
 });
 
 describe('getFullMonitoringSettings', () => {
@@ -2749,6 +3033,98 @@ ssl.test: 123
       }
     `);
   });
+
+  it('should not write proxy fields into kafka output even when a proxy is provided', () => {
+    const proxy = {
+      id: 'proxy-1',
+      name: 'Proxy 1',
+      url: 'https://proxy1.fr',
+      certificate_authorities: '/tmp/ssl/ca.crt',
+      proxy_headers: { Authorization: 'Bearer SECRET' },
+      certificate: 'my-cert',
+      certificate_key: 'PRIVATE_KEY',
+      is_preconfigured: false,
+    } as any;
+
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['test:9999'],
+        topic: 'test',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'kafka',
+        config_yaml: '',
+        client_id: 'Elastic',
+        version: '1.0.0',
+        compression: 'none',
+        auth_type: 'none',
+        connection_type: 'plaintext',
+        partition: 'random',
+        random: { group_events: 1 },
+        headers: [],
+        timeout: 30,
+        broker_timeout: 30,
+        required_acks: 1,
+        proxy_id: 'proxy-1',
+      },
+      proxy
+    );
+
+    expect(policyOutput).not.toHaveProperty('proxy_url');
+    expect(policyOutput).not.toHaveProperty('proxy_headers');
+    // proxy-sourced SSL entries must not appear
+    expect((policyOutput as any).ssl?.certificate_authorities).toBeUndefined();
+    expect((policyOutput as any).ssl?.certificate).toBeUndefined();
+    expect((policyOutput as any).ssl?.key).toBeUndefined();
+  });
+
+  it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+    const proxy = {
+      id: 'proxy-1',
+      name: 'proxy1',
+      url: 'https://proxy.fr',
+      certificate_authorities: '/tmp/ssl/ca.crt',
+      proxy_headers: { Authorization: 'Bearer SECRET' },
+      certificate: 'my-cert',
+      certificate_key: 'PRIVATE_KEY',
+      is_preconfigured: false,
+    } as any;
+
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        proxy_id: 'proxy-1',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+      } as any,
+      proxy,
+      false,
+      true // redactProxySecrets
+    );
+
+    expect(policyOutput.proxy_url).toBe('https://proxy.fr');
+    expect(policyOutput).not.toHaveProperty('proxy_headers');
+    expect(policyOutput.ssl?.certificate).toBe('my-cert');
+    expect(policyOutput.ssl).not.toHaveProperty('key');
+  });
+
+  it('should throw for OTLP outputs because compilation is not yet implemented', () => {
+    expect(() =>
+      transformOutputToFullPolicyOutput({
+        id: 'otlp-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test otlp output',
+        type: 'otlp',
+        otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+      } as any)
+    ).toThrow('OTLP output "otlp-id" cannot be compiled into an agent policy output');
+  });
 });
 
 describe('generateFleetConfig', () => {
@@ -2902,6 +3278,49 @@ describe('generateFleetConfig', () => {
         },
       },
     });
+  });
+
+  it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+    const res = generateFleetConfig(
+      {
+        host_urls: ['https://test.fr'],
+        proxy_id: 'proxy-1',
+      } as any,
+      [
+        {
+          id: 'proxy-1',
+          url: 'https://proxy.fr',
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          proxy_headers: { Authorization: 'Bearer SECRET' },
+          certificate: 'my-cert',
+          certificate_key: 'PRIVATE_KEY',
+        } as any,
+      ],
+      true // redactProxySecrets
+    );
+
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
+        ],
+        "proxy_url": "https://proxy.fr",
+        "ssl": Object {
+          "certificate": "my-cert",
+          "certificate_authorities": Array [
+            Array [
+              "/tmp/ssl/ca.crt",
+            ],
+          ],
+          "renegotiation": "never",
+          "verification_mode": "",
+        },
+      }
+    `);
+    expect(res).not.toHaveProperty('proxy_headers');
+    if (res && 'hosts' in res) {
+      expect(res.ssl).not.toHaveProperty('key');
+    }
   });
 });
 
@@ -3227,6 +3646,20 @@ describe('getBinarySourceSettings', () => {
           key: 'PROXY_KEY1',
         },
       });
+    });
+
+    it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+      const result = getBinarySourceSettings(downloadSource, proxy, true);
+      expect(result).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+        },
+      });
+      expect(result).not.toHaveProperty('proxy_headers');
+      expect(result.ssl).not.toHaveProperty('key');
     });
   });
 

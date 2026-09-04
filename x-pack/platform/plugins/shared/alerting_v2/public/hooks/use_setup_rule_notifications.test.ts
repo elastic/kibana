@@ -19,6 +19,7 @@ jest.mock('@kbn/workflows-ui');
 jest.mock('../services/action_policies_api');
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   buildInlineWorkflowYaml: jest.fn().mockReturnValue('workflow: yaml'),
+  buildRuleScopedMatcher: jest.fn((ruleId: string) => `rule.id: "${ruleId}"`),
 }));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
@@ -40,9 +41,9 @@ const emailAction = {
 const slackAction = {
   id: 'action-slack',
   source: 'inline' as const,
-  stepType: 'slack' as const,
+  stepType: 'slack2.sendMessage' as const,
   connectorId: 'connector-2',
-  params: 'message: ""',
+  params: 'channel: "my-channel"\ntext: "Hello"',
 };
 
 const existingWorkflowAction = {
@@ -128,8 +129,7 @@ describe('useSetupRuleNotifications', () => {
         expect(mockCreateActionPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'My Test Rule notifications',
-            type: 'single_rule',
-            ruleId: 'rule-1',
+            matcher: 'rule.id: "rule-1"',
             destinations: [{ type: 'workflow', id: 'workflow-new-1' }],
           })
         );

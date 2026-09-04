@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_TITLE } from '../../../common';
@@ -44,6 +37,24 @@ export const QueryRulesOverview = () => {
   const { data: queryRulesData, isInitialLoading, isError, error } = useFetchQueryRulesSets();
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
 
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      primaryActionItem: {
+        id: 'createRuleset',
+        label: i18n.translate('xpack.queryRules.queryRulesSetDetail.createButton', {
+          defaultMessage: 'Create ruleset',
+        }),
+        iconType: 'plusCircle',
+        testId: 'queryRulesOverviewCreateButton',
+        run: () => {
+          usageTracker?.click(AnalyticsEvents.addRulesetClicked);
+          setIsCreateModalVisible(true);
+        },
+      },
+    }),
+    [usageTracker]
+  );
+
   const backgroundProps = css({
     backgroundImage: `url(${
       colorMode === 'DARK' ? queryRulesBackgroundDark : queryRulesBackground
@@ -60,56 +71,14 @@ export const QueryRulesOverview = () => {
   return (
     <QueryRulesPageTemplate restrictWidth={false}>
       {!isInitialLoading && !isError && queryRulesData?._meta.totalItemCount !== 0 && (
-        <KibanaPageTemplate.Header
-          pageTitle={PLUGIN_TITLE}
-          restrictWidth
-          rightSideItems={[
-            <EuiFlexGroup alignItems="center" key="queryRulesOverviewHeaderButtons">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="queryRulesetDetailApiReferenceButton"
-                  iconType="documentation"
-                  color="text"
-                  aria-label={i18n.translate(
-                    'xpack.queryRules.queryRulesetDetail.apiReferenceButton',
-                    {
-                      defaultMessage: 'API reference',
-                    }
-                  )}
-                  href={docLinks.queryRulesApi}
-                  target="_blank"
-                >
-                  {i18n.translate('xpack.queryRules.queryRulesetDetail.apiReferenceButton', {
-                    defaultMessage: 'API reference',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="queryRulesOverviewCreateButton"
-                  fill
-                  iconType="plusCircle"
-                  onClick={() => {
-                    usageTracker?.click(AnalyticsEvents.addRulesetClicked);
-                    setIsCreateModalVisible(true);
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.queryRules.queryRulesSetDetail.createButton"
-                    defaultMessage="Create ruleset"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>,
-          ]}
-        >
-          <EuiText>
-            <FormattedMessage
-              id="xpack.queryRules.queryRulesSetDetail.description"
-              defaultMessage="Create and manage query rules sets."
-            />
-          </EuiText>
-        </KibanaPageTemplate.Header>
+        <AppHeader
+          title={PLUGIN_TITLE}
+          description={i18n.translate('xpack.queryRules.queryRulesSetDetail.description', {
+            defaultMessage: 'Create and manage query rules sets.',
+          })}
+          menu={menu}
+          docLink={docLinks.queryRulesApi}
+        />
       )}
       <KibanaPageTemplate.Section
         restrictWidth

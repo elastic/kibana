@@ -255,6 +255,17 @@
                         },
                         "schedule_delay": {
                             "type": "long"
+                        },
+                        "execution": {
+                            "properties": {
+                                "uuid": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024
+                                }
+                            }
+                        },
+                        "data": {
+                            "type": "flattened"
                         }
                     }
                 },
@@ -707,6 +718,10 @@
                     "properties": {
                         "dispatcher": {
                             "properties": {
+                                "failure_reason": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024
+                                },
                                 "episode_count": {
                                     "type": "long"
                                 },

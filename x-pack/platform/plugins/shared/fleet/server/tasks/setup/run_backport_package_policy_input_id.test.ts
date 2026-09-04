@@ -107,7 +107,7 @@ describe('_runBackportPackagePolicyInputId', () => {
         soClient,
         elasticsearchServiceMock.createClusterClient().asInternalUser,
         logger,
-        abortController
+        abortController.signal
       )
     ).rejects.toThrow(/Task was aborted/);
 

@@ -6,11 +6,22 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IKibanaResponse, RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
+import type {
+  IKibanaResponse,
+  OnRequestValidationError,
+  RouteConfigOptions,
+  RouteMethod,
+} from '@kbn/core-http-server';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { errorResponseSchema, type ErrorResponse } from '@kbn/alerting-v2-schemas';
 import { injectable } from 'inversify';
+import merge from 'lodash/merge';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
+import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
+import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
+import type { AlertingLabels } from '../lib/services/logger_service/types';
 import type { AlertingRouteContext } from './alerting_route_context';
+import { getCommonErrorOasOperationObject } from './common_error_oas_examples';
 import { deepMergeRouteOptions } from './deep_merge_route_options';
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { computeRouteValidate, type AlertingRouteSchemas } from './compute_route_validate';
@@ -39,28 +50,37 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   protected static readonly defaultOptions: RouteConfigOptions<RouteMethod> = {
     access: 'public',
     tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
+    availability: { stability: 'experimental', since: '9.5.0' },
   };
 
   protected static readonly routeOptions: RouteConfigOptions<RouteMethod> = {};
 
   public static get options(): RouteConfigOptions<RouteMethod> {
-    return deepMergeRouteOptions(BaseAlertingRoute.defaultOptions, this.routeOptions);
+    const merged = deepMergeRouteOptions(BaseAlertingRoute.defaultOptions, this.routeOptions);
+    const subclassOas = this.routeOptions.oasOperationObject;
+
+    // Keep shared error examples when subclasses add their own OAS fragment.
+    return {
+      ...merged,
+      oasOperationObject: async () => {
+        const common = getCommonErrorOasOperationObject();
+        if (!subclassOas) {
+          return common;
+        }
+        const extra = await subclassOas();
+        if (typeof extra === 'string') {
+          throw new Error(
+            'Alerting v2 route oasOperationObject must return an object so it can be composed with shared common-error examples'
+          );
+        }
+        return merge({}, common, extra);
+      },
+    };
   }
 
   /**
-   * Error responses every route can emit, merged into each
-   * subclass's declared `schemas.response` by the `validate` getter so the
-   * generated OAS captures them consistently. Subclass-declared status
-   * codes take precedence. A route can specialize, say, `500` with a more
-   * specific description and the merge keeps the override.
-   *
-   * Intentionally limited to truly universal codes:
-   *   401 — request was not authenticated (Kibana core enforces auth).
-   *   403 — request lacks the route's `requiredPrivileges`.
-   *   500 — any uncaught throw boomifies to 500.
-   *
-   * Route-specific codes (400 / 404 / 409 / …) belong on each subclass.
+   * Universal error responses merged into every route's OAS.
+   * Subclass status codes win. Route-specific codes (400/404/409/…) stay on subclasses.
    */
   protected static readonly commonResponses: NonNullable<AlertingRouteSchemas['response']> = {
     401: {
@@ -76,6 +96,48 @@ export abstract class BaseAlertingRoute implements RouteHandler {
       body: () => errorResponseSchema,
       description: 'Indicates an unexpected server-side error.',
     },
+    503: {
+      body: () => errorResponseSchema,
+      description:
+        'Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.',
+    },
+  };
+
+  /**
+   * Documents the 400 emitted by {@link BaseAlertingRoute.onRequestValidationError}
+   * for routes that validate requests. Kibana core validates the mapped
+   * response against this metadata in dev mode and surfaces it in the generated
+   * OAS. Subclasses that declare their own 400 (e.g. a domain-specific
+   * description) override it via the `validate` getter's merge.
+   */
+  protected static readonly requestValidationErrorResponse: NonNullable<
+    AlertingRouteSchemas['response']
+  >[number] = {
+    body: () => errorResponseSchema,
+    description: 'Indicates the request failed schema validation.',
+  };
+
+  /**
+   * Maps a request schema-validation failure to the alerting v2
+   * {@link ErrorResponse} shape so validation errors are indistinguishable from
+   * the domain errors produced by {@link BaseAlertingRoute.onError}. Wired into
+   * `validate.onRequestValidationError` by the `validate` getter for routes that
+   * declare request schemas. `bypassErrorFormat` keeps the flat body verbatim,
+   * matching `errorResponseSchema` (see `onError` for the rationale).
+   */
+  protected static readonly onRequestValidationError: OnRequestValidationError = (
+    error,
+    _request,
+    response
+  ) => {
+    const body: ErrorResponse = {
+      code: deriveErrorCodeFromStatus(400),
+      error: 'Bad Request',
+      message: error.message,
+      details: { source: error.source },
+    };
+
+    return response.customError({ statusCode: 400, body, bypassErrorFormat: true });
   };
 
   /**
@@ -87,13 +149,23 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   protected static schemas: AlertingRouteSchemas = {};
 
   public static get validate() {
-    const merged: AlertingRouteSchemas = {
-      ...this.schemas,
-      response: {
-        ...this.commonResponses,
-        ...(this.schemas.response ?? {}),
-      },
+    const { request } = this.schemas;
+    const hasRequestSchemas = Boolean(request && (request.params || request.query || request.body));
+
+    const response: NonNullable<AlertingRouteSchemas['response']> = {
+      ...this.commonResponses,
+      ...(this.schemas.response ?? {}),
     };
+
+    const merged: AlertingRouteSchemas = { ...this.schemas, response };
+
+    if (hasRequestSchemas) {
+      if (response[400] === undefined) {
+        response[400] = this.requestValidationErrorResponse;
+      }
+      merged.onRequestValidationError = this.onRequestValidationError;
+    }
+
     return computeRouteValidate(merged);
   }
 
@@ -103,6 +175,7 @@ export abstract class BaseAlertingRoute implements RouteHandler {
 
   async handle(): Promise<IKibanaResponse> {
     try {
+      await this.assertAlertingEnabled();
       return await this.execute();
     } catch (e) {
       return this.onError(e);
@@ -111,13 +184,41 @@ export abstract class BaseAlertingRoute implements RouteHandler {
 
   protected abstract execute(): Promise<IKibanaResponse>;
 
+  /**
+   * Global kill switch for the alerting v2 HTTP surface.
+   *
+   * Reads the `alerting:v2:enabled` advanced setting and short-circuits with
+   * a 503 `ALERTING_DISABLED` error before any route-specific work runs
+   * when the operator has turned the engine off.
+   */
+  private async assertAlertingEnabled(): Promise<void> {
+    const enabled = await this.ctx.settings.get(ALERTING_V2_ENABLED_SETTING_ID);
+
+    if (!enabled) {
+      throw Boom.serverUnavailable('Alerting is disabled.', {
+        code: ALERTING_ERROR_CODES.ALERTING_DISABLED,
+      });
+    }
+  }
+
+  protected errorLabels(_e: Boom.Boom | Error): AlertingLabels | undefined {
+    return undefined;
+  }
+
   protected onError(e: Boom.Boom | Error): IKibanaResponse {
     const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
 
     if (boom.output.statusCode >= 500) {
-      this.ctx.logger.error(`${this.routeName} error: ${boom.message}`, { error: e });
+      this.ctx.logger.error({
+        error: e,
+        code: ALERTING_LOG_CODES.ROUTES_HANDLER_FAILED,
+        labels: this.errorLabels(e),
+      });
     } else {
-      this.ctx.logger.debug(`${this.routeName} error: ${boom.message}`);
+      this.ctx.logger.debug({
+        message: 'Route handler returned client error',
+        labels: { resource: this.routeName },
+      });
     }
 
     const data = (boom.data ?? undefined) as AlertingBoomData | undefined;
@@ -131,9 +232,15 @@ export abstract class BaseAlertingRoute implements RouteHandler {
       ...(data?.details ? { details: data.details } : {}),
     };
 
+    // `bypassErrorFormat` sends `body` verbatim. Without it, Kibana core's
+    // `HapiResponseAdapter.toError` rebuilds the response from a bare Boom
+    // envelope (`{ statusCode, error, message }`) and drops every extra field,
+    // stripping our `code` / `details`. Bypassing keeps the response aligned
+    // with `errorResponseSchema`, the single source of truth for the OAS.
     return this.ctx.response.customError({
       statusCode: boom.output.statusCode,
       body,
+      bypassErrorFormat: true,
     });
   }
 }

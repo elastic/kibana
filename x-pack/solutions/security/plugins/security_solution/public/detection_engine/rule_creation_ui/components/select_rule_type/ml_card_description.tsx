@@ -6,12 +6,11 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBadge, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import styled from 'styled-components';
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import { useKibana } from '../../../../common/lib/kibana/use_kibana';
-import { ML_CPS_SUPPORT_COMING_SOON, ML_TYPE_DESCRIPTION } from './translations';
+import { ML_TYPE_DESCRIPTION } from './translations';
 
 interface MlCardDescriptionProps {
   hasValidLicense?: boolean;
@@ -24,30 +23,10 @@ const SmallText = styled.span`
 const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
   hasValidLicense = false,
 }) => {
-  const {
-    services: { cps },
-  } = useKibana();
-  const isCpsEnabled = Boolean(cps?.cpsManager && cps.cpsManager.getTotalProjectCount() > 1);
-
-  const description = useMemo(
-    () => (
-      <>
-        {isCpsEnabled ? (
-          <>
-            <EuiBadge color="primary">{ML_CPS_SUPPORT_COMING_SOON}</EuiBadge>
-            <EuiSpacer size="s" />
-          </>
-        ) : null}
-        {ML_TYPE_DESCRIPTION}
-      </>
-    ),
-    [isCpsEnabled]
-  );
-
   return (
     <SmallText>
       {hasValidLicense ? (
-        description
+        ML_TYPE_DESCRIPTION
       ) : (
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDisabledDescription"

@@ -100,6 +100,25 @@ describe('getKBVectorSearchQuery', () => {
     });
   });
 
+  it('filters private entries exclusively by profile UID', () => {
+    const query = getKBVectorSearchQuery({ user: mockUser });
+    const serializedQuery = JSON.stringify(query);
+
+    expect(serializedQuery).toContain(`"users.id":"${mockUser.profile_uid}"`);
+    expect(serializedQuery).not.toContain('users.name');
+    expect(serializedQuery).not.toContain(mockUser.username);
+  });
+
+  it('only searches global entries when the user has no profile UID', () => {
+    const query = getKBVectorSearchQuery({
+      user: { ...mockUser, profile_uid: undefined },
+    });
+    const serializedQuery = JSON.stringify(query);
+
+    expect(serializedQuery).not.toContain('users.id');
+    expect(serializedQuery).not.toContain('users.name');
+  });
+
   it('should include kbResource in the query if provided', () => {
     const query = getKBVectorSearchQuery({ user: mockUser, kbResource: 'esql' });
     expect(query?.bool?.must).toEqual(

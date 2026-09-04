@@ -18,7 +18,6 @@ import type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
-  SideNavLogo,
 } from '../../types';
 
 // React import is needed for JSX transform.
@@ -31,7 +30,6 @@ export type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
-  SideNavLogo,
 };
 
 /** Alias for the external package. */
@@ -41,7 +39,7 @@ export type SideNavigationProps = NavigationProps;
  * `SideNavigation` — standalone navigation component for non-Kibana applications.
  *
  * Wraps the internal `Navigation` component. Kibana-specific dependencies
- * (`@kbn/i18n`, `@kbn/ui-chrome-layout-constants`) are replaced at build
+ * (`@kbn/i18n`) are replaced at build
  * time via webpack aliases.
  */
 export const SideNavigation = (props: SideNavigationProps) => {

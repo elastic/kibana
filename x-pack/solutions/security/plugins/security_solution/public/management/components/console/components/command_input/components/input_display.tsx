@@ -8,11 +8,12 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
+import { AutoSuggestComplete } from './auto_suggest_complete';
 
 const SCROLLING_PADDING = 20;
 
@@ -30,8 +31,8 @@ const InputDisplayContainer = styled.div`
   .cursor {
     display: inline-block;
     width: 1px;
-    height: ${({ theme: { eui } }) => eui.euiLineHeight}em;
-    background-color: ${({ theme }) => theme.eui.euiTextSubduedColor};
+    height: ${({ theme }) => theme.euiTheme.font.lineHeightMultiplier}em;
+    background-color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
   }
 `;
 
@@ -162,6 +163,7 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="noMinWidth">
           <span className="cursor essentialAnimation" ref={cursorRef} />
+          <AutoSuggestComplete data-test-subj={getTestId('cmdInput-suggestion')} />
         </EuiFlexItem>
         <EuiFlexItem className="noMinWidth" data-test-subj={getTestId('cmdInput-rightOfCursor')}>
           {rightOfCursor}

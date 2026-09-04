@@ -23,8 +23,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ComposeFormValues } from '../../compose_form_types';
-import type { RuleBuilderRecoveryProps } from '../types';
+import type { FormValues } from '../../../../form/types';
+import type { CustomRecoveryRenderProps } from '../../types';
 import { useBuilderState } from '../builder_state_context';
 import type { ThresholdFormValues, RecoveryCondition, RecoveryConfig } from './form_types';
 import {
@@ -36,10 +36,10 @@ import {
 import { COMPARATOR_OPTIONS, CONDITION_OPERATOR_OPTIONS } from './translations';
 import { buildRecoveryBlock } from './build_esql';
 
-export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state, dispatch }) => {
+export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state, dispatch }) => {
   const { state: builderState, setState: onBuilderStateChange } =
     useBuilderState<ThresholdFormValues>();
-  const { setValue, getValues } = useFormContext<ComposeFormValues>();
+  const { setValue, getValues } = useFormContext<FormValues>();
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -165,6 +165,7 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
                   type: 'OPEN_CHILD_FOR_STEP',
                   step: state.step,
                   isAlert: true,
+                  focusedTab: 'recovery',
                 })
               }
               data-test-subj="ruleBuilderRecoveryPreview"
@@ -325,7 +326,7 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
       })}
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addRecoveryCondition}
         data-test-subj="ruleBuilderAddRecoveryCondition"
       >

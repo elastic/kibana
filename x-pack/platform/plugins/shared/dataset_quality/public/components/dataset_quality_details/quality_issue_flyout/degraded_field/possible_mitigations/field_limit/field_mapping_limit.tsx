@@ -35,7 +35,7 @@ export function FieldMappingLimit({
   areIntegrationAssetsAvailable: boolean;
 }) {
   const accordionId = useGeneratedHtmlId({
-    prefix: increaseFieldMappingLimitTitle,
+    prefix: 'datasetQualityDetailsDegradedFieldFlyoutFieldLimitMitigation',
   });
 
   const { degradedFieldAnalysis } = useQualityIssues();

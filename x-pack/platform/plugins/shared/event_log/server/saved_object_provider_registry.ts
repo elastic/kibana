@@ -10,6 +10,7 @@ import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server
 
 import { fromNullable, getOrElse } from 'fp-ts/Option';
 import { pipe } from 'fp-ts/pipeable';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 export type SavedObjectGetter = (
   ...params: Parameters<SavedObjectsClientContract['get']>
@@ -23,7 +24,7 @@ export type SavedObjectBulkGetterResult = (type: string, ids: string[]) => Promi
 
 export type SavedObjectProvider = (
   request: KibanaRequest,
-  spaceId?: string
+  spaceId?: SpaceId
 ) => SavedObjectBulkGetter;
 
 export class SavedObjectProviderRegistry {
@@ -51,14 +52,14 @@ export class SavedObjectProviderRegistry {
 
   public getProvidersClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): SavedObjectBulkGetterResult {
     return this.createProvidersClient(request, spaceId);
   }
 
   private createProvidersClient(
     request: KibanaRequest,
-    spaceId?: string
+    spaceId?: SpaceId
   ): SavedObjectBulkGetterResult {
     if (!this.defaultProvider) {
       throw new Error(

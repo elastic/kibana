@@ -73,7 +73,7 @@ export const Availability: Story = {
     actions: [
       <EuiButton fill href="https://www.elastic.co/subscriptions" target="_blank">
         {'Subscription plans'}
-        <EuiIcon type="popout" aria-hidden={true} />
+        <EuiIcon type="external" aria-hidden={true} />
       </EuiButton>,
       <EuiButtonEmpty href="#">{'Manage your license'}</EuiButtonEmpty>,
     ],

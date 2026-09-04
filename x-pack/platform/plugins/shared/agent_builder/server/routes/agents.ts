@@ -7,20 +7,25 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
+import { AgentAccessControlRole, AgentAccessControlMode } from '@kbn/agent-builder-common';
+import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
 import type {
+  AgentDefinitionWithPermissions,
   GetAgentResponse,
   CreateAgentResponse,
   UpdateAgentResponse,
   DeleteAgentResponse,
-  GetAgentAclResponse,
+  GetAgentAccessControlResponse,
   ListAgentResponse,
-  UpdateAgentAclResponse,
+  UpdateAgentAccessControlRequestBody,
+  UpdateAgentAccessControlResponse,
 } from '../../common/http_api/agents';
+import type { AgentBuilderHandlerContext } from '../request_handler_context';
 import { asError } from '../utils/as_error';
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
@@ -71,6 +76,95 @@ const CONNECTORS_SCHEMA = schema.arrayOf(
   }
 );
 
+const AI_INDICES_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'AI indices to associate with the agent.' },
+    maxLength: MAX_AI_INDEX_ID_LENGTH,
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of AI indices to associate with the agent.' },
+  }
+);
+
+const AI_INDICES_NOT_ENABLED_MESSAGE =
+  '[request body.configuration.ai_indices]: the Context Engine is not enabled. Set contextEngine:enabled to true to enable it.';
+
+/**
+ * `ai_indices` is only readable and writable while the Context Engine is enabled. The setting is
+ * registered by the `agentBuilderSml` plugin, a required dependency of `agentBuilder`.
+ */
+export const isContextEngineEnabled = async (ctx: AgentBuilderHandlerContext): Promise<boolean> => {
+  const { uiSettings } = await ctx.core;
+  return Boolean(await uiSettings.client.get(CONTEXT_ENGINE_ENABLED_SETTING_ID));
+};
+
+/**
+ * Shapes `ai_indices` for a response: absent while the Context Engine is disabled, and present
+ * with an empty-list default while it is enabled.
+ */
+const withAiIndices = <T extends AgentDefinitionWithPermissions>(
+  agent: T,
+  contextEngineEnabled: boolean
+): T => {
+  const { ai_indices: aiIndices, ...configuration } = agent.configuration;
+
+  return contextEngineEnabled
+    ? { ...agent, configuration: { ...configuration, ai_indices: aiIndices ?? [] } }
+    : { ...agent, configuration };
+};
+
+const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
+  [
+    schema.literal(AgentAccessControlMode.Public),
+    schema.literal(AgentAccessControlMode.Shared),
+    schema.literal(AgentAccessControlMode.Private),
+  ],
+  {
+    meta: {
+      description:
+        '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.',
+    },
+  }
+);
+
+const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
+  schema.object({
+    type: schema.literal('user'),
+    name: schema.string({
+      minLength: 1,
+      maxLength: 1024,
+      meta: {
+        description: 'Case-sensitive Kibana username of the principal to grant access to.',
+      },
+    }),
+    role: schema.oneOf(
+      [
+        schema.literal(AgentAccessControlRole.User),
+        schema.literal(AgentAccessControlRole.Editor),
+        schema.literal(AgentAccessControlRole.Manager),
+      ],
+      {
+        meta: {
+          description:
+            'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its access control; `manager` adds deleting the agent and managing access control.',
+        },
+      }
+    ),
+  }),
+  {
+    maxSize: 100,
+    meta: {
+      description:
+        'Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), a `name` (the principal username), and a `role`.',
+    },
+  }
+);
+
+const ACCESS_CONTROL_MODE_ONLY_SCHEMA = schema.object({
+  access_mode: ACCESS_CONTROL_MODE_SCHEMA,
+});
+
 export function registerAgentRoutes({
   router,
   getInternalServices,
@@ -107,7 +201,10 @@ export function registerAgentRoutes({
         const { agents: agentsService } = getInternalServices();
         const service = await agentsService.getRegistry({ request });
         const agents = await service.list();
-        return response.ok<ListAgentResponse>({ body: { results: agents } });
+        const contextEngineEnabled = await isContextEngineEnabled(ctx);
+        return response.ok<ListAgentResponse>({
+          body: { results: agents.map((agent) => withAiIndices(agent, contextEngineEnabled)) },
+        });
       })
     );
 
@@ -148,7 +245,10 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         const profile = await service.get(request.params.id);
-        return response.ok<GetAgentResponse>({ body: profile });
+        const contextEngineEnabled = await isContextEngineEnabled(ctx);
+        return response.ok<GetAgentResponse>({
+          body: withAiIndices(profile, contextEngineEnabled),
+        });
       })
     );
 
@@ -205,21 +305,7 @@ export function registerAgentRoutes({
                   }
                 )
               ),
-              visibility: schema.maybe(
-                schema.oneOf(
-                  [
-                    schema.literal(AgentVisibility.Public),
-                    schema.literal(AgentVisibility.Shared),
-                    schema.literal(AgentVisibility.Private),
-                  ],
-                  {
-                    meta: {
-                      description:
-                        '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
-                    },
-                  }
-                )
-              ),
+              access_control: schema.maybe(ACCESS_CONTROL_MODE_ONLY_SCHEMA),
               configuration: schema.object(
                 {
                   instructions: schema.maybe(
@@ -252,6 +338,7 @@ export function registerAgentRoutes({
                   ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
+                  ai_indices: schema.maybe(AI_INDICES_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -268,17 +355,24 @@ export function registerAgentRoutes({
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
+        const contextEngineEnabled = await isContextEngineEnabled(ctx);
+        if (request.body.configuration.ai_indices !== undefined && !contextEngineEnabled) {
+          return response.badRequest({ body: { message: AI_INDICES_NOT_ENABLED_MESSAGE } });
+        }
+
         try {
-          const profile = await service.create(request.body);
+          const createdProfile = await service.create(request.body);
           analyticsService?.reportAgentCreated({
             agentId: request.body.id,
             toolSelection: request.body.configuration.tools,
           });
           auditLogService.logAgentCreated(request, {
-            agentId: profile.id,
-            agentName: profile.name,
+            agentId: createdProfile.id,
+            agentName: createdProfile.name,
           });
-          return response.ok<CreateAgentResponse>({ body: profile });
+          return response.ok<CreateAgentResponse>({
+            body: withAiIndices(createdProfile, contextEngineEnabled),
+          });
         } catch (error) {
           auditLogService.logAgentCreated(request, {
             agentId: request.body.id,
@@ -347,21 +441,7 @@ export function registerAgentRoutes({
                   }
                 )
               ),
-              visibility: schema.maybe(
-                schema.oneOf(
-                  [
-                    schema.literal(AgentVisibility.Public),
-                    schema.literal(AgentVisibility.Shared),
-                    schema.literal(AgentVisibility.Private),
-                  ],
-                  {
-                    meta: {
-                      description:
-                        '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
-                    },
-                  }
-                )
-              ),
+              access_control: schema.maybe(ACCESS_CONTROL_MODE_ONLY_SCHEMA),
               configuration: schema.maybe(
                 schema.object(
                   {
@@ -396,6 +476,7 @@ export function registerAgentRoutes({
                     ),
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                     connector_ids: schema.maybe(CONNECTORS_SCHEMA),
+                    ai_indices: schema.maybe(AI_INDICES_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
@@ -413,6 +494,11 @@ export function registerAgentRoutes({
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
+        const contextEngineEnabled = await isContextEngineEnabled(ctx);
+        if (request.body.configuration?.ai_indices !== undefined && !contextEngineEnabled) {
+          return response.badRequest({ body: { message: AI_INDICES_NOT_ENABLED_MESSAGE } });
+        }
+
         try {
           const profile = await service.update(request.params.id, request.body);
           analyticsService?.reportAgentUpdated({
@@ -423,7 +509,9 @@ export function registerAgentRoutes({
             agentId: profile.id,
             agentName: profile.name,
           });
-          return response.ok<UpdateAgentResponse>({ body: profile });
+          return response.ok<UpdateAgentResponse>({
+            body: withAiIndices(profile, contextEngineEnabled),
+          });
         } catch (error) {
           auditLogService.logAgentUpdated(request, {
             agentId: request.params.id,
@@ -495,15 +583,15 @@ export function registerAgentRoutes({
       })
     );
 
-  // Get agent ACL
+  // Get agent access control
   router.versioned
     .get({
-      path: `${publicApiPath}/agents/{id}/acl`,
+      path: `${publicApiPath}/agents/{id}/access_control`,
       security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: "Get an agent's access control list",
       description:
-        'Get the access control list (ACL) for a specific agent. Callers without permission to manage the ACL receive `can_manage: false` and an empty `entries` list — the principal list itself is sensitive. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Get the access control for a specific agent. Callers without permission to manage access control receive `permissions.update_access_control: false` and only their own entry. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },
@@ -516,37 +604,36 @@ export function registerAgentRoutes({
           request: {
             params: schema.object({
               id: schema.string({
-                meta: { description: 'The unique identifier of the agent whose ACL to retrieve.' },
+                meta: {
+                  description:
+                    'The unique identifier of the agent whose access control to retrieve.',
+                },
               }),
             }),
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/agents_acl_get.yaml'),
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_access_control_get.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const result = await service.getAcl(request.params.id);
+        const body = await service.getAccessControl(request.params.id);
 
-        const body: GetAgentAclResponse = {
-          can_manage: result.can_manage,
-          acl: result.can_manage ? result.acl : { entries: [] },
-        };
-        return response.ok<GetAgentAclResponse>({ body });
+        return response.ok<GetAgentAccessControlResponse>({ body });
       })
     );
 
-  // Update agent ACL
+  // Update agent access control
   router.versioned
     .put({
-      path: `${publicApiPath}/agents/{id}/acl`,
+      path: `${publicApiPath}/agents/{id}/access_control`,
       security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: "Update an agent's access control list",
       description:
-        'Replace the per-agent access control list (ACL). The agent owner, cluster admins, and anyone the ACL grants Editor or higher can call this endpoint (or anyone with `manageAgents` on a Public agent). Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Replace the per-agent access-control entries. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },
@@ -559,48 +646,19 @@ export function registerAgentRoutes({
           request: {
             params: schema.object({
               id: schema.string({
-                meta: { description: 'The unique identifier of the agent whose ACL to update.' },
+                meta: {
+                  description: 'The unique identifier of the agent whose access control to update.',
+                },
               }),
             }),
             body: schema.object({
-              entries: schema.arrayOf(
-                schema.object({
-                  type: schema.literal('user'),
-                  name: schema.string({
-                    minLength: 1,
-                    maxLength: 1024,
-                    meta: {
-                      description:
-                        'Case-sensitive Kibana username of the principal to grant access to.',
-                    },
-                  }),
-                  role: schema.oneOf(
-                    [
-                      schema.literal(AgentAclRole.User),
-                      schema.literal(AgentAclRole.Editor),
-                      schema.literal(AgentAclRole.Manager),
-                    ],
-                    {
-                      meta: {
-                        description:
-                          'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its ACL; `manager` adds deleting the agent and changing visibility.',
-                      },
-                    }
-                  ),
-                }),
-                {
-                  maxSize: 100,
-                  meta: {
-                    description:
-                      'Access control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported; role-based grants are planned for a future release), a `name` (the principal username), and a `role`. Submitting this field replaces the existing ACL entirely; submit an empty array to clear all grants.',
-                  },
-                }
-              ),
+              entries: ACCESS_CONTROL_ENTRIES_SCHEMA,
             }),
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/agents_acl_update.yaml'),
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/agents_access_control_update.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -608,11 +666,14 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         try {
-          const updatedAcl = await service.updateAcl(request.params.id, request.body);
+          const updatedAccessControl = await service.updateAccessControl(
+            request.params.id,
+            request.body as UpdateAgentAccessControlRequestBody
+          );
           auditLogService.logAgentUpdated(request, {
             agentId: request.params.id,
           });
-          return response.ok<UpdateAgentAclResponse>({ body: updatedAcl });
+          return response.ok<UpdateAgentAccessControlResponse>({ body: updatedAccessControl });
         } catch (error) {
           auditLogService.logAgentUpdated(request, {
             agentId: request.params.id,

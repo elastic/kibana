@@ -19,6 +19,10 @@ import {
   toStoredRuntimeFields,
 } from './to_stored_fields';
 
+// Function overrides to better type the return value depending on the input type
+export function toStoredDataView(dataView: AsCodeDataView): string | DataViewSpec;
+export function toStoredDataView(dataView: AsCodeSavedDataView): DataViewSpec;
+
 /**
  * Convert an as-code data view back to a stored search-source `index` value
  * (string id for a referenced data view, or inline {@link DataViewSpec} fields).
@@ -39,9 +43,16 @@ export function toStoredDataView(
   return {
     title: dataView.index_pattern,
     ...(dataView.time_field !== undefined && { timeFieldName: dataView.time_field }),
+    ...(dataView.allow_hidden_indices !== undefined && {
+      allowHidden: dataView.allow_hidden_indices,
+    }),
     ...(runtimeFieldMap && Object.keys(runtimeFieldMap).length > 0 && { runtimeFieldMap }),
     ...(fieldFormats && Object.keys(fieldFormats).length > 0 && { fieldFormats }),
     ...(fieldAttrs && Object.keys(fieldAttrs).length > 0 && { fieldAttrs }),
+    ...(dataView.name && { name: dataView.name }),
+    ...(dataView.field_filters !== undefined && {
+      sourceFilters: dataView.field_filters.map((filter) => ({ value: filter })),
+    }),
     ...getSavedDataViewFields(dataView),
   };
 }
@@ -49,20 +60,14 @@ export function toStoredDataView(
 function isSavedDataView(
   dataView: AsCodeDataView | AsCodeSavedDataView
 ): dataView is AsCodeSavedDataView {
-  return (
-    'id' in dataView ||
-    'name' in dataView ||
-    'allow_hidden_indices' in dataView ||
-    'field_filters' in dataView
-  );
+  return 'id' in dataView;
 }
 
-function getSavedDataViewFields(dataView: AsCodeSavedDataView): Partial<DataViewSpec> {
+function getSavedDataViewFields(
+  dataView: AsCodeDataView | AsCodeSavedDataView
+): Partial<DataViewSpec> {
   if (!isSavedDataView(dataView)) return {};
   return {
     id: dataView.id,
-    name: dataView.name,
-    allowHidden: dataView.allow_hidden_indices,
-    sourceFilters: dataView.field_filters?.map((filter) => ({ value: filter })),
   };
 }

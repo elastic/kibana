@@ -20,6 +20,8 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
 import { useFilterConfig } from './table_filter_config/use_filter_config';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCasesConfig } from '../../common/lib/kibana';
+import { useGlobalInlineFields } from './hooks/use_global_inline_fields';
 import { TableSearch } from './search';
 import { DateRangeFilter } from './date_range_filter';
 
@@ -65,6 +67,12 @@ const CasesTableFiltersComponent = ({
     data: { customFields },
     isFetching: isLoadingCasesConfiguration,
   } = useGetCaseConfiguration();
+  const { templatesEnabled } = useCasesConfig();
+  const {
+    globalInlineFields,
+    isLoading: isLoadingGlobalFields,
+    isLoaded: areGlobalFieldsLoaded,
+  } = useGlobalInlineFields({ enabled: templatesEnabled });
 
   const onFilterOptionsChange = useCallback(
     (partialFilterOptions: Partial<FilterOptions>) => {
@@ -77,7 +85,11 @@ const CasesTableFiltersComponent = ({
   );
 
   const isLoadingFilters =
-    isLoading || isLoadingTags || isLoadingCategories || isLoadingCasesConfiguration;
+    isLoading ||
+    isLoadingTags ||
+    isLoadingCategories ||
+    isLoadingCasesConfiguration ||
+    isLoadingGlobalFields;
 
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
@@ -105,6 +117,9 @@ const CasesTableFiltersComponent = ({
     isSelectorView,
     filterOptions,
     customFields,
+    globalInlineFields,
+    areGlobalFieldsLoaded,
+    templatesEnabled,
     isLoading: isLoadingFilters,
   });
 

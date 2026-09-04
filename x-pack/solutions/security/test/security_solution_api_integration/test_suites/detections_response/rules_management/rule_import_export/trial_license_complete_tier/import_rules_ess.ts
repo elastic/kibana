@@ -25,6 +25,7 @@ import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hoo
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -74,20 +75,50 @@ export default ({ getService }: FtrProviderContext): void => {
       const sidecarActionsPostResults = await getLegacyActionSO(es);
 
       expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
+
+      const overwritten = await fetchRule(supertest, { ruleId: 'rule-1' });
+      expect(overwritten.id).toBe(createdRule.id);
+      expect(overwritten.name).toBe('some other name');
     });
 
     describe('importing rules with different roles', () => {
       before(async () => {
         await createUserAndRole(getService, ROLES.hunter_no_actions);
         await createUserAndRole(getService, ROLES.hunter);
+        await createUserAndRole(getService, ROLES.t1_analyst);
       });
       after(async () => {
         await deleteUserAndRole(getService, ROLES.hunter_no_actions);
         await deleteUserAndRole(getService, ROLES.hunter);
+        await deleteUserAndRole(getService, ROLES.t1_analyst);
+      });
+
+      it('returns 403 when the user lacks rules write privilege', async () => {
+        const ndjson = combineToNdJson(
+          getCustomQueryRuleParams({
+            rule_id: 'rbac-import-denied',
+            enabled: false,
+          })
+        );
+
+        await supertestWithoutAuth
+          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
+          .auth(ROLES.t1_analyst, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect(403);
+
+        await detectionsApi.readRule({ query: { rule_id: 'rbac-import-denied' } }).expect(404);
       });
 
       it('should successfully import rules without actions when user has no actions privileges', async () => {
-        const ndjson = combineToNdJson(getCustomQueryRuleParams());
+        const rule = getCustomQueryRuleParams({
+          rule_id: 'hunter-no-actions-rule',
+          name: 'Hunter no actions rule',
+          enabled: false,
+        });
+        const ndjson = combineToNdJson(rule);
 
         const { body } = await supertestWithoutAuth
           .post(DETECTION_ENGINE_RULES_IMPORT_URL)
@@ -107,6 +138,11 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        const { body: imported } = await detectionsApi
+          .readRule({ query: { rule_id: 'hunter-no-actions-rule' } })
+          .expect(200);
+        expect(imported.name).toBe('Hunter no actions rule');
       });
 
       it('should NOT import rules with actions when user has "read" actions privileges', async () => {

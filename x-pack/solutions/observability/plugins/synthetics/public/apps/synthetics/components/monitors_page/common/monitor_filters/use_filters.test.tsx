@@ -7,12 +7,12 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useFilters } from './use_filters';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { WrappedHelper } from '../../../../utils/testing';
 import { fetchMonitorFiltersAction } from '../../../../state';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: jest.fn().mockReturnValue(jest.fn()),
 }));
 
@@ -55,7 +55,7 @@ describe('useMonitorListFilters', () => {
     const { result } = renderHook(() => useFilters(), { wrapper: Wrapper });
 
     expect(result.current).toStrictEqual(null);
-    expect(spy).toBeCalledWith(fetchMonitorFiltersAction.get({}));
+    expect(spy).toHaveBeenCalledWith(fetchMonitorFiltersAction.get({}));
   });
 
   it('picks up results from filters selector', () => {
@@ -90,6 +90,6 @@ describe('useMonitorListFilters', () => {
     const { result } = renderHook(() => useFilters(), { wrapper: Wrapper });
 
     expect(result.current).toStrictEqual(filters);
-    expect(spy).toBeCalledWith(fetchMonitorFiltersAction.get({}));
+    expect(spy).toHaveBeenCalledWith(fetchMonitorFiltersAction.get({}));
   });
 });
