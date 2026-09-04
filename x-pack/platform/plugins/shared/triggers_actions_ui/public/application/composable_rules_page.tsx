@@ -10,46 +10,11 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { createMemoryHistory } from 'history';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
-import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import type { SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
-import type { ClassicRulesPageProps } from '../plugin';
 import { RulesPageApp } from './rules_page_app';
 import type { TriggersAndActionsUiServices } from './rules_app';
+import type { ClassicRulesPageInternalDeps, ClassicRulesPageProps } from './classic_rules_page';
 
-type ClassicRulesPagePluginsStart = Pick<
-  TriggersAndActionsUiServices,
-  | 'data'
-  | 'dataViews'
-  | 'dataViewEditor'
-  | 'charts'
-  | 'alerting'
-  | 'spaces'
-  | 'unifiedSearch'
-  | 'licensing'
-  | 'expressions'
-  | 'fieldFormats'
-  | 'lens'
-  | 'fieldsMetadata'
-  | 'contentManagement'
-  | 'share'
-  | 'uiActions'
-  | 'cps'
-  | 'inspector'
-> & {
-  features: { getFeatures: () => Promise<KibanaFeature[]> };
-};
-
-export interface ClassicRulesPageInternalDeps {
-  actions: ActionsPublicPluginSetup;
-  security: SecurityPluginStart;
-  cloud?: CloudSetup;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  ruleTypeRegistry: RuleTypeRegistryContract;
-  isServerless: boolean;
-  pluginsStart: ClassicRulesPagePluginsStart;
-}
+export type { ClassicRulesPageInternalDeps, ClassicRulesPageProps } from './classic_rules_page';
 
 export const ComposableClassicRulesPage = ({
   coreStart,

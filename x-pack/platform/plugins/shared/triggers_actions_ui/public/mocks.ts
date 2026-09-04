@@ -48,6 +48,8 @@ import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
 
+const ClassicRulesPageStub = () => null;
+
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
@@ -150,6 +152,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       }
       return ruleTypeRegistry.get(ruleTypeId).format;
     },
+    getClassicRulesPage: () => ClassicRulesPageStub,
   };
 }
 
