@@ -16,7 +16,7 @@ import type { PanelFailure } from '../utils';
 import { getErrorMessage } from '../utils';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import type { DashboardOperation } from './registry';
-import type { ResolveCustomContentTemplate } from './types';
+import type { ResolveAttachmentPanel, ResolveCustomContentTemplate } from './types';
 import {
   PANEL_TYPE_DEFINITIONS,
   type AddPanelsItemInput,
@@ -188,11 +188,13 @@ export const createPanelInputMaterializer = ({
   operationIndex,
   operationType,
   failures,
+  resolveAttachmentPanel,
 }: {
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
   operationType: DashboardOperation['operation'];
   failures: PanelFailure[];
+  resolveAttachmentPanel?: ResolveAttachmentPanel;
 }): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
   const resolvedRequestByInputIndex = new Map(
     getResolvedPanelCreationRequests({
@@ -206,6 +208,18 @@ export const createPanelInputMaterializer = ({
       return {
         panelContent: PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config),
       };
+    }
+
+    if (item.source === 'attachment') {
+      if (!resolveAttachmentPanel) {
+        throw new Error('Attachment panel resolver is required for attachment-source panels.');
+      }
+      const resolved = resolveAttachmentPanel(item.attachment_id);
+      if (resolved.type === 'failure') {
+        failures.push(resolved.failure);
+        return undefined;
+      }
+      return { panelContent: resolved.panelContent };
     }
 
     const resolvedRequest = resolvedRequestByInputIndex.get(panelInputIndex);

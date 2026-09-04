@@ -21,6 +21,7 @@ import { createCustomContentTemplateResolver } from '@kbn/custom-content-server'
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
+  createAttachmentPanelResolver,
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
@@ -150,6 +151,7 @@ Use operations[] to:
             modelProvider,
             esClient,
           }),
+          resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
         });
 
         // Data-aware default time range computation

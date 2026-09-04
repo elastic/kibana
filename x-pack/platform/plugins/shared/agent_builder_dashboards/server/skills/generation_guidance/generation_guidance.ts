@@ -41,7 +41,8 @@ For an existing dashboard:
 ## Panel Inputs
 
 - Use \`source: "request"\` to create or edit a Lens or Vega panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a visualization \`config\` for a new visualization.
-- Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, markdown, or custom content). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
+- Use \`source: "attachment"\` with an \`attachment_id\` to place a visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. The attachment's own renderer decides the panel type, so pass only the id and a \`grid\`. Prefer this over \`source: "config"\` whenever you have an id: it avoids copying the payload back through a tool call, which matters most for custom content, whose HTML template can be several KB.
+- Use \`source: "config"\` only for content you have resolved and cannot address by id (markdown, or a visualization config a previous tool result gave you by value).
 
 ## Panel Type Selection
 
