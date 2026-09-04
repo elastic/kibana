@@ -7,12 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
+import type {
+  SavedObjectsType,
+  SavedObjectsFullModelVersion,
+} from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
+import { DEFERRED_INIT_STATE_TYPE } from '@kbn/core-deferred-init-common';
+
+export { DEFERRED_INIT_STATE_TYPE };
+
+const deferredInitStateAttributesSchemaV1 = schema.object({
+  /** `available` once `lazyInitialize` has completed successfully anywhere in the cluster. */
+  status: schema.oneOf([schema.literal('available'), schema.literal('failed')]),
+  updatedAt: schema.string(),
+  /** Number of `lazyInitialize` attempts across the cluster; informational only. */
+  attempts: schema.number(),
+  lastError: schema.maybe(schema.string()),
+  /** Kibana version that last wrote this record; used to invalidate stale state after an upgrade. */
+  kibanaVersion: schema.string(),
+});
+
+const deferredInitStateModelVersion1: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    forwardCompatibility: deferredInitStateAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+    create: deferredInitStateAttributesSchemaV1,
+  },
+};
+
+const deferredInitStateType: SavedObjectsType = {
+  name: DEFERRED_INIT_STATE_TYPE,
+  // Cluster-global, not per space: a plugin's deferred init runs once for the whole
+  // deployment, matching `LazyInitContext`'s current single-project scope.
+  namespaceType: 'agnostic',
+  hidden: true,
+  mappings: {
+    dynamic: false,
+    properties: {
+      // `ignore_above` bounds these keyword fields so an over-long value can't blow up the
+      // mapping (both are short by construction: a fixed enum and a Kibana version string).
+      status: { type: 'keyword', ignore_above: 256 },
+      updatedAt: { type: 'date' },
+      attempts: { type: 'integer' },
+      kibanaVersion: { type: 'keyword', ignore_above: 256 },
+      // lastError is diagnostic free text; deliberately unmapped (dynamic: false covers it).
+    },
+  },
+  modelVersions: {
+    '1': deferredInitStateModelVersion1,
+  },
+};
 
 const legacyUrlAliasType: SavedObjectsType = {
   name: LEGACY_URL_ALIAS_TYPE,
@@ -49,4 +98,5 @@ const legacyUrlAliasType: SavedObjectsType = {
  */
 export function registerCoreObjectTypes(typeRegistry: ISavedObjectTypeRegistryInternal) {
   typeRegistry.registerType(legacyUrlAliasType);
+  typeRegistry.registerType(deferredInitStateType);
 }

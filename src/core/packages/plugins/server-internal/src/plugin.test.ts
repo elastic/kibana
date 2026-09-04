@@ -131,6 +131,35 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.runtimePluginDependencies).toEqual(['some-runtime-dep']);
 });
 
+describe('`enableLazyInitialize`', () => {
+  function createPlugin(manifestProps: Partial<PluginManifest> = {}) {
+    const manifest = createPluginManifest(manifestProps);
+    const opaqueId = Symbol();
+    return new PluginWrapper({
+      path: 'some-plugin-path',
+      manifest,
+      opaqueId,
+      initializerContext: createPluginInitializerContext({
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo,
+        nodeInfo,
+      }),
+    });
+  }
+
+  test('reflects the manifest flag even before `init()` has run', () => {
+    const plugin = createPlugin({ enableLazyInitialize: true });
+    expect(plugin.enableLazyInitialize).toBe(true);
+  });
+
+  test('defaults to `false` when unset in the manifest', () => {
+    const plugin = createPlugin();
+    expect(plugin.enableLazyInitialize).toBe(false);
+  });
+});
+
 describe('`constructor` correctly sets non-external source', () => {
   function createPlugin(path: string) {
     const manifest = createPluginManifest();

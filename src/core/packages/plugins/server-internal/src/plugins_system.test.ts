@@ -27,6 +27,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { PluginWrapper } from './plugin';
 import { findCircularDependencies, normalizeCycle, PluginsSystem } from './plugins_system';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { DeferredInitEngine } from './deferred_init';
 
 function createPlugin(
   id: string,
@@ -81,6 +82,7 @@ let coreContext: CoreContext;
 
 beforeEach(() => {
   runtimeResolverMock.setDependencyMap.mockReset();
+  runtimeResolverMock.setDeferredInitEngine.mockReset();
   runtimeResolverMock.resolveSetupRequests.mockReset();
   runtimeResolverMock.resolveStartRequests.mockReset();
 
@@ -730,6 +732,128 @@ describe('start', () => {
       pluginA: 'contractA',
       pluginB: 'contractB',
     });
+  });
+
+  it('attaches the deferred-init runner for lazy plugins before the loop moves on', async () => {
+    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    jest.spyOn(engine, 'setRunner');
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+
+    const lazyPlugin = createPlugin('lazyPlugin');
+    jest.spyOn(lazyPlugin, 'enableLazyInitialize', 'get').mockReturnValue(true);
+    jest.spyOn(lazyPlugin, 'setup').mockReturnValue({});
+    jest.spyOn(lazyPlugin, 'start').mockReturnValue('lazyContract');
+    jest.spyOn(lazyPlugin, 'runLazyInitialize').mockResolvedValue(undefined);
+
+    localPluginsSystem.addPlugin(lazyPlugin);
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+    await localPluginsSystem.startPlugins(startDeps);
+
+    expect(engine.setRunner).toHaveBeenCalledTimes(1);
+    const [pluginId, runner] = (engine.setRunner as jest.Mock).mock.calls[0];
+    expect(pluginId).toBe('lazyPlugin');
+
+    // the runner delegates to the plugin's own runLazyInitialize
+    await runner({});
+    expect(lazyPlugin.runLazyInitialize).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not attach a runner for plugins that did not opt into lazy init', async () => {
+    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    jest.spyOn(engine, 'setRunner');
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+
+    const plugin = createPlugin('regularPlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest.spyOn(plugin, 'start').mockReturnValue('contract');
+
+    localPluginsSystem.addPlugin(plugin);
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+    await localPluginsSystem.startPlugins(startDeps);
+
+    expect(engine.setRunner).not.toHaveBeenCalled();
+  });
+});
+
+describe('start - deferred-init start-cycle guard', () => {
+  it('brackets the start loop with begin/endStartCycle on the engine', async () => {
+    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    jest.spyOn(engine, 'beginStartCycle');
+    jest.spyOn(engine, 'endStartCycle');
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+
+    const plugin = createPlugin('somePlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest.spyOn(plugin, 'start').mockReturnValue('contract');
+    localPluginsSystem.addPlugin(plugin);
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+    await localPluginsSystem.startPlugins(startDeps);
+
+    expect(engine.beginStartCycle).toHaveBeenCalledTimes(1);
+    expect(engine.endStartCycle).toHaveBeenCalledTimes(1);
+    expect((engine.beginStartCycle as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (engine.endStartCycle as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  it('clears the start cycle even when a plugin start() throws', async () => {
+    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    jest.spyOn(engine, 'endStartCycle');
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+
+    const plugin = createPlugin('boom-plugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    const error = new Error('boom');
+    jest.spyOn(plugin, 'start').mockRejectedValueOnce(error);
+    localPluginsSystem.addPlugin(plugin);
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+    await expect(localPluginsSystem.startPlugins(startDeps)).rejects.toBe(error);
+
+    expect(engine.endStartCycle).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates a start() error immediately, without retrying', async () => {
+    const plugin = createPlugin('failing-start');
+    jest.spyOn(plugin, 'setup').mockResolvedValue({});
+    const error = new Error('boom');
+    jest.spyOn(plugin, 'start').mockRejectedValueOnce(error);
+
+    pluginsSystem.addPlugin(plugin);
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+    mockCreatePluginStartContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+
+    await expect(pluginsSystem.startPlugins(startDeps)).rejects.toBe(error);
+    expect(plugin.start).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('deferred-init engine wiring', () => {
+  it('registers the deferred-init engine with the runtime contract resolver, when present', async () => {
+    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+    const plugin = createPlugin('somePlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    localPluginsSystem.addPlugin(plugin);
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+
+    expect(runtimeResolverMock.setDeferredInitEngine).toHaveBeenCalledWith(engine);
+  });
+
+  it('does not attempt to register an engine when none was provided', async () => {
+    const plugin = createPlugin('somePlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    pluginsSystem.addPlugin(plugin);
+
+    await pluginsSystem.setupPlugins(setupDeps);
+
+    expect(runtimeResolverMock.setDeferredInitEngine).not.toHaveBeenCalled();
   });
 });
 

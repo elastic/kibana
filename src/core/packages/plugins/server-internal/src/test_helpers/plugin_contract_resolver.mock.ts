@@ -13,8 +13,11 @@ export const createRuntimePluginContractResolverMock =
   (): jest.Mocked<IRuntimePluginContractResolver> => {
     return {
       setDependencyMap: jest.fn(),
+      setDeferredInitEngine: jest.fn(),
       onSetup: jest.fn(),
       onStart: jest.fn(),
+      notifyStartContractAvailable: jest.fn(),
+      loadPluginContract: jest.fn(),
       resolveSetupRequests: jest.fn(),
       resolveStartRequests: jest.fn(),
     };

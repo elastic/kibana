@@ -9,7 +9,7 @@
 
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
-import { registerCoreObjectTypes } from './registration';
+import { registerCoreObjectTypes, DEFERRED_INIT_STATE_TYPE } from './registration';
 
 describe('Core saved object types registration', () => {
   describe('#registerCoreObjectTypes', () => {
@@ -17,9 +17,12 @@ describe('Core saved object types registration', () => {
       const typeRegistry = typeRegistryMock.create();
       registerCoreObjectTypes(typeRegistry);
 
-      expect(typeRegistry.registerType).toHaveBeenCalledTimes(1);
+      expect(typeRegistry.registerType).toHaveBeenCalledTimes(2);
       expect(typeRegistry.registerType).toHaveBeenCalledWith(
         expect.objectContaining({ name: LEGACY_URL_ALIAS_TYPE })
+      );
+      expect(typeRegistry.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ name: DEFERRED_INIT_STATE_TYPE })
       );
     });
   });

@@ -24,6 +24,7 @@ import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-int
 import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { SharedGlobalConfigKeys } from './shared_global_config';
+import type { LazyInitContext } from './deferred_init';
 type Maybe<T> = T | undefined;
 
 /**
@@ -270,6 +271,12 @@ export interface PluginManifest {
    * configured, etc.) Default is false.
    */
   readonly enabledOnAnonymousPages?: boolean;
+
+  /**
+   * Opt this plugin into core-managed lazy/deferred Elasticsearch initialization. See
+   * {@link Plugin.lazyInitialize}. Default is false.
+   */
+  readonly enableLazyInitialize?: boolean;
 }
 
 /**
@@ -299,6 +306,19 @@ export interface Plugin<
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
   stop?(): MaybePromise<void>;
+
+  /**
+   * The plugin's deferred Elasticsearch-backed initialization work. Only invoked by core when
+   * the plugin's manifest sets `enableLazyInitialize: true` (see {@link PluginManifest}). When
+   * enabled, core does not run this at boot; it defers the work until the first time any of the
+   * plugin's HTTP routes is hit (or an explicit/programmatic trigger fires), gates those routes
+   * with `503` while pending, and reflects the init state into the plugin's `/status` entry.
+   * Treated as idempotent: a `failed` run may be re-triggered, and concurrent triggers share a
+   * single in-flight run.
+   *
+   * @public
+   */
+  lazyInitialize?(ctx: LazyInitContext): Promise<void>;
 }
 
 /**

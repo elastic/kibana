@@ -10,6 +10,47 @@
 import type { PluginName } from '@kbn/core-base-common';
 
 /**
+ * Deferred (lazy) initialization helpers available to a plugin that has opted in via
+ * `enableLazyInitialize: true` in its manifest.
+ *
+ * @public
+ * @experimental
+ */
+export interface LazyInitPluginsSetup {
+  /**
+   * Returns a promise that resolves once this plugin's deferred initialization is complete, or
+   * rejects with a `DeferredInitializationError` if initialization ultimately fails.
+   *
+   * Call this at the start of a background task runner's `run` function (or inside a
+   * `taskManager.addMiddleware` `beforeRun` hook) to gate task execution until the plugin is
+   * ready. The task manager timeout still applies, so tasks that wait longer than their timeout
+   * will be retried automatically.
+   *
+   * @remarks
+   * Do NOT `await` this from your own `start()`: it would block boot on the very deferred
+   * initialization it is meant to gate, so core rejects it during the start lifecycle. Use it
+   * post-boot only (task runners, route handlers, etc.).
+   *
+   * @example
+   * ```ts
+   * // In plugin setup:
+   * const { waitForInit } = core.plugins.lazyInit!;
+   * deps.taskManager.registerTaskDefinitions({
+   *   'myPlugin:myTask': {
+   *     createTaskRunner: (ctx) => ({
+   *       run: async () => {
+   *         await waitForInit();
+   *         // ... actual task work
+   *       },
+   *     }),
+   *   },
+   * });
+   * ```
+   */
+  waitForInit: () => Promise<void>;
+}
+
+/**
  * Setup contract of Core's `plugins` service.
  *
  * @public
@@ -81,6 +122,43 @@ export interface PluginsServiceSetup {
    * ```
    */
   onStart: PluginContractResolver;
+  /**
+   * Loads a single declared dependency's start contract, waiting for it to become safe to use:
+   * the dependency's `start()` must have returned, and if it opted into deferred (lazy)
+   * initialization, that initialization must have completed. Rejects with a
+   * `DeferredInitializationError` (see `@kbn/core-plugins-server`) if the deferred
+   * initialization ultimately fails.
+   *
+   * The dependency must be declared in the calling plugin's manifest (required, optional, or
+   * `runtimePluginDependencies`), otherwise the API throws at call time.
+   *
+   * @remarks
+   * Do NOT `await` this from your own `setup()`/`start()` for a lazy dependency: blocking a
+   * lifecycle on another plugin's deferred initialization stalls boot, so core rejects it. Call it
+   * post-boot instead — from a route handler, a task runner, your own `lazyInitialize()`, or a
+   * function returned from `start()` that consumers invoke later.
+   *
+   * @example
+   * ```ts
+   * // In a route handler (post-boot):
+   * router.get({ path, validate }, async (ctx, req, res) => {
+   *   const fleet = await core.plugins.loadPluginContract<FleetStartContract>('fleet');
+   *   return res.ok({ body: await fleet.getSomething() });
+   * });
+   * ```
+   *
+   * @experimental
+   */
+  loadPluginContract: LoadPluginContract;
+  /**
+   * Available only for plugins that have `enableLazyInitialize: true` in their manifest.
+   * `undefined` for plugins without deferred initialization.
+   *
+   * @see {@link LazyInitPluginsSetup}
+   *
+   * @experimental
+   */
+  lazyInit?: LazyInitPluginsSetup;
 }
 
 /**
@@ -122,6 +200,35 @@ export interface PluginsServiceStart {
    * @experimental
    */
   onStart: PluginContractResolver;
+  /**
+   * Loads a single declared dependency's start contract, waiting for it to become safe to use:
+   * the dependency's `start()` must have returned, and if it opted into deferred (lazy)
+   * initialization, that initialization must have completed. Rejects with a
+   * `DeferredInitializationError` (see `@kbn/core-plugins-server`) if the deferred
+   * initialization ultimately fails.
+   *
+   * The dependency must be declared in the calling plugin's manifest (required, optional, or
+   * `runtimePluginDependencies`), otherwise the API throws at call time.
+   *
+   * @remarks
+   * Do NOT `await` this from your own `start()` for a lazy dependency: blocking `start()` on
+   * another plugin's deferred initialization stalls boot, so core rejects it. Call it post-boot
+   * instead — from a route handler, a task runner, your own `lazyInitialize()`, or a function
+   * returned from `start()` that consumers invoke later.
+   *
+   * @example
+   * ```ts
+   * start(core) {
+   *   // Return a function; consumers call it post-boot, never from their own start().
+   *   return {
+   *     getFleet: () => core.plugins.loadPluginContract<FleetStartContract>('fleet'),
+   *   };
+   * }
+   * ```
+   *
+   * @experimental
+   */
+  loadPluginContract: LoadPluginContract;
 }
 
 /**
@@ -183,3 +290,13 @@ export type PluginContractResolverResponse<ContractMap extends PluginContractMap
 export type PluginContractResolver = <T extends PluginContractMap>(
   ...pluginNames: Array<keyof T>
 ) => Promise<PluginContractResolverResponse<T>>;
+
+/**
+ * Loads a single declared dependency's start contract, typed by an explicit generic type
+ * argument. See {@link PluginsServiceSetup.loadPluginContract} and
+ * {@link PluginsServiceStart.loadPluginContract} for documentation and examples.
+ *
+ * @public
+ * @experimental
+ */
+export type LoadPluginContract = <T>(pluginName: PluginName) => Promise<T>;
