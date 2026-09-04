@@ -117,8 +117,6 @@ import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
 import { ChangeTrackingService } from './rules_client/lib/change_tracking';
-import { UiamApiKeyProvisioningTask } from './provisioning';
-import { uiamProvisioningEvents } from './provisioning/event_based_telemetry';
 import { ruleCreateTelemetryEvents } from './application/rule/methods/common_utils/event_based_telemetry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
@@ -259,7 +257,6 @@ export class AlertingPlugin {
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
   private changeTrackingService?: ChangeTrackingService;
-  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -429,17 +426,9 @@ export class AlertingPlugin {
       this.config
     );
 
-    uiamProvisioningEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
     ruleCreateTelemetryEvents.forEach((eventConfig) =>
       core.analytics.registerEventType(eventConfig)
     );
-
-    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
-      logger: this.logger,
-      isServerless: this.isServerless,
-      analytics: core.analytics,
-    });
-    this.uiamApiKeyProvisioningTask.register({ core, taskManager: plugins.taskManager });
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
@@ -717,7 +706,6 @@ export class AlertingPlugin {
       securityService: core.security,
       shouldGrantUiam,
       isServerless: this.isServerless,
-      featureFlags: core.featureFlags,
       analytics: core.analytics,
     });
 
@@ -839,10 +827,6 @@ export class AlertingPlugin {
       () => {}
     ); // it shouldn't reject, but just in case
 
-    this.uiamApiKeyProvisioningTask
-      ?.start({ core, taskManager: plugins.taskManager })
-      .catch(() => {});
-
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
       getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
@@ -899,7 +883,6 @@ export class AlertingPlugin {
     if (this.licenseState) {
       this.licenseState.clean();
     }
-    this.uiamApiKeyProvisioningTask?.stop();
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }

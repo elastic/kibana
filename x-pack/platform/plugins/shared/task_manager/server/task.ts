@@ -688,8 +688,7 @@ export interface ApiKeyOptions {
   cloneApiKey?: boolean;
   /**
    * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
-   * tests and narrow internal flows (e.g. exercising UIAM provisioning on tasks that have ES
-   * credentials only).
+   * tests and narrow internal flows that need tasks with ES credentials only.
    */
   onEsKey?: boolean;
 }

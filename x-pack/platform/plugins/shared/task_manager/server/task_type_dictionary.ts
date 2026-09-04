@@ -50,6 +50,10 @@ export const REMOVED_TYPES: string[] = [
   // one-off cleanup task removed after completing in its target project (added in #273285)
   'alerting:clear_stale_uiam_api_keys',
 
+  // UIAM API key backfill tasks removed after provisioning completed
+  'alerting:api_key_provisioning',
+  'task_manager:uiam_api_key_provisioning',
+
   // Legacy streams KI task types removed after migrating onboarding, feature
   // identification, and queries generation to managed workflows (https://github.com/elastic/kibana/pull/271468)
   'streams_onboarding',

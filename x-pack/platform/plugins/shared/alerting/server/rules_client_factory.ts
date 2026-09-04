@@ -90,7 +90,6 @@ export interface RulesClientFactoryOpts {
   securityService: CoreStart['security'];
   shouldGrantUiam: boolean;
   isServerless: boolean;
-  featureFlags: CoreStart['featureFlags'];
   analytics: CoreStart['analytics'];
 }
 
@@ -121,7 +120,6 @@ export class RulesClientFactory {
   private securityService!: CoreStart['security'];
   private shouldGrantUiam: boolean = false;
   private isServerless: boolean = false;
-  private featureFlags!: CoreStart['featureFlags'];
   private analytics!: CoreStart['analytics'];
 
   public initialize(options: RulesClientFactoryOpts) {
@@ -154,7 +152,6 @@ export class RulesClientFactory {
     this.securityService = options.securityService;
     this.shouldGrantUiam = options.shouldGrantUiam;
     this.isServerless = options.isServerless;
-    this.featureFlags = options.featureFlags;
     this.analytics = options.analytics;
   }
 
@@ -420,7 +417,6 @@ export class RulesClientFactory {
       uiSettings: this.uiSettings,
       shouldGrantUiam: this.shouldGrantUiam,
       isServerless: this.isServerless,
-      featureFlags: this.featureFlags,
       analytics: this.analytics,
 
       async getUserName() {

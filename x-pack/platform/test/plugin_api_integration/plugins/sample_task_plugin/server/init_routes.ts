@@ -125,10 +125,7 @@ export function initRoutes(
       validate: {
         body: schema.object({
           task: innerTaskSchema,
-          /**
-           * Grants only an Elasticsearch API key, skipping UIAM. Lets a test create a task in the
-           * pre-UIAM state so the UIAM provisioning task has something to convert.
-           */
+          /** Grants only an Elasticsearch API key, skipping UIAM. */
           onEsKey: schema.maybe(schema.boolean()),
         }),
       },

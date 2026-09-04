@@ -84,10 +84,6 @@ import {
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
 import { createApiKeyStrategy } from './api_key_strategy';
-import {
-  UiamApiKeyProvisioningTask,
-  taskManagerUiamProvisioningEvents,
-} from './uiam_api_key_provisioning';
 
 export interface TaskManagerSetupContract {
   /**
@@ -173,7 +169,6 @@ export class TaskManagerPlugin
   private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
-  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
   private enrichFakeRequest?: FakeRequestEnricher;
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -327,20 +322,6 @@ export class TaskManagerPlugin
       core.getStartServices,
       this.definitions
     );
-
-    taskManagerUiamProvisioningEvents.forEach((eventConfig) =>
-      core.analytics.registerEventType(eventConfig)
-    );
-
-    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
-      logger: this.logger,
-      isServerless,
-      analytics: core.analytics,
-    });
-    this.uiamApiKeyProvisioningTask.register({
-      coreSetup: core,
-      taskTypeDictionary: this.definitions,
-    });
 
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
@@ -564,20 +545,11 @@ export class TaskManagerPlugin
       },
     };
 
-    this.uiamApiKeyProvisioningTask
-      ?.start({
-        core,
-        taskScheduling,
-        removeIfExists: (id: string) => removeIfExists(taskStore, id),
-      })
-      .catch(() => {});
-
     return this.startContract;
   }
 
   public async stop() {
     this.licenseSubscriber?.cleanup();
-    this.uiamApiKeyProvisioningTask?.stop();
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {

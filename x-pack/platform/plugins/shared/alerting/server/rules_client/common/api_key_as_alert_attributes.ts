@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { RawRule } from '../../types';
 import type { CreateAPIKeyResult } from '../types';
 import type { RuleDomain } from '../../application/rule/types';
-import {
-  MISSING_UIAM_API_KEY_TAG,
-  PROVISION_UIAM_API_KEYS_FEATURE_FLAG,
-} from '../../application/rule/constants';
+import { MISSING_UIAM_API_KEY_TAG } from '../../application/rule/constants';
 
 export const API_KEY_ATTRIBUTES_TO_STRIP = [
   'apiKey',
@@ -110,39 +106,33 @@ export function apiKeyAsRuleDomainProperties(
  * Determines if the missing UIAM API key tag should be added to a rule.
  * The tag is added when:
  * - The environment is serverless
- * - The feature flag for provisioning UIAM API keys is enabled
+ * - UIAM API key granting is enabled (shouldGrantUiam)
  * - uiamApiKey is not set (null/undefined)
  * - AND apiKeyCreatedByUser is false (system-created API key)
  *
  * This indicates that the UIAM key rollout attempted to create a UIAM key but failed.
  */
-export async function shouldAddMissingUiamKeyTag(
+export function shouldAddMissingUiamKeyTag(
   uiamApiKey: string | null | undefined,
   apiKeyCreatedByUser: boolean | null | undefined,
   isServerless: boolean,
-  featureFlags: FeatureFlagsStart
-): Promise<boolean> {
-  const isFeatureFlagEnabled = await featureFlags.getBooleanValue(
-    PROVISION_UIAM_API_KEYS_FEATURE_FLAG,
-    false
-  );
-  return isServerless && isFeatureFlagEnabled && !uiamApiKey && apiKeyCreatedByUser === false;
+  shouldGrantUiam: boolean | undefined
+): boolean {
+  return isServerless && shouldGrantUiam === true && !uiamApiKey && apiKeyCreatedByUser === false;
 }
 
 /**
  * Adds the missing UIAM API key tag to the tags array if needed.
  * Returns a new array with the tag appended if the condition is met.
  */
-export async function addMissingUiamKeyTagIfNeeded(
+export function addMissingUiamKeyTagIfNeeded(
   tags: string[],
   uiamApiKey: string | null | undefined,
   apiKeyCreatedByUser: boolean | null | undefined,
   isServerless: boolean,
-  featureFlags: FeatureFlagsStart
-): Promise<string[]> {
-  if (
-    await shouldAddMissingUiamKeyTag(uiamApiKey, apiKeyCreatedByUser, isServerless, featureFlags)
-  ) {
+  shouldGrantUiam: boolean | undefined
+): string[] {
+  if (shouldAddMissingUiamKeyTag(uiamApiKey, apiKeyCreatedByUser, isServerless, shouldGrantUiam)) {
     // Avoid duplicates
     if (!tags.includes(MISSING_UIAM_API_KEY_TAG)) {
       return [...tags, MISSING_UIAM_API_KEY_TAG];

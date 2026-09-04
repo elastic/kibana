@@ -455,7 +455,7 @@ When reviewing a PR that adds or modifies a task:
 |---|---|---|
 | Fleet | `x-pack/platform/plugins/shared/fleet/server/tasks/automatic_agent_upgrade_task.ts` | `signal` threaded through call chain with a `throwIfAborted` helper in loops |
 | Entity Store | `x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/index.ts` | Destructures `signal` from `RunContext`; threads it through downstream services |
-| Alerting | `x-pack/platform/plugins/shared/alerting/server/provisioning/uiam_api_key_provisioning_task.ts` | `stateSchemaByVersion`; telemetry on success/failure |
+| Alerting | `x-pack/platform/plugins/shared/alerting/server/invalidate_pending_api_keys/task.ts` | `stateSchemaByVersion`; scheduled invalidation of ES and UIAM API keys |
 | SLO | `x-pack/solutions/observability/plugins/slo/server/services/tasks/health_scan_task/health_scan_task.ts` | `maxAttempts: 1`; config-gated execution; typed `RunContext` |
 | Synthetics | `x-pack/solutions/observability/plugins/synthetics/server/tasks/sync_private_locations_monitors_task.ts` | Preserves existing schedule in `ensureScheduled`; dynamic schedule from task result |
 
