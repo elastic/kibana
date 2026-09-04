@@ -58,4 +58,10 @@ export interface ClientTypeSpec<TClient> {
    * Only ever promotes to USER; FRAMEWORK is the default for unclassified failures.
    */
   isUserError?(err: unknown): boolean;
+  /**
+   * Optional: return true when a failed operation leaves this client unusable.
+   * The executor invalidates the exact pooled entry and terminates the client; it does not
+   * retry the failed operation.
+   */
+  shouldInvalidateOnError?(err: unknown): boolean;
 }

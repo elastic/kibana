@@ -13,6 +13,8 @@ import { KubernetesAksAuth } from './src/auth_types/kubernetes_aks_server';
 import { KubernetesEksAuth } from './src/auth_types/kubernetes_eks_server';
 import { KubernetesGkeAuth } from './src/auth_types/kubernetes_gke_server';
 
+export { clientTypes } from './src/lib/clients';
+
 export const authTypeSpecs = {
   ...authTypeDefinitions,
   BearerWithTlsAuth,

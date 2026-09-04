@@ -198,6 +198,72 @@ describe('LeasePool', () => {
     });
   });
 
+  describe('invalidate(key, promise)', () => {
+    it('terminates and removes only the matching entry', async () => {
+      const pool = new LeasePool<string>();
+      const terminateMatch = jest.fn().mockResolvedValue(undefined);
+      const terminateOther = jest.fn().mockResolvedValue(undefined);
+
+      const matchedPromise = pool.lease('conn:mcp:shared', async () => 'client-a', terminateMatch);
+      await matchedPromise;
+      await pool.lease('conn:other:shared', async () => 'client-b', terminateOther);
+
+      await pool.invalidate('conn:mcp:shared', matchedPromise);
+
+      expect(terminateMatch).toHaveBeenCalledWith('client-a');
+      expect(terminateOther).not.toHaveBeenCalled();
+
+      let rebuildCount = 0;
+      await pool.lease(
+        'conn:mcp:shared',
+        async () => {
+          rebuildCount++;
+          return 'client-a2';
+        },
+        noopTerminate
+      );
+      expect(rebuildCount).toBe(1);
+    });
+
+    it('does not invalidate a replacement when a late stale promise is presented', async () => {
+      const pool = new LeasePool<string>();
+      const staleTerminate = jest.fn().mockResolvedValue(undefined);
+      const replacementTerminate = jest.fn().mockResolvedValue(undefined);
+
+      const stalePromise = pool.lease('conn:mcp:shared', async () => 'stale', staleTerminate);
+      await stalePromise;
+      await pool.invalidate('conn:mcp:shared', stalePromise);
+
+      const replacementPromise = pool.lease(
+        'conn:mcp:shared',
+        async () => 'replacement',
+        replacementTerminate
+      );
+      await replacementPromise;
+
+      await pool.invalidate('conn:mcp:shared', stalePromise);
+
+      expect(replacementTerminate).not.toHaveBeenCalled();
+      expect(await pool.lease('conn:mcp:shared', async () => 'unexpected', noopTerminate)).toBe(
+        'replacement'
+      );
+    });
+
+    it('terminates only once when invalidate races with dispose', async () => {
+      const pool = new LeasePool<string>();
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      const promise = pool.lease('conn:mcp:shared', async () => 'client', terminateSpy);
+      await promise;
+
+      await Promise.all([
+        pool.invalidate('conn:mcp:shared', promise),
+        pool.invalidate('conn:mcp:shared', promise),
+      ]);
+
+      expect(terminateSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('evict(connectorId)', () => {
     it('calls terminate on matching-prefix resolved entries and removes them', async () => {
       const pool = new LeasePool<string>();

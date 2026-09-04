@@ -7,19 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createMcpClientType } from '../mcp/client/client_type';
-import type { ClientTypeSpecs } from './client_registry';
-
-export type {
-  ClientTypeSpec,
-  BuildContext,
-  ConnectorNetworkSettings,
-  ConnectorResponseSettings,
-  CredentialAccessor,
-} from './client_type_spec';
-
-export type { ClientRegistry, ClientTypeId, ClientTypeSpecs } from './client_registry';
-
-export const clientTypes: ClientTypeSpecs = {
-  mcp: createMcpClientType(),
-};
+export { createMcpClientType } from './client_type';
+export type { McpClientTypeDeps } from './client_type';
+export { createSseGatedFetch } from './sse_fetch';
+export { createFetchResource } from './fetch_resource';
+export type { CreateFetchResourceOpts, McpFetchResource } from './fetch_resource';

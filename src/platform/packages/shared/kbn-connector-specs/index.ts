@@ -90,14 +90,15 @@ export {
 } from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';
-export { clientTypes } from './src/lib/clients';
 export type {
   ClientTypeSpec,
   BuildContext,
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+} from './src/lib/clients/client_type_spec';
+export type {
   ClientRegistry,
   ClientTypeId,
   ClientTypeSpecs,
-} from './src/lib/clients';
+} from './src/lib/clients/client_registry';

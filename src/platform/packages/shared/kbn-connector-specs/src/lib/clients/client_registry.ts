@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createMcpClientType } from '../mcp/client/client_type';
-import type { ClientTypeSpecs } from './client_registry';
+import type { McpClient } from '@kbn/mcp-client';
+import type { ClientTypeSpec } from './client_type_spec';
 
-export type {
-  ClientTypeSpec,
-  BuildContext,
-  ConnectorNetworkSettings,
-  ConnectorResponseSettings,
-  CredentialAccessor,
-} from './client_type_spec';
+export interface ClientRegistry {
+  mcp: McpClient;
+}
 
-export type { ClientRegistry, ClientTypeId, ClientTypeSpecs } from './client_registry';
+export type ClientTypeId = keyof ClientRegistry;
 
-export const clientTypes: ClientTypeSpecs = {
-  mcp: createMcpClientType(),
-};
+export type ClientTypeSpecs = Readonly<{
+  [K in ClientTypeId]: ClientTypeSpec<ClientRegistry[K]>;
+}>;
