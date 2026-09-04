@@ -6,7 +6,7 @@
  */
 
 import React, { forwardRef, useMemo } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiSuperSelectOption, EuiSuperSelectRef } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
@@ -31,52 +31,51 @@ const featuresIcons: Record<string, string> = {
   observability: 'logoObservability',
 };
 
-export const AlertsSolutionSelector = forwardRef<
-  EuiSuperSelect<RuleTypeSolution>,
-  AlertsSolutionSelectorProps
->(({ availableSolutions, isLoading, isError, solution, onSolutionChange }, ref) => {
-  const options = useMemo<Array<EuiSuperSelectOption<RuleTypeSolution>>>(() => {
-    if (!availableSolutions) {
-      return [];
-    }
-    return availableSolutions.map((sol) => ({
-      value: sol,
-      inputDisplay: (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={featuresIcons[sol]} aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem>{capitalize(sol)}</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    }));
-  }, [availableSolutions]);
+export const AlertsSolutionSelector = forwardRef<EuiSuperSelectRef, AlertsSolutionSelectorProps>(
+  ({ availableSolutions, isLoading, isError, solution, onSolutionChange }, ref) => {
+    const options = useMemo<Array<EuiSuperSelectOption<RuleTypeSolution>>>(() => {
+      if (!availableSolutions) {
+        return [];
+      }
+      return availableSolutions.map((sol) => ({
+        value: sol,
+        inputDisplay: (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={featuresIcons[sol]} aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem>{capitalize(sol)}</EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      }));
+    }, [availableSolutions]);
 
-  return (
-    <EuiFormRow
-      label={SOLUTION_SELECTOR_LABEL}
-      isInvalid={isError}
-      isDisabled={isError}
-      error={isError ? RULE_TYPES_LOAD_ERROR_MESSAGE : undefined}
-      fullWidth
-      data-test-subj={SOLUTION_SELECTOR_SUBJ}
-    >
-      <EuiSuperSelect
-        ref={ref}
-        isLoading={isLoading}
-        disabled={isLoading}
+    return (
+      <EuiFormRow
+        label={SOLUTION_SELECTOR_LABEL}
         isInvalid={isError}
-        placeholder={SOLUTION_SELECTOR_PLACEHOLDER}
-        options={options}
-        valueOfSelected={solution}
-        onChange={(newSol) => onSolutionChange(newSol)}
+        isDisabled={isError}
+        error={isError ? RULE_TYPES_LOAD_ERROR_MESSAGE : undefined}
         fullWidth
-        compressed
-        popoverProps={{
-          repositionOnScroll: true,
-          ownFocus: true,
-        }}
-      />
-    </EuiFormRow>
-  );
-});
+        data-test-subj={SOLUTION_SELECTOR_SUBJ}
+      >
+        <EuiSuperSelect
+          ref={ref}
+          isLoading={isLoading}
+          disabled={isLoading}
+          isInvalid={isError}
+          placeholder={SOLUTION_SELECTOR_PLACEHOLDER}
+          options={options}
+          valueOfSelected={solution}
+          onChange={(newSol) => onSolutionChange(newSol)}
+          fullWidth
+          compressed
+          popoverProps={{
+            repositionOnScroll: true,
+            ownFocus: true,
+          }}
+        />
+      </EuiFormRow>
+    );
+  }
+);
