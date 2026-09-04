@@ -29,7 +29,8 @@ import type { FormValues } from '../../form/types';
 
 export const composeFormToCreateRequest = (
   formValues: FormValues,
-  builderType?: string
+  builderType?: string,
+  builderFields?: Record<string, unknown>
 ): CreateRuleData => {
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recovery = formRecoveryToApiRecovery(formValues);
@@ -45,10 +46,11 @@ export const composeFormToCreateRequest = (
         ? { routing_tags: formValues.metadata.routingTags }
         : {}),
       ...(builderType ? { builder: { type: builderType } } : {}),
+      ...(builderFields ? { builder_fields: builderFields } : {}),
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
-    query: ruleQueryToApiQuery(formValues.query),
+    ...(builderFields ? {} : { query: ruleQueryToApiQuery(formValues.query) }),
     ...(recovery ? { recovery } : {}),
     ...(noData ? { no_data: noData } : {}),
     grouping: formValues.grouping?.fields?.length
@@ -61,14 +63,32 @@ export const composeFormToCreateRequest = (
 
 export const composeFormToUpdateRequest = (
   formValues: FormValues,
-  builderType?: string
+  builderType?: string,
+  builderFields?: Record<string, unknown>
 ): UpdateRuleData => {
-  const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
-  const update = toUpdateRuleData(request);
+  const { kind, ...request } = composeFormToCreateRequest(formValues, builderType, builderFields);
+  // `toUpdateRuleData` maps a query unconditionally. A builder-authored body carries its fields
+  // instead, and the server generates the query from them.
+  const { query, ...update } = toUpdateRuleData({
+    ...request,
+    query: request.query ?? ruleQueryToApiQuery(formValues.query),
+  });
 
   return {
     ...update,
-    metadata: { ...update.metadata, builder: request.metadata.builder ?? null },
+    ...(request.query ? { query } : {}),
+    metadata: {
+      ...update.metadata,
+      builder: request.metadata.builder ?? null,
+      // Only clear builder_fields when leaving builder mode. When a builder
+      // has no toFields yet (no builder_fields support), omit the key so the
+      // server preserves whatever is already stored.
+      ...(builderFields != null
+        ? { builder_fields: builderFields }
+        : !builderType
+        ? { builder_fields: null }
+        : {}),
+    },
   };
 };
 
