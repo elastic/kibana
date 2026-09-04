@@ -7,6 +7,8 @@
 import React from 'react';
 import { EuiCode, EuiText } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
   type EsqlResults,
@@ -42,11 +44,15 @@ export const visualizationTagParser = createTagParser({
 
 export function createVisualizationRenderer({
   application,
+  http,
+  uiSettings,
   startDependencies,
   stepsFromCurrentRound,
   stepsFromPrevRounds,
 }: {
   application: ApplicationStart;
+  http: HttpStart;
+  uiSettings: IUiSettingsClient;
   startDependencies: AgentBuilderStartDependencies;
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
@@ -58,6 +64,11 @@ export function createVisualizationRenderer({
     uiActions: startDependencies.uiActions,
     unifiedSearch: startDependencies.unifiedSearch,
     embeddable: startDependencies.embeddable,
+    customContent: {
+      http,
+      uiSettings,
+      search: startDependencies.data.search.search,
+    },
   };
 
   return (props: VisualizationElementAttributes) => {
@@ -97,7 +108,7 @@ export function createVisualizationRenderer({
       return <EuiText>Unable to find visualization for {ToolResultAttribute}.</EuiText>;
     }
 
-    // Handle visualization result (pre-built Lens config or Vega spec).
+    // Handle visualization result (pre-built Lens config, Vega spec or custom content).
     if (toolResult.type === 'visualization') {
       const { data } = toolResult;
 
@@ -106,6 +117,7 @@ export function createVisualizationRenderer({
           services={services}
           renderer={data.renderer}
           visualization={data.visualization}
+          esql={data.esql}
           timeRange={data.time_range}
         />
       );

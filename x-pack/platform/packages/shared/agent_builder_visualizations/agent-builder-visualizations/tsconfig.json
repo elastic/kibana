@@ -17,6 +17,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/custom-content-renderer",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-visualizations-common",

@@ -5,6 +5,9 @@
   },
   "include": ["public/**/*", "server/**/*"],
   "kbn_references": [
+    "@kbn/data-plugin",
+    "@kbn/custom-content-common",
+    "@kbn/custom-content-server",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/i18n",

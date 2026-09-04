@@ -49,6 +49,11 @@ export class AgentBuilderVisualizationsPublicPlugin
         uiActions: plugins.uiActions,
         unifiedSearch: plugins.unifiedSearch,
         embeddable: plugins.embeddable,
+        customContent: {
+          http: core.http,
+          uiSettings: core.uiSettings,
+          search: plugins.data.search.search,
+        },
       })
     );
 
