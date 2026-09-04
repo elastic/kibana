@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildCanonicalQueryString, parseAwsHost, signRequest } from './aws_credential_helpers';
+import {
+  buildCanonicalQueryString,
+  canonicalizeUriPath,
+  parseAwsHost,
+  signRequest,
+} from './aws_credential_helpers';
 import { calculateAWSA4Signature, sha256Hash } from './aws_crypto_helpers';
 
 jest.mock('./aws_crypto_helpers', () => ({
@@ -84,6 +89,25 @@ describe('buildCanonicalQueryString()', () => {
   });
 });
 
+describe('canonicalizeUriPath()', () => {
+  it('leaves a plain path unchanged', () => {
+    expect(canonicalizeUriPath('/clusters/prod-eu/node-groups/workers')).toBe(
+      '/clusters/prod-eu/node-groups/workers'
+    );
+  });
+
+  it('double-encodes an already-encoded ARN path segment', () => {
+    // A handler encodes an ARN once (`:` -> %3A, `/` -> %2F); the canonical URI
+    // must encode the `%` again so AWS's own re-canonicalization matches.
+    const singleEncoded = `/tags/${encodeURIComponent(
+      'arn:aws:eks:us-east-1:123456789012:cluster/prod-eu'
+    )}`;
+    expect(canonicalizeUriPath(singleEncoded)).toBe(
+      '/tags/arn%253Aaws%253Aeks%253Aus-east-1%253A123456789012%253Acluster%252Fprod-eu'
+    );
+  });
+});
+
 describe('signRequest()', () => {
   beforeEach(async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-03-11T12:34:56.000Z'));
@@ -117,6 +141,49 @@ describe('signRequest()', () => {
     expect(result.Authorization).toContain('SignedHeaders=host;x-amz-date;x-amz-security-token');
     expect(result.Authorization).toMatch(/Signature=[a-f0-9]+/);
     expect(result['x-amz-content-sha256']).toBeUndefined();
+  });
+
+  it('signs the double-encoded path for a non-S3 request with an ARN path segment', async () => {
+    const arnPath = `/tags/${encodeURIComponent(
+      'arn:aws:eks:us-east-1:123456789012:cluster/prod-eu'
+    )}`;
+    await signRequest(
+      'GET',
+      'eks.us-east-1.amazonaws.com',
+      arnPath,
+      {},
+      'AKIA_TEST',
+      'SECRET_TEST',
+      'us-east-1',
+      'eks',
+      {}
+    );
+    // sha256Hash is called with the canonical request string; assert the path line is double-encoded.
+    const canonicalRequest = mockSha256Hash.mock.calls
+      .map(([arg]) => arg)
+      .find((arg) => arg.includes('/tags/'));
+    expect(canonicalRequest).toContain(
+      '/tags/arn%253Aaws%253Aeks%253Aus-east-1%253A123456789012%253Acluster%252Fprod-eu'
+    );
+  });
+
+  it('signs the path as-is for S3 (single-encoded)', async () => {
+    await signRequest(
+      'GET',
+      'my-bucket.s3.us-west-2.amazonaws.com',
+      '/my%20key',
+      {},
+      'AKIA_TEST',
+      'SECRET_TEST',
+      'us-west-2',
+      's3',
+      {}
+    );
+    const canonicalRequest = mockSha256Hash.mock.calls
+      .map(([arg]) => arg)
+      .find((arg) => arg.includes('/my'));
+    expect(canonicalRequest).toContain('/my%20key');
+    expect(canonicalRequest).not.toContain('/my%2520key');
   });
 
   it('returns signed headers for s3 requests including x-amz-content-sha256', async () => {

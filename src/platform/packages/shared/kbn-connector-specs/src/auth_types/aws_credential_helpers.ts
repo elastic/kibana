@@ -74,6 +74,25 @@ export function escapeSigV4ReservedChars(value: string): string {
  * function rather than two independently-encoded copies (see `signRequest`
  * callers in aws_credentials.ts, which reuse this to rewrite `config.url`).
  */
+/**
+ * The SigV4 canonical URI for every AWS service except S3 is the request path
+ * URI-encoded a *second* time: a path segment the caller already percent-encoded
+ * (e.g. an ARN's `:` and `/` as `%3A`/`%2F`) must appear in the string-to-sign
+ * with its `%` re-encoded (`%253A`/`%252F`). The request still goes on the wire
+ * single-encoded, so AWS decodes it once to route and re-encodes it once to
+ * verify the signature. Signing the single-encoded form instead yields a generic
+ * `SignatureDoesNotMatch` (confirmed live against `eks:ListTagsForResource` and
+ * the EKS access-entry endpoints, whose path carries an ARN). Segments without
+ * reserved characters are unchanged, so this is a no-op for plain paths.
+ * S3 uses the single-encoded path and is handled by the caller.
+ */
+export function canonicalizeUriPath(path: string): string {
+  return path
+    .split('/')
+    .map((segment) => escapeSigV4ReservedChars(encodeURIComponent(segment)))
+    .join('/');
+}
+
 export function buildCanonicalQueryString(queryParams: Record<string, string>): string {
   return Object.keys(queryParams)
     .sort()
@@ -134,9 +153,12 @@ export async function signRequest(
   const canonicalHeaders = sortedHeaderKeys.map((k) => `${k}:${headersToSign[k]}\n`).join('');
   const signedHeaders = sortedHeaderKeys.join(';');
 
+  // Non-S3 services sign the double-URI-encoded path; S3 signs the path as-is.
+  const canonicalUri = service === 's3' ? path : canonicalizeUriPath(path);
+
   const canonicalRequest = [
     method,
-    path,
+    canonicalUri,
     canonicalQuerystring,
     canonicalHeaders,
     signedHeaders,
