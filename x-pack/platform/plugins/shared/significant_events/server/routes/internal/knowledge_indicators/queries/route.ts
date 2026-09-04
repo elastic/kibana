@@ -288,6 +288,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
 
     let succeeded = 0;
     let failed = 0;
+    const candidateRuleIds = new Set<string>();
 
     for (const [streamName, { queryIds, backedRuleIds }] of byStream) {
       const definition = streamDefinitionsByName.get(streamName);
@@ -298,6 +299,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
       }
       try {
         await kiClient.deleteQueries(definition, queryIds);
+        backedRuleIds.forEach((ruleId) => candidateRuleIds.add(ruleId));
         succeeded += queryIds.length;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -311,16 +313,13 @@ const bulkDeleteQueriesRoute = createServerRoute({
       }
     }
 
-    const candidateRuleIds = [
-      ...new Set(queryLinks.flatMap((link) => (link.rule_id ? [link.rule_id] : []))),
-    ];
-    if (candidateRuleIds.length > 0) {
+    if (candidateRuleIds.size > 0) {
       try {
         const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
         await cleanupStaleEvents({
           eventClient: scopedClients.getEventClient(),
           rulesClient,
-          candidateRuleIds,
+          candidateRuleIds: [...candidateRuleIds],
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);

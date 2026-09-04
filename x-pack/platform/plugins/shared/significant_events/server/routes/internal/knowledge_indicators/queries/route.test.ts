@@ -61,7 +61,7 @@ const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enab
   getState: jest.fn().mockResolvedValue(state),
 });
 
-const makeQueryLink = (id: string, severityScore: number): QueryLink => ({
+const makeQueryLink = (id: string, severityScore: number, streamName = 'logs.test'): QueryLink => ({
   query: {
     id,
     type: 'match',
@@ -70,7 +70,7 @@ const makeQueryLink = (id: string, severityScore: number): QueryLink => ({
     esql: { query: `FROM logs-* | WHERE id == "${id}"` },
     severity_score: severityScore,
   },
-  stream_name: 'logs.test',
+  stream_name: streamName,
   rule_backed: true,
   rule_id: `rule-${id}`,
 });
@@ -234,18 +234,74 @@ describe('pause guard on rule-touching query routes', () => {
 });
 
 describe('bulkDeleteQueriesRoute', () => {
-  it('triggers stale event cleanup for deleted backing rules', async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('triggers stale event cleanup only for deleted backing rules', async () => {
     const eventClient = {};
     const rulesClient = {};
     const deleteQueries = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
-      params: { body: { queryIds: ['q1'] } },
+      params: { body: { queryIds: ['q1', 'q2'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: { getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }) },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+          getQueryLinks: jest
+            .fn()
+            .mockResolvedValue([
+              makeQueryLink('q1', 40),
+              { ...makeQueryLink('q2', 40), rule_backed: false },
+            ]),
+          deleteQueries,
+        }),
+        getEventClient: () => eventClient,
+        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
+      }),
+      server: makeServer(),
+      logger: {
+        warn: jest.fn(),
+        get: jest.fn().mockReturnValue({ error: jest.fn() }),
+      },
+    } as never;
+
+    await expect(bulkDeleteRoute.handler(handlerParams)).resolves.toEqual({
+      succeeded: 2,
+      failed: 0,
+      skipped: 0,
+    });
+    expect(deleteQueries).toHaveBeenCalled();
+    expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
+      eventClient,
+      rulesClient,
+      candidateRuleIds: ['rule-q1'],
+    });
+  });
+
+  it('excludes backing rules from streams whose deletion failed', async () => {
+    const eventClient = {};
+    const rulesClient = {};
+    const deleteQueries = jest
+      .fn()
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('storage write failed'));
+    const handlerParams = {
+      params: { body: { queryIds: ['q1', 'q2'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: {
+          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
+        },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          getQueryLinks: jest
+            .fn()
+            .mockResolvedValue([
+              makeQueryLink('q1', 40, 'logs.success'),
+              makeQueryLink('q2', 40, 'logs.failed'),
+            ]),
           deleteQueries,
         }),
         getEventClient: () => eventClient,
@@ -260,10 +316,9 @@ describe('bulkDeleteQueriesRoute', () => {
 
     await expect(bulkDeleteRoute.handler(handlerParams)).resolves.toEqual({
       succeeded: 1,
-      failed: 0,
+      failed: 1,
       skipped: 0,
     });
-    expect(deleteQueries).toHaveBeenCalled();
     expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
       eventClient,
       rulesClient,
