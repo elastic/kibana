@@ -6,8 +6,13 @@
  */
 
 import expect from 'expect';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import {
+  CASE_TELEMETRY_SAVED_OBJECT,
+  INTERNAL_FIELD_DEFINITIONS_URL,
+  OBSERVABLE_TYPE_IPV4,
+} from '@kbn/cases-plugin/common/constants';
 import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../common/lib/mock';
 import {
@@ -231,6 +236,75 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Clean up synthetic index
       await es.indices.delete({ index: alertIndex, ignore_unavailable: true });
+    });
+
+    describe('field library', () => {
+      const FIXTURE_OWNER = 'securitySolutionFixture';
+
+      const createFieldDefinition = async (
+        name: string,
+        owner: string,
+        overrides: Record<string, unknown> = {}
+      ) => {
+        await supertest
+          .post(INTERNAL_FIELD_DEFINITIONS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            name,
+            owner,
+            definition: `name: ${name}\ncontrol: INPUT_TEXT\ntype: keyword\n`,
+            ...overrides,
+          })
+          .expect(200);
+      };
+
+      /**
+       * Drops the stored snapshot, which `deleteAllCaseItems` leaves behind and the collector
+       * serves verbatim. Without this the retry below can pass on the PREVIOUS run's snapshot
+       * before the task overwrites it, so the assertions would hold even against a broken query.
+       */
+      const deleteTelemetrySnapshot = async () => {
+        await es.deleteByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: `type:${CASE_TELEMETRY_SAVED_OBJECT}`,
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      };
+
+      const zeroedScope = { total: 0, totalGlobal: 0, totalReusable: 0 };
+
+      it('should report the field library snapshot', async () => {
+        await createFieldDefinition('sec_global', 'securitySolution', { isGlobal: true });
+        await createFieldDefinition('sec_reusable', 'securitySolution', { isGlobal: false });
+        // No `isGlobal` key at all, which the create route allows and nothing backfills.
+        await createFieldDefinition('sec_unset', 'securitySolution');
+
+        // Not one of the three real owners, so it must reach `all` and no solution scope.
+        await createFieldDefinition('fixture_global', FIXTURE_OWNER, { isGlobal: true });
+
+        await deleteTelemetrySnapshot();
+        await runTelemetryTask(supertest);
+
+        await retry.try(async () => {
+          const res = await getTelemetry(supertest);
+          const casesTelemetry = getCasesTelemetry(res);
+
+          expect(casesTelemetry.fieldLibrary).toBeDefined();
+
+          expect(casesTelemetry.fieldLibrary.sec.totalReusable).toBe(2);
+
+          expect(casesTelemetry.fieldLibrary).toEqual({
+            featureEnabled: true,
+            // Spans every owner, so the fixture-owned definition lands here and nowhere else.
+            all: { total: 4, totalGlobal: 2, totalReusable: 2 },
+            sec: { total: 3, totalGlobal: 1, totalReusable: 2 },
+            obs: zeroedScope,
+            main: zeroedScope,
+          });
+        });
+      });
     });
   });
 };
