@@ -14,6 +14,7 @@ export {
   buildRuleScopedMatcher,
   buildRuleNotificationTag,
   resolveRuleNotificationTag,
+  ruleHasNotificationTag,
 } from './helpers/rule_scoped_action_policies';
 export {
   DISPATCH_PAYLOAD_VARIABLES,

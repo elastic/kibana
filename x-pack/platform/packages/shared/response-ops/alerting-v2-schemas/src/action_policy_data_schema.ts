@@ -226,7 +226,9 @@ export const updateActionPolicyDataSchema = z
     matcher: policyMatcherSchema
       .nullable()
       .optional()
-      .describe('Structured matcher; null clears the matcher (catch-all).'),
+      .describe(
+        'Structured matcher, replaced as a whole on update. To preserve an existing `expression` while changing `tags`, send both fields. `null` clears the matcher (catch-all).'
+      ),
     group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)

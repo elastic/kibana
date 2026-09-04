@@ -85,7 +85,7 @@ export const MatcherSummary = ({ matcher }: MatcherSummaryProps) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.alertingV2.actionPolicyDefinition.matcher.matchesWhere"
             defaultMessage="Matches alerts where"

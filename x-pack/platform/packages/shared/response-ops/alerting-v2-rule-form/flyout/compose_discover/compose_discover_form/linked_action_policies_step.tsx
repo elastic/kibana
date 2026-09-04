@@ -32,7 +32,10 @@ const actionPoliciesTitle = i18n.translate(
 
 const matchingSubtext = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.matchingSubtext',
-  { defaultMessage: 'These policies currently match this rule.' }
+  {
+    defaultMessage:
+      'These policies match this rule by catch-all or tag. Policies with a query condition may also match at dispatch time based on alert data.',
+  }
 );
 
 const emptyStateLabel = i18n.translate(

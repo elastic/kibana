@@ -97,6 +97,24 @@ describe('action policy form utils', () => {
 
       expect(payload.matcher).toEqual({ expression: 'event.severity: critical' });
     });
+
+    it('omits matcher when only null/empty parts remain (all-null object)', () => {
+      expect(
+        toCreatePayload({ ...state, matcher: { tags: null, expression: null } })
+      ).not.toHaveProperty('matcher');
+    });
+
+    it('omits matcher when expression is whitespace-only', () => {
+      expect(toCreatePayload({ ...state, matcher: { expression: '   ' } })).not.toHaveProperty(
+        'matcher'
+      );
+    });
+
+    it('omits matcher when tags array is empty and expression is null', () => {
+      expect(
+        toCreatePayload({ ...state, matcher: { tags: [], expression: null } })
+      ).not.toHaveProperty('matcher');
+    });
   });
 
   describe('toUpdatePayload', () => {
@@ -112,6 +130,14 @@ describe('action policy form utils', () => {
         throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
+    });
+
+    it('normalizes an all-null matcher object to null', () => {
+      const payload = toUpdatePayload(
+        { ...state, matcher: { tags: null, expression: null } },
+        'WzEsMV0='
+      );
+      expect(payload.matcher).toBeNull();
     });
 
     it('preserves concrete nullable values', () => {

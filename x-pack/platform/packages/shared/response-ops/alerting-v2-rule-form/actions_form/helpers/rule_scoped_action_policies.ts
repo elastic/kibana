@@ -24,14 +24,23 @@ export const buildRuleNotificationTag = (ruleName: string): string => {
 };
 
 /**
+ * Returns true when the rule already has a usable (non-blank) first tag that can serve
+ * as the notification tag, false when a `notify-<slug>` tag needs to be generated.
+ * Single source of truth for this predicate — used by both `resolveRuleNotificationTag`
+ * and callers that write the tag back to the rule before creating action policies.
+ */
+export const ruleHasNotificationTag = (metadata: { tags?: string[] }): boolean =>
+  Boolean(metadata.tags?.[0]?.trim());
+
+/**
  * Returns the tag a simple-action policy should use as its matcher for the given rule.
  * When the rule already has tags, the first tag is reused (no tag is added to the rule).
  * When the rule has no tags, a new `notify-<slug>` tag is generated (the caller is responsible
  * for writing this tag to the rule's metadata before saving).
  */
 export const resolveRuleNotificationTag = (metadata: { name: string; tags?: string[] }): string => {
-  const firstTag = metadata.tags?.[0]?.trim();
-  return firstTag || buildRuleNotificationTag(metadata.name);
+  if (ruleHasNotificationTag(metadata)) return metadata.tags![0].trim();
+  return buildRuleNotificationTag(metadata.name);
 };
 
 /**

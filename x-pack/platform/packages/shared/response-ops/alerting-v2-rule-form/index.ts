@@ -64,6 +64,7 @@ export {
   buildRuleScopedMatcher,
   buildRuleNotificationTag,
   resolveRuleNotificationTag,
+  ruleHasNotificationTag,
   InlineWorkflowEditor,
   INLINE_ACTION_STEP_DEFINITIONS,
   getInlineActionStepDefinition,

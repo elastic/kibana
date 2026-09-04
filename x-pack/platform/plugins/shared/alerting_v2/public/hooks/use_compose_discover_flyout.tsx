@@ -14,6 +14,7 @@ import {
   ComposeDiscoverFlyout,
   RULE_BUILDER_REGISTRY,
   resolveRuleNotificationTag,
+  ruleHasNotificationTag,
 } from '@kbn/alerting-v2-rule-form';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
@@ -127,6 +128,39 @@ export const useComposeDiscoverFlyout = ({
       dashboard,
       cps,
     ]
+  );
+
+  /**
+   * Ensures the rule carries a usable notification tag before linking action policies.
+   * Mirrors the `resolveRuleNotificationTag` guard (`tags[0]?.trim()`) so both use the
+   * same definition of "has a tag". If the write fails, shows a warning toast and returns
+   * `null` — the caller must abort notification setup in that case.
+   */
+  const ensureNotificationTag = useCallback(
+    async (rule: RuleApiResponse): Promise<RuleApiResponse | null> => {
+      if (ruleHasNotificationTag(rule.metadata)) return rule;
+      try {
+        return await rulesApi.updateRule(rule.id, {
+          metadata: { tags: [resolveRuleNotificationTag(rule.metadata)] },
+        });
+      } catch {
+        notifications.toasts.addWarning({
+          title: i18n.translate(
+            'xpack.alertingV2.useComposeDiscoverFlyout.notificationTagWriteFailedTitle',
+            { defaultMessage: 'Notifications not linked' }
+          ),
+          text: i18n.translate(
+            'xpack.alertingV2.useComposeDiscoverFlyout.notificationTagWriteFailedText',
+            {
+              defaultMessage:
+                'The rule was saved but could not be tagged for notification matching. Add a tag to the rule and retry linking notifications.',
+            }
+          ),
+        });
+        return null;
+      }
+    },
+    [notifications.toasts, rulesApi]
   );
 
   const closeFlyout = useCallback(() => {
@@ -243,30 +277,10 @@ export const useComposeDiscoverFlyout = ({
                 closeAndRedirect();
                 return;
               }
-              let ruleForNotifications = rule;
-              if (!rule.metadata.tags?.length) {
-                const tag = resolveRuleNotificationTag(rule.metadata);
-                try {
-                  ruleForNotifications = await rulesApi.updateRule(rule.id, {
-                    metadata: { tags: [tag] },
-                  });
-                } catch {
-                  notifications.toasts.addWarning({
-                    title: i18n.translate(
-                      'xpack.alertingV2.useComposeDiscoverFlyout.notificationTagWriteFailedTitle',
-                      { defaultMessage: 'Notifications not linked' }
-                    ),
-                    text: i18n.translate(
-                      'xpack.alertingV2.useComposeDiscoverFlyout.notificationTagWriteFailedText',
-                      {
-                        defaultMessage:
-                          'The rule was created but could not be tagged for notification matching. Add a tag to the rule and retry linking notifications.',
-                      }
-                    ),
-                  });
-                  closeAndRedirect();
-                  return;
-                }
+              const ruleForNotifications = await ensureNotificationTag(rule);
+              if (!ruleForNotifications) {
+                closeAndRedirect();
+                return;
               }
               setupNotificationsMutation.mutate(
                 { rule: ruleForNotifications, actions },
@@ -280,14 +294,22 @@ export const useComposeDiscoverFlyout = ({
         updateRuleMutation.mutate(
           { id, payload },
           {
-            onSuccess: (rule) => {
+            onSuccess: async (rule) => {
               const actions = ruleNotifications?.workflows ?? [];
               if (actions.length === 0) {
                 closeFlyout();
                 return;
               }
+              const ruleForNotifications = await ensureNotificationTag(rule);
+              if (!ruleForNotifications) {
+                closeFlyout();
+                return;
+              }
               // Only close the flyout once notification setup also succeeds
-              setupNotificationsMutation.mutate({ rule, actions }, { onSuccess: closeFlyout });
+              setupNotificationsMutation.mutate(
+                { rule: ruleForNotifications, actions },
+                { onSuccess: closeFlyout }
+              );
             },
           }
         )

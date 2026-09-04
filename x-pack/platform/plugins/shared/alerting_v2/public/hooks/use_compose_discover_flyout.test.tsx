@@ -28,6 +28,9 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
     threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
   },
   resolveRuleNotificationTag: jest.fn().mockReturnValue('notify-my-rule'),
+  ruleHasNotificationTag: jest
+    .fn()
+    .mockImplementation((metadata: { tags?: string[] }) => Boolean(metadata?.tags?.[0]?.trim())),
 }));
 
 jest.mock('@kbn/alerting-v2-schemas', () => ({
@@ -83,6 +86,16 @@ const editRule = {
 const updatedRule = {
   id: 'rule-1',
   metadata: { name: 'My rule (updated)' },
+} as unknown as RuleApiResponse;
+
+const taggedUpdatedRule = {
+  id: 'rule-1',
+  metadata: { name: 'My rule (updated)', tags: ['notify-my-rule'] },
+} as unknown as RuleApiResponse;
+
+const taggedAlreadyUpdatedRule = {
+  id: 'rule-1',
+  metadata: { name: 'My rule (updated)', tags: ['production'] },
 } as unknown as RuleApiResponse;
 
 const createdRule = {
@@ -259,6 +272,8 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     hookApi = undefined;
     // The rule update is an idempotent PATCH; default it to succeed with the updated rule.
     mockUpdateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.(updatedRule));
+    // Default: write the notification tag to the (tagless) updated rule.
+    mockRulesUpdateRule.mockResolvedValue(taggedUpdatedRule);
   });
 
   it('passes ruleId only in edit mode and provides onUpdateRule', async () => {
@@ -269,23 +284,72 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     expect(capturedFlyoutProps.onUpdateRule).toBeDefined();
   });
 
-  it('updates the rule then sets up notifications and closes on success', async () => {
+  it('writes notification tag to tagless rule before setting up notifications', async () => {
     mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
 
     await renderAndOpenEdit();
     callOnUpdateRule({ workflows: [existingAction] });
 
-    expect(mockUpdateMutate).toHaveBeenCalledWith(
-      { id: 'rule-1', payload: { metadata: { name: 'My rule (updated)' } } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
+    await waitFor(() => {
+      expect(mockRulesUpdateRule).toHaveBeenCalledWith('rule-1', {
+        metadata: { tags: ['notify-my-rule'] },
+      });
+      expect(mockSetupMutate).toHaveBeenCalledWith(
+        { rule: taggedUpdatedRule, actions: [existingAction] },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+  });
+
+  it('skips rule tag update when rule already has a non-blank tag', async () => {
+    mockUpdateMutate.mockImplementation((_vars, opts) =>
+      opts?.onSuccess?.(taggedAlreadyUpdatedRule)
     );
-    expect(mockSetupMutate).toHaveBeenCalledWith(
-      { rule: updatedRule, actions: [existingAction] },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
+
+    await renderAndOpenEdit();
+    callOnUpdateRule({ workflows: [existingAction] });
 
     await waitFor(() => {
+      expect(mockRulesUpdateRule).not.toHaveBeenCalled();
+      expect(mockSetupMutate).toHaveBeenCalledWith(
+        { rule: taggedAlreadyUpdatedRule, actions: [existingAction] },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+    });
+  });
+
+  it('shows warning toast and closes flyout when tag write fails', async () => {
+    mockRulesUpdateRule.mockRejectedValue(new Error('patch failed'));
+
+    await renderAndOpenEdit();
+    callOnUpdateRule({ workflows: [existingAction] });
+
+    await waitFor(() => {
+      expect(mockAddWarning).toHaveBeenCalledWith(
+        expect.objectContaining({ title: expect.any(String) })
+      );
+      expect(mockSetupMutate).not.toHaveBeenCalled();
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+  });
+
+  it('also writes tag for a rule whose only tags are blank', async () => {
+    const blankTagRule = {
+      id: 'rule-1',
+      metadata: { name: 'My rule (updated)', tags: ['  '] },
+    } as unknown as RuleApiResponse;
+    mockUpdateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.(blankTagRule));
+    mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
+
+    await renderAndOpenEdit();
+    callOnUpdateRule({ workflows: [existingAction] });
+
+    await waitFor(() => {
+      expect(mockRulesUpdateRule).toHaveBeenCalledWith('rule-1', {
+        metadata: { tags: ['notify-my-rule'] },
+      });
     });
   });
 
@@ -295,7 +359,9 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     await renderAndOpenEdit();
     callOnUpdateRule({ workflows: [existingAction] });
 
-    expect(mockSetupMutate).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockSetupMutate).toHaveBeenCalledTimes(1);
+    });
     expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
   });
 

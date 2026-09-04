@@ -27,7 +27,15 @@ const expressionBadgeLabel = i18n.translate(
 
 const expressionTooltipTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.expressionTitle',
-  { defaultMessage: 'Matches query' }
+  { defaultMessage: 'Has query condition' }
+);
+
+const expressionTooltipBody = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.expressionBody',
+  {
+    defaultMessage:
+      'This policy has an additional KQL query. It is evaluated against alert data at dispatch time and is not previewed here.',
+  }
 );
 
 export const getMatchedTags = (matcherTags: string[], ruleTags: string[]): string[] => {
@@ -95,7 +103,12 @@ export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
         <EuiFlexItem grow={false}>
           <EuiToolTip
             title={expressionTooltipTitle}
-            content={<EuiCode>{trimmedExpression}</EuiCode>}
+            content={
+              <>
+                <p>{expressionTooltipBody}</p>
+                <EuiCode>{trimmedExpression}</EuiCode>
+              </>
+            }
           >
             <EuiBadge
               color="hollow"
