@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -43,6 +43,16 @@ import { useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
+import type { DiscoverAppLocatorParams } from '../../../common';
+import {
+  getExpandedDocLinkability,
+  getExpandedDocRef,
+} from '../../application/main/utils/expanded_doc';
+import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
+import {
+  useCopyLocatorLink,
+  useShareDirectLinkAction,
+} from '../../components/discover_grid_flyout';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
@@ -168,6 +178,41 @@ export function SearchEmbeddableGridComponent({
   const timeRange = useMemo(
     () => (fetchContext ? getTimeRangeFromFetchContext(fetchContext) : undefined),
     [fetchContext]
+  );
+
+  const expandedDocLinkability = useMemo(
+    () => getExpandedDocLinkability(savedSearchQuery, expandedDoc),
+    [savedSearchQuery, expandedDoc]
+  );
+
+  const buildExpandedDocLocatorParams = useCallback((): DiscoverAppLocatorParams => {
+    const expandedDocRef = getExpandedDocRef(expandedDoc);
+    // Freeze the panel's window so the shared link reproduces the same results instead of drifting
+    // with a relative range like "Last 15 minutes".
+    const bounds = timeRange ? discoverServices.timefilter.calculateBounds(timeRange) : undefined;
+    const absoluteTimeRange =
+      bounds?.min && bounds?.max
+        ? { from: bounds.min.toISOString(), to: bounds.max.toISOString() }
+        : timeRange;
+
+    return {
+      ...getDiscoverLocatorParams(api),
+      ...(expandedDocRef ? { expandedDoc: expandedDocRef } : {}),
+      ...(absoluteTimeRange ? { timeRange: absoluteTimeRange } : {}),
+    };
+  }, [api, expandedDoc, timeRange, discoverServices.timefilter]);
+
+  const copyExpandedDocLink = useCopyLocatorLink(buildExpandedDocLocatorParams);
+  const shareDirectLinkActions = useShareDirectLinkAction({
+    copyLink: copyExpandedDocLink,
+    linkability: expandedDocLinkability,
+  });
+  const canShareExpandedDocLink =
+    Boolean(discoverServices.capabilities.discover_v2.show) ||
+    Boolean(discoverServices.capabilities.discover_v2.save);
+  const flyoutMenuTrailingActions = useMemo(
+    () => (canShareExpandedDocLink && expandedDoc ? shareDirectLinkActions : undefined),
+    [canShareExpandedDocLink, expandedDoc, shareDirectLinkActions]
   );
 
   const cellActionsMetadata = useAdditionalCellActions({
@@ -310,6 +355,7 @@ export function SearchEmbeddableGridComponent({
       initialDocViewerTabId={initialDocViewerTabId}
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
+      flyoutMenuTrailingActions={flyoutMenuTrailingActions}
     />
   );
 }
