@@ -66,6 +66,7 @@ export interface AlertsRagDatasetExpected {
 export interface AlertsRagDatasetMetadata extends Record<string, unknown> {
   category: AlertsRagCategory;
   dataset_split: string[];
+  spaceId?: string;
 }
 
 export type AlertsRagDatasetExample = Example<
@@ -84,6 +85,7 @@ export const toDatasetExample = (ex: AlertsRagExample): AlertsRagDatasetExample 
   metadata: {
     category: ex.metadata.category,
     dataset_split: ex.metadata.dataset_split,
+    ...(ex.metadata.spaceId ? { spaceId: ex.metadata.spaceId } : {}),
   },
 });
 
@@ -211,7 +213,10 @@ const buildTask = ({
     const questionPreview = `${question.slice(0, 120)}${question.length > 120 ? '...' : ''}`;
     log.info(`[alerts-rag] task request: question="${questionPreview}"`);
 
-    const response = await chatClient.converse({ message: question });
+    const response = await chatClient.converse({
+      message: question,
+      spaceId: metadata?.spaceId,
+    });
 
     // The framework's analysis evaluators read `output.messages[length-1]`
     // and `output.steps`. `converse` returns the same shape.
