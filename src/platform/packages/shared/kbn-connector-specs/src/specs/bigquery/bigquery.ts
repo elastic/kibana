@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import { BIGQUERY_READ_ONLY_PREFIXES, isReadOnlySql } from '../../lib/generic_db_connector';
 import type {
   ExecuteQueryInput,
   GetQueryResultsInput,
@@ -27,8 +28,6 @@ const BIGQUERY_API_BASE = 'https://bigquery.googleapis.com/bigquery/v2';
 const DEFAULT_LOCATION = 'US';
 const DEFAULT_MAX_RESULTS = 1000;
 const BIGQUERY_USER_AGENT = 'Kibana-BigQuery-Connector/1.0';
-
-const READ_ONLY_QUERY_PREFIXES = /^(SELECT|WITH|EXPLAIN)\b/i;
 
 interface BigQueryJobReference {
   projectId?: string;
@@ -68,30 +67,6 @@ interface BigQueryQueryResponse {
   cacheHit?: boolean;
   errors?: Array<{ message?: string; reason?: string; location?: string }>;
 }
-
-const stripLeadingCommentsAndWhitespace = (sql: string): string => {
-  let remaining = sql;
-  while (true) {
-    const before = remaining;
-    remaining = remaining.replace(/^\s+/, '');
-    remaining = remaining.replace(/^--[^\n]*(?:\n|$)/, '');
-    remaining = remaining.replace(/^\/\*[\s\S]*?\*\//, '');
-    if (remaining === before) return remaining;
-  }
-};
-
-const hasTrailingStatement = (sql: string): boolean => {
-  const semicolonIndex = sql.indexOf(';');
-  if (semicolonIndex === -1) return false;
-  const trailing = stripLeadingCommentsAndWhitespace(sql.slice(semicolonIndex + 1));
-  return trailing.length > 0;
-};
-
-const isReadOnlyQuery = (sql: string): boolean => {
-  if (hasTrailingStatement(sql)) return false;
-  const head = stripLeadingCommentsAndWhitespace(sql);
-  return READ_ONLY_QUERY_PREFIXES.test(head);
-};
 
 const throwBigQueryError = (error: unknown): never => {
   const err = error as {
@@ -285,7 +260,7 @@ export const BigQuery: ConnectorSpec = {
         'Run a read-only GoogleSQL query in BigQuery. Accepts SELECT, WITH (CTE), and EXPLAIN statements only; rejects DML, DDL, scripts, stored procedures, and semicolon-delimited multi-statement submissions before the request is sent. Returns normalized rows as objects plus the BigQuery job reference and pagination token when more rows are available.',
       input: RunQueryInputSchema,
       handler: async (ctx, input: RunQueryInput) => {
-        if (!isReadOnlyQuery(input.query)) {
+        if (!isReadOnlySql(input.query, BIGQUERY_READ_ONLY_PREFIXES)) {
           throw new Error(
             'runQuery only accepts read-only BigQuery GoogleSQL statements (SELECT, WITH, EXPLAIN) and rejects semicolon-delimited multi-statement submissions. Use executeQuery from a workflow for non-read-only statements.'
           );

@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { z } from '@kbn/zod/v4';
-import { ZodError } from '@kbn/zod/v4';
+import { z, ZodError } from '@kbn/zod/v4';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
@@ -72,8 +71,15 @@ export const getFieldFromSchema = ({
         return undefined;
       }
 
+      if (schema instanceof z.ZodNumber && value === '') {
+        return undefined;
+      }
+
       try {
-        schema.parse(value);
+        // Coerce non-empty strings to numbers before validating numeric schemas.
+        const coerced =
+          schema instanceof z.ZodNumber && typeof value === 'string' ? Number(value) : value;
+        schema.parse(coerced);
         return undefined;
       } catch (error) {
         if (!(error instanceof ZodError)) {

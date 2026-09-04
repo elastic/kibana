@@ -90,6 +90,8 @@ export function getWebpackConfig(
         }
         const sharedExternals: Record<string, string> = {
           'node:crypto': 'commonjs crypto',
+          mysql2: 'commonjs mysql2',
+          'mysql2/promise': 'commonjs mysql2/promise',
           ...UiSharedDepsSrc.externals,
         };
         if (request && request in sharedExternals) {
