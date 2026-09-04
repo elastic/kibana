@@ -28,6 +28,7 @@ export function CanvasVisualExtent({ coords }: { coords?: CoordinateExtent }) {
         css={css`
           transform: translate(${startPos[0]}px, ${startPos[1]}px);
           position: absolute;
+          pointer-events: none;
           width: ${width}px;
           height: ${height}px;
           box-shadow: inset 0 0 ${euiTheme.border.width.thick}
