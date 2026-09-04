@@ -115,7 +115,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           onChange: (searchValue: string) => setTagSearch(searchValue),
           placeholder: i18n.translate(
             'xpack.alertingV2.actionPolicy.form.quickFilters.tags.search',
-            { defaultMessage: 'Search tags' }
+            { defaultMessage: 'Search rule tags' }
           ),
           'data-test-subj': 'quickFilterTagsSearch',
         }}
