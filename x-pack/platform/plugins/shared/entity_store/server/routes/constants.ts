@@ -7,7 +7,7 @@
 
 import type { AuthzEnabled } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
-import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
+import { HistorySnapshotState, LogExtractionShape } from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -26,30 +26,8 @@ export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
 };
 
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
-// timeout: intentionally excluded from LogExtractionBodyParams
-// TODO: add timeout once we have a way to set it as a task override param
-export const LogExtractionInstallParams = LogExtractionConfig.pick({
-  fieldHistoryLength: true,
-  additionalIndexPatterns: true,
-  excludedIndexPatterns: true,
-  lookbackPeriod: true,
-  frequency: true,
-  delay: true,
-  docsLimit: true,
-  maxLogsPerPage: true,
-  maxTimeWindowSize: true,
-  maxLogsPerWindow: true,
-  maxLogsPerWindowCapBehavior: true,
-}).partial();
-
-/**
- * Update body uses the same bounded fields as install (all optional). Defined via the shared
- * LogExtractionConfig pick so route validation stays in sync with SO/config limits.
- */
-export type LogExtractionUpdateParams = LogExtractionInstallParams;
-export const LogExtractionUpdateParams = LogExtractionInstallParams;
-
-export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
+// timeout: intentionally excluded — TODO: add once we have a way to set it as a task override param
+export const LogExtractionInstallParams = LogExtractionShape.omit({ timeout: true }).partial();
 
 export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
 export const HistorySnapshotBodyParams = HistorySnapshotState.pick({

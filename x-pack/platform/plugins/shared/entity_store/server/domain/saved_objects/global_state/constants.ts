@@ -37,23 +37,45 @@ const durationString = z
 const indexPatternString = z.string().max(MAX_INDEX_PATTERN_LENGTH);
 const indexPatternsArray = z.array(indexPatternString).max(MAX_INDEX_PATTERNS);
 
-export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
-export const LogExtractionConfig = z.object({
-  additionalIndexPatterns: indexPatternsArray.default([]),
-  excludedIndexPatterns: indexPatternsArray.default([]),
-  fieldHistoryLength: z.number().int().default(10),
-  lookbackPeriod: durationString.default(LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT),
-  delay: durationString.default(LOG_EXTRACTION_DELAY_DEFAULT),
-  docsLimit: z.number().int().min(1).default(LOG_EXTRACTION_DOCS_LIMIT_DEFAULT),
-  maxLogsPerPage: z.number().int().min(1).default(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT),
-  timeout: durationString.default(LOG_EXTRACTION_TIMEOUT_DEFAULT),
-  frequency: durationString.default(LOG_EXTRACTION_FREQUENCY_DEFAULT),
-  maxTimeWindowSize: durationString.default(LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT),
-  maxLogsPerWindow: z.number().int().min(0).default(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT),
-  maxLogsPerWindowCapBehavior: z
-    .enum(['defer', 'drop'])
-    .default(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT),
+// Schema for shape validation (no defaults)
+export const LogExtractionShape = z.object({
+  additionalIndexPatterns: indexPatternsArray,
+  excludedIndexPatterns: indexPatternsArray,
+  fieldHistoryLength: z.number().int(),
+  lookbackPeriod: durationString,
+  delay: durationString,
+  docsLimit: z.number().int().min(1),
+  maxLogsPerPage: z.number().int().min(1),
+  timeout: durationString,
+  frequency: durationString,
+  maxTimeWindowSize: durationString,
+  maxLogsPerWindow: z.number().int().min(0),
+  maxLogsPerWindowCapBehavior: z.enum(['defer', 'drop']),
 });
+
+const base = LogExtractionShape.shape;
+
+export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
+
+// schema for defaults
+export const LogExtractionConfig = z.object({
+  additionalIndexPatterns: base.additionalIndexPatterns.default([]),
+  excludedIndexPatterns: base.excludedIndexPatterns.default([]),
+  fieldHistoryLength: base.fieldHistoryLength.default(10),
+  lookbackPeriod: base.lookbackPeriod.default(LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT),
+  delay: base.delay.default(LOG_EXTRACTION_DELAY_DEFAULT),
+  docsLimit: base.docsLimit.default(LOG_EXTRACTION_DOCS_LIMIT_DEFAULT),
+  maxLogsPerPage: base.maxLogsPerPage.default(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT),
+  timeout: base.timeout.default(LOG_EXTRACTION_TIMEOUT_DEFAULT),
+  frequency: base.frequency.default(LOG_EXTRACTION_FREQUENCY_DEFAULT),
+  maxTimeWindowSize: base.maxTimeWindowSize.default(LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT),
+  maxLogsPerWindow: base.maxLogsPerWindow.default(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT),
+  maxLogsPerWindowCapBehavior: base.maxLogsPerWindowCapBehavior.default(
+    LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT
+  ),
+});
+
+export const LATEST_LOG_EXTRACTION_DEFAULTS: LogExtractionConfig = LogExtractionConfig.parse({});
 
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;
 export const HistorySnapshotStatus = z.enum(['started', 'stopped']);
@@ -76,3 +98,16 @@ export const EntityStoreGlobalState = z.object({
   historySnapshot: HistorySnapshotState,
   logsExtraction: LogExtractionConfig,
 });
+
+export type EntityStoreGlobalStateOverrides = z.infer<typeof EntityStoreGlobalStateOverrides>;
+
+// Schema for persisted global state shape: logExtraction keeps overrides only, historySnapshot is persisted in full.
+export const EntityStoreGlobalStateOverrides = z
+  .object({
+    // 'legacy': logsExtraction holds overrides + defaults (data_backfill)
+    // 'latest': logsExtraction holds overrides only. (new writes)
+    defaultsVersion: z.enum(['legacy', 'latest']),
+    historySnapshot: HistorySnapshotState,
+    logsExtraction: LogExtractionShape.partial(),
+  })
+  .partial();

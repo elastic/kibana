@@ -10152,6 +10152,16 @@
         }
       }
     },
+    "entity_store": {
+      "properties": {
+        "legacy_global_state_doc_count": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of entity store global state docs still in legacy config format (defaultsVersion !== latest). Reaches 0 when all stores have been written to at least once after the 10.4 upgrade."
+          }
+        }
+      }
+    },
     "fileUpload": {
       "properties": {
         "file_upload": {
