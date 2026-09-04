@@ -8,5 +8,4 @@ products:
 - product: kibana
 areas:
 - AI and machine Learning
-title: Add streaming support to Agent Builder's Agent-to-Agent endpoint
-description: The Agent Builder A2A endpoint now supports `stream` mode, enabling streaming responses for compatible A2A clients.
+title: Add support for `stream` mode for A2A

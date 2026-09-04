@@ -6,4 +6,4 @@ type: enhancement
 products:
 - product: cloud-serverless
 - product: kibana
-title: "Add 'Add to chat' button to alert details page"
+title: "Add 'Add to chat' button to the alert details page"

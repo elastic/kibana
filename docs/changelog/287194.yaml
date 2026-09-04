@@ -6,4 +6,4 @@ type: enhancement
 products:
 - product: cloud-serverless
 - product: kibana
-title: Add policy_namespace field to agent status change events
+title: Add `policy_namespace` field to agent status change events

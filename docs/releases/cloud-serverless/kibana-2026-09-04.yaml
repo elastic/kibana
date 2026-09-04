@@ -23,9 +23,9 @@ entries:
   - Elastic Security
 - file:
     name: 287194.yaml
-    checksum: fbc9d94c63219f4f4eca18d8e2c596c911ed8f02
+    checksum: 92fe2155f6f6a592e1b5eb379effa7095c33c865
   type: enhancement
-  title: Add policy_namespace field to agent status change events
+  title: Add `policy_namespace` field to agent status change events
   products:
   - product: cloud-serverless
   - product: kibana
@@ -46,9 +46,9 @@ entries:
   - https://github.com/elastic/kibana/pull/285223
 - file:
     name: 287592.yaml
-    checksum: 8482889292d5fe961a937e4b7380a733d14b8e4a
+    checksum: a491e0a3206c9bf354035ddfc09a65828db32713
   type: bug-fix
-  title: Fix transform actions returning generic 500 errors on request timeouts
+  title: Fix dead `isRequestTimeout` guard masking transport errors as generic 500 errors
   products:
   - product: cloud-serverless
   - product: kibana
@@ -61,9 +61,9 @@ entries:
   - https://github.com/elastic/kibana/issues/282974
 - file:
     name: 288124.yaml
-    checksum: 82450fe6f6da72c7666c146017768f88f0477045
+    checksum: a7e508b5061a45a99c7133da6e93e4b6b3c325f6
   type: bug-fix
-  title: Add validation for boolean flag arguments in Endpoint console commands
+  title: 'Add validation for console command arguments that are defined as `mustHaveValue: false` (boolean flags)'
   products:
   - product: cloud-serverless
   - product: kibana
@@ -71,9 +71,9 @@ entries:
   - https://github.com/elastic/kibana/pull/288124
 - file:
     name: 287576.yaml
-    checksum: f6f1bf9f46765e96b044407f2fc45eaa1e668593
+    checksum: ec9f79c2db2f341b6f95935f8ce8659688b14ae5
   type: feature
-  title: Improve floating action button appearance in dashboards
+  title: Prettify the floating action dashboard button
   products:
   - product: cloud-serverless
   - product: kibana
@@ -93,9 +93,9 @@ entries:
   - https://github.com/elastic/kibana/pull/286849
 - file:
     name: 287043.yaml
-    checksum: 0e1ded401c2e71728fb965158adcf14fc480405e
+    checksum: 5e5be0cdb5ceb1ed87f21245e8147f9d7ca8d2b0
   type: enhancement
-  title: Add cases.extendedFieldsUpdated workflow trigger
+  title: Add the `cases.extendedFieldsUpdated` workflow trigger
   products:
   - product: cloud-serverless
   - product: kibana
@@ -116,9 +116,9 @@ entries:
   - '# PRIVATE: https://github.com/elastic/security-team/issues/19105'
 - file:
     name: 287557.yaml
-    checksum: e1418a263d175064be2555349c37dc21aa2e64f1
+    checksum: 3c8a7d9dcfcd39d5dd1ba5cee9a765af8be6a108
   type: bug-fix
-  title: Validate dataset name for integration package type
+  title: Validate the `data_stream.dataset` field for the `integration` package type
   products:
   - product: cloud-serverless
   - product: kibana
@@ -140,9 +140,9 @@ entries:
   - https://github.com/elastic/kibana/pull/288163
 - file:
     name: 287633.yaml
-    checksum: 7cb476e2caed8eab7b0d4537001887ea40f3d513
+    checksum: 6e6df44aa6753b5f89912fd81c8ec074664dd500
   type: bug-fix
-  title: Hide Cases tools and skills from Agent Builder and MCP in Elasticsearch-only spaces
+  title: Gate Cases tools and skills in projects or spaces where the Cases feature is unavailable
   products:
   - product: cloud-serverless
   - product: kibana
@@ -151,9 +151,9 @@ entries:
   - https://github.com/elastic/kibana/pull/287633
 - file:
     name: 287923.yaml
-    checksum: 00db849bb058d0869a84ef2b5ff30b660ae2b704
+    checksum: 8fd62aa97420492984ea90c2e179336616f81d47
   type: bug-fix
-  title: Fix orphaned panel state after deleting a dashboard section
+  title: Fix an issue where deleting a dashboard section leaves panel APIs in `children$`
   products:
   - product: cloud-serverless
   - product: kibana
@@ -177,13 +177,12 @@ entries:
   - https://github.com/elastic/kibana/pull/287935
 - file:
     name: 287763.yaml
-    checksum: 69af55e731455be24fd1ccc6ffdb52a21207da49
+    checksum: 18e5bd659ef3f57211330541f53188bcdc4aeaed
   type: enhancement
-  title: Add streaming support to Agent Builder's Agent-to-Agent endpoint
+  title: Add support for `stream` mode for A2A
   products:
   - product: cloud-serverless
   - product: kibana
-  description: The Agent Builder A2A endpoint now supports `stream` mode, enabling streaming responses for compatible A2A clients.
   areas:
   - AI and machine Learning
   prs:
@@ -192,13 +191,13 @@ entries:
   - https://github.com/elastic/kibana/issues/287702
 - file:
     name: 283350.yaml
-    checksum: 245620712be7cea34db122583bbbf46f5ba9d7c9
+    checksum: d45945f19ff305566bb7ebbf9e62c04b15faed9f
   type: bug-fix
-  title: Enforce required global fields and support `extended_fields` in case APIs
+  title: Enforce required global fields and workflow `extended_fields`
   products:
   - product: cloud-serverless
   - product: kibana
-  description: With case templates enabled, the API and workflow case-creation calls now enforce required global fields. The workflow and public case create/update APIs now accept `extended_fields`.
+  description: With case templates enabled, API and workflow case creates enforce required global fields. Workflow and public case create/update APIs accept `extended_fields`.
   prs:
   - https://github.com/elastic/kibana/pull/283350
   issues:
@@ -206,13 +205,12 @@ entries:
   - '# PRIVATE: https://github.com/elastic/security-team/issues/19063'
 - file:
     name: 285139.yaml
-    checksum: 5514f40c1c4f496fc911faba7d645cb0fc0de84a
+    checksum: 5a39fba703bced9a09b07a65834e6dac21dc525f
   type: bug-fix
-  title: Fix 500 error in Cloud Security graph when querying with pinned nodes
+  title: Guard nullable columns in graph pinned ES|QL predicate
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes a `null_pointer_exception` returned by the Cloud Security graph API when `pinnedIds` was non-empty, caused by a nullable column being passed directly into an ES|QL predicate.
   prs:
   - https://github.com/elastic/kibana/pull/285139
   issues:
@@ -294,9 +292,9 @@ entries:
   - '# PRIVATE: https://github.com/elastic/search-team/issues/15820'
 - file:
     name: 287949.yaml
-    checksum: fcd56418b647f334852a40805c5d35dd933da3ff
+    checksum: 569689f560453ba9eea53ed587bf5208b9d1665a
   type: enhancement
-  title: Cancel async searches when navigating away from Discover or Dashboard
+  title: Cancel async searches on browser navigation
   products:
   - product: cloud-serverless
   - product: kibana
@@ -307,9 +305,9 @@ entries:
   - https://github.com/elastic/kibana/issues/242154
 - file:
     name: 287420.yaml
-    checksum: 8c17cfa790a7e832b729db50a09b4564d40b6de9
+    checksum: 3ed2ea6274c311aa4d8c40da3686a6ee096234a5
   type: enhancement
-  title: Add 'Add to chat' button to alert details page
+  title: Add 'Add to chat' button to the alert details page
   products:
   - product: cloud-serverless
   - product: kibana
@@ -343,12 +341,11 @@ entries:
   - https://github.com/elastic/kibana/issues/287985
 - file:
     name: 287713.yaml
-    checksum: 70755ca88055f58ec1f38e383813a512a70bcd39
+    checksum: 26baa50a40d2e8535e9b335a01e811b360365ac5
   type: feature
-  title: Add raw memory dump support to Elastic Defend response actions
+  title: Enable the new `raw` memory dump response action type for Elastic Defend hosts
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Elastic Defend hosts running Elastic Agent 9.5.2 or later can now use the `--raw` option when running memory dump response actions.
   prs:
   - https://github.com/elastic/kibana/pull/287713

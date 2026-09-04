@@ -4,5 +4,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
 - product: kibana
-title: Hide Cases tools and skills from Agent Builder and MCP in Elasticsearch-only spaces
+title: Gate Cases tools and skills in projects or spaces where the Cases feature is unavailable
 description: Cases tools and skills are no longer registered in Agent Builder or the MCP server in projects or spaces where the Cases feature is unavailable, such as Elasticsearch solution spaces.

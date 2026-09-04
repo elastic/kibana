@@ -4,5 +4,4 @@ type: feature
 products:
 - product: cloud-serverless
 - product: kibana
-title: Add raw memory dump support to Elastic Defend response actions
-description: Elastic Defend hosts running Elastic Agent 9.5.2 or later can now use the `--raw` option when running memory dump response actions.
+title: Enable the new `raw` memory dump response action type for Elastic Defend hosts

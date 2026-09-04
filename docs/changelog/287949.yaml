@@ -6,5 +6,5 @@ type: enhancement
 products:
 - product: cloud-serverless
 - product: kibana
-title: Cancel async searches when navigating away from Discover or Dashboard
+title: Cancel async searches on browser navigation
 description: Async searches are now proactively cancelled when leaving the Discover and Dashboard apps mid-load via browser navigation (e.g. closing the browser or entering a new URL). This reduces wasteful work in Elasticsearch.
