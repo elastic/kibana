@@ -12,11 +12,12 @@ import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useEffect, useMemo } from 'react';
-import { useCustomContentHtml } from '../hooks/use_custom_content_html';
-import { getServices } from '../services';
+import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
+import type { CustomContentRendererServices } from './types';
 
-interface CustomContentComponentProps {
+export interface CustomContentComponentProps {
+  services: CustomContentRendererServices;
   embeddableId: string;
   esqlQuery: string | undefined;
   timeRange: TimeRange | undefined;
@@ -28,6 +29,8 @@ interface CustomContentComponentProps {
   filters: Filter[] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
   previewHtml: string | null;
+  /** Whether the host can hand an empty panel over to the agent. Drives the empty prompt's copy. */
+  isAiAvailable?: boolean;
   onLoadingChange: (isLoading: boolean) => void;
   onGenerateWithChat?: () => void;
 }
@@ -52,6 +55,7 @@ const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
 });
 
 export const CustomContentComponent = ({
+  services,
   embeddableId,
   esqlQuery,
   timeRange,
@@ -63,11 +67,13 @@ export const CustomContentComponent = ({
   filters,
   esqlVariables,
   previewHtml,
+  isAiAvailable = false,
   onLoadingChange,
   onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const { html, isLoading, error, noContent } = useCustomContentHtml({
+    services,
     embeddableId,
     esqlQuery,
     timeRange,
@@ -81,9 +87,6 @@ export const CustomContentComponent = ({
     filters,
     esqlVariables,
   });
-
-  const { agentBuilder } = getServices();
-  const isAiAvailable = Boolean(agentBuilder);
 
   useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
 

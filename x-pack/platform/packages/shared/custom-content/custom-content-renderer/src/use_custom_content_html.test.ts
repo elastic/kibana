@@ -14,22 +14,21 @@ jest.mock('dompurify', () => ({
   default: { sanitize: (html: string) => html },
 }));
 
-jest.mock('../services');
-jest.mock('../utils/fetch_esql_data');
-jest.mock('../utils/fill_template');
-jest.mock('@kbn/data-plugin/public', () => ({
+jest.mock('./fetch_esql_data');
+jest.mock('./fill_template');
+jest.mock('@kbn/data-service', () => ({
   getEsQueryConfig: jest.fn(),
 }));
 
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
-import type { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-service';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { getServices } from '../services';
-import { fetchEsqlData } from '../utils/fetch_esql_data';
-import { fillTemplate } from '../utils/fill_template';
+import { fetchEsqlData } from './fetch_esql_data';
+import { fillTemplate } from './fill_template';
 import { useCustomContentHtml } from './use_custom_content_html';
+import type { CustomContentRendererServices } from './types';
 
 const mockGetEsQueryConfig = getEsQueryConfig as jest.MockedFunction<typeof getEsQueryConfig>;
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
@@ -72,16 +71,19 @@ const mockEuiTheme = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (getServices as jest.Mock).mockReturnValue({
-    core: { http: mockHttp, uiSettings: {} },
-    search: mockSearch,
-  });
   mockGetEsQueryConfig.mockReturnValue(defaultEsQueryConfig);
   mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
   mockFillTemplate.mockResolvedValue('<div>rendered</div>');
 });
 
+const mockServices = {
+  http: mockHttp,
+  uiSettings: {} as CustomContentRendererServices['uiSettings'],
+  search: mockSearch as unknown as CustomContentRendererServices['search'],
+};
+
 const baseParams: Parameters<typeof useCustomContentHtml>[0] = {
+  services: mockServices,
   embeddableId: 'panel-1',
   esqlQuery: undefined,
   timeRange: undefined,

@@ -7,18 +7,18 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { getServices } from '../services';
-import { useCustomContentHtml } from '../hooks/use_custom_content_html';
+import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentComponent } from './custom_content_component';
+import type { CustomContentRendererServices } from './types';
 
-jest.mock('../services', () => ({ getServices: jest.fn() }));
-jest.mock('../hooks/use_custom_content_html', () => ({ useCustomContentHtml: jest.fn() }));
+jest.mock('./use_custom_content_html', () => ({ useCustomContentHtml: jest.fn() }));
 
 const mockUseCustomContentHtml = useCustomContentHtml as jest.MockedFunction<
   typeof useCustomContentHtml
 >;
 
 const defaultProps = {
+  services: {} as CustomContentRendererServices,
   embeddableId: 'panel-1',
   esqlQuery: undefined,
   timeRange: undefined,
@@ -35,7 +35,6 @@ const defaultProps = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (getServices as jest.Mock).mockReturnValue({});
   mockUseCustomContentHtml.mockReturnValue({
     html: '<p>hi</p>',
     isLoading: false,

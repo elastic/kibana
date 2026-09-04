@@ -602,6 +602,7 @@
     "@kbn/custom-branding-plugin": "link:x-pack/platform/plugins/private/custom_branding",
     "@kbn/custom-content-common": "link:x-pack/platform/packages/shared/custom-content/custom-content-common",
     "@kbn/custom-content-plugin": "link:x-pack/platform/plugins/shared/custom_content",
+    "@kbn/custom-content-renderer": "link:x-pack/platform/packages/shared/custom-content/custom-content-renderer",
     "@kbn/custom-content-server": "link:x-pack/platform/packages/shared/custom-content/custom-content-server",
     "@kbn/custom-icons": "link:src/platform/packages/shared/kbn-custom-icons",
     "@kbn/custom-integrations-plugin": "link:src/platform/plugins/shared/custom_integrations",

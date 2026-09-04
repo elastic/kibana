@@ -28,8 +28,8 @@ import { i18n } from '@kbn/i18n';
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { EsqlDataResult } from '@kbn/custom-content-renderer';
 import { getServices } from '../services';
-import type { EsqlDataResult } from '../utils/fetch_esql_data';
 
 interface EsqlPreviewSectionProps {
   esqlQuery: string;
