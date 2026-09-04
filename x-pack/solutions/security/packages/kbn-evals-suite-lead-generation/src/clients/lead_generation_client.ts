@@ -7,11 +7,15 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Lead, LeadGenerationStatus } from '../types';
+import type { FindLeadsResponse } from '@kbn/security-solution-plugin/common/entity_analytics/lead_generation/types';
+import type { Lead, LeadGenerationStatus, LeadChangesResponse } from '../types';
 
 const GENERATE_URL = '/internal/entity_analytics/leads/generate';
 const LEADS_URL = '/internal/entity_analytics/leads';
 const STATUS_URL = '/internal/entity_analytics/leads/status';
+const CHANGES_URL = '/internal/entity_analytics/leads/changes';
+const dismissUrl = (id: string): string =>
+  `/internal/entity_analytics/leads/${encodeURIComponent(id)}/_dismiss`;
 
 const INTERNAL_API_HEADERS = {
   'elastic-api-version': '1',
@@ -23,41 +27,19 @@ const INTERNAL_API_HEADERS = {
 const DEFAULT_POLL_INTERVAL_MS = 2_000;
 const DEFAULT_TIMEOUT_MS = 5 * 60_000;
 
-interface FindLeadsResponse {
-  leads: Lead[];
-  total: number;
-  page: number;
-  perPage: number;
-}
-
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class LeadGenerationClient {
   constructor(private readonly kbnClient: KbnClient, private readonly log: ToolingLog) {}
 
-  async generate({
-    connectorId,
-    maxLeads,
-  }: {
-    connectorId: string;
-    maxLeads?: number;
-  }): Promise<{ executionUuid: string }> {
-    this.log.info(
-      `[LeadGenerationClient] Triggering lead generation (connectorId=${connectorId}, maxLeads=${
-        maxLeads ?? 'default'
-      })`
-    );
-
-    const body: Record<string, unknown> = { connectorId };
-    if (maxLeads !== undefined) {
-      body.maxLeads = maxLeads;
-    }
+  async generate({ connectorId }: { connectorId: string }): Promise<{ executionUuid: string }> {
+    this.log.info(`[LeadGenerationClient] Triggering lead generation (connectorId=${connectorId})`);
 
     const response = await this.kbnClient.request<{ executionUuid: string }>({
       path: GENERATE_URL,
       method: 'POST',
       headers: INTERNAL_API_HEADERS,
-      body,
+      body: { connectorId },
     });
 
     const { executionUuid } = response.data;
@@ -70,6 +52,25 @@ export class LeadGenerationClient {
       path: STATUS_URL,
       method: 'GET',
       headers: INTERNAL_API_HEADERS,
+    });
+    return response.data;
+  }
+
+  async dismiss(id: string): Promise<{ success: boolean }> {
+    const response = await this.kbnClient.request<{ success: boolean }>({
+      path: dismissUrl(id),
+      method: 'POST',
+      headers: INTERNAL_API_HEADERS,
+    });
+    return response.data;
+  }
+
+  async getChanges(query?: { cursor?: string; perPage?: number }): Promise<LeadChangesResponse> {
+    const response = await this.kbnClient.request<LeadChangesResponse>({
+      path: CHANGES_URL,
+      method: 'GET',
+      headers: INTERNAL_API_HEADERS,
+      query: query as Record<string, string | number | boolean | undefined>,
     });
     return response.data;
   }
@@ -98,16 +99,14 @@ export class LeadGenerationClient {
    */
   async generateAndWait({
     connectorId,
-    maxLeads,
     pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
     timeoutMs = DEFAULT_TIMEOUT_MS,
   }: {
     connectorId: string;
-    maxLeads?: number;
     pollIntervalMs?: number;
     timeoutMs?: number;
   }): Promise<{ leads: Lead[]; executionUuid: string }> {
-    const { executionUuid } = await this.generate({ connectorId, maxLeads });
+    const { executionUuid } = await this.generate({ connectorId });
 
     const deadline = Date.now() + timeoutMs;
 

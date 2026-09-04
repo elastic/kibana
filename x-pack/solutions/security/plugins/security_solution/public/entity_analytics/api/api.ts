@@ -935,7 +935,7 @@ export const useEntityAnalyticsRoutes = () => {
       params,
     }: {
       signal?: AbortSignal;
-      params: { connectorId: string; maxLeads?: number };
+      params: { connectorId: string };
     }) =>
       http.fetch<GenerateLeadsResponse>(GENERATE_LEADS_URL, {
         version: API_VERSIONS.internal.v1,

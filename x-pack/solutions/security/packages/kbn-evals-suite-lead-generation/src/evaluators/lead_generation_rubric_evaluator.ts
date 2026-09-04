@@ -9,20 +9,22 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { BoundInferenceClient, ToolChoice } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { Evaluator } from '@kbn/evals';
-import type { LeadGenerationDatasetExample, LeadGenerationTaskOutput } from '../types';
+import type { Lead, LeadGenerationDatasetExample, LeadGenerationTaskOutput } from '../types';
 import { LeadGenerationRubricPrompt } from './lead_generation_rubric_prompt';
 
 export const createLeadGenerationRubricEvaluator = ({
   inferenceClient,
   log,
+  selectLeads = (leads) => leads,
 }: {
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
+  selectLeads?: (leads: Lead[]) => Lead[];
 }): Evaluator<LeadGenerationDatasetExample, LeadGenerationTaskOutput> => ({
   name: 'LeadGenerationRubric',
   kind: 'LLM',
   direction: 'maximize',
-  evaluate: async ({ output, expected }) => {
+  evaluate: async ({ output, expected, metadata }) => {
     const errors = (output as LeadGenerationTaskOutput | undefined)?.errors;
     if (errors && errors.length > 0) {
       return {
@@ -32,7 +34,9 @@ export const createLeadGenerationRubricEvaluator = ({
       };
     }
 
-    const leads = (output as LeadGenerationTaskOutput | undefined)?.leads ?? null;
+    const leads = (output as LeadGenerationTaskOutput | undefined)?.leads
+      ? selectLeads((output as LeadGenerationTaskOutput).leads as Lead[])
+      : null;
     if (!leads) {
       return {
         score: 0,
@@ -51,12 +55,15 @@ export const createLeadGenerationRubricEvaluator = ({
     }
 
     const submission = JSON.stringify({ leads }, null, 2);
-    const reference = JSON.stringify({ leads: expected?.leads ?? [] }, null, 2);
+    const reference = expected?.leads
+      ? JSON.stringify({ leads: expected.leads }, null, 2)
+      : undefined;
+    const criteria = metadata?.description;
 
     const response = await executeUntilValid({
       prompt: LeadGenerationRubricPrompt,
       inferenceClient,
-      input: { submission, reference },
+      input: { submission, ...(reference ? { reference } : {}), ...(criteria ? { criteria } : {}) },
       finalToolChoice: {
         function: 'grade',
       } as ToolChoice<'grade'>,

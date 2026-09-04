@@ -59,6 +59,7 @@ const makeTestLead = (overrides: Partial<SynthesizedLead> = {}): SynthesizedLead
     staleness: 'fresh',
     topRelatedEntities: [],
     relatedEntityCounts: {},
+    origin: 'observations',
     ...overrides,
     entity: { ...entity, record: {} },
     observations,
