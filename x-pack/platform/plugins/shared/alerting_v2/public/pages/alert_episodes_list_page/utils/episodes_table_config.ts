@@ -52,6 +52,7 @@ export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
   'rule.id',
   'duration',
   'tags',
+  'rule_tags',
   'assignees',
 ];
 

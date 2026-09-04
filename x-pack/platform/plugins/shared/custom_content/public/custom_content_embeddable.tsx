@@ -15,10 +15,13 @@ import type {
   PublishesDataViews,
   PublishesDataLoading,
   PublishesEsqlUsage,
+  PublishesWritableTimeRange,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   titleComparators,
+  initializeTimeRangeManager,
+  timeRangeComparators,
   initializeStateApi,
   useBatchedPublishingSubjects,
   apiPublishesReload,
@@ -67,7 +70,8 @@ export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState
   HasEditCapabilities &
   PublishesDataViews &
   PublishesDataLoading &
-  PublishesEsqlUsage;
+  PublishesEsqlUsage &
+  PublishesWritableTimeRange;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentEmbeddableState,
@@ -76,6 +80,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
+    const timeRangeManager = initializeTimeRangeManager(initialState);
     let isRetained = false;
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
@@ -86,6 +91,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
     const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[] | undefined>(undefined);
+    // The range the panel actually renders with: fetch$ resolves the panel's own override over the
+    // dashboard's. Seeded from the parent for the first render.
+    const effectiveTimeRange$ = new BehaviorSubject<TimeRange | undefined>(
+      timeRangeManager.api.timeRange$.getValue() ??
+        (apiPublishesTimeRange(parentApi)
+          ? parentApi.timeRange$.getValue() ?? undefined
+          : undefined)
+    );
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
     // Starts true so the panel is not reported as render-complete before its first fetch resolves;
     // screenshotting would otherwise capture an empty panel.
@@ -93,6 +106,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
+      ...timeRangeManager.getLatestState(),
       esql_query: toEsqlQueryState(esqlQuery$.getValue()),
       template: template$.getValue(),
     });
@@ -108,6 +122,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       anyStateChange$: merge(
         titleManager.anyStateChange$,
+        timeRangeManager.anyStateChange$,
         esqlQuery$.pipe(
           skip(1),
           map(() => undefined)
@@ -119,11 +134,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ),
       getComparators: () => ({
         ...titleComparators,
+        ...timeRangeComparators,
         esql_query: 'deepEquality',
         template: 'referenceEquality',
       }),
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
+        timeRangeManager.reinitializeState(lastSaved ?? {});
         esqlQuery$.next(lastSaved ? readEsqlQuery(lastSaved) : undefined);
         template$.next(lastSaved?.template);
       },
@@ -132,13 +149,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const api = finalizeApi({
       ...stateApi,
       ...titleManager.api,
+      ...timeRangeManager.api,
       serializeState,
       usesEsql$,
       dataViews$,
       dataLoading$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
-          defaultMessage: 'Custom content',
+          defaultMessage: 'Custom panel',
         }),
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         const { core } = getServices();
@@ -192,11 +210,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             };
 
             function FlyoutWithReactiveState() {
-              const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
-                apiPublishesTimeRange(parentApi)
-                  ? parentApi.timeRange$.getValue() ?? undefined
-                  : undefined
-              );
+              const [timeRange, setTimeRange] = useState(effectiveTimeRange$.getValue());
               const [isApproximate, setIsApproximate] = useState(isApproximate$.getValue());
               const [projectRouting, setProjectRouting] = useState(projectRouting$.getValue());
               const [query, setQuery] = useState(query$.getValue());
@@ -207,9 +221,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
               useEffect(() => {
                 const subs = [
-                  ...(apiPublishesTimeRange(parentApi)
-                    ? [parentApi.timeRange$.subscribe((tr) => setTimeRange(tr ?? undefined))]
-                    : []),
+                  effectiveTimeRange$.subscribe(setTimeRange),
                   isApproximate$.subscribe(setIsApproximate),
                   projectRouting$.subscribe(setProjectRouting),
                   query$.subscribe(setQuery),
@@ -295,6 +307,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       query$.next(ctx.query);
       filters$.next(ctx.filters);
       esqlVariables$.next(ctx.esqlVariables);
+      effectiveTimeRange$.next(ctx.timeRange);
       if (!ctx.isReload) {
         previewHtml$.next(null);
       }
@@ -313,6 +326,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           filters,
           esqlVariables,
           previewHtml,
+          timeRange,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
           template$,
@@ -322,14 +336,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           query$,
           filters$,
           esqlVariables$,
-          previewHtml$
+          previewHtml$,
+          effectiveTimeRange$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
-        const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
-          apiPublishesTimeRange(parentApi)
-            ? parentApi.timeRange$.getValue() ?? undefined
-            : undefined
-        );
 
         useEffect(() => {
           return () => {
@@ -342,12 +352,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         useEffect(() => {
           if (!apiPublishesReload(parentApi)) return;
           const sub = parentApi.reload$.subscribe(() => setGenerationVersion((v) => v + 1));
-          return () => sub.unsubscribe();
-        }, []);
-
-        useEffect(() => {
-          if (!apiPublishesTimeRange(parentApi)) return;
-          const sub = parentApi.timeRange$.subscribe((tr) => setTimeRange(tr ?? undefined));
           return () => sub.unsubscribe();
         }, []);
 

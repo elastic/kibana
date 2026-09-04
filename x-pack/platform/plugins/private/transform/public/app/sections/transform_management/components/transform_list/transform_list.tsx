@@ -12,8 +12,6 @@ import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiPageTemplate,
   EuiPopover,
@@ -370,14 +368,7 @@ export const TransformList: FC<TransformListProps> = ({
   };
 
   const toolsRight = (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-      <EuiFlexItem>
-        <RefreshTransformListButton onClick={refreshTransformList} isLoading={isLoading} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <CreateTransformButton onClick={onCreateTransform} transformNodes={transformNodes} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <RefreshTransformListButton onClick={refreshTransformList} isLoading={isLoading} />
   );
 
   const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {

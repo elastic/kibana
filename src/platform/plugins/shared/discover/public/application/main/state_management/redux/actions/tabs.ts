@@ -400,7 +400,10 @@ export const initializeTabs = createInternalStateAsyncThunk(
 
     const byValueEmbeddableTab = services.embeddableEditor.getByValueTab();
     const byValueEmbeddableTabState = byValueEmbeddableTab
-      ? fromSavedObjectTabToTabState({ tab: byValueEmbeddableTab })
+      ? fromSavedObjectTabToTabState({
+          tab: byValueEmbeddableTab,
+          profileStateRegistry: services.profileStateRegistry,
+        })
       : undefined;
 
     const initialTabsState = tabsStorageManager.loadLocally({

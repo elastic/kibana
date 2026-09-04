@@ -167,6 +167,7 @@ export const JiraConnector: ConnectorSpec = {
   actions: {
     searchIssuesWithJql: {
       isTool: true,
+      scope: 'read',
       description:
         'Search or filter Jira issues using JQL (Jira Query Language). Use when you need to find issues by status, assignee, project, label, or any other criteria. Supports pagination via nextPageToken.',
       input: SearchIssuesWithJqlInputSchema,
@@ -183,6 +184,7 @@ export const JiraConnector: ConnectorSpec = {
     },
     getIssue: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch full details of a single Jira issue by its ID or key. Use when you already have the issue key (e.g. PROJ-123) or issue ID and need the complete record including fields, comments, and metadata.',
       input: GetIssueInputSchema,
@@ -199,6 +201,7 @@ export const JiraConnector: ConnectorSpec = {
     },
     getProjects: {
       isTool: true,
+      scope: 'read',
       description:
         'List or search Jira projects. Use when you need to discover available projects or find a project by name or key. Supports pagination and optional text filtering.',
       input: GetProjectsInputSchema,
@@ -217,6 +220,7 @@ export const JiraConnector: ConnectorSpec = {
     },
     getProject: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch full details of a single Jira project by its ID or key. Use when you already have the project key (e.g. PROJ) or numeric project ID and need the complete project record.',
       input: GetProjectInputSchema,
@@ -233,6 +237,7 @@ export const JiraConnector: ConnectorSpec = {
     },
     searchUsers: {
       isTool: true,
+      scope: 'read',
       description:
         'Find Jira users by name, username, or email. Use when you need a user accountId (e.g. for JQL assignee filters) or to look up user contact details. At least one search parameter should be provided.',
       input: SearchUsersInputSchema,
@@ -373,6 +378,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getTransitions: {
       isTool: true,
+      scope: 'read',
       description:
         'List the workflow transitions available for a Jira issue. ' +
         'Use before transitionIssue — Jira requires a transition ID, not a status name. ' +
@@ -389,6 +395,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getIssueTypes: {
       isTool: true,
+      scope: 'read',
       description:
         'List the issue types available in a Jira project (e.g. Bug, Task, Story, Epic). ' +
         'Use before createIssue to discover valid issue type names and IDs for the project.',
@@ -406,6 +413,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getCreateMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the required and optional fields for creating a Jira issue of a specific type. ' +
         'Use after getIssueTypes to build a valid createIssue payload, especially when the ' +
@@ -467,6 +475,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getAttachment: {
       isTool: true,
+      scope: 'read',
       description:
         'Download the content of a Jira attachment by its ID. ' +
         'Returns the file as a base64-encoded string along with its MIME type. ' +
