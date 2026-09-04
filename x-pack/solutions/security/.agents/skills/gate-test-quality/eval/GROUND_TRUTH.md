@@ -20,6 +20,19 @@ steps (query, exception, suppression, risk_score) are correctly gated.
 | `vacuous_assertions_count` | all assertions in `gate.test.ts.txt` are `toContain`-on-source — every one is vacuous (9 assertions across 4 tests) |
 | `false_positive_steps` | empty — all four sibling gates are sound |
 
+## Fixture 2 — Pattern 2 (gate-vs-schema): `fixtures/p2/`
+
+Files: `suppression_workflow_source.txt` + `suppression_gate.test.ts.txt`.
+
+| Field | Expected |
+|---|---|
+| `found_defect_step` | `apply_suppression_tuning` (or `classify_proposal`/`can_apply_suppression` — any name identifying the suppression path) |
+| `defect_kind` | `missing_rule_type_check` — the gate proposes `alert_suppression` without checking `fetch_rule.output.type` against the rule types the validating schema wires `alert_suppression` into (query/saved_query/eql/threshold); a non-supported type passes approval then fails at apply |
+| `control` | `can_apply_query` DOES check `fetch_rule.output.type` — a correct gate in the same file the agent must NOT flag |
+| `vacuous_assertions_identified` | true — all tests are `toContain` substring checks; none would fail if the rule-type check were added or removed |
+
+Do NOT show this file to the agent under evaluation.
+
 ## Scoring rules
 
 - PASS requires: defect step named exactly, approval-clause absence identified, ≥1
