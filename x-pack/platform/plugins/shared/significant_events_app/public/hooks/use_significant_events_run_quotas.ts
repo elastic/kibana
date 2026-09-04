@@ -12,7 +12,6 @@ import type {
   RunQuotaSettingsUpdate,
   RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
-import { getFormattedError } from '../util/errors';
 import { useKibana } from './use_kibana';
 
 const RUN_QUOTAS_QUERY_KEY = ['significantEventsRunQuotas'] as const;
@@ -56,13 +55,6 @@ export const useUpdateRunQuotas = () => {
         }),
       });
       return queryClient.invalidateQueries({ queryKey: RUN_QUOTAS_QUERY_KEY });
-    },
-    onError: (error) => {
-      toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.significantEventsApp.runQuotas.saveErrorToastTitle', {
-          defaultMessage: 'Failed to update daily run limits',
-        }),
-      });
     },
   });
 
