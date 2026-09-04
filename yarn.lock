@@ -16505,7 +16505,7 @@ atomically@^2.0.3:
     stubborn-fs "^1.2.5"
     when-exit "^2.1.1"
 
-attr-accept@^2.2.2, attr-accept@^2.2.4:
+attr-accept@^2.2.2, attr-accept@^2.2.5:
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-2.2.5.tgz#d7061d958e6d4f97bf8665c68b75851a0713ab5e"
   integrity sha512-0bDNnY/u6pPwHDMoF0FieU354oBi0a8rD9FcsLwzcGWbc8KS8KPIi7y+s13OlVY+gMWc/9xEMUgNE6Qm8ZllYQ==
@@ -29377,12 +29377,12 @@ react-dom@18.2.0:
   dependencies:
     scheduler "^0.25.0"
 
-react-dropzone@15.0.0:
-  version "15.0.0"
-  resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-15.0.0.tgz#bd03c7c2b14fe4ea9db1a9c74502b85339f2e505"
-  integrity sha512-lGjYV/EoqEjEWPnmiSvH4v5IoIAwQM2W4Z1C0Q/Pw2xD0eVzKPS359BQTUMum+1fa0kH2nrKjuavmTPOGhpLPg==
+react-dropzone@16.0.0:
+  version "16.0.0"
+  resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-16.0.0.tgz#d6b0f8d9838f8a06860a7613b02e30990831c53e"
+  integrity sha512-Se0fi/i0/ymOJONQpZIC2qNzF9iis4RW/GQniOARVhJax4xb0qR/dV/Uw1aEVS3qwtjRqAO0RXpPOBC6FaSo3Q==
   dependencies:
-    attr-accept "^2.2.4"
+    attr-accept "^2.2.5"
     file-selector "^2.1.0"
     prop-types "^15.8.1"
 
