@@ -1,5 +1,5 @@
 {
-  "sha1": "f3ab25b20c9d50b76184606165a6967ac635ba7a",
+  "sha1": "2705670615455f991f2ed1018b242124fc04785a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 41,
-        "column": 5
+        "line": 43,
+        "column": 8
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 50,
-        "column": 11
+        "line": 51,
+        "column": 23
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 56,
-        "column": 16
+        "line": 57,
+        "column": 5
       }
     },
     {

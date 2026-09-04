@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/deeplinks-security'
   - '@kbn/spaces-plugin'
   - '@kbn/workflows'
+  - '@kbn/workflows-yaml'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
   - '@kbn/agent-builder-browser'

@@ -80,7 +80,7 @@ describe('AlertEpisodeOverviewList', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByText('Tags')).toBeInTheDocument();
+    expect(screen.getByText('Alert tags')).toBeInTheDocument();
     const tagsRow = screen.getByTestId('alertingV2EpisodeDetailsOverviewListTags');
     expect(tagsRow).toHaveTextContent('tag-a');
     expect(tagsRow).toHaveTextContent('tag-b');
