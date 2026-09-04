@@ -127,9 +127,8 @@ export function openSaveModal({
             meta: { saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE },
           });
 
-          if (saveResult.id) {
-            onSave({ ...saveResult, savedState: dashboardStateToSave });
-          }
+          onSave({ ...saveResult, savedState: dashboardStateToSave });
+          onClose();
         };
 
         return (

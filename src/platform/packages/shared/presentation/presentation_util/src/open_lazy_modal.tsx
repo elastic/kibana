@@ -12,7 +12,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
-  EuiDelayRender,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -53,16 +52,14 @@ export const openLazyModal = ({
 function LoadingModal({ onClose }: { onClose: () => void }) {
   return (
     <EuiModal onClose={onClose}>
-      <EuiDelayRender delay={300}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <EuiSkeletonTitle size="xs" />
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiSkeletonText />
-        </EuiModalBody>
-      </EuiDelayRender>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <EuiSkeletonTitle size="xs" />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiSkeletonText />
+      </EuiModalBody>
     </EuiModal>
   );
 }
