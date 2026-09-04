@@ -161,7 +161,6 @@ export type ParameterName =
   | 'priority'
   | 'dynamic_passthrough'
   | 'inference_id'
-  | 'inference_id_required'
   | 'reference_field'
   | 'depth_limit'
   | 'relations'

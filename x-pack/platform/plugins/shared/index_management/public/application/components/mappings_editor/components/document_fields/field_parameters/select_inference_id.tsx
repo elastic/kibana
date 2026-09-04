@@ -33,7 +33,7 @@ import { type SemanticInferenceFieldType, getTaskTypesForFieldType } from '../..
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
-import { documentationService, UseField } from '../../../shared_imports';
+import { documentationService, UseField, fieldValidators } from '../../../shared_imports';
 
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 
@@ -58,9 +58,23 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   'data-test-subj': dataTestSubj,
   fieldType = 'semantic_text',
 }: SelectInferenceIdProps) => {
-  const fieldConfig = getFieldConfig(
-    fieldType === 'semantic' ? 'inference_id_required' : 'inference_id'
-  );
+  const baseConfig = getFieldConfig('inference_id');
+  const fieldConfig =
+    fieldType === 'semantic'
+      ? {
+          ...baseConfig,
+          validations: [
+            {
+              validator: fieldValidators.emptyField(
+                i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.validation.required',
+                  { defaultMessage: 'Select an inference endpoint.' }
+                )
+              ),
+            },
+          ],
+        }
+      : baseConfig;
 
   return (
     <UseField path="inference_id" config={fieldConfig}>
