@@ -6,11 +6,7 @@
  */
 import { z } from '@kbn/zod';
 
-import {
-  budgetingMethodSchema,
-  objectiveSchema,
-  sloIdSchema,
-} from '../../schema/zod/slo';
+import { budgetingMethodSchema, objectiveSchema, sloIdSchema } from '../../schema/zod/slo';
 import { timeWindowSchema } from '../../schema/zod/time_window';
 import {
   allOrAnyString,

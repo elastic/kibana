@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { Duration, DurationUnit } from '../models/duration';
 import type { sloDefinitionSchema } from '../schema/zod/slo';
 import type { sloWithDataResponseSchemaZod } from '../rest_specs/slo';

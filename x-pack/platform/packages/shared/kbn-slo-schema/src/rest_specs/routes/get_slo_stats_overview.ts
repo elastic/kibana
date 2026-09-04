@@ -28,7 +28,9 @@ const getSLOStatsOverviewResponseSchema = z.object({
   burnRateRecoveredAlerts: z.number(),
 });
 
-type GetSLOStatsOverviewParams = NonNullable<z.output<typeof getSLOStatsOverviewParamsSchema.shape.query>>;
+type GetSLOStatsOverviewParams = NonNullable<
+  z.output<typeof getSLOStatsOverviewParamsSchema.shape.query>
+>;
 type GetSLOStatsOverviewResponse = z.output<typeof getSLOStatsOverviewResponseSchema>;
 
 export { getSLOStatsOverviewParamsSchema, getSLOStatsOverviewResponseSchema };
