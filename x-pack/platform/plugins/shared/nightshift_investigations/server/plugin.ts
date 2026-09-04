@@ -34,6 +34,10 @@ import {
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
 } from './saved_objects';
 import { SavedObjectInvestigationRepository } from './storage';
+import {
+  registerInvestigationReconciliationTask,
+  scheduleInvestigationReconciliationTask,
+} from './tasks/investigation_reconciliation_task';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -71,6 +75,13 @@ export class NightshiftInvestigationsPlugin
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+
+    registerInvestigationReconciliationTask({
+      core,
+      taskManager: plugins.taskManager,
+      logger: this.logger.get('investigation_reconciliation'),
+      getWorkflowsManagement: () => this.workflowsManagement,
+    });
 
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
       createTriggerEmitter({
@@ -149,6 +160,10 @@ export class NightshiftInvestigationsPlugin
         );
       });
     }
+
+    scheduleInvestigationReconciliationTask({ taskManager: plugins.taskManager }).catch((err) => {
+      this.logger.error(`Failed to schedule investigation reconciliation task: ${err.message}`);
+    });
 
     return {
       getInvestigationsClient: this.getInvestigationsClient,
