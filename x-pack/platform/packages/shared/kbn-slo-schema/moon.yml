@@ -18,7 +18,6 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-slo-schema
 dependsOn:
   - '@kbn/std'
-  - '@kbn/io-ts-utils'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/router-to-openapispec'
