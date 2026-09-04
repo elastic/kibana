@@ -45,7 +45,8 @@ const annotateStorybookDocsArtifacts = (
   registry: BuildDocsRegistryResult
 ) => {
   const annotation = [
-    '### Storybook docs artifacts',
+    '<details>',
+    '<summary>Storybook docs artifacts</summary>',
     '',
     `* Commit: \`${STORYBOOK_DOCS_ARCHIVE_SHA}\``,
     `* Registry: [${STORYBOOK_DOCS_REGISTRY_FILE}](${STORYBOOK_DOCS_REGISTRY_URL})`,
@@ -66,6 +67,8 @@ const annotateStorybookDocsArtifacts = (
     `    artifact: ${STORYBOOK_DOCS_ARCHIVE_URL}`,
     `    integrity: ${archive.integrity}`,
     '```',
+    '',
+    '</details>',
   ].join('\n');
 
   execSync('buildkite-agent annotate --style info --context storybook-docs-artifacts', {

@@ -441,7 +441,7 @@ export const createTabsStorageManager = ({
     sessionInfo.spaceId = spaceId;
 
     const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
-      fromSavedObjectTabToTabState({ tab })
+      fromSavedObjectTabToTabState({ tab, profileStateRegistry })
     );
     const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
       toTabState(tab, defaultTabState)

@@ -247,9 +247,15 @@ jest.mock('@kbn/monaco', () => ({
   monaco: {
     editor: {
       setModelMarkers: jest.fn(),
+      registerCommand: jest.fn().mockReturnValue({
+        dispose: jest.fn(),
+      }),
     },
     languages: {
       registerCompletionItemProvider: jest.fn().mockReturnValue({
+        dispose: jest.fn(),
+      }),
+      registerCodeActionProvider: jest.fn().mockReturnValue({
         dispose: jest.fn(),
       }),
     },

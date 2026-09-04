@@ -1,0 +1,173 @@
+{
+  "sha1": "4a40b5b1d09c63645d7e6cc1574ea13dda3ee6a4",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e0ed4c00a8b0e35-4ef7cf9b1c578ae",
+      "title": "Fleet Identity Federation agentless setup",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "d3cc7f7862ac702-c8fe4e6b395d318",
+      "title": "AWS Federated Identity — create, save, and edit round-trip GuardDuty agentless: an FI policy saves with role_arn only (regression guard for #284522 — no external_id anywhere in the payload)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/create_fi_policy.spec.ts",
+        "line": 74,
+        "column": 1
+      }
+    },
+    {
+      "id": "d3cc7f7862ac702-d313f1106b238ef",
+      "title": "AWS Federated Identity — create, save, and edit round-trip Edit page: a saved FI policy round-trips — identity_federation selected and its cloud connector rendered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/create_fi_policy.spec.ts",
+        "line": 136,
+        "column": 48
+      }
+    },
+    {
+      "id": "5e8e95251ad1761-dcb710864722be3",
+      "title": "AWS var_groups — Identity Federation option visibility GuardDuty agentless: identity_federation is offered and shows the FI form when selected (regression guard for #283131)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/fi_visibility.spec.ts",
+        "line": 118,
+        "column": 64
+      }
+    },
+    {
+      "id": "5e8e95251ad1761-61df7de124b8ea4",
+      "title": "AWS var_groups — Identity Federation option visibility GuardDuty agentless: only agentless-compatible credential options are shown (regression guard for hide_in_deployment_modes filtering)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/fi_visibility.spec.ts",
+        "line": 133,
+        "column": 1
+      }
+    },
+    {
+      "id": "5e8e95251ad1761-f56c0747c8f78bf",
+      "title": "AWS var_groups — Identity Federation option visibility GuardDuty agentless: switching identity_federation ↔ direct_access_key toggles FI form both ways (regression guard for var_group selection state)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/fi_visibility.spec.ts",
+        "line": 150,
+        "column": 27
+      }
+    },
+    {
+      "id": "5e8e95251ad1761-bd23563bb7f4481",
+      "title": "AWS var_groups — Identity Federation option visibility config agentless: identity_federation appears and is selectable (FI extended to all templates in integrations#20527)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/fi_visibility.spec.ts",
+        "line": 184,
+        "column": 25
+      }
+    },
+    {
+      "id": "5e8e95251ad1761-d20929f0ab53e8b",
+      "title": "AWS var_groups — Identity Federation option visibility inspector agentless: identity_federation appears and is selectable (FI extended to all templates in integrations#20527)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/fi_visibility.spec.ts",
+        "line": 184,
+        "column": 25
+      }
+    },
+    {
+      "id": "5e8e95251ad1761-7846cf85140614b",
+      "title": "AWS var_groups — Identity Federation option visibility RDS agentless: identity_federation appears and the metrics input is visible (aws/metrics is FI-capable since integrations#20527)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/fi_visibility.spec.ts",
+        "line": 210,
+        "column": 15
+      }
+    },
+    {
+      "id": "5e8e95251ad1761-7f712f18c3f3a5f",
+      "title": "AWS var_groups — Identity Federation option visibility S3 agentless: identity_federation appears via aws/metrics; aws-s3 input is excluded (aws-s3 is in AGENTLESS_DISABLED_INPUTS)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/fi_visibility.spec.ts",
+        "line": 210,
+        "column": 21
+      }
+    },
+    {
+      "id": "5e8e95251ad1761-f3944c9dfbfd63a",
+      "title": "AWS var_groups — Identity Federation option visibility GuardDuty agent-based: identity_federation is hidden and agent-only options are shown (hide_in_deployment_modes: [default] on the identity_federation option)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/fi_visibility.spec.ts",
+        "line": 222,
+        "column": 21
+      }
+    },
+    {
+      "id": "5e8e95251ad1761-50403171e6349c2",
+      "title": "AWS var_groups — Identity Federation option visibility Full AWS package agentless (no template scoping): all agentless-eligible options including identity_federation are offered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/var_groups/fi_visibility.spec.ts",
+        "line": 251,
+        "column": 17
+      }
+    }
+  ]
+}
