@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiTab, EuiTabs, EuiSpacer, EuiPanel, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
-import type { RuleQuery } from './compose_form_types';
+import type { RuleQuery } from '../../form/types';
 import type { QueryTab } from './types';
+import { MIN_EDITOR_HEIGHT, ESQL_EDITOR_LINE_HEIGHT, ESQL_CODE_EDITOR_OPTIONS } from './constants';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
-type LineNumbersType = monaco.editor.LineNumbersType;
 
 interface ComposeDiscoverTabsProps {
   baseQuery: string;
@@ -46,31 +46,45 @@ interface LockedBaseEditorProps {
   query: string;
 }
 
-const LOCKED_FONT_SIZE = 13;
-const LOCKED_LINE_HEIGHT = 18;
+const SPLIT_EDITOR_CONTAINER_STYLES: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+};
+
+const BLOCK_EDITOR_WRAPPER_STYLES: React.CSSProperties = {
+  flex: '1 1 0',
+  minHeight: MIN_EDITOR_HEIGHT,
+};
+
+const LOCKED_BASE_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
+  ...ESQL_CODE_EDITOR_OPTIONS,
+  // Drop bottom padding so the locked base sits flush against the block editor below.
+  padding: { top: ESQL_CODE_EDITOR_OPTIONS.padding?.top, bottom: 0 },
+  readOnly: true,
+  domReadOnly: true,
+  scrollbar: { vertical: 'hidden', horizontal: 'hidden' },
+  renderLineHighlight: 'none',
+  overviewRulerLanes: 0,
+};
 
 const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
-  const lineCount = query.split('\n').length;
-  const height = lineCount * LOCKED_LINE_HEIGHT + 4;
+  const [height, setHeight] = useState(() => query.split('\n').length * ESQL_EDITOR_LINE_HEIGHT);
+
+  const handleEditorMount = useCallback((editor: IStandaloneCodeEditor) => {
+    const updateHeight = () => setHeight(editor.getContentHeight());
+    updateHeight();
+    editor.onDidContentSizeChange(updateHeight);
+  }, []);
 
   return (
-    <div style={{ ...LOCKED_EDITOR_STYLES, height }}>
+    <div style={{ ...LOCKED_EDITOR_STYLES, height, flexShrink: 0 }}>
       <CodeEditor
         languageId={ESQL_LANG_ID}
         value={query}
         height={height}
-        options={{
-          readOnly: true,
-          domReadOnly: true,
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          scrollbar: { vertical: 'hidden', horizontal: 'hidden' },
-          renderLineHighlight: 'none',
-          overviewRulerLanes: 0,
-          fontSize: LOCKED_FONT_SIZE,
-          lineHeight: LOCKED_LINE_HEIGHT,
-          automaticLayout: true,
-        }}
+        options={LOCKED_BASE_EDITOR_OPTIONS}
+        editorDidMount={handleEditorMount}
       />
     </div>
   );
@@ -83,6 +97,8 @@ interface BlockEditorProps {
   lineNumberOffset: number;
   onEditorMount?: (editor: IStandaloneCodeEditor) => void;
   readOnly?: boolean;
+  /** Drop top padding so this editor sits flush against the locked base above. */
+  flushTop?: boolean;
 }
 
 const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -91,27 +107,27 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   lineNumberOffset,
   onEditorMount,
   readOnly = false,
+  flushTop = false,
 }) => {
-  const options = useMemo(() => {
-    const lineNumbers: LineNumbersType | undefined =
-      lineNumberOffset > 0 ? (n: number) => String(n + lineNumberOffset) : undefined;
-    return {
-      minimap: { enabled: false },
-      automaticLayout: true,
-      scrollBeyondLastLine: false,
-      fontSize: 13,
+  const options = useMemo(
+    (): monaco.editor.IStandaloneEditorConstructionOptions => ({
+      ...ESQL_CODE_EDITOR_OPTIONS,
       readOnly,
       domReadOnly: readOnly,
-      ...(lineNumbers && { lineNumbers }),
-    };
-  }, [lineNumberOffset, readOnly]);
+      lineNumbers: lineNumberOffset > 0 ? (n: number) => String(n + lineNumberOffset) : 'on',
+      ...(flushTop
+        ? { padding: { top: 0, bottom: ESQL_CODE_EDITOR_OPTIONS.padding?.bottom } }
+        : {}),
+    }),
+    [lineNumberOffset, readOnly, flushTop]
+  );
 
   return (
     <CodeEditor
       languageId={ESQL_LANG_ID}
       value={value}
       onChange={onChange}
-      height={200}
+      height="100%"
       options={options}
       editorDidMount={onEditorMount}
     />
@@ -258,6 +274,14 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
 
   const baseLineCount = baseQuery.split('\n').length;
 
+  const blockEditorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if ((safeActiveTab === 'alert' || safeActiveTab === 'recovery') && blockEditorRef.current) {
+      blockEditorRef.current.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [safeActiveTab]);
+
   const renderEditor = () => {
     switch (safeActiveTab) {
       case 'base':
@@ -271,29 +295,35 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
         );
       case 'alert':
         return (
-          <>
+          <div style={SPLIT_EDITOR_CONTAINER_STYLES}>
             {baseQuery && <LockedBaseEditor query={baseQuery} />}
-            <BlockEditor
-              value={alertBlock}
-              onChange={onAlertBlockChange}
-              lineNumberOffset={baseLineCount}
-              onEditorMount={onAlertEditorMount}
-              readOnly={readOnly}
-            />
-          </>
+            <div ref={blockEditorRef} style={BLOCK_EDITOR_WRAPPER_STYLES}>
+              <BlockEditor
+                value={alertBlock}
+                onChange={onAlertBlockChange}
+                lineNumberOffset={baseLineCount}
+                onEditorMount={onAlertEditorMount}
+                readOnly={readOnly}
+                flushTop={Boolean(baseQuery)}
+              />
+            </div>
+          </div>
         );
       case 'recovery':
         return (
-          <>
+          <div style={SPLIT_EDITOR_CONTAINER_STYLES}>
             {baseQuery && <LockedBaseEditor query={baseQuery} />}
-            <BlockEditor
-              value={recoveryBlock}
-              onChange={onRecoveryBlockChange}
-              lineNumberOffset={baseLineCount}
-              onEditorMount={onRecoveryEditorMount}
-              readOnly={readOnly}
-            />
-          </>
+            <div ref={blockEditorRef} style={BLOCK_EDITOR_WRAPPER_STYLES}>
+              <BlockEditor
+                value={recoveryBlock}
+                onChange={onRecoveryBlockChange}
+                lineNumberOffset={baseLineCount}
+                onEditorMount={onRecoveryEditorMount}
+                readOnly={readOnly}
+                flushTop={Boolean(baseQuery)}
+              />
+            </div>
+          </div>
         );
       default:
         return (

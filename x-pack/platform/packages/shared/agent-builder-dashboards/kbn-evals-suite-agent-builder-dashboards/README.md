@@ -38,7 +38,7 @@ This makes EIS connector IDs available as Playwright projects, for example `eis-
 node scripts/evals init config
 ```
 
-See [`@kbn/evals` documentation](../../kbn-evals/README.md) for `TRACING_EXPORTERS`, `TRACING_ES_URL`, and Phoenix executor details.
+See [`@kbn/evals` documentation](../../kbn-evals/README.md) for `TRACING_EXPORTERS` and `TRACING_ES_URL` details.
 
 ## Running Evaluations
 
@@ -99,7 +99,7 @@ node scripts/evals start \
 Equivalent environment variable:
 
 ```bash
-EVALUATION_REPETITIONS=3 node scripts/evals run \
+EVAL_REPETITIONS=3 node scripts/evals run \
   --suite agent-builder-dashboards \
   --grep "dashboards in chat smokescreen" \
   --project eis-anthropic-claude-4-5-sonnet \
@@ -111,7 +111,7 @@ EVALUATION_REPETITIONS=3 node scripts/evals run \
 For lower-level debugging, run Playwright directly:
 
 ```bash
-EVALUATION_CONNECTOR_ID=eis-anthropic-claude-4-5-sonnet \
+EVAL_CONNECTOR_ID=eis-anthropic-claude-4-5-sonnet \
 node scripts/playwright test \
   --config x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards/playwright.config.ts \
   evals/skill_selection/skill_selection.spec.ts \
@@ -122,7 +122,7 @@ node scripts/playwright test \
 Use `--list` to check what Playwright can discover:
 
 ```bash
-EVALUATION_CONNECTOR_ID=eis-anthropic-claude-4-5-sonnet \
+EVAL_CONNECTOR_ID=eis-anthropic-claude-4-5-sonnet \
 node scripts/playwright test \
   --config x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards/playwright.config.ts \
   --project eis-anthropic-claude-4-5-sonnet \

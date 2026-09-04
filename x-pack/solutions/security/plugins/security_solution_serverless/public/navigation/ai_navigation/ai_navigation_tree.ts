@@ -7,20 +7,13 @@
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
-
-import { AiNavigationIcon } from './icon';
-
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.aiNavigation.projectType.title',
-  { defaultMessage: 'Elastic AI SOC Engine' }
-);
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 export const createAiNavigationTree = (
   core: CoreStart,
@@ -29,13 +22,6 @@ export const createAiNavigationTree = (
   showAgentBuilderNavAtTop: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
-    {
-      id: 'ease_home',
-      link: securityLink(SecurityPageName.landing),
-      title: SOLUTION_NAME,
-      icon: AiNavigationIcon,
-      renderAs: 'home',
-    },
     ...(chatExperience === AIChatExperience.Agent && showAgentBuilderNavAtTop
       ? [
           {
@@ -88,7 +74,7 @@ export const createAiNavigationTree = (
       children: [
         {
           link: 'inbox' as AppDeepLinkId,
-          icon: 'email',
+          icon: 'mail',
         },
         {
           link: 'discover' as AppDeepLinkId,
@@ -103,13 +89,7 @@ export const createAiNavigationTree = (
               },
             ]
           : []),
-        ...(workflowsUiEnabled
-          ? [
-              {
-                link: 'workflows' as AppDeepLinkId,
-              },
-            ]
-          : []),
+        ...(workflowsUiEnabled ? getWorkflowsNavPanel(core) : []),
         {
           id: SecurityPageName.aiValue,
           link: securityLink(SecurityPageName.aiValue),

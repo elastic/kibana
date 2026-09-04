@@ -16,10 +16,18 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  ALERTING_V2_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
-import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '@kbn/security-solution-navigation';
+import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_UI_SETTING_ID,
+  WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
+} from '@kbn/workflows/common/constants';
+import {
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
+} from '@kbn/security-solution-navigation';
 import { ProductTier } from '../common/product';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
@@ -96,10 +104,34 @@ export class SecuritySolutionServerlessPlugin
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
     const projectSettings = [...SECURITY_PROJECT_SETTINGS];
+    const isSearchAiLakeTier = this.config.productTypes.some(
+      ({ product_tier: productTier }) => productTier === ProductTier.searchAiLake
+    );
+
+    // Search AI Lake disables maintenance windows, which is a required dependency
+    // of Alerting V2. Avoid allowlisting a setting that is not registered there.
+    if (!isSearchAiLakeTier) {
+      projectSettings.push(ALERTING_V2_ENABLED_SETTING_ID);
+    }
+
+    // Registered unconditionally in ESS (`security_solution/server/ui_settings.ts`), so it
+    // must be allowlisted unconditionally here too. Ideally this would be conditional on the
+    // `attackDiscoveryWorkflowsEnabled` feature flag, but two platform constraints prevent
+    // that: (1) feature-flag evaluation requires `FeatureFlagsStart`, which is unavailable
+    // during synchronous plugin setup; (2) the Advanced Settings page has no API to show/hide
+    // individual settings based on feature flags. The FF is only ever `false` when an
+    // administrator disables it globally; in that case the toggle is a harmless noop.
+    projectSettings.push(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING);
 
     // This setting is only registered when `enableAlertsAndAttacksAlignment` is enabled
     if (this.config.experimentalFeatures.enableAlertsAndAttacksAlignment) {
       projectSettings.push(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
+    }
+
+    // TODO(rule-changes-history GA): remove this block when the feature is GA
+    // This setting is only registered when `ruleChangesHistoryEnabled` is enabled
+    if (this.config.experimentalFeatures.ruleChangesHistoryEnabled) {
+      projectSettings.push('securitySolution:enableRuleChangesHistory');
     }
 
     // Workflows is enabled by default since 9.4.0. The setting is retained so admins can opt out.
@@ -110,6 +142,8 @@ export class SecuritySolutionServerlessPlugin
       )
     ) {
       projectSettings.push(WORKFLOWS_UI_SETTING_ID);
+      projectSettings.push(WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID);
+      projectSettings.push(WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID);
     }
 
     // Agent Builder is only enabled for Security projects in complete and EASE (search_ai_lake) tiers.

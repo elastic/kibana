@@ -38,10 +38,8 @@
     "@kbn/data-views-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/index-management-plugin",
-    "@kbn/usage-collection-plugin",
     "@kbn/console-plugin",
     "@kbn/core-chrome-browser",
-    "@kbn/core-logging-server-mocks",
     "@kbn/discover-plugin",
     "@kbn/content-connectors-plugin",
     "@kbn/react-kibana-context-render",
@@ -59,6 +57,9 @@
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
     "@kbn/alerting-v2-utils",
-    "@kbn/features-plugin"
+    "@kbn/deeplinks-workflows",
+    "@kbn/features-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/ui-callout"
   ]
 }

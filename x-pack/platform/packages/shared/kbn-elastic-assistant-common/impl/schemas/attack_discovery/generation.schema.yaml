@@ -11,7 +11,6 @@ components:
         - connector_id
         - discoveries
         - execution_uuid
-        - loading_message
         - start
         - status
       properties:
@@ -31,9 +30,24 @@ components:
             successful_generations:
               type: number
               description: The number of successful generations for the same connector id, for the current user
+        conversation_id:
+          type: string
+          description: Identifier of the persisted Agent Builder conversation for skill-based alert retrieval (optional; present only when the skill retrieval mode ran)
         discoveries:
           type: number
           description: The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
+        duplicates_dropped_count:
+          type: integer
+          description: The number of attack discoveries dropped as duplicates during the persist step
+        generated_count:
+          type: integer
+          description: The number of attack discoveries generated before deduplication and hallucination filtering
+        hallucinations_filtered_count:
+          type: integer
+          description: The number of attack discoveries filtered as hallucinations during the validation step
+        persisted_count:
+          type: integer
+          description: The number of attack discoveries successfully persisted after deduplication and hallucination filtering
         end:
           type: string
           description: When generation ended (max event.end)
@@ -43,6 +57,12 @@ components:
         loading_message:
           type: string
           description: Generation loading message (kibana.alert.rule.execution.status)
+        error_category:
+          type: string
+          description: Structured error category from server classification (optional; absent for successful generations)
+        failed_workflow_id:
+          type: string
+          description: Workflow ID that caused the failure (optional; absent for successful generations)
         reason:
           type: string
           description: Reason for failed generations (event.reason)
@@ -58,3 +78,70 @@ components:
             - failed
             - started
             - succeeded
+        step_event_actions:
+          type: array
+          description: Synthesized per-step lifecycle markers (e.g. step-start, step-complete, step-fail) derived from raw event.action values. The array is ordered by step sequence (alert retrieval, generation, validation), with each step contributing 0-2 tokens that indicate its execution status.
+          items:
+            type: string
+        workflow_executions:
+          $ref: '#/components/schemas/WorkflowExecutionsTracking'
+          description: Workflow execution tracking for alert retrieval, generation, and validation workflows
+        workflow_id:
+          type: string
+          description: The workflow definition ID for deep linking
+        source_metadata:
+          type: object
+          nullable: true
+          description: Source metadata for scheduled generations (rule_id, rule_name, action_execution_uuid)
+          properties:
+            action_execution_uuid:
+              type: string
+              description: The action execution UUID from the alerting framework
+            rule_id:
+              type: string
+              description: The ID of the alerting rule that triggered this generation
+            rule_name:
+              type: string
+              description: The name of the alerting rule that triggered this generation
+        workflow_run_id:
+          type: string
+          description: The workflow execution ID for monitoring
+
+    WorkflowExecutionReference:
+      type: object
+      required:
+        - workflowId
+        - workflowRunId
+      properties:
+        workflowId:
+          type: string
+          description: The workflow definition ID
+        workflowName:
+          type: string
+          description: The human-readable workflow name (optional; used by the UI to display a label)
+        workflowRunId:
+          type: string
+          description: The workflow execution ID
+
+    WorkflowExecutionsTracking:
+      type: object
+      description: Workflow execution tracking for manual orchestration
+      properties:
+        alertRetrieval:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true
+          description: Alert retrieval workflow executions (one per workflow invoked)
+        gate:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true
+          description: Generation-phase gate (skill) executions, including any net-new alert re-fetch the skill triggers
+        generation:
+          $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true
+        validation:
+          $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true

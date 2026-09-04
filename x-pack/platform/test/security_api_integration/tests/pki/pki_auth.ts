@@ -204,6 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
         authentication_type: 'realm',
         elastic_cloud_user: false,
         profile_uid: jestExpect.any(String),
+        http_authentication_scheme: null,
       });
 
       checkCookieIsSet(findSessionCookie(response.headers['set-cookie']));
@@ -486,8 +487,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await logFile.isWritten();
-        const auditEvents = await logFile.readJSON();
+        const auditEvents = await logFile.waitForAuditEvents([
+          { event: { action: 'user_login', outcome: 'success' } },
+          { event: { action: 'user_logout', outcome: 'unknown' } },
+        ]);
 
         expect(auditEvents).to.have.length(2);
 
@@ -509,8 +512,9 @@ export default function ({ getService }: FtrProviderContext) {
       it('should log authentication failure correctly', async () => {
         await supertest.get('/security/account').ca(CA_CERT).pfx(UNTRUSTED_CLIENT_CERT).expect(401);
 
-        await logFile.isWritten();
-        const auditEvents = await logFile.readJSON();
+        const auditEvents = await logFile.waitForAuditEvents([
+          { event: { action: 'user_login', outcome: 'failure' } },
+        ]);
 
         expect(auditEvents).to.have.length(1);
         expect(auditEvents[0]).to.be.ok();

@@ -9,7 +9,6 @@
 
 import YAML from 'yaml';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { ByteSizeValue } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -19,8 +18,11 @@ import { TaskManagerMock } from './mocks/task_manager.mock';
 import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
 import { mockContextDependencies } from '../server/execution_functions/__mock__/context_dependencies';
+import { createMockWorkflowExecutionEngineConfig } from '../server/execution_functions/execution_functions_test_utils';
 import { runWorkflow } from '../server/execution_functions/run_workflow';
 import { workflowsExecutionEngineMock } from '../server/mocks';
+import type { StepExecutionRepository } from '../server/repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../server/repositories/workflow_execution_repository';
 
 // Mock the repository classes so setupDependencies uses our mocks
 jest.mock('../server/repositories/workflow_execution_repository');
@@ -44,25 +46,15 @@ export class WorkflowRunFixture {
     getUnsecuredActionsClient: jest.fn().mockReturnValue(this.unsecuredActionsClientMock),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(this.scopedActionsClientMock),
   } as unknown as ActionsPluginStartContract);
-  public readonly configMock: WorkflowsExecutionEngineConfig = {
-    enabled: true,
-    eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
-    maxWorkflowDepth: 10,
-    logging: {
-      console: true,
-    },
-    http: {
-      allowedHosts: ['*'],
-    },
-    maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb default
-    eviction: {
-      minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb default
-    },
-    collectQueueMetrics: false,
-  };
+  public readonly configMock: WorkflowsExecutionEngineConfig =
+    createMockWorkflowExecutionEngineConfig();
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();
+  private readonly workflowExecutionRepository = this
+    .workflowExecutionRepositoryMock as unknown as WorkflowExecutionRepository;
+  private readonly stepExecutionRepository = this
+    .stepExecutionRepositoryMock as unknown as StepExecutionRepository;
   public readonly taskManagerMock = TaskManagerMock.create();
   public readonly workflowsExecutionEngineMock = workflowsExecutionEngineMock.createStart();
   public readonly internalResumeWorkflowExecutionMock = jest.fn().mockResolvedValue(undefined);
@@ -129,13 +121,15 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      taskAbortController: this.taskAbortController,
+      signal: this.taskAbortController.signal,
       dependencies: this.dependencies,
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
     });
   }
 
@@ -143,13 +137,15 @@ export class WorkflowRunFixture {
     return resumeWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      taskAbortController: this.taskAbortController,
+      signal: this.taskAbortController.signal,
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       dependencies: this.dependencies,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
     });
   }
 
@@ -187,13 +183,15 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      taskAbortController: this.taskAbortController,
+      signal: this.taskAbortController.signal,
       dependencies: this.dependencies,
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       workflowsExecutionEngine: this.workflowsExecutionEngineMock,
       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
+      workflowExecutionRepository: this.workflowExecutionRepository,
+      stepExecutionRepository: this.stepExecutionRepository,
     });
   }
 

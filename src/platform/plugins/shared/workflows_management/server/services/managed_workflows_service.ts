@@ -9,10 +9,11 @@
 
 import { createHash } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { pickManagedWorkflowFields } from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
+  getManagedWorkflowVisibilityContexts,
   type ManagedWorkflowDefinition,
   type ManagedWorkflowId,
   type ManagedWorkflowTemplateValues,
@@ -28,9 +29,10 @@ import type {
 } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
-import { WorkflowChangeHistoryAction } from './workflow_change_history_constants';
 import type { WorkflowCrudService } from './workflow_crud_service';
-import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
+import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
+import { applyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -45,6 +47,12 @@ interface ManagedWorkflowsServiceDeps {
   crudService: WorkflowCrudService;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   logger: Logger;
+  /** When true, abort before primary ES writes (plugin stop mid-install). */
+  isStopping?: () => boolean;
+  audit?: Pick<
+    WorkflowManagementAuditLog,
+    'logWorkflowCreated' | 'logWorkflowUpdated' | 'logWorkflowDeleted'
+  >;
 }
 
 export class ManagedWorkflowsService {
@@ -56,10 +64,35 @@ export class ManagedWorkflowsService {
    * individual instances that were not re-installed across restarts.
    */
   private readonly installedDocKeysByPlugin = new Map<string, Set<string>>();
+  /**
+   * Plugins whose managed install pass did not complete this boot (readiness gate skip
+   * or mid-install abort). Destructive ready() orphan cleanup must not run for these —
+   * `installedDocKeys` is only trustworthy when every install actually ran. Dynamic auto
+   * upgrades may still run once Elasticsearch readiness has already passed at ready().
+   */
+  private readonly incompleteInstallPluginIds = new Set<string>();
   private readonly logger: Logger;
 
   constructor(private readonly deps: ManagedWorkflowsServiceDeps) {
     this.logger = deps.logger;
+  }
+
+  private shouldAbortManagedWrite(operation: string): boolean {
+    if (!this.deps.isStopping?.()) {
+      return false;
+    }
+    this.logger.warn(`Managed workflows: skipping ${operation} (stopping)`);
+    return true;
+  }
+
+  /**
+   * Marks that this plugin's managed install pass is incomplete for this boot.
+   * Call when an install is gated out before reaching ManagedWorkflowsService, or when
+   * a mid-install write is aborted. ready() will skip destructive orphan cleanup but may
+   * still run dynamic auto upgrades.
+   */
+  public markInstallIncomplete(pluginId: string): void {
+    this.incompleteInstallPluginIds.add(pluginId);
   }
 
   public isPluginReady(pluginId: string): boolean {
@@ -70,6 +103,9 @@ export class ManagedWorkflowsService {
    * Called when a plugin signals it has finished installing all its static workflows.
    * Triggers per-plugin reconciliation: removes persisted static workflows that were
    * not installed during the startup window and upgrades dynamic auto workflows.
+   * Destructive orphan cleanup is skipped when any install for this plugin was gated or
+   * aborted incomplete this boot — see {@link markInstallIncomplete}. Dynamic auto
+   * upgrades still run when ready() itself passed Elasticsearch readiness.
    */
   public async pluginReady(pluginId: string): Promise<void> {
     if (this.readyPluginIds.has(pluginId)) {
@@ -95,7 +131,10 @@ export class ManagedWorkflowsService {
       includeDeleted: true,
     });
 
-    const orphanIdsBySpace = new Map<string, string[]>();
+    const orphanWorkflowsBySpace = new Map<
+      string,
+      Array<{ id: string; source: WorkflowProperties }>
+    >();
     for (const { id, source } of existingManagedDocs) {
       const owner = source.managedBy ?? undefined;
       const definitionId = source.originManagedWorkflowId ?? undefined;
@@ -108,19 +147,34 @@ export class ManagedWorkflowsService {
 
       if (isHardOrphan) {
         const workflowSpaceId = source.spaceId;
-        const ids = orphanIdsBySpace.get(workflowSpaceId) ?? [];
-        ids.push(id);
-        orphanIdsBySpace.set(workflowSpaceId, ids);
+        const workflows = orphanWorkflowsBySpace.get(workflowSpaceId) ?? [];
+        workflows.push({ id, source });
+        orphanWorkflowsBySpace.set(workflowSpaceId, workflows);
       }
     }
 
-    for (const [spaceId, orphanIds] of orphanIdsBySpace) {
-      if (orphanIds.length > 0) {
+    for (const [spaceId, orphanWorkflows] of orphanWorkflowsBySpace) {
+      if (orphanWorkflows.length > 0) {
         this.logger.info(
-          `Managed workflows: removing ${orphanIds.length} hard-orphaned workflow(s) in space '${spaceId}' ` +
+          `Managed workflows: removing ${orphanWorkflows.length} hard-orphaned workflow(s) in space '${spaceId}' ` +
             `(unregistered owner or removed definition)`
         );
-        await this.deps.crudService.deleteWorkflows(orphanIds, spaceId, { force: true });
+        await this.deps.crudService.deleteWorkflows(
+          orphanWorkflows.map(({ id }) => id),
+          spaceId,
+          { force: true }
+        );
+        for (const { id: workflowId, source } of orphanWorkflows) {
+          this.deps.audit?.logWorkflowDeleted(undefined, {
+            id: workflowId,
+            force: true,
+            managed: true,
+            originalWorkflowId: source.originManagedWorkflowId,
+            ownerPlugin: source.managedBy,
+            spaceId,
+            reason: 'orphan_cleanup',
+          });
+        }
       }
     }
   }
@@ -160,6 +214,13 @@ export class ManagedWorkflowsService {
     const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
     const spaceId = this.getRequiredSpaceId(options);
 
+    // Abort before trackInstall; mark incomplete so ready() does not treat a gated skip
+    // as "owner removed this workflow" and force-delete persisted docs.
+    if (this.shouldAbortManagedWrite(`install '${id}'`)) {
+      this.markInstallIncomplete(registeredPluginId);
+      return;
+    }
+
     this.trackInstall(registeredPluginId, id, workflowDocumentId, spaceId);
 
     const isStartupWindow = !this.readyPluginIds.has(registeredPluginId);
@@ -177,6 +238,13 @@ export class ManagedWorkflowsService {
     });
 
     if (!existing) {
+      if (this.shouldAbortManagedWrite(`install create '${id}'`)) {
+        // Never wrote — untrack so a *complete* later pass can orphan-clean; mark incomplete
+        // so ready() this boot does not delete other still-desired docs.
+        this.untrackInstall(registeredPluginId, workflowDocumentId, spaceId);
+        this.markInstallIncomplete(registeredPluginId);
+        return;
+      }
       const document = await this.prepareManagedWorkflowDocument({
         definition,
         workflowDocumentId,
@@ -186,8 +254,12 @@ export class ManagedWorkflowsService {
         spaceId,
         now,
       });
-      const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
-      const documentWithVersion = maybeApplyWorkflowVersion(document, undefined, versioningEnabled);
+      const documentWithVersion = applyWorkflowVersion(document, undefined);
+      if (this.shouldAbortManagedWrite(`install create '${id}'`)) {
+        this.untrackInstall(registeredPluginId, workflowDocumentId, spaceId);
+        this.markInstallIncomplete(registeredPluginId);
+        return;
+      }
       const savedDocument = await this.deps.crudService.createWorkflowDocument(
         workflowDocumentId,
         spaceId,
@@ -198,6 +270,14 @@ export class ManagedWorkflowsService {
         action: WorkflowChangeHistoryAction.workflowInstall,
         spaceId,
         timestamp: now,
+      });
+      this.deps.audit?.logWorkflowCreated(undefined, {
+        id: workflowDocumentId,
+        managed: true,
+        originalWorkflowId: definition.id,
+        ownerPlugin: definition.pluginId,
+        spaceId,
+        reason: 'install',
       });
       return;
     }
@@ -235,8 +315,13 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
-    const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
-    const documentWithVersion = maybeApplyWorkflowVersion(document, existing, versioningEnabled);
+    const documentWithVersion = applyWorkflowVersion(document, existing);
+    if (this.shouldAbortManagedWrite(`install update '${id}'`)) {
+      // Keep track so orphan cleanup (if it ran) would preserve working v1; mark incomplete
+      // so ready() skips destructive orphan deletes and we retry the upgrade later.
+      this.markInstallIncomplete(registeredPluginId);
+      return;
+    }
     const savedDocument = await this.deps.crudService.writeWorkflowDocumentWithOcc(
       workflowDocumentId,
       spaceId,
@@ -246,11 +331,21 @@ export class ManagedWorkflowsService {
         ifPrimaryTerm: existingDocument.primaryTerm,
       }
     );
-    await this.deps.crudService.logWorkflowChangesAfterWrite({
-      workflows: [{ id: workflowDocumentId, document: savedDocument }],
-      action: WorkflowChangeHistoryAction.workflowUpdate,
+    if (savedDocument.version !== existing.version) {
+      await this.deps.crudService.logWorkflowChangesAfterWrite({
+        workflows: [{ id: workflowDocumentId, document: savedDocument }],
+        action: WorkflowChangeHistoryAction.workflowUpdate,
+        spaceId,
+        timestamp: now,
+      });
+    }
+    this.deps.audit?.logWorkflowUpdated(undefined, {
+      id: workflowDocumentId,
+      managed: true,
+      originalWorkflowId: definition.id,
+      ownerPlugin: definition.pluginId,
       spaceId,
-      timestamp: now,
+      reason: 'reinstall',
     });
   }
 
@@ -279,6 +374,15 @@ export class ManagedWorkflowsService {
     }
 
     await this.deps.crudService.deleteWorkflows([workflowDocumentId], spaceId, { force: true });
+    this.deps.audit?.logWorkflowDeleted(undefined, {
+      id: workflowDocumentId,
+      force: true,
+      managed: true,
+      originalWorkflowId: existing.originManagedWorkflowId,
+      ownerPlugin: existing.managedBy,
+      spaceId,
+      reason: 'uninstall',
+    });
   }
 
   public async getManagedWorkflowStatus(
@@ -393,14 +497,21 @@ export class ManagedWorkflowsService {
     }
 
     const response = await this.deps.workflowsExecutionEngine.executeWorkflow(
-      {
-        id: workflowDocumentId,
-        name: existing.name,
-        enabled: existing.enabled,
-        definition: existing.definition,
-        yaml: existing.yaml,
-        ...pickManagedWorkflowFields(existing),
-      },
+      toWorkflowExecutionEngineModel(
+        {
+          id: workflowDocumentId,
+          name: existing.name,
+          enabled: existing.enabled,
+          definition: existing.definition,
+          yaml: existing.yaml,
+          version: existing.version,
+          managed: existing.managed,
+          managedBy: existing.managedBy,
+          originManagedWorkflowId: existing.originManagedWorkflowId,
+          managedVersion: existing.managedVersion,
+        },
+        { spaceId }
+      ),
       context,
       request
     );
@@ -413,8 +524,23 @@ export class ManagedWorkflowsService {
    * Removes persisted static workflow documents that were NOT installed during the
    * startup window, and upgrades persisted dynamic auto workflow documents to the
    * current registry definition.
+   *
+   * Must not run destructive orphan cleanup when installs were gated out or aborted
+   * incomplete this boot — `installedDocKeys` is only correct if the install pass
+   * completed. Dynamic auto upgrades do not depend on that set and still run once
+   * ready() has already passed Elasticsearch readiness.
    */
   private async reconcilePluginManagedWorkflows(pluginId: string): Promise<void> {
+    const installPassIncomplete = this.incompleteInstallPluginIds.has(pluginId);
+    if (installPassIncomplete) {
+      this.logger.warn(
+        `Managed workflows: skipping ready() orphan cleanup for plugin '${pluginId}' because ` +
+          `one or more managed installs were incomplete this boot (gated or aborted). ` +
+          `Persisted static workflows are preserved; missing installs retry on a later boot. ` +
+          `Dynamic auto upgrades still run when Elasticsearch is ready.`
+      );
+    }
+
     const installedDocKeys = this.installedDocKeysByPlugin.get(pluginId) ?? new Set<string>();
 
     const pluginDefinitions = getManagedWorkflowDefinitions().filter(
@@ -439,7 +565,10 @@ export class ManagedWorkflowsService {
       pluginId,
     });
 
-    const orphanIdsBySpace = new Map<string, string[]>();
+    const orphanWorkflowsBySpace = new Map<
+      string,
+      Array<{ id: string; source: WorkflowProperties }>
+    >();
     const dynamicUpdates: Array<{
       definitionId: ManagedWorkflowId;
       workflowId: string;
@@ -453,13 +582,13 @@ export class ManagedWorkflowsService {
         : undefined;
       const workflowSpaceId = source.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
 
-      if (isPluginStaticDoc) {
+      if (!installPassIncomplete && isPluginStaticDoc) {
         const docKey = `${docId}:${workflowSpaceId}`;
 
         if (!installedDocKeys.has(docKey)) {
-          const ids = orphanIdsBySpace.get(workflowSpaceId) ?? [];
-          ids.push(docId);
-          orphanIdsBySpace.set(workflowSpaceId, ids);
+          const workflows = orphanWorkflowsBySpace.get(workflowSpaceId) ?? [];
+          workflows.push({ id: docId, source });
+          orphanWorkflowsBySpace.set(workflowSpaceId, workflows);
         }
       }
 
@@ -472,14 +601,36 @@ export class ManagedWorkflowsService {
       }
     }
 
-    for (const [spaceId, orphanIds] of orphanIdsBySpace) {
-      if (orphanIds.length > 0) {
+    for (const [spaceId, orphanWorkflows] of orphanWorkflowsBySpace) {
+      if (orphanWorkflows.length > 0) {
         this.logger.info(
-          `Managed workflows: removing ${orphanIds.length} orphaned static workflow(s) ` +
+          `Managed workflows: removing ${orphanWorkflows.length} orphaned static workflow(s) ` +
             `for plugin '${pluginId}' in space '${spaceId}'`
         );
-        await this.deps.crudService.deleteWorkflows(orphanIds, spaceId, { force: true });
+        await this.deps.crudService.deleteWorkflows(
+          orphanWorkflows.map(({ id }) => id),
+          spaceId,
+          { force: true }
+        );
+        for (const { id: workflowId, source } of orphanWorkflows) {
+          this.deps.audit?.logWorkflowDeleted(undefined, {
+            id: workflowId,
+            force: true,
+            managed: true,
+            originalWorkflowId: source.originManagedWorkflowId,
+            ownerPlugin: source.managedBy,
+            spaceId,
+            reason: 'ready_reconciliation',
+          });
+        }
       }
+    }
+
+    if (installPassIncomplete && dynamicUpdates.length > 0) {
+      this.logger.warn(
+        `Managed workflows: running ${dynamicUpdates.length} dynamic auto upgrade(s) for plugin ` +
+          `'${pluginId}' despite incomplete static installs this boot (orphan cleanup skipped).`
+      );
     }
 
     for (const update of dynamicUpdates) {
@@ -514,6 +665,10 @@ export class ManagedWorkflowsService {
         );
       }
     }
+  }
+
+  private untrackInstall(pluginId: string, workflowDocumentId: string, spaceId: string): void {
+    this.installedDocKeysByPlugin.get(pluginId)?.delete(`${workflowDocumentId}:${spaceId}`);
   }
 
   private applyManagedEnabledState(
@@ -603,10 +758,12 @@ export class ManagedWorkflowsService {
       ...workflowData,
       managed: true,
       managedBy: definition.pluginId,
+      billable: definition.billable,
       definitionHash,
       managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
       originManagedWorkflowId: definition.id,
       lifecycle: definition.management.lifecycle,
+      managedVisibilityContexts: this.getManagedVisibilityContexts(definition),
       managedVersion: definition.version,
     };
 
@@ -718,5 +875,9 @@ export class ManagedWorkflowsService {
     next: ManagedWorkflowTemplateValues | null
   ): boolean {
     return JSON.stringify(existing ?? null) === JSON.stringify(next ?? null);
+  }
+
+  private getManagedVisibilityContexts(definition: ManagedWorkflowDefinition): string[] {
+    return getManagedWorkflowVisibilityContexts(definition.visibility);
   }
 }

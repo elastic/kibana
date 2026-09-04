@@ -19,14 +19,33 @@ describe('action policy form utils', () => {
     throttleStrategy: 'on_status_change' as const,
     throttleInterval: '',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
+    inlineActions: [],
   };
 
   describe('toCreatePayload', () => {
+    it('ignores inlineActions when building the payload', () => {
+      const payload = toCreatePayload({
+        ...state,
+        inlineActions: [
+          {
+            id: 'draft-1',
+            source: 'inline',
+            stepType: 'slack2.sendMessage',
+            connectorId: 'c1',
+            params: 'm: x',
+          },
+        ],
+      });
+
+      expect(payload).not.toHaveProperty('inlineActions');
+      expect(payload.destinations).toEqual([{ type: 'workflow', id: 'workflow-1' }]);
+    });
+
     it('includes groupingMode and throttle strategy, omits empty nullable fields', () => {
       expect(toCreatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_episode',
         throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
@@ -44,8 +63,8 @@ describe('action policy form utils', () => {
       expect(payload).toEqual({
         name: 'Policy',
         description: 'Description',
-        groupingMode: 'per_field',
-        groupBy: ['host.name'],
+        grouping_mode: 'per_field',
+        group_by: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
@@ -77,10 +96,10 @@ describe('action policy form utils', () => {
         version: 'WzEsMV0=',
         name: 'Policy',
         description: 'Description',
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_episode',
         tags: null,
         matcher: null,
-        groupBy: null,
+        group_by: null,
         throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
@@ -104,10 +123,10 @@ describe('action policy form utils', () => {
         version: 'WzEsMV0=',
         name: 'Policy',
         description: 'Description',
-        groupingMode: 'per_field',
+        grouping_mode: 'per_field',
         tags: ['production'],
         matcher: 'event.severity: critical',
-        groupBy: ['host.name'],
+        group_by: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
@@ -122,17 +141,17 @@ describe('action policy form utils', () => {
       description: 'A test policy',
       enabled: true,
       matcher: 'data.severity : "critical"',
-      groupBy: ['host.name'],
+      group_by: ['host.name'],
       tags: ['production'],
-      groupingMode: 'per_field',
+      grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
-      snoozedUntil: null,
+      snoozed_until: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
-      createdBy: 'elastic',
-      createdAt: '2026-03-01T10:00:00.000Z',
-      updatedBy: 'elastic',
-      updatedAt: '2026-03-01T10:00:00.000Z',
-      auth: { owner: 'elastic', createdByUser: true },
+      created_by: 'elastic',
+      created_at: '2026-03-01T10:00:00.000Z',
+      updated_by: 'elastic',
+      updated_at: '2026-03-01T10:00:00.000Z',
+      auth: { owner: 'elastic', created_by_user: true },
     };
 
     it('maps server response to form state', () => {
@@ -146,6 +165,7 @@ describe('action policy form utils', () => {
         throttleStrategy: 'time_interval',
         throttleInterval: '5m',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
       });
     });
 
@@ -153,9 +173,9 @@ describe('action policy form utils', () => {
       expect(
         toFormState({
           ...baseResponse,
-          groupingMode: null,
+          grouping_mode: null,
           throttle: null,
-          groupBy: null,
+          group_by: null,
           tags: null,
         })
       ).toEqual({
@@ -168,6 +188,7 @@ describe('action policy form utils', () => {
         throttleStrategy: 'on_status_change',
         throttleInterval: '',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
       });
     });
   });

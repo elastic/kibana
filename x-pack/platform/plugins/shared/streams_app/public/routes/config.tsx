@@ -13,10 +13,11 @@ import { StreamsAppPageTemplate } from '../components/streams_app_page_template'
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
 import { StreamManagementDefaultRedirect } from '../components/stream_management_default_redirect';
-import { StreamListView } from '../components/stream_list_view';
+import { StreamsRootRedirect } from '../components/streams_root_redirect';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
-import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
+import { StreamsLayout } from '../components/streams_layout';
+import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
 
 /**
  * Optional time range query params.
@@ -27,15 +28,18 @@ const timeRangeQueryParams = t.partial({
   rangeTo: t.string,
 });
 
+const flyoutParams = t.partial({
+  flyoutName: t.string,
+  flyoutTab: t.string,
+});
+
 /**
  * Extended query params for management routes that may include
- * additional feature-specific params (e.g., significant events flyout).
+ * additional feature-specific params (e.g., data quality page state).
  */
 const managementQueryParams = t.partial({
   rangeFrom: t.string,
   rangeTo: t.string,
-  // Significant events flyout params
-  openFlyout: t.string,
   // Data quality page state
   pageState: t.string,
 });
@@ -63,38 +67,41 @@ const streamsAppRoutes = {
     ),
     children: {
       '/': {
-        element: <StreamListView />,
+        element: <StreamsRootRedirect />,
         params: t.partial({
           query: timeRangeQueryParams,
         }),
       },
-      '/_discovery': {
+      /**
+       * Declared before `/{key}` so the literal path wins over a stream name.
+       */
+      '/new-experience': {
         element: <Outlet />,
         children: {
-          '/_discovery': {
-            element: <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />,
+          '/new-experience': {
+            element: (
+              <RedirectTo
+                path="/new-experience/{tab}"
+                params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
+              />
+            ),
           },
-          '/_discovery/{tab}': {
-            element: <SignificantEventsDiscoveryPage />,
+          '/new-experience/{tab}': {
+            element: <StreamsLayout />,
             params: t.intersection([
               t.type({
                 path: t.type({
                   tab: t.string,
                 }),
               }),
-              t.partial({
-                query: t.partial({
-                  rangeFrom: t.string,
-                  rangeTo: t.string,
-                  search: t.string,
-                  status: t.string,
-                  type: t.union([t.string, t.array(t.string)]),
-                  subtype: t.union([t.string, t.array(t.string)]),
-                  stream: t.union([t.string, t.array(t.string)]),
-                  showComputed: t.string,
-                  selectedItem: t.string,
+              t.intersection([
+                t.partial({
+                  query: timeRangeQueryParams,
                 }),
-              }),
+                t.partial({
+                  query: flyoutParams,
+                }),
+              ]),
             ]),
           },
         },

@@ -21,6 +21,7 @@ export const WorkflowManagementAuditActions = {
   CREATE: 'workflow_create',
   BULK_CREATE: 'workflow_bulk_create',
   UPDATE: 'workflow_update',
+  RESTORE: 'workflow_restore',
   DELETE: 'workflow_delete',
   BULK_DELETE: 'workflow_bulk_delete',
   CLONE: 'workflow_clone',
@@ -32,9 +33,41 @@ export const WorkflowManagementAuditActions = {
   TEST_STEP: 'workflow_test_step',
   CANCEL_EXECUTION: 'workflow_execution_cancel',
   RESUME_EXECUTION: 'workflow_execution_resume',
+  HITL_WAITING: 'workflow_hitl_waiting',
+  HITL_TIMED_OUT: 'workflow_hitl_timed_out',
 } as const;
 
 type WorkflowAuditEventType = 'access' | 'change' | 'creation' | 'deletion';
+
+export interface WorkflowAuditFields {
+  managed?: boolean;
+  originalWorkflowId?: string | null;
+  ownerPlugin?: string | null;
+  spaceId?: string;
+  reason?: string;
+}
+
+interface WorkflowAuditParams extends WorkflowAuditFields {
+  id: string;
+  error?: unknown;
+}
+
+const getManagedWorkflowMessageSuffix = (fields?: WorkflowAuditFields): string => {
+  if (fields?.managed !== true) {
+    return '';
+  }
+
+  return [
+    'managed=true',
+    fields.originalWorkflowId ? `originalWorkflowId=${fields.originalWorkflowId}` : undefined,
+    fields.ownerPlugin ? `ownerPlugin=${fields.ownerPlugin}` : undefined,
+    fields.spaceId ? `space=${fields.spaceId}` : undefined,
+    fields.reason ? `reason=${fields.reason}` : undefined,
+  ]
+    .filter((field): field is string => field !== undefined)
+    .map((field) => ` [${field}]`)
+    .join('');
+};
 
 /**
  * Builds a workflow-management audit event (success vs failure from presence of `error`).
@@ -44,10 +77,11 @@ function createEvent(
   action: string,
   eventType: WorkflowAuditEventType,
   message: string,
-  error?: unknown
+  error?: unknown,
+  fields?: WorkflowAuditFields
 ): AuditEvent {
   const event: AuditEvent = {
-    message,
+    message: `${message}${getManagedWorkflowMessageSuffix(fields)}`,
     event: {
       action,
       category: ['database'],
@@ -89,62 +123,72 @@ export class WorkflowManagementAuditLog {
       });
   }
 
-  private log(request: KibanaRequest, event: AuditEvent): void {
+  private getActor(request?: KibanaRequest): 'User' | 'System' {
+    return request ? 'User' : 'System';
+  }
+
+  private log(request: KibanaRequest | undefined, event: AuditEvent): void {
     try {
       if (!this.security) {
         return;
       }
-      this.security.audit.asScoped(request).log(event);
+      const auditLogger = request
+        ? this.security?.audit.asScoped(request)
+        : this.security?.audit.withoutRequest;
+      auditLogger?.log(event);
     } catch {
       // Best-effort only: never let audit affect the HTTP response.
     }
   }
 
   logWorkflowCreated(
-    request: KibanaRequest,
-    params: { id: string; viaBulkImport?: boolean }
+    request: KibanaRequest | undefined,
+    params: WorkflowAuditParams & { viaBulkImport?: boolean }
   ): void {
     const { id, viaBulkImport } = params;
+    const actor = this.getActor(request);
     const message = viaBulkImport
-      ? `User created workflow via bulk import [id=${id}]`
-      : `User created workflow [id=${id}]`;
+      ? `${actor} created workflow via bulk import [id=${id}]`
+      : `${actor} created workflow [id=${id}]`;
     const action = viaBulkImport
       ? WorkflowManagementAuditActions.BULK_CREATE
       : WorkflowManagementAuditActions.CREATE;
-    this.log(request, createEvent(action, 'creation', message));
+    this.log(request, createEvent(action, 'creation', message, undefined, params));
   }
 
   logWorkflowCreateFailed(
-    request: KibanaRequest,
+    request: KibanaRequest | undefined,
     error: unknown,
-    options: { bulkOperation?: boolean } = {}
+    options: WorkflowAuditFields & { bulkOperation?: boolean } = {}
   ): void {
+    const actor = this.getActor(request);
     const message = options.bulkOperation
-      ? 'User failed bulk workflow create'
-      : 'User failed to create a workflow';
+      ? `${actor} failed bulk workflow create`
+      : `${actor} failed to create a workflow`;
     const action = options.bulkOperation
       ? WorkflowManagementAuditActions.BULK_CREATE
       : WorkflowManagementAuditActions.CREATE;
-    this.log(request, createEvent(action, 'creation', message, error));
+    this.log(request, createEvent(action, 'creation', message, error, options));
   }
 
   /**
    * One `workflow_bulk_create` audit per created workflow and per failed bulk row (bulk POST /api/workflows).
    */
   logBulkWorkflowCreateResults(
-    request: KibanaRequest,
+    request: KibanaRequest | undefined,
     params: {
       created: ReadonlyArray<{ id: string }>;
       failed: ReadonlyArray<{ index: number; id: string; error: string }>;
     }
   ): void {
+    const actor = this.getActor(request);
     for (const workflow of params.created) {
       this.log(
         request,
         createEvent(
           WorkflowManagementAuditActions.BULK_CREATE,
           'creation',
-          `User created workflow via bulk import [id=${workflow.id}]`
+          `${actor} created workflow via bulk import [id=${workflow.id}]`
         )
       );
     }
@@ -154,63 +198,96 @@ export class WorkflowManagementAuditLog {
         createEvent(
           WorkflowManagementAuditActions.BULK_CREATE,
           'creation',
-          `User failed to create workflow via bulk import [index=${row.index}] [id=${row.id}]`,
+          `${actor} failed to create workflow via bulk import [index=${row.index}] [id=${row.id}]`,
           row.error
         )
       );
     }
   }
 
-  logWorkflowUpdated(request: KibanaRequest, params: { id: string; error?: unknown }): void {
+  logWorkflowUpdated(request: KibanaRequest | undefined, params: WorkflowAuditParams): void {
     const { id, error } = params;
+    const actor = this.getActor(request);
     const message =
       error !== undefined
-        ? `User failed to update workflow [id=${id}]`
-        : `User updated workflow [id=${id}]`;
-    this.log(request, createEvent(WorkflowManagementAuditActions.UPDATE, 'change', message, error));
+        ? `${actor} failed to update workflow [id=${id}]`
+        : `${actor} updated workflow [id=${id}]`;
+    this.log(
+      request,
+      createEvent(WorkflowManagementAuditActions.UPDATE, 'change', message, error, params)
+    );
+  }
+
+  logWorkflowRestored(
+    request: KibanaRequest | undefined,
+    params: WorkflowAuditParams & { eventId: string; version?: number; sequence?: number }
+  ): void {
+    const { id, eventId, version, sequence, error } = params;
+    const actor = this.getActor(request);
+    const metadataSuffix = [
+      sequence !== undefined ? `[sequence=${sequence}]` : undefined,
+      version !== undefined ? `[version=${version}]` : undefined,
+    ]
+      .filter((part): part is string => part !== undefined)
+      .join(' ');
+    const metadataPart = metadataSuffix.length > 0 ? ` ${metadataSuffix}` : '';
+    const message =
+      error !== undefined
+        ? `${actor} failed to restore workflow from history [id=${id}] [eventId=${eventId}]`
+        : `${actor} restored workflow from history [id=${id}] [eventId=${eventId}]${metadataPart}`;
+    this.log(
+      request,
+      createEvent(WorkflowManagementAuditActions.RESTORE, 'change', message, error, params)
+    );
   }
 
   logWorkflowDeleted(
-    request: KibanaRequest,
-    params: { id: string; viaBulkDelete?: boolean; force?: boolean; error?: unknown }
+    request: KibanaRequest | undefined,
+    params: WorkflowAuditParams & { viaBulkDelete?: boolean; force?: boolean }
   ): void {
     const { id, viaBulkDelete, force, error } = params;
+    const actor = this.getActor(request);
     const forceTag = force ? ' (force)' : '';
     let message: string;
     if (error !== undefined) {
       message = viaBulkDelete
-        ? `User failed to delete workflow via bulk delete [id=${id}]${forceTag}`
-        : `User failed to delete workflow [id=${id}]${forceTag}`;
+        ? `${actor} failed to delete workflow via bulk delete [id=${id}]${forceTag}`
+        : `${actor} failed to delete workflow [id=${id}]${forceTag}`;
     } else {
       message = viaBulkDelete
-        ? `User deleted workflow via bulk delete [id=${id}]${forceTag}`
-        : `User deleted workflow [id=${id}]${forceTag}`;
+        ? `${actor} deleted workflow via bulk delete [id=${id}]${forceTag}`
+        : `${actor} deleted workflow [id=${id}]${forceTag}`;
     }
     const action = viaBulkDelete
       ? WorkflowManagementAuditActions.BULK_DELETE
       : WorkflowManagementAuditActions.DELETE;
-    this.log(request, createEvent(action, 'deletion', message, error));
+    this.log(request, createEvent(action, 'deletion', message, error, params));
   }
 
   /**
    * One `workflow_bulk_delete` audit event per successfully removed id and per failed id (bulk API).
    */
   logBulkWorkflowDeleteResults(
-    request: KibanaRequest,
+    request: KibanaRequest | undefined,
     params: {
       successfulIds: readonly string[];
-      failures: ReadonlyArray<{ id: string; error: string }>;
+      failures: ReadonlyArray<{ id: string; error: string } & WorkflowAuditFields>;
       force?: boolean;
+      workflows?: ReadonlyArray<{ id: string } & WorkflowAuditFields>;
     }
   ): void {
+    const actor = this.getActor(request);
     const forceTag = params.force ? ' (force)' : '';
     for (const id of params.successfulIds) {
+      const workflow = params.workflows?.find((candidate) => candidate.id === id);
       this.log(
         request,
         createEvent(
           WorkflowManagementAuditActions.BULK_DELETE,
           'deletion',
-          `User deleted workflow via bulk delete [id=${id}]${forceTag}`
+          `${actor} deleted workflow via bulk delete [id=${id}]${forceTag}`,
+          undefined,
+          workflow
         )
       );
     }
@@ -220,26 +297,29 @@ export class WorkflowManagementAuditLog {
         createEvent(
           WorkflowManagementAuditActions.BULK_DELETE,
           'deletion',
-          `User failed to delete workflow via bulk delete [id=${f.id}]${forceTag}`,
-          f.error
+          `${actor} failed to delete workflow via bulk delete [id=${f.id}]${forceTag}`,
+          f.error,
+          f
         )
       );
     }
   }
 
   logBulkWorkflowDeleteFailed(
-    request: KibanaRequest,
+    request: KibanaRequest | undefined,
     error: unknown,
-    options: { force?: boolean } = {}
+    options: WorkflowAuditFields & { force?: boolean } = {}
   ): void {
+    const actor = this.getActor(request);
     const forceTag = options.force ? ' (force)' : '';
     this.log(
       request,
       createEvent(
         WorkflowManagementAuditActions.BULK_DELETE,
         'deletion',
-        `User failed bulk workflow delete${forceTag}`,
-        error
+        `${actor} failed bulk workflow delete${forceTag}`,
+        error,
+        options
       )
     );
   }
@@ -363,14 +443,35 @@ export class WorkflowManagementAuditLog {
   }
 
   logExecutionCanceled(
-    request: KibanaRequest,
-    params: { executionId: string; error?: unknown }
+    request: KibanaRequest | undefined,
+    params: {
+      executionId?: string;
+      /** Used for bulk-cancel failures where no single execution id applies. */
+      workflowId?: string;
+      error?: unknown;
+      channel?: string;
+    }
   ): void {
-    const { executionId, error } = params;
-    const message =
-      error !== undefined
-        ? `User failed to cancel workflow execution [executionId=${executionId}]`
-        : `User canceled workflow execution [executionId=${executionId}]`;
+    const { executionId, workflowId, error, channel } = params;
+    const actor = this.getActor(request);
+    const channelPart = channel !== undefined ? ` [channel=${channel}]` : '';
+
+    let targetPart = '';
+    if (executionId !== undefined) {
+      targetPart = `[executionId=${executionId}]`;
+    } else if (workflowId !== undefined) {
+      targetPart = `[workflowId=${workflowId}]`;
+    }
+
+    let message: string;
+    if (error !== undefined && executionId === undefined) {
+      message = `${actor} failed to cancel all active workflow executions ${targetPart}${channelPart}`;
+    } else if (error !== undefined) {
+      message = `${actor} failed to cancel workflow execution ${targetPart}${channelPart}`;
+    } else {
+      message = `${actor} canceled workflow execution ${targetPart}${channelPart}`;
+    }
+
     this.log(
       request,
       createEvent(WorkflowManagementAuditActions.CANCEL_EXECUTION, 'change', message, error)
@@ -378,25 +479,64 @@ export class WorkflowManagementAuditLog {
   }
 
   logExecutionResumed(
-    request: KibanaRequest,
+    request: KibanaRequest | undefined,
     params: {
       executionId: string;
       error?: unknown;
       /** Present on success; mirrors execution context written by the engine. */
       resumedBy?: string;
+      channel?: string;
     }
   ): void {
-    const { executionId, error, resumedBy } = params;
+    const { executionId, error, resumedBy, channel } = params;
+    const actor = this.getActor(request);
+    const channelPart = channel !== undefined ? ` [channel=${channel}]` : '';
     let message: string;
     if (error !== undefined) {
-      message = `User failed to resume workflow execution [executionId=${executionId}]`;
+      message = `${actor} failed to resume workflow execution [executionId=${executionId}]${channelPart}`;
     } else {
       const responderPart = resumedBy !== undefined ? ` [responder=${resumedBy}]` : '';
-      message = `User resumed workflow execution [executionId=${executionId}]${responderPart}`;
+      message = `${actor} resumed workflow execution [executionId=${executionId}]${responderPart}${channelPart}`;
     }
     this.log(
       request,
       createEvent(WorkflowManagementAuditActions.RESUME_EXECUTION, 'change', message, error)
+    );
+  }
+
+  logHitlWaiting(
+    request: KibanaRequest | undefined,
+    params: { executionId: string; stepExecutionId?: string; stepType?: string }
+  ): void {
+    const { executionId, stepExecutionId, stepType } = params;
+    const actor = this.getActor(request);
+    const stepPart = stepExecutionId !== undefined ? ` [stepExecutionId=${stepExecutionId}]` : '';
+    const typePart = stepType !== undefined ? ` [stepType=${stepType}]` : '';
+    this.log(
+      request,
+      createEvent(
+        WorkflowManagementAuditActions.HITL_WAITING,
+        'change',
+        `${actor} opened HITL wait [executionId=${executionId}]${stepPart}${typePart}`
+      )
+    );
+  }
+
+  logHitlTimedOut(
+    request: KibanaRequest | undefined,
+    params: { executionId: string; stepExecutionId?: string; stepType?: string }
+  ): void {
+    const { executionId, stepExecutionId, stepType } = params;
+    const actor = this.getActor(request);
+    const stepPart = stepExecutionId !== undefined ? ` [stepExecutionId=${stepExecutionId}]` : '';
+    const typePart = stepType !== undefined ? ` [stepType=${stepType}]` : '';
+    this.log(
+      request,
+      createEvent(
+        WorkflowManagementAuditActions.HITL_TIMED_OUT,
+        'change',
+        `${actor} timed out HITL wait [executionId=${executionId}]${stepPart}${typePart}`
+      )
     );
   }
 }

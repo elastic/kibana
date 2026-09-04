@@ -13,10 +13,7 @@ import type { CasesContextProps } from '../../components/cases_context';
 export type GetCasesContextPropsInternal = CasesContextProps;
 export type GetCasesContextProps = Omit<
   CasesContextProps,
-  | 'externalReferenceAttachmentTypeRegistry'
-  | 'persistableStateAttachmentTypeRegistry'
-  | 'unifiedAttachmentTypeRegistry'
-  | 'getFilesClient'
+  'unifiedAttachmentTypeRegistry' | 'getFilesClient'
 >;
 
 const CasesProviderLazy: React.FC<{
@@ -25,8 +22,6 @@ const CasesProviderLazy: React.FC<{
 }> = lazy(() => import('../../components/cases_context'));
 
 const CasesProviderLazyWrapper = ({
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   owner,
   permissions,
@@ -38,8 +33,6 @@ const CasesProviderLazyWrapper = ({
   <Suspense fallback={<EuiLoadingSpinner />}>
     <CasesProviderLazy
       value={{
-        externalReferenceAttachmentTypeRegistry,
-        persistableStateAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
         owner,
         permissions,
@@ -56,16 +49,11 @@ const CasesProviderLazyWrapper = ({
 CasesProviderLazyWrapper.displayName = 'CasesProviderLazyWrapper';
 
 export const getCasesContextLazy = ({
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   getFilesClient,
 }: Pick<
   GetCasesContextPropsInternal,
-  | 'externalReferenceAttachmentTypeRegistry'
-  | 'persistableStateAttachmentTypeRegistry'
-  | 'unifiedAttachmentTypeRegistry'
-  | 'getFilesClient'
+  'unifiedAttachmentTypeRegistry' | 'getFilesClient'
 >): (() => React.FC<PropsWithChildren<GetCasesContextProps>>) => {
   const CasesProviderLazyWrapperWithRegistry: React.FC<PropsWithChildren<GetCasesContextProps>> = ({
     children,
@@ -73,8 +61,6 @@ export const getCasesContextLazy = ({
   }) => (
     <CasesProviderLazyWrapper
       {...props}
-      externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
-      persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
       unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
       getFilesClient={getFilesClient}
     >

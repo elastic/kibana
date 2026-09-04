@@ -36,7 +36,7 @@ const getDataView = (name: string, dataViewFields: DataView['fields'], timeField
 };
 
 describe('getInitialESQLQuery', () => {
-  it('should NOT add the where clause if there is @timestamp in the index', () => {
+  it('should add SORT by timeFieldName when @timestamp exists in the index', () => {
     const fields = [
       {
         name: '@timestamp',
@@ -56,10 +56,10 @@ describe('getInitialESQLQuery', () => {
       },
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, '@timestamp');
-    expect(getInitialESQLQuery(dataView)).toBe('FROM logs*');
+    expect(getInitialESQLQuery(dataView)).toBe('FROM logs* | SORT @timestamp DESC');
   });
 
-  it('should NOT add the where clause if there is @timestamp in the index although the dataview timefielName is different', () => {
+  it('should add SORT by timeFieldName when @timestamp exists even if timeFieldName differs', () => {
     const fields = [
       {
         name: '@timestamp',
@@ -79,7 +79,7 @@ describe('getInitialESQLQuery', () => {
       },
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, 'timestamp');
-    expect(getInitialESQLQuery(dataView)).toBe('FROM logs*');
+    expect(getInitialESQLQuery(dataView)).toBe('FROM logs* | SORT timestamp DESC');
   });
 
   it('should append a where clause correctly if there is no @timestamp in the index fields', () => {
@@ -103,7 +103,7 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, '@custom_timestamp');
     expect(getInitialESQLQuery(dataView)).toBe(
-      'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend'
+      'FROM logs* | SORT @custom_timestamp DESC | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend'
     );
   });
 
@@ -128,7 +128,7 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, '@custom_timestamp');
     expect(getInitialESQLQuery(dataView, { language: 'kuery', query: 'error' })).toBe(
-      'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend AND KQL("""error""")'
+      'FROM logs* | SORT @custom_timestamp DESC | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend AND KQL("""error""")'
     );
   });
 
@@ -153,7 +153,7 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, 'timestamp');
     expect(getInitialESQLQuery(dataView, { language: 'lucene', query: 'error' })).toBe(
-      'FROM logs* | WHERE QSTR("""error""")'
+      'FROM logs* | SORT timestamp DESC | WHERE QSTR("""error""")'
     );
   });
 
@@ -178,7 +178,7 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, 'timestamp');
     expect(getInitialESQLQuery(dataView, { language: 'unknown', query: 'error' })).toBe(
-      'FROM logs*'
+      'FROM logs* | SORT timestamp DESC'
     );
   });
 
@@ -199,7 +199,7 @@ describe('getInitialESQLQuery', () => {
       { meta: { key: 'status' }, query: { match_phrase: { status: 200 } } },
     ];
     expect(getInitialESQLQuery(dataView, undefined, filters)).toBe(
-      'FROM logs* | WHERE `status` : 200'
+      'FROM logs* | SORT @timestamp DESC | WHERE `status` : 200'
     );
   });
 
@@ -220,7 +220,7 @@ describe('getInitialESQLQuery', () => {
       { meta: { key: 'status' }, query: { match_phrase: { status: 200 } } },
     ];
     expect(getInitialESQLQuery(dataView, { language: 'kuery', query: 'error' }, filters)).toBe(
-      'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend AND KQL("""error""") AND `status` : 200'
+      'FROM logs* | SORT @custom_timestamp DESC | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend AND KQL("""error""") AND `status` : 200'
     );
   });
 
@@ -237,7 +237,7 @@ describe('getInitialESQLQuery', () => {
       },
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, '@timestamp');
-    expect(getInitialESQLQuery(dataView, undefined, [])).toBe('FROM logs*');
+    expect(getInitialESQLQuery(dataView, undefined, [])).toBe('FROM logs* | SORT @timestamp DESC');
   });
 
   it('should use TS command when dataView is in TSDB mode', () => {
@@ -262,6 +262,6 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('metrics-*', fields, '@timestamp');
 
-    expect(getInitialESQLQuery(dataView)).toBe('TS metrics-*');
+    expect(getInitialESQLQuery(dataView)).toBe('TS metrics-* | SORT @timestamp DESC');
   });
 });

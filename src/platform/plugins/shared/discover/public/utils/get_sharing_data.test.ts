@@ -15,6 +15,7 @@ import type { DiscoverServices } from '../build_services';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { createDiscoverServicesMock } from '../__mocks__/services';
 import { getColumnsWithTimeField, getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
@@ -66,6 +67,28 @@ describe('getSharingData', () => {
         "getSearchSource": [Function],
       }
     `);
+  });
+
+  test('excludes Summary from selected reporting columns and fields', async () => {
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
+    const result = await getSharingData(
+      searchSourceMock,
+      { columns: ['column_a', SOURCE_COLUMN] },
+      services
+    );
+
+    expect(result.columns).toEqual(['column_a']);
+    expect(result.getSearchSource({}).fields).toEqual([
+      { field: 'column_a', include_unmapped: true },
+    ]);
+  });
+
+  test('exports all fields when Summary is the only column', async () => {
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
+    const result = await getSharingData(searchSourceMock, { columns: [SOURCE_COLUMN] }, services);
+
+    expect(result.columns).toEqual([]);
+    expect(result.getSearchSource({}).fields).toEqual([{ field: '*', include_unmapped: true }]);
   });
 
   test('getSearchSource does not add fields to the searchSource', async () => {
@@ -260,6 +283,25 @@ describe('getSharingData', () => {
     `);
   });
 
+  test('getSearchSource does not throw when there is no data view (ES|QL dashboard panel)', async () => {
+    // ES|QL saved-search panels on a dashboard can have no resolved data view on the search
+    // source, so `getField('index')` is undefined. getSearchSource must not throw when mapping
+    // columns to fields (nested field roots do not apply in ES|QL mode).
+    const searchSourceMock = createSearchSourceMock({});
+    searchSourceMock.setField('query', {
+      esql: 'from logstash-* | keep cool-field-1, cool-field-2',
+    });
+    const { getSearchSource } = await getSharingData(
+      searchSourceMock,
+      { columns: ['cool-field-1', 'cool-field-2'] },
+      services
+    );
+    expect(getSearchSource({}).fields).toStrictEqual([
+      { field: 'cool-field-1', include_unmapped: true },
+      { field: 'cool-field-2', include_unmapped: true },
+    ]);
+  });
+
   test('fields conditionally do not have prepended timeField', async () => {
     services.uiSettings = {
       get: (key: string) => {
@@ -397,6 +439,49 @@ describe('getSharingData', () => {
     expect(
       result2.getSearchSource({ addGlobalTimeFilter: true, absoluteTime: true }).filter
     ).toEqual([absoluteTimeFilter]);
+  });
+
+  test('uses explicit absoluteTimeRange when provided to build the absolute filter', async () => {
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
+    const servicesMock = createDiscoverServicesMock();
+
+    const defaultAbsoluteFilter = {
+      meta: { field: 'timestamp', type: 'range' as const },
+      query: {
+        range: { timestamp: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' } },
+      },
+    };
+    const lastFetchAbsoluteFilter = {
+      meta: { field: 'timestamp', type: 'range' as const },
+      query: {
+        range: { timestamp: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:15:00.000Z' } },
+      },
+    };
+    const lastFetchAbsoluteRange = {
+      from: '2024-01-01T00:00:00.000Z',
+      to: '2024-01-01T00:15:00.000Z',
+    };
+
+    servicesMock.data.query.timefilter.timefilter.createFilter = jest.fn((index, timeRange) => {
+      return timeRange ? lastFetchAbsoluteFilter : defaultAbsoluteFilter;
+    }) as jest.MockedFunction<typeof servicesMock.data.query.timefilter.timefilter.createFilter>;
+
+    const result = await getSharingData(
+      searchSourceMock,
+      { columns: [] },
+      servicesMock,
+      lastFetchAbsoluteRange
+    );
+
+    // The absolute filter should be built with the passed-in absolute time range
+    expect(servicesMock.data.query.timefilter.timefilter.createFilter).toHaveBeenCalledWith(
+      expect.anything(),
+      lastFetchAbsoluteRange
+    );
+
+    expect(
+      result.getSearchSource({ addGlobalTimeFilter: true, absoluteTime: true }).filter
+    ).toEqual([lastFetchAbsoluteFilter]);
   });
 });
 
@@ -563,6 +648,28 @@ describe('getColumnsWithTimeField', () => {
         query: { language: 'kuery', query: '*' },
       })
     ).toEqual(['@timestamp', 'bytes']);
+  });
+
+  it('should not prepend when time field is user-added at end of columns', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension', '@timestamp'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { esql: 'from logstash-*' },
+      })
+    ).toEqual(['bytes', 'extension', '@timestamp']);
+  });
+
+  it('should not prepend when time field is user-added in middle of columns', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', '@timestamp', 'extension'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { language: 'kuery', query: '*' },
+      })
+    ).toEqual(['bytes', '@timestamp', 'extension']);
   });
 
   it('should not prepend for a classic query when columns are empty', () => {

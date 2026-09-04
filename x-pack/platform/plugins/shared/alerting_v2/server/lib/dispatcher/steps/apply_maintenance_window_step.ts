@@ -11,6 +11,7 @@ import { inject, injectable } from 'inversify';
 import type { MaintenanceWindowServiceContract } from '../../services/maintenance_window_service/maintenance_window_service';
 import { MaintenanceWindowServiceInternalToken } from '../../services/maintenance_window_service/tokens';
 import type { ActiveMaintenanceWindow } from '../../services/maintenance_window_service/types';
+import { EpisodeTriage, RuleCatalog } from '../state';
 import type {
   AlertEpisode,
   DispatcherPipelineState,
@@ -19,6 +20,7 @@ import type {
   Rule,
 } from '../types';
 import { createMatcherContext } from './utils/matcher_context';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 /**
  * Suppresses episodes whose `last_event_timestamp` falls within an active
@@ -35,9 +37,12 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
     private readonly maintenanceWindowService: MaintenanceWindowServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatchable = [], suppressed = [], rules = new Map() } = state;
-    if (dispatchable.length === 0) {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { triage = EpisodeTriage.empty(), rules = RuleCatalog.empty() } = state;
+    if (!triage.hasDispatchable()) {
       return { type: 'continue' };
     }
 
@@ -47,36 +52,32 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
     }
 
     const windowsBySpace = Map.groupBy(enabledWindows, (mw) => mw.spaceId);
-    const newDispatchable: AlertEpisode[] = [];
-    const newlySuppressed: Array<AlertEpisode & { reason: string }> = [];
 
-    for (const episode of dispatchable) {
-      const rule = rules.get(episode.rule_id);
-      const candidates = rule && windowsBySpace.get(rule.spaceId);
-      if (!rule || !candidates) {
-        newDispatchable.push(episode);
-        continue;
+    const newTriage = triage.suppressDispatchableWhere((episode) => {
+      // Orphaned internal episodes bypass MW so that the evaluate_matchers guard
+      // (not MW suppression) is the reason they never dispatch — preserving pre-PR behavior.
+      if (rules.isOrphanedInternalEpisode(episode)) {
+        return undefined;
+      }
+      const candidates = windowsBySpace.get(episode.space_id);
+      if (!candidates) {
+        return undefined;
       }
 
-      const maintenanceWindow = findMatchingMaintenanceWindow(candidates, episode, rule);
-      if (maintenanceWindow) {
-        newlySuppressed.push({ ...episode, reason: maintenanceWindowReason(maintenanceWindow.id) });
-      } else {
-        newDispatchable.push(episode);
-      }
-    }
+      const maintenanceWindow = findMatchingMaintenanceWindow(
+        candidates,
+        episode,
+        rules.forEpisode(episode)
+      );
+      return maintenanceWindow ? maintenanceWindowReason(maintenanceWindow.id) : undefined;
+    });
 
-    if (newlySuppressed.length === 0) {
+    if (newTriage === triage) {
+      // Nothing newly suppressed — no state to emit.
       return { type: 'continue' };
     }
 
-    return {
-      type: 'continue',
-      data: {
-        dispatchable: newDispatchable,
-        suppressed: [...suppressed, ...newlySuppressed],
-      },
-    };
+    return { type: 'continue', data: { triage: newTriage } };
   }
 }
 
@@ -86,7 +87,7 @@ const maintenanceWindowReason = (id: string) => `${MAINTENANCE_WINDOW_REASON_PRE
 function findMatchingMaintenanceWindow(
   candidates: readonly ActiveMaintenanceWindow[],
   episode: AlertEpisode,
-  rule: Rule
+  rule?: Rule
 ): ActiveMaintenanceWindow | undefined {
   const eventTime = Date.parse(episode.last_event_timestamp);
   if (Number.isNaN(eventTime)) return undefined;

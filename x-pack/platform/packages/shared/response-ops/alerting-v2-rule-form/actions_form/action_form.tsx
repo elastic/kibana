@@ -100,7 +100,7 @@ export const ActionForm = ({ value, onChange, isInvalid }: ActionFormProps) => {
       ) : (
         value.length < MAX_ACTIONS && (
           <EuiButton
-            iconType="plusInCircle"
+            iconType="plusCircle"
             size="s"
             color="text"
             onClick={() => setIsPickerOpen(true)}

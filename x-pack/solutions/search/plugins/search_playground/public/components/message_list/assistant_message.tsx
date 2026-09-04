@@ -224,7 +224,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
           },
         }}
         eventColor="subdued"
-        timelineAvatar="compute"
+        timelineAvatar="processor"
         timelineAvatarAriaLabel={i18n.translate(
           'xpack.searchPlayground.chat.message.assistant.avatarAriaLabel',
           {

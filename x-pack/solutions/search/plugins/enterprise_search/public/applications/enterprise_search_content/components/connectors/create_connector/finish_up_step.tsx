@@ -135,10 +135,9 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           onClick={() => {
                             discover.locator?.navigate({
                               dataViewSpec: {
-                                title: connector?.name,
+                                name: connector?.name,
+                                ...(connector?.index_name && { title: connector?.index_name }),
                               },
-                              indexPattern: connector?.index_name,
-                              title: connector?.name,
                             });
                           }}
                         >
@@ -265,7 +264,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                         margin-top: ${euiTheme.size.xs};
                       `}
                       size="m"
-                      type="console"
+                      type="commandLine"
                       aria-hidden
                     />
                   }

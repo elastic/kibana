@@ -94,12 +94,6 @@ jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
 }));
 
-jest.mock('../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled() {
-    return true;
-  },
-}));
-
 jest.mock('../../hooks/use_rule_alert_fields', () => ({
   useRuleTypeAlertFields: () => ({
     isLoading: false,
@@ -204,7 +198,7 @@ describe('action_type_form', () => {
     );
 
     await waitFor(() => {
-      expect(setActionParamsProperty).toBeCalledWith('dedupKey', 'test', 1);
+      expect(setActionParamsProperty).toHaveBeenCalledWith('dedupKey', 'test', 1);
     });
   });
 
@@ -353,7 +347,7 @@ describe('action_type_form', () => {
 
     // Give the component time to settle; setActionParamsProperty should not be called
     await waitFor(() => {
-      expect(setActionParamsProperty).toBeCalledTimes(0);
+      expect(setActionParamsProperty).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -509,57 +503,6 @@ describe('action_type_form', () => {
         true,
       ],
     ]);
-  });
-
-  it('clears the default message when the user toggles the "Use template fields from alerts index" switch ', async () => {
-    const setActionParamsProperty = jest.fn();
-    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
-      id: '.pagerduty',
-      iconClass: 'test',
-      selectMessage: 'test',
-      validateParams: (): Promise<GenericValidationResult<unknown>> => {
-        const validationResult = { errors: {} };
-        return Promise.resolve(validationResult);
-      },
-      actionConnectorFields: null,
-      actionParamsFields: mockedActionParamsFields,
-      defaultActionParams: {
-        dedupKey: '{{rule.id}}:{{alert.id}}',
-        eventAction: 'resolve',
-      },
-    });
-    actionTypeRegistry.get.mockReturnValue(actionType);
-
-    const wrapper = render(
-      <I18nProvider>
-        {getActionTypeForm({
-          index: 1,
-          ruleTypeId: 'test',
-          setActionParamsProperty,
-          actionItem: {
-            id: '123',
-            actionTypeId: '.pagerduty',
-            group: 'recovered',
-            params: {
-              eventAction: 'recovered',
-              dedupKey: '232323',
-              summary: '2323',
-              source: 'source',
-              severity: '1',
-              timestamp: new Date().toISOString(),
-              component: 'test',
-              group: 'group',
-              class: 'test class',
-            },
-          },
-        })}
-      </I18nProvider>
-    );
-
-    expect(wrapper.getByTestId('mustacheAutocompleteSwitch')).toBeTruthy();
-
-    await userEvent.click(wrapper.getByTestId('mustacheAutocompleteSwitch'));
-    expect(setActionParamsProperty).toHaveBeenCalledWith('dedupKey', '', 1);
   });
 
   describe('Customize notify when options', () => {

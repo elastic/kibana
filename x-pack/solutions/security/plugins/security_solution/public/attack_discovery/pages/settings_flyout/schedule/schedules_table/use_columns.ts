@@ -21,14 +21,14 @@ export const useColumns = ({
   openScheduleDetails,
   enableSchedule,
   disableSchedule,
-  deleteSchedule,
+  requestDeleteSchedule,
 }: {
   isDisabled: boolean;
   isLoading: boolean;
   openScheduleDetails: (scheduleId: string) => void;
   enableSchedule: (scheduleId: string) => Promise<void>;
   disableSchedule: (scheduleId: string) => Promise<void>;
-  deleteSchedule: (scheduleId: string) => Promise<void>;
+  requestDeleteSchedule: (scheduleId: string) => void;
 }): TableColumn[] => {
   const onSwitchChange = useCallback(
     async (scheduleId: string, enabled: boolean) => {
@@ -45,8 +45,8 @@ export const useColumns = ({
       createNameColumn({ openScheduleDetails }),
       createStatusColumn(),
       createEnableColumn({ isDisabled, isLoading, onSwitchChange }),
-      createActionsColumn({ isDisabled, deleteSchedule }),
+      createActionsColumn({ isDisabled, requestDeleteSchedule }),
     ],
-    [deleteSchedule, isDisabled, isLoading, onSwitchChange, openScheduleDetails]
+    [isDisabled, isLoading, onSwitchChange, openScheduleDetails, requestDeleteSchedule]
   );
 };

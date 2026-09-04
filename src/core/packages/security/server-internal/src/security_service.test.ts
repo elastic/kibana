@@ -16,6 +16,7 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { SecurityService } from './security_service';
 import { configServiceMock } from '@kbn/config-mocks';
 import { getFips } from 'crypto';
@@ -98,7 +99,7 @@ describe('SecurityService', function () {
         const enricher = setup.acquireFakeRequestEnricher();
 
         const request = { isFakeRequest: true } as any;
-        expect(() => enricher(request, 'u_test_profile_123')).toThrow(
+        expect(() => enricher(request, { profileId: 'u_test_profile_123' })).toThrow(
           /Cannot enrich a fake request before the security delegate has been registered/
         );
       });
@@ -113,10 +114,13 @@ describe('SecurityService', function () {
         } as unknown as CoreSecurityDelegateContract);
 
         const request = { isFakeRequest: true } as any;
-        enricher(request, 'u_test_profile_123');
+        enricher(request, { profileId: 'u_test_profile_123', username: 'jdoe' });
 
         expect(fakeRequestEnricher).toHaveBeenCalledTimes(1);
-        expect(fakeRequestEnricher).toHaveBeenCalledWith(request, 'u_test_profile_123');
+        expect(fakeRequestEnricher).toHaveBeenCalledWith(request, {
+          profileId: 'u_test_profile_123',
+          username: 'jdoe',
+        });
       });
     });
 
@@ -143,7 +147,7 @@ describe('SecurityService', function () {
         expect(service.setup().uiam).toBeNull();
       });
 
-      it('should return shared secret if UIAM is enabled', () => {
+      it('should attach the configured shared secret if UIAM is enabled', () => {
         service = new SecurityService(
           mockCoreContext.create({
             configService: configServiceMock.create({
@@ -158,7 +162,12 @@ describe('SecurityService', function () {
             }),
           })
         );
-        expect(service.setup().uiam?.sharedSecret).toBe('some-secret');
+        expect(
+          service.setup().uiam?.getElasticsearchClientAuthentication({
+            credentialSource: 'internal',
+            credential: new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key'),
+          })
+        ).toBe('some-secret');
       });
     });
   });

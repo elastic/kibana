@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { EuiDataGridWrapper, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import type { EuiDataGridObject, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { ALERTS_TABLE_TEST_SUBJECTS as SUBJ, ALERT_TABLE_DATE_RANGE } from '../constants';
 
 /**
@@ -36,7 +36,7 @@ export class AlertsTablePage {
   public readonly createCaseFlyout: Locator;
   public readonly addToExistingCaseModal: Locator;
   public readonly queryInput: Locator;
-  public readonly dataGrid: EuiDataGridWrapper;
+  public readonly dataGrid: EuiDataGridObject;
   public readonly groupSelector: Locator;
   // Alert summary widget (full-size, rendered above the table)
   public readonly summaryWidget: Locator;
@@ -49,11 +49,11 @@ export class AlertsTablePage {
 
   constructor(private readonly page: ScoutPage) {
     this.table = this.page.testSubj.locator(SUBJ.TABLE_LOADED);
-    this.dataGrid = new EuiDataGridWrapper(this.page, SUBJ.TABLE_LOADED);
+    this.dataGrid = this.page.components.dataGrid(SUBJ.TABLE_LOADED);
     this.pageWithData = this.page.testSubj.locator(SUBJ.PAGE_WITH_DATA);
     this.noDataState = this.page.testSubj.locator(SUBJ.TABLE_EMPTY_STATE);
     this.errorPrompt = this.page.testSubj.locator(SUBJ.TABLE_ERROR_PROMPT);
-    this.errorToast = this.page.testSubj.locator('errorToastMessage');
+    this.errorToast = this.page.testSubj.locator('errorToast');
     this.actionsMenu = this.page.testSubj.locator(SUBJ.ACTIONS_MENU);
     this.groupSelector = this.page.testSubj.locator('group-selector-dropdown');
     this.summaryWidget = this.page.testSubj.locator('alertSummaryWidgetFullSize');
@@ -114,8 +114,8 @@ export class AlertsTablePage {
       .locator(SUBJ.TABLE_LOADING)
       .waitFor({ state: 'hidden', timeout: 30_000 });
     await Promise.race([
-      this.table.waitFor({ state: 'visible' }),
-      this.noDataState.waitFor({ state: 'visible' }),
+      this.table.waitFor({ state: 'visible', timeout: 30_000 }),
+      this.noDataState.waitFor({ state: 'visible', timeout: 30_000 }),
     ]);
   }
 
@@ -162,8 +162,30 @@ export class AlertsTablePage {
   }
 
   async closeFlyout() {
-    await this.flyout.locator('[data-test-subj="euiFlyoutCloseButton"]').click();
+    // A transient global toast (e.g. a background request failing for a
+    // low-privilege role) can overlap the flyout's close button and intercept
+    // the click. Dismiss any toasts first, then fall back to the Escape key if
+    // the button is still obscured, so closing the flyout stays deterministic.
+    await this.dismissToasts();
+    const closeButton = this.flyout.locator('[data-test-subj="euiFlyoutCloseButton"]');
+    try {
+      await closeButton.click({ timeout: 5_000 });
+    } catch {
+      await this.page.keyboard.press('Escape');
+    }
     await this.flyout.waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * Clears any visible global toasts so they cannot intercept pointer events on
+   * elements underneath them (e.g. the flyout close button). No-op when there
+   * are no toasts.
+   */
+  async dismissToasts() {
+    const toastCloseButtons = await this.page.locator('[data-test-subj="toastCloseButton"]').all();
+    for (const toastCloseButton of toastCloseButtons) {
+      await toastCloseButton.click({ timeout: 2_000 }).catch(() => {});
+    }
   }
 
   // Row actions
@@ -178,6 +200,10 @@ export class AlertsTablePage {
 
   async clickViewRuleDetails() {
     await this.page.testSubj.click('viewRuleDetails');
+  }
+
+  async clickInvestigate() {
+    await this.page.testSubj.click('o11yAlertActionsInvestigate');
   }
 
   // Add to case (from the row actions menu opened via `openActionsMenuForRow`)
@@ -259,6 +285,17 @@ export class AlertsTablePage {
       await button.click().catch(() => {});
     }
     return (allTitles[allTitles.length - 1] ?? '').trim();
+  }
+
+  /**
+   * Counts the muted/snoozed indicator badges (`bellSlash`) currently rendered
+   * in the table. The badge is shown by the alert status cell for every alert
+   * whose instance id is in the rule's muted/snoozed list, so it reflects the
+   * UI treatment of the muted state rather than the raw `kibana.alert.muted`
+   * field.
+   */
+  async getVisibleSnoozedBadgeCount(): Promise<number> {
+    return this.page.testSubj.locator('alertSnoozedBadge').count();
   }
 
   /**

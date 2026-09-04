@@ -484,7 +484,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.device_control.filter_images',
       {
         defaultMessage:
-          'Filter out file backed images and CD-ROM volumes from consideration by device control. Default: true.',
+          '[WARNING: this can prevent applications and macOS updates] Filter out file backed images mounted from internal drive from consideration by device control. Default: true.',
       }
     ),
   },
@@ -1817,6 +1817,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.enable_sync_driver_loads',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.enable_sync_driver_loads',
+      {
+        defaultMessage:
+          'Mitigates vulnerable driver abuse by providing additional safeguards and enrichment for driver loads. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.malware.networkshare',
     first_supported_version: '8.9',
     documentation: i18n.translate(
@@ -2787,6 +2798,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.image_load.dll_hijack_detection',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.dll_hijack_detection',
+      {
+        defaultMessage: 'Enable DLL search order hijacking detection. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.events.script_capture',
     first_supported_version: '9.3',
     documentation: i18n.translate(
@@ -2804,6 +2825,138 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Maximum size of scripts captured by mac.advanced.events.script_capturein bytes. Default 1024.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.response_actions.upload.download_streams_count',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.upload.download_streams_count',
+      {
+        defaultMessage:
+          'Maximum number of download streams for upload response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.response_actions.upload.download_streams_count',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.upload.download_streams_count',
+      {
+        defaultMessage:
+          'Maximum number of download streams for upload response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.response_actions.upload.download_streams_count',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.upload.download_streams_count',
+      {
+        defaultMessage:
+          'Maximum number of download streams for upload response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.response_actions.runscript.download_streams_count',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.runscript.download_streams_count',
+      {
+        defaultMessage:
+          'Maximum number of download streams for runscript response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.response_actions.runscript.download_streams_count',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.runscript.download_streams_count',
+      {
+        defaultMessage:
+          'Maximum number of download streams for runscript response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.response_actions.runscript.download_streams_count',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.runscript.download_streams_count',
+      {
+        defaultMessage:
+          'Maximum number of download streams for runscript response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.response_actions.upload.max_parallel_downloads',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.upload.max_parallel_downloads',
+      {
+        defaultMessage:
+          'Maximum number of parallel downloads for upload response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.response_actions.upload.max_parallel_downloads',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.upload.max_parallel_downloads',
+      {
+        defaultMessage:
+          'Maximum number of parallel downloads for upload response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.response_actions.upload.max_parallel_downloads',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.upload.max_parallel_downloads',
+      {
+        defaultMessage:
+          'Maximum number of parallel downloads for upload response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.response_actions.runscript.max_parallel_downloads',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.runscript.max_parallel_downloads',
+      {
+        defaultMessage:
+          'Maximum number of parallel downloads for runscript response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.response_actions.runscript.max_parallel_downloads',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.runscript.max_parallel_downloads',
+      {
+        defaultMessage:
+          'Maximum number of parallel downloads for runscript response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.response_actions.runscript.max_parallel_downloads',
+    first_supported_version: '9.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.runscript.max_parallel_downloads',
+      {
+        defaultMessage:
+          'Maximum number of parallel downloads for runscript response action. Default: 1.',
       }
     ),
   },

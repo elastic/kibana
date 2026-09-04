@@ -245,6 +245,69 @@ describe('publicBaseUrl', () => {
   });
 });
 
+describe('selfHttp', () => {
+  test('defaults to automatic targeting', () => {
+    expect(config.schema.validate({}).selfHttp).toEqual({
+      target: 'auto',
+      ssl: {},
+    });
+  });
+
+  test('accepts local target', () => {
+    expect(config.schema.validate({ selfHttp: { target: 'local' } }).selfHttp.target).toBe('local');
+  });
+
+  test('accepts outbound certificate authorities for an automatic HTTPS public target', () => {
+    expect(
+      config.schema.validate({
+        publicBaseUrl: 'https://kibana.example.com',
+        selfHttp: {
+          ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
+        },
+      }).selfHttp
+    ).toEqual({
+      target: 'auto',
+      ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
+    });
+  });
+
+  test.each([
+    {
+      name: 'local target',
+      value: {
+        publicBaseUrl: 'https://kibana.example.com',
+        selfHttp: {
+          target: 'local' as const,
+          ssl: { certificateAuthorities: '/path/to/ca.pem' },
+        },
+      },
+    },
+    {
+      name: 'missing public base URL',
+      value: {
+        selfHttp: { ssl: { certificateAuthorities: '/path/to/ca.pem' } },
+      },
+    },
+    {
+      name: 'HTTP public target',
+      value: {
+        publicBaseUrl: 'http://kibana.example.com',
+        selfHttp: { ssl: { certificateAuthorities: '/path/to/ca.pem' } },
+      },
+    },
+  ])('rejects outbound certificate authorities with $name', ({ value }) => {
+    expect(() => config.schema.validate(value)).toThrow(
+      '[selfHttp.ssl.certificateAuthorities] can only be used when [selfHttp.target] is [auto] and [publicBaseUrl] uses HTTPS'
+    );
+  });
+
+  test('rejects unsupported targets', () => {
+    expect(() => config.schema.validate({ selfHttp: { target: 'inject' } })).toThrow(
+      '[selfHttp.target]'
+    );
+  });
+});
+
 test('accepts only valid uuids for server.uuid', () => {
   const httpSchema = config.schema;
   expect(() => httpSchema.validate({ uuid: uuidv4() })).not.toThrow();
@@ -278,6 +341,41 @@ test('throws if xsrf.allowlist element does not start with a slash', () => {
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
     `"[xsrf.allowlist.1]: must start with a slash"`
   );
+});
+
+describe('xsrf.allowedSchemes', () => {
+  it('rejects schemes outside the apikey/bearer safe set', () => {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['basic'] } })).toThrow(
+      /xsrf\.allowedSchemes/
+    );
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['foo'] } })).toThrow(
+      /xsrf\.allowedSchemes/
+    );
+  });
+
+  it('accepts the canonical apikey and bearer literals unchanged and an empty list', () => {
+    const httpSchema = config.schema;
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: ['apikey', 'bearer'] } }).xsrf.allowedSchemes
+    ).toEqual(['apikey', 'bearer']);
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: ['bearer'] } }).xsrf.allowedSchemes
+    ).toEqual(['bearer']);
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: [] } }, { serverless: true }).xsrf
+        .allowedSchemes
+    ).toEqual([]);
+  });
+
+  it('defaults to apikey and bearer on serverless and empty on traditional', () => {
+    const httpSchema = config.schema;
+    expect(httpSchema.validate({}, { serverless: true }).xsrf.allowedSchemes).toEqual([
+      'apikey',
+      'bearer',
+    ]);
+    expect(httpSchema.validate({}, { traditional: true }).xsrf.allowedSchemes).toEqual([]);
+  });
 });
 
 test('accepts any type of objects for custom headers', () => {
@@ -814,5 +912,22 @@ describe('HttpConfig', () => {
       rawPermissionsPolicyConfig
     );
     expect(httpConfig.restrictInternalApis).toBe(true);
+  });
+
+  it('builds the self HTTP runtime config', () => {
+    const rawConfig = config.schema.validate({ selfHttp: { target: 'local' } }, {});
+    const rawCspConfig = cspConfig.schema.validate({});
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
+
+    expect(httpConfig.selfHttp).toEqual({
+      target: 'local',
+      ssl: { certificateAuthorities: undefined },
+    });
   });
 });

@@ -3,7 +3,7 @@
   "id": "@kbn/file-upload-plugin",
   "owner": [
     "@elastic/kibana-presentation",
-    "@elastic/ml-ui"
+    "@elastic/search-ml-ux"
   ],
   "group": "platform",
   "visibility": "private",

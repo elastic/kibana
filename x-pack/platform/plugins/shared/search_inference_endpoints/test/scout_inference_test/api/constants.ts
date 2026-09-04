@@ -9,6 +9,7 @@ import type { KibanaRole } from '@kbn/scout';
 
 export const INFERENCE_SETTINGS_API_PATH = 'internal/search_inference_endpoints/settings';
 export const INFERENCE_FEATURES_API_PATH = 'internal/search_inference_endpoints/features';
+export const REGION_POLICY_API_PATH = 'internal/search_inference_endpoints/region_policy';
 export const API_VERSION = '1';
 
 export const COMMON_HEADERS = {
@@ -19,7 +20,7 @@ export const COMMON_HEADERS = {
 } as const;
 
 export const FEATURE_PRIVILEGED_ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [] },
+  elasticsearch: { cluster: ['manage_inference'], indices: [] },
   kibana: [
     {
       base: [],

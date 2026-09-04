@@ -73,7 +73,7 @@ export interface AvailableLocale {
   label: string;
 }
 
-let availableLocales: ReadonlyArray<AvailableLocale> = [];
+let _availableLocales: ReadonlyArray<AvailableLocale> = [];
 
 /**
  * Sets the list of locales the current Kibana instance offers in the
@@ -82,7 +82,7 @@ let availableLocales: ReadonlyArray<AvailableLocale> = [];
  * UI is disabled for this deployment.
  */
 export const setAvailableLocales = (locales: ReadonlyArray<AvailableLocale>): void => {
-  availableLocales = locales.map(({ id, label }) => ({ id, label }));
+  _availableLocales = locales.map(({ id, label }) => ({ id, label }));
 };
 
 /**
@@ -90,4 +90,4 @@ export const setAvailableLocales = (locales: ReadonlyArray<AvailableLocale>): vo
  * language picker. Returns an empty array if `setAvailableLocales` has not
  * been called or if the deployment has disabled the picker.
  */
-export const getAvailableLocales = (): ReadonlyArray<AvailableLocale> => availableLocales;
+export const getAvailableLocales = (): ReadonlyArray<AvailableLocale> => _availableLocales;

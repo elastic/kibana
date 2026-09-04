@@ -7,29 +7,15 @@
 
 import { cloneDeep } from 'lodash';
 
-import type { ConstructorOptions } from './rules_client';
 import { RulesClient } from './rules_client';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-  coreFeatureFlagsMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from './rule_type_registry.mock';
-import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsClientMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from './authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
-import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
-import { backfillClientMock } from './backfill_client/backfill_client.mock';
+import { getRulesClientMockParams } from './test_utils';
 
 jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
@@ -41,47 +27,14 @@ const MockRuleId = 'rule-id';
 
 const ConflictAfterRetries = RetryForConflictsAttempts + 1;
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-
-const kibanaVersion = 'v7.10.0';
-const logger = loggingSystemMock.create().get();
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  cloneAPIKey: jest.fn(),
+  encryptedSavedObjects,
   logger,
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient: backfillClientMock.create(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+} = getRulesClientMockParams();
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
 // - one to run tests where an SO update conflicts once
@@ -143,13 +96,18 @@ async function update(success: boolean) {
     });
   } catch (err) {
     // only checking the warn messages in this test
-    expect(logger.warn).lastCalledWith(`rulesClient.update('rule-id') conflict, exceeded retries`);
+    expect(logger.warn).toHaveBeenLastCalledWith(
+      `rulesClient.update('rule-id') conflict, exceeded retries`
+    );
     return expectConflict(success, err, 'create');
   }
   expectSuccess(success, 2, 'create');
 
   // only checking the debug messages in this test
-  expect(logger.debug).nthCalledWith(1, `rulesClient.update('rule-id') conflict, retrying ...`);
+  expect(logger.debug).toHaveBeenNthCalledWith(
+    1,
+    `rulesClient.update('rule-id') conflict, retrying ...`
+  );
 }
 
 async function updateApiKey(success: boolean) {
@@ -249,8 +207,8 @@ function expectConflict(success: boolean, err: Error, method: 'update' | 'create
   expect(success).toBe(false);
   expect(unsecuredSavedObjectsClient[method]).toHaveBeenCalledTimes(ConflictAfterRetries);
   // message content checked in the update test
-  expect(logger.debug).toBeCalledTimes(RetryForConflictsAttempts);
-  expect(logger.warn).toBeCalledTimes(1);
+  expect(logger.debug).toHaveBeenCalledTimes(RetryForConflictsAttempts);
+  expect(logger.warn).toHaveBeenCalledTimes(1);
 }
 
 // wrapper to call the test function with a it's own name

@@ -113,7 +113,6 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
         <EisCloudConnectPromoCallout
           promoId="indexDetailsOverview"
           isSelfManaged={!cloud?.isCloudEnabled}
-          direction="row"
           navigateToApp={() =>
             core.application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
           }
@@ -126,7 +125,6 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
           promoId="indexDetailsOverview"
           shouldShowEisUpdateCallout={shouldShowEisUpdateCallout}
           handleOnClick={() => setIsUpdatingElserMappings(true)}
-          direction="row"
           hasUpdatePrivileges={hasUpdateMappingsPrivileges}
           addSpacer="bottom"
         />

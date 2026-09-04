@@ -26,12 +26,27 @@ export interface CreateCaseFlyoutProps {
   onClose?: () => void;
   onSuccess?: (theCase: CaseUI) => void;
   attachments?: CaseAttachmentsWithoutOwner;
+  /**
+   * Alternative to `attachments` when the correct attachment type depends on the
+   * case owner chosen by the user. Called with the created case's owner after the
+   * case is saved. Mutually exclusive with `attachments` — prefer this form when
+   * the consumer cannot determine the owner at attachment-build time.
+   */
+  getAttachments?: (owner: string) => CaseAttachmentsWithoutOwner;
   headerContent?: React.ReactNode;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, attachments, headerContent, initialValue, onClose, onSuccess }) => {
+  ({
+    afterCaseCreated,
+    attachments,
+    getAttachments,
+    headerContent,
+    initialValue,
+    onClose,
+    onSuccess,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const handleCancel = onClose || noop;
     const handleOnSuccess = onSuccess || noop;
@@ -74,6 +89,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
               <CreateCaseForm
                 afterCaseCreated={afterCaseCreated}
                 attachments={attachments}
+                getAttachments={getAttachments}
                 onCancel={handleCancel}
                 onSuccess={handleOnSuccess}
                 withSteps={false}

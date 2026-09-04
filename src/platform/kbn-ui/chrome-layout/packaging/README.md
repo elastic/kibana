@@ -3,6 +3,8 @@
 This directory contains the build infrastructure that produces a self-contained
 `@kbn/ui-chrome-layout` tarball for use outside of Kibana (e.g. Cloud UI).
 
+The tarball includes layout components, constants, and utilities.
+
 ## Building
 
 ```bash
@@ -16,13 +18,6 @@ Output lands in `../target/`:
 - `package.json` — installable manifest with peer-dependency declarations
 - `kbn-ui-chrome-layout-<version>.tgz` — installable tarball
 
-## How it works
-
-`@kbn/ui-chrome-layout-constants` and `@kbn/ui-chrome-layout-utils` are aliased
-at build time to their pre-built outputs under `../../chrome-layout-constants/target/`
-and `../../chrome-layout-utils/target/`. Run those packages' `build.sh` first if
-their targets are missing (Step 0 of this script does this automatically).
-
 ## Example app
 
 ```bash
@@ -32,3 +27,13 @@ their targets are missing (Step 0 of this script does this automatically).
 # Start the dev server (http://localhost:3000)
 cd example && ./start.sh
 ```
+
+## Host requirements
+
+- Wrap the layout in an EUI provider.
+- Install React 18 or later, EUI, and Emotion as peer dependencies.
+- Use the layout as the single full-viewport application shell.
+
+`GridLayoutGlobalStyles` contains only shell-level document and EUI overlay behavior, plus the
+generic `plain` / `framed` appearance. Kibana DOM selectors, legacy compatibility variables, and
+application-specific global styles are not included in the package.

@@ -31,11 +31,18 @@ export {
 } from './saved_objects';
 
 export type { RruleSchedule } from './task';
-export { TaskStatus, TaskPriority, TaskCost, InstanceTaskCost } from './task';
+export {
+  TaskStatus,
+  TaskPriority,
+  TaskCost,
+  InstanceTaskCost,
+  getTaskCostFromInstance,
+} from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
 export { asInterval } from './lib/intervals';
+export { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 export {
   isUnrecoverableError,
   throwUnrecoverableError,
@@ -55,6 +62,7 @@ export {
 export { aggregateTaskOverduePercentilesForType } from './queries/aggregate_task_overdue_percentiles_for_type';
 
 export { runInvalidate } from './invalidate_api_keys/lib';
+export { getUiamApiKeySecret } from './lib/api_key_utils';
 export type {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,
@@ -76,6 +84,10 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
       deprecate('claim_strategy', 'a future version', {
         level: 'warning',
         message: `Configuring "xpack.task_manager.claim_strategy" is deprecated and will be removed in a future version. This setting should be removed.`,
+      }),
+      deprecate('request_timeouts', 'a future version', {
+        level: 'warning',
+        message: `Configuring "xpack.task_manager.request_timeouts" is deprecated and will be removed in a future version. This setting should be removed.`,
       }),
       (settings, fromPath, addDeprecation) => {
         const taskManager = get(settings, fromPath);

@@ -12,14 +12,19 @@ import type {
   SearchResponse,
   Sort,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isResponseError } from '@kbn/es-errors';
+import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionListDto } from '@kbn/workflows';
+import { pickWorkflowDocumentVersion } from '@kbn/workflows';
+import type { WorkflowExecutionsDataClient } from '@kbn/workflows-execution-engine/server';
+import {
+  getElasticsearchErrorMessage,
+  isElasticsearchQueryError,
+  isIndexNotFoundError,
+} from './es_error_helpers';
 
 interface SearchWorkflowExecutionsParams {
-  esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   logger: Logger;
-  workflowExecutionIndex: string;
   query: QueryDslQueryContainer;
   sort?: Sort;
   collapse?: { field: string };
@@ -43,12 +48,18 @@ export const WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES = [
   'executedBy',
   'createdBy',
   'concurrencyGroupKey',
+  'managed',
+  'managedBy',
+  'originManagedWorkflowId',
+  'managedVersion',
+  'version',
+  'workflowDefinition.name',
+  'workflowDefinition.tags',
 ] as const;
 
 export const searchWorkflowExecutions = async ({
-  esClient,
+  workflowExecutionsDataClient,
   logger,
-  workflowExecutionIndex,
   query,
   sort = [{ createdAt: 'desc' }],
   collapse,
@@ -57,9 +68,8 @@ export const searchWorkflowExecutions = async ({
   page = 1,
 }: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {
   try {
-    logger.debug(`Searching workflow executions in index ${workflowExecutionIndex}`);
-    const response = await esClient.search<EsWorkflowExecution>({
-      index: workflowExecutionIndex,
+    logger.debug('Searching workflow executions');
+    const response = await workflowExecutionsDataClient.search({
       query,
       _source: { includes: [...WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES] },
       sort,
@@ -71,14 +81,18 @@ export const searchWorkflowExecutions = async ({
 
     return transformToWorkflowExecutionListModel(response, page, size);
   } catch (error) {
-    // Index not found is expected when no workflows have been executed yet
-    if (isResponseError(error) && error.body?.error?.type === 'index_not_found_exception') {
+    if (isIndexNotFoundError(error)) {
       return {
         results: [],
         size,
         page,
         total: 0,
       };
+    }
+
+    if (isElasticsearchQueryError(error)) {
+      const message = getElasticsearchErrorMessage(error) ?? 'Invalid search query';
+      throw Object.assign(new Error(message), { statusCode: 400 });
     }
 
     logger.error(`Failed to search workflow executions: ${error}`);
@@ -102,6 +116,10 @@ function transformToWorkflowExecutionListModel(
         acc.push({
           spaceId: source.spaceId,
           id,
+          managed: source.managed,
+          managedBy: source.managedBy,
+          originManagedWorkflowId: source.originManagedWorkflowId,
+          managedVersion: source.managedVersion,
           stepId: source.stepId,
           status: source.status,
           error: source.error || null,
@@ -110,9 +128,12 @@ function transformToWorkflowExecutionListModel(
           finishedAt: source.finishedAt,
           duration: source.duration,
           workflowId: source.workflowId,
+          workflowName: source.workflowDefinition?.name,
+          tags: source.workflowDefinition?.tags,
           triggeredBy: source.triggeredBy,
           executedBy: source.executedBy ?? source.createdBy,
           concurrencyGroupKey: source.concurrencyGroupKey,
+          ...pickWorkflowDocumentVersion(source),
         });
       }
       return acc;

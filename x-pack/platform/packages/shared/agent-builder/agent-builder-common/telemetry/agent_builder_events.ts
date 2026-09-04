@@ -33,6 +33,10 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   UsedByWarningProceeded: `${TELEMETRY_PREFIX}_used_by_warning_proceeded`,
   InappChatOpen: `${TELEMETRY_PREFIX}_inapp_chat_open`,
   FullscreenEntryPoint: `${TELEMETRY_PREFIX}_fullscreen_entry_point`,
+  HitlPromptShown: `${TELEMETRY_PREFIX}_hitl_prompt_shown`,
+  HitlQuestionAnswered: `${TELEMETRY_PREFIX}_hitl_question_answered`,
+  FeedbackSubmitted: `${TELEMETRY_PREFIX}_feedback_submitted`,
+  FeedbackRetracted: `${TELEMETRY_PREFIX}_feedback_retracted`,
 } as const;
 
 export type OptInSource =
@@ -89,6 +93,7 @@ export interface ReportRoundCompleteParams {
   conversation_id?: string;
   execution_id?: string;
   input_tokens: number;
+  cached_input_tokens?: number;
   llm_calls: number;
   message_length: number;
   model?: string;
@@ -146,6 +151,7 @@ export type SkillInvocationOrigin = 'builtin' | 'custom' | 'plugin';
 export type SkillSolutionArea =
   | 'security'
   | 'observability'
+  | 'ml'
   | 'search'
   | 'platform'
   | 'custom'
@@ -279,6 +285,80 @@ export interface ReportFullscreenEntryPointParams {
   source: FullscreenEntryPointSource;
 }
 
+export interface ReportHitlPromptShownParams {
+  prompt_id: string;
+  total_questions: number;
+  conversation_id?: string;
+  agent_id?: string;
+}
+
+export type HitlQuestionAnsweredOutcome = 'answered' | 'skipped';
+
+export interface ReportHitlQuestionAnsweredParams {
+  prompt_id: string;
+  conversation_id?: string;
+  agent_id?: string;
+  question_index: number;
+  is_multi_select: boolean;
+  outcome: HitlQuestionAnsweredOutcome;
+  used_custom_text: boolean;
+  selected_option_count: number;
+}
+
+export interface ReportFeedbackSubmittedParams {
+  /** Round that received feedback */
+  round_id: string;
+  conversation_id?: string;
+  /** up or down */
+  vote: string;
+  /** Predefined chip IDs selected by the user */
+  chips: string[];
+  /**
+   * Free-text comment from the user. Only sent when non-empty.
+   * The modal disclosure names Elastic as the recipient and links to the
+   * Elastic Privacy Statement (https://www.elastic.co/legal/privacy-statement).
+   */
+  comment?: string;
+  /** OTel trace ID of the round — correlates with traces-* and round_complete events */
+  trace_id?: string;
+  /** LLM connector used for this round */
+  connector_id?: string;
+  /** Model identifier */
+  model?: string;
+  /** Agent ID */
+  agent_id?: string;
+  /** Tool IDs called during the round */
+  tool_names?: string[];
+  /** Total input tokens used */
+  input_tokens?: number;
+  /** Total output tokens generated */
+  output_tokens?: number;
+  /** Number of LLM API calls made during the round */
+  llm_calls?: number;
+}
+
+export interface ReportFeedbackRetractedParams {
+  /** Round whose feedback was retracted */
+  round_id: string;
+  conversation_id?: string;
+  /** OTel trace ID of the round */
+  trace_id?: string;
+  /** LLM connector used for this round */
+  connector_id?: string;
+  /** Model identifier */
+  model?: string;
+  /** Agent ID */
+  agent_id?: string;
+  /** Tool IDs called during the round */
+  tool_names?: string[];
+  /** Total input tokens used */
+  input_tokens?: number;
+  /** Total output tokens generated */
+  output_tokens?: number;
+  /** Number of LLM API calls made during the round */
+  llm_calls?: number;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
@@ -306,6 +386,10 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded]: ReportUsedByWarningProceededParams;
   [AGENT_BUILDER_EVENT_TYPES.InappChatOpen]: ReportInappChatOpenParams;
   [AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint]: ReportFullscreenEntryPointParams;
+  [AGENT_BUILDER_EVENT_TYPES.HitlPromptShown]: ReportHitlPromptShownParams;
+  [AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered]: ReportHitlQuestionAnsweredParams;
+  [AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted]: ReportFeedbackSubmittedParams;
+  [AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted]: ReportFeedbackRetractedParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -329,7 +413,11 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportUsedByWarningShownParams>
   | EventTypeOpts<ReportUsedByWarningProceededParams>
   | EventTypeOpts<ReportInappChatOpenParams>
-  | EventTypeOpts<ReportFullscreenEntryPointParams>;
+  | EventTypeOpts<ReportFullscreenEntryPointParams>
+  | EventTypeOpts<ReportHitlPromptShownParams>
+  | EventTypeOpts<ReportHitlQuestionAnsweredParams>
+  | EventTypeOpts<ReportFeedbackSubmittedParams>
+  | EventTypeOpts<ReportFeedbackRetractedParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
@@ -352,7 +440,11 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown
   | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded
   | typeof AGENT_BUILDER_EVENT_TYPES.InappChatOpen
-  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint;
+  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint
+  | typeof AGENT_BUILDER_EVENT_TYPES.HitlPromptShown
+  | typeof AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered
+  | typeof AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted
+  | typeof AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -799,6 +891,14 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
+    cached_input_tokens: {
+      type: 'integer',
+      _meta: {
+        description:
+          'Number of input tokens served from cache during this round (subset of input_tokens), when reported by the provider',
+        optional: true,
+      },
+    },
     llm_calls: {
       type: 'integer',
       _meta: {
@@ -1133,7 +1233,7 @@ const MANAGE_ENTITY_LIST_VIEW_EVENT: AgentBuilderTelemetryEvent = {
     entity_type: {
       type: 'keyword',
       _meta: {
-        description: 'Type of entity on the list page (tool|plugin|skill)',
+        description: 'Type of entity on the list page (tool|plugin|skill|mcp_client)',
         optional: false,
       },
     },
@@ -1235,6 +1335,199 @@ const FULLSCREEN_ENTRY_POINT_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const HITL_PROMPT_SHOWN_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.HitlPromptShown,
+  schema: {
+    prompt_id: {
+      type: 'keyword',
+      _meta: { description: 'Unique ID of the ask_user_question prompt', optional: false },
+    },
+    total_questions: {
+      type: 'integer',
+      _meta: { description: 'Number of questions in this prompt', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'Conversation ID', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+  },
+};
+
+const HITL_QUESTION_ANSWERED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered,
+  schema: {
+    prompt_id: {
+      type: 'keyword',
+      _meta: { description: 'Unique ID of the ask_user_question prompt', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'Conversation ID', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+    question_index: {
+      type: 'integer',
+      _meta: {
+        description: '0-based index of the question being answered/skipped',
+        optional: false,
+      },
+    },
+    is_multi_select: {
+      type: 'boolean',
+      _meta: { description: 'Whether the question allows multiple selections', optional: false },
+    },
+    outcome: {
+      type: 'keyword',
+      _meta: {
+        description: 'How the user responded (answered|skipped)',
+        optional: false,
+      },
+    },
+    used_custom_text: {
+      type: 'boolean',
+      _meta: { description: 'Whether the user filled in the free-text field', optional: false },
+    },
+    selected_option_count: {
+      type: 'integer',
+      _meta: { description: 'Number of options selected (0 when skipped)', optional: false },
+    },
+  },
+};
+
+const FEEDBACK_SUBMITTED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted,
+  schema: {
+    round_id: {
+      type: 'keyword',
+      _meta: { description: 'ID of the round that received feedback', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'Conversation ID', optional: true },
+    },
+    vote: {
+      type: 'keyword',
+      _meta: { description: '"up" or "down"', optional: false },
+    },
+    chips: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Selected chip ID' },
+      },
+      _meta: { description: 'Predefined chip IDs selected by the user', optional: false },
+    },
+    comment: {
+      type: 'text',
+      _meta: {
+        description:
+          'Free-text comment from the user. Only present when non-empty. ' +
+          'Users are shown a disclosure before submitting.',
+        optional: true,
+      },
+    },
+    trace_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'OTel trace ID — correlates with traces-* and round_complete events',
+        optional: true,
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: { description: 'LLM connector used for this round', optional: true },
+    },
+    model: {
+      type: 'keyword',
+      _meta: { description: 'Model identifier', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+    tool_names: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Tool ID called during the round' },
+      },
+      _meta: { description: 'IDs of tools called during the round', optional: true },
+    },
+    input_tokens: {
+      type: 'long',
+      _meta: { description: 'Total input tokens used', optional: true },
+    },
+    output_tokens: {
+      type: 'long',
+      _meta: { description: 'Total output tokens generated', optional: true },
+    },
+    llm_calls: {
+      type: 'long',
+      _meta: { description: 'Number of LLM API calls made during the round', optional: true },
+    },
+  },
+};
+
+const FEEDBACK_RETRACTED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted,
+  schema: {
+    round_id: {
+      type: 'keyword',
+      _meta: { description: 'ID of the round whose feedback was retracted', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'Conversation ID', optional: true },
+    },
+    trace_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'OTel trace ID — correlates with traces-* and round_complete events',
+        optional: true,
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: { description: 'LLM connector used for this round', optional: true },
+    },
+    model: {
+      type: 'keyword',
+      _meta: { description: 'Model identifier', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+    tool_names: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Tool ID called during the round' },
+      },
+      _meta: { description: 'IDs of tools called during the round', optional: true },
+    },
+    input_tokens: {
+      type: 'long',
+      _meta: { description: 'Total input tokens used', optional: true },
+    },
+    output_tokens: {
+      type: 'long',
+      _meta: { description: 'Total output tokens generated', optional: true },
+    },
+    llm_calls: {
+      type: 'long',
+      _meta: { description: 'Number of LLM API calls made during the round', optional: true },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
@@ -1245,6 +1538,10 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   USED_BY_WARNING_PROCEEDED_EVENT,
   INAPP_CHAT_OPEN_EVENT,
   FULLSCREEN_ENTRY_POINT_EVENT,
+  HITL_PROMPT_SHOWN_EVENT,
+  HITL_QUESTION_ANSWERED_EVENT,
+  FEEDBACK_SUBMITTED_EVENT,
+  FEEDBACK_RETRACTED_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [

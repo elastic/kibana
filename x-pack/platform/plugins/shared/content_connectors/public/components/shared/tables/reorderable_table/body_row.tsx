@@ -7,14 +7,9 @@
 
 import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiToken,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken, useEuiTheme } from '@elastic/eui';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { Cell } from './cell';
 import { DRAGGABLE_UX_STYLE } from './constants';
@@ -97,13 +92,11 @@ export const BodyRow = <Item extends object>({
         <EuiFlexGroup direction="column">
           {errors.map((errorMessage, errorMessageIndex) => (
             <EuiFlexItem key={errorMessageIndex}>
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount={false}
                 role="alert"
                 aria-live="polite"
-                iconType="warning"
                 size="s"
-                color="danger"
                 title={errorMessage}
               />
             </EuiFlexItem>

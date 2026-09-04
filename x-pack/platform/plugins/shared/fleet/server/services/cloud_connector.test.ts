@@ -295,8 +295,8 @@ describe('CloudConnectorService', () => {
       );
     });
 
-    it('should throw error when AWS external_id is missing', async () => {
-      const invalidRequest: CreateCloudConnectorRequest = {
+    it('should create successfully when AWS external_id is absent (identity federation without external ID)', async () => {
+      const requestWithoutExternalId: CreateCloudConnectorRequest = {
         name: 'test-connector',
         cloudProvider: 'aws',
         vars: {
@@ -304,12 +304,39 @@ describe('CloudConnectorService', () => {
             value: 'arn:aws:iam::123456789012:role/TestRole',
             type: 'text',
           },
-        } as any, // Intentionally invalid for testing validation
+        },
       };
 
-      await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
-        /Package policy must contain valid external_id secret reference/
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          vars: {
+            role_arn: {
+              value: 'arn:aws:iam::123456789012:role/TestRole',
+              type: 'text',
+            },
+          },
+        },
+      });
+
+      const result = await service.create(mockSoClient, requestWithoutExternalId);
+
+      expect(result.name).toBe('test-connector');
+      const [soType, soAttributes] = mockSoClient.create.mock.calls[0];
+      expect(soType).toBe(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE);
+      expect(soAttributes).toEqual(
+        expect.objectContaining({
+          cloudProvider: 'aws',
+        })
       );
+      expect((soAttributes as any).vars.external_id).toBeUndefined();
     });
 
     describe('duplicate name validation', () => {
@@ -1152,24 +1179,24 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.update).not.toHaveBeenCalled();
     });
 
-    it('should require both role_arn and external_id when updating vars', async () => {
+    it('should allow updating vars with role_arn only (identity federation without external ID)', async () => {
       mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+      mockSoClient.update.mockResolvedValue(mockExistingSavedObject);
 
-      const incompleteVars = {
+      const varsWithoutExternalId = {
         role_arn: {
           value: 'arn:aws:iam::123456789012:role/ValidRole',
           type: 'text' as const,
         },
-        // Missing external_id
-      } as any; // Intentionally invalid for testing validation
+      };
 
       await expect(
         service.update(mockSoClient, 'cloud-connector-123', {
-          vars: incompleteVars,
+          vars: varsWithoutExternalId,
         })
-      ).rejects.toThrow('Package policy must contain valid external_id secret reference');
+      ).resolves.toBeDefined();
 
-      expect(mockSoClient.update).not.toHaveBeenCalled();
+      expect(mockSoClient.update).toHaveBeenCalled();
     });
 
     it('should throw error when cloud connector not found', async () => {
@@ -1768,8 +1795,8 @@ describe('CloudConnectorService', () => {
         );
       });
 
-      it('should throw error when external_id is missing', () => {
-        const invalidRequest: CreateCloudConnectorRequest = {
+      it('should validate successfully when external_id is absent (identity federation without external ID)', () => {
+        const validRequest: CreateCloudConnectorRequest = {
           name: 'test-connector',
           cloudProvider: 'aws',
           vars: {
@@ -1777,12 +1804,10 @@ describe('CloudConnectorService', () => {
               value: 'arn:aws:iam::123456789012:role/TestRole',
               type: 'text',
             },
-          } as any, // Intentionally invalid for testing validation
+          },
         };
 
-        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
-          'Package policy must contain valid external_id secret reference'
-        );
+        expect(() => (service as any).validateCloudConnectorDetails(validRequest)).not.toThrow();
       });
 
       it('should throw error when external_id value is missing', () => {

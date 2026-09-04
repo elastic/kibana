@@ -9,9 +9,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { pickManagedWorkflowFields } from '@kbn/workflows';
-import { preprocessAlertInputs } from './utils/preprocess_alert_inputs';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -20,7 +18,7 @@ import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerRunWorkflowRoute(deps: RouteDependencies) {
-  const { router, api, logger, spaces, audit } = deps;
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/workflow/{id}/run',
@@ -81,30 +79,14 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
 
           const { inputs, metadata } = request.body;
 
-          let processedInputs = inputs;
-          const event = inputs.event as { triggerType?: string; alertIds?: unknown[] } | undefined;
-          const hasAlertTrigger =
-            event?.triggerType === 'alert' && event?.alertIds && event.alertIds.length > 0;
-          if (hasAlertTrigger) {
-            processedInputs = await preprocessAlertInputs(inputs, context, spaceId, logger);
-          }
-
-          const workflowForExecution: WorkflowExecutionEngineModel = {
-            id: workflow.id,
-            name: workflow.name,
-            enabled: workflow.enabled,
-            definition: workflow.definition,
-            yaml: workflow.yaml,
-            ...pickManagedWorkflowFields(workflow),
-          };
-          const workflowExecutionId = await api.runWorkflow(
-            workflowForExecution,
+          const { workflowExecutionId } = await api.runWorkflowWithAlertPreprocessing({
+            workflow: toWorkflowExecutionEngineModel(workflow),
             spaceId,
-            processedInputs,
+            inputs,
             request,
-            undefined,
-            metadata
-          );
+            preprocessingContext: context,
+            metadata,
+          });
           audit.logWorkflowRun(request, {
             workflowId: id,
             executionId: workflowExecutionId,

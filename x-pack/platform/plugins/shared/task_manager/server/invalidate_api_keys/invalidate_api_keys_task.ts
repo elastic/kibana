@@ -122,6 +122,7 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
           const [{ savedObjects }] = await coreStartServices();
           const savedObjectsClient = savedObjects.createInternalRepository([
             INVALIDATE_API_KEY_SO_NAME,
+            TASK_SO_NAME,
           ]);
 
           const result = await runInvalidate({
@@ -137,6 +138,14 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
               {
                 type: TASK_SO_NAME,
                 apiKeyAttributePath: `${TASK_SO_NAME}.attributes.userScope.apiKeyId`,
+              },
+              // UIAM key ids live in their own attribute, so they are invisible to the
+              // `apiKeyId` query above. Without this entry a UIAM key that is still
+              // referenced by a live task would be invalidated: keys are granted per task
+              // type, so a single UIAM key is routinely shared by several tasks.
+              {
+                type: TASK_SO_NAME,
+                apiKeyAttributePath: `${TASK_SO_NAME}.attributes.userScope.uiamApiKeyId`,
               },
             ],
           });

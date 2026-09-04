@@ -14,7 +14,7 @@ import type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from '../../../s
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
-import { getIdForLayer, isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
+import { isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import { getReversibleMappings, getScaleTypeFromColumnType } from '../utils';
 import {
@@ -35,11 +35,7 @@ import {
 } from './constants';
 import type { XScaleSchemaType } from '../../../schema/charts/shared';
 
-import {
-  convertStylingToAPIFormat,
-  convertStylingToStateFormat,
-  type LayerPresence,
-} from './appearances';
+import { convertStylingToAPIFormat, convertStylingToStateFormat } from './appearances';
 
 type DomainType = XAxisSchemaType['domain'] | YAxisSchemaType['domain'];
 
@@ -159,38 +155,21 @@ function convertAxisSettingsToStateFormat(
   });
 }
 
-function getLayerPresence(dataLayers: XYDataLayerConfig[]): LayerPresence {
-  const seriesTypes = new Set(dataLayers.map((layer) => layer.seriesType));
-  return {
-    hasBars: [...seriesTypes].some((t) => t.startsWith('bar')),
-    hasLines: seriesTypes.has('line'),
-    hasAreas: [...seriesTypes].some((t) => t.startsWith('area')),
-  };
-}
-
-type LayerToDataView = Record<string, string>;
-
 export function buildVisualizationState(
   config: XYConfig,
-  usedDataViews: LayerToDataView,
   annotationGroupReferences: SavedObjectReference[]
 ): XYPersistedState {
   const layers = config.layers
-    .map((layer, index) =>
-      buildXYLayer(
-        config,
-        layer,
-        index,
-        usedDataViews[getIdForLayer(layer, index)],
-        annotationGroupReferences
-      )
-    )
+    .map((layer, index) => buildXYLayer(config, layer, index, annotationGroupReferences))
     .filter(nonNullable);
+  const dataLayers = layers.filter(isLensStateDataLayer);
+  const seriesTypes = dataLayers.map((layer) => layer.seriesType);
+
   return {
-    preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
+    preferredSeriesType: dataLayers[0]?.seriesType ?? 'bar_stacked',
     ...convertLegendToStateFormat(config.legend),
     ...convertAxisSettingsToStateFormat(config.axis),
-    ...(config.styling ? convertStylingToStateFormat(config.styling) : {}),
+    ...convertStylingToStateFormat(config.styling ?? {}, seriesTypes),
     layers,
   };
 }
@@ -211,6 +190,8 @@ export function buildVisualizationAPI(
   internalReferences: SavedObjectReference[]
 ): XYConfig {
   const dataLayers = config.layers.filter(isLensStateDataLayer);
+  const seriesTypes = dataLayers.map((layer) => layer.seriesType);
+
   if (!dataLayers.length) {
     throw new Error('At least one data layer is required to build the XY API state');
   }
@@ -219,7 +200,6 @@ export function buildVisualizationAPI(
       'Data layers must have at least one accessor defined to build the XY API state'
     );
   }
-  const layerPresence = getLayerPresence(dataLayers);
   const { resolveAxisId, usedModes } = resolveAxisLayout(config);
   const apiLayers = buildXYLayerAPI(
     config,
@@ -236,7 +216,7 @@ export function buildVisualizationAPI(
   }
 
   const axis = convertAxisSettingsToAPIFormat(config, layers, usedModes);
-  const styling = convertStylingToAPIFormat(config, layerPresence);
+  const styling = convertStylingToAPIFormat(config, seriesTypes);
   const legend = convertLegendToAPIFormat(config.legend);
 
   if (areAllLayersEsql(apiLayers)) {

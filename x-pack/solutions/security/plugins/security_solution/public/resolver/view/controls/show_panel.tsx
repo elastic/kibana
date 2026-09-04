@@ -27,7 +27,7 @@ export const ShowPanelButton = memo(({ onClick }: { onClick: () => void }) => {
       title={showPanelButtonTitle}
       aria-label={showPanelButtonTitle}
       onClick={onClick}
-      iconType={'list'}
+      iconType={'listBullet'}
       $backgroundColor={colorMap.graphControlsBackground}
       $iconColor={colorMap.graphControls}
       $borderColor={colorMap.graphControlsBorderColor}

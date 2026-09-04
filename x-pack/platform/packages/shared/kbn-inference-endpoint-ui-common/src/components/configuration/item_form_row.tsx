@@ -7,15 +7,8 @@
 
 import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { ConfigEntryView } from '../../types/types';
 import { FieldType, type Map } from '../../types/types';
@@ -123,10 +116,9 @@ export const ItemFormRow: React.FC<ItemFormRowProps> = ({
       {sensitive && reenterSecretsOnEdit ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={!isEdit}
             size="s"
-            color="warning"
             title={LABELS.RE_ENTER_SECRETS(label)}
           />
         </>

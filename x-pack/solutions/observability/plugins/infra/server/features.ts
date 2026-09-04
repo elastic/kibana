@@ -25,7 +25,7 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
     app: ['infra', 'metrics', 'kibana'],
     catalogue: ['infraops', 'metrics'],
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
     alerting: metricAlertingFeatures,
     privileges: {
@@ -49,7 +49,7 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
           },
         },
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         ui: ['show', 'configureSource', 'save'],
       },
@@ -70,7 +70,7 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
           },
         },
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         ui: ['show'],
       },

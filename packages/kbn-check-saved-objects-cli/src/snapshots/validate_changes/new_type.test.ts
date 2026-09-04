@@ -91,7 +91,7 @@ describe('validateChangesNewType', () => {
   it('should throw if the new type defines legacy migrations', () => {
     const to = buildNewType('my-type', { migrationVersions: ['7.14.0'] });
 
-    expect(() => callValidate(to)).toThrowError(
+    expect(() => callValidate(to)).toThrow(
       `New SO type 'my-type' cannot define legacy 'migrations'.`
     );
   });
@@ -99,7 +99,7 @@ describe('validateChangesNewType', () => {
   it('should throw if no model versions are defined', () => {
     const to = buildNewType('my-type', { modelVersions: [] });
 
-    expect(() => callValidate(to)).toThrowError(
+    expect(() => callValidate(to)).toThrow(
       `New SO type 'my-type' must define the first model version '1'.`
     );
   });
@@ -107,7 +107,7 @@ describe('validateChangesNewType', () => {
   it('should throw if the initial model version defines mapping changes', () => {
     const snapshot = loadSnapshot('changes_in_initial_version.json');
 
-    expect(() => callValidate(snapshot.typeDefinitions['usage-counter'])).toThrowError(
+    expect(() => callValidate(snapshot.typeDefinitions['usage-counter'])).toThrow(
       `The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
     );
   });
@@ -117,7 +117,7 @@ describe('validateChangesNewType', () => {
       modelVersions: [buildModelVersion({ version: '1' }), buildModelVersion({ version: '3' })],
     });
 
-    expect(() => callValidate(to)).toThrowError(
+    expect(() => callValidate(to)).toThrow(
       `The 'my-type' SO type is missing model version '2'. Model versions defined: 1,3`
     );
   });
@@ -129,7 +129,7 @@ describe('validateChangesNewType', () => {
       ],
     });
 
-    expect(() => callValidate(to)).toThrowError(
+    expect(() => callValidate(to)).toThrow(
       `The new model version '1' for SO type 'my-type' is missing the 'forwardCompatibility' schema definition.`
     );
   });
@@ -141,7 +141,7 @@ describe('validateChangesNewType', () => {
       ],
     });
 
-    expect(() => callValidate(to)).toThrowError(
+    expect(() => callValidate(to)).toThrow(
       `The new model version '1' for SO type 'my-type' is missing the 'create' schema definition.`
     );
   });
@@ -155,7 +155,7 @@ describe('validateChangesNewType', () => {
         name: 'new-type-with-undeclared-fields',
         schemaFields: ['declaredField'],
       })
-    ).toThrowError(
+    ).toThrow(
       /The SO type 'new-type-with-undeclared-fields' has mapping fields not present in the latest model version schema: undeclaredField/
     );
   });
@@ -168,7 +168,7 @@ describe('validateChangesNewType', () => {
       },
     });
 
-    expect(() => callValidate(to, createMockType('my-type', ['myField']))).toThrowError(
+    expect(() => callValidate(to, createMockType('my-type', ['myField']))).toThrow(
       /The SO type 'my-type' has new mapping fields with 'index: false': myField/
     );
   });
@@ -181,7 +181,7 @@ describe('validateChangesNewType', () => {
       },
     });
 
-    expect(() => callValidate(to, createMockType('my-type', ['myField']))).toThrowError(
+    expect(() => callValidate(to, createMockType('my-type', ['myField']))).toThrow(
       /The SO type 'my-type' has new mapping fields with 'enabled: false': myField/
     );
   });
@@ -194,7 +194,7 @@ describe('validateChangesNewType', () => {
       },
     });
 
-    expect(() => callValidate(to, createMockType('my-type', ['state_transition']))).toThrowError(
+    expect(() => callValidate(to, createMockType('my-type', ['state_transition']))).toThrow(
       /The SO type 'my-type' has new mapping fields with 'enabled: false': state_transition/
     );
   });
@@ -207,7 +207,7 @@ describe('validateChangesNewType', () => {
       },
     });
 
-    expect(() => callValidate(to, createMockType('my-type', ['parent.child']))).toThrowError(
+    expect(() => callValidate(to, createMockType('my-type', ['parent.child']))).toThrow(
       /The SO type 'my-type' has new mapping fields with 'enabled: false': parent.child/
     );
   });
@@ -221,7 +221,7 @@ describe('validateChangesNewType', () => {
         name: 'type-with-wrong-name-title',
         schemaFields: ['name', 'title'],
       })
-    ).toThrowError(
+    ).toThrow(
       /The SO type 'type-with-wrong-name-title' has 'name' or 'title' fields with incorrect types.*name \(type: keyword, expected: text\).*title \(type: keyword, expected: text\)/
     );
   });
@@ -286,7 +286,7 @@ describe('validateChangesNewType', () => {
         mappings: { 'properties.myField.type': 'keyword' },
       });
 
-      expect(() => callValidate(to, createMockType('my-type', ['myField']))).toThrowError(
+      expect(() => callValidate(to, createMockType('my-type', ['myField']))).toThrow(
         /The SO type 'my-type' has 'keyword' or 'flattened' mapping fields without 'ignore_above': myField/
       );
     });
@@ -296,7 +296,7 @@ describe('validateChangesNewType', () => {
         mappings: { 'properties.dataField.type': 'flattened' },
       });
 
-      expect(() => callValidate(to, createMockType('my-type', ['dataField']))).toThrowError(
+      expect(() => callValidate(to, createMockType('my-type', ['dataField']))).toThrow(
         /The SO type 'my-type' has 'keyword' or 'flattened' mapping fields without 'ignore_above': dataField/
       );
     });
@@ -320,7 +320,7 @@ describe('validateChangesNewType', () => {
         },
       });
 
-      expect(() => callValidate(to, createMockType('my-type', ['name']))).toThrowError(
+      expect(() => callValidate(to, createMockType('my-type', ['name']))).toThrow(
         /name\.fields\.keyword/
       );
     });
@@ -332,7 +332,7 @@ describe('validateChangesNewType', () => {
         },
       });
 
-      expect(() => callValidate(to, createMockType('my-type', ['parent.child']))).toThrowError(
+      expect(() => callValidate(to, createMockType('my-type', ['parent.child']))).toThrow(
         /parent\.child/
       );
     });
@@ -397,7 +397,7 @@ describe('validateChangesNewType', () => {
       },
     } as unknown as SavedObjectsType;
 
-    expect(() => callValidate(to, registeredType)).toThrowError(
+    expect(() => callValidate(to, registeredType)).toThrow(
       /The SO type 'my-type' has new mapping fields with 'enabled: false': artifacts/
     );
   });
@@ -431,7 +431,7 @@ describe('validateChangesNewType', () => {
       },
     } as unknown as SavedObjectsType;
 
-    expect(() => callValidate(to, registeredType)).toThrowError(
+    expect(() => callValidate(to, registeredType)).toThrow(
       /The SO type 'my-array-type' has mapping fields not present in the latest model version schema: destinations.foo/
     );
   });

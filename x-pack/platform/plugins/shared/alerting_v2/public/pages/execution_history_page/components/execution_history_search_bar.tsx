@@ -6,14 +6,20 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { EuiComboBox, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
+import { useService } from '@kbn/core-di-browser';
+import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
+import { useFetchRules } from '../../../hooks/use_fetch_rules';
+import { UserCapabilities } from '../../../services/user_capabilities';
 
 const SEARCH_DEBOUNCE_MS = 300;
+const RULE_FILTER_MAX_RESULTS = 20;
 
-const OUTCOME_OPTIONS: Array<{ value: PolicyExecutionOutcomeFilter; text: string }> = [
+export type PolicyOutcomeFilter = 'all' | PolicyExecutionOutcome;
+
+const OUTCOME_OPTIONS: Array<{ value: PolicyOutcomeFilter; text: string }> = [
   {
     value: 'all',
     text: i18n.translate('xpack.alertingV2.executionHistory.searchBar.outcome.all', {
@@ -32,20 +38,42 @@ const OUTCOME_OPTIONS: Array<{ value: PolicyExecutionOutcomeFilter; text: string
       defaultMessage: 'Throttled',
     }),
   },
+  {
+    value: 'dispatch_failed' as const,
+    text: i18n.translate('xpack.alertingV2.executionHistory.searchBar.outcome.dispatchFailed', {
+      defaultMessage: 'Failed',
+    }),
+  },
 ];
+
+export interface RuleOption {
+  id: string;
+  name: string;
+}
 
 interface ExecutionHistorySearchBarProps {
   onSearchChange: (search: string) => void;
-  outcome: PolicyExecutionOutcomeFilter;
-  onOutcomeChange: (outcome: PolicyExecutionOutcomeFilter) => void;
+  outcome: PolicyOutcomeFilter;
+  onOutcomeChange: (outcome: PolicyOutcomeFilter) => void;
+  ruleFilters?: RuleOption[];
+  onRuleFiltersChange?: (rules: RuleOption[]) => void;
+  showRuleFilter?: boolean;
 }
 
 export const ExecutionHistorySearchBar = ({
   onSearchChange,
   outcome,
   onOutcomeChange,
+  ruleFilters = [],
+  onRuleFiltersChange,
+  showRuleFilter = true,
 }: ExecutionHistorySearchBarProps) => {
   const [searchInput, setSearchInput] = useState('');
+  const [ruleSearchInput, setRuleSearchInput] = useState('');
+  const [debouncedRuleSearch, setDebouncedRuleSearch] = useState('');
+
+  const canReadRules = useService(UserCapabilities).canRead('rules');
+  const showRuleComboBox = showRuleFilter && canReadRules;
 
   useDebounce(
     () => {
@@ -54,6 +82,29 @@ export const ExecutionHistorySearchBar = ({
     SEARCH_DEBOUNCE_MS,
     [onSearchChange, searchInput]
   );
+
+  useDebounce(
+    () => {
+      setDebouncedRuleSearch(ruleSearchInput);
+    },
+    SEARCH_DEBOUNCE_MS,
+    [ruleSearchInput]
+  );
+
+  const { data: rulesData, isFetching: isFetchingRules } = useFetchRules({
+    page: 1,
+    perPage: RULE_FILTER_MAX_RESULTS,
+    search: debouncedRuleSearch.trim() || undefined,
+    enabled: showRuleComboBox,
+  });
+
+  const ruleOptions = (rulesData?.items ?? []).map((r) => ({
+    key: r.id,
+    label: r.metadata.name,
+    value: { id: r.id, name: r.metadata.name },
+  }));
+
+  const selectedOptions = ruleFilters.map((r) => ({ key: r.id, label: r.name, value: r }));
 
   return (
     <EuiFlexGroup gutterSize="s" direction="row" responsive={false} css={{ flexGrow: 0 }}>
@@ -74,13 +125,43 @@ export const ExecutionHistorySearchBar = ({
           )}
         />
       </EuiFlexItem>
+      {showRuleComboBox && (
+        <EuiFlexItem grow={false} style={{ minWidth: 260 }}>
+          <EuiComboBox<RuleOption>
+            compressed
+            data-test-subj="executionHistoryRuleFilter"
+            async
+            isClearable
+            isLoading={isFetchingRules}
+            placeholder={i18n.translate(
+              'xpack.alertingV2.executionHistory.searchBar.rulePlaceholder',
+              { defaultMessage: 'Filter by rules' }
+            )}
+            options={ruleOptions}
+            selectedOptions={selectedOptions}
+            onSearchChange={setRuleSearchInput}
+            onChange={(picked) => {
+              const values = picked
+                .map((opt) => opt.value)
+                .filter((v): v is RuleOption => v !== undefined);
+              onRuleFiltersChange?.(values);
+            }}
+            aria-label={i18n.translate(
+              'xpack.alertingV2.executionHistory.searchBar.ruleAriaLabel',
+              {
+                defaultMessage: 'Filter by rules',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiSelect
           compressed
           data-test-subj="executionHistoryOutcomeFilter"
           options={OUTCOME_OPTIONS}
           value={outcome}
-          onChange={(e) => onOutcomeChange(e.target.value as PolicyExecutionOutcomeFilter)}
+          onChange={(e) => onOutcomeChange(e.target.value as PolicyOutcomeFilter)}
           prepend={i18n.translate('xpack.alertingV2.executionHistory.searchBar.outcomeLabel', {
             defaultMessage: 'Outcome',
           })}

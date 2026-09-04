@@ -1,9 +1,12 @@
 {
-  "sha1": "3db41553d0dec490f71ca6ec6c1680d13ac6031e",
+  "sha1": "4cbf62a980d9674be9bdf8a048d32a619beb5eee",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
-      "id": "84b12615210c7cc-bbe9cf3613a4443",
-      "title": "Painless Lab validate painless lab editor and request",
+      "id": "84b12615210c7cc-5466ab80af9cb76",
+      "title": "Painless Lab runs a script, navigates the panels, and views the request without a11y violations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -15,8 +18,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/ui/tests/painless_lab.spec.ts",
-        "line": 58,
-        "column": 9
+        "line": 68,
+        "column": 15
       }
     }
   ]

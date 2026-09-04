@@ -19,7 +19,7 @@ import { generateObservabilityAlerts } from '../../fixtures/alerts_data';
 // generated alerts, not on a live rule.
 test.describe(
   'Observability alerts - table & query bar',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient }) => {
       await generateObservabilityAlerts(esClient);

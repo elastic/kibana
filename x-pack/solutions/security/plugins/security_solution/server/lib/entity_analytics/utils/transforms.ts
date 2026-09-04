@@ -133,14 +133,17 @@ const hasTransformStarted = (transformStats: TransformGetTransformStatsTransform
 
 export const scheduleTransformNow = async ({
   esClient,
+  logger,
   transformId,
 }: {
   esClient: ElasticsearchClient;
+  logger: Logger;
   transformId: string;
 }): Promise<void> => {
-  const transformStats = await esClient.transform.getTransformStats({
-    transform_id: transformId,
-  });
+  const transformStats = await retryTransientEsErrors(
+    () => esClient.transform.getTransformStats({ transform_id: transformId }),
+    { logger }
+  );
   if (transformStats.count <= 0) {
     throw new Error(
       `Unable to find transform status for [${transformId}] while attempting to schedule`
@@ -148,13 +151,15 @@ export const scheduleTransformNow = async ({
   }
 
   if (!hasTransformStarted(transformStats.transforms[0])) {
-    await esClient.transform.startTransform({
-      transform_id: transformId,
-    });
+    await retryTransientEsErrors(
+      () => esClient.transform.startTransform({ transform_id: transformId }),
+      { logger }
+    );
   } else {
-    await esClient.transform.scheduleNowTransform({
-      transform_id: transformId,
-    });
+    await retryTransientEsErrors(
+      () => esClient.transform.scheduleNowTransform({ transform_id: transformId }),
+      { logger }
+    );
   }
 };
 
@@ -224,7 +229,7 @@ export const scheduleLatestTransformNow = async ({
     );
   }
 
-  await scheduleTransformNow({ esClient, transformId });
+  await scheduleTransformNow({ esClient, logger, transformId });
 };
 
 const isTransformOutdated = (

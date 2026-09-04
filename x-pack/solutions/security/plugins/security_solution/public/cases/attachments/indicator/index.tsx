@@ -10,7 +10,6 @@ import { defineAttachment } from '@kbn/cases-plugin/public';
 import { INDICATOR_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { JsonValue } from '@kbn/utility-types';
 import React from 'react';
-import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { IndicatorAttachmentMetadata } from '../../../../common/cases/attachments/indicator';
@@ -27,7 +26,7 @@ const IndicatorAttachmentChildrenLazy = React.lazy(
 );
 
 const DISPLAY_NAME = i18n.translate('xpack.securitySolution.threatIntelligence.cases.displayName', {
-  defaultMessage: 'Indicator',
+  defaultMessage: 'Indicators',
 });
 
 /**
@@ -36,17 +35,16 @@ const DISPLAY_NAME = i18n.translate('xpack.securitySolution.threatIntelligence.c
 export const getIndicatorAttachment = () =>
   defineAttachment({
     id: INDICATOR_ATTACHMENT_TYPE,
-    icon: 'crosshair',
-    displayName: DISPLAY_NAME,
+    getIcon: () => 'crosshair',
+    getLabel: () => DISPLAY_NAME,
     schema: IndicatorAttachmentPayloadSchema,
-    getAttachmentViewObject: () => ({
+    getCreationActivity: () => ({
       event: (
         <FormattedMessage
           id="xpack.securitySolution.threatIntelligence.cases.eventDescription"
           defaultMessage="added an indicator of compromise"
         />
       ),
-      timelineAvatar: <EuiAvatar name="indicator" color="subdued" iconType="crosshair" />,
       children: IndicatorAttachmentChildrenLazy,
     }),
   });

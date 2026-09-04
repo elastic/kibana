@@ -31,6 +31,7 @@ describe('createTextFieldFormatter and createReactFieldFormatter', () => {
 
   const value = 1234567890;
   const stringValue = 'some string';
+  const base64Value = 'w6l0w6k=';
   const fieldFormatMap = {
     bytesField: {
       id: 'bytes',
@@ -76,8 +77,8 @@ describe('createTextFieldFormatter and createReactFieldFormatter', () => {
     const textFormatter = createTextFieldFormatter('stringField', fieldFormatMap);
     const reactFormatter = createReactFieldFormatter('stringField', fieldFormatMap);
 
-    expect(textFormatter(value)).toBe('×møç®ü÷');
-    expect(reactFormatter(value)).toBe('×møç®ü÷');
+    expect(textFormatter(base64Value)).toBe('été');
+    expect(reactFormatter(base64Value)).toBe('été');
   });
 
   it('should return formatted value for colorField (text vs react element)', () => {

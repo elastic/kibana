@@ -29,6 +29,7 @@
       "kibanaUtils",
       "kibanaReact",
       "visDefaultEditor"
-    ]
+    ],
+    "extraPublicDirs": ["common"]
   }
 }

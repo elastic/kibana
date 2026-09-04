@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import { withSpan } from '@kbn/apm-utils';
 import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import { RuleChangeTrackingAction, type RuleChangeTracking } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleCircuitBreakerErrorMessage, parseDuration } from '../../../../../common';
@@ -35,15 +35,16 @@ import type { RuleParams } from '../../types';
 import { createRuleDataSchema } from '../create/schemas';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import type {
-  ApiKeyEntry,
   BatchResult,
   BulkCreateRulesItem,
   BulkCreateRulesParams,
   BulkCreateRulesResult,
   PreparedRule,
 } from './types';
-import { invalidateKeys, prepareRule } from './utils';
+import { prepareRule } from './utils';
+import { invalidateKeys, type ApiKeyEntry } from '../common_utils/invalidate_keys';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
+import { reportRuleCreatedEvent } from '../common_utils/event_based_telemetry';
 
 export async function bulkCreateRules<Params extends RuleParams = never>(
   context: RulesClientContext,
@@ -148,7 +149,7 @@ async function preValidate<Params extends RuleParams>({
   const authPairs = new Map<string, Set<string>>();
 
   // Phase A1: per-rule in-memory checks, sequential, cheapest-first.
-  await withSpan({ name: 'preValidate.checkInMemory', type: 'rules' }, async () => {
+  await withSpan({ name: 'bulkCreateRules.preValidate.checkInMemory', type: 'rules' }, async () => {
     for (const { id, rule } of inputs) {
       try {
         const { actions: genActions, systemActions: genSystemActions } =
@@ -204,25 +205,28 @@ async function preValidate<Params extends RuleParams>({
   }
 
   // Phase A2: bulk authz fails the whole request on any unauthorized pair.
-  await withSpan({ name: 'preValidate.bulkEnsureAuthorized', type: 'rules' }, async () => {
-    try {
-      // Runs after A1 intentionally. A1 removes invalid/unregistered ruleTypeIds,
-      // so we only authorize pairs that survived schema + registry checks.
-      await context.authorization.bulkEnsureAuthorized({
-        ruleTypeIdConsumersPairs: [...authPairs.entries()].map(([ruleTypeId, consumers]) => ({
-          ruleTypeId,
-          consumers: [...consumers],
-        })),
-        operation: WriteOperations.Create,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    } catch (authzError) {
-      context.auditLogger?.log(
-        ruleAuditEvent({ action: RuleAuditAction.BULK_CREATE, error: authzError })
-      );
-      throw authzError;
+  await withSpan(
+    { name: 'bulkCreateRules.preValidate.bulkEnsureAuthorized', type: 'rules' },
+    async () => {
+      try {
+        // Runs after A1 intentionally. A1 removes invalid/unregistered ruleTypeIds,
+        // so we only authorize pairs that survived schema + registry checks.
+        await context.authorization.bulkEnsureAuthorized({
+          ruleTypeIdConsumersPairs: [...authPairs.entries()].map(([ruleTypeId, consumers]) => ({
+            ruleTypeId,
+            consumers: [...consumers],
+          })),
+          operation: WriteOperations.Create,
+          entity: AlertingAuthorizationEntity.Rule,
+        });
+      } catch (authzError) {
+        context.auditLogger?.log(
+          ruleAuditEvent({ action: RuleAuditAction.BULK_CREATE, error: authzError })
+        );
+        throw authzError;
+      }
     }
-  });
+  );
 
   // Phase A3: schedule-limit circuit breaker across all enabled rules upfront.
   const updatedInterval = [...validated.values()]
@@ -231,7 +235,7 @@ async function preValidate<Params extends RuleParams>({
 
   if (updatedInterval.length > 0) {
     const overflow = await withSpan(
-      { name: 'preValidate.validateScheduleLimit', type: 'rules' },
+      { name: 'bulkCreateRules.preValidate.validateScheduleLimit', type: 'rules' },
       () => validateScheduleLimit({ context, updatedInterval })
     );
     if (overflow) {
@@ -276,7 +280,7 @@ async function runBatch<Params extends RuleParams>({
   const errors: BulkOperationError[] = [];
 
   // Phase B1: per-rule prepare (high latency validation + API key generation).
-  await withSpan({ name: 'runBatch.pMap.prepareRule', type: 'rules' }, () =>
+  await withSpan({ name: 'bulkCreateRules.runBatch.pMap.prepareRule', type: 'rules' }, () =>
     pMap(
       batch,
       async ({ id, rule }) => {
@@ -382,11 +386,13 @@ async function runBatch<Params extends RuleParams>({
 
   let bulkResponse;
   try {
-    bulkResponse = await withSpan({ name: 'runBatch.bulkCreateRulesSo', type: 'rules' }, () =>
-      bulkCreateRulesSo({
-        savedObjectsClient: context.unsecuredSavedObjectsClient,
-        bulkCreateRuleAttributes: bulkObjects,
-      })
+    bulkResponse = await withSpan(
+      { name: 'bulkCreateRules.runBatch.bulkCreateRulesSo', type: 'rules' },
+      () =>
+        bulkCreateRulesSo({
+          savedObjectsClient: context.unsecuredSavedObjectsClient,
+          bulkCreateRuleAttributes: bulkObjects,
+        })
     );
   } catch (error) {
     // Whole-call SO failure: best-effort task cleanup, invalidate keys.
@@ -412,13 +418,12 @@ async function runBatch<Params extends RuleParams>({
   }
 
   // Phase B3 per-row outcomes.
-  const createTime = Date.now();
   const batchSuccessfulIds: string[] = [];
   const taskIdsToCleanUp: string[] = [];
   const successfulSavedObjects: Array<SavedObject<RawRule>> = [];
 
   for (const so of bulkResponse.saved_objects) {
-    if (so.error) {
+    if (isSavedObjectErrorResult(so)) {
       errors.push({
         message: so.error.message ?? 'Error saving rule SO',
         status: so.error.statusCode,
@@ -437,7 +442,7 @@ async function runBatch<Params extends RuleParams>({
       }
     } else {
       batchSuccessfulIds.push(so.id);
-      successfulSavedObjects.push(so as SavedObject<RawRule>);
+      successfulSavedObjects.push(so);
     }
   }
 
@@ -461,13 +466,33 @@ async function runBatch<Params extends RuleParams>({
   if (successfulSavedObjects.length > 0) {
     await logRuleChanges({
       ruleSOs: successfulSavedObjects,
+      encryptedFieldsMap: new Map(
+        [...apiKeys.entries()].map(([ruleId, { apiKey, uiamApiKey }]) => [
+          ruleId,
+          { apiKey, uiamApiKey },
+        ])
+      ),
       rulesClientContext: context,
       changesContext: {
         action: changeTracking?.action ?? RuleChangeTrackingAction.ruleCreate,
-        timestamp: createTime,
         metadata: changeTracking?.metadata,
       },
     });
+
+    for (const so of successfulSavedObjects) {
+      const prepared = preparedRules.get(so.id);
+      if (prepared) {
+        reportRuleCreatedEvent(context, {
+          id: prepared.id,
+          templateId: prepared.templateId,
+          createTime: prepared.createdAt,
+          alertTypeId: prepared.ruleTypeId,
+          enabled: prepared.enabled,
+          consumer: prepared.consumer,
+          producer: prepared.producer,
+        });
+      }
+    }
   }
 
   return { successfulIds: batchSuccessfulIds, errors };

@@ -8,14 +8,17 @@
 import React, { useCallback, useState } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { AnonymizationSettingsManagement } from '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
@@ -37,6 +40,7 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isAnonymizationModalVisible, setIsAnonymizationModalVisible] = useState(false);
   const {
     services: { telemetry },
   } = useKibana();
@@ -48,6 +52,13 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
   }, []);
+
+  const showAnonymizationModal = useCallback(() => {
+    setIsPopoverOpen(false);
+    setIsAnonymizationModalVisible(true);
+  }, []);
+
+  const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
 
   const handleToggleShowAnonymized = useCallback(
     (e: EuiSwitchEvent) => {
@@ -83,35 +94,52 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
   );
 
   return (
-    <EuiPopover
-      id="attacksViewOptionsPopover"
-      aria-label={i18n.VIEW_OPTIONS_ARIA_LABEL}
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="m"
-      anchorPosition="downRight"
-      panelStyle={{ minWidth: euiTheme.base * 18 }}
-    >
-      <EuiFormRow display="rowCompressed">
-        <EuiSwitch
-          label={i18n.SHOW_ANONYMIZED_LABEL}
-          checked={showAnonymized}
-          onChange={handleToggleShowAnonymized}
-          data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized-switch`}
-          compressed
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow display="rowCompressed">
-        <EuiSwitch
-          label={i18n.SHOW_ATTACKS_ONLY_LABEL}
-          checked={showAttacksOnly}
-          onChange={handleToggleShowAttacksOnly}
-          data-test-subj={`${TABLE_SECTION_TEST_ID}-show-attacks-only-switch`}
-          compressed
-        />
-      </EuiFormRow>
-    </EuiPopover>
+    <>
+      <EuiPopover
+        id="attacksViewOptionsPopover"
+        aria-label={i18n.VIEW_OPTIONS_ARIA_LABEL}
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="m"
+        anchorPosition="downRight"
+        panelStyle={{ minWidth: euiTheme.base * 18 }}
+      >
+        <EuiFormRow display="rowCompressed">
+          <EuiSwitch
+            label={i18n.SHOW_ANONYMIZED_LABEL}
+            checked={showAnonymized}
+            onChange={handleToggleShowAnonymized}
+            data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized-switch`}
+            compressed
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiFormRow display="rowCompressed">
+          <EuiSwitch
+            label={i18n.SHOW_ATTACKS_ONLY_LABEL}
+            checked={showAttacksOnly}
+            onChange={handleToggleShowAttacksOnly}
+            data-test-subj={`${TABLE_SECTION_TEST_ID}-show-attacks-only-switch`}
+            compressed
+          />
+        </EuiFormRow>
+        <EuiHorizontalRule margin="s" />
+        <EuiButtonEmpty
+          iconType="gear"
+          size="s"
+          flush="left"
+          color="text"
+          onClick={showAnonymizationModal}
+          data-test-subj={`${TABLE_SECTION_TEST_ID}-anonymization-settings-button`}
+        >
+          {i18n.ANONYMIZATION_SETTINGS_LABEL}
+        </EuiButtonEmpty>
+      </EuiPopover>
+
+      {isAnonymizationModalVisible && (
+        <AnonymizationSettingsManagement modalMode onClose={closeAnonymizationModal} />
+      )}
+    </>
   );
 };

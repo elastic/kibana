@@ -6,15 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SearchHit } from '@kbn/es-types';
-import { toBooleanRt } from '@kbn/io-ts-utils';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import * as t from 'io-ts';
-import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import {
-  agentConfigurationIntakeRt,
-  serviceRt,
-} from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
+  routeDefinitions,
+  type ListAgentConfigurationsResponse,
+  type GetSingleAgentConfigurationResponse,
+  type DeleteAgentConfigurationResponse,
+  type SearchAgentConfigurationResponse,
+  type ListAgentConfigurationEnvironmentsResponse,
+  type AgentConfigurationAgentNameResponse,
+} from '@kbn/apm-api-shared';
 import type { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
 import { createInternalESClientWithResources } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
@@ -25,7 +26,6 @@ import { createOrUpdateConfiguration } from './create_or_update_configuration';
 import { deleteConfiguration } from './delete_configuration';
 import { findExactConfiguration } from './find_exact_configuration';
 import { getAgentNameByService } from './get_agent_name_by_service';
-import type { EnvironmentsResponse } from './get_environments';
 import { getEnvironments } from './get_environments';
 import { handleAgentConfigurationSearch } from './handle_agent_configuration_search';
 import { listConfigurations } from './list_configurations';
@@ -38,13 +38,9 @@ function throwNotFoundIfAgentConfigNotAvailable(featureFlags: ApmFeatureFlags): 
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration 2023-10-31',
+  endpoint: routeDefinitions.agentConfiguration.list.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    configurations: AgentConfiguration[];
-  }> => {
+  handler: async (resources): Promise<ListAgentConfigurationsResponse> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const apmIndices = await resources.getApmIndices();
@@ -64,12 +60,10 @@ const agentConfigurationRoute = createApmServerRoute({
 
 // get a single configuration
 const getSingleAgentConfigurationRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/view 2023-10-31',
-  params: t.partial({
-    query: serviceRt,
-  }),
+  endpoint: routeDefinitions.agentConfiguration.getSingle.endpoint,
+  params: routeDefinitions.agentConfiguration.getSingle.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<AgentConfiguration> => {
+  handler: async (resources): Promise<GetSingleAgentConfigurationResponse> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const { params, logger } = resources;
@@ -97,18 +91,14 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
 
 // delete configuration
 const deleteAgentConfigurationRoute = createApmServerRoute({
-  endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
+  endpoint: routeDefinitions.agentConfiguration.delete.endpoint,
+  params: routeDefinitions.agentConfiguration.delete.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_settings_write'],
     },
   },
-  params: t.type({
-    body: t.type({
-      service: serviceRt,
-    }),
-  }),
-  handler: async (resources): Promise<{ result: string }> => {
+  handler: async (resources): Promise<DeleteAgentConfigurationResponse> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const { params, logger, core, telemetryUsageCounter } = resources;
@@ -155,16 +145,13 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 
 // create/update configuration
 const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
-  endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
+  endpoint: routeDefinitions.agentConfiguration.createOrUpdate.endpoint,
+  params: routeDefinitions.agentConfiguration.createOrUpdate.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_settings_write'],
     },
   },
-  params: t.intersection([
-    t.partial({ query: t.partial({ overwrite: toBooleanRt }) }),
-    t.type({ body: agentConfigurationIntakeRt }),
-  ]),
   handler: async (resources): Promise<void> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
     const { params, logger, core, telemetryUsageCounter } = resources;
@@ -215,28 +202,17 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   },
 });
 
-const searchParamsRt = t.intersection([
-  t.type({ service: serviceRt }),
-  t.partial({ etag: t.string, mark_as_applied_by_agent: t.boolean, error: t.string }),
-]);
-
-export type AgentConfigSearchParams = t.TypeOf<typeof searchParamsRt>;
-
 // Lookup single configuration (used by APM Server)
 const agentConfigurationSearchRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/settings/agent-configuration/search 2023-10-31',
-  params: t.type({
-    body: searchParamsRt,
-  }),
+  endpoint: routeDefinitions.agentConfiguration.search.endpoint,
+  params: routeDefinitions.agentConfiguration.search.params,
   options: { disableTelemetry: true },
   security: {
     authz: {
       requiredPrivileges: ['apm'],
     },
   },
-  handler: async (
-    resources
-  ): Promise<SearchHit<AgentConfiguration, undefined, undefined> | null> => {
+  handler: async (resources): Promise<SearchAgentConfigurationResponse> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const { params, logger } = resources;
@@ -256,16 +232,10 @@ const agentConfigurationSearchRoute = createApmServerRoute({
 
 // get environments for service
 const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/environments 2023-10-31',
-  params: t.partial({
-    query: t.partial({ serviceName: t.string }),
-  }),
+  endpoint: routeDefinitions.agentConfiguration.listEnvironments.endpoint,
+  params: routeDefinitions.agentConfiguration.listEnvironments.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    environments: EnvironmentsResponse;
-  }> => {
+  handler: async (resources): Promise<ListAgentConfigurationEnvironmentsResponse> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const { context, params, config } = resources;
@@ -297,12 +267,10 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
 
 // get agentName for service
 const agentConfigurationAgentNameRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/agent_name 2023-10-31',
-  params: t.type({
-    query: t.type({ serviceName: t.string }),
-  }),
+  endpoint: routeDefinitions.agentConfiguration.agentName.endpoint,
+  params: routeDefinitions.agentConfiguration.agentName.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ agentName: string | undefined }> => {
+  handler: async (resources): Promise<AgentConfigurationAgentNameResponse> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const apmEventClient = await getApmEventClient(resources);

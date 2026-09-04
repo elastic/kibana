@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ReactElement } from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EntityAnalyticsDashboardAttachment } from './entity_analytics_dashboard_attachment';
 import { createEntityAnalyticsDashboardAttachmentDefinition } from './entity_analytics_dashboard_attachment';
 import { navigateToEntityAnalyticsHomePageInApp } from './entity_explore_navigation';
@@ -20,6 +22,10 @@ interface ResizeDimensions {
 }
 
 const RESIZE_CALLBACK_KEY = '__eaDashboardOnResize';
+
+const experimentalFeatures = {
+  newFlyoutSystemDisabled: false,
+} as ExperimentalFeatures;
 
 jest.mock('@elastic/eui', () => {
   const React_ = jest.requireActual('react');
@@ -88,12 +94,7 @@ jest.mock('../../entity_analytics/components/risk_score_donut_chart', () => ({
 }));
 
 jest.mock('./entity_list_table', () => ({
-  EntityListTable: ({ closeCanvas }: { closeCanvas?: () => void }) => (
-    <div
-      data-test-subj="entityListTableMock"
-      data-has-close-canvas={closeCanvas ? 'true' : 'false'}
-    />
-  ),
+  EntityListTable: () => <div data-test-subj="entityListTableMock" />,
 }));
 
 jest.mock('./entity_explore_navigation', () => ({
@@ -127,11 +128,15 @@ const makeAttachment = (): EntityAnalyticsDashboardAttachment =>
   } as unknown as EntityAnalyticsDashboardAttachment);
 
 const renderCanvas = (
-  overrides: { searchSession?: ISessionService; closeCanvas?: () => void } = {}
+  overrides: {
+    searchSession?: ISessionService;
+    closeCanvas?: () => void;
+  } = {}
 ) => {
   const application = applicationServiceMock.createStartContract();
   const definition = createEntityAnalyticsDashboardAttachmentDefinition({
     application,
+    experimentalFeatures,
     searchSession: overrides.searchSession,
   });
   return render(
@@ -142,6 +147,7 @@ const renderCanvas = (
         } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[0],
         {
           closeCanvas: overrides.closeCanvas ?? jest.fn(),
+          registerActionButtons: jest.fn(),
         } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[1]
       )}
     </I18nProvider>
@@ -154,11 +160,13 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
     (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mockClear();
   });
 
-  it('returns an "Open in Security" action from getActionButtons in canvas mode and forwards searchSession', () => {
+  it('returns an "Open in Security" action from getActionButtons in canvas mode and closes the canvas before navigating', () => {
     const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+    const closeCanvas = jest.fn();
     const application = applicationServiceMock.createStartContract();
     const definition = createEntityAnalyticsDashboardAttachmentDefinition({
       application,
+      experimentalFeatures,
       searchSession,
     });
 
@@ -167,14 +175,19 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
       isSidebar: false,
       isCanvas: true,
       updateOrigin: jest.fn(),
+      closeCanvas,
     });
 
     expect(buttons).toHaveLength(1);
-    expect(buttons[0].icon).toBe('popout');
+    expect(buttons[0].icon).toBe('external');
     expect(buttons[0].label).toMatch(/open entity analytics in security/i);
 
     buttons[0].handler();
 
+    expect(closeCanvas).toHaveBeenCalledTimes(1);
+    expect(closeCanvas.mock.invocationCallOrder[0]).toBeLessThan(
+      (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mock.invocationCallOrder[0]
+    );
     expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledTimes(1);
     expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledWith(
       expect.objectContaining({ searchSession })
@@ -184,7 +197,10 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
   it('returns a Preview action from getActionButtons when not in canvas mode', () => {
     const application = applicationServiceMock.createStartContract();
     const openCanvas = jest.fn();
-    const definition = createEntityAnalyticsDashboardAttachmentDefinition({ application });
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      experimentalFeatures,
+    });
 
     const buttons = definition.getActionButtons!({
       attachment: makeAttachment(),
@@ -236,15 +252,55 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
 
   it('sets canvasWidth to 50vw so the dashboard uses the full canvas flyout width', () => {
     const application = applicationServiceMock.createStartContract();
-    const definition = createEntityAnalyticsDashboardAttachmentDefinition({ application });
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      experimentalFeatures,
+    });
     expect(definition.canvasWidth).toBe('50vw');
   });
 
-  it('forwards closeCanvas from the canvas render callbacks into EntityListTable so per-row navigation can dismiss the canvas overlay', () => {
+  it('forwards closeCanvas from the canvas render callbacks into the navigation provider so per-row navigation can dismiss the canvas overlay', () => {
     const closeCanvas = jest.fn();
-    renderCanvas({ closeCanvas });
-    expect(screen.getByTestId('entityListTableMock').getAttribute('data-has-close-canvas')).toBe(
-      'true'
-    );
+    const application = applicationServiceMock.createStartContract();
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      experimentalFeatures,
+    });
+
+    const providerElement = definition.renderCanvasContent!(
+      {
+        attachment: makeAttachment(),
+      } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[0],
+      {
+        closeCanvas,
+        registerActionButtons: jest.fn(),
+      } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[1]
+    ) as ReactElement<{ closeCanvas?: () => void }>;
+
+    expect(providerElement.props.closeCanvas).toBe(closeCanvas);
+  });
+
+  it('forwards the new flyout setting to entity navigation in the canvas preview', () => {
+    const application = applicationServiceMock.createStartContract();
+    const uiSettings = {
+      get: jest.fn(() => true),
+    } as unknown as IUiSettingsClient;
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      experimentalFeatures,
+      uiSettings,
+    });
+
+    const providerElement = definition.renderCanvasContent!(
+      {
+        attachment: makeAttachment(),
+      } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[0],
+      {
+        closeCanvas: jest.fn(),
+        registerActionButtons: jest.fn(),
+      } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[1]
+    ) as ReactElement<{ isNewFlyoutEnabled?: boolean }>;
+
+    expect(providerElement.props.isNewFlyoutEnabled).toBe(true);
   });
 });

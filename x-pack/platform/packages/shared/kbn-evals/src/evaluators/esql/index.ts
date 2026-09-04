@@ -113,6 +113,7 @@ export function createEsqlEquivalenceEvaluator({
       };
     },
     kind: 'LLM',
+    direction: 'maximize',
     name: ESQL_EQUIVALENCE_EVALUATOR_NAME,
   };
 }

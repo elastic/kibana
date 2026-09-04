@@ -9,5 +9,18 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/zod",
+    "@kbn/zod-helpers",
+    "@kbn/std",
+    "@kbn/core-data-streams-server",
+    "@kbn/core-data-streams-server-mocks",
+    "@kbn/core-user-storage-server",
+    "@kbn/core-user-storage-server-mocks",
+    "@kbn/core-user-storage-common",
+    "@kbn/data-streams",
+    "@kbn/es-mappings",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/test",
+    "@kbn/tooling-log"
   ]
 }

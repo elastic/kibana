@@ -1,5 +1,8 @@
 {
-  "sha1": "a130c2014eea409a4fce18c4450d7bb04060eaac",
+  "sha1": "7dfe612365be3b38c7cc5e723b67ab5aaa180ce7",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "926362ac9e9161a-ce96c191932cf3e",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin_serverless.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 15,
+        "column": 16
       }
     },
     {
@@ -27,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 24,
-        "column": 9
+        "line": 19,
+        "column": 16
       }
     },
     {
@@ -43,8 +46,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 29,
-        "column": 9
+        "line": 24,
+        "column": 10
       }
     },
     {
@@ -59,8 +62,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 29,
+        "column": 60
       }
     },
     {
@@ -75,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 56,
-        "column": 9
+        "line": 42,
+        "column": 22
       }
     },
     {
@@ -91,8 +94,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 57,
+        "column": 13
       }
     },
     {
@@ -107,8 +110,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 89,
-        "column": 9
+        "line": 63,
+        "column": 25
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 105,
-        "column": 9
+        "line": 75,
+        "column": 10
       }
     },
     {
@@ -139,8 +142,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 144,
-        "column": 9
+        "line": 110,
+        "column": 24
       }
     },
     {
@@ -155,8 +158,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 150,
-        "column": 9
+        "line": 117,
+        "column": 23
       }
     },
     {
@@ -171,7 +174,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 156,
+        "line": 124,
         "column": 9
       }
     },
@@ -187,8 +190,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 165,
-        "column": 9
+        "line": 130,
+        "column": 30
       }
     },
     {
@@ -203,8 +206,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 182,
-        "column": 9
+        "line": 138,
+        "column": 58
       }
     },
     {
@@ -219,8 +222,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 192,
-        "column": 9
+        "line": 144,
+        "column": 82
       }
     },
     {
@@ -233,13 +236,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_data_management_user.spec.ts",
-        "line": 31,
-        "column": 14
+        "line": 21,
+        "column": 84
       }
     },
     {
-      "id": "36d5b3c1e8655d5-f6bc7b4906887c3",
-      "title": "Homepage - Limited permissions user should only see Data Management in primary sidenav",
+      "id": "36d5b3c1e8655d5-5629a8d4290c357",
+      "title": "Homepage - Limited permissions user should only see expected primary sidenav items",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -247,8 +250,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_data_management_user.spec.ts",
-        "line": 51,
-        "column": 14
+        "line": 34,
+        "column": 33
       }
     },
     {
@@ -261,8 +264,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer_serverless.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 15,
+        "column": 16
       }
     },
     {
@@ -277,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 24,
-        "column": 9
+        "line": 19,
+        "column": 16
       }
     },
     {
@@ -293,8 +296,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 32,
-        "column": 9
+        "line": 24,
+        "column": 75
       }
     },
     {
@@ -309,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 66,
-        "column": 9
+        "line": 59,
+        "column": 32
       }
     },
     {
@@ -325,8 +328,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 75,
-        "column": 9
+        "line": 62,
+        "column": 26
       }
     },
     {
@@ -341,8 +344,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 68,
+        "column": 7
       }
     },
     {
@@ -357,8 +360,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 75,
+        "column": 10
       }
     },
     {
@@ -373,8 +376,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 112,
-        "column": 9
+        "line": 88,
+        "column": 24
       }
     },
     {
@@ -389,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 120,
-        "column": 9
+        "line": 94,
+        "column": 24
       }
     },
     {
@@ -405,8 +408,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 136,
-        "column": 9
+        "line": 101,
+        "column": 25
       }
     },
     {
@@ -421,8 +424,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 153,
-        "column": 9
+        "line": 111,
+        "column": 13
       }
     },
     {
@@ -437,8 +440,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 163,
-        "column": 9
+        "line": 125,
+        "column": 24
       }
     }
   ]

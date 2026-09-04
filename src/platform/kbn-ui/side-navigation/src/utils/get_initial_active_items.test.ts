@@ -38,6 +38,7 @@ const navigation: NavigationStructure = {
       },
     ]),
   ],
+  overflowItems: [],
   footerItems: [
     createMenuItem('settings', 'Settings', [
       {
@@ -53,15 +54,6 @@ describe('getActiveItems', () => {
     expect(getActiveItems(navigation)).toEqual({
       primaryItem: null,
       secondaryItem: null,
-      isLogoActive: false,
-    });
-  });
-
-  it('marks the logo as active when the logo id matches', () => {
-    expect(getActiveItems(navigation, 'logo-id', 'logo-id')).toEqual({
-      primaryItem: null,
-      secondaryItem: null,
-      isLogoActive: true,
     });
   });
 
@@ -70,7 +62,6 @@ describe('getActiveItems', () => {
 
     expect(result.primaryItem?.id).toBe('dashboards');
     expect(result.secondaryItem?.id).toBe('dashboards-overview');
-    expect(result.isLogoActive).toBe(false);
   });
 
   it('returns the footer item and secondary item when a footer secondary item matches', () => {
@@ -78,7 +69,6 @@ describe('getActiveItems', () => {
 
     expect(result.primaryItem?.id).toBe('settings');
     expect(result.secondaryItem?.id).toBe('settings-general');
-    expect(result.isLogoActive).toBe(false);
   });
 
   it('returns the primary item when the active id matches a primary menu item', () => {
@@ -86,7 +76,6 @@ describe('getActiveItems', () => {
 
     expect(result.primaryItem?.id).toBe('home');
     expect(result.secondaryItem).toBeNull();
-    expect(result.isLogoActive).toBe(false);
   });
 
   it('returns the footer item when the active id matches a footer item', () => {
@@ -94,6 +83,5 @@ describe('getActiveItems', () => {
 
     expect(result.primaryItem?.id).toBe('settings');
     expect(result.secondaryItem).toBeNull();
-    expect(result.isLogoActive).toBe(false);
   });
 });

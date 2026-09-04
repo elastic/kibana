@@ -14,6 +14,7 @@ import { getFeaturesFromOutput } from '../types';
 export const typeAssertionsEvaluator = {
   name: 'type_assertions',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const { required_types, forbidden_types } = expected;
 
@@ -60,7 +61,7 @@ export const typeAssertionsEvaluator = {
         issues.length > 0
           ? `Type assertion failures: ${issues.join('; ')}`
           : 'All type assertions passed',
-      details: { presentTypes: [...presentTypes], required_types, forbidden_types, issues },
+      metadata: { presentTypes: [...presentTypes], required_types, forbidden_types, issues },
     };
   },
 } satisfies KIFeatureExtractionEvaluator;

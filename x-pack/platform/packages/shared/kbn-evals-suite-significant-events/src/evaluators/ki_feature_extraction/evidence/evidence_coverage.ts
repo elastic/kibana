@@ -15,6 +15,7 @@ import { getFeaturesFromOutput } from '../types';
 export const evidenceCoverageEvaluator = {
   name: 'evidence_coverage',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const features = getFeaturesFromOutput(output);
     if (features.length === 0) {
@@ -33,7 +34,7 @@ export const evidenceCoverageEvaluator = {
               features.length
             } feature(s) lack evidence: ${withoutEvidence.map((f) => `"${f.id}"`).join(', ')}`
           : `All ${features.length} feature(s) include evidence`,
-      details: {
+      metadata: {
         total: features.length,
         withEvidence: withEvidence.length,
         withoutEvidence: withoutEvidence.map((f) => f.id),

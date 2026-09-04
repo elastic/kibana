@@ -17,7 +17,10 @@ project:
   owner: '@elastic/kibana-security'
   sourceRoot: x-pack/platform/plugins/shared/security
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/cloud-plugin'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'
@@ -83,6 +86,7 @@ dependsOn:
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-user-profile-server'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/core-user-profile-browser-hooks'
   - '@kbn/security-api-key-management'
   - '@kbn/security-form-components'
   - '@kbn/core-security-server-mocks'
@@ -102,16 +106,21 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
   - '@kbn/scout'
+  - '@kbn/dev-utils'
+  - '@kbn/security-api-integration-helpers'
   - '@kbn/mock-idp-utils'
   - '@kbn/core-user-activity-server'
   - '@kbn/core-user-activity-server-mocks'
-  - '@kbn/management-settings-ids'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/react-query'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-user-profile-common'
   - '@kbn/core-chrome-browser-components'
+  - '@kbn/core-logging-server'
+  - '@kbn/projects-solutions-groups'
+  - '@kbn/unsaved-changes-prompt'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

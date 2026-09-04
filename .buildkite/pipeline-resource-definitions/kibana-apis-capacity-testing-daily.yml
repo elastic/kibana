@@ -26,6 +26,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/scalability/api_capacity_testing_daily.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/scalability/api_capacity_testing_daily.yml
+            cleanup_sparse_state: true
       provider_settings:
         trigger_mode: none
         build_branches: true
@@ -40,10 +45,5 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
-      schedules:
-        Capacity every 3h testing:
-          cronline: 0 1/3 * * * Europe/Berlin
-          message: Capacity every 3h testing
-          branch: main
       tags:
         - kibana

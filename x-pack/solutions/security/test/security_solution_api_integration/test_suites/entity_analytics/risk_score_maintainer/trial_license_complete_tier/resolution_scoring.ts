@@ -20,7 +20,6 @@ import {
   cleanUpWatchlists,
   riskScoreMaintainerScenarioFactory,
   riskScoreMaintainerEntityBuilders,
-  waitForEntityStoreEntities,
   waitForEntityStoreDoc,
   indexListOfDocumentsFactory,
   setupMaintainerLogsDataStream,
@@ -266,7 +265,8 @@ export default ({ getService }: FtrProviderContext): void => {
           entityTypes: ['user', 'host'],
           dataViewPattern: testLogsIndex,
         });
-        await waitForEntityStoreEntities({ es, log, count: 2 });
+        await waitForEntityStoreDoc({ es, retry, entityId: targetUser.expectedEuid });
+        await waitForEntityStoreDoc({ es, retry, entityId: aliasUser.expectedEuid });
 
         await maintainerScenario.setEntityResolutionTarget({
           testEntity: aliasUser,
@@ -328,7 +328,7 @@ export default ({ getService }: FtrProviderContext): void => {
           entityTypes: ['user', 'host'],
           dataViewPattern: testLogsIndex,
         });
-        await waitForEntityStoreEntities({ es, log, count: 1 });
+        await waitForEntityStoreDoc({ es, retry, entityId: user.expectedEuid });
 
         await maintainerRoutes.runMaintainerSync('risk-score');
 
@@ -365,7 +365,8 @@ export default ({ getService }: FtrProviderContext): void => {
           entityTypes: ['user', 'host'],
           dataViewPattern: testLogsIndex,
         });
-        await waitForEntityStoreEntities({ es, log, count: 2 });
+        await waitForEntityStoreDoc({ es, retry, entityId: targetUser.expectedEuid });
+        await waitForEntityStoreDoc({ es, retry, entityId: silentAlias.expectedEuid });
 
         await maintainerScenario.setEntityResolutionTarget({
           testEntity: silentAlias,
@@ -405,7 +406,8 @@ export default ({ getService }: FtrProviderContext): void => {
           entityTypes: ['user', 'host'],
           dataViewPattern: testLogsIndex,
         });
-        await waitForEntityStoreEntities({ es, log, count: 2 });
+        await waitForEntityStoreDoc({ es, retry, entityId: targetUser.expectedEuid });
+        await waitForEntityStoreDoc({ es, retry, entityId: aliasUser.expectedEuid });
 
         await maintainerScenario.setEntityResolutionTarget({
           testEntity: aliasUser,
@@ -428,7 +430,8 @@ export default ({ getService }: FtrProviderContext): void => {
         await entityStoreUtils.unlinkEntitiesViaResolutionApi({
           entityIds: [aliasUser.expectedEuid],
         });
-        await entityStoreUtils.forceExtractEntities({ entityType: 'user' });
+        const extractResponse = await entityStoreUtils.forceExtractEntities({ entityType: 'user' });
+        expect(extractResponse.body.success).to.be(true);
         await waitForResolutionRelationshipCleared(aliasUser.expectedEuid);
 
         await maintainerScenario.createAlertsForDocumentIds({
@@ -528,7 +531,8 @@ export default ({ getService }: FtrProviderContext): void => {
             entityTypes: ['user', 'host'],
             dataViewPattern: testLogsIndex,
           });
-          await waitForEntityStoreEntities({ es, log, count: 2 });
+          await waitForEntityStoreDoc({ es, retry, entityId: targetUser.expectedEuid });
+          await waitForEntityStoreDoc({ es, retry, entityId: silentAlias.expectedEuid });
 
           const wlAResponse = await watchlistRoutes.create({
             name: 'wl-a',

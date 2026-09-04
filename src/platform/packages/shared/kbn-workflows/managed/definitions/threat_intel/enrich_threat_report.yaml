@@ -1,0 +1,331 @@
+version: "1"
+# Every 4h: IOC extract, taxonomy, severity, and Diamond for pending reports.
+# Driver `size: 50` caps wall clock and inference load. Each item runs several
+# LLM steps sequentially; partial drain per pass is intentional.
+# Scoped to `workflow.spaceId` plus global (`*`) report rows via `space_id`.
+# The LLM steps do not name an inference endpoint. Each route resolves its own
+# model through the inference feature registry, so operators pick the models in
+# Stack Management > Model Settings rather than by editing this workflow.
+name: Enrich threat report
+description: Extract IOCs, taxonomy, severity, and Diamond from pending reports
+tags:
+  - threat-intel
+enabled: true
+settings:
+  concurrency:
+    key: "threat-intel-enrich-{{ workflow.spaceId }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "4h"
+steps:
+  - name: set_space_context
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+
+  - name: load_pending_reports
+    type: elasticsearch.search
+    with:
+      # Bare index name. `{index}/_search` is skipped if `index` is omitted, and the
+      # engine falls through to cluster-wide `_search`.
+      index: .kibana-threat-reports
+      size: 50
+      # Fingerprints only. Fetch bodies per item after the dedup skip (10 MB step cap).
+      _source:
+        - content_fingerprint
+      query:
+        bool:
+          must:
+            - term:
+                lineage.extraction_method: pending
+          filter:
+            - terms:
+                space_id:
+                  - "{{ variables.spaceId }}"
+                  - "*"
+      # Field-name strings sort ascending. Object form `{ "@timestamp": "asc" }` is rejected.
+      sort:
+        - "@timestamp"
+
+  - name: extract_each_report
+    type: foreach
+    foreach: "{{ steps.load_pending_reports.output.hits.hits }}"
+    steps:
+      # Per-item fingerprint lookup. KQL `if` has no array-containment operator.
+      - name: check_already_extracted
+        type: elasticsearch.search
+        with:
+          index: .kibana-threat-reports
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              must:
+                - term:
+                    content_fingerprint: "{{ foreach.item._source.content_fingerprint }}"
+              must_not:
+                # A different non-pending doc with this fingerprint means already extracted.
+                - term:
+                    lineage.extraction_method: pending
+                - ids:
+                    values:
+                      - "{{ foreach.item._id }}"
+              filter:
+                - terms:
+                    space_id:
+                      - "{{ variables.spaceId }}"
+                      - "*"
+      - name: skip_already_extracted
+        type: loop.continue
+        if: "steps.check_already_extracted.output.hits.total.value > 0"
+
+      - name: load_full_doc
+        type: elasticsearch.search
+        with:
+          index: "{{ foreach.item._index }}"
+          size: 1
+          query:
+            ids:
+              values:
+                - "{{ foreach.item._id }}"
+
+      # Observe-first gate: persist the verdict, do not skip later stages.
+      - name: assess_relevance
+        type: kibana.request
+        with:
+          method: POST
+          path: "/s/{{ variables.spaceId }}/internal/threat_intel/assess_relevance"
+          headers:
+            elastic-api-version: "1"
+            x-elastic-internal-origin: "kibana"
+          body:
+            html: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_html }}"
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
+            title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
+        on-failure:
+          continue: true
+
+      # Fail-open: missing gate output defaults to intelligence=true.
+      - name: capture_gate_signals
+        type: data.set
+        with:
+          gate_is_intelligence: "${{ steps.assess_relevance.output.is_intelligence | default: true }}"
+          gate_quality_class: "{{ steps.assess_relevance.output.quality_class | default: 'intel' }}"
+          gate_evidence_tier: "{{ steps.assess_relevance.output.evidence_tier | default: 'primary' }}"
+          gate_needs_render: "${{ steps.assess_relevance.output.needs_render | default: false }}"
+          gate_has_original_commentary: "${{ steps.assess_relevance.output.has_original_commentary | default: true }}"
+          gate_reason: "{{ steps.assess_relevance.output.reason | default: '' }}"
+
+      - name: extract_iocs
+        type: kibana.request
+        with:
+          method: POST
+          path: "/s/{{ variables.spaceId }}/internal/threat_intel/extract_iocs"
+          headers:
+            elastic-api-version: "1"
+            x-elastic-internal-origin: "kibana"
+          body:
+            html: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_html }}"
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
+            defang: true
+        on-failure:
+          continue: true
+
+      # Taxonomy + actionability. Do not set use_server_info: true (breaks on Cloud).
+      - name: enrich_taxonomy
+        type: kibana.request
+        with:
+          method: POST
+          path: "/s/{{ variables.spaceId }}/internal/threat_intel/enrich_taxonomy"
+          headers:
+            elastic-api-version: "1"
+            x-elastic-internal-origin: "kibana"
+          body:
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
+            report_id: "{{ foreach.item._id }}"
+            title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
+        on-failure:
+          continue: true
+
+      - name: classify_severity
+        type: kibana.request
+        with:
+          method: POST
+          path: "/s/{{ variables.spaceId }}/internal/threat_intel/classify_severity"
+          headers:
+            elastic-api-version: "1"
+            x-elastic-internal-origin: "kibana"
+          body:
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
+            report_id: "{{ foreach.item._id }}"
+            title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
+            categories: "${{ steps.enrich_taxonomy.output.categories }}"
+            ioc_count: "${{ steps.extract_iocs.output.count | default: 0 }}"
+        on-failure:
+          continue: true
+
+      # `${{ }}` keeps numbers typed. Neutral defaults when taxonomy failed.
+      - name: capture_ranking_signals
+        type: data.set
+        with:
+          relevance: "${{ steps.enrich_taxonomy.output.relevance | default: 0.5 }}"
+          # False is Liquid-falsy, so `default:` covers both missing and explicit false.
+          diamond_suitable: "${{ steps.enrich_taxonomy.output.diamond_suitable | default: false }}"
+          # Sentinel so related-report `terms` never receives an empty array.
+          technique_ids: "${{ '__no_techniques__' | split: ',' }}"
+
+      # Keep `pending` unless extraction, taxonomy, and severity all succeeded.
+      # Probe step health via `.error`, not payload fields: every taxonomy
+      # field has a legitimate falsy value (relevance 0.0, diamond_suitable
+      # false, empty categories/regions). All three steps use on-failure
+      # continue, so a failure still reaches this gate with `.error` set. The
+      # enrich taxonomy route returns non-2xx when Zod validation fails.
+      #
+      # extract_iocs has to be in this set. It is the step whose output the rest
+      # of the pipeline actually consumes: promote_threat_indicators only reads
+      # reports that have extracted.iocs, and load_pending_reports only re-reads
+      # reports still marked pending. Leaving it out meant one transient IOC-route
+      # failure marked the report complete with no IOCs, and nothing ever looked
+      # at it again.
+      - name: mark_llm_enrich_complete
+        type: data.set
+        if: "${{ steps.extract_iocs.error == null and steps.classify_severity.error == null and steps.enrich_taxonomy.error == null }}"
+        with:
+          extraction_method: workflow_v2
+
+      - name: mark_llm_enrich_incomplete
+        type: data.set
+        if: "${{ steps.extract_iocs.error != null or steps.classify_severity.error != null or steps.enrich_taxonomy.error != null }}"
+        with:
+          extraction_method: pending
+
+      # Diamond extraction when diamond_suitable. Do not set use_server_info: true.
+      - name: extract_diamond
+        type: kibana.request
+        if: "variables.diamond_suitable: true"
+        with:
+          method: POST
+          path: "/s/{{ variables.spaceId }}/internal/threat_intel/extract_diamond"
+          headers:
+            elastic-api-version: "1"
+            x-elastic-internal-origin: "kibana"
+          body:
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
+            report_id: "{{ foreach.item._id }}"
+        on-failure:
+          continue: true
+
+      # Separate write so a diamond failure does not block persist_extractions.
+      - name: persist_diamond_fields
+        type: elasticsearch.update
+        if: "variables.diamond_suitable: true"
+        with:
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            extracted:
+              diamond:
+                adversary: "${{ steps.extract_diamond.output.adversary }}"
+                capability: "${{ steps.extract_diamond.output.capability }}"
+                infrastructure: "${{ steps.extract_diamond.output.infrastructure }}"
+                victim: "${{ steps.extract_diamond.output.victim }}"
+                signal_count: "${{ steps.extract_diamond.output.signal_count }}"
+                model_id: "{{ steps.extract_diamond.output.model_id }}"
+                extracted_at: "{{ steps.extract_diamond.output.extracted_at }}"
+                extraction_mode: "{{ steps.extract_diamond.output.extraction_mode }}"
+        on-failure:
+          continue: true
+
+      # Related-report scoring is calibrated. Do not "simplify" these numbers.
+      # size 15: 50 returned ~the whole corpus (related_reports_count 49).
+      # min_score 4: one shared common domain stays below the floor.
+      # boost 5 (exact ioc_set_hash) or boost 2 + score_mode sum (IOC overlap)
+      # is what clears it. Technique overlap is omitted on purpose: common
+      # ATT&CK IDs have low IDF and never cleared min_score 4 alone.
+      - name: find_related_reports
+        type: elasticsearch.search
+        if: "steps.extract_iocs.output.ioc_set_hash : *"
+        with:
+          index: .kibana-threat-reports
+          size: 15
+          _source: false
+          min_score: 4
+          query:
+            bool:
+              minimum_should_match: 1
+              filter:
+                - terms:
+                    space_id:
+                      - "{{ variables.spaceId }}"
+                      - "*"
+              must_not:
+                - ids:
+                    values:
+                      - "{{ foreach.item._id }}"
+              should:
+                - term:
+                    extracted.ioc_set_hash:
+                      value: "{{ steps.extract_iocs.output.ioc_set_hash }}"
+                      boost: 5
+                # `${{ }}` keeps the mapped IOC values as an array.
+                - nested:
+                    path: extracted.iocs
+                    score_mode: sum
+                    boost: 2
+                    query:
+                      terms:
+                        extracted.iocs.value: "${{ steps.extract_iocs.output.iocs | map: 'value' }}"
+        on-failure:
+          continue: true
+
+      - name: persist_extractions
+        type: elasticsearch.update
+        with:
+          # Concrete `_index`; wildcards are rejected on update.
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
+          # `${{ }}` keeps arrays, numbers, and dates typed. `{{ }}` stringifies them.
+          # Omit `default: []`; Liquid has no array literal and would drop the field.
+          doc:
+            extracted:
+              iocs: "${{ steps.extract_iocs.output.iocs }}"
+              ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
+              categories: "${{ steps.enrich_taxonomy.output.categories }}"
+              relevance: "${{ variables.relevance }}"
+              diamond:
+                suitable: "${{ variables.diamond_suitable }}"
+              gate:
+                is_intelligence: "${{ variables.gate_is_intelligence }}"
+                quality_class: "{{ variables.gate_quality_class }}"
+                evidence_tier: "{{ variables.gate_evidence_tier }}"
+                needs_render: "${{ variables.gate_needs_render }}"
+                has_original_commentary: "${{ variables.gate_has_original_commentary }}"
+                reason: "{{ variables.gate_reason }}"
+                assessed_at: "${{ now }}"
+            geography:
+              regions: "${{ steps.enrich_taxonomy.output.regions }}"
+            lineage:
+              extracted_at: "${{ now }}"
+              extraction_method: "{{ variables.extraction_method | default: 'pending' }}"
+              related_reports: "${{ steps.find_related_reports.output.hits.hits | map: '_id' }}"
+              related_reports_count: "${{ steps.find_related_reports.output.hits.total.value | default: 0 }}"
+        on-failure:
+          continue: true
+
+      # Severity only after a successful classify. Incomplete LLM runs keep ingest severity.
+      - name: persist_classified_severity
+        type: elasticsearch.update
+        if: "steps.classify_severity.output.level : *"
+        with:
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            severity:
+              level: "{{ steps.classify_severity.output.level }}"
+              score: "${{ steps.classify_severity.output.score }}"
+            rank_score: "${{ steps.classify_severity.output.score | times: variables.relevance }}"
+        on-failure:
+          continue: true

@@ -21,11 +21,10 @@ import {
   getEditorExtensions,
   getEsqlPolicies,
   getInferenceEndpoints,
-  getTimeseriesIndices,
   getViews,
   getDatasets,
 } from '@kbn/esql-utils';
-import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
+import type { getEsqlColumns, getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { clearCacheWhenOld } from '../helpers';
 import { getHistoryItems } from '../history_local_storage';
@@ -33,7 +32,11 @@ import type { ESQLEditorDeps } from '../types';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
 import { useCanCreateLookupIndex } from '../lookup_join';
 import { useCanSuggestResourceBrowser } from '../resource_browser/use_can_suggest_resource_browser';
-import { DATA_SOURCES_CACHE_KEY, HISTORY_STARRED_ITEMS_CACHE_KEY } from '../helpers';
+import {
+  DATA_SOURCES_CACHE_KEY,
+  HISTORY_STARRED_ITEMS_CACHE_KEY,
+  TIMESERIES_INDICES_CACHE_KEY,
+} from '../helpers';
 
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {
   timestamp: number;
@@ -58,7 +61,8 @@ type MemoizedSources = MemoizedFn<
   [
     CoreStart,
     (() => Promise<ILicense | undefined>) | undefined,
-    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
+    AbortSignal | undefined
   ],
   ReturnType<typeof getESQLSources>
 >;
@@ -66,6 +70,11 @@ type MemoizedSources = MemoizedFn<
 type MemoizedHistoryStarredItems = MemoizedFn<
   [typeof getHistoryItems, FavoritesClient<StarredQueryMetadata>],
   Promise<string[]>
+>;
+
+type MemoizedTimeseriesIndices = MemoizedFn<
+  [CoreStart['http'], AbortSignal?],
+  ReturnType<typeof getTimeseriesIndices>
 >;
 
 interface UseEsqlCallbacksParams {
@@ -83,6 +92,8 @@ interface UseEsqlCallbacksParams {
   memoizedFieldsFromESQL: MemoizedFieldsFromESQL;
   historyStarredItemsCache: MapCache;
   memoizedHistoryStarredItems: MemoizedHistoryStarredItems;
+  timeseriesIndicesCache: MapCache;
+  memoizedTimeseriesIndices: MemoizedTimeseriesIndices;
   favoritesClient: FavoritesClient<StarredQueryMetadata>;
   getJoinIndicesCallback: Required<ESQLCallbacks>['getJoinIndices'];
   enableResourceBrowser: boolean;
@@ -103,18 +114,27 @@ export const useEsqlCallbacks = ({
   memoizedFieldsFromESQL,
   historyStarredItemsCache,
   memoizedHistoryStarredItems,
+  timeseriesIndicesCache,
+  memoizedTimeseriesIndices,
   favoritesClient,
   getJoinIndicesCallback,
   enableResourceBrowser,
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
   const columnsAbortControllerRef = useRef<AbortController | undefined>(undefined);
   const previousColumnsQueryRef = useRef<string | undefined>(undefined);
+  const lifecycleAbortControllerRef = useRef(new AbortController());
+  const sourcesAbortControllerRef = useRef(new AbortController());
 
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, DATA_SOURCES_CACHE_KEY);
     const getLicense = esqlService?.getLicense;
     const enrichSources = esqlService?.enrichSources;
-    const sources = await memoizedSources(core, getLicense, enrichSources).result;
+    const sources = await memoizedSources(
+      core,
+      getLicense,
+      enrichSources,
+      sourcesAbortControllerRef.current.signal
+    ).result;
     return sources;
   }, [dataSourcesCache, memoizedSources, core, esqlService]);
 
@@ -181,18 +201,24 @@ export const useEsqlCallbacks = ({
     ]
   );
 
-  // Abort any in-flight getColumnsFor request when the editor unmounts. Without this, navigating away
-  // from a long-running query leaves it polling in the browser and running on ES.
+  // Abort any in-flight requests when the editor unmounts.
   useEffect(() => {
+    const lifecycleController = lifecycleAbortControllerRef.current;
+    const sourcesController = sourcesAbortControllerRef.current;
     return () => {
       columnsAbortControllerRef.current?.abort();
       if (previousColumnsQueryRef.current) {
         esqlFieldsCache.delete(previousColumnsQueryRef.current);
       }
+      lifecycleController.abort();
+      sourcesController.abort();
     };
   }, [esqlFieldsCache]);
 
-  const getPolicies = useCallback(async () => getEsqlPolicies(core.http), [core.http]);
+  const getPolicies = useCallback(
+    async () => getEsqlPolicies(core.http, lifecycleAbortControllerRef.current.signal),
+    [core.http]
+  );
 
   const getPreferences = useCallback(
     async () => ({
@@ -214,11 +240,15 @@ export const useEsqlCallbacks = ({
   );
 
   const getTimeseriesIndicesCallback = useCallback(async () => {
-    return (await getTimeseriesIndices(core.http)) || [];
-  }, [core.http]);
+    clearCacheWhenOld(timeseriesIndicesCache, TIMESERIES_INDICES_CACHE_KEY);
+    return (
+      (await memoizedTimeseriesIndices(core.http, lifecycleAbortControllerRef.current.signal)
+        .result) || { indices: [] }
+    );
+  }, [core.http, memoizedTimeseriesIndices, timeseriesIndicesCache]);
 
   const getViewsCallback = useCallback(async () => {
-    const views = await getViews(core.http);
+    const views = await getViews(core.http, lifecycleAbortControllerRef.current.signal);
     const enrichViews = esqlService?.enrichViews;
     if (!enrichViews) {
       return views;
@@ -227,7 +257,7 @@ export const useEsqlCallbacks = ({
   }, [core.http, esqlService]);
 
   const getDatasetsCallback = useCallback(async () => {
-    return await getDatasets(core.http);
+    return await getDatasets(core.http, lifecycleAbortControllerRef.current.signal);
   }, [core.http]);
 
   const getEditorExtensionsCallback = useCallback(
@@ -235,7 +265,12 @@ export const useEsqlCallbacks = ({
       // Only fetch recommendations if there's an active solutionId and a non-empty query
       // Otherwise the route will return an error
       if (activeSolutionId && queryString.trim() !== '') {
-        return await getEditorExtensions(core.http, queryString, activeSolutionId);
+        return await getEditorExtensions(
+          core.http,
+          queryString,
+          activeSolutionId,
+          lifecycleAbortControllerRef.current.signal
+        );
       }
       return {
         recommendedQueries: [],
@@ -247,7 +282,13 @@ export const useEsqlCallbacks = ({
 
   const getInferenceEndpointsCallback = useCallback(
     async (taskType: string) => {
-      return (await getInferenceEndpoints(core.http, taskType)) || [];
+      return (
+        (await getInferenceEndpoints(
+          core.http,
+          taskType,
+          lifecycleAbortControllerRef.current.signal
+        )) || []
+      );
     },
     [core.http]
   );

@@ -9,7 +9,8 @@ import React, { useEffect, useState, Fragment } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { ScopedHistory } from '@kbn/core/public';
 
 import type { TemplateDeserialized } from '../../../../common';
@@ -130,60 +131,60 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   }
 
   return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      {isSystemTemplate && (
-        <Fragment>
-          <EuiCallOut
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.idxMgmt.templateEdit.systemTemplateWarningTitle"
-                defaultMessage="Editing a system template can break Kibana"
-              />
-            }
-            color="danger"
-            iconType="warning"
-            data-test-subj="systemTemplateEditCallout"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.templateEdit.systemTemplateWarningDescription"
-              defaultMessage="System templates are critical for internal operations."
-            />
-          </EuiCallOut>
+    <>
+      {(isSystemTemplate || isDeprecatedTemplate) && (
+        <EuiPageSection restrictWidth style={{ width: '100%' }} paddingSize="none">
           <EuiSpacer size="l" />
-        </Fragment>
-      )}
-      {isDeprecatedTemplate && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.idxMgmt.templateEdit.deprecatedTemplateWarningTitle"
-                defaultMessage="This index template is deprecated"
+          {isSystemTemplate && (
+            <Fragment>
+              <KbnDangerCallout
+                announceOnMount
+                title={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateEdit.systemTemplateWarningTitle"
+                    defaultMessage="Editing a system template can break Kibana"
+                  />
+                }
+                data-test-subj="systemTemplateEditCallout"
+                text={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateEdit.systemTemplateWarningDescription"
+                    defaultMessage="System templates are critical for internal operations."
+                  />
+                }
               />
-            }
-            iconType="warning"
-            color="warning"
-            data-test-subj="deprecatedIndexTemplateCallout"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.templateEdit.deprecatedTemplateWarningDescription"
-              defaultMessage="This index template is no longer supported and might be removed in a future release. Instead, use one of the other index templates available or create a new one."
-            />
-          </EuiCallOut>
-          <EuiSpacer size="l" />
-        </>
+              <EuiSpacer size="l" />
+            </Fragment>
+          )}
+          {isDeprecatedTemplate && (
+            <>
+              <KbnWarningCallout
+                announceOnMount
+                title={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateEdit.deprecatedTemplateWarningTitle"
+                    defaultMessage="This index template is deprecated"
+                  />
+                }
+                data-test-subj="deprecatedIndexTemplateCallout"
+                text={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateEdit.deprecatedTemplateWarningDescription"
+                    defaultMessage="This index template is no longer supported and might be removed in a future release. Instead, use one of the other index templates available or create a new one."
+                  />
+                }
+              />
+              <EuiSpacer size="l" />
+            </>
+          )}
+        </EuiPageSection>
       )}
 
       <TemplateForm
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
-            defaultMessage="Edit template ''{name}''"
-            values={{ name: decodedTemplateName }}
-          />
-        }
+        title={i18n.translate('xpack.idxMgmt.editTemplate.editTemplatePageTitle', {
+          defaultMessage: "Edit template ''{name}''",
+          values: { name: decodedTemplateName },
+        })}
         defaultValue={template!}
         onSave={onSave}
         isSaving={isSaving}
@@ -193,6 +194,6 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
         isLegacy={isLegacy}
         history={history as ScopedHistory}
       />
-    </EuiPageSection>
+    </>
   );
 };

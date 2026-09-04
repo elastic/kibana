@@ -64,13 +64,23 @@ export const EPM_API_ROUTES = {
   BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/_bulk_rollback/available_check`,
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
   REVIEW_UPGRADE_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/review_upgrade`,
+  ILM_POLICIES_PATTERN: `${INTERNAL_ROOT}/epm/ilm_policies`,
+  NAMESPACE_PREFLIGHT_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/namespace_customization/_preflight_check`,
 };
 
 // Data stream API routes
 export const DATA_STREAM_API_ROUTES = {
   LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
+  HAS_DATA_PATTERN: `${DATA_STREAM_API_ROOT}/data`,
   DEPRECATED_ILM_CHECK_PATTERN: `${INTERNAL_ROOT}/data_streams/deprecated_ilm_check`,
 };
+
+/**
+ * Validates a `logs-<dataset>-*` or `metrics-<dataset>-*` wildcard index pattern, as accepted by
+ * the `dataStreams` query param of `DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN`. Callers should use
+ * this to drop patterns the route would reject before making the request.
+ */
+export const DATA_STREAM_INDEX_PATTERN_REGEX = /^(logs|metrics)-[a-z0-9_.]+-\*$/;
 
 // Package policy API routes
 export const PACKAGE_POLICY_API_ROUTES = {
@@ -121,6 +131,11 @@ export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
   BY_CONNECTOR_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/connector/{connectorId}`,
   UPDATE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
   DELETE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
+};
+
+// IaC Provisioner API routes
+export const IAC_PROVISIONER_API_ROUTES = {
+  RENDER_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/render_template`,
 };
 
 // Kubernetes Manifest API routes
@@ -215,10 +230,30 @@ export const AGENT_API_ROUTES = {
   GENERATE_REPORT_PATTERN: `${INTERNAL_ROOT}/agents/reporting/generate`,
 };
 
+// Canonical managed integrations API (formerly "agentless policies"). New code should use these.
+export const MANAGED_INTEGRATIONS_ROUTES = {
+  CREATE_PATTERN: `${API_ROOT}/managed_integrations`,
+  LIST_PATTERN: `${API_ROOT}/managed_integrations`,
+  GET_PATTERN: `${API_ROOT}/managed_integrations/{policyId}`,
+  UPDATE_PATTERN: `${API_ROOT}/managed_integrations/{policyId}`,
+  DELETE_PATTERN: `${API_ROOT}/managed_integrations/{policyId}`,
+  UPGRADE_PATTERN: `${API_ROOT}/managed_integrations/_upgrade`,
+  UPGRADE_DRYRUN_PATTERN: `${API_ROOT}/managed_integrations/_upgrade/dryrun`,
+  SYNC_PATTERN: `${INTERNAL_ROOT}/managed_integrations/_sync`,
+  BULK_THROUGHPUT_PATTERN: `${INTERNAL_ROOT}/managed_integrations/bulk_throughput`,
+};
+
+// Deprecated public aliases retained for backward compatibility: they are registered against the
+// same handlers as MANAGED_INTEGRATIONS_ROUTES so existing clients keep working. Only the public
+// routes are aliased — the internal `_sync`/`bulk_throughput` routes moved without an alias.
 export const AGENTLESS_POLICIES_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
+  LIST_PATTERN: `${API_ROOT}/agentless_policies`,
+  GET_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
+  UPDATE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
   DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
-  SYNC_PATTERN: `${INTERNAL_ROOT}/agentless_policies/_sync`,
+  UPGRADE_PATTERN: `${API_ROOT}/agentless_policies/_upgrade`,
+  UPGRADE_DRYRUN_PATTERN: `${API_ROOT}/agentless_policies/_upgrade/dryrun`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
@@ -232,6 +267,7 @@ export const ENROLLMENT_API_KEY_ROUTES = {
 export const UNINSTALL_TOKEN_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/uninstall_tokens`,
   INFO_PATTERN: `${API_ROOT}/uninstall_tokens/{uninstallTokenId}`,
+  ROTATE_PATTERN: `${API_ROOT}/uninstall_tokens/{agentPolicyId}/rotate`,
 };
 
 // Agents setup API routes

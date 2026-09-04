@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import type { Logger } from '@kbn/logging';
 
 import type { FleetProxy, Output, TemplateAgentPolicyInput } from '../../types';
+import type { BeatsOutput } from '../../../common/types';
 import type {
   FullAgentPolicyInput,
   FullAgentPolicyInputStream,
@@ -319,8 +320,12 @@ function resolveOutputsById({
 function buildDataStreamStatements(type: string, dataset: string, namespace: string): string[] {
   return [
     `set(attributes["data_stream.type"], "${type}")`,
-    `set(attributes["data_stream.dataset"], "${dataset}")`,
-    `set(attributes["data_stream.namespace"], "${namespace}")`,
+    // Only set dataset/namespace when not already provided upstream (e.g. by an OTel receiver
+    // in a Gateway collector feeding this Fleet-managed agent). This preserves upstream routing
+    // so content-pack dashboards resolve to the correct data stream.
+    // See: https://github.com/elastic/ingest-dev/issues/7716
+    `set(attributes["data_stream.dataset"], "${dataset}") where attributes["data_stream.dataset"] == nil`,
+    `set(attributes["data_stream.namespace"], "${namespace}") where attributes["data_stream.namespace"] == nil`,
   ];
 }
 
@@ -610,7 +615,7 @@ function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]): OTelCollectorC
 }
 
 function buildBeatsauthConfig(
-  output: Output,
+  output: BeatsOutput,
   proxy?: FleetProxy,
   logger?: Logger
 ): Record<string, unknown> {
@@ -667,7 +672,7 @@ function buildBeatsauthConfig(
 function parseOutputConfigYaml(yaml: string | null | undefined): Record<string, unknown> {
   if (!yaml) return {};
   try {
-    const parsed = load(yaml);
+    const parsed = parse(yaml);
     if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, unknown>;
     }
@@ -741,7 +746,7 @@ function parseOtelExporterConfigYaml(
 ): Record<string, unknown> {
   if (!yaml) return {};
   try {
-    const parsed = load(yaml);
+    const parsed = parse(yaml);
     if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, unknown>;
     }

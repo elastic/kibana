@@ -243,7 +243,7 @@ describe('ArtifactService', () => {
 
     setupMockResponses(zip.toBuffer());
 
-    await expect(artifactService.getArtifact(artifactName)).rejects.toThrowError(
+    await expect(artifactService.getArtifact(artifactName)).rejects.toThrow(
       'Invalid manifest signature'
     );
   });

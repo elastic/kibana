@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-query-rules",
-  "owner": "@elastic/search-kibana",
+  "owner": "@elastic/search-ml-ux",
   "group": "search",
   "visibility": "private",
   "plugin": {

@@ -1,0 +1,218 @@
+{
+  "sha1": "efae7abcc293a84c18854170f529f5d8328ed839",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e8f722387a3dee5-9be44a4fb742275",
+      "title": "Discover query sync — Rule flyout flyout query updates when the Discover query changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/discover_query_sync.spec.ts",
+        "line": 42,
+        "column": 26
+      }
+    },
+    {
+      "id": "c81eb23bac82e1c-365fefaed06dbcf",
+      "title": "ES|QL rule flyout — ?param validation save button is enabled and no callout shown when query has no ?params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/esql_rule_flyout_validation.spec.ts",
+        "line": 25,
+        "column": 41
+      }
+    },
+    {
+      "id": "c81eb23bac82e1c-cedbfc207920e04",
+      "title": "ES|QL rule flyout — ?param validation save button is disabled and callout lists unresolved ?param when no matching control exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/esql_rule_flyout_validation.spec.ts",
+        "line": 38,
+        "column": 24
+      }
+    },
+    {
+      "id": "9c1881f2135d817-21909d01f6a3e51",
+      "title": "Rule Builder — threshold create and edit flows create flow: configure threshold builder and submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 54,
+        "column": 38
+      }
+    },
+    {
+      "id": "9c1881f2135d817-241c0182ad4356a",
+      "title": "Rule Builder — threshold create and edit flows edit flow: open builder-created rule and modify",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 115,
+        "column": 13
+      }
+    },
+    {
+      "id": "9c1881f2135d817-cb0291d735f9ca6",
+      "title": "Rule Builder — threshold create and edit flows permissions: viewer role cannot access create flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 169,
+        "column": 26
+      }
+    },
+    {
+      "id": "9c1881f2135d817-686926d85ee73c5",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: rule without builder_type opens in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 182,
+        "column": 12
+      }
+    },
+    {
+      "id": "9c1881f2135d817-03e8d139e7cd81f",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: unparseable query shows confirmation modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 228,
+        "column": 51
+      }
+    },
+    {
+      "id": "9c1881f2135d817-04b710afa6358fd",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: switch toggle shows confirmation modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 264,
+        "column": 21
+      }
+    },
+    {
+      "id": "6dccdf7d98d0236-a7d0ae7c38928c4",
+      "title": "Rule name validation — Discover flyout opens rule form flyout and displays default placeholder name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 44,
+        "column": 41
+      }
+    },
+    {
+      "id": "6dccdf7d98d0236-a47285aef34cc43",
+      "title": "Rule name validation — Discover flyout shows validation error when saving flyout with empty default name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 48,
+        "column": 8
+      }
+    },
+    {
+      "id": "6dccdf7d98d0236-f42d35dffb1ebce",
+      "title": "Rule name validation — Discover flyout error callout scrolls into view in flyout on failed submission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 58,
+        "column": 5
+      }
+    },
+    {
+      "id": "c00a5416f5250d2-a130c3dc63aa3dc",
+      "title": "Rule tags — edit via ES|QL form removing all tags persists (does not restore the old tags)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_tags_edit.spec.ts",
+        "line": 51,
+        "column": 34
+      }
+    },
+    {
+      "id": "a8d49fdf249de40-8ed8a0399e08cbb",
+      "title": "Rules list bulk actions respect active filters bulk disable applies only to rules matching the list filter, not the full space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_bulk_respects_filters.spec.ts",
+        "line": 43,
+        "column": 28
+      }
+    },
+    {
+      "id": "3247368523a4c09-6cccb255189b3d2",
+      "title": "Rules list - read/write privileges editor can create rules and toggle enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_privileges.spec.ts",
+        "line": 31,
+        "column": 6
+      }
+    },
+    {
+      "id": "3247368523a4c09-c897612ecadbffe",
+      "title": "Rules list - read/write privileges read-only user cannot create rules or toggle enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_privileges.spec.ts",
+        "line": 37,
+        "column": 5
+      }
+    }
+  ]
+}

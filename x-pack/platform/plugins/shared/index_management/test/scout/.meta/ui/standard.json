@@ -1,6 +1,509 @@
 {
-  "sha1": "9d58493d56d08ec156b9dca742f157c04c1bab6a",
+  "sha1": "034ef3cdef2d0c8e6a83aae435e9b38e99cdfe39",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "2c2ea88c6054293-0f3a836fc0427c7",
+      "title": "Component templates tab renders the component templates tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/component_templates/component_templates_tab.spec.ts",
+        "line": 26,
+        "column": 15
+      }
+    },
+    {
+      "id": "2c2ea88c6054293-95f88a603ba3e89",
+      "title": "Component templates tab displays a component template in the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/component_templates/component_templates_tab.spec.ts",
+        "line": 29,
+        "column": 5
+      }
+    },
+    {
+      "id": "2c2ea88c6054293-2de3755b98e5c52",
+      "title": "Component templates tab creates a component template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/component_templates/component_templates_tab.spec.ts",
+        "line": 39,
+        "column": 62
+      }
+    },
+    {
+      "id": "82e4204ddd89b25-c189eee60aae162",
+      "title": "Data streams bulk data retention allows to update data retention in bulk",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_bulk_data_retention.spec.ts",
+        "line": 25,
+        "column": 27
+      }
+    },
+    {
+      "id": "7a9e8fcf5870821-c0ac1a62f179d6d",
+      "title": "Data streams failure store allows to enable failure store from the details panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_failure_store.spec.ts",
+        "line": 20,
+        "column": 11
+      }
+    },
+    {
+      "id": "7a9e8fcf5870821-a6568c2bb30abcf",
+      "title": "Data streams failure store allows to disable failure store from the details panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_failure_store.spec.ts",
+        "line": 29,
+        "column": 78
+      }
+    },
+    {
+      "id": "ab141bdc9191bd5-e5f8be59926ea89",
+      "title": "Data streams index mode shows standard index mode in the details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
+        "line": 72,
+        "column": 8
+      }
+    },
+    {
+      "id": "ab141bdc9191bd5-0d2fe0e25ea3d83",
+      "title": "Data streams index mode shows logsdb index mode in the details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
+        "line": 75,
+        "column": 5
+      }
+    },
+    {
+      "id": "ab141bdc9191bd5-14ce718d79c4c66",
+      "title": "Data streams index mode allows to upgrade data stream from standard to logsdb index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
+        "line": 93,
+        "column": 29
+      }
+    },
+    {
+      "id": "ab141bdc9191bd5-989f2abedb34998",
+      "title": "Data streams index mode allows to downgrade data stream from logsdb to standard index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
+        "line": 109,
+        "column": 56
+      }
+    },
+    {
+      "id": "ab141bdc9191bd5-7ff0a40e4afd8cb",
+      "title": "Data streams index mode allows to upgrade data stream from time series to logsdb index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
+        "line": 132,
+        "column": 5
+      }
+    },
+    {
+      "id": "ab141bdc9191bd5-5cb9a65537172d2",
+      "title": "Data streams index mode allows to downgrade data stream from logsdb to time series index mode",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
+        "line": 158,
+        "column": 5
+      }
+    },
+    {
+      "id": "c53f740b93cce31-ca2b4229acdfa29",
+      "title": "Data streams lifecycle editing allows to keep data indefinitely from the details panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_lifecycle_editing.spec.ts",
+        "line": 30,
+        "column": 8
+      }
+    },
+    {
+      "id": "c53f740b93cce31-6224878268415ee",
+      "title": "Data streams lifecycle editing allows to disable data retention in bulk",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_lifecycle_editing.spec.ts",
+        "line": 41,
+        "column": 5
+      }
+    },
+    {
+      "id": "cf31fb04ae21e93-9b43cad6ad4b012",
+      "title": "Data streams project level retention shows project data retention in the data streams list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_project_level_retention.spec.ts",
+        "line": 21,
+        "column": 13
+      }
+    },
+    {
+      "id": "ab8f401fd362856-3c090ae0f090296",
+      "title": "Data streams lifecycle on serverless offers only the delete phase, with no ILM lifecycle method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_serverless_lifecycle.spec.ts",
+        "line": 19,
+        "column": 11
+      }
+    },
+    {
+      "id": "27f17144c2b91a8-dc40a3eb8fdcf6b",
+      "title": "Data streams tab shows the details flyout when clicking on a data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_tab.spec.ts",
+        "line": 18,
+        "column": 11
+      }
+    },
+    {
+      "id": "27f17144c2b91a8-8c45b21a1b9d7c3",
+      "title": "Data streams tab allows to update data retention from the details panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_tab.spec.ts",
+        "line": 23,
+        "column": 27
+      }
+    },
+    {
+      "id": "55f86f6b7b06490-1af8e999e8fb134",
+      "title": "Create enrich policy shows create enrich policies page and docs link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/enrich_policies/create_enrich_policy.spec.ts",
+        "line": 33,
+        "column": 5
+      }
+    },
+    {
+      "id": "55f86f6b7b06490-5ecac5ddc3551d7",
+      "title": "Create enrich policy can create an enrich policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/enrich_policies/create_enrich_policy.spec.ts",
+        "line": 39,
+        "column": 8
+      }
+    },
+    {
+      "id": "2c1100d355177cb-b0ee5e7e3535ea9",
+      "title": "Enrich policies access read only access hides create and delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/enrich_policies/enrich_policies_access.spec.ts",
+        "line": 17,
+        "column": 11
+      }
+    },
+    {
+      "id": "2c1100d355177cb-495b7b8a7866a2e",
+      "title": "Enrich policies access no access hides the enrich policies tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/enrich_policies/enrich_policies_access.spec.ts",
+        "line": 22,
+        "column": 5
+      }
+    },
+    {
+      "id": "77609773ad4a38d-9399a2e8af12024",
+      "title": "Enrich policies tab shows enrich policies page and docs link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/enrich_policies/enrich_policies_tab.spec.ts",
+        "line": 20,
+        "column": 11
+      }
+    },
+    {
+      "id": "77609773ad4a38d-e34721e09793774",
+      "title": "Enrich policies tab shows the details flyout when clicking on a policy name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/enrich_policies/enrich_policies_tab.spec.ts",
+        "line": 25,
+        "column": 8
+      }
+    },
+    {
+      "id": "77609773ad4a38d-3ab96751b56f578",
+      "title": "Enrich policies tab can execute a policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/enrich_policies/enrich_policies_tab.spec.ts",
+        "line": 29,
+        "column": 61
+      }
+    },
+    {
+      "id": "77609773ad4a38d-6ca88bf494c478b",
+      "title": "Enrich policies tab can delete a policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/enrich_policies/enrich_policies_tab.spec.ts",
+        "line": 32,
+        "column": 5
+      }
+    },
     {
       "id": "e7ca8c886a58426-d57f60fe1d6db3b",
       "title": "Home page Loads the app and renders the indices tab by default",
@@ -11,8 +514,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 66,
-        "column": 7
+        "line": 58,
+        "column": 9
       }
     },
     {
@@ -25,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 84,
-        "column": 7
+        "line": 68,
+        "column": 8
       }
     },
     {
@@ -39,8 +542,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 77,
+        "column": 12
       }
     },
     {
@@ -53,8 +556,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 105,
-        "column": 7
+        "line": 84,
+        "column": 78
       }
     },
     {
@@ -67,8 +570,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 116,
-        "column": 7
+        "line": 92,
+        "column": 11
       }
     },
     {
@@ -81,7 +584,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 170,
+        "line": 133,
         "column": 7
       }
     },
@@ -95,8 +598,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 181,
-        "column": 7
+        "line": 141,
+        "column": 18
       }
     },
     {
@@ -109,7 +612,61 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 196,
+        "line": 152,
+        "column": 24
+      }
+    },
+    {
+      "id": "12fbe1db6a5131f-344fe5bf4df5313",
+      "title": "Index actions context menu can create an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions_context_menu.spec.ts",
+        "line": 30,
+        "column": 19
+      }
+    },
+    {
+      "id": "12fbe1db6a5131f-6b52749e8ff263d",
+      "title": "Index actions context menu navigates to overview, settings, and mappings tabs from the manage index menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions_context_menu.spec.ts",
+        "line": 37,
+        "column": 23
+      }
+    },
+    {
+      "id": "12fbe1db6a5131f-581b08f6ccf56f0",
+      "title": "Index actions context menu can delete an index from the manage index menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions_context_menu.spec.ts",
+        "line": 68,
         "column": 7
       }
     },
@@ -119,16 +676,38 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
-        "line": 17,
-        "column": 7
+        "line": 23,
+        "column": 63
       }
     },
     {
-      "id": "b881be62b258ebc-9a7d3356056083c",
+      "id": "8b2302c844751d9-4774623dac3b908",
+      "title": "Index details page Shows enabled mappings and settings actions for a fresh index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
+        "line": 30,
+        "column": 86
+      }
+    },
+    {
+      "id": "c6ecd67391e73d8-9a7d3356056083c",
       "title": "Index template wizard - Mappings step clearing up the Numeric subtype dropdown doesn't break the page",
       "expectedStatus": "passed",
       "tags": [
@@ -136,13 +715,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 43,
-        "column": 7
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
+        "line": 27,
+        "column": 5
       }
     },
     {
-      "id": "b881be62b258ebc-a615b69eb6e5911",
+      "id": "c6ecd67391e73d8-a615b69eb6e5911",
       "title": "Index template wizard - Mappings step clearing up the Range subtype dropdown doesn't break the page",
       "expectedStatus": "passed",
       "tags": [
@@ -150,13 +729,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 62,
-        "column": 7
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
+        "line": 39,
+        "column": 95
       }
     },
     {
-      "id": "b881be62b258ebc-55c3d2b0ef98d52",
+      "id": "c6ecd67391e73d8-55c3d2b0ef98d52",
       "title": "Index template wizard - Mappings step advanced options tab doesn't add default values to request by default",
       "expectedStatus": "passed",
       "tags": [
@@ -164,13 +743,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 81,
-        "column": 7
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
+        "line": 55,
+        "column": 8
       }
     },
     {
-      "id": "b881be62b258ebc-aaa3d55cabfade3",
+      "id": "c6ecd67391e73d8-aaa3d55cabfade3",
       "title": "Index template wizard - Mappings step advanced options tab adds the set values to the request",
       "expectedStatus": "passed",
       "tags": [
@@ -178,13 +757,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 100,
-        "column": 7
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
+        "line": 65,
+        "column": 11
       }
     },
     {
-      "id": "7d82deafb17121c-339a53750c46ef4",
+      "id": "e9354c16fbe0625-339a53750c46ef4",
       "title": "Index template wizard - Preview template can create and preview an index template",
       "expectedStatus": "passed",
       "tags": [
@@ -192,23 +771,145 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_preview.spec.ts",
-        "line": 23,
-        "column": 7
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_preview.spec.ts",
+        "line": 15,
+        "column": 58
       }
     },
     {
-      "id": "ed0c62c57a89768-1a697404152ef55",
+      "id": "f1463b69dc1477f-1a697404152ef55",
       "title": "Index template wizard - Create can walk through all wizard steps and create a template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard.spec.ts",
+        "line": 15,
+        "column": 58
+      }
+    },
+    {
+      "id": "497ca98d887b298-548d15b2f07dbce",
+      "title": "Index templates tab - template creation can create an index template with data retention",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard.spec.ts",
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_creation.spec.ts",
+        "line": 66,
+        "column": 21
+      }
+    },
+    {
+      "id": "497ca98d887b298-1cab86f3630ddef",
+      "title": "Index templates tab - template creation can create a data stream index template with a frozen phase",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_creation.spec.ts",
+        "line": 78,
+        "column": 5
+      }
+    },
+    {
+      "id": "b59a865f2cc741f-dd20753dee5099e",
+      "title": "Index templates tab - template creation with index mode can create an index template with logsdb index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_index_mode.spec.ts",
         "line": 25,
-        "column": 7
+        "column": 22
+      }
+    },
+    {
+      "id": "ffa5910e57d491c-42b8fd6acfcf1d6",
+      "title": "Index templates tab - templates list shows link to ingest pipeline when default pipeline is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_list.spec.ts",
+        "line": 20,
+        "column": 56
+      }
+    },
+    {
+      "id": "035771a1bf6befd-6b691a026a8b459",
+      "title": "Index templates tab - managed templates shows warning callout when deleting a managed index template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_managed.spec.ts",
+        "line": 14,
+        "column": 14
+      }
+    },
+    {
+      "id": "99447a6687708a7-0ba09d90e862f22",
+      "title": "Index templates tab - template modification can modify ignore_above, ignore_malformed, ignore_dynamic_beyond_limit, subobjects and timestamp format in an index template with logsdb index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_modification.spec.ts",
+        "line": 46,
+        "column": 22
+      }
+    },
+    {
+      "id": "47d4015b4bcc63b-2a2db74e633f36d",
+      "title": "Index templates tab - source field can not disable synthetic source in an index template with logsdb index mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_source_field.spec.ts",
+        "line": 32,
+        "column": 42
       }
     },
     {
@@ -221,8 +922,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/management_sidebar_smoke.spec.ts",
-        "line": 32,
-        "column": 7
+        "line": 27,
+        "column": 100
       }
     }
   ]

@@ -73,7 +73,7 @@ describe('bundledPackages', () => {
       expect(packagesRes1.map((p) => omit(p, 'getBuffer'))).toEqual(
         packagesRes2.map((p) => omit(p, 'getBuffer'))
       );
-      expect(fs.readdir).toBeCalledTimes(1);
+      expect(fs.readdir).toHaveBeenCalledTimes(1);
     });
 
     it('should cache getBuffer if called multiple time in the scope of getBundledPackages', async () => {
@@ -81,7 +81,7 @@ describe('bundledPackages', () => {
 
       await packagesRes1[0].getBuffer();
       await packagesRes1[0].getBuffer();
-      expect(fs.readFile).toBeCalledTimes(1);
+      expect(fs.readFile).toHaveBeenCalledTimes(1);
     });
 
     it('should not use cache if called multiple time and cache is disabled', async () => {
@@ -93,11 +93,18 @@ describe('bundledPackages', () => {
       } as any);
       await getBundledPackages();
       await getBundledPackages();
-      expect(fs.readdir).toBeCalledTimes(2);
+      expect(fs.readdir).toHaveBeenCalledTimes(2);
     });
   });
   describe('getBundledPackageByPkgKey', () => {
-    it('should return package by name if no version is provided', async () => {
+    it('should return package by name when air-gapped with no registry URL', async () => {
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        developer: {
+          bundledPackageLocation: '/tmp/test',
+        },
+        isAirGapped: true,
+      } as any);
+
       const pkg = await getBundledPackageByPkgKey('apm');
 
       expect(pkg).toBeDefined();
@@ -110,6 +117,28 @@ describe('bundledPackages', () => {
 
       expect(await pkg?.getBuffer()).toEqual(Buffer.from('TEST'));
     });
+
+    it.each([
+      ['isAirGapped is false', { isAirGapped: false }],
+      [
+        'isAirGapped is true with registryUrl configured',
+        { isAirGapped: true, registryUrl: 'https://epr.example.com' },
+      ],
+    ])(
+      'should not return package by name when registry is reachable (%s)',
+      async (_label, airGapConfig) => {
+        jest.mocked(appContextService.getConfig).mockReturnValue({
+          developer: {
+            bundledPackageLocation: '/tmp/test',
+          },
+          ...airGapConfig,
+        } as any);
+
+        const pkg = await getBundledPackageByPkgKey('apm');
+
+        expect(pkg).toBeUndefined();
+      }
+    );
 
     it('should return package by name and version if version is provided', async () => {
       const pkg = await getBundledPackageByPkgKey('apm-8.8.0');

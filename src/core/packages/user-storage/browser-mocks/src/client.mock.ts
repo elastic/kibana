@@ -11,13 +11,16 @@ import { Subject } from 'rxjs';
 import { lazyObject } from '@kbn/lazy-object';
 import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 
-export const clientMock = (): jest.Mocked<IUserStorageClient> =>
-  lazyObject({
+export const clientMock = (): jest.Mocked<IUserStorageClient> => {
+  const mock: jest.Mocked<IUserStorageClient> = lazyObject({
+    isAvailable: jest.fn().mockReturnValue(true),
     peek: jest.fn(),
-    get: jest.fn(),
+    get: jest.fn().mockResolvedValue(undefined),
     get$: jest.fn().mockReturnValue(new Subject<unknown>()),
     set: jest.fn().mockImplementation((_key: string, value: unknown) => Promise.resolve(value)),
     remove: jest.fn().mockResolvedValue(undefined),
-    getUpdate$: jest.fn().mockReturnValue(new Subject<unknown>()),
     getHttpError$: jest.fn().mockReturnValue(new Subject<Error>()),
   });
+
+  return mock;
+};

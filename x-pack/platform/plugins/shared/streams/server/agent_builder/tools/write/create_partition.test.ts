@@ -25,7 +25,7 @@ describe('createCreatePartitionTool', () => {
   });
 
   it('uses confirmation_body as confirmation message when provided', async () => {
-    const { tool } = setup();
+    const { tool, context } = setup();
     const description = '**Parent**: logs.otel\n**New child**: logs.otel.nginx';
 
     const confirmation = await tool.confirmation!.getConfirmation!({
@@ -36,6 +36,7 @@ describe('createCreatePartitionTool', () => {
         status: 'enabled',
         confirmation_body: description,
       },
+      context,
     });
 
     expect(confirmation.title).toBe('Create child stream "logs.otel.nginx"');
@@ -44,7 +45,7 @@ describe('createCreatePartitionTool', () => {
   });
 
   it('falls back to JSON params when confirmation_body is omitted', async () => {
-    const { tool } = setup();
+    const { tool, context } = setup();
 
     const confirmation = await tool.confirmation!.getConfirmation!({
       toolParams: {
@@ -53,6 +54,7 @@ describe('createCreatePartitionTool', () => {
         condition_json: '{"field":"service.name","eq":"nginx"}',
         status: 'enabled',
       },
+      context,
     });
 
     expect(confirmation.message).toContain('**parent:** logs.otel');

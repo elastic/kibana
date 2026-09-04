@@ -251,9 +251,13 @@ export type Privileges = Array<Privilege | PrivilegeSet>;
  * Describes the authorization requirements when authorization is enabled.
  *
  * - `requiredPrivileges`: An array of privileges or privilege sets that are required for the route.
+ * - `extendedPrivileges`: A flat list of privilege name strings checked and surfaced in
+ *   `request.authzResult` but not enforced. Missing extended privileges never produce a 403.
+ *   Privilege sets (`anyRequired` / `allRequired`) are not supported here — only string names.
  */
 export interface AuthzEnabled {
   requiredPrivileges: Privileges;
+  extendedPrivileges?: Privilege[];
 }
 
 /**
@@ -490,6 +494,13 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   httpResource?: boolean;
 
   /**
+   * When set to `info`, core emits a slim HTTP response log at info for this
+   * route (`status`, `path`, `http.request.id`). The full access-log record
+   * remains at debug.
+   */
+  httpResponseLogLevel?: 'info';
+
+  /**
    * Based on the the ES API specification (see https://github.com/elastic/elasticsearch-specification)
    * Kibana APIs can also specify some metadata about API availability.
    *
@@ -499,7 +510,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    */
   availability?: {
     /** @default stable */
-    stability?: 'experimental' | 'beta' | 'stable' | 'tech_preview';
+    stability?: 'experimental' | 'stable' | 'tech_preview';
     /**
      * The stack version in which the route was introduced (eg: 8.15.0).
      */

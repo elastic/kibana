@@ -10,12 +10,15 @@
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { ForEachContextSchema } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
-import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
+import type {
+  EnterForeachNodeConfiguration,
+  EnterParallelNodeConfiguration,
+} from '@kbn/workflows/graph';
 import {
   getDetailedTypeDescription,
   getZodTypeName,
   inferZodType,
-  VARIABLE_REGEX,
+  matchVariable,
 } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { InvalidForeachParameterError, InvalidForeachParameterErrorCodes } from './errors';
@@ -23,9 +26,21 @@ import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 export function getForeachStateSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
-  foreachStep: EnterForeachNodeConfiguration
+  // Both `foreach` and `parallel` enter-node configurations expose the same
+  // `foreach` source (parallel fans out over it), and only that field is read
+  // here — accept either so callers don't need an unsafe cast.
+  foreachStep: EnterForeachNodeConfiguration | EnterParallelNodeConfiguration
 ) {
   let itemSchema: z.ZodType = z.unknown();
+
+  // A static `parallel` step (named `branches`) has no `foreach` source, so there
+  // is no per-item context to derive — fall back to a permissive item schema.
+  if (foreachStep.foreach === undefined) {
+    return ForEachContextSchema.extend({
+      item: itemSchema,
+      items: z.array(itemSchema),
+    });
+  }
 
   try {
     if (Array.isArray(foreachStep.foreach)) {
@@ -36,7 +51,7 @@ export function getForeachStateSchema(
       });
     }
     const cleanedForeachParam =
-      foreachStep.foreach.match(VARIABLE_REGEX)?.groups?.key ?? foreachStep.foreach;
+      matchVariable(foreachStep.foreach)?.groups.key ?? foreachStep.foreach;
     itemSchema = getForeachItemSchema(stepContextSchema, cleanedForeachParam);
     return ForEachContextSchema.extend({
       item: itemSchema,
@@ -103,6 +118,7 @@ const ENTRIES_FILTER = 'entries';
 export const FOREACH_ITEM_SCHEMA_DESC = {
   UNRESOLVED_PATH: 'Unable to parse foreach parameter',
   RUNTIME_JSON: 'Unable to determine foreach item type',
+  RUNTIME_TYPE: 'Collection type cannot be determined statically, it will be resolved at runtime',
 } as const;
 
 export interface ForeachCollectionDiagnostic {
@@ -128,7 +144,10 @@ export function getForeachCollectionDiagnostic(
       severity: 'error',
     };
   }
-  if (description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON) {
+  if (
+    description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON ||
+    description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE
+  ) {
     return {
       message: description,
       severity: 'warning',
@@ -176,18 +195,20 @@ export function getForeachItemSchema(
     } else if (iterableSchema instanceof z.ZodString) {
       // If the resolved path is a string, we return a string schema and will tell the user we will try to parse it as JSON in runtime
       return z.unknown().describe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON);
+    } else if (iterableSchema instanceof z.ZodUnknown || iterableSchema instanceof z.ZodAny) {
+      // The type isn't statically inferable (e.g. an output shape we don't model),
+      // so we can't prove it isn't iterable — leave it to runtime.
+      return z.unknown().describe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
     } else if (iterableSchema instanceof z.ZodUnion) {
       const arrayOption = iterableSchema.options.find((option) => option instanceof z.ZodArray);
       if (arrayOption && arrayOption instanceof z.ZodArray) {
         return arrayOption.element as z.ZodType;
-      } else {
-        throw new InvalidForeachParameterError(
-          `Expected array in union for foreach iteration, but no array type was found. Union options: [${iterableSchema.options
-            .map((opt) => getZodTypeName(opt as z.ZodType))
-            .join(', ')}]`,
-          InvalidForeachParameterErrorCodes.INVALID_UNION
-        );
       }
+      // A union means the type was never narrowed to a single branch. Elasticsearch
+      // result cells, for instance, are all typed by a primitive-only union even
+      // when the underlying field is multivalued, so a missing array branch is not
+      // proof that the collection isn't iterable — leave it to runtime.
+      return z.unknown().describe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
     } else if (iterableSchema instanceof z.ZodObject && hasEntriesFilter) {
       return z.object({ key: z.string(), value: z.unknown() });
     } else {

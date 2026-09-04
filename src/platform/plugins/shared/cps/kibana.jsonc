@@ -14,7 +14,9 @@
     "configPath": [
       "cps"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "cloud"
+    ],
     "requiredPlugins": [],
     "requiredBundles": []
   }

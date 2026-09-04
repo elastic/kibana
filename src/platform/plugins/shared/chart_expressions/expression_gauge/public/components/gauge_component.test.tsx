@@ -9,6 +9,7 @@
 
 import React from 'react';
 import type { ColorStop } from '@kbn/coloring';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -407,6 +408,82 @@ describe('GaugeComponent', function () {
       expect(colorBands?.steps).toEqual([0, 2, 6, 8, 10]);
       expect(colorBands?.colors).toEqual(['blue', 'blue', 'blue', 'blue']);
     });
+
+    // The following cases guard the normalizeBands fix: a stop sitting exactly on
+    // rangeMin/rangeMax must NOT create a duplicate (zero-width) band, while a
+    // stop strictly inside the range must be preserved.
+    const bandsForPalette = (params: CustomPaletteState) => {
+      const customProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+          colorMode: GaugeColorModes.PALETTE,
+          palette: { type: 'palette' as const, name: 'custom', params },
+          ticksPosition: GaugeTicksPositions.BANDS,
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
+        },
+      } as GaugeRenderProps;
+      const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
+      return bullet.prop<ColorBandSimpleConfig>('colorBands');
+    };
+
+    it('drops a number-range stop equal to rangeMax (no duplicate boundary)', () => {
+      const colorBands = bandsForPalette({
+        colors: ['#aaa', '#bbb', '#ccc'],
+        gradient: false,
+        stops: [2, 6, 8],
+        range: 'number',
+        rangeMin: 0,
+        rangeMax: 8,
+        continuity: 'none',
+      });
+      // 8 == rangeMax must not appear twice: [0, 2, 6, 8, 10], not [..., 8, 8, 10]
+      expect(colorBands?.steps).toEqual([0, 2, 6, 8, 10]);
+    });
+
+    it('keeps a number-range stop strictly below rangeMax', () => {
+      const colorBands = bandsForPalette({
+        colors: ['#aaa', '#bbb', '#ccc'],
+        gradient: false,
+        stops: [2, 6, 7],
+        range: 'number',
+        rangeMin: 0,
+        rangeMax: 8,
+        continuity: 'none',
+      });
+      // 7 < rangeMax (8) is preserved, and 8 is added as the rangeMax boundary
+      expect(colorBands?.steps).toEqual([0, 2, 6, 7, 8, 10]);
+    });
+
+    it('drops a number-range stop equal to rangeMin (no duplicate lower boundary)', () => {
+      const colorBands = bandsForPalette({
+        colors: ['#aaa', '#bbb', '#ccc'],
+        gradient: false,
+        stops: [2, 4, 6],
+        range: 'number',
+        rangeMin: 2,
+        rangeMax: 8,
+        continuity: 'none',
+      });
+      // rangeMin 2 is introduced as a boundary; the stop at 2 must not duplicate it
+      expect(colorBands?.steps).toEqual([0, 2, 4, 6, 8, 10]);
+    });
+
+    it('does not add a finite upper boundary when continuity extends above (rangeMax Infinity)', () => {
+      const colorBands = bandsForPalette({
+        colors: ['#aaa', '#bbb', '#ccc'],
+        gradient: false,
+        stops: [2, 4, 6],
+        range: 'number',
+        rangeMin: 0,
+        rangeMax: Infinity,
+        continuity: 'above',
+      });
+      // No finite rangeMax boundary, so the last band runs to the chart max (10)
+      expect(colorBands?.steps).toEqual([0, 2, 4, 6, 10]);
+    });
   });
 
   describe('overrides', () => {
@@ -481,7 +558,7 @@ describe('GaugeComponent', function () {
 
     it('should use custom metric format params, if provided', () => {
       shallowWithIntl(<GaugeComponent {...baseFormattingProps} />);
-      expect(formatService.deserialize).toBeCalledWith(metricFormat);
+      expect(formatService.deserialize).toHaveBeenCalledWith(metricFormat);
     });
 
     it('should use table metric format params, if provided', () => {
@@ -493,7 +570,7 @@ describe('GaugeComponent', function () {
         },
       };
       shallowWithIntl(<GaugeComponent {...customProps} />);
-      expect(formatService.deserialize).toBeCalledWith(tableFormatParams);
+      expect(formatService.deserialize).toHaveBeenCalledWith(tableFormatParams);
     });
 
     it('should use default metric format params, if no others provided', () => {
@@ -513,7 +590,7 @@ describe('GaugeComponent', function () {
       };
 
       shallowWithIntl(<GaugeComponent {...customProps} />);
-      expect(formatService.deserialize).toBeCalledWith(testParams);
+      expect(formatService.deserialize).toHaveBeenCalledWith(testParams);
     });
 
     it('should use fallback if no default metric format and no others provided', () => {
@@ -530,7 +607,7 @@ describe('GaugeComponent', function () {
       };
 
       shallowWithIntl(<GaugeComponent {...customProps} />);
-      expect(formatService.deserialize).toBeCalledWith({
+      expect(formatService.deserialize).toHaveBeenCalledWith({
         id: 'number',
         params: {
           pattern: '0,0.0',

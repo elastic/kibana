@@ -10,7 +10,13 @@ import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX, ACTIONS_INDEX } from '../../../common/constants';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { hasOsqueryReadPrivilege } from '../../lib/has_osquery_read_privilege';
+import { OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR } from '../constants';
+import { enforceSpaceScope } from './enforce_space_scope';
 import type {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -20,12 +26,17 @@ import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
 import type { OsqueryFactory } from './factory/types';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
-  esClient: CoreStart['elasticsearch']['client']
+  esClient: CoreStart['elasticsearch']['client'],
+  osqueryContext: Pick<OsqueryAppContext, 'security' | 'service' | 'cpsEnabled'>
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
-  let es: typeof data.search.searchAsInternalUser;
+  // Only used by `cancel`, which has no access to the request that selected a
+  // client. Every search binds its own client locally, so concurrent requests
+  // cannot steal each other's identity.
+  let lastUsedEs: typeof data.search.searchAsInternalUser;
 
   return {
     search: (request, options, deps) => {
@@ -35,18 +46,26 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
       const queryFactory: OsqueryFactory<T> = osqueryFactory[request.factoryQueryType];
 
-      return forkJoin({
-        actionsIndexExists: esClient.asInternalUser.indices.exists({
-          index: `${ACTIONS_INDEX}*`,
+      return from(hasOsqueryReadPrivilege(osqueryContext.security, deps.request)).pipe(
+        mergeMap((isAuthorized) => {
+          if (!isAuthorized) {
+            throw new KbnServerError(OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR, 403);
+          }
+
+          return forkJoin({
+            actionsIndexExists: esClient.asInternalUser.indices.exists({
+              index: `${ACTIONS_INDEX}*`,
+            }),
+            newDataStreamIndexExists: esClient.asInternalUser.indices.exists({
+              index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+              allow_no_indices: false,
+              expand_wildcards: 'all',
+            }),
+            ccsEnabled: hasConnectedRemoteClusters(esClient.asInternalUser),
+            activeSpace: from(Promise.resolve(osqueryContext.service.getActiveSpace(deps.request))),
+          });
         }),
-        newDataStreamIndexExists: esClient.asInternalUser.indices.exists({
-          index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
-          allow_no_indices: false,
-          expand_wildcards: 'all',
-        }),
-        ccsEnabled: hasConnectedRemoteClusters(esClient.asInternalUser),
-      }).pipe(
-        mergeMap(({ actionsIndexExists, newDataStreamIndexExists, ccsEnabled }) => {
+        mergeMap(({ actionsIndexExists, newDataStreamIndexExists, ccsEnabled, activeSpace }) => {
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
             kuery: request.kuery,
@@ -57,13 +76,15 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('agentId' in request ? { agentId: request.agentId } : {}),
             ...('agentIds' in request ? { agentIds: request.agentIds } : {}),
             ...('policyIds' in request ? { policyIds: request.policyIds } : {}),
-            ...('spaceId' in request ? { spaceId: request.spaceId } : {}),
             ...('integrationNamespaces' in request
               ? { integrationNamespaces: request.integrationNamespaces }
               : {}),
             ...('scheduleId' in request ? { scheduleId: request.scheduleId } : {}),
             ...('executionCount' in request ? { executionCount: request.executionCount } : {}),
             ...('esFilters' in request ? { esFilters: request.esFilters } : {}),
+            ...('matchMissingSpaceId' in request
+              ? { matchMissingSpaceId: request.matchMissingSpaceId }
+              : {}),
             // exportResults factory fields — baseFilter is required and unique to this
             // factory type, so its presence is a reliable discriminator for all six fields.
             ...('baseFilter' in request
@@ -78,19 +99,45 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               : {}),
           } as StrategyRequestType<T>;
 
-          const dsl = queryFactory.buildDsl({
-            ...strictRequest,
-            componentTemplateExists: actionsIndexExists,
-            ccsEnabled,
-          } as StrategyRequestType<T>);
+          const spaceId = activeSpace?.id ?? DEFAULT_SPACE_ID;
 
-          // Select internal client for all osquery indices that require it.
-          // The 'osquery_manager' substring matches both local and CCS-prefixed patterns
-          // (e.g. '*:logs-osquery_manager.action...').
-          es =
-            dsl.index?.includes('fleet') || dsl.index?.includes('osquery_manager')
+          const spaceScopeOptions =
+            'matchMissingSpaceId' in request && request.matchMissingSpaceId !== undefined
+              ? { matchMissingSpaceId: request.matchMissingSpaceId }
+              : undefined;
+
+          const dsl = enforceSpaceScope(
+            queryFactory.buildDsl({
+              ...strictRequest,
+              spaceId,
+              componentTemplateExists: actionsIndexExists,
+              ccsEnabled,
+            } as StrategyRequestType<T>),
+            spaceId,
+            spaceScopeOptions
+          );
+
+          // Client selection is per search, not per request: the legacy and data-stream
+          // reads below target different index families, so a single decision taken from
+          // the legacy DSL would silently apply the wrong client to the other. On a project
+          // without the osquery integration installed the legacy read resolves to
+          // `.fleet-actions-results*`, which pins that read to the internal client, and
+          // reusing it for the data-stream read would cancel fan-out for every result.
+          const selectSearchClient = (searchDsl: typeof dsl) => {
+            const indices = Array.isArray(searchDsl.index)
+              ? searchDsl.index
+              : searchDsl.index
+              ? [searchDsl.index]
+              : [];
+
+            return shouldUseInternalSearchClient(indices, osqueryContext.cpsEnabled)
               ? data.search.searchAsInternalUser
               : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+          };
+
+          const es = selectSearchClient(dsl);
+
+          lastUsedEs = es;
 
           // When a PIT is present ES rejects requests that also specify `index`,
           // `allow_no_indices`, or `ignore_unavailable` (the PIT already encodes
@@ -123,17 +170,26 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             mergeMap((legacyIndexResponse) => {
               if (
                 request.factoryQueryType === OsqueryQueries.actionResults &&
-                (newDataStreamIndexExists || ccsEnabled)
+                (newDataStreamIndexExists || ccsEnabled || osqueryContext.cpsEnabled)
               ) {
-                const dataStreamDsl = queryFactory.buildDsl({
-                  ...strictRequest,
-                  componentTemplateExists: actionsIndexExists,
-                  ccsEnabled,
-                  useNewDataStream: true,
-                } as StrategyRequestType<T>);
+                const dataStreamDsl = enforceSpaceScope(
+                  queryFactory.buildDsl({
+                    ...strictRequest,
+                    spaceId,
+                    componentTemplateExists: actionsIndexExists,
+                    ccsEnabled,
+                    useNewDataStream: true,
+                  } as StrategyRequestType<T>),
+                  spaceId,
+                  spaceScopeOptions
+                );
+
+                const dataStreamEs = selectSearchClient(dataStreamDsl);
+
+                lastUsedEs = dataStreamEs;
 
                 return from(
-                  es.search(
+                  dataStreamEs.search(
                     {
                       ...strictRequest,
                       params: dataStreamDsl,
@@ -167,8 +223,8 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
       );
     },
     cancel: async (id, options, deps) => {
-      if (es?.cancel) {
-        return es.cancel(id, options, deps);
+      if (lastUsedEs?.cancel) {
+        return lastUsedEs.cancel(id, options, deps);
       }
     },
   };

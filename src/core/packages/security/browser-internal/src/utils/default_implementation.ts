@@ -16,5 +16,8 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
         return Promise.reject(new Error('No authenticated user'));
       },
     },
+    serviceAccounts: {
+      isEnabled: () => false,
+    },
   };
 };

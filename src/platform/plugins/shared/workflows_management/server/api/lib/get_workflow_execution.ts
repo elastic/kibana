@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
-import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
+import { pickWorkflowDocumentVersion } from '@kbn/workflows';
+import type {
+  GetStepExecutionsByIdsOptions,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
+import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 
 interface GetWorkflowExecutionParams {
-  esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   logger: Logger;
-  workflowExecutionIndex: string;
-  stepsExecutionIndex: string;
   workflowExecutionId: string;
   spaceId: string;
   includeInput?: boolean;
@@ -28,37 +33,19 @@ interface GetWorkflowExecutionParams {
 }
 
 export const getWorkflowExecution = async ({
-  esClient,
+  workflowExecutionsDataClient,
+  stepExecutionsDataClient,
   logger,
-  workflowExecutionIndex,
-  stepsExecutionIndex,
   workflowExecutionId,
   spaceId,
   includeInput = false,
   includeOutput = false,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
-    // Use direct GET by _id for O(1) lookup performance instead of search
+    // Use mget by id for O(1) lookup performance instead of search
     // This is critical for reducing ES CPU load from frequent UI polling
-    let response;
-    try {
-      response = await esClient.get<EsWorkflowExecution>({
-        index: workflowExecutionIndex,
-        id: workflowExecutionId,
-      });
-    } catch (error: unknown) {
-      // Handle 404 - document not found
-      if (
-        error instanceof Error &&
-        'meta' in error &&
-        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
-      ) {
-        return null;
-      }
-      throw error;
-    }
-
-    const doc = response._source;
+    const { items } = await workflowExecutionsDataClient.getByIds([workflowExecutionId]);
+    const doc = items[0]?.document;
 
     // Verify spaceId matches for security/multi-tenancy
     if (!doc || doc.spaceId !== spaceId) {
@@ -70,11 +57,10 @@ export const getWorkflowExecution = async ({
     if (!includeOutput) sourceExcludes.push('output');
 
     const stepExecutions = await getStepExecutionsByWorkflowExecution({
-      esClient,
-      stepsExecutionIndex,
+      stepExecutionsDataClient,
       workflowExecutionId,
       stepExecutionIds: doc.stepExecutionIds,
-      sourceExcludes,
+      sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
     });
 
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
@@ -90,6 +76,7 @@ function transformToWorkflowExecutionDetailDto(
   stepExecutions: EsWorkflowStepExecution[],
   logger: Logger
 ): WorkflowExecutionDto {
+  const { billable: _billable, ...workflowExecutionDtoFields } = workflowExecution;
   let yaml = workflowExecution.yaml;
   // backward compatibility for workflow executions created before yaml was added to the workflow execution object
   try {
@@ -101,7 +88,7 @@ function transformToWorkflowExecutionDetailDto(
     yaml = '';
   }
   return {
-    ...workflowExecution,
+    ...workflowExecutionDtoFields,
     id,
     isTestRun: workflowExecution.isTestRun ?? false,
     stepId: workflowExecution.stepId,
@@ -112,5 +99,6 @@ function transformToWorkflowExecutionDetailDto(
     traceId: workflowExecution.traceId,
     entryTransactionId: workflowExecution.entryTransactionId,
     concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
+    ...pickWorkflowDocumentVersion(workflowExecution),
   };
 }

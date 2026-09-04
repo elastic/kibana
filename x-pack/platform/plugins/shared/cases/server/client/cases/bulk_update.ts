@@ -14,6 +14,7 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
 import { nodeBuilder } from '@kbn/es-query';
@@ -46,14 +47,9 @@ import {
   isAlertAttachmentType,
   UNIFIED_ALERT_TYPES_ARRAY,
 } from '../../../common/utils/attachments';
+import { getCaseToUpdate, buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import {
-  arraysDifference,
-  getCaseToUpdate,
-  buildFilter,
-  combineFilters,
-  NodeBuilderOperators,
-} from '../utils';
-import {
+  applyProfilesToAssignees,
   dedupAssignees,
   fillMissingCustomFields,
   getCloseReasonIfValid,
@@ -61,6 +57,7 @@ import {
   getDurationForUpdate,
   getInProgressInfoForUpdate,
   getTimingMetricsForUpdate,
+  getUserProfilesSafe,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -76,10 +73,34 @@ import type {
 import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
 import {
   validateCustomFields,
+  validateCaseExtendedFields,
   validateExtendedFieldsInRequest,
+  validateExtendedFieldsOnClose,
+  resolveTemplateFieldsForClose,
   resolveGlobalFields,
 } from './validators';
+import type { InlineField } from '../../../common/types/domain/template/fields';
+import type { TemplatesService } from '../../services/templates';
+import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
+import {
+  loadFieldLinkIndexes,
+  logUnresolvedMirrorKeys,
+  throwIfMalformedFieldLinkage,
+} from '../../common/utils/mirror_custom_fields';
+import type { ActiveLinkMaps } from '../../common/utils/pair_field_representations';
+import {
+  buildActiveLinkMaps,
+  incrementPairedWriteCounter,
+  pairUpdatedCaseFields,
+  throwIfFieldRepresentationConflicts,
+  throwIfInvalidLinkedFieldValues,
+} from '../../common/utils/pair_field_representations';
+import {
+  APPLY_TEMPLATE_COUNTER,
+  CLEAR_TEMPLATE_COUNTER,
+  incrementCasesClientCounter,
+} from '../usage_counters';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -210,20 +231,18 @@ async function getAlertComments({
     AttachmentType.alert
   );
 
-  const alertFilter = isCasesAttachmentsEnabled
-    ? combineFilters(
-        [
-          legacyAlertFilter,
-          buildFilter({
-            filters: UNIFIED_ALERT_TYPES_ARRAY,
-            field: 'type',
-            operator: 'or',
-            type: CASE_ATTACHMENT_SAVED_OBJECT,
-          }),
-        ],
-        NodeBuilderOperators.or
-      )
-    : legacyAlertFilter;
+  const alertFilter = combineFilters(
+    [
+      legacyAlertFilter,
+      buildFilter({
+        filters: UNIFIED_ALERT_TYPES_ARRAY,
+        field: 'type',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      }),
+    ],
+    NodeBuilderOperators.or
+  );
 
   return (await caseService.getAllCaseComments({
     id: idsOfCasesToSync,
@@ -400,6 +419,16 @@ function partitionPatchRequest(
   };
 }
 
+/**
+ * Fields that are allowed to be present when users reopen cases
+ */
+const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status']);
+
+/**
+ * Fields that are allowed to be present when case is reassigned
+ */
+const ASSIGN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'assignees']);
+
 export function getOperationsToAuthorize({
   reopenedCases,
   changedAssignees,
@@ -411,9 +440,17 @@ export function getOperationsToAuthorize({
 }): OperationDetails[] {
   const operations: OperationDetails[] = [];
   const onlyAssigneeOperations =
-    reopenedCases.length === 0 && changedAssignees.length === allCases.length;
+    reopenedCases.length === 0 &&
+    changedAssignees.length === allCases.length &&
+    changedAssignees.every((caseReq) =>
+      Object.keys(caseReq).every((key) => ASSIGN_ONLY_CASE_FIELDS.has(key))
+    );
   const onlyReopenOperations =
-    changedAssignees.length === 0 && reopenedCases.length === allCases.length;
+    changedAssignees.length === 0 &&
+    reopenedCases.length === allCases.length &&
+    reopenedCases.every((caseReq) =>
+      Object.keys(caseReq).every((key) => REOPEN_ONLY_CASE_FIELDS.has(key))
+    );
 
   if (reopenedCases.length > 0) {
     operations.push(Operations.reopenCase);
@@ -434,6 +471,69 @@ export interface UpdateRequestWithOriginalCase {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
 }
+
+/**
+ * Counts the cases that had a template applied or cleared, once per case.
+ *
+ * A `template` key only survives into `updateReq` when it differs from the case's current
+ * template, so re-sending an unchanged one is not an apply. Restricted to the cases that actually
+ * persisted, since a bulk update can partially fail, and deduped by id so a request repeating a
+ * case id counts that case once, keeping the first change as `updatedFieldsByCaseId` does.
+ */
+const countTemplateChanges = (
+  casesToUpdate: UpdateRequestWithOriginalCase[],
+  persistedCaseIds: Set<string>
+): {
+  appliedCases: number;
+  clearedCases: number;
+  casesPerTemplateId: Map<string, number>;
+} => {
+  const countedCaseIds = new Set<string>();
+  const casesPerTemplateId = new Map<string, number>();
+  let appliedCases = 0;
+  let clearedCases = 0;
+
+  for (const { updateReq } of casesToUpdate) {
+    const { id, template } = updateReq;
+    const isCountable =
+      template !== undefined && persistedCaseIds.has(id) && !countedCaseIds.has(id);
+
+    if (isCountable) {
+      countedCaseIds.add(id);
+
+      if (template === null) {
+        clearedCases += 1;
+      } else {
+        appliedCases += 1;
+        casesPerTemplateId.set(template.id, (casesPerTemplateId.get(template.id) ?? 0) + 1);
+      }
+    }
+  }
+
+  return { appliedCases, clearedCases, casesPerTemplateId };
+};
+
+/**
+ * Adds the cases that just received a template to each template's usage tally.
+ *
+ * Best effort: the tally is a display concern, so a failure is logged and swallowed rather than
+ * failing an update whose cases are already persisted.
+ */
+const incrementTemplateUsageStats = async (
+  casesPerTemplateId: Map<string, number>,
+  templatesService: TemplatesService,
+  logger: CasesClientArgs['logger']
+): Promise<void> => {
+  await Promise.allSettled(
+    [...casesPerTemplateId].map(async ([templateId, caseCount]) => {
+      try {
+        await templatesService.incrementUsageStats(templateId, caseCount);
+      } catch (error) {
+        logger.warn(`Failed to update template usage stats for template ${templateId}: ${error}`);
+      }
+    })
+  );
+};
 
 /**
  * Updates the specified cases with new values
@@ -583,15 +683,21 @@ export const bulkUpdate = async (
     await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
 
     // Pre-resolve global fields once per owner to avoid N SO queries inside Promise.all.
-    const uniqueOwnersWithExtendedFields = [
+    // Owners are collected for both cases that include extended_fields in the request and
+    // cases that are transitioning to closed (close-time validation needs the global fields
+    // even when the request does not include extended_fields).
+    const uniqueOwnersNeedingFields = [
       ...casesToUpdate.reduce((owners, { updateReq, originalCase }) => {
-        if (updateReq.extended_fields) owners.add(originalCase.attributes.owner);
+        const isBeingClosed =
+          updateReq.status === CaseStatuses.closed &&
+          originalCase.attributes.status !== CaseStatuses.closed;
+        if (updateReq.extended_fields || isBeingClosed) owners.add(originalCase.attributes.owner);
         return owners;
       }, new Set<string>()),
     ];
     const globalFieldsByOwner = new Map(
       await Promise.all(
-        uniqueOwnersWithExtendedFields.map(async (owner) => {
+        uniqueOwnersNeedingFields.map(async (owner) => {
           const fields = await resolveGlobalFields(owner, fieldDefinitionsService);
           return [owner, fields] as const;
         })
@@ -604,23 +710,172 @@ export const bulkUpdate = async (
           updateReq,
           originalCase,
           templatesService,
+          fieldDefinitionsService,
           globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
         })
       )
     );
 
-    const patchCasesPayload = createPatchCasesPayload({
+    // Pre-resolve template fields for cases transitioning to closed.
+    // Deduplicates SO fetches: N cases sharing the same (template id, version) pair issue only one getTemplate call.
+    const getEffectiveTemplate = (
+      updateReq: CasePatchRequest,
+      originalCase: CaseSavedObjectTransformed
+    ): { id: string; version: number } | null => {
+      if (updateReq.template === null) return null;
+      if (updateReq.template != null) {
+        return { id: updateReq.template.id, version: updateReq.template.version };
+      }
+      const t = originalCase.attributes.template;
+      return t != null ? { id: t.id, version: t.version } : null;
+    };
+
+    // Deduplicate by "id@version" so different versions of the same template are fetched separately.
+    const closingCasesTemplates = [
+      ...new Map(
+        casesToUpdate
+          .filter(
+            ({ updateReq, originalCase }) =>
+              updateReq.status === CaseStatuses.closed &&
+              originalCase.attributes.status !== CaseStatuses.closed
+          )
+          .map(({ updateReq, originalCase }) => getEffectiveTemplate(updateReq, originalCase))
+          .filter((t): t is { id: string; version: number } => t != null)
+          .map((t) => [`${t.id}@${t.version}`, t] as const)
+      ).values(),
+    ];
+    const templateFieldsByKey = new Map<string, InlineField[]>(
+      await Promise.all(
+        closingCasesTemplates.map(async ({ id, version }) => {
+          const fields = await resolveTemplateFieldsForClose({
+            templateId: id,
+            templateVersion: version,
+            templatesService,
+            fieldDefinitionsService,
+            logger,
+          });
+          return [`${id}@${version}`, fields] as [string, InlineField[]];
+        })
+      )
+    );
+
+    // Preload per-owner active-link maps for the customFields ⇄ extended_fields
+    // pairing adapter. Only owners with at least one update touching either
+    // representation pay the (bounded) definitions fetch. Pairing for existing
+    // links runs independently of the templates feature flag (addendum A1).
+    const linkMapsByOwner = new Map<string, ActiveLinkMaps>();
+    const ownersNeedingLinks = [
+      ...new Set(
+        casesToUpdate
+          .filter(
+            ({ updateReq }) => updateReq.customFields?.length || updateReq.extended_fields != null
+          )
+          .map(({ originalCase }) => originalCase.attributes.owner)
+      ),
+    ];
+    for (const ownerNeedingLinks of ownersNeedingLinks) {
+      const indexes = await loadFieldLinkIndexes(ownerNeedingLinks, fieldDefinitionsService);
+      linkMapsByOwner.set(
+        ownerNeedingLinks,
+        buildActiveLinkMaps(customFieldsConfigurationMap.get(ownerNeedingLinks) ?? [], indexes)
+      );
+    }
+
+    const patchCasesPayload = await createPatchCasesPayload({
       user,
       casesToUpdate,
       customFieldsConfigurationMap,
+      linkMapsByOwner,
+      logger,
+      usageCounter: clientArgs.usageCounter,
+      templatesService,
+      fieldDefinitionsService,
+      globalFieldsByOwner,
     });
+
+    // Close-time required_on_close check must run against the exact extended_fields map that
+    // will be persisted. `updatedAttributes.extended_fields`, when present, is that map: it is
+    // the complete post-merge, post-pairing state (a key deleted by pairing — e.g. a linked
+    // field cleared via customFields or via an empty-string extended_fields entry — is absent
+    // from it and must read as empty). When absent, the update did not touch extended_fields
+    // through either representation, so the persisted state is the original map merged with the
+    // raw request delta (the delta is nil here; the merge keeps the fallback explicit).
+    // `patchCasesPayload.cases` is produced by mapping `casesToUpdate` 1:1 in order, so the two
+    // arrays are index-aligned.
+    casesToUpdate.forEach(({ updateReq, originalCase }, index) => {
+      const effectiveTemplate = getEffectiveTemplate(updateReq, originalCase);
+      const templateKey =
+        effectiveTemplate != null ? `${effectiveTemplate.id}@${effectiveTemplate.version}` : null;
+      const finalExtendedFields = patchCasesPayload.cases[index].updatedAttributes
+        .extended_fields ?? {
+        ...(originalCase.attributes.extended_fields ?? {}),
+        ...(updateReq.extended_fields ?? {}),
+      };
+      validateExtendedFieldsOnClose({
+        caseId: updateReq.id,
+        requestedStatus: updateReq.status,
+        originalStatus: originalCase.attributes.status,
+        finalExtendedFields,
+        templateFields: templateKey != null ? templateFieldsByKey.get(templateKey) ?? [] : [],
+        globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
+      });
+    });
+
+    // Resolve names of newly-applied templates so the "applied template" user action records the
+    // name (durable in the audit trail). Only templates being set on this update; deduped by
+    // "id@version" because template names can change across versions and the recorded name must be a
+    // point-in-time snapshot of the exact version applied (not the current latest).
+    const appliedTemplates = [
+      ...new Map(
+        casesToUpdate
+          .map(({ updateReq }) => updateReq.template)
+          .filter((t): t is NonNullable<typeof t> => t != null)
+          .map((t) => [`${t.id}@${t.version}`, t] as const)
+      ).values(),
+    ];
+    const templateNamesByKey = new Map<string, string>(
+      (
+        await Promise.all(
+          appliedTemplates.map(async ({ id, version }) => {
+            const templateSO = await templatesService.getTemplate(id, String(version));
+            return templateSO
+              ? ([`${id}@${version}`, templateSO.attributes.name] as [string, string])
+              : null;
+          })
+        )
+      ).filter((entry): entry is [string, string] => entry != null)
+    );
+
     let userActionsDict = userActionService.creator.buildUserActions({
       updatedCases: patchCasesPayload,
       user,
+      templateNamesByKey,
     });
 
     await throwIfMaxUserActionsReached({ userActionsDict, userActionService });
     notifyPlatinumUsage(licensingService, casesToUpdate);
+
+    // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
+    if (clientArgs.config.assigneeIdentity.enabled) {
+      const allUids = new Set(
+        patchCasesPayload.cases.flatMap(
+          ({ updatedAttributes }) => updatedAttributes.assignees?.map(({ uid }) => uid) ?? []
+        )
+      );
+
+      if (allUids.size > 0) {
+        const profiles = await getUserProfilesSafe(clientArgs.securityStartPlugin, allUids, logger);
+
+        if (profiles) {
+          for (const patchCase of patchCasesPayload.cases) {
+            const { assignees } = patchCase.updatedAttributes;
+            if (assignees && assignees.length > 0) {
+              patchCase.updatedAttributes.assignees = applyProfilesToAssignees(assignees, profiles);
+            }
+          }
+        }
+      }
+    }
 
     const updatedCases = await patchCases({ caseService, patchCasesPayload });
 
@@ -668,7 +923,7 @@ export const bulkUpdate = async (
       (flattenCases, updatedCase) => {
         const originalCase = casesMap.get(updatedCase.id);
 
-        if (!originalCase) {
+        if (!originalCase || isSavedObjectErrorResult(updatedCase)) {
           return flattenCases;
         }
 
@@ -720,6 +975,17 @@ export const bulkUpdate = async (
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
     const updatedCasesResponse = decodeOrThrow(PatchCasesResponseRt)(returnUpdatedCase);
+
+    const { appliedCases, clearedCases, casesPerTemplateId } = countTemplateChanges(
+      casesToUpdate,
+      new Set(updatedCasesResponse.map(({ id }) => id))
+    );
+
+    incrementCasesClientCounter(clientArgs, APPLY_TEMPLATE_COUNTER, appliedCases);
+    incrementCasesClientCounter(clientArgs, CLEAR_TEMPLATE_COUNTER, clearedCases);
+
+    await incrementTemplateUsageStats(casesPerTemplateId, templatesService, logger);
+
     const updatedFieldsByCaseId = casesToUpdate.reduce<Map<string, string[]>>(
       (acc, { updateReq }) => {
         // Keep first occurrence for duplicate ids handling.
@@ -811,19 +1077,54 @@ const normalizeCaseAttributes = (
   return trimmedAttributes;
 };
 
-const createPatchCasesPayload = ({
+const createPatchCasesPayload = async ({
   casesToUpdate,
   user,
   customFieldsConfigurationMap,
+  linkMapsByOwner,
+  logger,
+  usageCounter,
+  templatesService,
+  fieldDefinitionsService,
+  globalFieldsByOwner,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
   customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
-}): PatchCasesArgs => {
+  linkMapsByOwner: Map<string, ActiveLinkMaps>;
+  logger: CasesClientArgs['logger'];
+  usageCounter: CasesClientArgs['usageCounter'];
+  templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
+  /** Per-owner (isGlobal) field-definition cache; populated lazily for owners not pre-resolved by the caller. */
+  globalFieldsByOwner: Map<string, InlineField[]>;
+}): Promise<PatchCasesArgs> => {
   const updatedDt = new Date().toISOString();
 
-  return {
-    cases: casesToUpdate.map(({ updateReq, originalCase }) => {
+  // Concurrent callers for the same not-yet-cached owner (this runs per-case under the
+  // `Promise.all` below) must await the SAME fetch rather than each racing to see an empty
+  // `globalFieldsByOwner` and issuing their own — otherwise N cases sharing one owner cost
+  // N queries instead of 1. Caching the in-flight promise (not just the resolved value)
+  // closes that window.
+  const globalFieldsFetchesInFlight = new Map<string, Promise<InlineField[]>>();
+
+  const resolveCachedGlobalFields = async (owner: string): Promise<InlineField[]> => {
+    const cached = globalFieldsByOwner.get(owner);
+    if (cached) {
+      return cached;
+    }
+    let inFlight = globalFieldsFetchesInFlight.get(owner);
+    if (!inFlight) {
+      inFlight = resolveGlobalFields(owner, fieldDefinitionsService);
+      globalFieldsFetchesInFlight.set(owner, inFlight);
+    }
+    const globalFields = await inFlight;
+    globalFieldsByOwner.set(owner, globalFields);
+    return globalFields;
+  };
+
+  const cases = await Promise.all(
+    casesToUpdate.map(async ({ updateReq, originalCase }) => {
       // intentionally removing owner and closeReason from the case so that we don't accidentally allow it to be updated
       const {
         id: caseId,
@@ -860,10 +1161,100 @@ const createPatchCasesPayload = ({
         };
       }
 
+      // Pair the two representations of every linked field the request touches
+      // (customFields ⇄ extended_fields) so one case write persists a consistent
+      // pair. Runs whenever the update includes either representation — an
+      // update touching neither must not change either map.
+      //
+      // Pass the RAW request values (updateCaseAttributes.customFields and
+      // updateReq.extended_fields), never post-fill / post-merge derivatives:
+      // fillMissingCustomFields pads absent optional-no-default fields with
+      // { key, value: null }, and the PATCH merge above folds existing keys into
+      // the map — both would otherwise be mistaken for explicit caller intent
+      // and clear or conflict with values the update never touched.
+      //
+      // Explicit conflicting dual input rejects with a structured 400; malformed
+      // linkage rejects with a structured 400; codec failures reject with a 400;
+      // unresolved fields are skipped with a diagnostic. Same-reference results
+      // mean "unchanged" — guard on reference inequality to avoid spurious
+      // writes/user-actions.
+      const links = linkMapsByOwner.get(originalCase.attributes.owner);
+      let pairedStorageKeys: Record<string, string> | undefined;
+      if (
+        links !== undefined &&
+        (updateCaseAttributes.customFields || updateCaseAttributes.extended_fields)
+      ) {
+        const baseCustomFields =
+          trimmedCaseAttributes.customFields ?? originalCase.attributes.customFields ?? [];
+        const baseExtendedFields =
+          trimmedCaseAttributes.extended_fields ?? originalCase.attributes.extended_fields;
+        const paired = pairUpdatedCaseFields({
+          requestCustomFields: updateCaseAttributes.customFields,
+          requestExtendedFields: updateCaseAttributes.extended_fields as
+            | Record<string, unknown>
+            | undefined,
+          baseCustomFields,
+          baseExtendedFields,
+          links,
+        });
+        throwIfMalformedFieldLinkage(paired.malformedFields);
+        throwIfFieldRepresentationConflicts(paired.conflictFields, usageCounter);
+        throwIfInvalidLinkedFieldValues(paired.invalidValues);
+        logUnresolvedMirrorKeys(paired.unresolvedKeys, {
+          owner: originalCase.attributes.owner,
+          logger,
+        });
+        const extendedFieldsChanged =
+          paired.extendedFields !== baseExtendedFields && paired.extendedFields != null;
+        const customFieldsChanged =
+          paired.customFields !== undefined && paired.customFields !== baseCustomFields;
+        if (extendedFieldsChanged) {
+          const finalExtendedFields = paired.extendedFields as Record<string, string>;
+
+          // Definition-aware validation of the FINAL map, matching create.ts/bulk_create.ts:
+          // pairing-derived values must also be valid keys with valid values against the
+          // linked definition. `partial: true` — pairing never makes an absent field
+          // "required-missing".
+          const templateId =
+            updateReq.template === null
+              ? null
+              : updateReq.template?.id ?? originalCase.attributes.template?.id;
+          const globalFields = await resolveCachedGlobalFields(originalCase.attributes.owner);
+          await validateCaseExtendedFields({
+            extendedFields: finalExtendedFields,
+            templateId,
+            globalFields,
+            templatesService,
+            fieldDefinitionsService,
+            owner: originalCase.attributes.owner,
+            partial: true,
+          });
+
+          trimmedCaseAttributes.extended_fields = finalExtendedFields;
+        }
+        if (customFieldsChanged) {
+          // Values were decoded through the per-type codecs, so they satisfy the
+          // customFields union even though the adapter is structurally typed.
+          trimmedCaseAttributes.customFields =
+            paired.customFields as unknown as CaseAttributes['customFields'];
+        }
+        if (Object.keys(paired.pairedKeyToStorageKey).length > 0) {
+          pairedStorageKeys = paired.pairedKeyToStorageKey;
+        }
+        incrementPairedWriteCounter(
+          usageCounter,
+          paired,
+          extendedFieldsChanged || customFieldsChanged
+        );
+      }
+
       return {
         caseId,
         originalCase,
         closeReason: updateReq.closeReason,
+        ...(pairedStorageKeys !== undefined && {
+          pairedCustomFieldStorageKeys: pairedStorageKeys,
+        }),
         updatedAttributes: {
           ...trimmedCaseAttributes,
           ...(dedupedAssignees && { assignees: dedupedAssignees }),
@@ -893,7 +1284,11 @@ const createPatchCasesPayload = ({
         },
         version,
       };
-    }),
+    })
+  );
+
+  return {
+    cases,
     refresh: false,
   };
 };
@@ -918,20 +1313,22 @@ const getCasesAndAssigneesToNotifyForAssignment = (
   >((acc, updatedCase) => {
     const originalCaseSO = casesMap.get(updatedCase.id);
 
-    if (!originalCaseSO) {
+    if (!originalCaseSO || isSavedObjectErrorResult(updatedCase)) {
       return acc;
     }
 
-    const alreadyAssignedToCase = originalCaseSO.attributes.assignees;
-    const comparedAssignees = arraysDifference(
-      alreadyAssignedToCase,
-      updatedCase.attributes.assignees ?? []
+    // Compare by uid, not object identity: server-derived identity fields make an enriched
+    // assignee unequal to the legacy uid-only record, so a deep diff would flag every retained
+    // assignee on a pre-rollout case as newly added and re-notify them.
+    const alreadyAssignedUids = new Set(originalCaseSO.attributes.assignees.map(({ uid }) => uid));
+    const addedAssignees = (updatedCase.attributes.assignees ?? []).filter(
+      ({ uid }) => !alreadyAssignedUids.has(uid)
     );
 
-    if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
+    if (addedAssignees.length > 0) {
       const theCase = mergeOriginalSOWithUpdatedSO(originalCaseSO, updatedCase);
 
-      const assigneesWithoutCurrentUser = comparedAssignees.addedItems.filter(
+      const assigneesWithoutCurrentUser = addedAssignees.filter(
         (assignee) => assignee.uid !== user.profile_uid
       );
 

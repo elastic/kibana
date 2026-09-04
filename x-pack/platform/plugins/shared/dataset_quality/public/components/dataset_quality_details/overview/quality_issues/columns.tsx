@@ -72,7 +72,7 @@ export const getQualityIssuesColumns = ({
             size="xs"
             color="text"
             onClick={onExpandClick}
-            iconType={isExpanded ? 'minimize' : 'expand'}
+            iconType={isExpanded ? 'minimize' : 'maximize'}
             aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
           />
         </EuiToolTip>

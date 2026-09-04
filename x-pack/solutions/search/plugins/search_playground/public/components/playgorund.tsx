@@ -7,6 +7,8 @@
 
 import React, { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { useWatch } from 'react-hook-form';
@@ -15,8 +17,8 @@ import { SearchQueryMode } from './query_mode/search_query_mode';
 import { ChatSetupPage } from './setup_page/chat_setup_page';
 import { Header } from './header';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
-import type { PlaygroundForm, PlaygroundPageMode } from '../types';
-import { PlaygroundFormFields, PlaygroundViewMode } from '../types';
+import type { PlaygroundForm } from '../types';
+import { PlaygroundFormFields, PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { Chat } from './chat';
 import { SearchMode } from './search_mode/search_mode';
 import { SearchPlaygroundSetupPage } from './setup_page/search_playground_setup_page';
@@ -77,8 +79,28 @@ export const Playground: React.FC<AppProps> = ({ showDocs = false }) => {
         showDocs={showDocs}
         onModeChange={handleModeChange}
         isActionsDisabled={showSetupPage}
-        onSelectPageModeChange={handlePageModeChange}
       />
+      {isSearchModeEnabled && (
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          css={({ euiTheme }) => ({ padding: euiTheme.size.s })}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiSelect
+              data-test-subj="page-mode-select"
+              options={[
+                { value: PlaygroundPageMode.Chat, text: 'Chat' },
+                { value: PlaygroundPageMode.Search, text: 'Search' },
+              ]}
+              value={pageMode}
+              aria-label={i18n.translate('xpack.searchPlayground.header.pageModeSelectAriaLabel', {
+                defaultMessage: 'Page mode',
+              })}
+              onChange={(e) => handlePageModeChange(e.target.value as PlaygroundPageMode)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <Routes>
         {showSetupPage ? (
           <>

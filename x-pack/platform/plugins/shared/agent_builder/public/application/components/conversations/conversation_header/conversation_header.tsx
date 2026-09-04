@@ -6,41 +6,68 @@
  */
 
 import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { ConversationRightActions } from './conversation_actions_right';
 import { ConversationTitle } from './conversation_title';
+import { useConversationReadOnly } from '../../../hooks/use_conversation';
 
-const headerGridStyles = css`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  width: 100%;
+const titleSlotStyles = css`
+  min-width: 0;
 `;
 
-const rightActionsStyles = css`
-  justify-self: end;
-`;
+const labels = {
+  readOnly: i18n.translate('xpack.agentBuilder.conversationHeader.readOnly', {
+    defaultMessage: 'Read-Only',
+  }),
+};
+
+const ConversationReadOnlyBadge = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiBadge
+      color={euiTheme.colors.lightShade}
+      iconType="lock"
+      data-test-subj="agentBuilderConversationReadOnlyBadge"
+      css={css`
+        color: ${euiTheme.colors.text};
+      `}
+    >
+      {labels.readOnly}
+    </EuiBadge>
+  );
+};
 
 interface ConversationHeaderProps {
-  onClose?: () => void;
   ariaLabelledBy?: string;
 }
-export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
-  onClose,
-  ariaLabelledBy,
-}) => {
+export const ConversationHeader = ({ ariaLabelledBy }: ConversationHeaderProps) => {
+  const { isReadOnly } = useConversationReadOnly();
+
   return (
-    <div css={headerGridStyles}>
-      {/* Left column — intentionally empty, reserved for future actions */}
-      <div />
-
-      {/* Center column — always exactly centered */}
-      <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
-
-      {/* Right column — right-aligned within its 1fr column */}
-      <div css={rightActionsStyles}>
-        <ConversationRightActions onClose={onClose} />
-      </div>
-    </div>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem grow={true} css={titleSlotStyles}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false} css={titleSlotStyles}>
+            <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
+          </EuiFlexItem>
+          {isReadOnly && (
+            <EuiFlexItem grow={false}>
+              <ConversationReadOnlyBadge />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ConversationRightActions />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

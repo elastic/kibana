@@ -6,13 +6,17 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { isRuleError, isRuleForbidden, isRuleLoaded, isRuleNotFound } from '../../types/rule_state';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
-import { parseEpisodeDataJson } from '../../utils/episode_grouping_data';
-import { AlertEpisodeOverviewList } from './overview_list';
+import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
+import { AlertEpisodeOverviewList, type GroupingRowStatus } from './overview_list';
+import { AlertEpisodeDescriptionListSkeleton } from './section_skeletons';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
@@ -21,7 +25,7 @@ export interface AlertEpisodeOverviewListSectionProps {
   groupHash: string | undefined;
   services: Pick<
     AlertEpisodeDetailsServices,
-    'data' | 'http' | 'expressions' | 'spaces' | 'uiSettings' | 'userProfile'
+    'data' | 'http' | 'expressions' | 'spaces' | 'uiSettings' | 'userProfile' | 'dataViews'
   >;
 }
 
@@ -37,14 +41,10 @@ export const AlertEpisodeOverviewListSection = ({
   } = useFetchEpisodeQuery({ episodeId, services });
 
   const ruleId = episode?.['rule.id'];
-  const triggeredAt = episode?.triggered_at;
+  const triggeredAt = episode?.triggered_at ?? undefined;
   const durationMs = episode?.duration;
 
-  const {
-    data: rule,
-    isLoading: isLoadingRule,
-    isError: isRuleError,
-  } = useFetchRule({ id: ruleId, http: services.http });
+  const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
 
   const {
     data: episodeActionsMap,
@@ -61,7 +61,16 @@ export const AlertEpisodeOverviewListSection = ({
     services,
   });
 
-  if (isEpisodeError || isRuleError || isEpisodeActionsError || isGroupActionsError) {
+  const sourceQuery =
+    isRuleLoaded(ruleState) && ruleState.rule.query
+      ? getRootEsqlQuery(ruleState.rule.query)
+      : undefined;
+  const { value: sourceDataView } = useAlertingEpisodeSourceDataView({
+    query: sourceQuery,
+    dataViews: services.dataViews,
+    http: services.http,
+  });
+  if (isEpisodeError || isEpisodeActionsError || isGroupActionsError) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodeOverviewListSectionError">
         {i18n.OVERVIEW_LIST_SECTION_LOAD_ERROR}
@@ -69,18 +78,19 @@ export const AlertEpisodeOverviewListSection = ({
     );
   }
 
-  if (
-    isLoadingEpisode ||
-    (ruleId && isLoadingRule) ||
-    isLoadingEpisodeActions ||
-    (groupHash && isLoadingGroupActions)
-  ) {
+  if (isLoadingEpisode || isLoadingEpisodeActions || (groupHash && isLoadingGroupActions)) {
     return (
-      <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeOverviewListSectionLoading" />
+      <AlertEpisodeDescriptionListSkeleton data-test-subj="alertingV2EpisodeOverviewListSectionLoading" />
     );
   }
 
-  const groupingFields = rule?.grouping?.fields ?? [];
+  const groupingFields = isRuleLoaded(ruleState) ? ruleState.rule.grouping?.fields ?? [] : [];
+  const groupingStatus: GroupingRowStatus =
+    isRuleForbidden(ruleState) || isRuleNotFound(ruleState)
+      ? 'hidden'
+      : isRuleError(ruleState)
+      ? 'error'
+      : 'visible';
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
   const assigneeUid = episode?.last_assignee_uid ?? undefined;
   const episodeAction = episodeActionsMap?.get(episodeId);
@@ -90,6 +100,8 @@ export const AlertEpisodeOverviewListSection = ({
     <AlertEpisodeOverviewList
       groupingFields={groupingFields}
       groupingData={groupingData}
+      groupingDataView={sourceDataView}
+      groupingStatus={groupingStatus}
       triggeredAt={triggeredAt}
       durationMs={durationMs}
       assigneeUid={assigneeUid}

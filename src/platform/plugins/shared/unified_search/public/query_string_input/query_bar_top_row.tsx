@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, mergeMap, of } from 'rxjs';
+import { EMPTY, delay, distinctUntilChanged, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
@@ -58,22 +58,26 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import {
+  DATE_RANGE_PICKER_FEATURE_FLAG,
   DateRangePicker,
   type DateRangePickerSettings,
   type DateRangePickerOnChangeProps,
   type AutoRefreshSettings,
 } from '@kbn/date-range-picker';
+import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
+import { EsqlApproximationToggle } from './esql_approximation_toggle';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
 import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
+import { QuerySubmitTrigger } from '../search_bar/query_submit_metadata';
 
-/** Feature flag key for the new DateRangePicker. Falls back to `true` (new picker). */
-const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
+const DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG =
+  'unifiedSearch.dateRangePickerPresetsPersistenceEnabled';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -159,7 +163,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onChange: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
+  onSubmit: (
+    payload: { dateRange: TimeRange; query?: Query | QT },
+    trigger?: QuerySubmitTrigger
+  ) => void;
   onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => Promise<void>;
   onCancel?: () => void;
   onDraftChange?: (draft: UnifiedSearchDraft | undefined) => void;
@@ -258,6 +265,15 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * the flag is disabled, the legacy picker is always used.
    */
   enableDateRangePicker?: boolean;
+  /**
+   * When provided, renders the ES|QL approximate execution toggle (bolt icon) before the date picker.
+   */
+  esqlApproximation?: {
+    isApproximate: boolean;
+    onChange: (isApproximate: boolean) => void;
+    additionalText?: string;
+    disabled?: boolean;
+  };
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -344,7 +360,7 @@ export const QueryBarTopRow = React.memo(
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
     const [dateRangePickerSettings, setDateRangePickerSettings] = useState<DateRangePickerSettings>(
       {
-        roundRelativeTime: true,
+        roundRelativeTime: false,
         timePrecision: 'none',
       }
     );
@@ -388,11 +404,46 @@ export const QueryBarTopRow = React.memo(
       http,
       dataViews,
       application,
+      featureFlags,
     } = kibana.services;
 
+    const isDateRangePickerFeatureFlagEnabled$ = useMemo(
+      () =>
+        enableDateRangePicker && featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [enableDateRangePicker, featureFlags]
+    );
+    const isDateRangePickerFeatureFlagEnabled = useObservable(
+      isDateRangePickerFeatureFlagEnabled$,
+      true
+    );
+
     const shouldUseLegacyTimePicker =
-      !enableDateRangePicker ||
-      !kibana.services.featureFlags?.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true);
+      !enableDateRangePicker || !isDateRangePickerFeatureFlagEnabled;
+
+    const isPresetsPersistenceFeatureFlagEnabled$ = useMemo(
+      () =>
+        featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [featureFlags]
+    );
+    const isPresetsPersistenceFeatureFlagEnabled = useObservable(
+      isPresetsPersistenceFeatureFlagEnabled$,
+      true
+    );
+    const shouldPersistDateRangePickerPresets =
+      !shouldUseLegacyTimePicker && isPresetsPersistenceFeatureFlagEnabled;
+    const dateRangePickerPresets = useDateRangePickerPresets({
+      service: data.dateRangePickerPresets,
+      persistenceEnabled: shouldPersistDateRangePickerPresets,
+      notifications,
+    });
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
     const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
@@ -468,12 +519,15 @@ export const QueryBarTopRow = React.memo(
     });
 
     const onSubmit = useCallback(
-      ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {
+      (
+        { query, dateRange }: { query?: Query | QT; dateRange: TimeRange },
+        trigger?: QuerySubmitTrigger
+      ) => {
         if (timeHistory) {
           timeHistory.add(dateRange);
         }
 
-        propsOnSubmit({ query, dateRange });
+        propsOnSubmit({ query, dateRange }, trigger);
       },
       [timeHistory, propsOnSubmit]
     );
@@ -484,10 +538,13 @@ export const QueryBarTopRow = React.memo(
           persistedLog.add(queryRef.current.query);
         }
         event.preventDefault();
-        onSubmit({
-          query: queryRef.current,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query: queryRef.current,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
+        );
       },
       [persistedLog, onSubmit]
     );
@@ -557,7 +614,7 @@ export const QueryBarTopRow = React.memo(
         };
 
         if (isQuickSelection) {
-          onSubmit(retVal);
+          onSubmit(retVal, QuerySubmitTrigger.TIME_FILTER);
         } else {
           propsOnChange(retVal);
         }
@@ -579,10 +636,13 @@ export const QueryBarTopRow = React.memo(
       ({ start, end, isInvalid }: DateRangePickerOnChangeProps) => {
         setIsDateRangeInvalid(isInvalid);
         if (!isInvalid) {
-          onSubmit({
-            query: queryRef.current,
-            dateRange: { from: start, to: end },
-          });
+          onSubmit(
+            {
+              query: queryRef.current,
+              dateRange: { from: start, to: end },
+            },
+            QuerySubmitTrigger.TIME_FILTER
+          );
         }
       },
       [onSubmit]
@@ -617,12 +677,23 @@ export const QueryBarTopRow = React.memo(
       return () => subscription.unsubscribe();
     }, [shouldUseLegacyTimePicker, propsOnRefreshChange, data.query.timefilter.timefilter]);
 
+    // Visualize-style consumers request auto-refresh-only mode via
+    // `showAutoRefreshOnly` + `!showDatePicker`: the picker renders readOnly with
+    // only the auto-refresh play/pause button operable.
+    const isAutoRefreshOnly = showAutoRefreshOnly && !showDatePicker;
+
     const dateRangePickerSettingsWithAutoRefresh = useMemo<DateRangePickerSettings>(
       () =>
         propsOnRefreshChange
-          ? { ...dateRangePickerSettings, autoRefresh }
+          ? {
+              ...dateRangePickerSettings,
+              // In auto-refresh-only mode the settings panel (the only place to
+              // enable auto-refresh) is unreachable behind readOnly, so force the
+              // play/pause button visible; paused state still follows props.
+              autoRefresh: isAutoRefreshOnly ? { ...autoRefresh, isEnabled: true } : autoRefresh,
+            }
           : dateRangePickerSettings,
-      [dateRangePickerSettings, autoRefresh, propsOnRefreshChange]
+      [dateRangePickerSettings, autoRefresh, propsOnRefreshChange, isAutoRefreshOnly]
     );
 
     const onDateRangePickerSettingsChange = useCallback(
@@ -660,10 +731,13 @@ export const QueryBarTopRow = React.memo(
 
     const onInputSubmit = useCallback(
       (query: Query) => {
-        onSubmit({
-          query,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
+        );
       },
       [onSubmit]
     );
@@ -811,28 +885,24 @@ export const QueryBarTopRow = React.memo(
       } else {
         const noTimeFieldNameDisabled =
           typeof isDisabled === 'object' && isDisabled.display !== undefined;
-        // Visualize-style consumers request auto-refresh-only mode via
-        // `showAutoRefreshOnly` + `!showDatePicker`. The legacy picker rendered a
-        // read-only date display while still letting users operate the auto-refresh
-        // controls. The new picker has no read-only mode, so we disable it here —
-        // but that also removes access to auto-refresh, a temporary regression.
-        // TODO: add a `readOnly` prop to the new picker so auto-refresh stays
-        // operable, and use it instead of `disabled` for this case.
-        const autoRefreshOnlyDisabled = Boolean(showAutoRefreshOnly && !showDatePicker);
-        const pickerDisabled =
-          Boolean(props.isDisabled) || noTimeFieldNameDisabled || autoRefreshOnlyDisabled;
+        // In auto-refresh-only mode (`isAutoRefreshOnly`) the picker renders
+        // readOnly — like the legacy picker's read-only date display, no time
+        // filtering is possible but the auto-refresh play/pause button (which
+        // ignores `readOnly`, unlike `disabled`) stays operable.
+        const pickerDisabled = Boolean(props.isDisabled) || noTimeFieldNameDisabled;
         datePicker = (
           <>
-            {(noTimeFieldNameDisabled || autoRefreshOnlyDisabled) && (
-              // Hidden sibling so FTR tests can detect the disabled state via
-              // testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'), matching
-              // the span the legacy picker renders inside its isDisabled.display node.
+            {(noTimeFieldNameDisabled || isAutoRefreshOnly) && (
+              // Hidden sibling so FTR tests can detect that the time filter is off
+              // via testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'),
+              // matching the span the legacy picker renders inside its
+              // isDisabled.display node.
               <span data-test-subj="kbnQueryBar-datePicker-disabled" style={{ display: 'none' }} />
             )}
             <DateRangePicker
               className="kbnQueryBar__datePicker"
               value={
-                noTimeFieldNameDisabled || autoRefreshOnlyDisabled
+                noTimeFieldNameDisabled || isAutoRefreshOnly
                   ? strings.getDisabledDatePickerLabel()
                   : dateRangeValue
               }
@@ -840,12 +910,15 @@ export const QueryBarTopRow = React.memo(
               onInputChange={onDateRangeInputChange}
               isInvalid={isDateRangeInvalid}
               disabled={pickerDisabled}
+              readOnly={isAutoRefreshOnly}
               width="auto"
               compressed
               collapsed={isMobile || isQueryInputFocused}
               showTimeWindowButtons
-              presets={commonlyUsedRanges}
+              presets={dateRangePickerPresets.presets}
               recent={recentlyUsedRanges}
+              onPresetSave={dateRangePickerPresets.onPresetSave}
+              onPresetDelete={dateRangePickerPresets.onPresetDelete}
               settings={dateRangePickerSettingsWithAutoRefresh}
               onSettingsChange={onDateRangePickerSettingsChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
@@ -1041,6 +1114,14 @@ export const QueryBarTopRow = React.memo(
               {shouldRenderESQLUi ? (
                 <>
                   {shouldRenderUpdateButton() ? button : null}
+                  {props.esqlApproximation && (
+                    <EsqlApproximationToggle
+                      isApproximate={props.esqlApproximation.isApproximate}
+                      onChange={props.esqlApproximation.onChange}
+                      additionalText={props.esqlApproximation.additionalText}
+                      disabled={props.esqlApproximation.disabled}
+                    />
+                  )}
                   {shouldRenderDatePicker() ? renderDatePicker() : null}
                 </>
               ) : (
@@ -1300,6 +1381,14 @@ export const QueryBarTopRow = React.memo(
                 {renderQueryInput()}
                 {props.renderQueryInputAppend?.()}
                 {shouldShowDatePickerAsBadge() && props.filterBar}
+                {props.esqlApproximation && (
+                  <EsqlApproximationToggle
+                    isApproximate={props.esqlApproximation.isApproximate}
+                    onChange={props.esqlApproximation.onChange}
+                    additionalText={props.esqlApproximation.additionalText}
+                    disabled={props.esqlApproximation.disabled}
+                  />
+                )}
                 {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}

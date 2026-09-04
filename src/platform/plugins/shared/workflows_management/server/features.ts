@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -94,6 +95,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
               ),
               includeIn: 'read',
               savedObject: { all: [], read: [] },
+              aiIndex: { read: [WORKFLOW_KI_TYPE] },
               api: [WorkflowsManagementApiActions.read],
               ui: [WorkflowsManagementUiActions.read],
             },
@@ -136,6 +138,28 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
         {
           groupType: 'independent',
           privileges: [
+            {
+              id: 'workflow_read_managed',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.readManagedWorkflowsSubFeaturePrivilege',
+                { defaultMessage: 'Read managed workflows' }
+              ),
+              includeIn: 'read',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.readManaged],
+              ui: [WorkflowsManagementUiActions.readManaged],
+            },
+            {
+              id: 'workflow_execution_read_managed',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.readManagedWorkflowExecutionSubFeaturePrivilege',
+                { defaultMessage: 'Read managed workflow execution' }
+              ),
+              includeIn: 'read',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.readManagedExecution],
+              ui: [WorkflowsManagementUiActions.readManagedExecution],
+            },
             {
               id: 'workflow_update_managed',
               name: i18n.translate(

@@ -1,0 +1,491 @@
+products:
+- product: cloud-serverless
+  target: 2026-08-21
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-08-21
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 284940.yaml
+    checksum: 90f2e4b8a7de3a16ed6ddbaea2199c23f11a4dde
+  type: bug-fix
+  title: Fix Cases Activity search showing unrelated custom field history
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes Activity search for a custom field value returning every field from the same save. Matching history rows now appear without sibling fields that do not contain the search term.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/284940
+- file:
+    name: 285428.yaml
+    checksum: 38fa4543bff9757cf5edd1a2bddaeac4d6d84e04
+  type: bug-fix
+  title: Fix "Source event" failing to load for Security alerts from another project
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes clicking "Source event" in the Elastic Security alert details flyout showing "Cannot find document" for alerts that came from a linked project in cross-project search. Alerts from the current project were unaffected.
+  areas:
+  - security
+  prs:
+  - https://github.com/elastic/kibana/pull/285428
+- file:
+    name: 285453.yaml
+    checksum: 6a67787a72dc80806cde8f444c6a395dc4ddfac1
+  type: enhancement
+  title: Warn when Cases template fields are required and do not have a default
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Adds authoring warnings in the Cases field library and template editor when a required field has no default (automated case creation cannot fill it) and when a field's name and type become its permanent identity.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/285453
+- file:
+    name: 285279.yaml
+    checksum: 9996f81ba2d55daafe7a21e9c12f23bfd8619859
+  type: bug-fix
+  title: Fix Fleet installing outdated bundled packages when the registry is reachable
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes versionless package installs silently using a bundled package instead of the latest registry version when the Elastic Package Registry is reachable.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/285279
+  issues:
+  - https://github.com/elastic/kibana/issues/284975
+- file:
+    name: 284720.yaml
+    checksum: ebf376a5cf65cda95b6da3ab94fd8e6ae5b22fd1
+  type: feature
+  title: Add a Get Notes workflow step in Security
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - security
+  prs:
+  - https://github.com/elastic/kibana/pull/284720
+- file:
+    name: 282772.yaml
+    checksum: 18de8fd673bffec37f6a5305f6d79a8b0f08dcbf
+  type: bug-fix
+  title: Fix Cases custom field values falling out of sync with field definitions
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes legacy Cases custom fields and field-library values getting out of sync on write. Linked fields now stay paired in both directions, and conflicting values in the same request return an error instead of silently keeping one side.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/282772
+- file:
+    name: 285425.yaml
+    checksum: a966ffc459e974575438b7ce15d01a3893103602
+  type: bug-fix
+  title: Fix missing Dashboard action icons after the EUI upgrade
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/285425
+  issues:
+  - https://github.com/elastic/kibana/issues/285354
+- file:
+    name: 284721.yaml
+    checksum: 1f8a3a425e893e824e915916e41737334cccf4eb
+  type: feature
+  title: Add an Update Note workflow step in Security
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - security
+  prs:
+  - https://github.com/elastic/kibana/pull/284721
+- file:
+    name: 284280.yaml
+    checksum: 0fe7df936e119667eef29716a26ed5b95ade469a
+  type: bug-fix
+  title: Fix expired Fleet enrollment tokens still showing as Active
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/284280
+  issues:
+  - https://github.com/elastic/kibana/issues/283866
+- file:
+    name: 285526.yaml
+    checksum: ed79543d7d3931c5addb8ae6e232fb641727cce2
+  type: bug-fix
+  title: Fix unnecessary Elasticsearch searches during Fleet integration sync
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes automatic integrations synchronization running intensive Elasticsearch searches every five minutes when the feature is not configured. The task now returns early in that case.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/285526
+- file:
+    name: 284854.yaml
+    checksum: cdc026a9fe1289021b19f904f06632a0800eea99
+  type: bug-fix
+  title: Fix cases created from templates missing connector, settings, and assignees
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes the Cases system action so cases created from templates inherit the template's external connector, sync and observables settings, and assignees.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/284854
+- file:
+    name: 284710.yaml
+    checksum: 045654e52f4551d4c76d8bf62b3e644ef03c7288
+  type: bug-fix
+  title: Fix agent policy updates failing after a Kibana minor upgrade
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes agent policy edits failing with a missing `inputs_for_versions` error after a Kibana minor upgrade. Fleet now compiles version-specific integration inputs instead of aborting the update.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/284710
+  issues:
+  - https://github.com/elastic/kibana/issues/281451
+- file:
+    name: 283345.yaml
+    checksum: e4a5a6344708931c69a6274e366a3ae9d5ea1788
+  type: bug-fix
+  title: Fix highlighted search terms rendering broken markup in Discover
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes search highlighting that showed raw highlight-marker text when the search term was a substring of the marker (for example, `field`).
+  areas:
+  - Search and data
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/283345
+  issues:
+  - https://github.com/elastic/kibana/issues/283344
+- file:
+    name: 284603.yaml
+    checksum: 5396d7ea7ffb7db07bbd19898e5cb5517301abf7
+  type: enhancement
+  title: Highlight only the matched part of a metric name in Discover search
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  - Discover and ES|QL
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/284603
+  issues:
+  - https://github.com/elastic/kibana/issues/275705
+- file:
+    name: 283538.yaml
+    checksum: d891846330938b63f9b7b9ed8744bc9e691669be
+  type: enhancement
+  title: Add a toggle for the Summary column in the Discover table
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/283538
+- file:
+    name: 278233.yaml
+    checksum: 62ccf22c4954edd7baa6def09f79e5db6c51a219
+  type: enhancement
+  title: Enable Node.js code-generation protection by default
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Enables `--disallow-code-generation-from-strings` when starting Kibana unless you set `KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false`.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/278233
+- file:
+    name: 284863.yaml
+    checksum: e5af70966e939e8becc6ee9f95c318353ce14ebe
+  type: bug-fix
+  title: Fix Cribl routing pipeline creation with invalid route IDs
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes Cribl integration policies writing invalid `dataId` values into the routing ingest pipeline. Invalid routes now fail the policy save instead of creating a broken pipeline.
+  areas:
+  - security
+  prs:
+  - https://github.com/elastic/kibana/pull/284863
+- file:
+    name: 272076.yaml
+    checksum: a1726626d1fc2943d23ba5055ae060c6f8bc33eb
+  type: enhancement
+  title: Improve anomaly detection job health rules with threshold and percentage options
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/272076
+- file:
+    name: 284964.yaml
+    checksum: 9db34e3276961b4e3fc9c3bd5d52f6644781d80e
+  type: bug-fix
+  title: Fix stale Data Frame Analytics results after changing the job ID
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/284964
+  issues:
+  - https://github.com/elastic/kibana/issues/284757
+- file:
+    name: 282776.yaml
+    checksum: da9876629a0e3d6f99e2ba2d70814c5112275088
+  type: feature
+  title: Persist ES|QL fast mode in Discover sessions
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Adds persistence of ES|QL fast mode when you save a Discover session, so the setting is restored when you reopen the session.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/282776
+  issues:
+  - https://github.com/elastic/kibana/issues/275333
+- file:
+    name: 284769.yaml
+    checksum: bccc77d3a9ef9391c79bbf69684523e44e76e27e
+  type: enhancement
+  title: Add IP fields to the Security alerts table group-by picker
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Adds `destination.ip` as a built-in group-by option in the Security alerts table. Aggregatable IP-type fields are also selectable in the custom field group-by picker.
+  areas:
+  - security
+  prs:
+  - https://github.com/elastic/kibana/pull/284769
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/16899'
+- file:
+    name: 285138.yaml
+    checksum: 5f11f64e9138a44eb5eedff80874c3cdc080e43a
+  type: bug-fix
+  title: Fix intermittent Cloud Security graph load failures
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes the Cloud Security graph API returning an internal server error when origin event IDs are null or empty. The graph query no longer passes nullable `event.id` values into ES|QL `IN` comparisons.
+  prs:
+  - https://github.com/elastic/kibana/pull/285138
+  issues:
+  - https://github.com/elastic/kibana/issues/268321
+- file:
+    name: 285456.yaml
+    checksum: 2c55fde9ae41ba7efc516da1fd6f29dbb94771a9
+  type: bug-fix
+  title: Fix Cases attachment toasts, delete actions, and read-only menus
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: 'Fixes Cases attachment UI: attach success toasts now name the object, saved-object tables include a delete action, and users with read access no longer see an empty overflow menu.'
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/285456
+- file:
+    name: 282130.yaml
+    checksum: 0c3a12ee8779b70bfe168b4c8603368f76e5692b
+  type: breaking-change
+  title: Entity Store v2 indices are renamed from Security-scoped names (`.entities.v2.*.security_{space}`) to solution-neutral names (`.entities.v2.*.{space}`).
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  impact: Custom Elasticsearch roles that only grant privileges on the old `security_*` patterns will get `403` when querying the new neutral names (such as `.entities.v2.latest.*`, `.entities.v2.latest.{space}`, concrete `-00001` indices, updates or metadata streams) until those roles are updated. Compatibility aliases preserve access for callers that still target the old names and enable or install privilege checks that accept either naming scheme during the transition.
+  action: Existing deployments migrate automatically on Kibana upgrade (background task) and on Entity Store install.
+  prs:
+  - https://github.com/elastic/kibana/pull/282130
+- file:
+    name: 285163.yaml
+    checksum: 78837d7974cdfbc1bc5febb4ca44c4b09db02634
+  type: bug-fix
+  title: Fix scheduled task authentication failures for serverless API keys
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes scheduled tasks failing authentication when stored serverless identity API keys used a different encoding than Elasticsearch expects. Task Manager now normalizes both stored shapes before using the key.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/285163
+  issues:
+  - '# PRIVATE: https://github.com/elastic/response-ops-team/issues/707'
+- file:
+    name: 285476.yaml
+    checksum: d29204eaf2b467fa833d47dbcada41338e22ac7f
+  type: bug-fix
+  title: Fix by-reference Lens panels disappearing from dashboards
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Fixes by-reference Lens panels being removed when a dashboard loads because the panel is missing its saved-object link.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/285476
+  issues:
+  - https://github.com/elastic/kibana/issues/285475
+- file:
+    name: 283454.yaml
+    checksum: 61beae37659ead00b32411bc298a409912ecfc04
+  type: enhancement
+  title: Add support for preconfigured Fleet agent binary download sources
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/283454
+  issues:
+  - https://github.com/elastic/kibana/issues/186008
+- file:
+    name: 284942.yaml
+    checksum: 5dd68d1d0f7284940de53673c48cea12a87fceaf
+  type: feature
+  title: Add rule change history in Alerting
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Adds the ability to view a rule's change history. Open "View change history" from the rule details menu or a rule's row actions to browse previous versions — each showing the author, timestamp, and action — and compare snapshots with a JSON diff.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/284942
+- file:
+    name: 284722.yaml
+    checksum: 36eac7304f0784e25c6a791b254fcb10214248ee
+  type: feature
+  title: Add a Delete Note workflow step in Security
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - security
+  prs:
+  - https://github.com/elastic/kibana/pull/284722
+- file:
+    name: 284719.yaml
+    checksum: 52cc534a0b2cf79f75e74a73fd6563bd14e0373d
+  type: feature
+  title: Add a Create Note workflow step in Security
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - security
+  prs:
+  - https://github.com/elastic/kibana/pull/284719
+- file:
+    name: 279522.yaml
+    checksum: b89feb5f6606fc6fb4da520d89bee4da95ab7cdd
+  type: feature
+  title: Add the cross-project search project picker to Kibana
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Adds the updated cross-project search project picker to the Kibana header and embeddable surfaces so project selections produce valid routing.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/279522
+  issues:
+  - https://github.com/elastic/kibana/issues/279895
+- file:
+    name: 281891.yaml
+    checksum: 2968f4e74597d157215041667673d27639951f47
+  type: enhancement
+  title: Persist Metrics sort state across Discover page reloads
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/281891
+  issues:
+  - https://github.com/elastic/kibana/issues/278162
+- file:
+    name: 277802.yaml
+    checksum: 011f24aeb015c1fd72c0159443a9602934c3625f
+  type: feature
+  title: Add workflow steps to create Security exception items
+  products:
+  - product: cloud-serverless
+    target: 2026-08-21
+  - product: kibana
+  description: Adds workflow steps that create a rule exception or an exception list item, so detection workflows can add exceptions without using the Exceptions UI.
+  areas:
+  - security
+  prs:
+  - https://github.com/elastic/kibana/pull/277802

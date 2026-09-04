@@ -146,7 +146,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: customFieldConfiguration.defaultValue,
       });
@@ -238,9 +238,45 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: 123412345,
+      });
+    });
+  });
+
+  it('calls onSubmit with 0 when the value is 0', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          customField={customField}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.click(
+      await screen.findByTestId('case-number-custom-field-edit-button-test_key_5')
+    );
+    await userEvent.clear(
+      await screen.findByTestId('case-number-custom-field-form-field-test_key_5')
+    );
+    await userEvent.click(
+      await screen.findByTestId('case-number-custom-field-form-field-test_key_5')
+    );
+    await userEvent.paste('0');
+
+    await userEvent.click(
+      await screen.findByTestId('case-number-custom-field-submit-button-test_key_5')
+    );
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        ...customField,
+        value: 0,
       });
     });
   });
@@ -278,7 +314,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: customFieldConfiguration.defaultValue,
       });
@@ -314,7 +350,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: null,
       });
@@ -471,5 +507,414 @@ describe('Edit ', () => {
         'The value of the My test label 5 should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
       )
     ).toBeInTheDocument();
+  });
+});
+
+describe('Edit inline variant', () => {
+  const onSubmit = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const customField = customFieldsMock[4] as CaseCustomFieldNumber;
+  const customFieldConfiguration = customFieldsConfigurationMock[4];
+  const formFieldTestId = `case-number-custom-field-form-field-${customFieldConfiguration.key}`;
+
+  it('renders correctly', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('case-number-custom-field-test_key_5')).toBeInTheDocument();
+    expect(await screen.findByTestId(formFieldTestId)).toBeInTheDocument();
+    expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
+    expect(await screen.findByTestId(formFieldTestId)).toHaveValue(1234);
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('shows the optional label when the field is not required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('form-optional-field-label')).toBeInTheDocument();
+  });
+
+  it('does not show the optional label when the field is required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId(formFieldTestId)).toBeInTheDocument();
+    expect(screen.queryByTestId('form-optional-field-label')).not.toBeInTheDocument();
+  });
+
+  it('disables the field if the user does not have permissions', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={false}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId(formFieldTestId)).toBeDisabled();
+  });
+
+  it('disables the field when loading', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={true}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId(formFieldTestId)).toBeDisabled();
+  });
+
+  it('shows the loading spinner when loading', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={true}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(
+      await screen.findByTestId('case-number-custom-field-loading-test_key_5')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the default value when the custom field is undefined', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId(formFieldTestId)).toHaveValue(
+      customFieldConfiguration.defaultValue as number
+    );
+    expect(await screen.findByText(POPULATED_WITH_DEFAULT)).toBeInTheDocument();
+  });
+
+  it('uses the required value correctly if a required field is empty', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={{ ...customField, value: null }}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId(formFieldTestId)).toHaveValue(
+      customFieldConfiguration.defaultValue as number
+    );
+    expect(await screen.findByText(POPULATED_WITH_DEFAULT)).toBeInTheDocument();
+
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+    await userEvent.type(
+      await screen.findByTestId(formFieldTestId),
+      String((customFieldConfiguration.defaultValue as number) + 1)
+    );
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        ...customField,
+        value: (customFieldConfiguration.defaultValue as number) + 1,
+      });
+    });
+  });
+
+  it('calls onSubmit when changing value, with no confirm step', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+    await userEvent.type(await screen.findByTestId(formFieldTestId), '12345');
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        ...customField,
+        value: 12345,
+      });
+    });
+  });
+
+  it('calls onSubmit with 0 when the value is 0', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+    await userEvent.type(await screen.findByTestId(formFieldTestId), '0');
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        ...customField,
+        value: 0,
+      });
+    });
+  });
+
+  it('sets the value to null if the number field is empty', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        ...customField,
+        value: null,
+      });
+    });
+  });
+
+  it('does not call onSubmit again once the value is invalid', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+    await userEvent.type(await screen.findByTestId(formFieldTestId), '321');
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        ...customField,
+        value: 321,
+      });
+    });
+
+    onSubmit.mockClear();
+
+    // Required field left empty: invalid, so no further buffering happens.
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+
+    await waitFor(() => {
+      expect(screen.getByText('My test label 5 is required.')).toBeInTheDocument();
+    });
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('shows validation error if the field is required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+
+    expect(await screen.findByText('My test label 5 is required.')).toBeInTheDocument();
+  });
+
+  it('does not shows a validation error if the field is not required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        ...customField,
+        value: null,
+      });
+    });
+    expect(screen.queryByText('My test label 5 is required.')).not.toBeInTheDocument();
+  });
+
+  it('shows validation error if the number is too big', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+    await userEvent.click(await screen.findByTestId(formFieldTestId));
+    await userEvent.paste(`${2 ** 53 + 1}`);
+
+    expect(
+      await screen.findByText(
+        'The value of the My test label 5 should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
+      )
+    ).toBeInTheDocument();
+  });
+});
+
+describe('Edit inline variant, section not editing', () => {
+  const onSubmit = jest.fn();
+  const onRequestSectionEdit = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const customField = customFieldsMock[4] as CaseCustomFieldNumber;
+  const customFieldConfiguration = customFieldsConfigurationMock[4];
+  const formFieldTestId = `case-number-custom-field-form-field-${customFieldConfiguration.key}`;
+
+  it('renders a label/value row instead of the editable form', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          isSectionEditing={false}
+          onRequestSectionEdit={onRequestSectionEdit}
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
+    expect(await screen.findByText(String(customField.value))).toBeInTheDocument();
+    expect(screen.queryByTestId(formFieldTestId)).not.toBeInTheDocument();
+  });
+
+  it('requests section edit when the row is clicked', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          isSectionEditing={false}
+          onRequestSectionEdit={onRequestSectionEdit}
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.click(
+      await screen.findByTestId(`template-field-edit-${customFieldConfiguration.key}`)
+    );
+
+    expect(onRequestSectionEdit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });

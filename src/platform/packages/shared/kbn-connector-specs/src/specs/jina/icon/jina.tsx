@@ -8,17 +8,28 @@
  */
 
 import React from 'react';
+
+import { useBrandFill } from '../../../brand_icon';
 import type { ConnectorIconProps } from '../../../types';
 
-export default (props: ConnectorIconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" {...props} viewBox="0 0 1024 1024">
-    <g fill="none" fillRule="nonzero" transform="translate(12 299)">
-      <circle cx="65.19" cy="360.034" r="65.19" fill="#EB6161" />
+/*
+ * The square mark Jina uses for their favicon — the dot plus the leading glyph —
+ * rather than the full wordmark, which is 2.35:1 and collapses into a smudge at 16px.
+ * Both shapes are verbatim from their `Jina-color.svg`; the viewBox is the union of
+ * the two (67.1 x 63.5) padded to a square. On dark surfaces they both go white,
+ * which is what their `Jina-white.svg` reversed asset does to the whole mark.
+ */
+export default (props: ConnectorIconProps) => {
+  const dotFill = useBrandFill('#EB6161');
+  const glyphFill = useBrandFill('#009191');
+
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" {...props} viewBox="0 34.5 67.1 67.1">
+      <circle fill={dotFill} cx="15.3" cy="84.5" r="15.3" />
       <path
-        fill="#009191"
-        d="M270.558 154.666a15.275 15.275 0 0 1 15.339 15.338l-.852 124.84c0 71.155-57.094 129.101-128.25 130.38h-2.13V295.27h.427l.426-124.84a15.275 15.275 0 0 1 15.338-15.34h99.702zm200.256 0a15.275 15.275 0 0 1 15.339 15.338v174.691a15.275 15.275 0 0 1-15.34 15.34h-99.7a15.275 15.275 0 0 1-15.34-15.34v-174.69a15.275 15.275 0 0 1 15.34-15.34zm156.796-.427h2.13c63.911.853 115.893 52.408 117.597 116.32v73.71a15.275 15.275 0 0 1-15.339 15.339H570.942a15.275 15.275 0 0 1-15.34-15.339V169.58a15.275 15.275 0 0 1 15.34-15.34zm263.74 203.665c-53.685-3.409-96.719-48.147-96.719-102.685 0-56.668 46.017-102.684 102.685-102.684 54.537 0 99.275 42.608 102.684 96.72v93.31a15.275 15.275 0 0 1-15.339 15.339z"
+        fill={glyphFill}
+        d="M63.5 36.3c2 0 3.6 1.6 3.6 3.6l-.2 29.3c0 16.7-13.4 30.3-30.1 30.6h-.5V69.3 40c0-2 1.8-3.7 3.8-3.7h23.4z"
       />
-      <circle cx="65.19" cy="65.19" r="65.19" fill="#FBCB67" transform="translate(355.556)" />
-    </g>
-  </svg>
-);
+    </svg>
+  );
+};

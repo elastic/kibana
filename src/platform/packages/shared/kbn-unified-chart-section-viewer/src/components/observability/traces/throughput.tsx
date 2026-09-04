@@ -52,6 +52,7 @@ const ThroughputChartContent = ({
   return (
     <Chart
       id="throughput"
+      isSelected={false}
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -63,7 +64,6 @@ const ThroughputChartContent = ({
       title={title}
       chartLayers={chartLayers}
       legend={breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined}
-      syncTooltips
       syncCursor
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}

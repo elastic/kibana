@@ -11,7 +11,6 @@
 import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
-import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MISSING_TOKEN, NAN_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat } from '../field_format';
@@ -36,6 +35,21 @@ export abstract class NumeralFormat extends FieldFormat {
     pattern: this.getConfig?.(`format:${this.id}:defaultPattern`),
     alwaysShowSign: false,
   });
+
+  // memoized zero-formatted baseline used to detect values that round to zero under the
+  // current pattern/locale (see getConvertedValue); recomputed only when either changes
+  private zeroFormattedPattern: string | undefined;
+  private zeroFormattedLocale: string | undefined;
+  private zeroFormatted: string | undefined;
+
+  private getZeroFormatted(pattern: string, locale: string): string {
+    if (this.zeroFormattedPattern !== pattern || this.zeroFormattedLocale !== locale) {
+      this.zeroFormattedPattern = pattern;
+      this.zeroFormattedLocale = locale;
+      this.zeroFormatted = numeralInst.set(0).format(pattern);
+    }
+    return this.zeroFormatted!;
+  }
 
   protected getConvertedValue(val: unknown): string {
     const originalVal = val;
@@ -64,12 +78,17 @@ export abstract class NumeralFormat extends FieldFormat {
       (this.getConfig && this.getConfig(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
     numeral.language(defaultLocale);
 
-    let pattern: string = this.param('pattern');
-    if (pattern && this.param('alwaysShowSign')) {
-      pattern = pattern.startsWith('+') || val === 0 ? pattern : `+ ${pattern}`;
-    }
+    const pattern: string = this.param('pattern');
+    let formatted = numeralInst.set(val).format(pattern);
 
-    const formatted = numeralInst.set(val).format(pattern);
+    if (pattern && this.param('alwaysShowSign') && !pattern.startsWith('+')) {
+      // add the sign only when the value doesn't round to zero under the pattern,
+      // otherwise e.g. -0.0001 with pattern '0,0' would render as '+0'
+      const roundsToZero = formatted === this.getZeroFormatted(pattern, String(defaultLocale));
+      if (!roundsToZero) {
+        formatted = numeralInst.set(val).format(`+ ${pattern}`);
+      }
+    }
 
     numeral.language(previousLocale);
 
@@ -78,7 +97,7 @@ export abstract class NumeralFormat extends FieldFormat {
 
   reactConvert: ReactConvertFunction = (val) => {
     if (val == null || val === MISSING_TOKEN) {
-      return <span className="ffString__emptyValue">{NULL_LABEL}</span>;
+      return this.checkForMissingValueReact(val);
     }
     if (typeof val === 'object' && !Array.isArray(val)) {
       return asPrettyString(val);

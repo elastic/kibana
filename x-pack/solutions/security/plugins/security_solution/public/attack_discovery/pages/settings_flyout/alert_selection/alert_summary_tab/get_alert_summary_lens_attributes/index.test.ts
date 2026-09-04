@@ -58,11 +58,11 @@ describe('getAlertSummaryLensAttributes', () => {
           columns: [
             {
               columnId: 'tableStackBy0',
-              width: 300,
             },
             {
               columnId: 'count',
               summaryRow: 'sum',
+              width: 100,
             },
           ],
           layerId: '094d6c10-a28a-4780-8a0c-5789b73e4cef',

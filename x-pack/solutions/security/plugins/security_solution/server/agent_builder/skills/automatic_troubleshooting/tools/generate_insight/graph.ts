@@ -6,6 +6,7 @@
  */
 
 import type { ScopedModel, ToolHandlerResult } from '@kbn/agent-builder-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
@@ -17,14 +18,26 @@ import {
 import { securityWorkflowInsightsService } from '../../../../../endpoint/services';
 import { getDefendInsightsOutputSchema } from './schemas';
 import { getPrompts } from './prompts';
+import {
+  getPolicyResponseFailureEvents,
+  type PolicyResponseFailureEvent,
+} from './refetch_policy_response_failures';
 
 const CATEGORIZE_INSIGHT_TYPE_NODE_NAME = 'categorizeInsightType';
+const REFETCH_POLICY_RESPONSE_NODE_NAME = 'refetchPolicyResponseFailures';
 const GENERATE_INSIGHT_NODE_NAME = 'generateInsights';
 const CREATE_WORKFLOW_INSIGHTS_NODE_NAME = 'createWorkflowInsights';
 
+const isPolicyResponseFailureType = (insightType: WorkflowInsightType): boolean =>
+  insightType === WorkflowInsightType.enum.policy_response_failure;
+
 const StateAnnotation = Annotation.Root({
   insightType: Annotation<WorkflowInsightType>(),
-  insights: Annotation<DefendInsights>(),
+  refetchedData: Annotation<PolicyResponseFailureEvent[] | undefined>(),
+  insights: Annotation<DefendInsights>({
+    reducer: (_a, b) => b,
+    default: () => [],
+  }),
   error: Annotation<string>(),
   results: Annotation<ToolHandlerResult[]>({
     reducer: (a, b) => [...a, ...b],
@@ -41,6 +54,8 @@ export const createGenerateInsightGraph = ({
   endpointIds,
   data,
   spaceId,
+  esClient,
+  ccsEnabled,
 }: {
   model: ScopedModel;
   problemDescription: string;
@@ -48,6 +63,8 @@ export const createGenerateInsightGraph = ({
   endpointIds: string[];
   data: unknown[];
   spaceId: string;
+  esClient: ElasticsearchClient;
+  ccsEnabled: boolean;
 }) => {
   async function categorizeInsightType(): Promise<{ insightType: WorkflowInsightType }> {
     const output = await model.chatModel.withStructuredOutput(
@@ -63,9 +80,32 @@ ${problemDescription}
     return { insightType: output.insightType || WorkflowInsightType.enum.custom };
   }
 
-  async function generateInsights({ insightType }: StateType): Promise<{
+  async function refetchPolicyResponseFailures({
+    insightType,
+  }: StateType): Promise<{ refetchedData?: PolicyResponseFailureEvent[] }> {
+    if (!isPolicyResponseFailureType(insightType)) {
+      return {};
+    }
+
+    const refetchedData = await getPolicyResponseFailureEvents(esClient, {
+      endpointIds,
+      ccsEnabled,
+    });
+    return { refetchedData };
+  }
+
+  function routeAfterRefetch({ insightType, refetchedData }: StateType): string {
+    if (isPolicyResponseFailureType(insightType) && (refetchedData?.length ?? 0) === 0) {
+      return CREATE_WORKFLOW_INSIGHTS_NODE_NAME;
+    }
+    return GENERATE_INSIGHT_NODE_NAME;
+  }
+
+  async function generateInsights({ insightType, refetchedData }: StateType): Promise<{
     insights: DefendInsights;
   }> {
+    const generationData = isPolicyResponseFailureType(insightType) ? refetchedData ?? [] : data;
+
     const { insights } = await model.chatModel.withStructuredOutput(
       getDefendInsightsOutputSchema({ type: insightType })
     ).invoke(`
@@ -81,10 +121,16 @@ ${remediation}
 ${endpointIds.join(', ')}
 
 ## Data:
-${JSON.stringify(data, null, 2)}
+${JSON.stringify(generationData, null, 2)}
 
 Provide a concise and actionable insight for each group of events that can help address the problem described.
     `);
+
+    if (!Array.isArray(insights)) {
+      throw new Error(
+        `Automatic Troubleshooting insight generation failed for insight type "${insightType}": the model returned no usable insights envelope (structured output was missing or malformed). This is NOT a "no findings" result — no insights were created or suppressed and existing insights were left unchanged.`
+      );
+    }
 
     return {
       insights: insights.filter((insight) => insight.events && insight.events.length),
@@ -92,12 +138,8 @@ Provide a concise and actionable insight for each group of events that can help 
   }
 
   async function createWorkflowInsights({ insights, insightType }: StateType) {
-    if (insights.length === 0) {
-      return {
-        results: [],
-      };
-    }
-
+    // Always call through, even with no insights: the service suppresses stale
+    // insights first and safely no-ops creation on an empty array.
     const workflowInsights = await securityWorkflowInsightsService.createFromDefendInsights(
       insights,
       endpointIds,
@@ -106,6 +148,12 @@ Provide a concise and actionable insight for each group of events that can help 
       model.chatModel.name,
       spaceId
     );
+
+    if (!workflowInsights.length) {
+      return {
+        results: [],
+      };
+    }
 
     const results: ToolHandlerResult[] = [
       {
@@ -121,10 +169,15 @@ Provide a concise and actionable insight for each group of events that can help 
 
   return new StateGraph(StateAnnotation)
     .addNode(CATEGORIZE_INSIGHT_TYPE_NODE_NAME, categorizeInsightType)
+    .addNode(REFETCH_POLICY_RESPONSE_NODE_NAME, refetchPolicyResponseFailures)
     .addNode(GENERATE_INSIGHT_NODE_NAME, generateInsights)
     .addNode(CREATE_WORKFLOW_INSIGHTS_NODE_NAME, createWorkflowInsights)
     .addEdge('__start__', CATEGORIZE_INSIGHT_TYPE_NODE_NAME)
-    .addEdge(CATEGORIZE_INSIGHT_TYPE_NODE_NAME, GENERATE_INSIGHT_NODE_NAME)
+    .addEdge(CATEGORIZE_INSIGHT_TYPE_NODE_NAME, REFETCH_POLICY_RESPONSE_NODE_NAME)
+    .addConditionalEdges(REFETCH_POLICY_RESPONSE_NODE_NAME, routeAfterRefetch, {
+      [GENERATE_INSIGHT_NODE_NAME]: GENERATE_INSIGHT_NODE_NAME,
+      [CREATE_WORKFLOW_INSIGHTS_NODE_NAME]: CREATE_WORKFLOW_INSIGHTS_NODE_NAME,
+    })
     .addEdge(GENERATE_INSIGHT_NODE_NAME, CREATE_WORKFLOW_INSIGHTS_NODE_NAME)
     .addEdge(CREATE_WORKFLOW_INSIGHTS_NODE_NAME, '__end__')
     .compile();

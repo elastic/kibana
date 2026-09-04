@@ -26,6 +26,8 @@ import type { Logger } from '@kbn/logging';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
+import type { ConnectorSpecEvents } from './connector_spec_events';
+import type { ClientRegistry, ClientTypeId } from './lib/clients';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -54,6 +56,13 @@ export interface ConnectorMetadata {
   displayName: string;
   icon?: string;
   description: string;
+  /**
+   * Documentation URL for this connector type. Set it when the id-based derivation
+   * wouldn't resolve to the published page (e.g. a differing slug or a third-party site).
+   * Use an empty string when the connector has no dedicated page: it resolves to the
+   * connectors index via the doc-links service. When omitted, the URL is derived from
+   * the connector id.
+   */
   docsUrl?: string;
   minimumLicense: LicenseType;
   isTechnicalPreview?: boolean;
@@ -68,6 +77,7 @@ export interface ConnectorMetadata {
     | 'endpointSecurity'
     | 'workflows'
     | 'agentBuilder'
+    | 'contextEngine'
   >;
 }
 
@@ -120,12 +130,16 @@ export interface AuthContext {
 
 export type AuthMode = 'per-user' | 'shared';
 
-export interface AuthTypeSpec<T extends Record<string, unknown>> {
+export interface AuthTypeDefinition {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
-  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
   authMode?: AuthMode;
+}
+
+export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
+  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -203,6 +217,18 @@ export interface ConnectorPolicies {
 // ACTIONS
 // ============================================================================
 
+/**
+ * Scope of a connector action's side effects. Advisory signal for the LLM and
+ * any orchestration layer — does not enforce access control at runtime.
+ *
+ * - `read`    The action only reads data; no external state is modified.
+ * - `write`   The action creates or appends data but does not overwrite or delete
+ *             existing state (e.g. send a message, create a resource).
+ * - `destroy` The action may overwrite, update, or delete existing data
+ *             (e.g. resolve an issue, delete a resource, patch a record).
+ */
+export type ActionScope = 'read' | 'write' | 'destroy';
+
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
   input: z.ZodSchema<TInput>;
@@ -218,10 +244,23 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
    * response-size limit is exceeded. Defaults to `content-length`.
    */
   responseSizeHeader?: string;
+  /** Advisory scope hint for the LLM/orchestration layer. See {@link ActionScope}. */
+  scope: ActionScope;
 }
 
 export interface ActionContext {
   client: AxiosInstance;
+  /**
+   * Leases a pooled, ready-to-use client by id. The connection is built on the
+   * first request for a given connector and reused across calls. Building is an
+   * async, side-effecting operation, so this is an explicit call (not a property)
+   * and only the client types a handler actually asks for are ever built.
+   *
+   * Lifetime is governed by the actions plugin's client lease pool, not by the action
+   * stack frame. No client types are registered yet, so `ClientTypeId` currently
+   * resolves to `never`.
+   */
+  getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
@@ -252,13 +291,23 @@ export interface Transformations {
 // TESTING
 // ============================================================================
 
+export const TEST_CONNECTOR_SUB_ACTION = '_test';
+
+/**
+ * Success = return data (use `{}` when there's nothing to report); failure = throw.
+ * The `ok?: never` intersection prevents accidentally returning the legacy `{ ok: false }` shape.
+ */
+export type ConnectorTestHandlerResult = Record<string, unknown> & { ok?: never };
+
 export interface ConnectorTest {
-  handler: (ctx: ActionContext) => Promise<{
-    ok: boolean;
-    message?: string;
-    [key: string]: unknown;
-  }>;
+  /**
+   * Test-tab handler. Return data (use `{}` when there's nothing to report); throw on failure.
+   * A resolved value is treated as success by the executor.
+   */
+  handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
+  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler. Events-only specs must keep this false; Test is outbound HTTP. */
+  enabled: boolean;
 }
 
 // ============================================================================
@@ -267,9 +316,15 @@ export interface ConnectorTest {
 
 export interface AuthTypeDef {
   type: string;
+  /** When true, renders a "Recommended" badge in the picker to highlight the preferred auth option. */
+  isRecommended?: boolean;
+  /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
+  isLegacy?: boolean;
   isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
+    /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
+    label?: string;
     meta?: Record<string, Record<string, unknown>>;
     // can override other Zod fields here in the future if needed
   };
@@ -295,7 +350,12 @@ export interface ConnectorSpec {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
   actions: Record<string, ActionDefinition<any, any, any>>;
 
-  test?: ConnectorTest;
+  test: ConnectorTest;
+
+  // Optional inbound events (`handleEvents` + definitions).
+  // Omit when the connector has no inbound surface. A connector may declare both
+  // `actions` and `events`. Only allowlisted specs may set this (see contract tests).
+  events?: ConnectorSpecEvents;
 
   transformations?: Transformations;
 

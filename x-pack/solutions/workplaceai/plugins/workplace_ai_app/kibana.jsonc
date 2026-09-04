@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/workplace-ai-app",
   "owner": [
-    "@elastic/search-kibana",
+    "@elastic/search-ml-ux",
     "@elastic/workchat-eng"
    ],
   "group": "workplaceai",

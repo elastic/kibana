@@ -20,6 +20,8 @@ import {
   isWorkflowValidationError,
 } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change_history_disabled_error';
+import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
+import { WorkflowHistoryPaginationError } from '../../../lib/workflow_history_pagination_error';
 import { WorkflowForbiddenError } from '../../workflow_forbidden_error';
 
 /**
@@ -55,12 +57,30 @@ export function handleRouteError(
   }
 
   if (isWorkflowValidationError(error)) {
+    // `response.badRequest` enforces the standard `{ statusCode, error, message,
+    // attributes }` error schema and strips any other top-level fields, so the
+    // per-reason `validationErrors` array must travel under `attributes` to reach
+    // the client (otherwise only the generic "Workflow validation failed" message
+    // survives). See elastic/kibana HTTP error-formatting behavior.
     return response.badRequest({
-      body: error.toJSON(),
+      body: {
+        message: error.message,
+        ...(error.validationErrors && error.validationErrors.length > 0
+          ? { attributes: { validationErrors: error.validationErrors } }
+          : {}),
+      },
     });
   }
 
   if (error instanceof WorkflowNotFoundError) {
+    return response.notFound({
+      body: {
+        message: error.message,
+      },
+    });
+  }
+
+  if (error instanceof WorkflowHistoryEventNotFoundError) {
     return response.notFound({
       body: {
         message: error.message,
@@ -84,6 +104,17 @@ export function handleRouteError(
   }
 
   if (error instanceof WorkflowChangeHistoryDisabledError) {
+    return response.badRequest({
+      body: {
+        message: error.message,
+        attributes: {
+          code: 'HISTORY_DISABLED',
+        },
+      },
+    });
+  }
+
+  if (error instanceof WorkflowHistoryPaginationError) {
     return response.badRequest({
       body: {
         message: error.message,

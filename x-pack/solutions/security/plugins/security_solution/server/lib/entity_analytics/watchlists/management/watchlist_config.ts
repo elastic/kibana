@@ -13,11 +13,15 @@ import type {
   SavedObjectReference,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { SetOptional } from 'type-fest';
 import type {
+  AggregationsFilterAggregate,
   AggregationsStringTermsAggregate,
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
+import { nodeBuilder } from '@kbn/es-query';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { validateWatchlistUpdate } from './validation';
@@ -27,6 +31,7 @@ import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
 import { invalidateEntitySourceApiKey } from '../entity_sources/entity_source_api_key';
+import { MANUAL_SOURCE_ID } from '../entity_sources/manual/constants';
 
 export const MAX_PER_PAGE = 10_000;
 
@@ -44,9 +49,19 @@ interface WatchlistConfigClientDeps {
   logger: Logger;
 }
 
-type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'id' | 'createdAt' | 'updatedAt'>;
+type WatchlistSavedObjectAttributes = Omit<
+  WatchlistObject,
+  'id' | 'createdAt' | 'updatedAt' | 'hasManualEntities'
+>;
 type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
 type WatchlistObjectWithId = WatchlistObject & { id: string };
+
+export type ResolveWatchlistResult = { id: string; name: string } | { error: string };
+
+interface WatchlistEntityMetadata {
+  entityCount: number;
+  hasManualEntities: boolean;
+}
 
 const omitWatchlistMeta = (
   watchlist: Partial<WatchlistObject>
@@ -55,6 +70,7 @@ const omitWatchlistMeta = (
     id: _ignoredId,
     createdAt: _ignoredCreatedAt,
     updatedAt: _ignoredUpdatedAt,
+    hasManualEntities: _ignoredHasManualEntities,
     ...attrs
   } = watchlist;
   return attrs;
@@ -107,15 +123,26 @@ export class WatchlistConfigClient {
       throw new Error('internalEsClient is required to create a watchlist index');
     }
 
-    await createOrUpdateIndex({
-      esClient: this.deps.internalEsClient,
-      logger: this.deps.logger,
-      options: {
-        index: getIndexForWatchlist(this.deps.namespace),
-        mappings: generateWatchlistEntityIndexMappings(),
-        settings: { hidden: true },
-      },
-    });
+    try {
+      await createOrUpdateIndex({
+        esClient: this.deps.internalEsClient,
+        logger: this.deps.logger,
+        options: {
+          index: getIndexForWatchlist(this.deps.namespace),
+          mappings: generateWatchlistEntityIndexMappings(),
+          settings: { hidden: true, auto_expand_replicas: '0-1' },
+        },
+      });
+    } catch (err) {
+      await this.deps.soClient
+        .delete(watchlistConfigTypeName, so.id, { refresh: 'wait_for' })
+        .catch((deleteErr) =>
+          this.deps.logger.error(
+            `Failed to roll back watchlist saved object '${so.id}' after index creation failed: ${deleteErr.message}`
+          )
+        );
+      throw err;
+    }
 
     return toWatchlistObject(so);
   }
@@ -155,12 +182,63 @@ export class WatchlistConfigClient {
     );
     const watchlistIds = watchlists.map((w) => w.id);
     if (watchlistIds.length > 0) {
-      const countsMap = await this.getEntityCounts(watchlistIds);
+      const entityMetadata = await this.getEntityMetadata(watchlistIds);
       for (const w of watchlists) {
-        w.entityCount = countsMap[w.id] ?? 0;
+        const metadata = entityMetadata[w.id];
+        w.entityCount = metadata?.entityCount ?? 0;
+        w.hasManualEntities = metadata?.hasManualEntities ?? false;
       }
     }
     return watchlists;
+  }
+
+  /**
+   * Resolves a watchlist reference that may be either an id or a name to its canonical id.
+   *
+   * Tries the reference as an id first (a direct saved-object get); on a miss, looks it up by an
+   * **exact** name match. Because the `name` field is a case-sensitive `keyword` (no normalizer),
+   * the name match is exact and case-sensitive. Returns an actionable `error` when the name is
+   * unknown or ambiguous. Does not populate entity counts — resolution only needs id + name.
+   */
+  async resolveIdentifier(identifier: string): Promise<ResolveWatchlistResult> {
+    const trimmed = identifier.trim();
+
+    // 1. Treat the reference as an id.
+    try {
+      const so = await this.deps.soClient.get<WatchlistSavedObjectAttributes>(
+        watchlistConfigTypeName,
+        trimmed
+      );
+      return { id: so.id, name: so.attributes.name };
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        throw error;
+      }
+    }
+
+    // 2. Look it up by exact name
+    const response = await this.deps.soClient.find<WatchlistSavedObjectAttributes>({
+      type: watchlistConfigTypeName,
+      namespaces: [this.deps.namespace],
+      filter: nodeBuilder.is(`${watchlistConfigTypeName}.attributes.name`, trimmed),
+      perPage: 100,
+      fields: ['name'],
+    });
+
+    const matches = response.saved_objects;
+    if (matches.length === 1) {
+      return { id: matches[0].id, name: matches[0].attributes.name };
+    }
+    if (matches.length > 1) {
+      return {
+        error: `Multiple watchlists are named "${trimmed}". Pass the watchlist id instead. Candidates: ${matches
+          .map((so) => `${so.attributes.name} (${so.id})`)
+          .join(', ')}.`,
+      };
+    }
+    return {
+      error: `No watchlist found named "${trimmed}". The name must match exactly (case-sensitive) — use security.list_watchlists to see the available watchlists, or pass the watchlist id.`,
+    };
   }
 
   async get(id: string) {
@@ -192,7 +270,11 @@ export class WatchlistConfigClient {
       );
 
       soResults.saved_objects.forEach((so) => {
-        if (!so.error && so.attributes.type === 'index' && !!so.attributes.apiKeyId) {
+        if (
+          !isSavedObjectErrorResult(so) &&
+          so.attributes.type === 'index' &&
+          !!so.attributes.apiKeyId
+        ) {
           indexSourcesApiKeyIdMap.set(so.id, so.attributes.apiKeyId);
         }
       });
@@ -321,18 +403,28 @@ export class WatchlistConfigClient {
    * @returns Map of watchlist IDs to entity counts
    */
   async getEntityCounts(ids: string[]): Promise<Record<string, number>> {
+    const metadata = await this.getEntityMetadata(ids);
+    return Object.fromEntries(ids.map((id) => [id, metadata[id]?.entityCount ?? 0])) as Record<
+      string,
+      number
+    >;
+  }
+
+  /**
+   * Bulk fetch entity counts and manual-assignment state for a list of watchlists.
+   */
+  private async getEntityMetadata(ids: string[]): Promise<Record<string, WatchlistEntityMetadata>> {
     if (ids.length === 0) return {};
 
     const index = getIndexForWatchlist(this.deps.namespace);
-    const counts: Record<string, number> = {};
+    const metadata: Record<string, WatchlistEntityMetadata> = {};
 
-    // Initialize all requested IDs to 0 so they are guaranteed to exist in the response
     for (const id of ids) {
-      counts[id] = 0;
+      metadata[id] = { entityCount: 0, hasManualEntities: false };
     }
 
     try {
-      const countResponse = await this.deps.esClient.search({
+      const response = await this.deps.esClient.search({
         index,
         ignore_unavailable: true,
         size: 0,
@@ -347,21 +439,34 @@ export class WatchlistConfigClient {
               field: 'watchlist.id',
               size: ids.length,
             },
+            aggs: {
+              manual_entities: {
+                filter: {
+                  term: {
+                    'labels.source_ids': MANUAL_SOURCE_ID,
+                  },
+                },
+              },
+            },
           },
         },
       });
 
-      const watchlistCountsAgg = countResponse.aggregations?.watchlist_counts as
+      const watchlistCountsAgg = response.aggregations?.watchlist_counts as
         | AggregationsStringTermsAggregate
         | undefined;
       const buckets = (watchlistCountsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
       for (const bucket of buckets) {
-        counts[String(bucket.key)] = bucket.doc_count;
+        const manualEntities = bucket.manual_entities as AggregationsFilterAggregate | undefined;
+        metadata[String(bucket.key)] = {
+          entityCount: bucket.doc_count,
+          hasManualEntities: (manualEntities?.doc_count ?? 0) > 0,
+        };
       }
     } catch (err) {
-      this.deps.logger.warn(`Failed to fetch watchlist entity counts: ${(err as Error).message}`);
+      this.deps.logger.warn(`Failed to fetch watchlist entity metadata: ${(err as Error).message}`);
     }
 
-    return counts;
+    return metadata;
   }
 }

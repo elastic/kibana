@@ -14,9 +14,9 @@ import { loadJsonFile } from '@kbn/utils';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
-import extract from 'extract-zip';
+import AdmZip from 'adm-zip';
 import del from 'del';
-import globby from 'globby';
+import { globby } from 'globby';
 
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
 const PLUGIN_BUILD_DIR = Path.resolve(PLUGIN_DIR, 'build');
@@ -89,7 +89,8 @@ describe('scripts/generate_plugin', () => {
      succ plugin archive created"
   `);
 
-    await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
+    const zip = new AdmZip(PLUGIN_ARCHIVE);
+    await zip.extractAllToAsync(TMP_DIR);
 
     const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
     files.sort((a, b) => a.localeCompare(b));
@@ -123,11 +124,9 @@ describe('scripts/generate_plugin', () => {
       "optionalPlugins": Array [],
       "owner": Object {
         "githubTeam": "",
-        "name": "",
+        "name": "Plugin Author",
       },
-      "requiredPlugins": Array [
-        "navigation",
-      ],
+      "requiredPlugins": Array [],
       "server": true,
       "ui": true,
       "version": "1.0.0",
@@ -171,7 +170,8 @@ describe('scripts/generate_plugin', () => {
     expect(logs).toContain('browser bundle created');
     expect(logs).toContain('plugin archive created');
 
-    await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
+    const zip = new AdmZip(PLUGIN_ARCHIVE);
+    await zip.extractAllToAsync(TMP_DIR);
 
     const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
 

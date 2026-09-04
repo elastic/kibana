@@ -35,6 +35,13 @@ export const STACK_BY_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const ALERT_DETAILS_TOGGLE_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertDetailsToggleAriaLabel',
+  {
+    defaultMessage: 'Alert details',
+  }
+);
+
 export const GROUP_BY_TOP_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.histogram.stackByOptions.groupByTopLabel',
   {

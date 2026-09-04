@@ -36,7 +36,7 @@ describe('createOrUpdateIlmPolicy', () => {
     jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
-  it(`should call esClient to put ILM policy`, async () => {
+  it(`should call esClient to put ILM policy, stamped with a content hash`, async () => {
     await createOrUpdateIlmPolicy({
       logger,
       esClient: clusterClient,
@@ -47,8 +47,94 @@ describe('createOrUpdateIlmPolicy', () => {
 
     expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith({
       name: 'test-policy',
-      policy: IlmPolicy,
+      policy: {
+        ...IlmPolicy,
+        _meta: {
+          managed: true,
+          content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
+        },
+      },
     });
+  });
+
+  it(`should skip the PUT when the installed content hash matches`, async () => {
+    // First install to capture the hash this policy stamps.
+    await createOrUpdateIlmPolicy({
+      logger,
+      esClient: clusterClient,
+      name: 'test-policy',
+      policy: IlmPolicy,
+      dataStreamAdapter,
+    });
+    const installedHash = (
+      clusterClient.ilm.putLifecycle.mock.calls[0][0] as unknown as {
+        policy: { _meta: { content_hash: string } };
+      }
+    ).policy._meta.content_hash;
+    clusterClient.ilm.putLifecycle.mockClear();
+
+    clusterClient.ilm.getLifecycle.mockResolvedValue({
+      'test-policy': { policy: { _meta: { managed: true, content_hash: installedHash } } },
+    } as unknown as Awaited<ReturnType<typeof clusterClient.ilm.getLifecycle>>);
+
+    await createOrUpdateIlmPolicy({
+      logger,
+      esClient: clusterClient,
+      name: 'test-policy',
+      policy: IlmPolicy,
+      dataStreamAdapter,
+    });
+
+    expect(clusterClient.ilm.putLifecycle).not.toHaveBeenCalled();
+  });
+
+  it(`should PUT when the installed content hash differs`, async () => {
+    clusterClient.ilm.getLifecycle.mockResolvedValue({
+      'test-policy': { policy: { _meta: { managed: true, content_hash: 'stale-hash' } } },
+    } as unknown as Awaited<ReturnType<typeof clusterClient.ilm.getLifecycle>>);
+
+    await createOrUpdateIlmPolicy({
+      logger,
+      esClient: clusterClient,
+      name: 'test-policy',
+      policy: IlmPolicy,
+      dataStreamAdapter,
+    });
+
+    expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(1);
+  });
+
+  it(`should PUT when the installed policy carries no content hash`, async () => {
+    clusterClient.ilm.getLifecycle.mockResolvedValue({
+      'test-policy': { policy: { _meta: { managed: true } } },
+    } as unknown as Awaited<ReturnType<typeof clusterClient.ilm.getLifecycle>>);
+
+    await createOrUpdateIlmPolicy({
+      logger,
+      esClient: clusterClient,
+      name: 'test-policy',
+      policy: IlmPolicy,
+      dataStreamAdapter,
+    });
+
+    expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(1);
+  });
+
+  it(`should PUT when the installed policy cannot be read`, async () => {
+    clusterClient.ilm.getLifecycle.mockRejectedValue(new Error('security_exception'));
+
+    await createOrUpdateIlmPolicy({
+      logger,
+      esClient: clusterClient,
+      name: 'test-policy',
+      policy: IlmPolicy,
+      dataStreamAdapter,
+    });
+
+    expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Could not read installed ILM policy test-policy content hash; will install (security_exception)`
+    );
   });
 
   it(`should retry on transient ES errors`, async () => {

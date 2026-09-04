@@ -28,7 +28,12 @@ export async function createNewAPIKeySet(
     errorMessage?: string;
     apiKeyOwnership?: RuleApiKeyOwnership;
   }
-): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'>> {
+): Promise<
+  Pick<
+    RawRule,
+    'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+  >
+> {
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {

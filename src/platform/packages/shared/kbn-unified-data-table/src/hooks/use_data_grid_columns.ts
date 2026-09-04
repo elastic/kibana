@@ -73,8 +73,5 @@ export const useColumns = ({
 };
 
 function getColumns(columns: string[] | undefined) {
-  if (!columns) {
-    return [];
-  }
-  return columns.filter((col) => col !== '_source');
+  return columns ?? [];
 }

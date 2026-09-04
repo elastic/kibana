@@ -11,6 +11,19 @@ import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/agent-builder-server/tools';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
+const generateSecurityStartMock = () => {
+  const mockSecurityStart = securityMock.createStart();
+  const mockCheckPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
+  jest
+    .mocked(mockSecurityStart.authz.actions.api.get)
+    .mockImplementation((privilege) => `api:${privilege}`);
+  mockSecurityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+    mockCheckPrivileges
+  );
+  return { mockSecurityStart, mockCheckPrivileges };
+};
 
 /**
  * Creates common mocks for tool tests
@@ -19,6 +32,7 @@ export const createToolTestMocks = () => {
   const mockCore = coreMock.createSetup();
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchClientMock.createScopedClusterClient();
+  const { mockSecurityStart, mockCheckPrivileges } = generateSecurityStartMock();
   const mockRequest = httpServerMock.createKibanaRequest({
     path: '/s/default/app/security',
   });
@@ -27,6 +41,8 @@ export const createToolTestMocks = () => {
     mockCore,
     mockLogger,
     mockEsClient,
+    mockSecurityStart,
+    mockCheckPrivileges,
     mockRequest,
   };
 };
@@ -36,14 +52,27 @@ export const createToolTestMocks = () => {
  */
 export const setupMockCoreStartServices = (
   mockCore: ReturnType<typeof coreMock.createSetup>,
-  mockEsClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>
+  mockEsClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>,
+  mockSecurityStart: ReturnType<typeof securityMock.createStart> = generateSecurityStartMock()
+    .mockSecurityStart
 ) => {
   const mockCoreStart = coreMock.createStart();
   Object.assign(mockCoreStart.elasticsearch.client, {
     asInternalUser: mockEsClient.asInternalUser,
     asCurrentUser: mockEsClient.asCurrentUser,
   });
-  mockCore.getStartServices.mockResolvedValue([mockCoreStart, {}, {}]);
+  mockCore.getStartServices.mockResolvedValue([
+    mockCoreStart,
+    {
+      entityStore: {
+        createCRUDClient: jest.fn().mockReturnValue({}),
+        createResolutionClient: undefined,
+        getMaintainerStatus: jest.fn().mockResolvedValue([]),
+      },
+      security: mockSecurityStart,
+    },
+    {},
+  ]);
   return mockCoreStart;
 };
 

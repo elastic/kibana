@@ -29,14 +29,20 @@ export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 export interface DiscoverGridFlyoutProps
   extends Pick<
     UnifiedDocViewerFlyoutProps,
-    'initialDocViewerState' | 'onInitialDocViewerStateChange' | 'onUpdateSelectedTabId'
+    | 'initialDocViewerState'
+    | 'onInitialDocViewerStateChange'
+    | 'onUpdateSelectedTabId'
+    | 'requestState'
+    | 'requestStateMeta'
+    | 'notice'
+    | 'flyoutMenuTrailingActions'
   > {
   savedSearchId?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
-  hit: DataTableRecord;
+  hit?: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
   initialTabId?: string;
@@ -52,7 +58,7 @@ export interface DiscoverGridFlyoutProps
   hideFilteringOnComputedColumns?: boolean;
 }
 
-const getOriginDocType = (record: DataTableRecord): DocumentType =>
+const getOriginDocType = (record: DataTableRecord | undefined): DocumentType =>
   recordHasContext(record) ? record.context.type : DocumentType.Default;
 
 /**
@@ -78,16 +84,20 @@ export function DiscoverGridFlyout({
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
   hideFilteringOnComputedColumns,
+  requestState,
+  requestStateMeta,
+  notice,
+  flyoutMenuTrailingActions,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
-  const isESQLQuery = isOfAggregateQueryType(query);
+  const isEsqlQuery = isOfAggregateQueryType(query);
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
 
   const { flyoutActions } = useFlyoutActions({
     dataView,
-    rowIndex: actualHit.raw._index,
-    rowId: actualHit.raw._id,
+    rowIndex: actualHit?.raw._index,
+    rowId: actualHit?.raw._id,
     columns,
     filters,
     savedSearchId,
@@ -102,7 +112,8 @@ export function DiscoverGridFlyout({
       docViewsRegistry: (registry: DocViewsRegistry) => registry,
     }));
 
-    return getDocViewer({ record: actualHit });
+    // Document profiles cannot resolve a doc viewer until the record is available.
+    return actualHit ? getDocViewer({ record: actualHit }) : undefined;
   }, [actualHit, getDocViewerAccessor]);
 
   useEffect(() => {
@@ -114,19 +125,23 @@ export function DiscoverGridFlyout({
   return (
     <UnifiedDocViewerFlyout
       originDocType={originDocType}
-      flyoutTitle={docViewer.title}
+      flyoutTitle={docViewer?.title}
       flyoutActions={
-        !isESQLQuery && flyoutActions.length > 0 ? (
+        !isEsqlQuery && actualHit && flyoutActions.length > 0 ? (
           <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
         ) : null
       }
+      flyoutMenuTrailingActions={flyoutMenuTrailingActions}
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
       services={services}
-      docViewsRegistry={docViewer.docViewsRegistry}
-      renderCustomHeader={docViewer.renderHeader}
-      renderCustomFooter={docViewer.renderFooter}
-      isEsqlQuery={isESQLQuery}
+      docViewsRegistry={docViewer?.docViewsRegistry}
+      renderCustomHeader={docViewer?.renderHeader}
+      renderCustomFooter={docViewer?.renderFooter}
+      isEsqlQuery={isEsqlQuery}
       hit={hit}
+      requestState={requestState}
+      requestStateMeta={requestStateMeta}
+      notice={notice}
       hits={hits}
       dataView={dataView}
       columns={columns}

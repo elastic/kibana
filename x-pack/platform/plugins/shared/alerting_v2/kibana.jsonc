@@ -34,8 +34,8 @@
       "eventLog",
       "triggersActionsUi"
     ],
-    "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer", "dashboard", "cps"],
-    "requiredBundles": ["alerting", "kibanaReact"],
+    "optionalPlugins": ["usageCollection", "agentBuilder", "agentBuilderSml", "dashboard", "cps"],
+    "requiredBundles": ["alerting", "kibanaReact", "agentBuilder"],
     "extraPublicDirs": []
   }
 }

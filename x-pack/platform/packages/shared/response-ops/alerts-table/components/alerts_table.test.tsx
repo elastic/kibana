@@ -23,7 +23,7 @@ import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_a
 import { searchAlerts } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { getMutedAlertsInstancesByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
+import { getAlertSnoozeStateByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
 import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -133,9 +133,9 @@ jest.mocked(fetchAlertsFields).mockResolvedValue({
   fields: [],
 });
 
-// Muted alerts mock
+// Alert snooze state mock
 jest.mock('@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule');
-jest.mocked(getMutedAlertsInstancesByRule).mockResolvedValue({
+jest.mocked(getAlertSnoozeStateByRule).mockResolvedValue({
   data: [],
 });
 
@@ -237,7 +237,7 @@ describe('AlertsTable', () => {
   let refresh: RenderContext<AdditionalContext>['refresh'];
   let refreshSpy: jest.SpyInstance<void, []>;
 
-  mockAlertsDataGrid.mockImplementation((props) => {
+  const realAlertsDataGridMockImplementation = (props: AlertsDataGridProps) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
     onPageIndexChange = props.renderContext.onPageIndexChange;
     onToggleColumn = props.onToggleColumn;
@@ -245,7 +245,9 @@ describe('AlertsTable', () => {
     refresh = props.renderContext.refresh;
     refreshSpy = jest.spyOn(props.renderContext, 'refresh');
     return <ActualAlertsDataGrid {...props} />;
-  });
+  };
+
+  mockAlertsDataGrid.mockImplementation(realAlertsDataGridMockImplementation);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -254,8 +256,24 @@ describe('AlertsTable', () => {
   });
 
   describe('Columns', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/253350
-    describe.skip('with no saved configuration', () => {
+    describe('with no saved configuration', () => {
+      beforeAll(() => {
+        mockAlertsDataGrid.mockImplementation((props) => {
+          onToggleColumn = props.onToggleColumn;
+          onResetColumns = props.onResetColumns;
+          return (
+            <div>
+              {props.columnVisibility.visibleColumns.map((columnId: string) => (
+                <div key={columnId} data-test-subj={`dataGridHeaderCell-${columnId}`} />
+              ))}
+            </div>
+          );
+        });
+      });
+
+      afterAll(() => {
+        mockAlertsDataGrid.mockImplementation(realAlertsDataGridMockImplementation);
+      });
       it('should show the default columns if the columns prop is not set', async () => {
         render(<AlertsTable {...tableProps} columns={undefined} />);
 
@@ -497,10 +515,6 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: ['cases'],
           permissions: { create: true, read: true },
-          features: {
-            alerts: { sync: false },
-            observables: { enabled: true, autoExtract: false },
-          },
         },
         {}
       );
@@ -516,10 +530,6 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: [],
           permissions: { create: true, read: true },
-          features: {
-            alerts: { sync: false },
-            observables: { enabled: true, autoExtract: false },
-          },
         },
         {}
       );
@@ -538,35 +548,6 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: [],
           permissions: { create: false, read: false },
-          features: {
-            alerts: { sync: false },
-            observables: { enabled: true, autoExtract: false },
-          },
-        },
-        {}
-      );
-    });
-
-    it('should call the cases context with sync alerts turned on if defined in the cases config', async () => {
-      const CasesContextMock = jest.fn().mockReturnValue(null);
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
-
-      render(
-        <AlertsTable
-          {...casesTableProps}
-          casesConfiguration={{
-            featureId: 'test-feature-id',
-            owner: ['cases'],
-            syncAlerts: true,
-          }}
-        />
-      );
-      expect(CasesContextMock).toHaveBeenCalledWith(
-        {
-          children: expect.anything(),
-          owner: ['cases'],
-          permissions: { create: true, read: true },
-          features: { alerts: { sync: true }, observables: { enabled: true, autoExtract: false } },
         },
         {}
       );

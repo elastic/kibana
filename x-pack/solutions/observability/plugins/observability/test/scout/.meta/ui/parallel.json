@@ -1,5 +1,8 @@
 {
-  "sha1": "d2c514223ac9bb6ccb09caa9b81965c25728af74",
+  "sha1": "a553c51928c3cf9555be8f33e9e8f2bd722ec7ec",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
@@ -13,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 16,
+        "line": 6,
         "column": 1
       }
     },
@@ -29,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 65,
-        "column": 9
+        "line": 89,
+        "column": 74
       }
     },
     {
@@ -45,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 72,
-        "column": 9
+        "line": 96,
+        "column": 34
       }
     },
     {
@@ -61,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 83,
-        "column": 9
+        "line": 107,
+        "column": 17
       }
     },
     {
@@ -77,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 90,
-        "column": 9
+        "line": 113,
+        "column": 15
       }
     },
     {
@@ -93,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 97,
-        "column": 9
+        "line": 119,
+        "column": 26
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 108,
-        "column": 9
+        "line": 129,
+        "column": 26
       }
     },
     {
@@ -125,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 119,
-        "column": 9
+        "line": 139,
+        "column": 13
       }
     },
     {
@@ -141,14 +144,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 130,
-        "column": 9
+        "line": 149,
+        "column": 11
       }
     },
     {
-      "id": "09420caa5b9785f-1887bb9ce43cc37",
-      "title": "Observability Landing Page redirects to page specified in defaultRoute uiSetting",
-      "expectedStatus": "skipped",
+      "id": "a9b59e66421b951-f97219627087f5f",
+      "title": "Alert Details Page should fall back to the generic overview for an Observability alerts user without rule read",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -156,15 +159,15 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 35,
-        "column": 9
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
+        "line": 159,
+        "column": 7
       }
     },
     {
-      "id": "09420caa5b9785f-b4d285151fca090",
-      "title": "Observability Landing Page redirects to Discover logs when logs data exists",
-      "expectedStatus": "skipped",
+      "id": "6424ee8b61bcc56-409a70db7abf447",
+      "title": "Observability alert details page - rule type RBAC logs rule reader sees the custom alert details overview",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -172,15 +175,15 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 57,
-        "column": 9
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
+        "line": 97,
+        "column": 15
       }
     },
     {
-      "id": "09420caa5b9785f-1089e5f36b13719",
-      "title": "Observability Landing Page redirects to APM services when only APM data exists",
-      "expectedStatus": "skipped",
+      "id": "6424ee8b61bcc56-3cd73251dc4f22a",
+      "title": "Observability alert details page - rule type RBAC metrics rule reader sees the generic overview for a logs alert",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -188,15 +191,15 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 76,
-        "column": 9
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
+        "line": 109,
+        "column": 13
       }
     },
     {
-      "id": "09420caa5b9785f-b8a96bff3cd83db",
-      "title": "Observability Landing Page redirects to Discover logs when both logs and APM data exist (logs priority)",
-      "expectedStatus": "skipped",
+      "id": "6424ee8b61bcc56-2106edd02a78d86",
+      "title": "Observability alert details page - rule type RBAC shows the \"Add to case\" button only with cases privileges",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -204,15 +207,15 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 95,
-        "column": 9
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
+        "line": 127,
+        "column": 11
       }
     },
     {
-      "id": "09420caa5b9785f-00e86e3614855e3",
-      "title": "Observability Landing Page redirects to onboarding when no data exists",
-      "expectedStatus": "skipped",
+      "id": "94ab52636793beb-e47c6210d3bdde0",
+      "title": "Observability alerts page - alerts table RBAC logs rule reader sees rule links only for the logs alert",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -220,15 +223,15 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 121,
-        "column": 9
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alerts_table_rbac.spec.ts",
+        "line": 103,
+        "column": 15
       }
     },
     {
-      "id": "09420caa5b9785f-d5a54704b60249e",
-      "title": "Observability Landing Page redirects to onboarding when log data that should be ignored exists",
-      "expectedStatus": "skipped",
+      "id": "94ab52636793beb-51a911be2bf4cf3",
+      "title": "Observability alerts page - alerts table RBAC metrics rule reader sees rule links only for the metrics alert",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -236,9 +239,25 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 129,
-        "column": 9
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alerts_table_rbac.spec.ts",
+        "line": 135,
+        "column": 15
+      }
+    },
+    {
+      "id": "94ab52636793beb-1f48eb09a877e05",
+      "title": "Observability alerts page - alerts table RBAC Observability Alerts only user has no rule management affordances or rule links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alerts_table_rbac.spec.ts",
+        "line": 167,
+        "column": 13
       }
     },
     {
@@ -246,13 +265,13 @@
       "title": "Stateful Observability Navigation - Footer renders expected footer items with working links",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 25,
-        "column": 9
+        "line": 19,
+        "column": 43
       }
     },
     {
@@ -260,27 +279,27 @@
       "title": "Stateful Observability Navigation - Footer clicking footer items navigates to the correct destinations",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 51,
+        "line": 40,
         "column": 9
       }
     },
     {
-      "id": "ef6f2482ea914d8-aff4cfecfe81669",
-      "title": "Stateful Observability Navigation - Footer Stack Management panel children navigate and update breadcrumbs",
+      "id": "ef6f2482ea914d8-2e928d73e90cb17",
+      "title": "Stateful Observability Navigation - Footer Stack Management panel children navigate to the correct destinations",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 73,
-        "column": 9
+        "line": 59,
+        "column": 22
       }
     },
     {
@@ -288,13 +307,13 @@
       "title": "Stateful Observability Navigation - Footer legacy management landing page opens the Stack Management panel",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 101,
-        "column": 9
+        "line": 76,
+        "column": 38
       }
     },
     {
@@ -302,13 +321,13 @@
       "title": "Stateful Observability Navigation - Footer active sidenav panel is re-opened after a browser refresh",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 112,
-        "column": 9
+        "line": 86,
+        "column": 22
       }
     },
     {
@@ -316,41 +335,41 @@
       "title": "Stateful Observability Navigation - Sidebar renders expected body nav items with working links",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 25,
-        "column": 9
+        "line": 19,
+        "column": 43
       }
     },
     {
-      "id": "d4c1536758c1f7d-6bb14cf244a9765",
-      "title": "Stateful Observability Navigation - Sidebar clicking body nav items sets the active link, updates breadcrumbs, and navigates",
+      "id": "d4c1536758c1f7d-305965b9cdeeb30",
+      "title": "Stateful Observability Navigation - Sidebar clicking body nav items sets the active link and navigates",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 75,
+        "column": 13
       }
     },
     {
-      "id": "d4c1536758c1f7d-5a93e4386d422ad",
-      "title": "Stateful Observability Navigation - Sidebar in-panel deep links navigate and update breadcrumbs",
+      "id": "d4c1536758c1f7d-e04393273fefb25",
+      "title": "Stateful Observability Navigation - Sidebar in-panel deep links navigate to the expected pages",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 124,
-        "column": 9
+        "line": 122,
+        "column": 91
       }
     },
     {
@@ -358,13 +377,13 @@
       "title": "Stateful Observability Navigation - Sidebar navigates through the Cases app (list → create → configure)",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 174,
-        "column": 9
+        "line": 166,
+        "column": 24
       }
     },
     {
@@ -372,13 +391,13 @@
       "title": "Stateful Observability Navigation - Sidebar navigates between apps without a full page reload (SPA) and restores via logo",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 199,
-        "column": 9
+        "line": 192,
+        "column": 32
       }
     },
     {
@@ -393,8 +412,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/ad_hoc_data_view.spec.ts",
-        "line": 32,
-        "column": 9
+        "line": 26,
+        "column": 7
       }
     },
     {
@@ -409,24 +428,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_full_form.spec.ts",
-        "line": 65,
-        "column": 9
-      }
-    },
-    {
-      "id": "19ff7375d931f4e-920679a76f69971",
-      "title": "Custom threshold preview chart should render the empty chart only once at bootstrap",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 54,
+        "column": 25
       }
     },
     {
@@ -441,8 +444,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 28,
-        "column": 9
+        "line": 19,
+        "column": 25
       }
     },
     {
@@ -457,8 +460,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 42,
-        "column": 9
+        "line": 32,
+        "column": 26
       }
     },
     {
@@ -468,13 +471,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_rule_creation.spec.ts",
-        "line": 32,
-        "column": 9
+        "line": 29,
+        "column": 10
       }
     },
     {
@@ -489,8 +491,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/kql_filter_autocomplete.spec.ts",
-        "line": 25,
-        "column": 9
+        "line": 20,
+        "column": 7
       }
     },
     {
@@ -505,8 +507,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 45,
-        "column": 9
+        "line": 37,
+        "column": 7
       }
     },
     {
@@ -521,8 +523,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 72,
-        "column": 9
+        "line": 58,
+        "column": 7
       }
     },
     {
@@ -537,8 +539,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 65,
+        "column": 13
       }
     },
     {
@@ -553,8 +555,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 89,
-        "column": 9
+        "line": 72,
+        "column": 10
       }
     },
     {
@@ -569,8 +571,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 107,
-        "column": 9
+        "line": 81,
+        "column": 88
       }
     },
     {
@@ -585,8 +587,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 126,
-        "column": 9
+        "line": 99,
+        "column": 24
       }
     },
     {
@@ -601,8 +603,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 142,
-        "column": 9
+        "line": 108,
+        "column": 11
       }
     },
     {
@@ -617,8 +619,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 162,
-        "column": 9
+        "line": 122,
+        "column": 17
       }
     },
     {
@@ -633,8 +635,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
-        "line": 33,
-        "column": 9
+        "line": 29,
+        "column": 30
       }
     },
     {
@@ -649,8 +651,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 42,
+        "column": 7
       }
     },
     {
@@ -665,8 +667,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
-        "line": 61,
-        "column": 9
+        "line": 48,
+        "column": 7
       }
     },
     {
@@ -681,13 +683,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
-        "line": 77,
-        "column": 9
+        "line": 57,
+        "column": 7
       }
     },
     {
-      "id": "c30849bf17a1231-b87bedab0eccd3a",
-      "title": "Rule Details Page - Viewer should not show actions button for viewer user",
+      "id": "c30849bf17a1231-f5df63d939c7a0e",
+      "title": "Rule Details Page - Viewer should not show edit or delete actions for viewer user",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -697,8 +699,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
-        "line": 93,
-        "column": 9
+        "line": 68,
+        "column": 7
       }
     },
     {
@@ -713,8 +715,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_header/rules_page_header.admin.spec.ts",
-        "line": 24,
-        "column": 9
+        "line": 20,
+        "column": 7
       }
     },
     {
@@ -729,8 +731,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_header/rules_page_header.viewer.spec.ts",
-        "line": 24,
-        "column": 9
+        "line": 20,
+        "column": 7
       }
     },
     {
@@ -745,8 +747,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
-        "line": 25,
-        "column": 9
+        "line": 21,
+        "column": 7
       }
     },
     {
@@ -761,8 +763,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
-        "line": 36,
-        "column": 9
+        "line": 32,
+        "column": 24
       }
     },
     {
@@ -777,8 +779,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 34,
+        "column": 7
       }
     },
     {
@@ -793,8 +795,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
-        "line": 55,
-        "column": 9
+        "line": 42,
+        "column": 7
       }
     },
     {
@@ -809,8 +811,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 31,
-        "column": 9
+        "line": 25,
+        "column": 22
       }
     },
     {
@@ -825,8 +827,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 35,
-        "column": 9
+        "line": 28,
+        "column": 7
       }
     },
     {
@@ -841,8 +843,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 35,
+        "column": 69
       }
     },
     {
@@ -857,8 +859,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 57,
+        "column": 26
       }
     },
     {
@@ -873,8 +875,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 19,
+        "column": 25
       }
     },
     {
@@ -889,8 +891,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
-        "line": 27,
-        "column": 9
+        "line": 23,
+        "column": 10
       }
     },
     {
@@ -905,8 +907,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
-        "line": 32,
-        "column": 9
+        "line": 27,
+        "column": 72
       }
     }
   ]

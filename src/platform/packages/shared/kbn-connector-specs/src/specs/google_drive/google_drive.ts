@@ -24,6 +24,17 @@ const GOOGLE_WORKSPACE_MIME_PREFIX = 'application/vnd.google-apps.';
 const DEFAULT_EXPORT_MIME_TYPE = 'application/pdf';
 // XLSX preserves tabular structure better than PDF for spreadsheets
 const SHEETS_EXPORT_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+// Files in shared drives (Team Drives) have no individual owner. The Drive API excludes
+// them from list/search results and rejects access by ID unless the caller explicitly
+// opts into shared drive support. `supportsAllDrives` is required on every shared-drive
+// operation; `includeItemsFromAllDrives` additionally surfaces shared-drive files in
+// list/search results. The files.export endpoint accepts neither and is not gated behind
+// them, so exporting shared-drive Google Docs/Sheets works without extra params.
+// See https://developers.google.com/workspace/drive/api/guides/enable-shareddrives
+const SHARED_DRIVE_LIST_PARAMS = {
+  includeItemsFromAllDrives: true,
+  supportsAllDrives: true,
+} as const;
 interface GoogleDriveFileMetadata {
   id: string;
   name: string;
@@ -92,12 +103,24 @@ export const GoogleDriveConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
-      'bearer',
+      {
+        type: 'ears',
+        isRecommended: true,
+        isExperimental: true,
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'google',
+          scope:
+            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+        },
+      },
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -114,18 +137,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
         },
       },
-      {
-        type: 'ears',
-        isExperimental: true,
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'google',
-          scope:
-            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
-        },
-      },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
     headers: {
       Accept: 'application/json',
@@ -135,6 +147,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
   actions: {
     searchFiles: {
       isTool: true,
+      scope: 'read',
       description:
         "Search for files in Google Drive using Google's query syntax. Use this to find files by name, content, type, owner, or modification date across the entire Drive.",
       input: lazySchema(() =>
@@ -194,11 +207,12 @@ export const GoogleDriveConnector: ConnectorSpec = {
           orderBy?: string;
         };
 
-        const params: Record<string, string | number> = {
+        const params: Record<string, string | number | boolean> = {
           q: typedInput.query,
           pageSize: Math.min(typedInput.pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          ...SHARED_DRIVE_LIST_PARAMS,
         };
 
         if (typedInput.pageToken) {
@@ -227,6 +241,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     listFiles: {
       isTool: true,
+      scope: 'read',
       description:
         'List files and subfolders within a specific Google Drive folder. Use this to browse folder contents by folder ID, or start at the root folder.',
       input: lazySchema(() =>
@@ -272,11 +287,12 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
         const folderId = typedInput.folderId || DEFAULT_FOLDER_ID;
         const trashedFilter = typedInput.includeTrashed ? '' : ' and trashed=false';
-        const params: Record<string, string | number> = {
+        const params: Record<string, string | number | boolean> = {
           q: `'${escapeQueryValue(folderId)}' in parents${trashedFilter}`,
           pageSize: Math.min(typedInput.pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          ...SHARED_DRIVE_LIST_PARAMS,
         };
 
         if (typedInput.pageToken) {
@@ -305,6 +321,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a file from Google Drive and return its content. ' +
         'With the default responseType "arraybuffer", content is returned base64-encoded — suitable for PDFs, images, Office documents, and any binary format. ' +
@@ -346,6 +363,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             {
               params: {
                 fields: 'id, name, mimeType, size',
+                supportsAllDrives: true,
               },
             }
           );
@@ -381,6 +399,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
               {
                 params: {
                   alt: 'media',
+                  supportsAllDrives: true,
                 },
                 responseType: useTextResponse ? 'text' : 'arraybuffer',
               }
@@ -422,6 +441,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     getFileMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed metadata for one or more specific files, including ownership, sharing status, permissions, labels, and descriptions. Use after searchFiles or listFiles to inspect specific files in depth.',
       input: lazySchema(() =>
@@ -464,7 +484,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             typedInput.fileIds.map(async (fileId) => {
               try {
                 const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files/${fileId}`, {
-                  params: { fields: metadataFields },
+                  params: { fields: metadataFields, supportsAllDrives: true },
                 });
                 return response.data;
               } catch (error: unknown) {
@@ -521,31 +541,11 @@ export const GoogleDriveConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Google Drive test handler');
-      try {
-        const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {
-          params: {
-            fields: 'user',
-          },
-        });
-
-        if (response.status !== 200) {
-          return { ok: false, message: 'Failed to connect to Google Drive API' };
-        }
-
-        return {
-          ok: true,
-          message: `Successfully connected to Google Drive API as ${
-            response.data.user?.emailAddress || 'user'
-          }`,
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect to Google Drive API: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        };
-      }
+      await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {
+        params: { fields: 'user' },
+      });
+      return {};
     },
+    enabled: true,
   },
 };

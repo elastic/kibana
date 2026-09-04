@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
-import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
@@ -43,9 +44,7 @@ export const JobConfigErrorCallout: FC<Props> = ({
     jobCapsServiceErrorMessage.includes('locate that index-pattern') &&
     jobCapsServiceErrorMessage.includes('click here to re-create');
 
-  const message = (
-    <p>{jobConfigErrorMessage ? jobConfigErrorMessage : jobCapsServiceErrorMessage}</p>
-  );
+  const message = jobConfigErrorMessage ? jobConfigErrorMessage : jobCapsServiceErrorMessage;
   const newDataViewUrl = useMemo(
     () =>
       getUrlForApp('management', {
@@ -55,24 +54,21 @@ export const JobConfigErrorCallout: FC<Props> = ({
     []
   );
 
-  const calloutBody = containsDataViewLink ? (
-    <EuiLink href={newDataViewUrl} target="_blank">
-      {message}
-    </EuiLink>
-  ) : (
-    message
-  );
-
   return (
     <EuiPanel grow={false}>
       <EuiSpacer />
-      <EuiCallOut
+      <KbnDangerCallout
         title={jobConfigErrorMessage ? jobConfigErrorTitle : jobCapsErrorTitle}
-        color="danger"
-        iconType="cross"
+        text={!containsDataViewLink && message}
       >
-        {calloutBody}
-      </EuiCallOut>
+        {containsDataViewLink && (
+          // Keeps using a link as custom content due to potentially long error message content
+          // that can't be passed to actionProps
+          <EuiLink href={newDataViewUrl} target="_blank">
+            {message}
+          </EuiLink>
+        )}
+      </KbnDangerCallout>
     </EuiPanel>
   );
 };

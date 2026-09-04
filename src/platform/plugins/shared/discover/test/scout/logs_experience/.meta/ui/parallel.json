@@ -1,0 +1,336 @@
+{
+  "sha1": "7db8260678c039969deb7d226a2cca4bce1c938e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ed5fca72264a666-459c2f711f8e499",
+      "title": "Setup logs experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-585df4fbb906807",
+      "title": "Logs profile - Doc viewer should open each section from its own leading control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 72,
+        "column": 25
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-0b4e2838c6f5217",
+      "title": "Logs profile - Doc viewer should keep both sections open when both controls of the same row are used",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 100,
+        "column": 22
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-cfb1d7fab898bf7",
+      "title": "Logs profile - Doc viewer should open only the new section when the controls are on different rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 120,
+        "column": 5
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-496b7803a592ad4",
+      "title": "Logs profile - Doc viewer should return to the Log overview tab from another tab when a control is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 138,
+        "column": 9
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-68eefa20ac72341",
+      "title": "Logs profile - Doc viewer should open a section from a leading control inside a dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 168,
+        "column": 5
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-684763565ca4062",
+      "title": "Logs profile - Doc viewer should return to the Log overview tab from another tab inside a dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 179,
+        "column": 64
+      }
+    },
+    {
+      "id": "c8a9a8119ead355-bc56b24ae66d2fc",
+      "title": "Logs profile - Pagination (getPaginationConfig) should keep numbered pagination for a non-logs data view (multiPage mode)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/pagination.spec.ts",
+        "line": 31,
+        "column": 15
+      }
+    },
+    {
+      "id": "c8a9a8119ead355-a06d3c09d4287c7",
+      "title": "Logs profile - Pagination (getPaginationConfig) should drop the numbered pagination toolbar for a logs data view (singlePage mode)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/pagination.spec.ts",
+        "line": 42,
+        "column": 25
+      }
+    },
+    {
+      "id": "c8a9a8119ead355-eabf23cfad6f4d4",
+      "title": "Logs profile - Pagination (getPaginationConfig) should render no pagination toolbar in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/pagination.spec.ts",
+        "line": 52,
+        "column": 80
+      }
+    },
+    {
+      "id": "c8a9a8119ead355-93ca2f8999fac5d",
+      "title": "Logs profile - Pagination (getPaginationConfig) should apply singlePage mode in a dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/pagination.spec.ts",
+        "line": 66,
+        "column": 25
+      }
+    },
+    {
+      "id": "94ad8250756af26-08b02f06b030375",
+      "title": "Logs profile - Recommended fields should show the recommended fields group for the logs data source profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
+        "line": 32,
+        "column": 15
+      }
+    },
+    {
+      "id": "94ad8250756af26-9b87093350eb32f",
+      "title": "Logs profile - Recommended fields should NOT show the recommended fields group for a non-logs data source profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
+        "line": 45,
+        "column": 42
+      }
+    },
+    {
+      "id": "94ad8250756af26-c0c4f68f4cccb59",
+      "title": "Logs profile - Recommended fields should show the recommended fields group in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
+        "line": 64,
+        "column": 16
+      }
+    },
+    {
+      "id": "94ad8250756af26-acf6483fe1ba158",
+      "title": "Logs profile - Recommended fields should NOT show the recommended fields group for a non-logs ES|QL query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
+        "line": 73,
+        "column": 33
+      }
+    },
+    {
+      "id": "6572b95e45348d3-941e043c8217712",
+      "title": "Logs profile - Summary column should render the summary content in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/summary_column.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "6572b95e45348d3-acfaa18db8c2e05",
+      "title": "Logs profile - Summary column should render Summary as a default column in data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/summary_column.spec.ts",
+        "line": 40,
+        "column": 15
+      }
+    },
+    {
+      "id": "6572b95e45348d3-061e009f724b0d6",
+      "title": "Logs profile - Summary column should format a computed ES|QL column in the summary the same as its own column",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/summary_column.spec.ts",
+        "line": 49,
+        "column": 27
+      }
+    },
+    {
+      "id": "8462d8fddf362e8-7bb8b3164f5f9d7",
+      "title": "Teardown logs experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
+      }
+    }
+  ]
+}

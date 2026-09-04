@@ -6,7 +6,12 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { createKnowledgeBaseEntry } from './create_knowledge_base_entry';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import {
+  createKnowledgeBaseEntry,
+  transformToCreateSchema,
+  transformToUpdateSchema,
+} from './create_knowledge_base_entry';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
@@ -167,6 +172,144 @@ describe('createKnowledgeBaseEntry', () => {
         logger,
         telemetry,
       })
-    ).rejects.toThrowError('Test error');
+    ).rejects.toThrow('Test error');
+  });
+
+  test('it rejects a private entry when the user has no profile UID', async () => {
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+
+    const createEntry = createKnowledgeBaseEntry({
+      esClient,
+      knowledgeBaseIndex: 'index-1',
+      spaceId: 'test',
+      user: { ...authenticatedUser, profile_uid: undefined },
+      knowledgeBaseEntry: getCreateKnowledgeBaseEntrySchemaMock(),
+      logger,
+      telemetry,
+    });
+
+    await expect(createEntry).rejects.toBeInstanceOf(BadRequestError);
+    await expect(createEntry).rejects.toThrow(
+      'Cannot persist a private knowledge base entry without a user profile UID'
+    );
+    expect(esClient.create).not.toHaveBeenCalled();
+  });
+
+  test('it ignores client-provided users when creating a private index entry', async () => {
+    const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock({
+      type: 'index',
+      global: false,
+      users: [],
+    });
+    (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
+      ...getKnowledgeBaseEntryMock(),
+      id: 'elastic-id-123',
+    });
+
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.create.mockResponse(
+      // @ts-expect-error not full response interface
+      { _id: 'elastic-id-123' }
+    );
+    await createKnowledgeBaseEntry({
+      esClient,
+      knowledgeBaseIndex: 'index-1',
+      spaceId: 'test',
+      user: authenticatedUser,
+      knowledgeBaseEntry,
+      logger,
+      telemetry,
+    });
+
+    expect(esClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          users: [{ id: 'my_profile_uid', name: 'elastic' }],
+        }),
+      })
+    );
+  });
+});
+
+describe('transformToCreateSchema', () => {
+  it('returns the authenticated user as owner when client sends empty users on a private index entry', () => {
+    const result = transformToCreateSchema({
+      createdAt: '2024-01-28T04:20:02.394Z',
+      spaceId: 'test',
+      user: authenticatedUser,
+      entry: getCreateKnowledgeBaseEntrySchemaMock({
+        type: 'index',
+        global: false,
+        users: [],
+      }),
+    });
+
+    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'elastic' }]);
+  });
+
+  it('returns the authenticated user as owner when client spoofs another user id on a private index entry', () => {
+    const result = transformToCreateSchema({
+      createdAt: '2024-01-28T04:20:02.394Z',
+      spaceId: 'test',
+      user: authenticatedUser,
+      entry: getCreateKnowledgeBaseEntrySchemaMock({
+        type: 'index',
+        global: false,
+        users: [{ id: 'other-user', name: 'other' }],
+      }),
+    });
+
+    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'elastic' }]);
+  });
+
+  it('returns empty users for a global index entry', () => {
+    const result = transformToCreateSchema({
+      createdAt: '2024-01-28T04:20:02.394Z',
+      spaceId: 'test',
+      user: authenticatedUser,
+      entry: getCreateKnowledgeBaseEntrySchemaMock({
+        type: 'index',
+        global: true,
+        users: [{ id: 'other-user', name: 'other' }],
+      }),
+    });
+
+    expect(result.users).toEqual([]);
+  });
+});
+
+describe('transformToUpdateSchema', () => {
+  it('returns the authenticated user as owner when client sends empty users on a private index entry', () => {
+    const result = transformToUpdateSchema({
+      updatedAt: '2024-01-28T04:20:02.394Z',
+      user: authenticatedUser,
+      entry: {
+        ...getCreateKnowledgeBaseEntrySchemaMock({
+          type: 'index',
+          global: false,
+          users: [],
+        }),
+        id: 'entry-1',
+      },
+    });
+
+    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'elastic' }]);
+  });
+
+  it('returns the authenticated user as owner when client spoofs another user id on a private index entry', () => {
+    const result = transformToUpdateSchema({
+      updatedAt: '2024-01-28T04:20:02.394Z',
+      user: authenticatedUser,
+      entry: {
+        ...getCreateKnowledgeBaseEntrySchemaMock({
+          type: 'index',
+          global: false,
+          users: [{ id: 'other-user', name: 'other' }],
+        }),
+        id: 'entry-1',
+      },
+    });
+
+    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'elastic' }]);
   });
 });

@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { AgentExecutionMode, ToolType, internalTools } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 
 const optionSchema = z.object({
@@ -57,9 +57,11 @@ Once the user has answered all questions, the execution will resume and the resp
 - Do **NOT** call this tool in parallel (with itself or other tools). The tool pauses the execution, and is meant to be called independently so the interrupt state is clean.
 
 - Using a description (in addition to the label) for each option is optional but recommended.
+
+- The "question" field should contain *only* the question itself. Do **NOT** add instructions such as "Pick as many as you like" or "Pick one" — the UI already indicates whether the question is single or multi-choice.
 `;
 
-export const createAskUserQuestionTool = (): BuiltinToolDefinition<typeof schema> => {
+export const createAskUserQuestionTool = (): InternalBuiltinToolDefinition<typeof schema> => {
   return {
     id: internalTools.askUserQuestion,
     description,

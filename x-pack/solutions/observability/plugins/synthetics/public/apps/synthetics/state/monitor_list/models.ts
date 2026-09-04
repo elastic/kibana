@@ -31,7 +31,16 @@ export interface MonitorFilterState {
   // pings only from the selected remote clusters.
   remoteNames?: string[];
   showFromAllSpaces?: boolean;
+  // When `false`, hides read-only Heartbeat / Agent autodiscovered monitors
+  // (`origin: 'heartbeat'`) from the overview. Persisted in localStorage.
+  includeHeartbeatMonitors?: boolean;
   useLogicalAndFor?: UseLogicalAndField[];
+  // Date-range window for the overview list, sourced from the page-level date
+  // picker so it stays in sync with the visualizations. Each monitor's status
+  // is scoped to this window; monitors with no run in the window show as
+  // `pending` rather than being removed from the list.
+  dateRangeStart?: string;
+  dateRangeEnd?: string;
 }
 
 export interface MonitorListPageState extends MonitorFilterState {

@@ -29,7 +29,9 @@ describe('Outputs handler', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue({ error: jest.fn() } as any);
+    jest
+      .spyOn(appContextService, 'getLogger')
+      .mockReturnValue({ error: jest.fn(), debug: jest.fn() } as any);
     jest.spyOn(outputService, 'create').mockResolvedValue({ id: 'output1' } as any);
     jest.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
     jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
@@ -94,24 +96,6 @@ describe('Outputs handler', () => {
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
   });
 
-  it('should return error on post elasticsearch output in serverless if host url is different from default', async () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
-
-    const res = await postOutputHandlerWithErrorHandler(
-      mockContext,
-      { body: { id: 'output1', type: 'elasticsearch', hosts: ['http://localhost:8080'] } } as any,
-      mockResponse as any
-    );
-
-    expect(res).toEqual({
-      body: {
-        message:
-          'Elasticsearch output host must have default URL in serverless: http://elasticsearch:9200',
-      },
-      statusCode: 400,
-    });
-  });
-
   it('should return ok on post elasticsearch output in serverless if host url is same as default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
@@ -138,35 +122,6 @@ describe('Outputs handler', () => {
     );
 
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
-  });
-
-  it('should return error on put elasticsearch output in serverless if host url is different from default', async () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
-    // The original output should provide the output type
-    jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
-      if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
-        return { hosts: ['http://elasticsearch:9200'] } as any;
-      } else {
-        return { id: 'output1', type: 'elasticsearch' } as any;
-      }
-    });
-
-    const res = await putOutputHandlerWithErrorHandler(
-      mockContext,
-      {
-        body: { hosts: ['http://localhost:8080'] },
-        params: { outputId: 'output1' },
-      } as any,
-      mockResponse as any
-    );
-
-    expect(res).toEqual({
-      body: {
-        message:
-          'Elasticsearch output host must have default URL in serverless: http://elasticsearch:9200',
-      },
-      statusCode: 400,
-    });
   });
 
   it('should return ok on put elasticsearch output in serverless if host url is same as default', async () => {
@@ -266,29 +221,6 @@ describe('Outputs handler', () => {
     );
   });
 
-  it('should return error if both service_token and secrets.service_token is provided for remote_elasticsearch output', async () => {
-    jest
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
-
-    const res = await postOutputHandlerWithErrorHandler(
-      mockContext,
-      {
-        body: {
-          type: 'remote_elasticsearch',
-          service_token: 'token1',
-          secrets: { service_token: 'token2' },
-        },
-      } as any,
-      mockResponse as any
-    );
-
-    expect(res).toEqual({
-      body: { message: 'Cannot specify both service_token and secrets.service_token' },
-      statusCode: 400,
-    });
-  });
-
   it('should return ok if one of service_token and secrets.service_token is provided for remote_elasticsearch output', async () => {
     jest
       .spyOn(appContextService, 'getCloud')
@@ -331,30 +263,6 @@ describe('Outputs handler', () => {
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
   });
 
-  it('should return error if both ssl.key and secrets.ssl.key are provided for remote_elasticsearch output', async () => {
-    jest
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
-
-    const res = await postOutputHandlerWithErrorHandler(
-      mockContext,
-      {
-        body: {
-          type: 'remote_elasticsearch',
-          kibana_api_key: 'value1',
-          secrets: { ssl: { key: 'token2' } },
-          ssl: { key: 'token2' },
-        },
-      } as any,
-      mockResponse as any
-    );
-
-    expect(res).toEqual({
-      body: { message: 'Cannot specify both ssl.key and secrets.ssl.key' },
-      statusCode: 400,
-    });
-  });
-
   it('should return ok if one of ssl.key and secrets.ssl.key is provided for elasticsearch output', async () => {
     jest
       .spyOn(appContextService, 'getCloud')
@@ -367,29 +275,5 @@ describe('Outputs handler', () => {
     );
 
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
-  });
-
-  it('should return error if both ssl.key and secrets.ssl.key are provided for elasticsearch output', async () => {
-    jest
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
-
-    const res = await postOutputHandlerWithErrorHandler(
-      mockContext,
-      {
-        body: {
-          type: 'elasticsearch',
-          kibana_api_key: 'value1',
-          secrets: { ssl: { key: 'token2' } },
-          ssl: { key: 'token2' },
-        },
-      } as any,
-      mockResponse as any
-    );
-
-    expect(res).toEqual({
-      body: { message: 'Cannot specify both ssl.key and secrets.ssl.key' },
-      statusCode: 400,
-    });
   });
 });

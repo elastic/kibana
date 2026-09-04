@@ -20,6 +20,7 @@ import type {
   ElasticsearchClient,
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import { debounce } from 'lodash';
@@ -448,7 +449,10 @@ export class SearchSessionService implements ISearchSessionService {
     const sessions = await savedObjectsClient.bulkGet<SearchSessionSavedObjectAttributes>(
       sessionIds.map((id) => ({ id, type: SEARCH_SESSION_TYPE }))
     );
-    const filteredSessions = sessions.saved_objects.filter((session) => !session.error);
+    const filteredSessions = sessions.saved_objects.filter(
+      (session): session is SavedObject<SearchSessionSavedObjectAttributes> =>
+        !isSavedObjectErrorResult(session)
+    );
     filteredSessions.forEach((session) => this.throwOnUserConflict(user, session));
     return filteredSessions;
   };

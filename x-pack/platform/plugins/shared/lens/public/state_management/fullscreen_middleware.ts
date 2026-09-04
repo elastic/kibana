@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
+import type { Dispatch, MiddlewareAPI, Action } from 'redux-toolkit-v1';
 import type { LensStoreDeps } from '@kbn/lens-common';
 import type { LensGetState } from '.';
 

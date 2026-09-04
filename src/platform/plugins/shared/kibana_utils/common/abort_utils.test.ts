@@ -36,7 +36,7 @@ describe('AbortUtils', () => {
         const whenRejected = jest.fn();
         promise.catch(whenRejected);
         await flushPromises();
-        expect(whenRejected).not.toBeCalled();
+        expect(whenRejected).not.toHaveBeenCalled();
       });
 
       test('should reject if the signal does abort', async () => {
@@ -46,7 +46,7 @@ describe('AbortUtils', () => {
         promise.catch(whenRejected);
         controller.abort();
         await flushPromises();
-        expect(whenRejected).toBeCalled();
+        expect(whenRejected).toHaveBeenCalled();
         expect(whenRejected.mock.calls[0][0]).toBeInstanceOf(AbortError);
       });
 
@@ -64,7 +64,7 @@ describe('AbortUtils', () => {
         cleanup();
         controller.abort();
         await flushPromises();
-        expect(whenRejected).not.toBeCalled();
+        expect(whenRejected).not.toHaveBeenCalled();
       });
     });
   });

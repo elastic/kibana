@@ -94,6 +94,7 @@ export function buildOptionsListFetchBody({
       esqlVariables: fetchContext.esqlVariables,
       ignoreValidations,
       isReload: fetchContext.isReload,
+      projectRouting: fetchContext.projectRouting,
     };
 
     return { outcome: 'fetch', body, showLoadingSuggestions: false };
@@ -128,6 +129,7 @@ export function buildOptionsListFetchBody({
       filters,
       runtimeFieldMap: dataView.toSpec?.(false).runtimeFieldMap,
       isReload: fetchContext.isReload,
+      projectRouting: fetchContext.projectRouting,
     },
   };
 }

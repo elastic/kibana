@@ -18,9 +18,9 @@ import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { useIsServerless } from '@kbn/react-env';
 import { css } from '@emotion/react';
-import type { HelpLinks, HelpMenuLinkItem } from './help_menu_links';
+import type { HelpLinks } from './help_menu_links';
 import { buildHelpLinks, toContextMenuItem } from './help_menu_links';
-import { useNavigateToUrl, useIsNextChrome } from './chrome_hooks';
+import { useNavigateToUrl } from './chrome_hooks';
 import { useChromeComponentsDeps } from '../context';
 
 /**
@@ -31,10 +31,8 @@ export function useHelpLinks$(): Observable<HelpLinks> {
   const chrome = useChromeService();
   const chromeStyle = useChromeStyle();
   const docLinks = useChromeComponentsDeps().docLinks;
-  const isNextChrome = useIsNextChrome();
   const isServerless = useIsServerless();
-  const isProjectAndNextChrome = chromeStyle === 'project' && isNextChrome;
-  const showNewsfeed = isProjectAndNextChrome && !isServerless;
+  const showNewsfeed = !isServerless;
 
   return useMemo(
     () =>
@@ -72,7 +70,7 @@ export function useHelpLinks$(): Observable<HelpLinks> {
                 supportUrl,
                 globalExtensionMenuLinks,
                 docLinks,
-                feedbackHandler: isProjectAndNextChrome ? feedbackHandler : undefined,
+                feedbackHandler,
                 newsfeedHandler: showNewsfeed ? newsfeedInfo?.open : undefined,
                 newsfeedHasNew: showNewsfeed ? newsfeedInfo?.hasNew : undefined,
               },
@@ -80,7 +78,7 @@ export function useHelpLinks$(): Observable<HelpLinks> {
         ),
         distinctUntilChanged(equal)
       ),
-    [chrome, chromeStyle, docLinks, isProjectAndNextChrome, showNewsfeed]
+    [chrome, chromeStyle, docLinks, showNewsfeed]
   );
 }
 
@@ -88,13 +86,14 @@ export const useHelpMenuItems = ({
   closeMenu,
 }: {
   closeMenu: () => void;
-}): EuiContextMenuPanelItemDescriptor[] => {
+}): { items: EuiContextMenuPanelItemDescriptor[]; hasUnreadNews: boolean } => {
   const helpLinks$ = useHelpLinks$();
-  const helpLinks = useObservable(helpLinks$, { global: [], default: [] });
+  const helpLinks = useObservable(helpLinks$, { global: [], default: [], hasUnreadNews: false });
   const navigateToUrl = useNavigateToUrl();
   const { euiTheme } = useEuiTheme();
 
   const stableNavigate = useCallback((url: string) => navigateToUrl(url), [navigateToUrl]);
+  const { hasUnreadNews } = helpLinks;
 
   const appNameStyle = useMemo(
     () =>
@@ -104,43 +103,33 @@ export const useHelpMenuItems = ({
     [euiTheme.font.weight.bold]
   );
 
-  const indicatorStyle = useMemo(
+  const unreadLabelStyle = useMemo(
     () =>
       css`
-        position: absolute;
-        top: -3px;
-        right: -3px;
-        pointer-events: none;
-        stroke: ${euiTheme.components.buttons.backgroundText};
-        stroke-width: 2px;
-        paint-order: stroke;
+        display: inline-flex;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
       `,
-    [euiTheme.components.buttons.backgroundText]
+    [euiTheme.size.xs]
   );
 
-  return useMemo(() => {
-    const toIcon = (item: HelpMenuLinkItem): React.ReactElement | string | undefined => {
-      if (!item.icon) return undefined;
-      if (!item.hasNewIndicator) return item.icon as string;
-      return (
-        <span
-          css={css`
-            position: relative;
-            display: inline-flex;
-          `}
-        >
-          <EuiIcon type={item.icon} size="m" aria-hidden={true} />
-          <EuiIcon css={indicatorStyle} color="primary" type="dot" size="m" aria-hidden={true} />
-        </span>
-      );
-    };
-
-    const mapItems = (items: HelpLinks['global']) =>
-      items.map((item) => {
+  const items = useMemo(() => {
+    const mapItems = (links: HelpLinks['global']) =>
+      links.map((item) => {
         const menuItem = toContextMenuItem(item, stableNavigate, closeMenu);
-        const iconOverride = toIcon(item);
-        if (iconOverride !== undefined) {
-          menuItem.icon = iconOverride;
+        if (item.isWhatsNew && hasUnreadNews) {
+          menuItem.name = (
+            <span css={unreadLabelStyle}>
+              {item.name}
+              <EuiIcon
+                type="dot"
+                color="primary"
+                size="s"
+                aria-hidden={true}
+                data-test-subj="helpMenuWhatsNewUnreadIndicator"
+              />
+            </span>
+          );
         }
         return menuItem;
       });
@@ -164,5 +153,7 @@ export const useHelpMenuItems = ({
     }
 
     return menuItems;
-  }, [helpLinks, stableNavigate, closeMenu, appNameStyle, indicatorStyle]);
+  }, [helpLinks, hasUnreadNews, stableNavigate, closeMenu, appNameStyle, unreadLabelStyle]);
+
+  return { items, hasUnreadNews };
 };

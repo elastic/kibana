@@ -77,7 +77,7 @@ export const CopyStatusIndicator = (props: Props) => {
   if (hasUnresolvableErrors) {
     return (
       <EuiIconTip
-        type={'alert'}
+        type={'warning'}
         color={'danger'}
         data-test-subj={`cts-object-result-error-${objectResult.id}`}
         content={
@@ -95,7 +95,7 @@ export const CopyStatusIndicator = (props: Props) => {
       case 'conflict':
         return (
           <EuiIconTip
-            type={'alert'}
+            type={'warning'}
             color={'warning'}
             content={
               <Fragment>
@@ -110,7 +110,7 @@ export const CopyStatusIndicator = (props: Props) => {
       case 'ambiguous_conflict':
         return (
           <EuiIconTip
-            type={'alert'}
+            type={'warning'}
             color={'warning'}
             content={
               <Fragment>

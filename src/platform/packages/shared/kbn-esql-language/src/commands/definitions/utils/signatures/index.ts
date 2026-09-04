@@ -16,7 +16,9 @@ export {
 
 export {
   argMatchesParamType,
+  areCompatibleStringTypes,
   getMatchingSignatures,
+  isRepeatingValuePosition,
   PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING,
   pairKeywordAndTextTypes,
 } from './matchers';
@@ -27,6 +29,7 @@ export {
   hasRepeatingSignature,
   hasArbitraryExpressionSignature,
   hasBooleanSignature,
+  isConstantParameter,
 } from './traits';
 
 export {

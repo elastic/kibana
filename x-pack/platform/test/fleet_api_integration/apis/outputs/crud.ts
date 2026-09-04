@@ -576,6 +576,8 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'A Kafka Output',
             type: 'kafka',
+            hosts: ['kafka.test.fr:9092'],
+            auth_type: 'none',
           })
           .expect(200);
 

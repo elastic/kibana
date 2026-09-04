@@ -55,6 +55,45 @@ describe('insertTriggerSnippet', () => {
       expect.any(Function)
     );
   });
+
+  it('should insert a scheduled trigger outside manual trigger inputs', () => {
+    const inputYaml = `name: New workflow
+enabled: false
+description: This is a new workflow
+triggers:
+  - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
+
+steps:
+  - name: hello_world_step
+    type: console
+    with:
+      message: "{{ inputs.message }}"
+`;
+    const model = createFakeMonacoModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+
+    insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'scheduled');
+
+    expect(model.pushEditOperations).toHaveBeenCalledWith(
+      null,
+      [
+        {
+          // Insert at the start of the existing steps line.
+          range: new monaco.Range(11, 1, 11, 1),
+          text: `  - type: scheduled
+    with:
+      every: 5m
+`,
+        },
+      ],
+      expect.any(Function)
+    );
+  });
+
   it('should not override existing trigger of the same type', () => {
     const inputYaml = `triggers:\n  - type: manual`;
     const model = createFakeMonacoModel(inputYaml);
@@ -76,7 +115,7 @@ describe('insertTriggerSnippet', () => {
       yamlDocument,
       'custom.trigger',
       undefined,
-      defaultCondition
+      { defaultCondition }
     );
 
     expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
@@ -86,6 +125,29 @@ describe('insertTriggerSnippet', () => {
         monacoSuggestionFormat: false,
         withTriggersSection: false,
         defaultCondition,
+      })
+    );
+  });
+
+  it('should pass requiresConnectorId to generateTriggerSnippet when provided', () => {
+    const inputYaml = `triggers:\n  - type: alert\n`;
+    const model = createFakeMonacoModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+    const connectorEventTriggerId = 'example.connector_event';
+
+    insertTriggerSnippet(
+      model as unknown as monaco.editor.ITextModel,
+      yamlDocument,
+      connectorEventTriggerId,
+      undefined,
+      { requiresConnectorId: true }
+    );
+
+    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+      connectorEventTriggerId,
+      expect.objectContaining({
+        full: true,
+        requiresConnectorId: true,
       })
     );
   });

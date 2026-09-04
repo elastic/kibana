@@ -1,0 +1,576 @@
+{
+  "sha1": "e2ac40622afe8251b08430c0eb8c94c2785bd4da",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "230fcfe7ad78991-744ce32675c025c",
+      "title": "Setup environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "4fc76a8d2e77893-e0176e372fb48de",
+      "title": "Attachments shows empty attachments prompt when navigating to attachments tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/attachments.spec.ts",
+        "line": 118,
+        "column": 7
+      }
+    },
+    {
+      "id": "4fc76a8d2e77893-17f1921df3c07a9",
+      "title": "Attachments opens add attachment flyout and shows available attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/attachments.spec.ts",
+        "line": 122,
+        "column": 26
+      }
+    },
+    {
+      "id": "4fc76a8d2e77893-78a107722ab10ab",
+      "title": "Attachments adds and removes all attachments from the stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/attachments.spec.ts",
+        "line": 134,
+        "column": 25
+      }
+    },
+    {
+      "id": "4fc76a8d2e77893-7bcc2f437dac5d2",
+      "title": "Attachments opens attachment details flyout and verifies information for each type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/attachments.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "63983bc249d77f4-742f5ddf45e2615",
+      "title": "Stream canvas - classic source to destination nodes renders inferred source and destination nodes for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 74,
+        "column": 7
+      }
+    },
+    {
+      "id": "63983bc249d77f4-53dbed096f9102c",
+      "title": "Stream canvas - classic source to destination nodes renders a minimap that collapses and reopens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 82,
+        "column": 30
+      }
+    },
+    {
+      "id": "63983bc249d77f4-cea0e326d059f2a",
+      "title": "Stream canvas - classic source to destination nodes tidies up the whole graph from the pane menu and enables undo",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 90,
+        "column": 13
+      }
+    },
+    {
+      "id": "63983bc249d77f4-fb6ccdc1b694d87",
+      "title": "Stream canvas - classic source to destination nodes renders the canvas toolbar with undo/redo and add-node placeholders",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 101,
+        "column": 21
+      }
+    },
+    {
+      "id": "63983bc249d77f4-68ba85ffd15d224",
+      "title": "Stream canvas - classic source to destination nodes exposes accessible node labels and keyboard controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "63983bc249d77f4-07e1b29a8d7c4c2",
+      "title": "Stream canvas - classic source to destination nodes undoes a keyboard-driven node reposition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 131,
+        "column": 24
+      }
+    },
+    {
+      "id": "63983bc249d77f4-af2f473ed3e97ca",
+      "title": "Stream canvas - classic source to destination nodes shows the processing button only on destinations with processing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 140,
+        "column": 13
+      }
+    },
+    {
+      "id": "63983bc249d77f4-a197aeba921176d",
+      "title": "Stream canvas - classic source to destination nodes opens the processing tab when the processing button is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 146,
+        "column": 26
+      }
+    },
+    {
+      "id": "63983bc249d77f4-96951f3e43395ce",
+      "title": "Stream canvas - classic source to destination nodes shows a flyout for classic streams when a destination node is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 153,
+        "column": 21
+      }
+    },
+    {
+      "id": "63983bc249d77f4-34668eb28f9e51d",
+      "title": "Stream canvas - classic source to destination nodes navigating away from a flyout and back will restore the flyout to its previous state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 168,
+        "column": 7
+      }
+    },
+    {
+      "id": "2525c9be5f05faa-15fd0e803c090f9",
+      "title": "Enable Wired Streams - Permissions should prevent editor users from enabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 42,
+        "column": 46
+      }
+    },
+    {
+      "id": "2525c9be5f05faa-79afd6053c91090",
+      "title": "Enable Wired Streams - Permissions should prevent viewer users from enabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 52,
+        "column": 25
+      }
+    },
+    {
+      "id": "2525c9be5f05faa-587db47b0f5e38e",
+      "title": "Enable Wired Streams - Permissions should prevent editor from disabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "2525c9be5f05faa-d65044e52c0ad5a",
+      "title": "Enable Wired Streams - Permissions should prevent viewer from disabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 84,
+        "column": 11
+      }
+    },
+    {
+      "id": "5225ca7749befbd-bde4a25bf2ac4be",
+      "title": "Enable Wired Streams - Success flow should enable wired streams and show logs.otel and logs.ecs streams in the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
+        "line": 49,
+        "column": 10
+      }
+    },
+    {
+      "id": "5225ca7749befbd-71ecd6caba85171",
+      "title": "Enable Wired Streams - Success flow should show the root logs.otel and logs.ecs streams after enabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
+        "line": 87,
+        "column": 20
+      }
+    },
+    {
+      "id": "5225ca7749befbd-3616ba4d9924e34",
+      "title": "Enable Wired Streams - Success flow should disable wired streams and show empty state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
+        "line": 109,
+        "column": 18
+      }
+    },
+    {
+      "id": "568962f5011b7fb-07c04439e965fa4",
+      "title": "Stream detail header shows correct badges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
+        "line": 33,
+        "column": 25
+      }
+    },
+    {
+      "id": "568962f5011b7fb-11d7b61a786cb4d",
+      "title": "Stream detail header shows Wired badge on wired stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
+        "line": 44,
+        "column": 9
+      }
+    },
+    {
+      "id": "568962f5011b7fb-03b7182c894994c",
+      "title": "Stream detail header transitions data quality from Good -> Degraded -> Poor for stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
+        "line": 56,
+        "column": 26
+      }
+    },
+    {
+      "id": "6697d27925b9def-16d50274d54ed1c",
+      "title": "Streams layout renders every tab and lands on canvas",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "6697d27925b9def-46be01c9ed77676",
+      "title": "Streams layout falls back to the canvas tab for an unknown tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
+        "line": 38,
+        "column": 25
+      }
+    },
+    {
+      "id": "6697d27925b9def-7203c017ee5c2ad",
+      "title": "Streams layout renders Sources and placeholders for tabs without content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "6697d27925b9def-ea242490a272e1b",
+      "title": "Streams layout renders the destinations table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "0898e865767bdc7-47f1c0fe4eada27",
+      "title": "Streams list view - classic stream creation creates a classic stream via the creation flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/classic_stream_creation.spec.ts",
+        "line": 92,
+        "column": 14
+      }
+    },
+    {
+      "id": "28fc827e425380c-4a006e49a0c4672",
+      "title": "Stream list view - expand and collapse streams in the table should expand and collapse",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_collapsible_rows.spec.ts",
+        "line": 39,
+        "column": 16
+      }
+    },
+    {
+      "id": "4256506d786a628-cbc15fc0aafc245",
+      "title": "Stream list view - table values should display correct doc count in the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
+        "line": 111,
+        "column": 28
+      }
+    },
+    {
+      "id": "4256506d786a628-33b9b0d2d910060",
+      "title": "Stream list view - table values should display correct data quality badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
+        "line": 139,
+        "column": 60
+      }
+    },
+    {
+      "id": "4256506d786a628-960cbddcfc2d99e",
+      "title": "Stream list view - table values should display correct retention in the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
+        "line": 167,
+        "column": 10
+      }
+    },
+    {
+      "id": "4256506d786a628-273d9e3abd6bc69",
+      "title": "Stream list view - table values should provide Discover actions with correct ESQL queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
+        "line": 177,
+        "column": 80
+      }
+    },
+    {
+      "id": "fbe5c6bcfe99e83-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

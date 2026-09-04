@@ -115,6 +115,7 @@ export const JinaReaderConnector: ConnectorSpec = {
   actions: {
     browse: {
       isTool: true,
+      scope: 'read',
       responseSizeHeader: 'x-decompressed-content-length',
       description: 'Turn any URL to markdown for LLM consumption',
       input: lazySchema(() =>
@@ -160,6 +161,7 @@ export const JinaReaderConnector: ConnectorSpec = {
     },
     search: {
       isTool: true,
+      scope: 'read',
       responseSizeHeader: 'x-decompressed-content-length',
       description: 'Web search to find relevant context for LLMs',
       input: lazySchema(() =>
@@ -200,6 +202,7 @@ export const JinaReaderConnector: ConnectorSpec = {
     },
     fileToMarkdown: {
       isTool: true,
+      scope: 'read',
       description: 'Convert a file to markdown for LLM consumption',
       input: lazySchema(() =>
         z.object({
@@ -236,6 +239,7 @@ export const JinaReaderConnector: ConnectorSpec = {
     },
     fileToRenderedImage: {
       isTool: true,
+      scope: 'read',
       description: 'Render a document file to image. Office and PDF files supported.',
       input: lazySchema(() =>
         z.object({
@@ -280,21 +284,12 @@ export const JinaReaderConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        const r = await ctx.client.get(
-          (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL
-        );
-        return {
-          ok: true,
-          message: `Successfully connected to Jina Reader API: \n${r.data}`,
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      await ctx.client.get(
+        (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL
+      );
+      return {};
     },
     description: 'Verifies Jina Reader API connectivity',
+    enabled: true,
   },
 };

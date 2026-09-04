@@ -12,20 +12,17 @@ import type {
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
+  ConversationRoundAuthor,
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
-  ReasoningStep,
-  ToolCallStep,
-  ToolProgressEvent,
-  ToolResultEvent,
   RuntimeAgentConfigurationOverrides,
-  CompactionStep,
   BackgroundAgentCompleteEvent,
-  BackgroundAgentCompleteStep,
+  SubagentRosterUpdatedEvent,
   TodosStep,
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
@@ -44,6 +41,8 @@ import {
   isReasoningEvent,
   isToolCallStep,
   isBackgroundAgentCompleteEvent,
+  isSubagentRosterUpdatedEvent,
+  createSubagentRosterUpdatedStep,
   isToolUiEvent,
   carriedOverTodos,
   TODOS_UPDATED_UI_EVENT,
@@ -67,6 +66,14 @@ import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
+import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
+import { formatAttachmentsMetadata } from './attachment_presentation';
+import {
+  createPreExecutionSteps,
+  createBackgroundAgentStep,
+  createReasoningStep,
+  createToolCallStep,
+} from './round_steps';
 
 type SourceEvents = ConvertedEvents;
 
@@ -74,6 +81,7 @@ type StepEvents =
   | ReasoningEvent
   | ToolCallEvent
   | BackgroundAgentCompleteEvent
+  | SubagentRosterUpdatedEvent
   | UserQuestionAskedEvent;
 
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
@@ -81,6 +89,7 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
     isReasoningEvent(event) ||
     isToolCallEvent(event) ||
     isBackgroundAgentCompleteEvent(event) ||
+    isSubagentRosterUpdatedEvent(event) ||
     isUserQuestionAskedEvent(event)
   );
 };
@@ -88,22 +97,41 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 export const addRoundCompleteEvent = ({
   pendingRound,
   userInput,
+  origin,
+  author,
   startTime,
   endTime,
   getConversationState,
   modelProvider,
+  mainConnectorId,
   stateManager,
   attachmentStateManager,
   configurationOverrides,
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
+  relevantSkillsSelection,
   getWorkspaceId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
+  /**
+   * External origin that initiated this execution. Stamps `origin.type` on newly created
+   * rounds; resumed rounds keep their original origin.
+   */
+  origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external author, or the Kibana user for public
+   * conversations). Stamped on newly created rounds; resumed rounds keep their original author.
+   */
+  author?: ConversationRoundAuthor;
   startTime: Date;
   modelProvider: ModelProvider;
+  /**
+   * Connector id of the model driving the agent graph for this round. Used to
+   * attribute `model_usage` to the right connector.
+   */
+  mainConnectorId: string;
   stateManager: ConversationStateManager;
   getConversationState: () => ConversationInternalState;
   attachmentStateManager: AttachmentStateManager;
@@ -115,6 +143,8 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
+  /** Skills selected as relevant this round; persisted as a `relevant_skills` step (fresh rounds only) */
+  relevantSkillsSelection?: RelevantSkillSelection;
   /** Returns the workspace_id used in this round, if any */
   getWorkspaceId?: () => string | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
@@ -134,6 +164,7 @@ export const addRoundCompleteEvent = ({
                 startTime,
                 endTime,
                 modelProvider,
+                mainConnectorId,
                 attachmentRefs,
                 configurationOverrides,
                 compactionResult,
@@ -142,16 +173,30 @@ export const addRoundCompleteEvent = ({
                 roundId: providedRoundId,
                 events,
                 input: userInput,
+                origin,
+                author,
                 startTime,
                 endTime,
                 modelProvider,
+                mainConnectorId,
                 attachmentRefs,
                 configurationOverrides,
                 compactionResult,
                 initialTodos,
+                relevantSkillsSelection,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
+
+          if (round.input.attachment_refs && round.input.attachment_refs.length > 0) {
+            const attachmentContext = formatAttachmentsMetadata(
+              round.input.attachment_refs,
+              attachmentStateManager
+            );
+            if (attachmentContext) {
+              round.input = { ...round.input, attachment_context: attachmentContext };
+            }
+          }
 
           const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
@@ -179,6 +224,7 @@ const resumeRound = ({
   startTime,
   endTime = new Date(),
   modelProvider,
+  mainConnectorId,
   attachmentRefs,
   configurationOverrides,
   compactionResult,
@@ -189,6 +235,7 @@ const resumeRound = ({
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
@@ -231,6 +278,7 @@ const resumeRound = ({
     startTime,
     endTime,
     modelProvider,
+    mainConnectorId,
     attachmentRefs,
     configurationOverrides,
     compactionResult,
@@ -265,6 +313,8 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
+    origin: previous.origin,
+    author: previous.author,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 
@@ -281,7 +331,7 @@ const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => 
   };
 };
 
-const mergeAttachmentRefs = (
+export const mergeAttachmentRefs = (
   previous?: AttachmentVersionRef[],
   next?: AttachmentVersionRef[]
 ): AttachmentVersionRef[] | undefined => {
@@ -306,24 +356,32 @@ const createRound = ({
   roundId: providedRoundId,
   events,
   input,
+  origin,
+  author,
   startTime,
   endTime = new Date(),
   modelProvider,
+  mainConnectorId,
   attachmentRefs,
   configurationOverrides,
   compactionResult,
   initialTodos,
+  relevantSkillsSelection,
 }: {
   roundId?: string;
   events: SourceEvents[];
   input: RoundInput;
+  origin?: ExecutionConversationOrigin;
+  author?: ConversationRoundAuthor;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
   initialTodos?: TodoItem[];
+  relevantSkillsSelection?: RelevantSkillSelection;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -367,6 +425,9 @@ const createRound = ({
     if (isBackgroundAgentCompleteEvent(event)) {
       return [createBackgroundAgentStep(event)];
     }
+    if (isSubagentRosterUpdatedEvent(event)) {
+      return [createSubagentRosterUpdatedStep({ roster: event.data.roster })];
+    }
     if (isUserQuestionAskedEvent(event)) {
       return [
         createAskUserQuestionStep({
@@ -391,17 +452,10 @@ const createRound = ({
     ? thinkingCompleteEvent.data.time_to_first_token
     : timeToLastToken;
 
-  const steps: ConversationRoundStep[] = [];
-
-  if (compactionResult?.compactionTriggered && compactionResult.summary) {
-    const compactionStep: CompactionStep = {
-      type: ConversationRoundStepType.compaction,
-      token_count_before: compactionResult.tokensBefore ?? 0,
-      token_count_after: compactionResult.tokensAfter ?? 0,
-      summarized_round_count: compactionResult.summary.summarized_round_count,
-    };
-    steps.push(compactionStep);
-  }
+  const steps: ConversationRoundStep[] = createPreExecutionSteps({
+    compactionResult,
+    relevantSkillsSelection,
+  });
 
   steps.push(...stepEvents.flatMap(eventToStep));
 
@@ -424,14 +478,18 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
-      ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
+      ...(attachmentRefs.length > 0
+        ? { attachment_refs: mergeAttachmentRefs(input.attachment_refs, attachmentRefs) }
+        : {}),
     },
     steps,
+    ...(origin ? { origin: { type: origin.type } } : {}),
+    ...(author ? { author } : {}),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
-    model_usage: getModelUsage(modelProvider.getUsageStats()),
+    model_usage: getModelUsage(modelProvider.getUsageStats(), mainConnectorId),
     response: lastMessage
       ? {
           message: lastMessage.message_content,
@@ -444,64 +502,32 @@ const createRound = ({
   return round;
 };
 
-const createReasoningStep = (event: ReasoningEvent): ReasoningStep => {
-  return {
-    type: ConversationRoundStepType.reasoning,
-    reasoning: event.data.reasoning,
-    tool_call_id: event.data.tool_call_id,
-    tool_call_group_id: event.data.tool_call_group_id,
-  };
-};
-
-const createBackgroundAgentStep = (
-  event: BackgroundAgentCompleteEvent
-): BackgroundAgentCompleteStep => {
-  return {
-    type: ConversationRoundStepType.backgroundAgentComplete,
-    ...event.data.execution,
-  };
-};
-
-const createToolCallStep = ({
-  toolCall,
-  toolResult,
-  toolProgress,
-}: {
-  toolCall: ToolCallEvent;
-  toolProgress: ToolProgressEvent[];
-  toolResult?: ToolResultEvent;
-}): ToolCallStep => {
-  return {
-    type: ConversationRoundStepType.toolCall,
-    tool_id: toolCall.data.tool_id,
-    params: toolCall.data.params,
-    tool_call_id: toolCall.data.tool_call_id,
-    progression: toolProgress.map(({ data: { message, metadata } }) => ({
-      message,
-      metadata,
-    })),
-    results: toolResult?.data.results ?? [],
-    tool_call_group_id: toolCall.data.tool_call_group_id,
-    tool_origin: toolCall.data.tool_origin,
-    tool_type: toolCall.data.tool_type,
-  };
-};
-
-const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
+const getModelUsage = (
+  stats: ModelProviderStats,
+  mainConnectorId: string
+): RoundModelUsageStats => {
   let inputTokens = 0;
   let outputTokens = 0;
+  let cachedInputTokens = 0;
+  let hasCachedInputTokens = false;
   for (const call of stats.calls) {
     inputTokens += call.tokens?.prompt ?? 0;
     outputTokens += call.tokens?.completion ?? 0;
+    if (call.tokens?.cached !== undefined) {
+      cachedInputTokens += call.tokens.cached;
+      hasCachedInputTokens = true;
+    }
   }
-  const modelFromResponse = stats.calls.find((call) => call.model)?.model;
+  const modelFromResponse = stats.calls.find(
+    (call) => call.connectorId === mainConnectorId && call.model
+  )?.model;
 
   return {
-    // we don't support multi-models yet, so we can just pick from the first call
-    connector_id: stats.calls.length ? stats.calls[0].connectorId : 'unknown',
+    connector_id: mainConnectorId,
     llm_calls: stats.calls.length,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
+    ...(hasCachedInputTokens ? { cached_input_tokens: cachedInputTokens } : {}),
     ...(modelFromResponse ? { model: modelFromResponse } : {}),
   };
 };
@@ -571,6 +597,9 @@ const mergeModelUsage = (
     llm_calls: a.llm_calls + b.llm_calls,
     input_tokens: a.input_tokens + b.input_tokens,
     output_tokens: a.output_tokens + b.output_tokens,
+    ...(a.cached_input_tokens !== undefined || b.cached_input_tokens !== undefined
+      ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
+      : {}),
     model: a.model ?? b.model,
   };
 };

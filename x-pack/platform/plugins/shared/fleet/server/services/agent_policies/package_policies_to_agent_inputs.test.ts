@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import {
   DATA_STREAM_TYPE_VAR_NAME,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../common/constants/epm';
+import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { appContextService } from '../app_context';
+import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
+import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
@@ -18,6 +25,19 @@ import {
   storedPackagePoliciesToAgentInputs,
   storedPackagePolicyToAgentInputs,
 } from './package_policies_to_agent_inputs';
+
+jest.mock('../app_context');
+jest.mock('../epm/packages/get', () => ({
+  getAgentTemplateAssetsMap: jest.fn(),
+}));
+// `package_policy` imports `recompileInputsWithAgentVersion` back from this module, so a
+// `jest.requireActual` factory here re-enters this mock while it is still being built and hands the
+// module under test a different set of mock functions than the ones these tests configure. Only
+// these two exports are used from `package_policy`, so declare them directly instead.
+jest.mock('../package_policy', () => ({
+  _compilePackagePolicyInputs: jest.fn(),
+  getPackagePolicySavedObjectType: jest.fn(),
+}));
 
 const packageInfoCache = new Map();
 packageInfoCache.set('mock_package-0.0.0', {
@@ -1410,6 +1430,210 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
   });
 });
 
+describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs backfill', () => {
+  const versionedPackagePolicy: PackagePolicy = {
+    id: 'versioned-uuid',
+    name: 'auditd-policy',
+    description: '',
+    created_at: '',
+    created_by: '',
+    updated_at: '',
+    updated_by: '',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    namespace: 'default',
+    package: {
+      name: 'mock_package',
+      title: 'Mock package',
+      version: '0.0.0',
+    },
+    package_agent_version_condition: '^9.6.0',
+    inputs: [{ type: 'test-logs', enabled: true, streams: [] }],
+    revision: 1,
+  };
+
+  // Deliberately distinguishable from the package policy's own inputs and from the stored '9.5'
+  // entry, so the assertions can tell a recompile apart from the defaults being passed through.
+  const recompiledInputs: PackagePolicyInput[] = [
+    { type: 'test-logs-recompiled', enabled: true, streams: [] },
+  ];
+  const storedInputsFor95: PackagePolicyInput[] = [
+    { type: 'test-logs-9-5', enabled: true, streams: [] },
+  ];
+
+  const soVersion = 'WzEsMV0=';
+
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  const makeSoClient = (existingInputsForVersions?: Record<string, PackagePolicyInput[]>) => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.get.mockResolvedValue({
+      id: versionedPackagePolicy.id,
+      type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      references: [],
+      version: soVersion,
+      attributes: existingInputsForVersions
+        ? { inputs_for_versions: existingInputsForVersions }
+        : {},
+    } as any);
+    soClient.update.mockResolvedValue({} as any);
+    return soClient;
+  };
+
+  const getAgentInputs = (
+    soClient: ReturnType<typeof savedObjectsClientMock.create>,
+    packagePolicy: PackagePolicy = versionedPackagePolicy
+  ) =>
+    storedPackagePoliciesToAgentInputs(
+      [packagePolicy],
+      packageInfoCache,
+      undefined,
+      undefined,
+      undefined,
+      '9.6',
+      soClient,
+      true
+    );
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    jest.mocked(appContextService.getLogger).mockReturnValue(logger);
+    jest
+      .mocked(appContextService.getExperimentalFeatures)
+      .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
+    jest
+      .mocked(getPackagePolicySavedObjectType)
+      .mockResolvedValue(LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE);
+    jest.mocked(getAgentTemplateAssetsMap).mockResolvedValue(new Map() as any);
+    jest.mocked(_compilePackagePolicyInputs).mockReturnValue(recompiledInputs);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('recompiles and persists inputs for an agent version missing from inputs_for_versions instead of throwing', async () => {
+    const soClient = makeSoClient({ '9.5': storedInputsFor95 });
+
+    const result = await getAgentInputs(soClient);
+
+    // It is the recompiled inputs that reach the agent, not the defaults and not the '9.5' entry.
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ type: 'test-logs-recompiled' });
+    expect(_compilePackagePolicyInputs).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'mock_package' }),
+      {},
+      versionedPackagePolicy.inputs,
+      expect.anything(),
+      '9.6'
+    );
+    // The stored versions are preserved and the write is guarded by the version that was read, so a
+    // concurrent backfill of another version cannot be dropped by this one.
+    expect(soClient.update).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      {
+        inputs_for_versions: {
+          '9.5': storedInputsFor95,
+          '9.6': recompiledInputs,
+        },
+      },
+      { version: soVersion }
+    );
+  });
+
+  it('uses the already compiled inputs for a version present in inputs_for_versions without recompiling', async () => {
+    const soClient = makeSoClient({ '9.6': storedInputsFor95 });
+
+    const result = await getAgentInputs(soClient);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ type: 'test-logs-9-5' });
+    expect(_compilePackagePolicyInputs).not.toHaveBeenCalled();
+    expect(soClient.update).not.toHaveBeenCalled();
+  });
+
+  it('backfills a package policy that has no inputs_for_versions at all', async () => {
+    // Written before enableVersionSpecificPolicies was turned on, so nothing was ever compiled for
+    // it. Previously this fell through to the default inputs silently.
+    const soClient = makeSoClient(undefined);
+
+    const result = await getAgentInputs(soClient);
+
+    expect(result[0]).toMatchObject({ type: 'test-logs-recompiled' });
+    expect(soClient.update).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      { inputs_for_versions: { '9.6': recompiledInputs } },
+      { version: soVersion }
+    );
+  });
+
+  it('does not compile or persist for a package policy that has no version conditions', async () => {
+    // hasAgentVersionConditions is computed once per agent policy, so it is true here even though
+    // this package policy has no conditions of its own. It must not get inputs_for_versions written.
+    const { package_agent_version_condition: _condition, ...withoutCondition } =
+      versionedPackagePolicy;
+    const soClient = makeSoClient(undefined);
+
+    const result = await getAgentInputs(soClient, withoutCondition as PackagePolicy);
+
+    expect(result[0]).toMatchObject({ type: 'test-logs' });
+    expect(_compilePackagePolicyInputs).not.toHaveBeenCalled();
+    expect(soClient.update).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the default inputs when the recompile itself throws', async () => {
+    jest.mocked(_compilePackagePolicyInputs).mockImplementation(() => {
+      throw new Error('missing package assets');
+    });
+    const soClient = makeSoClient({ '9.5': storedInputsFor95 });
+
+    const result = await getAgentInputs(soClient);
+
+    // The agent policy read still succeeds rather than aborting the whole request.
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ type: 'test-logs' });
+    expect(soClient.update).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to compile inputs for agent version 9.6')
+    );
+  });
+
+  it('warns and still serves the recompiled inputs when persisting fails', async () => {
+    // getFullAgentPolicy is reachable from read only routes whose request scoped client may not be
+    // allowed to write, which would otherwise recompile on every request with nothing in the logs.
+    const soClient = makeSoClient({ '9.5': storedInputsFor95 });
+    soClient.update.mockRejectedValue(new Error('forbidden'));
+
+    const result = await getAgentInputs(soClient);
+
+    expect(result[0]).toMatchObject({ type: 'test-logs-recompiled' });
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to persist inputs for agent version 9.6')
+    );
+  });
+
+  it('does not warn when a concurrent write already changed the saved object', async () => {
+    const soClient = makeSoClient({ '9.5': storedInputsFor95 });
+    soClient.update.mockRejectedValue(
+      SavedObjectsErrorHelpers.createConflictError(
+        LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        versionedPackagePolicy.id
+      )
+    );
+
+    const result = await getAgentInputs(soClient);
+
+    expect(result[0]).toMatchObject({ type: 'test-logs-recompiled' });
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('the saved object changed concurrently')
+    );
+  });
+});
+
 describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () => {
   const baseMockPolicy: PackagePolicy = {
     id: 'some-uuid',
@@ -1521,7 +1745,7 @@ describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () 
       ],
     };
 
-    expect(() => storedPackagePolicyToAgentInputs(policy, nonDynamicPackageInfo)).toThrowError(
+    expect(() => storedPackagePolicyToAgentInputs(policy, nonDynamicPackageInfo)).toThrow(
       '[data_stream.type]: unexpected undefined stream type for non-dynamic package'
     );
   });

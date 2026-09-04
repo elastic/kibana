@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { initContextSwitcher } from './context_switcher';
+export { SpacesContextSwitcher } from './context_switcher';

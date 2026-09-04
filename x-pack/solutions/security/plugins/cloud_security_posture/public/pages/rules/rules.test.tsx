@@ -22,6 +22,9 @@ import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_i
 import * as TEST_SUBJECTS from './test_subjects';
 import { SECURITY_FEATURE_ID } from '../../test/constants';
 
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: () => null,
+}));
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_is_subscription_status_valid');

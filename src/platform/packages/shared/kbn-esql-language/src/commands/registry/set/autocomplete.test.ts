@@ -57,7 +57,7 @@ describe('SET Autocomplete', () => {
       mockCallbacks.isServerless = true;
     });
     const serverlessSettings = settings
-      .filter((s) => s.serverlessOnly)
+      .filter((s) => !s.ignoreAsSuggestion)
       .map((setting) => `${setting.name} = `);
 
     it('suggests available settings after SET command', async () => {

@@ -37,42 +37,42 @@ describe('leastCommonInterval', () => {
   it('should throw an error for intervals of different types', () => {
     expect(() => {
       leastCommonInterval('60 s', '1m');
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       leastCommonInterval('1m', '2m');
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       leastCommonInterval('1h', '2h');
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       leastCommonInterval('1d', '7d');
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       leastCommonInterval('1h', '3d');
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       leastCommonInterval('7d', '1w');
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       leastCommonInterval('1M', '1000ms');
-    }).toThrowError();
+    }).toThrow();
   });
 
   it('should throw an error for invalid intervals', () => {
     expect(() => {
       leastCommonInterval('foo', 'bar');
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       leastCommonInterval('0h', '1h');
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       leastCommonInterval('0.5h', '1h');
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       leastCommonInterval('5w', '1h');
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       leastCommonInterval('2M', '4w');
-    }).toThrowError();
+    }).toThrow();
   });
 });

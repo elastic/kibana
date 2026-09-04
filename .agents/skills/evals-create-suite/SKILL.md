@@ -14,12 +14,12 @@ Eval suites live in dedicated `kbn-evals-suite-<name>` packages. Each suite is a
 
 - **Suite name** (kebab-case, e.g. `my-feature`)
 - **Parent directory** under `x-pack/` (e.g. `x-pack/platform/packages/shared/ai-infra/` or `x-pack/solutions/security/test/`)
-- **Owner** GitHub team handle (e.g. `@elastic/appex-ai-infra`)
+- **Owner** GitHub team handle (e.g. `@elastic/search-ml-ux`)
 - **Group** (`platform`, `security`, `observability`, `search`)
 - **Visibility** (`shared` or `private`)
 - **Whether custom fixtures are needed** (chat client, esArchiver, supertest, etc.)
 
-## Do NOT Use `node scripts/scout.js generate`
+## Do NOT Use `node scripts/scout generate`
 
 Eval suites are **not** standard Scout test configs. The Scout generator creates `test/scout/` directories that are picked up by Scout's CI discovery glob -- this will break because evals configs use `createPlaywrightEvalsConfig` (not `createPlaywrightConfig`) and contain non-JS files (like `.text` prompt files) that Playwright cannot parse.
 
@@ -101,7 +101,7 @@ export default createPlaywrightEvalsConfig({
 Options:
 - `testDir` (required) -- directory containing `.spec.ts` files
 - `timeout` (optional, default `5 * 60_000`) -- per-test timeout in ms
-- `repetitions` (optional, default `1`) -- overridable via `EVALUATION_REPETITIONS` env var
+- `repetitions` (optional, default `1`) -- overridable via `EVAL_REPETITIONS` env var
 
 ### `src/evaluate.ts`
 
@@ -177,7 +177,7 @@ Registration is optional for local dev (suites are auto-discovered from `createP
 ## Common Mistakes
 
 - **Placing configs under `test/scout/`** -- Scout's CI discovery will find them and crash. Keep `playwright.config.ts` in the package root.
-- **Using `node scripts/scout.js generate`** -- this creates Scout test scaffolds, not eval suites. Scaffold manually using the templates above.
+- **Using `node scripts/scout generate`** -- this creates Scout test scaffolds, not eval suites. Scaffold manually using the templates above.
 - Setting `type` to anything other than `"functional-tests"` in `kibana.jsonc`.
 - Forgetting `@kbn/evals` in `kbn_references` -- causes TS resolution failures.
 - Using `Path.join` instead of `Path.resolve` for `testDir` -- Playwright needs an absolute path.

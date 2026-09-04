@@ -101,6 +101,8 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       enableSemanticField: false,
       enforceAdaptiveAllocations: false,
       enableFailureStoreRetentionDisabling: true,
+      enableIndexMode: true,
+      enableVectorCount: false,
       isServerless: false,
     },
     history: { push: jest.fn() } as unknown as AppDependencies['history'],
@@ -113,7 +115,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
     docLinks: {} as unknown as AppDependencies['docLinks'],
     kibanaVersion: {} as unknown as AppDependencies['kibanaVersion'],
     overlays: {} as unknown as AppDependencies['overlays'],
-    canUseSyntheticSource: false,
+    hasAtLeastEnterpriseLicense: false,
     privs: { monitor: true, manageEnrich: true, monitorEnrich: true, manageIndexTemplates: true },
   };
 
@@ -768,6 +770,40 @@ describe('IndexActionsContextMenu', () => {
 
         expect(getByName).not.toHaveBeenCalled();
       });
+
+      it.each(['close', 'closed'])(
+        'SHOULD NOT call getByName when the index status is %s',
+        async (status) => {
+          const props = getBaseProps();
+          const getByName = jest.fn();
+          const emptyDocCount$ = of<Record<string, DocCountResult>>({});
+          const closedIndexProps: MenuProps = {
+            ...props,
+            indices: [
+              {
+                name: 'index-1',
+                status: status as Index['status'],
+                primary: 1,
+                hidden: false,
+                aliases: [],
+                isFrozen: false,
+                // documents intentionally omitted
+              } satisfies Partial<Index>,
+            ] as Index[],
+            indexStatusByName: { 'index-1': status as Index['status'] },
+            docCountApi: {
+              getByName,
+              getObservable: () => emptyDocCount$,
+              abort: jest.fn(),
+            },
+          };
+
+          renderWithProviders(<IndexActionsContextMenu {...closedIndexProps} />);
+          await openContextMenu();
+
+          expect(getByName).not.toHaveBeenCalled();
+        }
+      );
     });
 
     describe('AND WHEN index is hidden or already a lookup index', () => {

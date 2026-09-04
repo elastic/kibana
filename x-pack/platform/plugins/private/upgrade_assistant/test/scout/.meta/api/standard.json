@@ -1,5 +1,8 @@
 {
   "sha1": "6cc53a3d2e8312ede1a9eade4981138576b21ed1",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "9991953b7104b9e-739f71e0a324a1a",
@@ -10,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/cloud_backup_status.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 29,
+        "column": 7
       }
     },
     {
@@ -23,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/cloud_backup_status.spec.ts",
-        "line": 51,
-        "column": 12
+        "line": 42,
+        "column": 24
       }
     },
     {
@@ -37,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/cluster_settings.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 26,
+        "column": 10
       }
     },
     {
@@ -51,8 +54,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/es_deprecation_logs.spec.ts",
-        "line": 30,
-        "column": 12
+        "line": 26,
+        "column": 13
       }
     },
     {
@@ -65,8 +68,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/es_deprecations.spec.ts",
-        "line": 17,
-        "column": 12
+        "line": 13,
+        "column": 17
       }
     },
     {
@@ -79,8 +82,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/node_disk_space.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 21,
+        "column": 13
       }
     },
     {
@@ -93,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/privileges.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 21,
+        "column": 13
       }
     },
     {
@@ -107,8 +110,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/privileges.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 27,
+        "column": 51
       }
     },
     {
@@ -121,8 +124,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/remote_clusters.spec.ts",
-        "line": 50,
-        "column": 12
+        "line": 41,
+        "column": 16
       }
     },
     {
@@ -135,8 +138,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 38,
+        "column": 26
       }
     },
     {
@@ -149,8 +152,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 47,
+        "column": 16
       }
     },
     {
@@ -163,8 +166,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
-        "line": 93,
-        "column": 12
+        "line": 79,
+        "column": 14
       }
     },
     {
@@ -177,8 +180,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
-        "line": 111,
-        "column": 12
+        "line": 95,
+        "column": 16
       }
     },
     {
@@ -191,8 +194,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
-        "line": 121,
-        "column": 12
+        "line": 106,
+        "column": 16
       }
     },
     {
@@ -205,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
-        "line": 131,
-        "column": 12
+        "line": 114,
+        "column": 9
       }
     },
     {
@@ -219,8 +222,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
-        "line": 144,
-        "column": 12
+        "line": 123,
+        "column": 51
       }
     },
     {
@@ -233,8 +236,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
-        "line": 156,
-        "column": 12
+        "line": 132,
+        "column": 24
       }
     }
   ]

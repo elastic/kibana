@@ -20,23 +20,23 @@ describe('getStackAlertAttachmentType', () => {
     expect(registration.schema).toBe(StackAlertAttachmentPayloadSchema);
   });
 
-  describe('getAttachmentRemovalObject', () => {
-    const getAttachmentRemovalObject = registration.getAttachmentRemovalObject!;
+  describe('getRemovalActivity', () => {
+    const getRemovalActivity = registration.getRemovalActivity!;
 
     it('returns a singular removal event when there is one alert id', () => {
-      const removal = getAttachmentRemovalObject({ attachmentId: 'a1' } as never);
+      const removal = getRemovalActivity({ attachmentId: 'a1' } as never);
       expect(removal.event).toBeDefined();
     });
 
     it('returns a plural removal event when there are multiple alert ids', () => {
-      const removal = getAttachmentRemovalObject({ attachmentId: ['a1', 'a2'] } as never);
+      const removal = getRemovalActivity({ attachmentId: ['a1', 'a2'] } as never);
       expect(removal.event).toBeDefined();
     });
   });
 
-  describe('getAttachmentTabViewObject', () => {
+  describe('getAttachmentList', () => {
     it('returns the stack alert tab content', () => {
-      const tab = registration.getAttachmentTabViewObject?.();
+      const tab = registration.getAttachmentList?.();
       expect(tab?.children).toBeDefined();
     });
   });

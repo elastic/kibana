@@ -23,7 +23,7 @@ const restorableDefaults = getDefaultESQLDataVisualizerListState();
 
 const EmbeddableESQLFieldStatsTableWrapper = React.memo(
   (props: ESQLDataVisualizerGridEmbeddableState) => {
-    const { onTableUpdate, onRenderComplete } = props;
+    const { onTableUpdate, onRenderComplete, onFieldsCountChange } = props;
     const [dataVisualizerListState, setDataVisualizerListState] =
       useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
 
@@ -63,6 +63,11 @@ const EmbeddableESQLFieldStatsTableWrapper = React.memo(
         onRenderComplete();
       }
     }, [progress, onRenderComplete]);
+
+    useEffect(() => {
+      // undefined while (re)loading, so a stale or empty count isn't reported
+      onFieldsCountChange?.(progress === 100 ? configs.length : undefined);
+    }, [progress, configs.length, onFieldsCountChange]);
 
     if (progress === 100 && configs.length === 0) {
       return <EmbeddableNoResultsEmptyPrompt />;

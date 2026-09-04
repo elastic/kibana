@@ -13,6 +13,7 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import {
   useAgentId,
+  useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
   useIsAwaitingPrompt,
@@ -34,6 +35,7 @@ jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
 }));
 jest.mock('../../../hooks/use_conversation', () => ({
   useAgentId: jest.fn(),
+  useConversationReadOnly: jest.fn(),
   useConversationTitle: jest.fn(),
   useHasActiveConversation: jest.fn(),
   useIsAwaitingPrompt: jest.fn(),
@@ -73,6 +75,7 @@ const mockedUseConversationStream = jest.mocked(useConversationStream);
 const mockedUseAgentBuilderAgents = jest.mocked(useAgentBuilderAgents);
 const mockedUseValidateAgentId = jest.mocked(useValidateAgentId);
 const mockedUseAgentId = jest.mocked(useAgentId);
+const mockedUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockedUseConversationTitle = jest.mocked(useConversationTitle);
 const mockedUseHasActiveConversation = jest.mocked(useHasActiveConversation);
 const mockedUseIsAwaitingPrompt = jest.mocked(useIsAwaitingPrompt);
@@ -107,6 +110,7 @@ describe('ConversationInput', () => {
     mockedUseValidateAgentId.mockReturnValue(((agentId?: string): agentId is string =>
       Boolean(agentId)) as never);
     mockedUseAgentId.mockReturnValue('elastic-ai-agent');
+    mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: false });
     mockedUseConversationTitle.mockReturnValue({ title: '', isLoading: false } as never);
     mockedUseHasActiveConversation.mockReturnValue(false);
     mockedUseIsAwaitingPrompt.mockReturnValue(false);
@@ -148,5 +152,42 @@ describe('ConversationInput', () => {
     expect(submitMessage).toHaveBeenCalledTimes(1);
     expect(submitMessage).toHaveBeenCalledWith('hello agent');
     expect(editorController.clear).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the message input for read-only conversations', () => {
+    mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: true, isLoading: false });
+
+    render(<ConversationInput />);
+
+    expect(screen.queryByTestId('mock-message-editor-submit')).not.toBeInTheDocument();
+  });
+
+  it('hides the message input while the conversation is loading', () => {
+    mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: true });
+
+    render(<ConversationInput />);
+
+    expect(screen.queryByTestId('mock-message-editor-submit')).not.toBeInTheDocument();
+  });
+
+  describe('auto-focus', () => {
+    it('focuses the editor shortly after mount', () => {
+      jest.useFakeTimers();
+      render(<ConversationInput />);
+
+      jest.advanceTimersByTime(200);
+      expect(editorController.focus).toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+
+    it('does not steal focus from an open HITL prompt', () => {
+      jest.useFakeTimers();
+      mockedUseIsAwaitingPrompt.mockReturnValue(true);
+      render(<ConversationInput />);
+
+      jest.advanceTimersByTime(200);
+      expect(editorController.focus).not.toHaveBeenCalled();
+      jest.useRealTimers();
+    });
   });
 });

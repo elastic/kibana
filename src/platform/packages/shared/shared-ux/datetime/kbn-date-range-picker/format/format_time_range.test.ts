@@ -43,8 +43,20 @@ describe('timeRangeToDisplayText', () => {
     expect(toDisplay('-15m to -5m')).toBe('15 minutes ago → 5 minutes ago');
   });
 
+  it('keeps chained date math as-is instead of resolving to absolute dates', () => {
+    expect(toDisplay('now/y+3M')).toBe('now/y+3M → now');
+    expect(toDisplay('now-3M/y+3M')).toBe('now-3M/y+3M → now');
+    expect(toDisplay('-1y/y+3M to now/y+3M')).toBe('now-1y/y+3M → now/y+3M');
+  });
+
   it('handles relative to now', () => {
     expect(toDisplay('-1w')).toBe('Last 1 week');
+  });
+
+  it('handles millisecond offsets as named ranges', () => {
+    expect(toDisplay('500ms')).toBe('Last 500 milliseconds');
+    expect(toDisplay('now to +500ms')).toBe('Next 500 milliseconds');
+    expect(toDisplay('-500ms to -250ms')).toBe('500 milliseconds ago → 250 milliseconds ago');
   });
 
   it('handles now to relative', () => {
@@ -121,6 +133,109 @@ describe('timeRangeToDisplayText', () => {
     it('shows only minutes with none', () => {
       expect(toDisplay('Feb 3 2016 to now', { timePrecision: 'none' })).toBe(
         'Feb 3, 2016, 00:00 → now'
+      );
+    });
+  });
+
+  describe('locale generation', () => {
+    // Proves the core round-trip design: display text is generated FROM the
+    // active grammar's own templates (not hand-built English), so whatever
+    // is shown here is also what the corpus proves the parser re-accepts.
+    it('generates a German compact relative label (past)', () => {
+      expect(toDisplay('-1w', { locale: 'de-DE' })).toBe('Letzte 1 Woche');
+    });
+
+    it('generates a German compact relative label (future)', () => {
+      expect(toDisplay('now to +15m', { locale: 'de-DE' })).toBe('Nächste 15 Minuten');
+    });
+
+    it('generates gender-agreeing German singular duration labels', () => {
+      // der Tag / der Monat (masculine) vs das Jahr (neuter)
+      expect(toDisplay('-1d', { locale: 'de-DE' })).toBe('Letzter 1 Tag');
+      expect(toDisplay('-1M', { locale: 'de-DE' })).toBe('Letzter 1 Monat');
+      expect(toDisplay('-1y', { locale: 'de-DE' })).toBe('Letztes 1 Jahr');
+      expect(toDisplay('now to +1y', { locale: 'de-DE' })).toBe('Nächstes 1 Jahr');
+    });
+
+    it('generates German relative-to-relative instant phrasing', () => {
+      expect(toDisplay('-15m to -5m', { locale: 'de-DE' })).toBe('vor 15 Minuten → vor 5 Minuten');
+    });
+
+    it('generates the German dative plural after "vor"/"in" (Tagen, not Tage)', () => {
+      expect(toDisplay('-15d to -5d', { locale: 'de-DE' })).toBe('vor 15 Tagen → vor 5 Tagen');
+      expect(toDisplay('-15M to -5M', { locale: 'de-DE' })).toBe('vor 15 Monaten → vor 5 Monaten');
+      expect(toDisplay('-15y to -5y', { locale: 'de-DE' })).toBe('vor 15 Jahren → vor 5 Jahren');
+    });
+
+    it('generates gender-agreeing French duration labels', () => {
+      // la semaine / la minute (feminine) vs le jour (masculine)
+      expect(toDisplay('-1w', { locale: 'fr-FR' })).toBe('Dernière 1 semaine');
+      expect(toDisplay('-15m', { locale: 'fr-FR' })).toBe('Dernières 15 minutes');
+      expect(toDisplay('-15d', { locale: 'fr-FR' })).toBe('Derniers 15 jours');
+      expect(toDisplay('now to +15m', { locale: 'fr-FR' })).toBe('Prochaines 15 minutes');
+    });
+
+    it('generates French relative-to-relative instant phrasing', () => {
+      expect(toDisplay('-15m to -5m', { locale: 'fr-FR' })).toBe(
+        'il y a 15 minutes → il y a 5 minutes'
+      );
+    });
+
+    it('generates "jetzt" for bare now in German', () => {
+      expect(toDisplay('Feb 3 2016 to now', { locale: 'de-DE' })).toBe(
+        'Feb 3, 2016, 00:00:00 → jetzt'
+      );
+    });
+
+    // CJK has no plural inflection, so singular/plural counts produce the
+    // same word — proven here with count=1 (unlike German/French, where the
+    // count=1 forms above look visibly different from plural forms). Chinese
+    // generates SPACED (moment zh-CN's own "%d 天" convention), Japanese
+    // generates GLUED (moment ja's "%d日") — both accept either form as input.
+    it('generates a Chinese compact relative label (past), spaced', () => {
+      expect(toDisplay('-1w', { locale: 'zh-CN' })).toBe('最近 1 周');
+    });
+
+    it('generates a Chinese compact relative label (future), spaced', () => {
+      expect(toDisplay('now to +15m', { locale: 'zh-CN' })).toBe('未来 15 分钟');
+    });
+
+    it('generates Chinese relative-to-relative instant phrasing', () => {
+      expect(toDisplay('-15m to -5m', { locale: 'zh-CN' })).toBe('15 分钟前 → 5 分钟前');
+    });
+
+    it('generates "现在" for bare now in Chinese', () => {
+      expect(toDisplay('Feb 3 2016 to now', { locale: 'zh-CN' })).toBe(
+        'Feb 3, 2016, 00:00:00 → 现在'
+      );
+    });
+
+    it('generates a Japanese compact relative label (past), glued', () => {
+      expect(toDisplay('-1w', { locale: 'ja-JP' })).toBe('過去1週間');
+    });
+
+    it('generates a Japanese compact relative label (future), glued', () => {
+      expect(toDisplay('now to +15m', { locale: 'ja-JP' })).toBe('今後15分間');
+    });
+
+    it('generates the Japanese 〜間 counter forms for duration labels (native preference)', () => {
+      expect(toDisplay('-15m', { locale: 'ja-JP' })).toBe('過去15分間');
+      expect(toDisplay('-7d', { locale: 'ja-JP' })).toBe('過去7日間');
+      expect(toDisplay('-3y', { locale: 'ja-JP' })).toBe('過去3年間');
+    });
+
+    it('generates Japanese relative-to-relative instant phrasing', () => {
+      expect(toDisplay('-15m to -5m', { locale: 'ja-JP' })).toBe('15分前 → 5分前');
+    });
+
+    it('generates the bare unit (not 〜間) inside Japanese instants', () => {
+      expect(toDisplay('-7d to -3d', { locale: 'ja-JP' })).toBe('7日前 → 3日前');
+      expect(toDisplay('-3y to -1y', { locale: 'ja-JP' })).toBe('3年前 → 1年前');
+    });
+
+    it('generates "今" for bare now in Japanese', () => {
+      expect(toDisplay('Feb 3 2016 to now', { locale: 'ja-JP' })).toBe(
+        'Feb 3, 2016, 00:00:00 → 今'
       );
     });
   });

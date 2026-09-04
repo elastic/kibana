@@ -13,8 +13,11 @@ import { evaluate } from '../../src/evaluate';
  *
  * These specs validate that the entity-analytics skill correctly routes known-entity
  * lookup queries to the `security.get_entity` tool when Entity Store V2 is enabled.
- * This includes profile retrieval, risk score history over an interval, and
- * point-in-time profile snapshots on a specific date (new capability in V2).
+ * This includes profile retrieval, point-in-time profile snapshots on a specific
+ * date, and alert contribution questions. Risk-score *time series* / chart
+ * prompts belong in `entity_store_v2_get_entity_risk_score_history.spec.ts`
+ * (`security.get_entity_risk_score_history`) — `get_entity`'s
+ * profile_history is entity-store attribute snapshots, not the risk score series.
  *
  * Tool routing assertions work without pre-seeded data; the tool may return
  * "entity not found" but the call itself must still be made. For grounded
@@ -55,34 +58,13 @@ evaluate.describe(
             },
             {
               input: {
-                question: "Has Cielo39's risk score changed significantly over the last 90 days?",
-              },
-              output: {
-                criteria: [
-                  "Analyse Cielo39's risk score history over the last 90 days and state whether the change is significant (greater than 20 points), or clearly state the entity was not found.",
-                  'Include previous and current risk scores where available.',
-                  'Do not fabricate entity or risk data.',
-                ],
-                toolCalls: [
-                  {
-                    id: 'security.get_entity',
-                    criteria: [
-                      'The tool is called with an entityId matching "Cielo39" and an interval parameter of "90d" or equivalent.',
-                    ],
-                  },
-                ],
-              },
-              metadata: { query_intent: 'Factual' },
-            },
-            {
-              input: {
                 question:
-                  "Show me user jsmith123's full profile including their last 30 days of risk history",
+                  "Show me user jsmith123's full profile including changes in criticality and watchlists over the last 30 days",
               },
               output: {
                 criteria: [
-                  "Retrieve jsmith123's profile with risk score history over the last 30 days, or clearly state the entity was not found.",
-                  'Summarise any notable changes in risk score, asset criticality, watchlists, or behaviors over the interval.',
+                  "Retrieve jsmith123's profile with attribute history over the last 30 days, or clearly state the entity was not found.",
+                  'Summarise any notable changes in asset criticality, watchlists, or behaviors over the interval.',
                   'Do not fabricate entity data.',
                 ],
                 toolCalls: [
@@ -119,13 +101,16 @@ evaluate.describe(
             },
             {
               input: {
-                question: 'What is the current risk profile for host server1?',
+                question:
+                  'What is the current risk profile for host server1, and is that risk score up to date?',
               },
               output: {
                 criteria: [
                   'Retrieve and summarise the current risk profile for host server1, or clearly state the entity was not found.',
                   'Include risk score, risk level, and asset criticality where available.',
-                  'Do not fabricate entity data.',
+                  'If the risk score grounding signal reports the risk-score maintainer as stopped or never_started, explicitly caveat that risk scores are stale or unavailable rather than implying they are current.',
+                  'If the risk score grounding signal reports started, do not add an unnecessary "scoring is current" caveat.',
+                  'Do not fabricate entity data or a risk score grounding status.',
                 ],
                 toolCalls: [
                   {
@@ -153,6 +138,27 @@ evaluate.describe(
                     id: 'security.get_entity',
                     criteria: [
                       'The tool is called with an entityId matching "jsmith123"; the response should include risk_score_inputs if the entity has a risk score.',
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+            {
+              input: {
+                question: 'Which watchlists is host server01 on?',
+              },
+              output: {
+                criteria: [
+                  "Call security.get_entity — the entity's watchlist memberships are on the entity profile (entity.attributes.watchlists). Or clearly state the entity was not found.",
+                  "Answer from the entity profile; do NOT iterate/enumerate all watchlists looking for this entity's memberships — the profile already has them.",
+                  'Do not fabricate entity or watchlist data.',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.get_entity',
+                    criteria: [
+                      'The tool is called with an entityId matching "server01" or "host:server01".',
                     ],
                   },
                 ],

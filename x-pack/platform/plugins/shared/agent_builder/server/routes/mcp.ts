@@ -116,17 +116,22 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
 
           const registry = await toolService.getRegistry({ request });
           const allTools = await registry.list({});
-          const tools = filterToolsByNamespace(allTools, request.query.namespace);
+          const tools = filterToolsByNamespace(allTools, request.query.namespace).filter(
+            (tool) => !tool.excludeFromMcp
+          );
 
           const idMapping = createToolIdMappings(tools);
 
           // Expose tools scoped to the request
           for (const tool of tools) {
             const toolSchema = await tool.getSchema();
-            server.tool(
+            server.registerTool(
               idMapping.get(tool.id) ?? tool.id,
-              tool.description,
-              toolSchema.shape,
+              {
+                description: tool.description,
+                inputSchema: toolSchema.shape,
+                annotations: tool.annotations,
+              },
               async (args: { [x: string]: any }) => {
                 const toolResult = await registry.execute({
                   toolId: tool.id,

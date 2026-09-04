@@ -8,11 +8,13 @@
 import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 
+import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
+
 import { SpaceCard } from './space_card';
 
 test('it renders without crashing', () => {
   const space = {
-    id: '',
+    id: '' as SpaceId,
     name: 'space name',
     description: 'space description',
     disabledFeatures: [],
@@ -24,7 +26,7 @@ test('it renders without crashing', () => {
 
 test('links to the indicated space', () => {
   const space = {
-    id: 'some-space',
+    id: asSpaceId('some-space'),
     name: 'space name',
     description: 'space description',
     disabledFeatures: [],
@@ -39,7 +41,7 @@ test('links to the indicated space', () => {
 
 test('links to the default space too', () => {
   const space = {
-    id: 'default',
+    id: asSpaceId('default'),
     name: 'default space',
     description: 'space description',
     disabledFeatures: [],

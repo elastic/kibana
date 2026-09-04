@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/shared-ux-column-presets'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/eui'
+  defaultOwner: '@elastic/eui-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/shared-ux-column-presets'
   description: Moon project for @kbn/shared-ux-column-presets
   channel: ''
-  owner: '@elastic/eui'
+  owner: '@elastic/eui-team'
   sourceRoot: src/platform/packages/shared/shared-ux/column-presets
 dependsOn:
   - '@kbn/i18n'

@@ -12,7 +12,6 @@ import type { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../typ
 export interface ActiveItemsState {
   primaryItem: MenuItem | null;
   secondaryItem: SecondaryMenuItem | null;
-  isLogoActive: boolean;
 }
 
 /**
@@ -20,58 +19,53 @@ export interface ActiveItemsState {
  *
  * @param items - the navigation structure.
  * @param activeItemId - the active item ID.
- * @param logoId - the logo ID.
- * @returns the active items state including: `primaryItem`, `secondaryItem`, and `isLogoActive`.
+ * @returns the active items state including: `primaryItem` and `secondaryItem`.
  */
 export const getActiveItems = (
   items: NavigationStructure,
-  activeItemId?: string,
-  logoId?: string
+  activeItemId?: string
 ): ActiveItemsState => {
   if (!activeItemId) {
-    return { primaryItem: null, secondaryItem: null, isLogoActive: false };
+    return { primaryItem: null, secondaryItem: null };
   }
 
-  // First, check if the logo is active
-  if (logoId && activeItemId === logoId) {
-    return { primaryItem: null, secondaryItem: null, isLogoActive: true };
-  }
-
-  // Second, search the secondary menu items using their IDs (prioritize children over parents)
-  for (const primary of items.primaryItems) {
+  // Search the secondary menu items using their IDs (prioritize children over parents)
+  for (const primary of [...items.primaryItems, ...(items.overflowItems ?? [])]) {
     if (!primary.sections) continue;
 
     for (const section of primary.sections) {
       const secondaryItem = section.items.find((item) => item.id === activeItemId);
       if (secondaryItem) {
-        return { primaryItem: primary, secondaryItem, isLogoActive: false };
+        return { primaryItem: primary, secondaryItem };
       }
     }
   }
 
-  // Third, search the secondary items of footer items
+  // Search the secondary items of footer items
   for (const footer of items.footerItems) {
     if (!footer.sections) continue;
 
     for (const section of footer.sections) {
       const secondaryItem = section.items.find((item) => item.id === activeItemId);
       if (secondaryItem) {
-        return { primaryItem: footer, secondaryItem, isLogoActive: false };
+        return { primaryItem: footer, secondaryItem };
       }
     }
   }
 
-  // Fourth, search the primary menu items using their IDs
-  const primaryItem = items.primaryItems.find((item) => item.id === activeItemId);
+  // Search the primary and overflow menu items using their IDs
+  const primaryItem = [...items.primaryItems, ...(items.overflowItems ?? [])].find(
+    (item) => item.id === activeItemId
+  );
   if (primaryItem) {
-    return { primaryItem, secondaryItem: null, isLogoActive: false };
+    return { primaryItem, secondaryItem: null };
   }
 
-  // Fifth, search the footer items using their IDs
+  // Search the footer items using their IDs
   const footerItem = items.footerItems.find((item) => item.id === activeItemId);
   if (footerItem) {
-    return { primaryItem: footerItem, secondaryItem: null, isLogoActive: false };
+    return { primaryItem: footerItem, secondaryItem: null };
   }
 
-  return { primaryItem: null, secondaryItem: null, isLogoActive: false };
+  return { primaryItem: null, secondaryItem: null };
 };

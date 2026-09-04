@@ -8,25 +8,25 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiScreenReaderOnly,
   EuiSpacer,
+  EuiText,
+  EuiToolTip,
   logicalCSS,
   useEuiTheme,
-  EuiButtonEmpty,
-  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { RenderDocumentViewCallback, SortOrder } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
-  ROWS_HEIGHT_OPTIONS,
   UnifiedDataTable,
+  getRenderCustomToolbarWithElements,
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
   type UnifiedDataTableSettings,
@@ -38,20 +38,27 @@ import { css } from '@emotion/react';
 import deepEqual from 'fast-deep-equal';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useService } from '@kbn/core-di-browser';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
+import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
-import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
+import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import {
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
+  EpisodeRuleTagsCell,
+  EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
-import { ExperimentalBadge } from '../../components/experimental_badge';
+import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
+import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
+import { experimentalBadge } from '../../components/experimental_badge';
+import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -62,36 +69,62 @@ import { EpisodesHistogram } from './components/episodes_histogram';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import {
+  filterEpisodeActionsByPrivilege,
+  EPISODE_ACTIONS_PRIVILEGE,
+} from '../../utils/filter_episode_actions_by_privilege';
+import { UserCapabilities } from '../../services/user_capabilities';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 
-const PAGE_SIZE = 1000;
-
-const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
-
-const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
-  columns: {
-    duration: { width: 110 },
-    assignees: { width: 120 },
-    'episode.status': { width: 110 },
+const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
+  primaryActionItem: {
+    id: 'manageRules',
+    label: i18n.EPISODES_LIST_MANAGE_RULES,
+    iconType: 'gear',
+    href: manageRulesHref,
+    testId: 'alertingV2EpisodesListManageRules',
   },
-};
+});
 
+// Neither tag column is in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a sort on them
+// falls back to `@timestamp` and only looks like it works.
 const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
-    displayAsText: i18n.EPISODES_LIST_COLUMN_TAGS,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_ALERT_TAGS,
+    isSortable: false,
+  }),
+  rule_tags: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_RULE_TAGS,
+    isSortable: false,
   }),
   assignees: ({ column }) => ({
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
   }),
-  duration: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
-    ...column,
-    displayHeaderCellProps: { style: { textAlign: 'left' } },
-  }),
 };
+
+// The table fills the space left below the KPIs and the histogram. On short viewports that space
+// only fits one or two rows, so we keep a floor that shows a usable number of rows and let the page
+// scroll instead.
+const MIN_TABLE_HEIGHT = 400;
+
+/**
+ * Two reasons this is a whole pixel value rather than the `1.6em` default:
+ *
+ * - The grid derives its row height from `parseInt` of the cell's computed line height, so the
+ *   default (19.199px at the grid font size) under-allocates every row by ~1.6px.
+ * - The row is one pixel taller than its cells (the row border is not part of the row height
+ *   calculation), so the last line of a cell always loses a pixel to `overflow: hidden`.
+ *
+ * 24px leaves a 20px badge two pixels of slack per side, which survives that lost pixel. Other
+ * data tables with badges in cells (asset inventory, entity analytics, cloud security) land on
+ * the same value.
+ */
+const TABLE_ROW_LINE_HEIGHT = '24px';
 
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
   height: 100%;
@@ -99,12 +132,12 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   border: ${euiTheme.border.thin};
   overflow: hidden;
 
-  & .unifiedDataTable__cellValue {
-    font-family: unset;
+  & .unifiedDataTableToolbar {
+    padding-bottom: ${euiTheme.size.s};
   }
 
-  & .euiDataGridRowCell__content {
-    display: flex;
+  & .unifiedDataTable__cellValue {
+    font-family: unset;
   }
 
   & .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--autoHeight) {
@@ -126,6 +159,9 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
 export const AlertEpisodesListPage = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
   const queryClient = useQueryClient();
+  const alertsCapability = useService(UserCapabilities).canWrite('alerts')
+    ? EPISODE_ACTIONS_PRIVILEGE.all
+    : EPISODE_ACTIONS_PRIVILEGE.read;
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
@@ -150,60 +186,81 @@ export const AlertEpisodesListPage = () => {
     setFilterState({ ...DEFAULT_EPISODES_LIST_FILTER });
   }, [setFilterState]);
 
-  const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
-  const [columns, setColumns] = useState<string[]>([
-    'episode.status',
-    '@timestamp',
-    'rule.id',
-    'duration',
-    'tags',
-    'assignees',
-  ]);
-  const [rowHeight, setRowHeight] = useState<number>(ROWS_HEIGHT_OPTIONS.default);
+  const {
+    visibleColumns,
+    sort: sortState,
+    rowHeight,
+    columnSettings,
+    setVisibleColumns,
+    setSort,
+    setRowHeight,
+    onResize,
+  } = useEpisodesTableConfig(services.storage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
+  const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
+  const closeRuleFlyout = useCallback(() => setRuleIdToView(null), []);
+  const {
+    flyout: composeFlyout,
+    confirmationModal,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
+
+  // The rule and the episode flyout occupy the same edge of the screen, so only one of them
+  // can be open at a time.
+  const openRuleFlyout = useCallback((ruleId: string) => {
+    setExpandedDoc(undefined);
+    setRuleIdToView(ruleId);
+  }, []);
+
+  const expandDoc = useCallback((doc?: DataTableRecord) => {
+    if (doc) {
+      setRuleIdToView(null);
+    }
+    setExpandedDoc(doc);
+  }, []);
 
   const {
     data: episodesData,
     dataView,
     isLoading,
   } = useFetchAlertingEpisodesQuery({
-    pageSize: PAGE_SIZE,
+    pageSize: ALERT_EPISODES_LIST_PAGE_SIZE,
     services,
     filterState,
     sortState,
     timeRange,
   });
 
-  const { data: filteredKpis } = useEpisodesKpisQuery({ services, filterState, timeRange });
-  const { data: totalKpis } = useEpisodesKpisQuery({ services, timeRange });
-
-  const filteredAlertEpisodesCount = filteredKpis?.alertsCount ?? 0;
-  /* The two KPI queries resolve independently; clamping avoids briefly showing an
-  impossible "filtered > total" state when the filtered count updates first.
-  */
-  const totalAlertEpisodesCount = Math.max(totalKpis?.alertsCount ?? 0, filteredAlertEpisodesCount);
+  const loadedEpisodesCount = episodesData?.length ?? 0;
+  const isEpisodeListCapped = loadedEpisodesCount >= ALERT_EPISODES_LIST_PAGE_SIZE;
 
   const sort: SortOrder[] = useMemo(
     () => [[sortState.sortField, sortState.sortDirection]],
     [sortState.sortField, sortState.sortDirection]
   );
 
+  const settings: UnifiedDataTableSettings = useMemo(
+    () => ({ columns: columnSettings }),
+    [columnSettings]
+  );
+
   const onSort = useCallback(
     (nextSort: string[][]) => {
       if (!nextSort.length) {
-        setSortState(DEFAULT_SORT);
+        setSort(DEFAULT_EPISODES_TABLE_SORT);
         return;
       }
       const [field, dir] = nextSort[nextSort.length - 1];
       if (field != null && dir != null) {
-        setSortState({
+        setSort({
           sortField: String(field),
           sortDirection: dir === 'asc' ? 'asc' : 'desc',
         });
       }
     },
-    [setSortState]
+    [setSort]
   );
 
   const ruleIds = useMemo(
@@ -214,6 +271,12 @@ export const AlertEpisodesListPage = () => {
   const { rulesCache, loading: isLoadingRules } = useAlertingRulesCache({
     ruleIds,
     services,
+  });
+
+  const sourceDataViewsByRule = useAlertingRuleSourceDataViews({
+    rules: rulesCache,
+    dataViews: services.dataViews,
+    http: services.http,
   });
 
   const ruleOptions = useMemo(
@@ -227,31 +290,92 @@ export const AlertEpisodesListPage = () => {
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
+  const renderCustomToolbar = useMemo(
+    () =>
+      getRenderCustomToolbarWithElements({
+        leftSide: (
+          <EuiFlexGroup
+            alignItems="center"
+            responsive={false}
+            gutterSize="xs"
+            css={css`
+              ${logicalCSS('padding-horizontal', euiTheme.size.s)}
+            `}
+          >
+            <EuiFlexItem grow={false}>
+              {isEpisodeListCapped ? (
+                <EuiToolTip
+                  content={i18n.EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP(
+                    ALERT_EPISODES_LIST_PAGE_SIZE
+                  )}
+                >
+                  <EuiText size="xs" data-test-subj="alertEpisodesItemCount" tabIndex={0}>
+                    {i18n.EPISODES_LIST_ITEM_COUNT_CAPPED(ALERT_EPISODES_LIST_PAGE_SIZE)}
+                  </EuiText>
+                </EuiToolTip>
+              ) : (
+                <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
+                  {i18n.EPISODES_LIST_ITEM_COUNT(loadedEpisodesCount)}
+                </EuiText>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                |
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="eraser"
+                color="text"
+                disabled={!hasActiveFilters}
+                onClick={handleClearFilters}
+                data-test-subj="episodesFilterBar-resetFilters"
+              >
+                {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      }),
+    [
+      euiTheme.size.s,
+      handleClearFilters,
+      hasActiveFilters,
+      isEpisodeListCapped,
+      loadedEpisodesCount,
+    ]
+  );
+
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      createEpisodeActions({
-        http: services.http,
-        overlays: services.overlays,
-        notifications: services.notifications,
-        rendering: services.rendering,
-        application: services.application,
-        userProfile: services.userProfile,
-        docLinks: services.docLinks,
-        expressions: services.expressions,
-        spaces: services.spaces,
-        queryClient,
-        getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
-          getDiscoverHrefForRuleAndEpisodeTimestamp({
-            share: services.share,
-            capabilities: services.application.capabilities,
-            uiSettings: services.uiSettings,
-            ruleEsql: rulesCache[ruleId]?.query
-              ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
-              : undefined,
-            episodeIsoTimestamp,
-          }),
-      }),
-    [services, queryClient, rulesCache]
+      filterEpisodeActionsByPrivilege(
+        createEpisodeActions({
+          http: services.http,
+          overlays: services.overlays,
+          notifications: services.notifications,
+          rendering: services.rendering,
+          application: services.application,
+          userProfile: services.userProfile,
+          docLinks: services.docLinks,
+          expressions: services.expressions,
+          spaces: services.spaces,
+          queryClient,
+          getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
+            getDiscoverHrefForRuleAndEpisodeTimestamp({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+              ruleEsql: rulesCache[ruleId]?.query
+                ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
+                : undefined,
+              episodeIsoTimestamp,
+            }),
+        }),
+        alertsCapability
+      ),
+    [services, queryClient, rulesCache, alertsCapability]
   );
 
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
@@ -314,20 +438,35 @@ export const AlertEpisodesListPage = () => {
     [episodesData]
   );
 
-  const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
-    setColumns(cols);
-  }, []);
+  const onSetColumns = useCallback(
+    (cols: string[], _hideTimeCol: boolean) => {
+      setVisibleColumns(cols);
+    },
+    [setVisibleColumns]
+  );
+
+  const getRuleDetailsHref = useCallback(
+    (ruleId: string) => services.http.basePath.prepend(paths.ruleDetails(ruleId)),
+    [services.http.basePath]
+  );
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
+      rule_tags: (props) => (
+        <EpisodeRuleTagsCell {...props} rulesCache={rulesCache} isLoadingRules={isLoadingRules} />
+      ),
       'rule.id': (props) => (
         <EpisodeRuleCell
           {...props}
           rulesCache={rulesCache}
           isLoadingRules={isLoadingRules}
           rowHeight={rowHeight}
+          getRuleDetailsHref={getRuleDetailsHref}
+          onRuleNameClick={openRuleFlyout}
+          sourceDataViewsByRule={sourceDataViewsByRule}
         />
       ),
       assignees: (props) => {
@@ -337,7 +476,23 @@ export const AlertEpisodesListPage = () => {
         );
       },
     }),
-    [rulesCache, isLoadingRules, rowHeight, services.userProfile]
+    [
+      rulesCache,
+      isLoadingRules,
+      rowHeight,
+      getRuleDetailsHref,
+      openRuleFlyout,
+      services.userProfile,
+      sourceDataViewsByRule,
+    ]
+  );
+
+  const episodesMenu = useMemo(
+    () =>
+      getEpisodesListMenu({
+        manageRulesHref: services.http.basePath.prepend(paths.ruleList),
+      }),
+    [services.http.basePath]
   );
 
   return (
@@ -351,30 +506,12 @@ export const AlertEpisodesListPage = () => {
         min-width: 0;
       `}
     >
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false} component="span">
-              {i18n.EPISODES_LIST_PAGE_TITLE}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <ExperimentalBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rightSideItems={[
-          <EuiButton
-            key="manage-rules"
-            color="text"
-            size="s"
-            iconType="gear"
-            href={services.http.basePath.prepend(paths.ruleList)}
-            data-test-subj="alertingV2EpisodesListManageRules"
-          >
-            {i18n.EPISODES_LIST_MANAGE_RULES}
-          </EuiButton>,
-        ]}
+      <AppHeader
+        sticky={false}
+        title={i18n.EPISODES_LIST_PAGE_TITLE}
+        badges={[experimentalBadge]}
+        spacing="bleed"
+        menu={episodesMenu}
       />
       <EuiSpacer size="m" />
 
@@ -416,47 +553,10 @@ export const AlertEpisodesListPage = () => {
           grow
           css={css`
             min-width: 0;
+            ${logicalCSS('min-height', `${MIN_TABLE_HEIGHT}px`)}
           `}
         >
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                margin-top: ${euiTheme.size.m};
-              `}
-            >
-              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
-                    <FormattedMessage
-                      id="xpack.alertingV2.episodes.itemCount"
-                      defaultMessage="Showing {filtered} of {total} {total, plural, one {alert} other {alerts}}"
-                      values={{
-                        filtered: <strong>{filteredAlertEpisodesCount}</strong>,
-                        total: <strong>{totalAlertEpisodesCount}</strong>,
-                      }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    |
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="eraser"
-                    disabled={!hasActiveFilters}
-                    onClick={handleClearFilters}
-                    data-test-subj="episodesFilterBar-resetFilters"
-                  >
-                    {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-
             <EuiFlexItem
               grow
               css={css`
@@ -476,39 +576,44 @@ export const AlertEpisodesListPage = () => {
                 ) : (
                   <UnifiedDataTable
                     ariaLabelledBy="alertingEpisodesTableAriaLabel"
-                    settings={ALERT_EPISODES_TABLE_SETTINGS}
+                    settings={settings}
                     css={getTableCss(euiTheme)}
                     gridStyleOverride={{
                       stripes: false,
                       cellPadding: 'l',
+                      header: 'shade',
                     }}
+                    rowLineHeightOverride={TABLE_ROW_LINE_HEIGHT}
                     dataView={dataView}
-                    columns={columns}
+                    columns={visibleColumns}
                     onSetColumns={onSetColumns}
                     canDragAndDropColumns
                     showTimeCol={!!dataView.timeFieldName}
                     customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
                     externalCustomRenderers={externalCustomRenderers}
                     rows={rows}
-                    totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
+                    totalHits={!episodesData?.length ? 0 : ALERT_EPISODES_LIST_PAGE_SIZE + 1}
                     loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
                     isPaginationEnabled
                     paginationMode="singlePage"
-                    sampleSizeState={PAGE_SIZE}
+                    sampleSizeState={ALERT_EPISODES_LIST_PAGE_SIZE}
                     isSortEnabled
                     sort={sort}
                     onSort={onSort}
+                    onResize={onResize}
                     rowHeightState={rowHeight}
                     onUpdateRowHeight={setRowHeight}
                     configRowHeight={rowHeight}
                     customBulkActions={customBulkActions}
+                    hideDefaultBulkActions
                     rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                     visibleRowLeadingControls={3}
                     enableComparisonMode={false}
                     services={services}
                     expandedDoc={expandedDoc}
-                    setExpandedDoc={setExpandedDoc}
+                    setExpandedDoc={expandDoc}
                     renderDocumentView={renderDocumentView}
+                    renderCustomToolbar={renderCustomToolbar}
                   />
                 )}
               </CellActionsProvider>
@@ -516,6 +621,23 @@ export const AlertEpisodesListPage = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {ruleIdToView ? (
+        <RuleSummaryFlyoutContainer
+          ruleId={ruleIdToView}
+          type="overlay"
+          onClose={closeRuleFlyout}
+          onEdit={(rule) => {
+            setRuleIdToView(null);
+            openEditFlyout(rule);
+          }}
+          onClone={(rule) => {
+            setRuleIdToView(null);
+            openCloneFlyout(rule);
+          }}
+        />
+      ) : null}
+      {composeFlyout}
+      {confirmationModal}
     </div>
   );
 };

@@ -81,7 +81,8 @@ export const useApplicationConnectionsTableColumns = ({
       width: '40px',
       align: 'right',
       isExpander: true,
-      render: ({ client }) => {
+      render: ({ client, connections }) => {
+        if (connections.length === 0) return null;
         const isOpen = expandedRows.has(client.id);
         return (
           <EuiToolTip
@@ -99,7 +100,7 @@ export const useApplicationConnectionsTableColumns = ({
                   ? labels.groupedColumns.collapseRowAriaLabel
                   : labels.groupedColumns.expandRowAriaLabel
               }
-              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
               onClick={() => onToggleExpand(client.id)}
             />
           </EuiToolTip>

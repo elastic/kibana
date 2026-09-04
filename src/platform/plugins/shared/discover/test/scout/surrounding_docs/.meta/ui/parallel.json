@@ -1,0 +1,441 @@
+{
+  "sha1": "a8d526687b909582740731e068f3491e77f4ae8f",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "75066322895708e-25b2b42030c54ba",
+      "title": "Setup surrounding docs tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "7d242f0d6878318-36e03d4985ea740",
+      "title": "Discover context - accessibility should tab from the Load link to the Columns control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_accessibility.spec.ts",
+        "line": 21,
+        "column": 45
+      }
+    },
+    {
+      "id": "855b1a917c90ac6-f8999ee310ebfdf",
+      "title": "Discover context - date_nanos custom timestamp displays predecessors - anchor - successors in right order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_date_nanos_custom.spec.ts",
+        "line": 32,
+        "column": 53
+      }
+    },
+    {
+      "id": "7d868cd36992c7f-b4663abcbac685f",
+      "title": "Discover context - date_nanos displays predecessors - anchor - successors in right order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_date_nanos.spec.ts",
+        "line": 29,
+        "column": 51
+      }
+    },
+    {
+      "id": "7d868cd36992c7f-05fb7425e05259b",
+      "title": "Discover context - date_nanos displays correctly when predecessors and successors are loaded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_date_nanos.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "33dc680e240f0bc-59cf5b9adcb2ea5",
+      "title": "Discover context - navigation from Discover should open context view with the same columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_discover_navigation.spec.ts",
+        "line": 44,
+        "column": 53
+      }
+    },
+    {
+      "id": "33dc680e240f0bc-d2842dcb8e3d6c1",
+      "title": "Discover context - navigation from Discover should open context view with selected document as anchor and allow selecting next anchor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_discover_navigation.spec.ts",
+        "line": 61,
+        "column": 47
+      }
+    },
+    {
+      "id": "33dc680e240f0bc-640d82206aa280b",
+      "title": "Discover context - navigation from Discover should open context view with filters disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_discover_navigation.spec.ts",
+        "line": 86,
+        "column": 7
+      }
+    },
+    {
+      "id": "33dc680e240f0bc-b8fce18b4faed35",
+      "title": "Discover context - navigation from Discover should navigate to doc view and back to discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_discover_navigation.spec.ts",
+        "line": 95,
+        "column": 81
+      }
+    },
+    {
+      "id": "33dc680e240f0bc-ae121ff5c0dfdb9",
+      "title": "Discover context - navigation from Discover should navigate to doc view from embeddable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_discover_navigation.spec.ts",
+        "line": 105,
+        "column": 49
+      }
+    },
+    {
+      "id": "823bb5314b66c7b-1eb504e79dabfd6",
+      "title": "Discover context - filters (basic) inclusive filter should be addable via expanded data grid rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
+        "line": 40,
+        "column": 23
+      }
+    },
+    {
+      "id": "823bb5314b66c7b-0cda6d01292c361",
+      "title": "Discover context - filters (basic) inclusive filter should be toggleable via the filter bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
+        "line": 53,
+        "column": 25
+      }
+    },
+    {
+      "id": "823bb5314b66c7b-61476eac8c8e6e6",
+      "title": "Discover context - filters (basic) should update data grid when a pinned filter is modified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "823bb5314b66c7b-f10bdb79e8f5207",
+      "title": "Discover context - filters (basic) should preserve filters when the page is refreshed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
+        "line": 90,
+        "column": 16
+      }
+    },
+    {
+      "id": "823bb5314b66c7b-caf5840264835bf",
+      "title": "Discover context - filters (basic) should update filters when navigating forward and backward in history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
+        "line": 126,
+        "column": 18
+      }
+    },
+    {
+      "id": "2abb03108f9a5a2-41735578fa8a599",
+      "title": "Discover context - back navigation should go back after loading more in context view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_navigation.spec.ts",
+        "line": 60,
+        "column": 22
+      }
+    },
+    {
+      "id": "2abb03108f9a5a2-552649e6024fe00",
+      "title": "Discover context - back navigation should go back to Discover with preserved state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_navigation.spec.ts",
+        "line": 69,
+        "column": 23
+      }
+    },
+    {
+      "id": "2abb03108f9a5a2-6be08197dc53bba",
+      "title": "Discover context - back navigation should go back to Discover with preserved state after page refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_navigation.spec.ts",
+        "line": 74,
+        "column": 5
+      }
+    },
+    {
+      "id": "2abb03108f9a5a2-ac98811fce9a863",
+      "title": "Discover context - back navigation should preserve state when navigating back after URL state changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_navigation.spec.ts",
+        "line": 79,
+        "column": 5
+      }
+    },
+    {
+      "id": "160fdae52727488-dc0344b1215c589",
+      "title": "Discover context - size settings should increase according to the context:step setting when clicking load newer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_size.spec.ts",
+        "line": 31,
+        "column": 64
+      }
+    },
+    {
+      "id": "160fdae52727488-54a874b4942f0ce",
+      "title": "Discover context - size settings should increase according to the context:step setting when clicking load older",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_size.spec.ts",
+        "line": 36,
+        "column": 13
+      }
+    },
+    {
+      "id": "ec0fe18338751e8-71337924280cc0e",
+      "title": "Discover tabs - navigation goes back to the last active tab when returning from Surrounding Docs page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/navigation.spec.ts",
+        "line": 25,
+        "column": 23
+      }
+    },
+    {
+      "id": "ec0fe18338751e8-ca1a4d5ac2c4cf9",
+      "title": "Discover tabs - navigation returns to the last active tab from Single Doc page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/navigation.spec.ts",
+        "line": 80,
+        "column": 20
+      }
+    },
+    {
+      "id": "ec0fe18338751e8-2fa468ec2b3afdd",
+      "title": "Discover tabs - navigation restores the latest tabs when returning via app navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/navigation.spec.ts",
+        "line": 108,
+        "column": 20
+      }
+    },
+    {
+      "id": "d7169ee3bc6bd51-7be94d09c2674e5",
+      "title": "Teardown surrounding docs tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
+      }
+    }
+  ]
+}

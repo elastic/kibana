@@ -3,20 +3,20 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-evals-weekly-llm-evals
-  description: 'Runs weekly LLM eval suites (fanout across all LiteLLM models)'
+  description: 'Runs weekly LLM eval suites (fanout across EIS/OpenRouter models)'
   links:
     - url: 'https://buildkite.com/elastic/kibana-evals-weekly-llm-evals'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
-  owner: 'group:obs-ai-team'
+  owner: 'group:nightshift-context-and-research-team'
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
       name: 'Kibana / Evals / Weekly LLM Evals'
-      description: 'Runs all @kbn/evals suites against all LiteLLM models on a weekly schedule'
+      description: 'Runs all @kbn/evals suites against weekly EIS/OpenRouter models on a weekly schedule'
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kbn-evals-notifications'
@@ -28,6 +28,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/evals/llm_evals.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/evals/llm_evals.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -39,7 +44,7 @@ spec:
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
-        obs-ai-team:
+        nightshift-context-and-research-team:
           access_level: MANAGE_BUILD_AND_READ
         security-generative_ai:
           access_level: MANAGE_BUILD_AND_READ
@@ -49,7 +54,7 @@ spec:
           access_level: READ_ONLY
       schedules:
         Weekly build:
-          cronline: 0 0 * * 1 GMT
+          cronline: 0 20 * * 6 GMT
           message: Weekly LLM Evals (all suites, all models)
           branch: main
       tags:

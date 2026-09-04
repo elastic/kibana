@@ -14,7 +14,9 @@ import processFunctionDefinition from './process_function_definition';
 
 export default function (directory) {
   function getTuple(directory, name) {
-    return [name, require(`../${directory}/${name}`)]; // eslint-disable-line import/no-dynamic-require
+    const fn = require(`../${directory}/${name}`); // eslint-disable-line import/no-dynamic-require
+    // interop for the transpiled `export default`
+    return [name, fn.__esModule ? fn.default : fn];
   }
 
   // Get a list of all files and use the filename as the object key

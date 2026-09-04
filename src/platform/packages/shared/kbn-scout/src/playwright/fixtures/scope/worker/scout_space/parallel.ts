@@ -8,6 +8,7 @@
  */
 
 import type { UiSettingValues } from '@kbn/kbn-client';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
 import { formatTime, isValidUTCDate } from '../../../../utils';
 import { coreWorkerFixtures } from '..';
 import type { ImportSavedObjects, ScoutSpaceParallelFixture, SpaceSolutionView } from '.';
@@ -26,7 +27,17 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         disabledFeatures: [],
       };
       await measurePerformanceAsync(log, `spaces.create('${spaceId}')`, async () => {
-        return kbnClient.spaces.create(spacePayload);
+        try {
+          await kbnClient.spaces.create(spacePayload);
+        } catch (error) {
+          // A retried create can 409 when an earlier attempt already created the space (a transient gateway error masked success during a Cloud boot); delete and recreate so the worker starts from a clean, known space.
+          if (error instanceof KbnClientRequesterError && error.status === 409) {
+            await kbnClient.spaces.delete(spaceId);
+            await kbnClient.spaces.create(spacePayload);
+          } else {
+            throw error;
+          }
+        }
       });
 
       // cache saved objects ids in space

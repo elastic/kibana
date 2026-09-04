@@ -22,6 +22,7 @@ export interface MaintenanceWindowClientFactoryOpts {
   savedObjectsService: SavedObjectsServiceStart;
   securityService: SecurityServiceStart;
   uiSettings: UiSettingsServiceStart;
+  notifyChange?: () => void;
 }
 
 export class MaintenanceWindowClientFactory {
@@ -30,6 +31,7 @@ export class MaintenanceWindowClientFactory {
   private savedObjectsService!: SavedObjectsServiceStart;
   private securityService!: SecurityServiceStart;
   private uiSettings!: UiSettingsServiceStart;
+  private notifyChange?: () => void;
 
   public initialize(options: MaintenanceWindowClientFactoryOpts) {
     if (this.isInitialized) {
@@ -40,6 +42,7 @@ export class MaintenanceWindowClientFactory {
     this.savedObjectsService = options.savedObjectsService;
     this.securityService = options.securityService;
     this.uiSettings = options.uiSettings;
+    this.notifyChange = options.notifyChange;
   }
 
   private getSoClient(request: KibanaRequest, withAuth: boolean): SavedObjectsClientContract {
@@ -60,6 +63,7 @@ export class MaintenanceWindowClientFactory {
       logger: this.logger,
       savedObjectsClient,
       uiSettings: uiSettingClient,
+      notifyChange: this.notifyChange,
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
         return user?.username ?? null;

@@ -93,14 +93,20 @@ export const ConfigureValuesQuery = ({
         updateEditorState({
           esql_query: query,
           field_name: result.column.name,
-          data_view_id: await getDataViewIdFromESQLQuery(query),
+          data_view_id: await getDataViewIdFromESQLQuery(query, { parentApi }),
         });
       } else {
         updatePreviewOptionsAndColumns([], result.columns);
         setESQLQueryValidation(false);
       }
     },
-    [esqlVariables, setESQLQueryValidation, updatePreviewOptionsAndColumns, updateEditorState]
+    [
+      esqlVariables,
+      parentApi,
+      setESQLQueryValidation,
+      updatePreviewOptionsAndColumns,
+      updateEditorState,
+    ]
   );
 
   // For edit mode, initialize the values preview

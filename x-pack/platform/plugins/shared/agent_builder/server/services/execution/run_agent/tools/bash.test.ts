@@ -6,6 +6,7 @@
  */
 
 import type { BashExecResult, IBashService } from '@kbn/agent-builder-server/runner';
+import { SAFEGUARD_TOKEN_COUNT } from '../bash/output_truncation';
 import { createBashTool } from './bash';
 
 describe('bash tool', () => {
@@ -29,5 +30,46 @@ describe('bash tool', () => {
       stderr: '',
       exit_code: 0,
     });
+  });
+
+  it('returns an error result when the command exits non-zero with stderr output', async () => {
+    const execResult: BashExecResult = {
+      stdout: 'partial\n',
+      stderr: 'boom\n',
+      exit_code: 2,
+    };
+    const exec = jest.fn<Promise<BashExecResult>, [string]>().mockResolvedValue(execResult);
+    const bashService = { exec } as unknown as IBashService;
+    const tool = createBashTool({ bashService });
+    const result = (await tool.handler({ command: 'do-it' }, {} as never)) as {
+      results: Array<{ type: string; data: { message: string; metadata: BashExecResult } }>;
+    };
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].type).toBe('error');
+    expect(result.results[0].data.message).toBe('Command exited with code 2');
+    expect(result.results[0].data.metadata).toEqual(execResult);
+  });
+
+  it('returns an other result when the command exits non-zero without stderr (e.g. grep no match)', async () => {
+    const exec = jest.fn<Promise<BashExecResult>, [string]>().mockResolvedValue({
+      stdout: '',
+      stderr: '',
+      exit_code: 1,
+    });
+    const bashService = { exec } as unknown as IBashService;
+    const tool = createBashTool({ bashService });
+    const result = (await tool.handler({ command: 'grep foo file' }, {} as never)) as {
+      results: Array<{ type: string; data: BashExecResult }>;
+    };
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].type).toBe('other');
+    expect(result.results[0].data.exit_code).toBe(1);
+  });
+
+  it('raises the tool-result length guardrail budget to cover its own worst case', () => {
+    const bashService = { exec: jest.fn() } as unknown as IBashService;
+    const tool = createBashTool({ bashService });
+    // stdout and stderr are each capped independently at SAFEGUARD_TOKEN_COUNT.
+    expect(tool.maxResultTokens).toBe(SAFEGUARD_TOKEN_COUNT * 2);
   });
 });

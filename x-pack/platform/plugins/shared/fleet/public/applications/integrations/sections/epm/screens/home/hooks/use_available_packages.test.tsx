@@ -49,9 +49,19 @@ jest.mock('./use_build_integrations_url', () => ({
   useBuildIntegrationsUrl: () => mockUseBuildIntegrationsUrl(),
 }));
 
+jest.mock('./apply_grouping', () => ({
+  applyGrouping: (params: any) => mockApplyGrouping(params),
+}));
+
+const mockExperimentalFeaturesServiceGet = jest.fn();
+const mockApplyGrouping = jest.fn();
+
 jest.mock('../../../../../services', () => ({
   doesPackageHaveIntegrations: (pkg: any) => {
     return pkg.policy_templates && pkg.policy_templates.length > 0;
+  },
+  ExperimentalFeaturesService: {
+    get: () => mockExperimentalFeaturesServiceGet(),
   },
 }));
 
@@ -164,6 +174,16 @@ describe('useAvailablePackages', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockExperimentalFeaturesServiceGet.mockReturnValue({
+      enableIntegrationCollectionTiles: false,
+    });
+
+    // Default: grouping pass is a no-op (returns all items as ungrouped, no collection cards)
+    mockApplyGrouping.mockImplementation(({ items }: any) => ({
+      collectionCards: [],
+      ungroupedItems: items,
+    }));
 
     mockUseAgentless.mockReturnValue({ isAgentlessEnabled: false });
     mockUseGetPackageVerificationKeyId.mockReturnValue({
@@ -719,6 +739,96 @@ describe('useAvailablePackages', () => {
 
       // allCards should contain all packages regardless of agentless filter
       expect(result.current.allCards).toHaveLength(2);
+    });
+  });
+
+  describe('collection tile grouping (enableIntegrationCollectionTiles)', () => {
+    const mockCollectionCard = {
+      id: 'collection:nginx',
+      name: 'nginx',
+      title: 'Nginx',
+      description: 'Nginx collection',
+      icons: [],
+      url: '/collection/nginx',
+      integration: '',
+      version: '',
+      categories: ['web'],
+      isCollectionCard: true,
+      groupMembers: [
+        { id: 'nginx-1.0.0', title: 'Nginx' },
+        { id: 'nginx_otel-1.0.0', title: 'Nginx OTel' },
+      ],
+    };
+
+    it('does not call applyGrouping when flag is off', () => {
+      mockExperimentalFeaturesServiceGet.mockReturnValue({
+        enableIntegrationCollectionTiles: false,
+      });
+
+      renderHook(() => useAvailablePackages({ prereleaseIntegrationsEnabled: false }));
+
+      expect(mockApplyGrouping).not.toHaveBeenCalled();
+    });
+
+    it('calls applyGrouping and emits collection cards when flag is on and enableCollectionGrouping is true', () => {
+      mockExperimentalFeaturesServiceGet.mockReturnValue({
+        enableIntegrationCollectionTiles: true,
+      });
+      mockApplyGrouping.mockReturnValue({
+        collectionCards: [mockCollectionCard],
+        ungroupedItems: [mockBasicPackage],
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({
+          prereleaseIntegrationsEnabled: false,
+          enableCollectionGrouping: true,
+        })
+      );
+
+      expect(mockApplyGrouping).toHaveBeenCalled();
+      // 1 collection card + 1 mapped ungrouped card
+      expect(result.current.allCards).toHaveLength(2);
+      const collectionCard = result.current.allCards.find((c) => c.isCollectionCard);
+      expect(collectionCard).toBeDefined();
+      expect(collectionCard?.name).toBe('nginx');
+    });
+
+    it('emits only normal cards when applyGrouping returns no collection cards', () => {
+      mockExperimentalFeaturesServiceGet.mockReturnValue({
+        enableIntegrationCollectionTiles: true,
+      });
+      // Grouping finds nothing to collapse
+      mockApplyGrouping.mockReturnValue({
+        collectionCards: [],
+        ungroupedItems: [mockBasicPackage],
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.allCards).toHaveLength(1);
+      expect(result.current.allCards.every((c) => !c.isCollectionCard)).toBe(true);
+    });
+
+    it('skips applyGrouping and emits individual cards when enableCollectionGrouping is false, even if flag is on', () => {
+      mockExperimentalFeaturesServiceGet.mockReturnValue({
+        enableIntegrationCollectionTiles: true,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({
+          prereleaseIntegrationsEnabled: false,
+          enableCollectionGrouping: false,
+        })
+      );
+
+      // applyGrouping should NOT be called — individual cards are used directly
+      expect(mockApplyGrouping).not.toHaveBeenCalled();
+      // The single package should appear as a normal card, not a collection
+      expect(result.current.allCards).toHaveLength(1);
+      expect(result.current.allCards[0].isCollectionCard).toBeFalsy();
     });
   });
 

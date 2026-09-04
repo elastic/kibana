@@ -25,16 +25,17 @@ const mockEnabledRuleResponse: RuleResponse = {
   enabled: true,
   metadata: {
     name: 'My CPU Alert',
+    version: 1,
     description: '',
     tags: [],
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
   query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-  createdBy: 'test-user',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'test-user',
-  updatedAt: '2026-01-01T00:00:00.000Z',
+  created_by: 'test-user',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_by: 'test-user',
+  updated_at: '2026-01-01T00:00:00.000Z',
 };
 
 const createWrapper = () => {
@@ -49,7 +50,8 @@ const createWrapper = () => {
 };
 
 describe('useToggleRuleEnabled', () => {
-  const mockUpdateRule = jest.fn();
+  const mockEnableRule = jest.fn();
+  const mockDisableRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddDanger = jest.fn();
 
@@ -60,7 +62,7 @@ describe('useToggleRuleEnabled', () => {
 
     mockUseService.mockImplementation((service: unknown) => {
       if (service === RulesApi) {
-        return { updateRule: mockUpdateRule } as any;
+        return { enableRule: mockEnableRule, disableRule: mockDisableRule } as any;
       }
       if (service === 'notifications') {
         return { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } } as any;
@@ -69,34 +71,36 @@ describe('useToggleRuleEnabled', () => {
     });
   });
 
-  it('should show an enabled toast with the rule name when enabling', async () => {
-    mockUpdateRule.mockResolvedValue(mockEnabledRuleResponse);
+  it('should enable the rule and show an enabled toast with the rule name', async () => {
+    mockEnableRule.mockResolvedValue(mockEnabledRuleResponse);
     const { result } = renderHook(() => useToggleRuleEnabled(), { wrapper: createWrapper() });
 
     result.current.mutate({ id: 'rule-1', enabled: true });
 
     await waitFor(() => {
-      expect(mockUpdateRule).toHaveBeenCalledWith('rule-1', { enabled: true });
+      expect(mockEnableRule).toHaveBeenCalledWith('rule-1');
+      expect(mockDisableRule).not.toHaveBeenCalled();
       expect(mockAddSuccess).toHaveBeenCalledWith('Rule "My CPU Alert" enabled');
       expect(mockAddDanger).not.toHaveBeenCalled();
     });
   });
 
-  it('should show a disabled toast with the rule name when disabling', async () => {
-    mockUpdateRule.mockResolvedValue({ ...mockEnabledRuleResponse, enabled: false });
+  it('should disable the rule and show a disabled toast with the rule name', async () => {
+    mockDisableRule.mockResolvedValue({ ...mockEnabledRuleResponse, enabled: false });
     const { result } = renderHook(() => useToggleRuleEnabled(), { wrapper: createWrapper() });
 
     result.current.mutate({ id: 'rule-1', enabled: false });
 
     await waitFor(() => {
-      expect(mockUpdateRule).toHaveBeenCalledWith('rule-1', { enabled: false });
+      expect(mockDisableRule).toHaveBeenCalledWith('rule-1');
+      expect(mockEnableRule).not.toHaveBeenCalled();
       expect(mockAddSuccess).toHaveBeenCalledWith('Rule "My CPU Alert" disabled');
       expect(mockAddDanger).not.toHaveBeenCalled();
     });
   });
 
   it('should show a danger toast when the toggle fails', async () => {
-    mockUpdateRule.mockRejectedValue(new Error('toggle failed'));
+    mockEnableRule.mockRejectedValue(new Error('toggle failed'));
     const { result } = renderHook(() => useToggleRuleEnabled(), { wrapper: createWrapper() });
 
     result.current.mutate({ id: 'rule-1', enabled: true });
@@ -105,5 +109,35 @@ describe('useToggleRuleEnabled', () => {
       expect(mockAddDanger).toHaveBeenCalledWith(expect.any(String));
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
+  });
+
+  it('stays in a loading state until the invalidated queries have refetched', async () => {
+    mockEnableRule.mockResolvedValue(mockEnabledRuleResponse);
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+    let resolveInvalidate: () => void = () => {};
+    const invalidatePromise = new Promise<void>((resolve) => {
+      resolveInvalidate = resolve;
+    });
+    jest.spyOn(queryClient, 'invalidateQueries').mockReturnValue(invalidatePromise);
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+    const { result } = renderHook(() => useToggleRuleEnabled(), { wrapper });
+
+    result.current.mutate({ id: 'rule-1', enabled: true });
+
+    // The success toast fires synchronously before invalidation is awaited, so once
+    // it has been called we know the mutation is now blocked on the invalidation promise.
+    await waitFor(() => expect(mockAddSuccess).toHaveBeenCalled());
+    expect(result.current.isLoading).toBe(true);
+
+    resolveInvalidate();
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
   });
 });

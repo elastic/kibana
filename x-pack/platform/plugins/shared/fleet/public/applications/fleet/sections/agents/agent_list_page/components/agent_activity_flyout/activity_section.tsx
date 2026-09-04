@@ -11,6 +11,7 @@ import { EuiText, EuiPanel, EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elasti
 
 import type { ActionStatus } from '../../../../../types';
 
+import { isScheduledAction } from './agent_activity_helper';
 import { UpgradeInProgressActivityItem } from './upgrade_in_progress_activity_item';
 import { UnenrollInProgressActivityItem } from './unenroll_in_progress_activity_item';
 import { ActivityItem } from './activity_item';
@@ -62,12 +63,7 @@ export const ActivitySection: React.FunctionComponent<{
         // is still active (start_time in the future). Once start_time has passed the
         // execute phase will have picked up the action, so cancellation is no longer
         // meaningful and we fall through to the standard activity item rendering.
-        if (
-          currentAction.type === 'UNENROLL' &&
-          currentAction.status === 'IN_PROGRESS' &&
-          currentAction.startTime &&
-          new Date(currentAction.startTime).getTime() > Date.now()
-        ) {
+        if (currentAction.type === 'UNENROLL' && isScheduledAction(currentAction)) {
           return (
             <UnenrollInProgressActivityItem
               action={currentAction}

@@ -21,6 +21,9 @@ export interface ActionRequestOptions extends RequestBasicOptions {
     order: SortOrder;
     field: string;
   };
+  ccsEnabled?: boolean;
+  /** Set by the search strategy only when the read fans out, and bounds it to the active space */
+  spaceId?: string;
 }
 
 export interface ActionRequestStrategyResponse extends IEsSearchResponse {

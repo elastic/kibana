@@ -6,77 +6,29 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
-import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
-import { MemoryServiceImpl } from '../lib/memory';
-import type { MemoryToolsOptions } from './tools/memory';
+
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderSkills } from './skills/register_skills';
-import { registerAgentBuilderAttachments } from './attachments/register_attachments';
-import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
-import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
-import { registerInvestigationAgents } from './agents/investigation';
-
-export const createMemoryToolsOptions = ({
-  getScopedClients,
-  server,
-  logger,
-}: {
-  getScopedClients: GetScopedClients;
-  server: StreamsServer;
-  logger: Logger;
-}): MemoryToolsOptions => {
-  const getMemoryService = (esClient: ElasticsearchClient) =>
-    new MemoryServiceImpl({
-      logger: logger.get('memory'),
-      esClient,
-    });
-
-  return {
-    getMemoryService,
-    getSecurity: () => server.core.security,
-    getScopedClients,
-    server,
-    logger,
-  };
-};
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
-  agentContextLayer,
   getScopedClients,
   server,
   logger,
   telemetry,
-  streamsKIsOnboardingClient,
-  investigationEnabled = false,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  agentContextLayer?: AgentContextLayerPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
-  investigationEnabled?: boolean;
 }): Promise<void> => {
-  const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
-
-  registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
-  registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerAgentBuilderSkills({
     agentBuilder,
-    telemetry,
-    streamsKIsOnboardingClient,
-    memoryToolsOptions,
   });
-  registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
-  if (investigationEnabled) {
-    registerInvestigationAgents(agentBuilder);
-  }
 };

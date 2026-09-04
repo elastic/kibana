@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const EVENT_DISPLAY_NAME = i18n.translate('xpack.securitySolution.cases.event.displayName', {
+  defaultMessage: 'Events',
+});
+
 export const DATA_VIEW_ERROR = i18n.translate('xpack.securitySolution.caseEvents.dataViewError', {
   defaultMessage: 'Data View Error',
 });
@@ -68,7 +72,7 @@ export const REMOVED_EVENTS_LABEL_TITLE = (eventCount: number) =>
     values: { eventCount },
   });
 
-export const DELETE_EVENTS_SUCCESS_TITLE = (totalEvents: number) =>
+export const DELETE_EVENTS_SUCCESS_TOAST = (totalEvents: number) =>
   i18n.translate('xpack.securitySolution.cases.eventAttachment.deleteEventsSuccessTitle', {
     defaultMessage:
       'Deleted {totalEvents, plural, =1 {one} other {{totalEvents}}} {totalEvents, plural, =1 {event} other {events}}',

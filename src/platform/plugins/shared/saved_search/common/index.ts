@@ -18,13 +18,10 @@ export type {
   SavedSearchByValueAttributes,
   DiscoverSession,
   DiscoverSessionTab,
+  DiscoverSessionTabTypeState,
 } from './types';
 
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-  PATTERN_LEVEL = 'patterns',
-}
+export { VIEW_MODE } from '@kbn/discover-utils';
 
 export {
   SavedSearchType,
@@ -35,6 +32,7 @@ export {
   MAX_DISCOVER_SESSION_COLUMNS,
   MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS,
   MAX_DISCOVER_SESSION_TABS,
+  MAX_METRICS_TAB_DIMENSIONS,
 } from './constants';
 
 export {

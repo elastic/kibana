@@ -1080,6 +1080,11 @@ exports[`buildOSSFeatures with a basic license returns the dashboard feature aug
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -1157,6 +1162,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
           "markdown",
           "query",
           "url",
@@ -1169,7 +1175,6 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
         ],
@@ -1187,6 +1192,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
@@ -1259,6 +1269,11 @@ exports[`buildOSSFeatures with a basic license returns the dashboard_v2 feature 
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -1304,6 +1319,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
           "markdown",
           "url",
           "search-session",
@@ -1315,7 +1331,6 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
         ],
@@ -1332,6 +1347,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
@@ -1937,6 +1957,11 @@ exports[`buildOSSFeatures with a basic license returns the visualize feature aug
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -2030,6 +2055,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "api": Array [
         "savedQuery:read",
       ],
@@ -2095,6 +2125,11 @@ exports[`buildOSSFeatures with a basic license returns the visualize_v2 feature 
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -2153,6 +2188,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "api": Array [],
       "app": Array [
         "visualize",
@@ -2239,6 +2279,11 @@ exports[`buildOSSFeatures with a enterprise license returns the dashboard featur
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -2316,6 +2361,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
           "markdown",
           "query",
           "url",
@@ -2328,7 +2374,6 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
         ],
@@ -2346,6 +2391,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
@@ -2418,6 +2468,11 @@ exports[`buildOSSFeatures with a enterprise license returns the dashboard_v2 fea
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -2463,6 +2518,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
           "markdown",
           "url",
           "search-session",
@@ -2474,7 +2530,6 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
         ],
@@ -2491,6 +2546,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
@@ -3096,6 +3156,11 @@ exports[`buildOSSFeatures with a enterprise license returns the visualize featur
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -3189,6 +3254,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "api": Array [
         "savedQuery:read",
       ],
@@ -3254,6 +3324,11 @@ exports[`buildOSSFeatures with a enterprise license returns the visualize_v2 fea
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -3312,6 +3387,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "api": Array [],
       "app": Array [
         "visualize",

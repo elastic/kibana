@@ -30,3 +30,7 @@ export const CLOUD_DEFEND_FLEET_PACKAGE_KUERY = `${PACKAGE_POLICY_SAVED_OBJECT_T
 
 export const DEFAULT_POLICIES_PER_PAGE = 20;
 export const POLICIES_PACKAGE_POLICY_PREFIX = 'package_policy.';
+
+// String length ceilings (maxLength) for schema.string — DoS protection.
+// Policy name is a human-readable label; generic label ceiling.
+export const POLICY_NAME_MAX_LENGTH = 1024;

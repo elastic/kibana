@@ -1,5 +1,8 @@
 {
-  "sha1": "3d0589a2e9901c9fe7cbe46ca2e11343b5afd612",
+  "sha1": "680119ee494b57c9a0ebc66968be8339221b6b1b",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "afd8b26596cdd7f-5bb39416912e9b9",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/add_data.spec.ts",
-        "line": 14,
-        "column": 7
+        "line": 13,
+        "column": 14
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 17,
-        "column": 7
+        "line": 16,
+        "column": 24
       }
     },
     {
@@ -39,7 +42,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 43,
+        "line": 40,
         "column": 7
       }
     },
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/home_a11y.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 19,
+        "column": 16
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/home_a11y.spec.ts",
-        "line": 37,
-        "column": 7
+        "line": 29,
+        "column": 8
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/navigation.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 18,
+        "column": 70
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/navigation.spec.ts",
-        "line": 36,
-        "column": 7
+        "line": 26,
+        "column": 84
       }
     },
     {
@@ -108,8 +111,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/sample_data_install.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 46,
+        "column": 18
       }
     },
     {
@@ -122,8 +125,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/sample_data.spec.ts",
-        "line": 38,
-        "column": 7
+        "line": 32,
+        "column": 5
       }
     },
     {
@@ -136,8 +139,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/sample_data.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 38,
+        "column": 8
       }
     },
     {
@@ -150,8 +153,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/sample_data.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 46,
+        "column": 78
       }
     }
   ]

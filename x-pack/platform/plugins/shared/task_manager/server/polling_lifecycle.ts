@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { Subject, withLatestFrom, BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, startWith } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { Subject, withLatestFrom, BehaviorSubject, combineLatest } from 'rxjs';
+import { distinctUntilChanged, startWith, pairwise, map as rxMap, share, scan } from 'rxjs';
 import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
@@ -18,10 +18,7 @@ import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import type { TaskManagerConfig } from './config';
-import {
-  CLAIM_STRATEGY_UPDATE_BY_QUERY,
-  WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS,
-} from './config';
+import { WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS } from './config';
 
 import type {
   TaskMarkRunning,
@@ -31,11 +28,13 @@ import type {
   TaskPollingCycle,
   TaskManagerStat,
   TaskManagerMetric,
+  TaskManagerBackpressure,
 } from './task_events';
 import {
   asTaskRunRequestEvent,
   asTaskPollingCycleEvent,
   asTaskManagerStatEvent,
+  asTaskManagerBackpressureEvent,
 } from './task_events';
 import type { TimedFillPoolResult } from './lib/fill_pool';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
@@ -43,7 +42,7 @@ import type { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
-import { TaskPool } from './task_pool';
+import { TaskPool, TaskPoolRunResult } from './task_pool';
 import type { TaskRunner } from './task_running';
 import { TaskManagerRunner } from './task_running';
 import type { TaskStore } from './task_store';
@@ -51,7 +50,6 @@ import type { ApiKeyStrategy } from './api_key_strategy';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import type { TaskTypeDictionary } from './task_type_dictionary';
-import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import type { ClaimOwnershipResult } from './task_claimers';
 import type { TaskPartitioner } from './lib/task_partitioner';
@@ -61,8 +59,13 @@ import {
   createPollIntervalScan,
   countErrors,
   ADJUST_THROUGHPUT_INTERVAL,
+  BACKPRESSURE_HOLD_INTERVALS,
+  isBackpressureActive,
 } from './lib/create_managed_configuration';
+import type { BackpressureReason } from './lib/backpressure_reason';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
+import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
+import type { TaskExecutionControlService, TaskExecutionControlState } from './execution_control';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -77,6 +80,7 @@ export interface TaskPollingLifecycleOpts {
   config: TaskManagerConfig;
   middleware: Middleware;
   elasticsearchAndSOAvailability$: Observable<boolean>;
+  executionControlService: TaskExecutionControlService;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
@@ -93,7 +97,8 @@ export type TaskLifecycleEvent =
   | TaskRunRequest
   | TaskPollingCycle
   | TaskManagerStat
-  | TaskManagerMetric;
+  | TaskManagerMetric
+  | TaskManagerBackpressure;
 
 /**
  * The public interface into the task manager system.
@@ -109,6 +114,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private logger: Logger;
   private poller: TaskPoller<string, TimedFillPoolResult>;
   private started = false;
+  private stopped = false;
+  private readonly executionControlService: TaskExecutionControlService;
+  private executionControlSubscription?: Subscription;
+  private backpressureSubscription?: Subscription;
 
   public pool: TaskPool;
 
@@ -140,6 +149,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     config,
     // Elasticsearch and SavedObjects availability status
     elasticsearchAndSOAvailability$,
+    executionControlService,
     taskStore,
     definitions,
     executionContext,
@@ -158,12 +168,15 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.usageCounter = usageCounter;
     this.config = config;
     this.apiKeyStrategy = apiKeyStrategy;
+    this.executionControlService = executionControlService;
     this.enrichFakeRequest = enrichFakeRequest;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
 
-    const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
+    // `countErrors` is cold, so share it: the capacity scan, poll-interval scan,
+    // and reason tracker must all react to the same windowed error counts.
+    const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL).pipe(share());
     const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
     const tmUtilizationQueue = createRunningAveragedStat<number>(window);
     this.capacityConfiguration$ = errorCheck$.pipe(
@@ -182,6 +195,48 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     });
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
+
+    // Track windows since the last ES-pressure error (keeping the last cause) so
+    // `active` can be held across the sparse re-detections a cluster-block
+    // produces, rather than flapping with the raw config state.
+    const recentBackpressure$ = errorCheck$.pipe(
+      scan(
+        (
+          recent: { windowsSinceError: number; reason: BackpressureReason | null },
+          { count, reason }
+        ) =>
+          count > 0
+            ? { windowsSinceError: 0, reason: reason ?? recent.reason }
+            : {
+                windowsSinceError: Math.min(
+                  recent.windowsSinceError + 1,
+                  BACKPRESSURE_HOLD_INTERVALS
+                ),
+                reason: recent.reason,
+              },
+        { windowsSinceError: BACKPRESSURE_HOLD_INTERVALS, reason: null }
+      ),
+      startWith({ windowsSinceError: BACKPRESSURE_HOLD_INTERVALS, reason: null })
+    );
+
+    // `active` is the current managed-config state OR a recent ES-pressure error,
+    // so a sustained block reads as one period; distinctUntilChanged emits on change.
+    this.backpressureSubscription = combineLatest([
+      this.capacityConfiguration$,
+      this.pollIntervalConfiguration$,
+      recentBackpressure$,
+    ])
+      .pipe(
+        rxMap(([capacity, currentPollInterval, recent]) => {
+          const active =
+            isBackpressureActive(capacity, startingCapacity, currentPollInterval) ||
+            recent.windowsSinceError < BACKPRESSURE_HOLD_INTERVALS;
+          return { active, reason: active ? recent.reason : null };
+        }),
+        distinctUntilChanged((a, b) => a.active === b.active && a.reason === b.reason),
+        rxMap((snapshot) => asTaskManagerBackpressureEvent(asOk(snapshot)))
+      )
+      .subscribe(emitEvent);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: MAX_BUFFER_OPERATIONS,
@@ -205,26 +260,30 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       logger: this.logger,
       getAvailableCapacity: (taskType?: string) => this.pool.availableCapacity(taskType),
       taskPartitioner,
+      // Until the initial control-document read settles, the pause state is
+      // unknown, so treat execution as paused. This ensures a node that
+      // (re)starts while the cluster is paused does not claim tasks before the
+      // persisted state is known.
+      getExecutionControlState: () =>
+        this.executionControlService.isInitialized()
+          ? this.executionControlService.getState()
+          : { paused: true, pausedTaskTypes: [] },
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
 
-    let pollIntervalDelay$: Observable<number> | undefined;
-    if (claimStrategy === CLAIM_STRATEGY_UPDATE_BY_QUERY) {
-      pollIntervalDelay$ = delayOnClaimConflicts(
-        this.capacityConfiguration$,
-        this.pollIntervalConfiguration$,
-        this.events$,
-        config.version_conflict_threshold,
-        config.monitored_stats_running_average_window
-      ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
-    }
+    // React to runtime pause/resume transitions: when execution is paused,
+    // best-effort cancel the tasks that are already running so an overwhelmed
+    // cluster gets immediate relief. Using pairwise() means we only act on
+    // transitions, never on every poll of the unchanged state.
+    this.executionControlSubscription = this.executionControlService.state
+      .pipe(pairwise())
+      .subscribe(([previous, current]) => this.handleExecutionControlTransition(previous, current));
 
     this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
       initialPollInterval: pollInterval,
       pollInterval$: this.pollIntervalConfiguration$,
-      pollIntervalDelay$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
         if (!capacity) {
@@ -246,10 +305,64 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable && !this.started) {
-        this.poller.start();
+        // set synchronously so repeat availability emissions (e.g. ES
+        // reconnects) can never trigger a second reconciliation or poller start
         this.started = true;
+        // fire-and-forget: reconcileAndStartPolling never rejects (it handles
+        // its own errors) and starts the poller when it settles
+        void this.reconcileAndStartPolling();
       }
     });
+  }
+
+  private handleExecutionControlTransition(
+    previous: TaskExecutionControlState,
+    current: TaskExecutionControlState
+  ) {
+    if (!previous.paused && current.paused) {
+      this.logger.warn(
+        'Task Manager execution has been paused by an operator; task claiming is disabled and running tasks will be cancelled.'
+      );
+      this.pool.cancelRunningTasks();
+      return;
+    }
+
+    if (previous.paused && !current.paused) {
+      this.logger.info('Task Manager execution has been resumed by an operator.');
+    }
+
+    // When only the paused task types changed, cancel the newly-paused types.
+    const newlyPausedTypes = current.pausedTaskTypes.filter(
+      (type) => !previous.pausedTaskTypes.includes(type)
+    );
+    if (newlyPausedTypes.length) {
+      this.logger.warn(
+        `Task Manager execution has been paused by an operator for task types: ${newlyPausedTypes.join(
+          ', '
+        )}; running tasks of these types will be cancelled.`
+      );
+      this.pool.cancelRunningTasksByTypes(newlyPausedTypes);
+    }
+  }
+
+  /**
+   * Before the first poll, reset tasks this node still owns from a previous run
+   * (e.g. after a crash) so they don't wait out their retryAt timeout.
+   * Best-effort: the poller starts regardless of the outcome, and the retryAt
+   * timeout remains the safety net.
+   */
+  private async reconcileAndStartPolling() {
+    try {
+      await resetInFlightTasksOwnedByThisNode({ logger: this.logger, taskStore: this.store });
+    } catch (e) {
+      this.logger.error(
+        `Failed to reconcile in-flight tasks on startup, starting the poller anyway: ${e.message}`
+      );
+    } finally {
+      if (!this.stopped) {
+        this.poller.start();
+      }
+    }
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
@@ -257,6 +370,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   }
 
   public stop() {
+    this.stopped = true;
+    this.executionControlSubscription?.unsubscribe();
+    this.backpressureSubscription?.unsubscribe();
     this.poller.stop();
   }
 
@@ -275,14 +391,12 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       store: this.bufferedStore,
       definitions: this.definitions,
       beforeRun: this.middleware.beforeRun,
-      beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
       config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
-      strategy: this.config.claim_strategy,
       getPollInterval: () => this.currentPollInterval,
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
@@ -311,10 +425,26 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       this.createTaskRunnerForTask,
       // place tasks in the Task Pool
       async (tasks: TaskRunner[]) => {
+        const { paused, pausedTaskTypes } = this.executionControlService.getState();
+        // If a global pause landed after tasks were claimed in this cycle, don't
+        // start any of them; they idle out via retryAt and are reclaimed once resumed.
+        if (paused) {
+          this.logger.debug(
+            'Task Manager execution was paused mid-cycle; not running the tasks claimed in this cycle.'
+          );
+          return TaskPoolRunResult.NoTaskWereRan;
+        }
+        // Likewise, if specific task types were paused mid-cycle, don't start the
+        // tasks of those types that were already claimed in this cycle.
+        const pausedTypes = new Set(pausedTaskTypes);
         const tasksToRun = [];
         const removeTaskPromises = [];
         for (const task of tasks) {
-          if (task.isAdHocTaskAndOutOfAttempts) {
+          if (pausedTypes.has(task.taskType)) {
+            this.logger.debug(
+              `Not running claimed task ${task} because task type "${task.taskType}" was paused mid-cycle.`
+            );
+          } else if (task.isAdHocTaskAndOutOfAttempts) {
             this.logger.debug(`Removing ${task} because the max attempts have been reached.`);
             removeTaskPromises.push(task.removeTask());
           } else {

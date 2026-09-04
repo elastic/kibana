@@ -19,13 +19,18 @@ spec:
       description: Builds and publishes @kbn/one-console to Artifactory on each merge to main when console code changes
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-management'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kbn-ui-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/console_packaging_publish.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/console_packaging_publish.yml
+            cleanup_sparse_state: true
       skip_intermediate_builds: false
       provider_settings:
         build_branches: true

@@ -18,6 +18,7 @@ import {
   buildMockSetupDependenciesReturn,
   createFakeKibanaRequest,
   createMockLogger,
+  createMockStepExecutionRepository,
   createMockWorkflowExecutionEngineConfig,
   createMockWorkflowExecutionRepository,
   createMockWorkflowRuntime,
@@ -25,6 +26,7 @@ import {
 } from './execution_functions_test_utils';
 import { runWorkflow } from './run_workflow';
 import { setupDependencies } from './setup_dependencies';
+import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
@@ -32,6 +34,9 @@ import type { WorkflowExecutionState } from '../workflow_context_manager/workflo
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 jest.mock('./setup_dependencies');
+jest.mock('../concurrency/handle_queued_workflow_run_at_task_start', () => ({
+  handleQueuedWorkflowRunAtTaskStart: jest.fn().mockResolvedValue(false),
+}));
 jest.mock('../workflow_execution_loop', () => ({
   workflowExecutionLoop: jest.fn().mockResolvedValue(undefined),
 }));
@@ -50,6 +55,11 @@ const mockStartSpan = apm.startSpan as jest.Mock;
 
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
+const mockHandleQueuedWorkflowRunAtTaskStart =
+  handleQueuedWorkflowRunAtTaskStart as jest.MockedFunction<
+    typeof handleQueuedWorkflowRunAtTaskStart
+  >;
+
 describe('runWorkflow', () => {
   describe('wiring / spans / metering', () => {
     const workflowRunId = 'test-workflow-run-id';
@@ -63,6 +73,7 @@ describe('runWorkflow', () => {
     let taskAbortController: AbortController;
     let workflowRuntime: ReturnType<typeof createMockWorkflowRuntime>;
     let workflowExecutionRepository: ReturnType<typeof createMockWorkflowExecutionRepository>;
+    let stepExecutionRepository: ReturnType<typeof createMockStepExecutionRepository>;
     let mockGetWorkflowExecutionFromState: jest.Mock;
     const recordedSpans: Array<{ end: jest.Mock; setOutcome: jest.Mock }> = [];
 
@@ -83,7 +94,7 @@ describe('runWorkflow', () => {
       runWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController,
+        signal: taskAbortController.signal,
         logger,
         config: mockConfig,
         fakeRequest,
@@ -91,6 +102,8 @@ describe('runWorkflow', () => {
         workflowsExecutionEngine:
           overrides?.workflowsExecutionEngine ?? mockWorkflowExecutionEngine,
         meteringService: overrides?.meteringService,
+        workflowExecutionRepository: workflowExecutionRepository as any,
+        stepExecutionRepository,
       });
 
     beforeEach(() => {
@@ -111,6 +124,7 @@ describe('runWorkflow', () => {
 
       workflowRuntime = createMockWorkflowRuntime();
       workflowExecutionRepository = createMockWorkflowExecutionRepository();
+      stepExecutionRepository = createMockStepExecutionRepository();
 
       mockGetWorkflowExecutionFromState = jest.fn().mockImplementation(defaultRunningExecution);
 
@@ -135,6 +149,8 @@ describe('runWorkflow', () => {
           logger,
           mockConfig,
           dependencies,
+          workflowExecutionRepository,
+          stepExecutionRepository,
           fakeRequest,
           mockWorkflowExecutionEngine
         );
@@ -159,7 +175,7 @@ describe('runWorkflow', () => {
             workflowExecutionRepository,
             dependencies,
             fakeRequest,
-            taskAbortController,
+            signal: taskAbortController.signal,
           })
         );
       });
@@ -185,6 +201,10 @@ describe('runWorkflow', () => {
           isTestRun: false,
           workflowDefinition: { name: 'Test Workflow', steps: [] },
           triggeredBy: 'cases.caseCreated',
+          context: {
+            event: { caseId: 'case-1' },
+            metadata: { eventTriggerId: 'cases.caseCreated', eventId: 'evt-1' },
+          },
         });
         mockWorkflowExecutionEngine.triggerEvents.isEnabled = false;
 
@@ -279,6 +299,11 @@ describe('runWorkflow', () => {
         mockGetWorkflowExecutionFromState.mockReturnValue({
           ...baseExecution(),
           triggeredBy: 'cases.caseCreated',
+          context: {
+            event: { caseId: 'case-1' },
+            metadata: { eventTriggerId: 'cases.caseCreated', eventId: 'evt-1' },
+          },
+          metadata: { eventTriggerId: 'cases.caseCreated', eventId: 'evt-1' },
         });
         mockWorkflowExecutionEngine.triggerEvents.isEnabled = false;
 
@@ -304,8 +329,26 @@ describe('runWorkflow', () => {
         mockGetWorkflowExecutionFromState.mockReturnValue({
           ...baseExecution(),
           triggeredBy: 'cases.caseCreated',
+          context: {
+            event: { caseId: 'case-1' },
+            metadata: { eventTriggerId: 'cases.caseCreated', eventId: 'evt-1' },
+          },
         });
         mockWorkflowExecutionEngine.triggerEvents.isEnabled = true;
+
+        await runWorkflowWithDefaults();
+
+        expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+        expect(workflowRuntime.start).toHaveBeenCalled();
+        expect(mockWorkflowExecutionLoop).toHaveBeenCalled();
+      });
+
+      it('when custom provenance triggeredBy has no event evidence, continues even if trigger events are disabled', async () => {
+        mockGetWorkflowExecutionFromState.mockReturnValue({
+          ...baseExecution(),
+          triggeredBy: 'attack-discovery-pipeline',
+        });
+        mockWorkflowExecutionEngine.triggerEvents.isEnabled = false;
 
         await runWorkflowWithDefaults();
 
@@ -415,6 +458,38 @@ describe('runWorkflow', () => {
         expect(reportWorkflowExecution).not.toHaveBeenCalled();
       });
     });
+
+    describe('queued-at-start handling', () => {
+      it('returns shouldDeleteTask when the dormant queue run is handled at task start', async () => {
+        mockHandleQueuedWorkflowRunAtTaskStart.mockResolvedValueOnce(true);
+
+        const result = await runWorkflowWithDefaults();
+
+        expect(result).toEqual({ shouldDeleteTask: true });
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      });
+
+      it('reports metering once via handlePostExecutionLoop when queued run ends FAILED', async () => {
+        mockHandleQueuedWorkflowRunAtTaskStart.mockResolvedValueOnce(true);
+        const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+        const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
+        const failedExecution = {
+          id: workflowRunId,
+          workflowId: 'wf',
+          spaceId,
+          status: ExecutionStatus.FAILED,
+        };
+        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(failedExecution);
+
+        await runWorkflowWithDefaults({ meteringService });
+
+        expect(reportWorkflowExecution).toHaveBeenCalledTimes(1);
+        expect(reportWorkflowExecution).toHaveBeenCalledWith(
+          failedExecution,
+          dependencies.cloudSetup
+        );
+      });
+    });
   });
 
   describe('workflow_execution_failed event emission', () => {
@@ -429,6 +504,8 @@ describe('runWorkflow', () => {
     let mockGetWorkflowExecution: jest.Mock;
     let mockGetWorkflowExecutionFromState: jest.Mock;
     let mockRuntimeStart: jest.Mock;
+    const mockWorkflowExecutionRepositoryForEmit = createMockWorkflowExecutionRepository();
+    const mockStepExecutionRepositoryForEmit = createMockStepExecutionRepository();
 
     const mockWorkflowExecutionEngineLocal = workflowsExecutionEngineMock.createStart();
 
@@ -507,12 +584,14 @@ describe('runWorkflow', () => {
         runWorkflow({
           workflowRunId,
           spaceId,
-          taskAbortController: new AbortController(),
+          signal: new AbortController().signal,
           logger: logger as Logger,
           config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
+          workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForEmit,
         })
       ).rejects.toThrow('Step failed');
 
@@ -567,12 +646,14 @@ describe('runWorkflow', () => {
         runWorkflow({
           workflowRunId,
           spaceId,
-          taskAbortController: new AbortController(),
+          signal: new AbortController().signal,
           logger: logger as Logger,
           config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
+          workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForEmit,
         })
       ).rejects.toThrow('Runtime error');
 
@@ -591,15 +672,20 @@ describe('runWorkflow', () => {
       await runWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: logger as Logger,
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
         workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
+        workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+        stepExecutionRepository: mockStepExecutionRepositoryForEmit,
       });
 
-      expect(mockGetWorkflowExecutionById).toHaveBeenCalledWith(workflowRunId, spaceId);
+      expect(mockWorkflowExecutionRepositoryForEmit.getWorkflowExecutionById).toHaveBeenCalledWith(
+        workflowRunId,
+        spaceId
+      );
     });
 
     it('does not emit when execution status is not FAILED', async () => {
@@ -616,12 +702,14 @@ describe('runWorkflow', () => {
         runWorkflow({
           workflowRunId,
           spaceId,
-          taskAbortController: new AbortController(),
+          signal: new AbortController().signal,
           logger: logger as Logger,
           config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
+          workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForEmit,
         })
       ).rejects.toThrow('Step failed');
 
@@ -649,12 +737,14 @@ describe('runWorkflow', () => {
         runWorkflow({
           workflowRunId,
           spaceId,
-          taskAbortController: new AbortController(),
+          signal: new AbortController().signal,
           logger: logger as Logger,
           config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
+          workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForEmit,
         })
       ).rejects.toThrow('Step failed');
 
@@ -677,13 +767,15 @@ describe('runWorkflow', () => {
       await runWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: logger as Logger,
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
         workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
         meteringService: { reportWorkflowExecution } as any,
+        workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+        stepExecutionRepository: mockStepExecutionRepositoryForEmit,
       });
 
       expect(mockRuntimeStart).not.toHaveBeenCalled();

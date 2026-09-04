@@ -7,8 +7,8 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { LeadEntity, Observation, ObservationModule } from '../types';
-import { createLeadGenerationEngine } from './lead_generation_engine';
+import type { LeadEntity, Observation, ObservationModule, ScoredEntity } from '../types';
+import { createLeadGenerationEngine, computeCohortContext } from './lead_generation_engine';
 import { llmSynthesizeBatch } from './llm_synthesize';
 
 jest.mock('./llm_synthesize');
@@ -54,6 +54,17 @@ const createMockModule = (
     collect: collectFn,
   } as ObservationModule);
 
+/** Test helper: prepare all candidates then synthesize (sorted by priority). */
+const runEngine = async (
+  engine: ReturnType<typeof createLeadGenerationEngine>,
+  entities: LeadEntity[],
+  chatModel: InferenceChatModel
+) => {
+  const candidates = await engine.prepareLeadCandidates(entities);
+  const leads = await engine.synthesizeLeads(candidates, { chatModel });
+  return [...leads].sort((a, b) => b.priority - a.priority);
+};
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -67,9 +78,10 @@ describe('LeadGenerationEngine', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLlmSynthesizeBatch.mockImplementation(async (_model, groups) =>
-      groups.map(() => ({
+    mockLlmSynthesizeBatch.mockImplementation(async (_model, entities) =>
+      entities.map(() => ({
         title: 'LLM title',
+        byline: 'LLM byline',
         description: 'LLM description',
         tags: ['tag'],
         recommendations: ['recommendation'],
@@ -94,7 +106,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       // contribution = 0.35 × 100 × 1.0 = 35
       // no bonuses (single observation, single module)
@@ -121,7 +133,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs1, obs2]))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       // obs1 contribution = 0.35 × 80 × 0.9 = 25.2
       // obs2 contribution = 0.35 × 70 × 0.8 = 19.6
@@ -153,7 +165,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('behavioral_analysis', 0.3, jest.fn().mockResolvedValue([alertObs]))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       // risk contribution = 0.35 × 80 × 0.9 = 25.2
       // alert contribution = 0.30 × 70 × 0.85 = 17.85
@@ -191,7 +203,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('behavioral_analysis', 0.3, jest.fn().mockResolvedValue([alert]))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       // risk1 = 0.35 × 90 × 0.95 = 29.925
       // risk2 = 0.35 × 80 × 0.85 = 23.8
@@ -218,7 +230,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       // contribution = 0.35 × 20 × 0.6 = 4.2
       // normalized = (4.2 / 100) × 9 + 1 = 1.378 → round = 1
@@ -241,7 +253,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('risk_analysis', 0.5, jest.fn().mockResolvedValue(observations))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       // 5 × (0.5 × 100 × 1.0) = 250
       // corroboration: 250 × 1.15 = 287.5
@@ -263,7 +275,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       // contribution = 0.35 × 0 × 0.5 = 0
       // normalized = (0 / 100) × 9 + 1 = 1 → round = 1
@@ -284,7 +296,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       // contribution = 0.35 × 90 × 0 = 0
       // normalized = 1
@@ -304,7 +316,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('known_module', 0.35, jest.fn().mockResolvedValue([obs]))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       // obs.moduleId is 'unknown_module' which is not in moduleWeights
       // fallback weight = 1.0
@@ -336,7 +348,7 @@ describe('LeadGenerationEngine', () => {
       engine.registerModule(createMockModule('mod_a', 0.5, jest.fn().mockResolvedValue([obs1])));
       engine.registerModule(createMockModule('mod_b', 0.5, jest.fn().mockResolvedValue([obs2])));
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       // obs1 = 0.5 × 60 × 1.0 = 30
       // obs2 = 0.5 × 40 × 1.0 = 20
@@ -351,12 +363,12 @@ describe('LeadGenerationEngine', () => {
   // Orchestrator
   // -------------------------------------------------------------------------
 
-  describe('generateLeads', () => {
+  describe('prepareLeadCandidates + synthesizeLeads', () => {
     it('returns empty array for no entities', async () => {
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(createMockModule('m', 0.5, jest.fn().mockResolvedValue([])));
 
-      const leads = await engine.generateLeads([], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [], fakeChatModel);
       expect(leads).toEqual([]);
     });
 
@@ -365,7 +377,7 @@ describe('LeadGenerationEngine', () => {
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(createMockModule('m', 0.5, jest.fn().mockResolvedValue([])));
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
       expect(leads).toEqual([]);
     });
 
@@ -386,11 +398,11 @@ describe('LeadGenerationEngine', () => {
         createMockModule('mod', 0.5, jest.fn().mockResolvedValue([aliceObs1, aliceObs2, bobObs]))
       );
 
-      const leads = await engine.generateLeads([alice, bob], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [alice, bob], fakeChatModel);
 
       // Bob has only 1 observation, threshold is 2
       expect(leads).toHaveLength(1);
-      expect(leads[0].entities[0].name).toBe('alice');
+      expect(leads[0].entity.name).toBe('alice');
     });
 
     it('limits output to maxLeads', async () => {
@@ -404,7 +416,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('mod', 0.5, jest.fn().mockResolvedValue(observations))
       );
 
-      const leads = await engine.generateLeads(entities, { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, entities, fakeChatModel);
       expect(leads).toHaveLength(3);
     });
 
@@ -428,7 +440,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('mod', 0.35, jest.fn().mockResolvedValue([lowObs, highObs]))
       );
 
-      const leads = await engine.generateLeads([low, high], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [low, high], fakeChatModel);
       expect(leads.length).toBeGreaterThanOrEqual(2);
       expect(leads[0].priority).toBeGreaterThanOrEqual(leads[1].priority);
     });
@@ -443,7 +455,7 @@ describe('LeadGenerationEngine', () => {
       );
       engine.registerModule(createMockModule('working', 0.3, jest.fn().mockResolvedValue([obs])));
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       expect(leads).toHaveLength(1);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Module "failing" failed'));
@@ -463,7 +475,7 @@ describe('LeadGenerationEngine', () => {
       engine.registerModule(disabledModule);
       engine.registerModule(createMockModule('enabled', 0.3, jest.fn().mockResolvedValue([obs])));
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       expect(leads).toHaveLength(1);
       expect(disabledModule.collect).not.toHaveBeenCalled();
@@ -475,7 +487,7 @@ describe('LeadGenerationEngine', () => {
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(createMockModule('mod', 0.5, jest.fn().mockResolvedValue([obs])));
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       expect(leads[0].staleness).toBe('fresh');
     });
@@ -490,7 +502,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('behavioral_analysis', 0.3, jest.fn().mockResolvedValue([obs]))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       expect(leads[0].chatRecommendations.length).toBeGreaterThan(0);
     });
@@ -511,6 +523,7 @@ describe('LeadGenerationEngine', () => {
       mockLlmSynthesizeBatch.mockResolvedValueOnce([
         {
           title: 'LLM-generated title',
+          byline: 'alice accessed 2 unfamiliar hosts in the last 24h',
           description: 'LLM-generated description',
           tags: ['credential-access'],
           recommendations: ['Check recent logins for alice'],
@@ -522,15 +535,50 @@ describe('LeadGenerationEngine', () => {
         createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
       );
 
-      const leads = await engine.generateLeads([entity], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [entity], fakeChatModel);
 
       expect(mockLlmSynthesizeBatch).toHaveBeenCalledTimes(1);
-      expect(mockLlmSynthesizeBatch).toHaveBeenCalledWith(fakeChatModel, expect.any(Array), logger);
+      expect(mockLlmSynthesizeBatch).toHaveBeenCalledWith(
+        fakeChatModel,
+        expect.any(Array),
+        logger,
+        expect.objectContaining({ totalCandidates: expect.any(Number) })
+      );
       expect(leads).toHaveLength(1);
       expect(leads[0].title).toBe('LLM-generated title');
+      expect(leads[0].byline).toBe('alice accessed 2 unfamiliar hosts in the last 24h');
       expect(leads[0].description).toBe('LLM-generated description');
       expect(leads[0].tags).toEqual(['credential-access']);
       expect(leads[0].chatRecommendations).toEqual(['Check recent logins for alice']);
+    });
+
+    it('falls back to the templated byline when the LLM returns an empty byline', async () => {
+      const entity = createMockEntity('alice');
+      const obs = createMockObservation(entity, 'risk_analysis', {
+        score: 80,
+        confidence: 0.9,
+      });
+
+      mockLlmSynthesizeBatch.mockResolvedValueOnce([
+        {
+          title: 'LLM-generated title',
+          byline: '   ',
+          description: 'LLM-generated description',
+          tags: ['credential-access'],
+          recommendations: ['Check recent logins for alice'],
+        },
+      ]);
+
+      const engine = createLeadGenerationEngine({ logger });
+      engine.registerModule(
+        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
+      );
+
+      const leads = await runEngine(engine, [entity], fakeChatModel);
+
+      expect(leads).toHaveLength(1);
+      expect(leads[0].byline).toContain('alice');
+      expect(leads[0].byline).not.toBe('   ');
     });
 
     it('propagates LLM synthesis errors to the caller', async () => {
@@ -548,7 +596,7 @@ describe('LeadGenerationEngine', () => {
         createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
       );
 
-      await expect(engine.generateLeads([entity], { chatModel: fakeChatModel })).rejects.toThrow(
+      await expect(runEngine(engine, [entity], fakeChatModel)).rejects.toThrow(
         'LLM service unavailable'
       );
     });
@@ -569,12 +617,14 @@ describe('LeadGenerationEngine', () => {
       mockLlmSynthesizeBatch.mockResolvedValueOnce([
         {
           title: 'Alice threat',
+          byline: 'Alice byline',
           description: 'Alice analysis',
           tags: ['tag-alice'],
           recommendations: ['Investigate alice'],
         },
         {
           title: 'Bob threat',
+          byline: 'Bob byline',
           description: 'Bob analysis',
           tags: ['tag-bob'],
           recommendations: ['Investigate bob'],
@@ -586,13 +636,94 @@ describe('LeadGenerationEngine', () => {
         createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([aliceObs, bobObs]))
       );
 
-      const leads = await engine.generateLeads([alice, bob], { chatModel: fakeChatModel });
+      const leads = await runEngine(engine, [alice, bob], fakeChatModel);
 
       expect(mockLlmSynthesizeBatch).toHaveBeenCalledTimes(1);
       expect(leads).toHaveLength(2);
       const titles = leads.map((l) => l.title);
       expect(titles).toContain('Alice threat');
       expect(titles).toContain('Bob threat');
+    });
+
+    it('passes computed cohort context to the synthesis step', async () => {
+      const alice = createMockEntity('alice');
+      const bob = createMockEntity('bob');
+
+      const aliceObs = createMockObservation(alice, 'risk_analysis', {
+        type: 'risk_escalation_24h',
+        score: 90,
+      });
+      const bobObs = createMockObservation(bob, 'risk_analysis', {
+        type: 'risk_escalation_24h',
+        score: 80,
+      });
+
+      mockLlmSynthesizeBatch.mockResolvedValueOnce([
+        {
+          title: 'Alice',
+          byline: 'b',
+          description: 'd',
+          tags: ['t'],
+          recommendations: ['r'],
+        },
+        { title: 'Bob', byline: 'b', description: 'd', tags: ['t'], recommendations: ['r'] },
+      ]);
+
+      const engine = createLeadGenerationEngine({ logger });
+      engine.registerModule(
+        createMockModule('risk_analysis', 0.9, jest.fn().mockResolvedValue([aliceObs, bobObs]))
+      );
+
+      await runEngine(engine, [alice, bob], fakeChatModel);
+
+      const cohortArg = mockLlmSynthesizeBatch.mock.calls[0][3];
+      expect(cohortArg).toEqual({
+        totalCandidates: 2,
+        entityCountByObservationType: { risk_escalation_24h: 2 },
+      });
+    });
+  });
+});
+
+describe('computeCohortContext', () => {
+  const scored = (id: string, types: string[]): ScoredEntity => ({
+    entity: { id, type: 'user', name: id, record: {} as ScoredEntity['entity']['record'] },
+    priority: 5,
+    observations: types.map((type) => ({
+      entityId: id,
+      moduleId: 'm',
+      type,
+      score: 50,
+      severity: 'medium',
+      confidence: 0.7,
+      description: 'd',
+      metadata: {},
+    })),
+    topRelatedEntities: [],
+    relatedEntityCounts: {},
+  });
+
+  it('counts each entity once per observation type', () => {
+    const candidates: ScoredEntity[] = [
+      scored('user:a', ['risk_escalation_24h', 'risk_escalation_24h', 'ml_anomaly']),
+      scored('user:b', ['risk_escalation_24h']),
+      scored('user:c', ['governance_gap']),
+    ];
+
+    expect(computeCohortContext(candidates)).toEqual({
+      totalCandidates: 3,
+      entityCountByObservationType: {
+        risk_escalation_24h: 2,
+        ml_anomaly: 1,
+        governance_gap: 1,
+      },
+    });
+  });
+
+  it('returns zero candidates and no signals for an empty batch', () => {
+    expect(computeCohortContext([])).toEqual({
+      totalCandidates: 0,
+      entityCountByObservationType: {},
     });
   });
 });

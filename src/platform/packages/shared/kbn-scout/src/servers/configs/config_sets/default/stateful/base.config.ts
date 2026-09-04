@@ -131,6 +131,7 @@ export const defaultConfig: ScoutServerConfig = {
       `--data.search.aggs.shardDelay.enabled=true`,
       `--data.query.timefilter.minRefreshInterval=1000`,
       `--security.showInsecureClusterWarning=false`,
+      '--xpack.spaces.initialSolutionSetup.enabled=false',
       '--telemetry.banner=false',
       '--telemetry.optIn=false',
       // These are *very* important to have them pointing to staging
@@ -188,6 +189,7 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.security.session.idleTimeout=3600000', // 1 hour
       '--telemetry.optIn=true',
       '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
+      '--xpack.fleet.productVersionsApiTimeoutMs=5000',
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.cache.enabled=false',

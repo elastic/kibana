@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { SignalType } from '../../aws_service_matrix';
@@ -20,15 +20,22 @@ export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
   }),
 };
 
-const COLORS: Record<SignalType, string> = {
-  logs: 'primary',
-  metrics: 'success',
-};
-
 interface SignalTypeBadgeProps {
-  signalType: SignalType;
+  signalTypes: SignalType[];
 }
 
-export const SignalTypeBadge: React.FC<SignalTypeBadgeProps> = ({ signalType }) => (
-  <EuiBadge color={COLORS[signalType]}>{SIGNAL_TYPE_LABELS[signalType]}</EuiBadge>
-);
+export const SignalTypeBadge: React.FC<SignalTypeBadgeProps> = ({ signalTypes }) => {
+  if (signalTypes.length === 0) return null;
+  if (signalTypes.length === 1) {
+    return <EuiBadge color="hollow">{SIGNAL_TYPE_LABELS[signalTypes[0]]}</EuiBadge>;
+  }
+  return (
+    <EuiFlexGroup gutterSize="xs" wrap={false} responsive={false}>
+      {signalTypes.map((t) => (
+        <EuiFlexItem key={t} grow={false}>
+          <EuiBadge color="hollow">{SIGNAL_TYPE_LABELS[t]}</EuiBadge>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};

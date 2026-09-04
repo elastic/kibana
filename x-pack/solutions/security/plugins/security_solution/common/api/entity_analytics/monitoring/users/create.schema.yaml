@@ -9,8 +9,12 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: CreatePrivMonUser
+      deprecated: true
       summary: Create a new monitored user
-      description: Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+        Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
       requestBody:
         required: true
         content:

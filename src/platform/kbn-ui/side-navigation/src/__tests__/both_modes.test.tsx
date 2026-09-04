@@ -38,7 +38,6 @@ const appsItemId = observabilityMock.navItems.primaryItems[6].id;
 const infrastructureItemId = observabilityMock.navItems.primaryItems[7].id;
 const machineLearningItemId = observabilityMock.navItems.primaryItems[10].id;
 
-const logoId = `kbnChromeNav-logo`;
 const primaryItemId = (id: string) => `kbnChromeNav-primaryItem-${id}`;
 const secondaryItemId = (id: string) => `kbnChromeNav-secondaryItem-${id}`;
 const sidePanelId = /\bkbnChromeNav-sidePanel\b/;
@@ -72,48 +71,9 @@ describe('Both modes', () => {
   });
 
   it('should render the side navigation', () => {
-    const { container } = render(
-      <TestComponent items={basicMock.navItems} logo={basicMock.logo} />
-    );
+    const { container } = render(<TestComponent items={basicMock.navItems} />);
 
     expect(container).toMatchSnapshot();
-  });
-
-  describe('Solution logo', () => {
-    /**
-     * GIVEN the solution logo is displayed in the navigation
-     * WHEN I click the solution logo
-     * THEN I should be redirected to the solution’s homepage
-     */
-    it('should redirect to the solution homepage when clicked', () => {
-      render(<TestComponent items={basicMock.navItems} logo={basicMock.logo} />);
-
-      const solutionLogo = screen.getByTestId(logoId);
-      const expectedHref = basicMock.logo.href;
-
-      expect(solutionLogo).toHaveAttribute('href', expectedHref);
-
-      user.click(solutionLogo);
-    });
-
-    /**
-     * GIVEN the current page is the solution’s homepage
-     * WHEN the navigation renders
-     * THEN the solution logo is in an active state
-     */
-    it('should have active state if the initial active item is the homepage', () => {
-      render(
-        <TestComponent
-          items={basicMock.navItems}
-          logo={basicMock.logo}
-          initialActiveItemId={basicMock.logo.id}
-        />
-      );
-
-      const solutionLogo = screen.getByTestId(logoId);
-
-      expect(solutionLogo).toHaveAttribute('aria-current', 'page');
-    });
   });
 
   describe('Responsive mode', () => {
@@ -125,19 +85,13 @@ describe('Both modes', () => {
     it('should render in collapsed mode if the screen size is less than `s` (767px)', () => {
       restoreWindowSize = resizeWindow(640, 480);
 
-      render(
-        <TestComponent
-          items={basicMock.navItems}
-          logo={basicMock.logo}
-          initialActiveItemId={basicMock.logo.id}
-        />
-      );
+      render(<TestComponent items={basicMock.navItems} initialActiveItemId={dashboardsItemId} />);
 
-      const solutionLogo = screen.getByTestId(logoId);
+      const dashboardsLink = screen.getByTestId(primaryItemId(dashboardsItemId));
 
       // The label is wrapped with `<EuiScreenReaderOnly />` in collapsed mode
       // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
-      expect(solutionLogo.children[1].className).toContain('euiScreenReaderOnly');
+      expect(dashboardsLink.children[1].className).toContain('euiScreenReaderOnly');
     });
 
     /**
@@ -148,19 +102,13 @@ describe('Both modes', () => {
     it('should render in expanded mode if the screen size is more or equal to `s` (767px)', () => {
       restoreWindowSize = resizeWindow(1024, 768);
 
-      render(
-        <TestComponent
-          items={basicMock.navItems}
-          logo={basicMock.logo}
-          initialActiveItemId={basicMock.logo.id}
-        />
-      );
+      render(<TestComponent items={basicMock.navItems} initialActiveItemId={dashboardsItemId} />);
 
-      const solutionLogo = screen.getByTestId(logoId);
+      const dashboardsLink = screen.getByTestId(primaryItemId(dashboardsItemId));
 
       // The label is NOT wrapped with `<EuiScreenReaderOnly />` in expanded mode
       // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
-      expect(solutionLogo.children[1].className).not.toContain('euiScreenReaderOnly');
+      expect(dashboardsLink.children[1].className).not.toContain('euiScreenReaderOnly');
     });
   });
 
@@ -172,13 +120,7 @@ describe('Both modes', () => {
        * THEN this primary menu item is in an active state
        */
       it('should have active state if the initial active item is the primary menu item', () => {
-        render(
-          <TestComponent
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            initialActiveItemId={dashboardsItemId}
-          />
-        );
+        render(<TestComponent items={basicMock.navItems} initialActiveItemId={dashboardsItemId} />);
 
         const dashboardsLink = screen.getByTestId(primaryItemId(dashboardsItemId));
 
@@ -204,11 +146,7 @@ describe('Both modes', () => {
        */
       it('should have active state if the initial active item is the submenu item', async () => {
         render(
-          <TestComponent
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            initialActiveItemId={tlsCertificatesItemId}
-          />
+          <TestComponent items={basicMock.navItems} initialActiveItemId={tlsCertificatesItemId} />
         );
 
         const appsLink = screen.getByTestId(primaryItemId(basicMock.navItems.primaryItems[2].id));
@@ -233,13 +171,7 @@ describe('Both modes', () => {
        * THEN this primary menu item becomes active
        */
       it('(without submenu) should have active state after clicking on it', async () => {
-        render(
-          <TestComponent
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            initialActiveItemId={dashboardsItemId}
-          />
-        );
+        render(<TestComponent items={basicMock.navItems} initialActiveItemId={dashboardsItemId} />);
 
         const discoverLink = screen.getByTestId(primaryItemId('discover'));
 
@@ -262,13 +194,7 @@ describe('Both modes', () => {
        * AND the first item in the submenu is in an active state by default
        */
       it('(with submenu) should have active state after clicking on it, and a side panel should open', async () => {
-        render(
-          <TestComponent
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            initialActiveItemId={settingsItemId}
-          />
-        );
+        render(<TestComponent items={basicMock.navItems} initialActiveItemId={settingsItemId} />);
 
         const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
@@ -320,13 +246,7 @@ describe('Both modes', () => {
           ],
         };
 
-        render(
-          <TestComponent
-            items={modifiedNavItems}
-            logo={basicMock.logo}
-            initialActiveItemId="child_different_id"
-          />
-        );
+        render(<TestComponent items={modifiedNavItems} initialActiveItemId="child_different_id" />);
 
         const parentLink = screen.getByTestId(primaryItemId('parent_different_id'));
 
@@ -351,11 +271,7 @@ describe('Both modes', () => {
        */
       it('(with submenu) should still have active state after clicking on another submenu item', async () => {
         render(
-          <TestComponent
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            initialActiveItemId={tlsCertificatesItemId}
-          />
+          <TestComponent items={basicMock.navItems} initialActiveItemId={tlsCertificatesItemId} />
         );
 
         const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
@@ -407,7 +323,7 @@ describe('Both modes', () => {
           ],
         };
 
-        render(<TestComponent items={customNavItems} logo={basicMock.logo} />);
+        render(<TestComponent items={customNavItems} />);
 
         const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
         const analyticsLink = screen.getByTestId(primaryItemId('analytics'));
@@ -441,7 +357,6 @@ describe('Both modes', () => {
         render(
           <TestComponent
             items={elasticsearchMock.navItems}
-            logo={elasticsearchMock.logo}
             initialActiveItemId={dashboardsItemId}
           />
         );
@@ -485,7 +400,6 @@ describe('Both modes', () => {
         render(
           <TestComponent
             items={navigationWithTwelveItems.navItems}
-            logo={navigationWithTwelveItems.logo}
             initialActiveItemId={dashboardsItemId}
           />
         );
@@ -511,11 +425,7 @@ describe('Both modes', () => {
       it('should display a "More" menu item with a submenu when more than 12 exist', async () => {
         // Security mock has exactly 13 primary menu items
         render(
-          <TestComponent
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-            initialActiveItemId={dashboardsItemId}
-          />
+          <TestComponent items={securityMock.navItems} initialActiveItemId={dashboardsItemId} />
         );
 
         securityMock.navItems.primaryItems.slice(0, 11).forEach((item) => {
@@ -564,11 +474,7 @@ describe('Both modes', () => {
       it('should have persistent popover on hover out after the trigger was clicked', async () => {
         // Security mock has exactly 13 primary menu items
         render(
-          <TestComponent
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-            initialActiveItemId={dashboardsItemId}
-          />
+          <TestComponent items={securityMock.navItems} initialActiveItemId={dashboardsItemId} />
         );
 
         const moreButton = await screen.findByTestId(moreMenuId);
@@ -588,9 +494,9 @@ describe('Both modes', () => {
 
         expect(morePopover).toBeInTheDocument();
 
-        const solutionLogo = screen.getByTestId(logoId);
+        const dashboardsLink = screen.getByTestId(primaryItemId(dashboardsItemId));
 
-        await user.click(solutionLogo);
+        await user.click(dashboardsLink);
 
         // Popover has a delay on hover out so we need to await the assertion
         await waitFor(() => {
@@ -606,7 +512,7 @@ describe('Both modes', () => {
        */
       it('should not show another popover when the "More" popover is open', async () => {
         // Security mock has exactly 13 primary menu items
-        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+        render(<TestComponent items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -634,13 +540,7 @@ describe('Both modes', () => {
        */
       it('should show correct active states when active item is in "More" menu', async () => {
         // Security mock has exactly 13 primary menu items
-        render(
-          <TestComponent
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-            initialActiveItemId={mlItemId}
-          />
-        );
+        render(<TestComponent items={securityMock.navItems} initialActiveItemId={mlItemId} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -672,13 +572,7 @@ describe('Both modes', () => {
        * THEN this footer item is in an active state
        */
       it('should have active state if the initial active item is the footer item', () => {
-        render(
-          <TestComponent
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            initialActiveItemId={settingsItemId}
-          />
-        );
+        render(<TestComponent items={basicMock.navItems} initialActiveItemId={settingsItemId} />);
 
         const settingsLink = screen.getByTestId(footerItemId('integrations'));
 
@@ -694,11 +588,7 @@ describe('Both modes', () => {
        */
       it('should have active state if the initial active item is the footer submenu item', async () => {
         render(
-          <TestComponent
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            initialActiveItemId={advancedSettingsItemId}
-          />
+          <TestComponent items={basicMock.navItems} initialActiveItemId={advancedSettingsItemId} />
         );
 
         const settingsLink = screen.getByTestId(footerItemId('integrations'));
@@ -726,13 +616,7 @@ describe('Both modes', () => {
        * AND the first item in the submenu is in an active state by default
        */
       it('(with submenu) should have active state after clicking on it, and a side panel should open', async () => {
-        render(
-          <TestComponent
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            initialActiveItemId={settingsItemId}
-          />
-        );
+        render(<TestComponent items={basicMock.navItems} initialActiveItemId={settingsItemId} />);
 
         const settingsLink = screen.getByTestId(footerItemId('integrations'));
 
@@ -760,11 +644,7 @@ describe('Both modes', () => {
        */
       it('(with submenu) should still have active state after clicking on another submenu item', async () => {
         render(
-          <TestComponent
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            initialActiveItemId={advancedSettingsItemId}
-          />
+          <TestComponent items={basicMock.navItems} initialActiveItemId={advancedSettingsItemId} />
         );
 
         const settingsLink = screen.getByTestId(footerItemId('integrations'));
@@ -820,7 +700,7 @@ describe('Both modes', () => {
           ],
         };
 
-        render(<TestComponent items={customNavItems} logo={basicMock.logo} />);
+        render(<TestComponent items={customNavItems} />);
 
         const footer1Link = screen.getByTestId(footerItemId('footer1'));
         const footer2Link = screen.getByTestId(footerItemId('footer2'));
@@ -851,7 +731,7 @@ describe('Both modes', () => {
        */
       it('should display all existing footer items if fewer than 5 exist', () => {
         // Renders 4 footer items
-        render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
+        render(<TestComponent items={observabilityMock.navItems} />);
 
         const footer = screen.getByTestId(footerContainerId);
         const footerItems = within(footer).getAllByTestId(/^kbnChromeNav-footerItem-/);
@@ -866,7 +746,7 @@ describe('Both modes', () => {
        */
       it('should display all 5 footer items if exactly 5 exist', () => {
         // Renders 5 footer items
-        render(<TestComponent items={basicMock.navItems} logo={basicMock.logo} />);
+        render(<TestComponent items={basicMock.navItems} />);
 
         const footer = screen.getByTestId(footerContainerId);
         const footerItems = within(footer).getAllByTestId(/^kbnChromeNav-footerItem-/);
@@ -893,7 +773,7 @@ describe('Both modes', () => {
           ],
         };
 
-        render(<TestComponent items={navItemsWithSixFooterItems} logo={basicMock.logo} />);
+        render(<TestComponent items={navItemsWithSixFooterItems} />);
 
         const footer = screen.getByTestId(footerContainerId);
         const footerItems = within(footer).getAllByTestId(/^kbnChromeNav-footerItem-/);
@@ -910,7 +790,7 @@ describe('Both modes', () => {
        * AND a beta badge with beta icon
        */
       it('should render a tooltip with the item label and a beta badge with beta icon', async () => {
-        render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
+        render(<TestComponent items={observabilityMock.navItems} />);
 
         const footer = screen.getByTestId(footerContainerId);
 
@@ -937,7 +817,7 @@ describe('Both modes', () => {
        * AND a beta badge with flask icon
        */
       it('should render a tooltip with the item label and a beta badge with flask icon', async () => {
-        render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
+        render(<TestComponent items={observabilityMock.navItems} />);
 
         const gettingStartedLink = screen.getByTestId(footerItemId('developer_tools'));
 
@@ -961,7 +841,7 @@ describe('Both modes', () => {
        * AND a badge reading "New"
        */
       it('should render a tooltip with the item label and a beta badge reading "New"', async () => {
-        render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
+        render(<TestComponent items={observabilityMock.navItems} />);
 
         const whatsNewLink = screen.getByTestId(footerItemId('whats_new'));
 
@@ -989,11 +869,7 @@ describe('Both modes', () => {
        */
       it('should render a beta badge with beta icon next to the menu title', async () => {
         render(
-          <TestComponent
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-            initialActiveItemId={appsItemId}
-          />
+          <TestComponent items={observabilityMock.navItems} initialActiveItemId={appsItemId} />
         );
 
         const sidePanel = screen.getByTestId(sidePanelId);
@@ -1012,11 +888,7 @@ describe('Both modes', () => {
        */
       it('should render a beta badge with beta icon next to the menu item label', async () => {
         render(
-          <TestComponent
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-            initialActiveItemId={appsItemId}
-          />
+          <TestComponent items={observabilityMock.navItems} initialActiveItemId={appsItemId} />
         );
 
         const sidePanel = screen.getByTestId(sidePanelId);
@@ -1039,7 +911,6 @@ describe('Both modes', () => {
         render(
           <TestComponent
             items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
             initialActiveItemId={machineLearningItemId}
           />
         );
@@ -1064,7 +935,6 @@ describe('Both modes', () => {
         render(
           <TestComponent
             items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
             initialActiveItemId={infrastructureItemId}
           />
         );
@@ -1085,11 +955,7 @@ describe('Both modes', () => {
        */
       it('should render a beta badge reading "New" next to the menu title', async () => {
         render(
-          <TestComponent
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-            initialActiveItemId={detectionRulesItemId}
-          />
+          <TestComponent items={securityMock.navItems} initialActiveItemId={detectionRulesItemId} />
         );
 
         const sidePanel = screen.getByTestId(sidePanelId);
@@ -1107,13 +973,7 @@ describe('Both modes', () => {
        * THEN a beta badge reading "New" appears next to the menu item label
        */
       it('should render a beta badge reading "New" next to the menu item label', async () => {
-        render(
-          <TestComponent
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-            initialActiveItemId={alertsItemId}
-          />
-        );
+        render(<TestComponent items={securityMock.navItems} initialActiveItemId={alertsItemId} />);
 
         const sidePanel = screen.getByTestId(sidePanelId);
         const attacksLink = within(sidePanel).getByTestId(sidePanelItemId('attacks'));
@@ -1131,11 +991,7 @@ describe('Both modes', () => {
        */
       it('should render a popout icon next to the link text', async () => {
         render(
-          <TestComponent
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-            initialActiveItemId={appsItemId}
-          />
+          <TestComponent items={observabilityMock.navItems} initialActiveItemId={appsItemId} />
         );
 
         const sidePanel = screen.getByTestId(sidePanelId);
@@ -1152,17 +1008,162 @@ describe('Both modes', () => {
        */
       it('should open the link in a new tab', () => {
         render(
-          <TestComponent
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-            initialActiveItemId={appsItemId}
-          />
+          <TestComponent items={observabilityMock.navItems} initialActiveItemId={appsItemId} />
         );
 
         const sidePanel = screen.getByTestId(sidePanelId);
         const tracesLink = within(sidePanel).getByTestId(sidePanelItemId('traces'));
 
         expect(tracesLink).toHaveAttribute('target', '_blank');
+      });
+    });
+
+    describe('Custom secondary menu title', () => {
+      const longTitle =
+        'A very long custom secondary menu title that should still render fully in the header';
+
+      const customTitleNav = {
+        primaryItems: [
+          {
+            id: 'resource',
+            label: 'Resources',
+            iconType: 'apps',
+            href: '/resource/overview',
+            secondaryMenuTitle: longTitle,
+            sections: [
+              {
+                id: 'resource-section',
+                items: [
+                  { id: 'resource-overview', label: 'Overview', href: '/resource/overview' },
+                  { id: 'resource-settings', label: 'Settings', href: '/resource/settings' },
+                ],
+              },
+            ],
+          },
+        ],
+        overflowItems: [],
+        footerItems: [],
+      };
+
+      /**
+       * GIVEN a primary menu item defines a custom `secondaryMenuTitle`
+       * WHEN its side panel is open
+       * THEN the panel header shows the custom title instead of the item label
+       */
+      it('should render the custom title in the side panel header', () => {
+        render(<TestComponent items={customTitleNav} initialActiveItemId="resource-overview" />);
+
+        const sidePanel = screen.getByTestId(sidePanelId);
+
+        expect(within(sidePanel).getByRole('heading', { name: longTitle })).toBeInTheDocument();
+        expect(
+          within(sidePanel).queryByRole('heading', { name: 'Resources' })
+        ).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN a primary menu item defines a custom `secondaryMenuTitle`
+       * WHEN I hover the item to open its popover
+       * THEN the popover header shows the custom title instead of the item label
+       */
+      it('should render the custom title in the hover popover header', async () => {
+        render(<TestComponent items={customTitleNav} />);
+
+        const resourceLink = screen.getByTestId(primaryItemId('resource'));
+
+        await user.hover(resourceLink);
+        flushPopoverTimers();
+
+        const popover = await screen.findByTestId(popoverId('Resources'));
+
+        expect(within(popover).getByRole('heading', { name: longTitle })).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN a primary menu item does NOT define a custom `secondaryMenuTitle`
+       * WHEN its side panel is open
+       * THEN the panel header falls back to the item label
+       */
+      it('should fall back to the item label when no custom title is provided', () => {
+        render(
+          <TestComponent items={basicMock.navItems} initialActiveItemId={tlsCertificatesItemId} />
+        );
+
+        const sidePanel = screen.getByTestId(sidePanelId);
+
+        expect(within(sidePanel).getByRole('heading', { name: 'Apps' })).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN an overflow item (in the "More" menu) defines a custom `secondaryMenuTitle`
+       * WHEN I open its nested panel
+       * THEN the nested panel header shows the custom title instead of the item label
+       */
+      it('should render the custom title in the "More" nested panel header', async () => {
+        const overflowNav = {
+          primaryItems: [
+            {
+              id: 'dashboards',
+              label: 'Dashboards',
+              iconType: 'dashboardApp',
+              href: '/dashboards',
+            },
+          ],
+          footerItems: [],
+          overflowItems: [
+            {
+              id: 'resource',
+              label: 'Resources',
+              iconType: 'apps',
+              href: '/resource/overview',
+              secondaryMenuTitle: longTitle,
+              sections: [
+                {
+                  id: 'resource-section',
+                  items: [
+                    { id: 'resource-overview', label: 'Overview', href: '/resource/overview' },
+                  ],
+                },
+              ],
+            },
+          ],
+        };
+
+        render(<TestComponent items={overflowNav} />);
+
+        const moreButton = await screen.findByTestId(moreMenuId);
+
+        await user.click(moreButton);
+        flushPopoverTimers();
+
+        const popover = await screen.findByTestId(popoverId('More'));
+        const resourceTrigger = within(popover).getByTestId(secondaryItemId('resource'));
+
+        await user.click(resourceTrigger);
+        flushPopoverTimers();
+
+        expect(
+          await within(popover).findByRole('heading', { name: longTitle })
+        ).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN a primary menu item defines a custom `secondaryMenuTitle`
+       * WHEN I open its popover
+       * THEN the popover's accessible (screen-reader) label uses the custom title, not the item label
+       */
+      it('should use the custom title in the popover accessible label', async () => {
+        render(<TestComponent items={customTitleNav} />);
+
+        const resourceLink = screen.getByTestId(primaryItemId('resource'));
+
+        await user.hover(resourceLink);
+        flushPopoverTimers();
+
+        const popover = await screen.findByTestId(popoverId('Resources'));
+        const instructions = within(popover).getByText(/secondary menu dialog/i);
+
+        expect(instructions).toHaveTextContent(longTitle);
       });
     });
   });
@@ -1175,7 +1176,7 @@ describe('Both modes', () => {
        * THEN focus moves to the next or previous item in that menu, respectively
        */
       it('should move focus to the next or previous item in the menu when pressing Arrow Down or Arrow Up', async () => {
-        render(<TestComponent items={basicMock.navItems} logo={basicMock.logo} />);
+        render(<TestComponent items={basicMock.navItems} />);
 
         const primaryMenu = screen.getByTestId(primaryNavigationId);
         const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
@@ -1205,14 +1206,9 @@ describe('Both modes', () => {
        */
       it('should move focus through all navigable menus when pressing Tab', async () => {
         render(
-          <TestComponent
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-            initialActiveItemId={appsItemId}
-          />
+          <TestComponent items={observabilityMock.navItems} initialActiveItemId={appsItemId} />
         );
 
-        const solutionLogo = screen.getByTestId(logoId);
         const discoverLink = screen.getByTestId(primaryItemId('discover'));
         const gettingStartedLink = screen.getByTestId(footerItemId('getting_started'));
         const sidePanel = screen.getByTestId(sidePanelId);
@@ -1221,13 +1217,8 @@ describe('Both modes', () => {
         );
 
         act(() => {
-          solutionLogo.focus();
+          discoverLink.focus();
         });
-
-        expect(solutionLogo).toHaveFocus();
-
-        // Tab to primary menu - should land on first focusable item (Dashboards)
-        await user.tab();
 
         expect(discoverLink).toHaveFocus();
 
@@ -1249,15 +1240,10 @@ describe('Both modes', () => {
        * THEN focus moves to the first or last item in that menu, respectively
        */
       it('should move focus to the first or last item in the menu when pressing Home or End', async () => {
-        render(<TestComponent items={basicMock.navItems} logo={basicMock.logo} />);
+        render(<TestComponent items={basicMock.navItems} />);
 
-        const solutionLogo = screen.getByTestId(logoId);
         const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
         const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
-
-        await user.tab();
-
-        expect(solutionLogo).toHaveFocus();
 
         await user.tab();
 
@@ -1282,7 +1268,7 @@ describe('Both modes', () => {
        * AND does not leave it
        */
       it('should cycle focus through interactive elements in the popover when pressing Arrow Down or Arrow Up', async () => {
-        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+        render(<TestComponent items={securityMock.navItems} />);
 
         const assetsLink = screen.getByTestId(primaryItemId('assets'));
 
@@ -1334,7 +1320,7 @@ describe('Both modes', () => {
        * THEN focus moves to the first or last item in that popover, respectively
        */
       it('should move focus to the first or last item in the popover when pressing Home or End', async () => {
-        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+        render(<TestComponent items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -1375,7 +1361,7 @@ describe('Both modes', () => {
        * AND focus returns to the menu item that originally opened it
        */
       it('should return focus to the menu item that opened the popover when it is closed', async () => {
-        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+        render(<TestComponent items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -1405,7 +1391,7 @@ describe('Both modes', () => {
        * AND focus moves to the next primary menu or footer menu item
        */
       it('should move focus to the next primary menu or footer menu item when pressing Tab', async () => {
-        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+        render(<TestComponent items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -1439,7 +1425,7 @@ describe('Both modes', () => {
        * AND focus moves to the previous primary menu or footer menu item
        */
       it('should move focus to the previous primary menu or footer menu item when pressing Shift + Tab', async () => {
-        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+        render(<TestComponent items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -1475,7 +1461,7 @@ describe('Both modes', () => {
        * AND the "Go back" button receives focus
        */
       it('should focus the "Go back" button when opening a nested panel with Enter', async () => {
-        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+        render(<TestComponent items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -1509,7 +1495,7 @@ describe('Both modes', () => {
        * AND does not leave the panel
        */
       it('should keep focus within nested submenu items when using arrow keys', async () => {
-        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+        render(<TestComponent items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -1570,7 +1556,7 @@ describe('Both modes', () => {
        * AND focus returns to the menu item that opened it
        */
       it('should return focus to the trigger that opened the nested panel when activating the "Go back" button', async () => {
-        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+        render(<TestComponent items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -1604,7 +1590,7 @@ describe('Both modes', () => {
 
       // https://github.com/elastic/kibana/issues/239726
       it('does NOT close the popover when onBlur has relatedTarget === null (Safari quirk)', async () => {
-        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+        render(<TestComponent items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
         act(() => {
@@ -1640,7 +1626,7 @@ describe('Both modes', () => {
      * THEN a new indicator should appear next to the menu item
      */
     it('should show a new indicator next to the new primary menu item', () => {
-      render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
+      render(<TestComponent items={observabilityMock.navItems} />);
 
       const alertsItem = screen.getByTestId(primaryItemId('alerts'));
       expect(alertsItem.querySelector('[data-euiicon-type="dot"]')).toBeInTheDocument();
@@ -1652,7 +1638,7 @@ describe('Both modes', () => {
      * THEN a new indicator should appear next to the menu item
      */
     it('should show a new indicator next to the new footer menu item', () => {
-      render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
+      render(<TestComponent items={observabilityMock.navItems} />);
 
       const whatsNewItem = screen.getByTestId(footerItemId('whats_new'));
       expect(
@@ -1666,7 +1652,7 @@ describe('Both modes', () => {
      * THEN a new indicator should appear next to its primary parent item
      */
     it('should show a new indicator next to the new secondary menu item', async () => {
-      render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+      render(<TestComponent items={securityMock.navItems} />);
 
       const alertsLink = screen.getByTestId(primaryItemId('alerts'));
       expect(alertsLink.querySelector('[data-euiicon-type="dot"]')).toBeInTheDocument();
@@ -1679,7 +1665,7 @@ describe('Both modes', () => {
      * THEN the new indicator should disappear
      */
     it('should remove new indicator after visiting a new primary item and navigating away from it', async () => {
-      render(<TestComponent items={elasticsearchMock.navItems} logo={elasticsearchMock.logo} />);
+      render(<TestComponent items={elasticsearchMock.navItems} />);
 
       const webCrawlersItem = screen.getByTestId(primaryItemId('web_crawlers'));
 
@@ -1703,7 +1689,7 @@ describe('Both modes', () => {
      * THEN the new indicator should disappear
      */
     it('should remove new indicator after visiting two new secondary items and navigating away from them', async () => {
-      render(<TestComponent items={elasticsearchMock.navItems} logo={elasticsearchMock.logo} />);
+      render(<TestComponent items={elasticsearchMock.navItems} />);
 
       const performanceItem = screen.getByTestId(footerItemId('project-settings'));
 

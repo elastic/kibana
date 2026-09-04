@@ -21,6 +21,7 @@ import type {
   FillStyle,
   YAxisConfig,
   PointVisibility,
+  AreaFillOption,
 } from '@kbn/expression-xy-plugin/common';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type {
@@ -147,6 +148,7 @@ export interface XYVisualizationState {
   labelsOrientation?: LabelsOrientationConfig;
   curveType?: XYCurveType;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   minBarHeight?: number;
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;

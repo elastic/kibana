@@ -6,8 +6,10 @@
  */
 
 import { stringify as yamlStringify } from 'yaml';
+import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CustomFieldsConfiguration, CaseCustomFields } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CustomFieldTypes, CaseStatuses } from '../../../common/types/domain';
 import type { CasesSearchRequest } from '../../../common/types/api';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import {
@@ -16,9 +18,14 @@ import {
   validateRequiredCustomFields,
   validateSearchCasesCustomFields,
   validateExtendedFieldsInRequest,
+  validateExtendedFieldsOnClose,
+  validateCaseExtendedFields,
+  resolveTemplateFieldsForClose,
+  resolveGlobalFieldsWithoutStaleMirrorRequired,
 } from './validators';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
+import type { FieldDefinitionsService } from '../../services/field_definitions';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 
 describe('validators', () => {
@@ -703,6 +710,7 @@ describe('validators', () => {
       ({
         id: 'case-1',
         attributes: {
+          owner: 'securitySolution',
           template: templateId ? { id: templateId, version: 1 } : null,
         },
       } as unknown as CaseSavedObjectTransformed);
@@ -747,10 +755,14 @@ describe('validators', () => {
     });
 
     let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
 
     beforeEach(() => {
       templatesService = {
         getTemplate: jest.fn().mockResolvedValue(simpleTemplateSO),
+      };
+      fieldDefinitionsService = {
+        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [] }),
       };
     });
 
@@ -760,6 +772,7 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1' },
           originalCase: makeOriginalCase('tpl-1'),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).resolves.toBeUndefined();
@@ -771,6 +784,7 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
           originalCase: makeOriginalCase(), // no template
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([{ name: 'summary', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
@@ -782,10 +796,11 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
           originalCase: makeOriginalCase(), // no template, no global defs
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow(
-        'extended_fields keys [summary_as_keyword] are not global (isGlobal) field definitions'
+        'Invalid extended_fields: Unknown extended field key: "summary_as_keyword". No fields are available for this case'
       );
     });
 
@@ -802,6 +817,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow('Template missing-tpl not found');
@@ -818,6 +834,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).resolves.toBeUndefined();
@@ -850,6 +867,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow('Invalid extended_fields: Field "Summary" is required');
@@ -879,6 +897,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-1'),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([{ name: 'my_global_field', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
@@ -910,6 +929,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow('Template tpl-1 has an invalid definition');
@@ -926,10 +946,11 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow(
-        'extended_fields keys [summary_as_keyword] are not global (isGlobal) field definitions'
+        'Invalid extended_fields: Unknown extended field key: "summary_as_keyword". No fields are available for this case'
       );
 
       expect(templatesService.getTemplate).not.toHaveBeenCalled();
@@ -946,6 +967,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([{ name: 'summary', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
@@ -963,11 +985,14 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).resolves.toBeUndefined();
 
-      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-from-original');
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-from-original', undefined, {
+        includeDeleted: true,
+      });
     });
 
     it('allows global field keys alongside template fields when template is set', async () => {
@@ -984,6 +1009,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([{ name: 'global_tag', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
@@ -1001,6 +1027,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(), // no template
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([
             { name: 'summary', type: 'keyword', label: 'Summary', validation: { required: true } },
           ]),
@@ -1023,6 +1050,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([
             {
               name: 'global_required',
@@ -1045,11 +1073,701 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(), // no template
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([
             { name: 'summary', type: 'keyword', label: 'Summary', validation: { required: true } },
           ]),
         })
       ).resolves.toBeUndefined();
+    });
+
+    it('does not throw when a template $refs a required global field and its value is sent (partial update)', async () => {
+      // The template resolves the $ref'd global field (required: true), but the value is
+      // stored under the GLOBAL key — the template pass must not re-check it as absent.
+      const requiredGlobalDef = {
+        fieldDefinitionId: 'fd-my_new_field',
+        name: 'my_new_field',
+        owner: 'cases',
+        definition: yamlStringify({
+          name: 'my_new_field',
+          label: 'My new Field',
+          type: 'keyword',
+          control: 'INPUT_TEXT',
+          validation: { required: true },
+        }),
+      };
+      templatesService.getTemplate.mockResolvedValue(
+        makeTemplatesSO({ fields: [{ $ref: 'my_new_field' }] })
+      );
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [requiredGlobalDef],
+        total: 1,
+      });
+
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: { my_new_field_as_keyword: 'a value' },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalFields: makeGlobalFields([
+            {
+              name: 'my_new_field',
+              type: 'keyword',
+              label: 'My new Field',
+              validation: { required: true },
+            },
+          ]),
+        })
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('validateCaseExtendedFields', () => {
+    /**
+     * Covers the create path (partial: false), mirroring how `create.ts` calls it with
+     * `preResolvedTemplateFields` from server-side template expansion.
+     *
+     * Regression scenario: v1→v2 migration marks every field definition `isGlobal: true` and
+     * emits `$ref` template entries for each legacy template custom field, so a migrated
+     * template always references required global fields. The submitted value lives under the
+     * global key; the template validation pass must not treat it as a missing required value.
+     */
+    const requiredGlobalField = {
+      control: 'INPUT_TEXT',
+      name: 'my_new_field',
+      type: 'keyword',
+      label: 'My new Field',
+      validation: { required: true },
+    } as unknown as InlineField;
+
+    const templateOwnField = {
+      control: 'INPUT_TEXT',
+      name: 'summary',
+      type: 'keyword',
+      label: 'Summary',
+      validation: { required: true },
+    } as unknown as InlineField;
+
+    let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
+
+    beforeEach(() => {
+      templatesService = { getTemplate: jest.fn() };
+      fieldDefinitionsService = {
+        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [] }),
+      };
+    });
+
+    const validate = (
+      extendedFields: Record<string, string>,
+      preResolvedTemplateFields: InlineField[]
+    ) =>
+      validateCaseExtendedFields({
+        extendedFields,
+        templateId: 'tpl-1',
+        globalFields: [requiredGlobalField],
+        templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        owner: 'securitySolution',
+        preResolvedTemplateFields,
+      });
+
+    it('does not throw when a template $refs a required global field and its value is sent under the global key', async () => {
+      // preResolvedTemplateFields contains the $ref-resolved global field, as produced by
+      // resolveTemplateForCreate for a migrated template.
+      await expect(
+        validate({ my_new_field_as_keyword: 'some required text' }, [requiredGlobalField])
+      ).resolves.toBeUndefined();
+    });
+
+    it('throws when a required global field $ref-ed by the template is empty', async () => {
+      await expect(
+        validate({ my_new_field_as_keyword: '' }, [requiredGlobalField])
+      ).rejects.toThrow('Invalid extended_fields: Field "My new Field" is required');
+    });
+
+    it('throws when a required global field is absent from a create request with a template', async () => {
+      // Non-partial mode: the global pass enforces required global fields even when the
+      // request carries no global keys at all.
+      await expect(validate({}, [requiredGlobalField])).rejects.toThrow(
+        'Invalid extended_fields: Field "My new Field" is required'
+      );
+    });
+
+    it('still enforces required template-specific fields alongside a filled global field', async () => {
+      await expect(
+        validate({ my_new_field_as_keyword: 'filled' }, [requiredGlobalField, templateOwnField])
+      ).rejects.toThrow('Invalid extended_fields: Field "Summary" is required');
+    });
+
+    it('does not throw when both the $ref-ed global field and the template-specific field are filled', async () => {
+      await expect(
+        validate({ my_new_field_as_keyword: 'filled', summary_as_keyword: 'also filled' }, [
+          requiredGlobalField,
+          templateOwnField,
+        ])
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('validateExtendedFieldsOnClose', () => {
+    const makeGlobalFields = (
+      defs: Array<{
+        name: string;
+        type?: string;
+        label?: string;
+        validation?: Record<string, unknown>;
+      }> = []
+    ): InlineField[] =>
+      defs.map(({ name, type = 'keyword', label = name, validation }) => ({
+        control: 'INPUT_TEXT' as const,
+        name,
+        type,
+        label,
+        ...(validation ? { validation } : {}),
+      })) as unknown as InlineField[];
+
+    const makeTemplateField = (
+      def: Partial<{
+        name: string;
+        label: string;
+        type: string;
+        validation: Record<string, unknown>;
+      }> = {}
+    ): InlineField =>
+      ({
+        control: 'INPUT_TEXT' as const,
+        name: def.name ?? 'resolution',
+        type: def.type ?? 'keyword',
+        label: def.label ?? def.name ?? 'resolution',
+        ...(def.validation ? { validation: def.validation } : {}),
+      } as unknown as InlineField);
+
+    const requiredOnCloseField = makeTemplateField({
+      name: 'resolution',
+      label: 'Resolution',
+      validation: { required_on_close: true },
+    });
+
+    it('returns without error when status is not being set to closed', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.open,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('returns without error when case is already closed (no transition)', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.closed,
+          finalExtendedFields: {},
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('returns without error when the request does not set a status', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: undefined,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('returns without error when no template fields and no global required_on_close fields', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [],
+          globalFields: makeGlobalFields([{ name: 'notes', type: 'keyword' }]),
+        })
+      ).not.toThrow();
+    });
+
+    it('throws when closing and required_on_close field is missing from the final extended_fields', () => {
+      // FAILURE SCENARIO: user closes the case without filling the required_on_close field
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).toThrow('Cannot close case case-1, required fields must be filled');
+    });
+
+    it('error message includes the case ID', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'my-case-id',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).toThrow('Cannot close case my-case-id, required fields must be filled');
+    });
+
+    it('throws when closing and required_on_close field is empty string in the final map', () => {
+      // FAILURE SCENARIO: field was explicitly cleared before closing
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: { resolution_as_keyword: '' },
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).toThrow('Cannot close case case-1, required fields must be filled');
+    });
+
+    it('passes when closing and required_on_close field is filled in the final map', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: { resolution_as_keyword: 'Fixed the issue' },
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('does not consult any state outside the final map (deleted keys stay deleted)', () => {
+      // REGRESSION: the validator used to merge the original case's stored extended_fields
+      // under its input, resurrecting keys that pairing deliberately deleted (a linked field
+      // cleared via customFields). The final map is now the single source of truth — an absent
+      // key must read as empty regardless of what the case previously stored.
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          // Pairing removed resolution_as_keyword; the previously saved value must not leak in.
+          finalExtendedFields: { unrelated_as_keyword: 'kept' },
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).toThrow('Cannot close case case-1, required fields must be filled');
+    });
+
+    it('passes when no template fields are given (template cleared by caller)', () => {
+      // Caller passes [] when template is null — no template fields to enforce
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: { resolution_as_keyword: 'old value' },
+          templateFields: [],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('enforces required_on_close on global fields when closing', () => {
+      // FAILURE SCENARIO: global field has required_on_close but is not filled
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [],
+          globalFields: makeGlobalFields([
+            {
+              name: 'impact',
+              type: 'keyword',
+              label: 'Impact',
+              validation: { required_on_close: true },
+            },
+          ]),
+        })
+      ).toThrow('Cannot close case case-1, required fields must be filled');
+    });
+
+    it('does not enforce regular required fields (write-time concern only)', () => {
+      // A field with required:true but NOT required_on_close:true should not block closing
+      const regularRequiredField = makeTemplateField({
+        name: 'summary',
+        label: 'Summary',
+        validation: { required: true },
+      });
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [regularRequiredField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('does not enforce required_on_close on display-only (MARKDOWN) fields', () => {
+      // A display-only field holds no value and can never satisfy a required check — even if a
+      // template author mistakenly sets required_on_close, it must not block closure.
+      const markdownField = {
+        control: 'MARKDOWN' as const,
+        name: 'instructions',
+        label: 'Instructions',
+        type: 'keyword',
+        metadata: { content: 'Follow these steps.' },
+        validation: { required_on_close: true },
+      } as unknown as InlineField;
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [markdownField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('mentions a global required_on_close field once when the template also resolves the same key', () => {
+      // FAILURE SCENARIO (before fix): naive concat of global + template `$ref` listed the same
+      // field twice in the close error ("Field X is required; Field X is required").
+      const globalResolutionNotes = makeGlobalFields([
+        {
+          name: 'resolution_notes',
+          type: 'keyword',
+          label: 'Resolution notes',
+          validation: { required_on_close: true },
+        },
+      ]);
+      const templateRefToSameField = makeTemplateField({
+        name: 'resolution_notes',
+        label: 'Resolution notes',
+        validation: { required_on_close: true },
+      });
+
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [templateRefToSameField],
+          globalFields: globalResolutionNotes,
+        })
+      ).toThrow(
+        'Cannot close case case-1, required fields must be filled: Field "Resolution notes" is required'
+      );
+    });
+
+    it('ignores template required_on_close when a colliding global field is not required on close', () => {
+      // Global wins: template `$ref` override must not block close if the global definition
+      // does not set required_on_close.
+      const globalWithoutRequiredOnClose = makeGlobalFields([
+        {
+          name: 'resolution_notes',
+          type: 'keyword',
+          label: 'Resolution notes',
+        },
+      ]);
+      const templateRefRequiredOnClose = makeTemplateField({
+        name: 'resolution_notes',
+        label: 'Resolution notes',
+        validation: { required_on_close: true },
+      });
+
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [templateRefRequiredOnClose],
+          globalFields: globalWithoutRequiredOnClose,
+        })
+      ).not.toThrow();
+    });
+
+    it('lists distinct global and template required_on_close fields once each', () => {
+      const globalRequiredOnClose = makeGlobalFields([
+        {
+          name: 'resolution_notes',
+          type: 'keyword',
+          label: 'Resolution notes',
+          validation: { required_on_close: true },
+        },
+      ]);
+      const templateOnlyRequiredOnClose = makeTemplateField({
+        name: 'recovery_approach',
+        label: 'Recovery approach',
+        validation: { required_on_close: true },
+      });
+
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [templateOnlyRequiredOnClose],
+          globalFields: globalRequiredOnClose,
+        })
+      ).toThrow(
+        'Cannot close case case-1, required fields must be filled: Field "Resolution notes" is required; Field "Recovery approach" is required'
+      );
+    });
+  });
+
+  describe('resolveTemplateFieldsForClose', () => {
+    const makeTemplatesSO = (definition: object) => ({
+      id: 'so-id',
+      type: 'cases-templates',
+      references: [],
+      attributes: {
+        templateId: 'tpl-1',
+        name: 'Test Template',
+        owner: 'securitySolution',
+        definition: yamlStringify({ name: 'Test Template', fields: [], ...definition }),
+        templateVersion: 1,
+        deletedAt: null,
+        isLatest: true,
+      },
+    });
+
+    const templateWithRequiredOnClose = () =>
+      makeTemplatesSO({
+        fields: [
+          {
+            control: 'INPUT_TEXT',
+            name: 'resolution',
+            label: 'Resolution',
+            type: 'keyword',
+            validation: { required_on_close: true },
+          },
+        ],
+      });
+
+    let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
+    let logger: jest.Mocked<Logger>;
+
+    beforeEach(() => {
+      templatesService = {
+        getTemplate: jest.fn().mockResolvedValue(templateWithRequiredOnClose()),
+      };
+      fieldDefinitionsService = {
+        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [] }),
+      };
+      logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+    });
+
+    it('returns parsed inline fields from a valid template SO', async () => {
+      const fields = await resolveTemplateFieldsForClose({
+        templateId: 'tpl-1',
+        templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        logger,
+      });
+      expect(fields.length).toBeGreaterThan(0);
+      expect(fields[0].name).toBe('resolution');
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', undefined, {
+        includeDeleted: true,
+      });
+    });
+
+    it('passes templateVersion as string to getTemplate when provided', async () => {
+      await resolveTemplateFieldsForClose({
+        templateId: 'tpl-1',
+        templateVersion: 3,
+        templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        logger,
+      });
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', '3', {
+        includeDeleted: true,
+      });
+    });
+
+    it('returns [] when template is not found', async () => {
+      templatesService.getTemplate.mockResolvedValue(undefined);
+      const fields = await resolveTemplateFieldsForClose({
+        templateId: 'tpl-missing',
+        templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        logger,
+      });
+      expect(fields).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('returns [] and logs a warning when template definition is unparseable', async () => {
+      const invalidSO = makeTemplatesSO({});
+      templatesService.getTemplate.mockResolvedValue({
+        ...invalidSO,
+        attributes: { ...invalidSO.attributes, definition: '{invalid yaml: [unclosed' },
+      } as unknown as Awaited<ReturnType<TemplatesService['getTemplate']>>);
+
+      const fields = await resolveTemplateFieldsForClose({
+        templateId: 'tpl-1',
+        templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        logger,
+      });
+      expect(fields).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to parse template "tpl-1"')
+      );
+    });
+  });
+
+  describe('resolveGlobalFieldsWithoutStaleMirrorRequired', () => {
+    const makeDefinition = ({
+      name,
+      required = true,
+      legacyKey,
+      maxLength,
+    }: {
+      name: string;
+      required?: boolean;
+      legacyKey?: string;
+      maxLength?: number;
+    }) => ({
+      fieldDefinitionId: `fd-${name}`,
+      name,
+      owner: 'securitySolution',
+      isGlobal: true,
+      ...(legacyKey !== undefined ? { legacyKey } : {}),
+      definition: yamlStringify({
+        name,
+        type: 'keyword',
+        control: 'INPUT_TEXT',
+        label: name,
+        validation: {
+          ...(required ? { required: true } : {}),
+          ...(maxLength !== undefined ? { max_length: maxLength } : {}),
+        },
+      }),
+    });
+
+    const configuredField = (key: string): CustomFieldsConfiguration[number] => ({
+      key,
+      type: CustomFieldTypes.TEXT,
+      label: key,
+      required: true,
+    });
+
+    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
+
+    const mockDefinitions = (fieldDefinitions: Array<ReturnType<typeof makeDefinition>>) => {
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions,
+        total: fieldDefinitions.length,
+      });
+    };
+
+    const resolve = (customFieldsConfiguration?: CustomFieldsConfiguration) =>
+      resolveGlobalFieldsWithoutStaleMirrorRequired(
+        'securitySolution',
+        fieldDefinitionsService as unknown as FieldDefinitionsService,
+        customFieldsConfiguration
+      );
+
+    beforeEach(() => {
+      fieldDefinitionsService = {
+        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
+      };
+    });
+
+    it('requests only global definitions', async () => {
+      await resolve();
+
+      expect(fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledWith('securitySolution', {
+        isGlobal: true,
+      });
+    });
+
+    it('keeps required on a definition that mirrors a configured v1 custom field', async () => {
+      mockDefinitions([makeDefinition({ name: 'risk_score', legacyKey: 'risk_key' })]);
+
+      const fields = await resolve([configuredField('risk_key')]);
+
+      expect(fields[0].validation?.required).toBe(true);
+    });
+
+    it('drops required from a definition whose v1 custom field is no longer configured', async () => {
+      mockDefinitions([makeDefinition({ name: 'risk_score', legacyKey: 'risk_key' })]);
+
+      const fields = await resolve([configuredField('another_key')]);
+
+      expect(fields[0].validation?.required).toBeUndefined();
+    });
+
+    it('drops required from a mirror when the owner has no configuration at all', async () => {
+      mockDefinitions([makeDefinition({ name: 'risk_score', legacyKey: 'risk_key' })]);
+
+      const fields = await resolve();
+
+      expect(fields[0].validation?.required).toBeUndefined();
+    });
+
+    it('keeps required on a native global field with no v1 counterpart', async () => {
+      // No legacyKey — the field was created in the field library and owns its own flag, so an
+      // absent configuration says nothing about it.
+      mockDefinitions([makeDefinition({ name: 'risk_score' })]);
+
+      const fields = await resolve();
+
+      expect(fields[0].validation?.required).toBe(true);
+    });
+
+    it('keeps the remaining validation of a stale mirror intact', async () => {
+      mockDefinitions([
+        makeDefinition({ name: 'risk_score', legacyKey: 'risk_key', maxLength: 3 }),
+      ]);
+
+      const [field] = await resolve();
+
+      expect(field.validation).toEqual({ max_length: 3 });
+      expect(field.name).toBe('risk_score');
+    });
+
+    it('preserves definition order and skips malformed definitions', async () => {
+      mockDefinitions([
+        makeDefinition({ name: 'first', legacyKey: 'first_key' }),
+        { ...makeDefinition({ name: 'broken' }), definition: '{invalid yaml: [unclosed' },
+        makeDefinition({ name: 'second' }),
+      ]);
+
+      const fields = await resolve();
+
+      expect(fields.map((field) => field.name)).toEqual(['first', 'second']);
     });
   });
 });

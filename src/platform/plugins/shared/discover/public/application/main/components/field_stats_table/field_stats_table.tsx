@@ -39,6 +39,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
     hideAggregatedPreview,
     totalHits,
     updateState,
+    onFieldsCountChange,
   } = props;
 
   // If `_source` is in the columns, we should exclude it for Field Statistics
@@ -97,6 +98,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         isEsqlMode={isEsqlMode}
         overridableServices={overridableServices}
         timeRange={timeRange}
+        onFieldsCountChange={onFieldsCountChange}
       />
     </EuiFlexItem>
   );

@@ -18,6 +18,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
+  /**
+   * Purpose: Verify dashboard can be stared/unstarred from listing page and edit page
+   *
+   * Migration: Migrate to scout
+   */
   describe('favorites', function () {
     const USERNAME = 'dashboard_read_user';
     const ROLE = 'dashboard_read_role';

@@ -19,7 +19,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const config = getService('config');
 
-  describe('lens smokescreen tests', () => {
+  // Flaky on MKI (#kibana-serverless-test-alerts); keep local serverless coverage.
+  // Tracking: https://github.com/elastic/kibana/issues/282284
+  describe('lens smokescreen tests', function () {
+    this.tags(['skipMKI']);
+
     before(async () => {
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
@@ -410,6 +414,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
+      // Switching chart type re-applies the target type's empty-rows default, so
+      // the datatable turns "Include empty rows" back on. Turn it off again to
+      // assert the populated buckets only.
+      await PageObjects.lens.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger');
+      await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'uncheck');
+      await PageObjects.lens.closeDimensionEditor();
+
       expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql('Average of bytes');
@@ -665,7 +676,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'last_value',
         field: 'bytes',
         isPreviousIncompatible: true,
+        keepOpen: true,
       });
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Last value of bytes'

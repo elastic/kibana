@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   CoreSecurityDelegateContract,
   GrantUiamAPIKeyParams,
+  HTTPAuthorizationHeader,
   InvalidateUiamAPIKeyParams,
 } from '@kbn/core-security-server';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
@@ -31,7 +32,7 @@ export const buildSecurityApi = ({
   getAuthc: () => InternalAuthenticationServiceStart;
   getSession: () => Pick<Session, 'getSID'>;
   audit: AuditServiceSetup;
-  config: { uiam?: { enabled: boolean } };
+  config: { uiam?: { enabled: boolean }; serviceAccounts?: { enabled: boolean } };
   logger: Logger;
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
@@ -70,6 +71,8 @@ export const buildSecurityApi = ({
                 invalidateUiamApiKeyParams: InvalidateUiamAPIKeyParams
               ) => getAuthc().apiKeys.uiam!.invalidate(request, invalidateUiamApiKeyParams),
               convert: (keys: string[]) => getAuthc().apiKeys.uiam!.convert(keys),
+              getInternalCallerAttestationHeaders: (credential: HTTPAuthorizationHeader) =>
+                getAuthc().apiKeys.uiam!.getInternalCallerAttestationHeaders(credential),
             }
           : null,
       },
@@ -84,6 +87,9 @@ export const buildSecurityApi = ({
         includeSavedObjectNames: audit.withoutRequest.includeSavedObjectNames,
       },
     },
+    serviceAccounts: {
+      isEnabled: () => config.serviceAccounts?.enabled === true,
+    },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };
 };
@@ -95,6 +101,7 @@ export const buildUserProfileApi = ({
 }): CoreUserProfileDelegateContract => {
   return {
     getCurrent: (params) => getUserProfile().getCurrent(params),
+    getCurrentProfileId: (params) => getUserProfile().getCurrentProfileId(params),
     suggest: (params) => getUserProfile().suggest(params),
     bulkGet: (params) => getUserProfile().bulkGet(params),
     update: (uids, data) => getUserProfile().update(uids, data),

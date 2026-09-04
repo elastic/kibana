@@ -233,7 +233,7 @@ describe('createAddToNewTimelineCellAction', () => {
         },
       });
 
-      expect(mockDispatch).toBeCalledWith({
+      expect(mockDispatch).toHaveBeenCalledWith({
         ...defaultAddProviderAction,
         payload: {
           ...defaultAddProviderAction.payload,
@@ -271,7 +271,7 @@ describe('createAddToNewTimelineCellAction', () => {
         },
       });
 
-      expect(mockDispatch).toBeCalledWith({
+      expect(mockDispatch).toHaveBeenCalledWith({
         type: showTimeline.type,
         payload: {
           id: TimelineId.active,

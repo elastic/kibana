@@ -19,6 +19,7 @@ export interface TemporaryState<SelectionType> {
   availableOptions: OptionsListSuggestions<SelectionType>;
   invalidSelections: Set<SelectionType>;
   totalCardinality: number;
+  isPartial: boolean;
 }
 
 const defaultTemporaryState = {
@@ -29,6 +30,7 @@ const defaultTemporaryState = {
   availableOptions: [],
   invalidSelections: new Set(),
   totalCardinality: 0,
+  isPartial: false,
 };
 
 export const initializeTemporayStateManager = <SelectionType>() => {

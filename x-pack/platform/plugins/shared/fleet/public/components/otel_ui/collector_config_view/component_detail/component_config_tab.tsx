@@ -6,10 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { dump } from 'js-yaml';
+import { EuiCodeBlock, EuiLink, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useYaml } from '../../../../services';
 import type { OTelComponentType } from '../graph_view/constants';
 import { DETAIL_PANEL_CONTENT_MAX_HEIGHT } from '../graph_view/constants';
 
@@ -27,15 +27,16 @@ export const ComponentConfigTab: React.FunctionComponent<ComponentConfigTabProps
   componentType,
 }) => {
   const docUrl = getComponentDocUrl(componentType);
+  const yaml = useYaml();
 
   const yamlContent = useMemo(() => {
-    if (componentConfig == null) {
+    if (componentConfig == null || !yaml) {
       return null;
     }
-    return dump({ [componentId]: componentConfig }, { lineWidth: -1, quotingType: '"' });
-  }, [componentId, componentConfig]);
+    return yaml.stringify({ [componentId]: componentConfig }, { lineWidth: 0, singleQuote: false });
+  }, [componentId, componentConfig, yaml]);
 
-  if (!yamlContent) {
+  if (componentConfig == null) {
     return (
       <EuiText size="s" color="subdued">
         {i18n.translate('xpack.fleet.otelUi.componentDetail.noConfiguration', {
@@ -43,6 +44,10 @@ export const ComponentConfigTab: React.FunctionComponent<ComponentConfigTabProps
         })}
       </EuiText>
     );
+  }
+
+  if (!yamlContent) {
+    return <EuiLoadingSpinner />;
   }
 
   return (

@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
-import { EuiCallOut, EuiSpacer, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiFlexItem } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +33,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
         {numExamples === 0 && (
           <Fragment>
             <EuiSpacer size="xs" />
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount={false}
               size="s"
               title={i18n.translate(
@@ -41,7 +42,6 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
                   defaultMessage: 'No examples were obtained for this field',
                 }
               )}
-              iconType="warning"
             >
               <FormattedMessage
                 id="xpack.dataVisualizer.dataGrid.fieldText.fieldNotPresentDescription"
@@ -63,7 +63,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
                   excludesParam: <span className="dvExpandedRow__codeContent">excludes</span>,
                 }}
               />
-            </EuiCallOut>
+            </KbnInfoCallout>
           </Fragment>
         )}
       </EuiFlexItem>

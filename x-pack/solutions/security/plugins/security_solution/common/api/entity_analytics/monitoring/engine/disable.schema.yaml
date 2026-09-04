@@ -9,8 +9,9 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: DisableMonitoringEngine
+      deprecated: true
       summary: Disable the Privilege Monitoring Engine
-      description: Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+      description: '**Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.'
 
       responses:
         "200":

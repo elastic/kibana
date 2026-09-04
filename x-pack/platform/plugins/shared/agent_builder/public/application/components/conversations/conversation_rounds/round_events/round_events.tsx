@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
 import {
   isBackgroundAgentCompleteStep,
@@ -18,6 +18,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { StepItem } from './step_item';
 import { ToolCallGroup } from './steps/tool_call_group';
+import { ToolCallStep } from './steps/tool_call_step';
 import { groupSteps } from './group_steps';
 
 interface RoundEventsProps {
@@ -38,14 +39,18 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
   const displayItems = groupSteps(steps);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="agentBuilderThinkingPanel">
+    <EuiFlexGroup direction="column" data-test-subj="agentBuilderThinkingPanel">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup gutterSize="m" direction="column">
           {displayItems.map((item) => {
             if (item.kind === 'group') {
               return (
                 <EuiFlexItem grow={false} key={`group-${item.steps[0].tool_call_id}`}>
-                  <ToolCallGroup steps={item.steps} />
+                  {item.steps.length === 1 ? (
+                    <ToolCallStep step={item.steps[0]} />
+                  ) : (
+                    <ToolCallGroup steps={item.steps} />
+                  )}
                 </EuiFlexItem>
               );
             }
@@ -62,7 +67,6 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
             );
           })}
         </EuiFlexGroup>
-        <EuiSpacer size="xs" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
