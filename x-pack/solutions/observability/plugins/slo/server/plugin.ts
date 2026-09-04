@@ -187,10 +187,6 @@ export class SLOPlugin
       .catch((err) => {
         if (err instanceof LockAcquisitionError) {
           this.logger.debug('Cannot install SLO resources, another process is already doing it');
-        }
-      .catch((err) => {
-        if (err instanceof LockAcquisitionError) {
-          this.logger.debug('Cannot install SLO resources, another process is already doing it');
         } else {
           this.logger.error(`Failed to install SLO common resources: ${err.message}`);
         }
