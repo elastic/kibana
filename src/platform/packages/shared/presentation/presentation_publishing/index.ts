@@ -66,6 +66,7 @@ export {
   type PublishesTimeRange,
   type PublishesTimeslice,
   type PublishesUnifiedSearch,
+  type PublishesWritableTimeRange,
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
 export {

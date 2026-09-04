@@ -146,22 +146,53 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.source).toBe(ACTION_TYPE_SOURCES.spec);
   });
 
-  it('throws an error if the actions are empty', () => {
+  it('throws when there are no actions, no events, and test is disabled', () => {
     const spec = createMockSpec({
       metadata: {
-        id: 'workflows-multi-feature-connector-no-actions',
+        id: 'empty-connector',
         description: 'foobar',
-        displayName: 'Workflows Multi Feature Connector No Actions',
+        displayName: 'Empty',
         minimumLicense: 'basic',
-        supportedFeatureIds: [WorkflowsConnectorFeatureId, 'alerting'],
+        supportedFeatureIds: [WorkflowsConnectorFeatureId],
       },
       actions: {},
+      test: { handler: jest.fn(), enabled: false },
     });
 
-    // This should throw an error because generateParamsSchema requires actions
     expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(
-      'No actions defined'
+      'No actions or events defined'
     );
+  });
+
+  it('registers a type with no executor when the spec is events-only', () => {
+    const spec = createMockSpec({
+      metadata: {
+        id: 'inbound-only-connector',
+        description: 'foobar',
+        displayName: 'Inbound Only',
+        minimumLicense: 'basic',
+        supportedFeatureIds: [WorkflowsConnectorFeatureId],
+      },
+      actions: {},
+      test: { handler: jest.fn(), enabled: false },
+      events: {
+        definitions: {
+          received: {
+            eventId: 'inboundOnly.received',
+            title: 'Received',
+            description: 'Inbound event',
+            eventSchema: z4.object({ body: z4.unknown() }),
+          },
+        },
+        handleEvents: async () => ({ type: 'emit' as const, events: [] }),
+      },
+    });
+
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+    expect(connectorType.executor).toBeUndefined();
+    expect(connectorType.validate.params).toBeUndefined();
+    expect(connectorType.isTestable).toBe(false);
   });
 
   it('always includes config and secrets validators', () => {
@@ -415,7 +446,7 @@ describe('createConnectorTypeFromSpec', () => {
 
       expect(() =>
         createConnectorTypeFromSpec(specWithOnlyDisabledTest, mockActionsPlugin)
-      ).toThrow('No actions defined');
+      ).toThrow('No actions or events defined');
 
       const specWithActions = createMockSpec({
         test: { handler: testHandler, enabled: false },
@@ -511,6 +542,28 @@ describe('createConnectorTypeFromSpec', () => {
       expect(spec.actions).not.toHaveProperty(TEST_CONNECTOR_SUB_ACTION);
     });
 
+    it('throws when test is enabled without outbound actions', () => {
+      const spec = createMockSpec({
+        actions: {},
+        test: { handler: jest.fn(), enabled: true },
+        events: {
+          definitions: {
+            received: {
+              eventId: 'test.received',
+              title: 'Received',
+              description: 'Inbound event',
+              eventSchema: z4.object({ body: z4.unknown() }),
+            },
+          },
+          handleEvents: async () => ({ type: 'emit' as const, events: [] }),
+        },
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(
+        'Connector spec "test-connector" cannot enable test without outbound actions.'
+      );
+    });
+
     it('creates executor and params validator for spec with only test and empty actions', () => {
       const spec = createMockSpec({
         actions: {},
@@ -588,6 +641,58 @@ describe('createConnectorTypeFromSpec', () => {
       expect(connectorType.validate.config.schema.parse(configWithAuthType)).toEqual(
         configWithAuthType
       );
+    });
+
+    it('injects ingestTokenHash when the spoke schema is empty', () => {
+      const spec = createMockSpec({
+        schema: z4.object({}),
+        actions: {},
+        events: {
+          definitions: {
+            received: {
+              eventId: 'test.received',
+              title: 'Received',
+              description: 'Inbound event',
+              eventSchema: z4.object({ body: z4.unknown() }),
+            },
+          },
+          handleEvents: async () => ({ type: 'emit' as const, events: [] }),
+        },
+      });
+
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+      const hash = 'a'.repeat(64);
+
+      expect(connectorType.validate.config.schema.parse({ ingestTokenHash: hash })).toEqual({
+        ingestTokenHash: hash,
+      });
+    });
+
+    it('accepts ingestTokenHash on dual specs that declare events', () => {
+      const spec = createMockSpec({
+        schema: z4.object({ url: z4.string() }),
+        events: {
+          definitions: {
+            received: {
+              eventId: 'test.received',
+              title: 'Received',
+              description: 'Inbound event',
+              eventSchema: z4.object({ body: z4.unknown() }),
+            },
+          },
+          handleEvents: async () => ({ type: 'emit' as const, events: [] }),
+        },
+      });
+
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+      const hash = 'a'.repeat(64);
+
+      expect(() =>
+        connectorType.validate.config.schema.parse({
+          url: 'https://example.com',
+          ingestTokenHash: hash,
+        })
+      ).not.toThrow();
     });
   });
 });
