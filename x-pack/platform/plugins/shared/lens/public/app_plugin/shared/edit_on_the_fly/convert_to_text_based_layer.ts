@@ -13,6 +13,8 @@ import type {
   FormBasedLayer,
   FormBasedPrivateState,
   FramePublicAPI,
+  IndexPattern,
+  OriginalColumn,
   TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPrivateState,
@@ -39,6 +41,73 @@ const getMetaTypeFromDataType = (dataType: DataType): DatatableColumnType => {
     return 'number';
   }
   return dataType;
+};
+
+/**
+ * Builds a single text-based column for one original form-based column, keeping its
+ * original column ID so the visualization can still reference it.
+ */
+const buildTextBasedColumn = ({
+  sourceColumn,
+  esqlFieldName,
+  layer,
+  indexPattern,
+}: {
+  sourceColumn: OriginalColumn;
+  esqlFieldName: string;
+  layer: FormBasedLayer;
+  indexPattern: IndexPattern | undefined;
+}): TextBasedLayerColumn => {
+  const dataType = sourceColumn.dataType ?? 'string';
+
+  const column: TextBasedLayerColumn = {
+    columnId: sourceColumn.id,
+    fieldName: esqlFieldName,
+    meta: {
+      type: getMetaTypeFromDataType(dataType),
+    },
+  };
+
+  const hasCustomLabel = Boolean(sourceColumn.customLabel);
+
+  column.customLabel = true; // set always to true so we can use the default label as a custom label
+  if (hasCustomLabel) {
+    column.label = sourceColumn.label;
+    // This is a sanity check to satisfy TS for the incoming form based column.
+  } else if ('operationType' in sourceColumn && sourceColumn.operationType) {
+    // use the generated default label
+    column.label = operationDefinitionMap[sourceColumn.operationType].getDefaultLabel(
+      layer.columns[sourceColumn.id],
+      layer.columns,
+      indexPattern
+    );
+  }
+
+  // GenericIndexPatternColumn doesn't declare params on all variants (e.g. field-based columns),
+  // but at runtime many have params.format. Cast to a minimal shape so we can safely read it.
+  const originalCol = layer.columns[sourceColumn.id] as
+    | { params?: { format?: ValueFormatConfig } }
+    | undefined;
+  const hadUserFormat = Boolean(
+    originalCol?.params && 'format' in originalCol.params && originalCol.params.format !== undefined
+  );
+
+  // Only set format when the user had explicitly configured it on the form-based column.
+  // If it was default (no user override), leave column.params.format unset so it stays default.
+  if (hadUserFormat) {
+    let format = sourceColumn.format;
+    if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
+      const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
+      if (fieldFormat?.id) {
+        format = fieldFormat as typeof sourceColumn.format;
+      }
+    }
+    if (format?.id !== undefined) {
+      column.params = { format: format as ValueFormatConfig };
+    }
+  }
+
+  return column;
 };
 
 /**
@@ -98,63 +167,13 @@ function buildTextBasedState(
     // Build new text-based columns from esAggsIdMap
     // Keep original column IDs so visualizations can still reference them
     // sourceColumn from esAggsIdMap already has properly computed label (via getDefaultLabel) and format
-    const newColumns: TextBasedLayerColumn[] = Object.entries(conversionResult.esAggsIdMap).map(
-      ([esqlFieldName, originalColumns]) => {
-        const sourceColumn = originalColumns[0];
-        const dataType = sourceColumn.dataType ?? 'string';
-        const metaType = getMetaTypeFromDataType(dataType);
-
-        const column: TextBasedLayerColumn = {
-          columnId: sourceColumn.id,
-          fieldName: esqlFieldName,
-          meta: {
-            type: metaType,
-          },
-        };
-
-        const hasCustomLabel = Boolean(sourceColumn.customLabel);
-
-        column.customLabel = true; // set always to true so we can use the default label as a custom label
-        if (hasCustomLabel) {
-          column.label = sourceColumn.label;
-          // This is a sanity check to satisfy TS for the incoming form based column.
-        } else if ('operationType' in sourceColumn && sourceColumn.operationType) {
-          // use the generated default label
-          column.label = operationDefinitionMap[sourceColumn.operationType].getDefaultLabel(
-            layer.columns[sourceColumn.id],
-            layer.columns,
-            indexPattern
-          );
-        }
-
-        // GenericIndexPatternColumn doesn't declare params on all variants (e.g. field-based columns),
-        // but at runtime many have params.format. Cast to a minimal shape so we can safely read it.
-        const originalCol = layer.columns[sourceColumn.id] as
-          | { params?: { format?: ValueFormatConfig } }
-          | undefined;
-        const hadUserFormat = Boolean(
-          originalCol?.params &&
-            'format' in originalCol.params &&
-            originalCol.params.format !== undefined
-        );
-
-        // Only set format when the user had explicitly configured it on the form-based column.
-        // If it was default (no user override), leave column.params.format unset so it stays default.
-        if (hadUserFormat) {
-          let format = sourceColumn.format;
-          if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
-            const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
-            if (fieldFormat?.id) {
-              format = fieldFormat as typeof sourceColumn.format;
-            }
-          }
-          if (format?.id !== undefined) {
-            column.params = { format: format as ValueFormatConfig };
-          }
-        }
-
-        return column;
-      }
+    // Several Lens columns can share one ES|QL column (e.g. duplicate metrics), so each entry
+    // of the map yields one text-based column per original column.
+    const newColumns: TextBasedLayerColumn[] = Object.entries(conversionResult.esAggsIdMap).flatMap(
+      ([esqlFieldName, originalColumns]) =>
+        originalColumns.map((sourceColumn) =>
+          buildTextBasedColumn({ sourceColumn, esqlFieldName, layer, indexPattern })
+        )
     );
 
     newLayers[layerId] = {
