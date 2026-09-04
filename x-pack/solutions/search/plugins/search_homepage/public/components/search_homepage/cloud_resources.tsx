@@ -21,6 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { unstableAutoGridCss } from '@kbn/css-utils/public/unstable_layout_css';
 import { docLinks } from '../../../common/doc_links';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
@@ -95,6 +96,7 @@ const ResourceCard = ({
 };
 
 export const CloudResources = () => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: { cloud },
   } = useKibana();
@@ -189,20 +191,19 @@ export const CloudResources = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="l">
+        <div css={unstableAutoGridCss({ minItemWidth: '30rem', gap: euiTheme.size.l })}>
           {cards.map((card, index) => (
-            <EuiFlexItem key={`resource-${index}`}>
-              <ResourceCard
-                title={card.title}
-                icon={card.icon}
-                description={card.description}
-                actionHref={card.actionHref}
-                actionText={card.actionText}
-                dataTestSubj={card.dataTestSubj}
-              />
-            </EuiFlexItem>
+            <ResourceCard
+              key={`resource-${index}`}
+              title={card.title}
+              icon={card.icon}
+              description={card.description}
+              actionHref={card.actionHref}
+              actionText={card.actionText}
+              dataTestSubj={card.dataTestSubj}
+            />
           ))}
-        </EuiFlexGroup>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
