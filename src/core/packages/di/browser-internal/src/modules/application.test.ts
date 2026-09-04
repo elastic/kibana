@@ -9,7 +9,7 @@
 
 import type { Container } from 'inversify';
 import { inject, injectable } from 'inversify';
-import { KibanaContainerModule } from '@kbn/core-di';
+import { KibanaContainerModule, Scope, type ScopedContainer } from '@kbn/core-di';
 import { injectionServiceMock, setup, start } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Application, ApplicationParameters } from '@kbn/core-di-browser';
 import type { App, AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
@@ -70,20 +70,20 @@ describe('application', () => {
   });
 
   describe('Application', () => {
-    let fork: ReturnType<typeof injection.fork>;
+    let scope: ScopedContainer;
     let mount: App['mount'];
     let mountSpy: jest.SpyInstance;
     let unmountSpy: jest.SpyInstance;
-    let unbindAllSpy: jest.SpyInstance;
+    let disposeSpy: jest.SpyInstance;
     let params: AppMountParameters;
 
     beforeEach(() => {
-      fork = injection.fork();
+      scope = container.get(Scope);
       params = {} as unknown as AppMountParameters;
 
       mountSpy = jest.spyOn(TestApplication.prototype, 'mount');
       unmountSpy = jest.spyOn(TestApplication.prototype, 'unmount');
-      unbindAllSpy = jest.spyOn(fork, 'unbindAllAsync');
+      disposeSpy = jest.spyOn(scope, 'dispose');
 
       setup(container);
       start(container);
@@ -101,7 +101,7 @@ describe('application', () => {
       const [testApplication] = mountSpy.mock.contexts as TestApplication[];
       expect(testApplication.params).toBe(params);
       expect(unmountSpy).not.toHaveBeenCalled();
-      expect(unbindAllSpy).not.toHaveBeenCalled();
+      expect(disposeSpy).not.toHaveBeenCalled();
     });
 
     it('should unmount an application', async () => {
@@ -109,20 +109,20 @@ describe('application', () => {
       (unmount as Function)();
 
       expect(unmountSpy).toHaveBeenCalled();
-      expect(unbindAllSpy).toHaveBeenCalled();
+      expect(disposeSpy).toHaveBeenCalled();
     });
 
-    it('should unbind all dependencies when unmount throws', async () => {
+    it('should dispose the request scope when unmount throws', async () => {
       const unmount = await mount(params);
       unmountSpy.mockImplementation(() => {
         throw new Error('Unmount error');
       });
 
       expect(() => (unmount as Function)()).toThrow('Unmount error');
-      expect(unbindAllSpy).toHaveBeenCalled();
+      expect(disposeSpy).toHaveBeenCalled();
     });
 
-    it('should unbind all dependencies when unmount is a promise', async () => {
+    it('should dispose the request scope when unmount is a promise', async () => {
       let resolveHandle: () => void;
       mountSpy.mockImplementation(function (this: TestApplication) {
         return new Promise<AppUnmount>((resolve) => {
@@ -132,11 +132,11 @@ describe('application', () => {
       const unmount = mount(params);
       await new Promise(process.nextTick);
 
-      expect(unbindAllSpy).not.toHaveBeenCalled();
+      expect(disposeSpy).not.toHaveBeenCalled();
       resolveHandle!();
       await expect(unmount as Promise<AppUnmount>).resolves.toBeInstanceOf(Function);
       (await unmount)();
-      expect(unbindAllSpy).toHaveBeenCalled();
+      expect(disposeSpy).toHaveBeenCalled();
     });
   });
 });
