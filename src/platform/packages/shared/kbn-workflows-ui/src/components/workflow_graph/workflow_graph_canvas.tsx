@@ -160,7 +160,7 @@ function CanvasZoomControls({
   const handleZoomIn = useCallback(() => zoomIn({ duration: 200 }), [zoomIn]);
 
   return (
-    <Panel position="bottom-right" style={{ margin: 12 }}>
+    <Panel position="bottom-left" style={{ margin: 12 }}>
       <div
         css={{
           background: euiTheme.colors.backgroundBasePlain,
@@ -256,7 +256,7 @@ export interface WorkflowGraphCanvasProps {
   };
   /** Whether to render the minimap. Pass false to suppress it (e.g. for exports). */
   readonly showMinimap?: boolean;
-  /** Whether to render the floating zoom controls in the bottom-right corner. */
+  /** Whether to render the floating zoom controls in the bottom-left corner. */
   readonly showZoomControls?: boolean;
   /**
    * Whether to render the dot-pattern background and the coloured wrapper div
@@ -701,7 +701,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                 <MiniMap
                   pannable
                   zoomable
-                  position="bottom-left"
+                  position="bottom-right"
                   bgColor={euiTheme.colors.backgroundBaseSubdued}
                   maskColor={transparentize(euiTheme.colors.backgroundBaseSubdued, 0.7)}
                   nodeColor={minimapNodeColor}
