@@ -23,7 +23,8 @@ export const buildCustomContentContextAttachment = (
   template: string,
   esqlQuery: string | undefined,
   embeddableId: string,
-  panelTitle?: string
+  panelTitle?: string,
+  timeRange?: { from: string; to: string }
 ): AttachmentInput<
   typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   CustomContentContextAttachmentData
@@ -35,5 +36,6 @@ export const buildCustomContentContextAttachment = (
     esql_query: esqlQuery,
     panel_title: panelTitle,
     embeddable_id: embeddableId,
+    ...(timeRange ? { time_range: timeRange } : {}),
   },
 });

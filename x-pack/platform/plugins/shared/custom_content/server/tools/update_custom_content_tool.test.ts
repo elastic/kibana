@@ -299,4 +299,26 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(results[0].type).toBe(ToolResultType.error);
     });
   });
+
+  describe('time range', () => {
+    // A refined version previews in the same chat card, so losing the range would make the
+    // preview silently jump to a default window after the first edit.
+    it('carries the panel time range through an update', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'panel-1', prompt: 'make it darker' },
+        {
+          panel_template: '<div>old</div>',
+          esql_query: 'FROM logs',
+          embeddable_id: 'panel-1',
+          time_range: { from: 'now-7d', to: 'now' },
+        }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        expect.anything(),
+        { data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }) },
+        expect.anything()
+      );
+    });
+  });
 });

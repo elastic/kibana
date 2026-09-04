@@ -18,6 +18,17 @@ export const customContentContextAttachmentDataSchema = z.object({
   esql_query: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
   panel_title: z.string().max(256).optional(),
   embeddable_id: z.string().max(256),
+  /**
+   * The range the panel was rendering with when it was sent to chat. A snapshot, not a
+   * mirror: it lets the chat preview show what the user was looking at instead of a
+   * default range, but it does not follow later changes to the dashboard's picker.
+   */
+  time_range: z
+    .object({
+      from: z.string().max(256),
+      to: z.string().max(256),
+    })
+    .optional(),
 });
 
 export type CustomContentContextAttachmentData = z.infer<

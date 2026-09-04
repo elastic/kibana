@@ -138,6 +138,9 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       esql_query: resolvedQuery,
       panel_title: currentData?.panel_title,
       embeddable_id: currentData?.embeddable_id ?? '',
+      // Carried over so a refined version still previews against the range the panel was
+      // sent with, rather than silently reverting to the default.
+      ...(currentData?.time_range ? { time_range: currentData.time_range } : {}),
     };
 
     const updated = await attachments.update(
