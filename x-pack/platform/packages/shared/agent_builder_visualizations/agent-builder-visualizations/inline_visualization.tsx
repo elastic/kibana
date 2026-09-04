@@ -74,6 +74,7 @@ export const InlineVisualization = ({
             visualization={visualization}
             esql={esql}
             timeRange={timeRange}
+            registerActionButtons={registerActionButtons}
           />
         );
       default:
