@@ -13,7 +13,7 @@ settings:
   # proposal is still pending: alerts are only tagged after the gate resolves,
   # so the harvest keeps returning such a rule until then.
   concurrency:
-    key: "rule-tuning-proposal-{{ inputs.rule_id }}"
+    key: "rule-tuning-proposal-{{ inputs.rule_uuid }}"
     strategy: drop
     max: 1
 triggers:
@@ -23,11 +23,9 @@ triggers:
         rule_uuid:
           type: string
           maxLength: 512
-          description: Saved-object id of the rule incarnation that produced the alerts.
-        rule_id:
-          type: string
-          maxLength: 512
-          description: Public rule_id used to fetch the rule from the detection engine API.
+          description: >-
+            Saved-object id of the rule incarnation that produced the alerts; keys the
+            per-rule gate and fetches the rule from the detection engine API.
         fp_count:
           type: integer
           minimum: 2
@@ -70,13 +68,12 @@ triggers:
       # independently without a one-sided input-validation failure.
       required:
         - rule_uuid
-        - rule_id
         - fp_count
         - last_fp_at
         - alert_ids
       additionalProperties: false
 outputs:
-  - name: rule_id
+  - name: rule_uuid
     type: string
   - name: approved
     type: boolean
@@ -102,11 +99,14 @@ consts:
     - detection-watch:tuning-handoff
   no_items: []
 steps:
+  # Fetched by saved-object id, which pins the exact rule incarnation that produced
+  # the harvested alerts: a rule deleted and recreated under the same signature 404s
+  # here instead of receiving a diagnosis built on its predecessor's alerts.
   - name: fetch_rule
     type: kibana.request
     with:
       method: GET
-      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.rule_id | url_encode }}"
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
       headers:
         kbn-xsrf: string
         elastic-api-version: "2023-10-31"
@@ -118,8 +118,7 @@ steps:
     type: ai.agent
     if: >-
       ${{ steps.fetch_rule.error == null
-        and steps.fetch_rule.output.enabled == true
-        and steps.fetch_rule.output.id == inputs.rule_uuid }}
+        and steps.fetch_rule.output.enabled == true }}
     timeout: "10m"
     create-conversation: true
     with:
@@ -127,7 +126,7 @@ steps:
       # (investigate_rule_skill.ts), the most ids one get_alerts_by_ids call accepts.
       message: |-
         Use the [/investigate-rule](skill://investigate-rule) skill to investigate
-        rule_id "{{ inputs.rule_id }}" ({{ steps.fetch_rule.output.name }}).
+        rule_id "{{ steps.fetch_rule.output.rule_id }}" ({{ steps.fetch_rule.output.name }}).
 
         {{ inputs.fp_count }} alerts from this rule were closed as false positives
         during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
@@ -345,7 +344,7 @@ steps:
         and steps.record_auto_apply_support.output.supported == true }}
     with:
       method: GET
-      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.rule_id | url_encode }}"
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
       headers:
         kbn-xsrf: string
         elastic-api-version: "2023-10-31"
@@ -423,6 +422,6 @@ steps:
     type: workflow.output
     status: completed
     with:
-      rule_id: "{{ inputs.rule_id }}"
+      rule_uuid: "{{ inputs.rule_uuid }}"
       approved: "${{ steps.review_tuning.output.response.approved == true }}"
       applied: "${{ steps.record_outcome.output.rule_patched }}"

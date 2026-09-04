@@ -93,7 +93,7 @@ steps:
       continue: true
 
   # The list response carries each execution's concurrencyGroupKey
-  # (`rule-tuning-proposal-<rule_id>`), not its inputs. Liquid cannot transform array
+  # (`rule-tuning-proposal-<rule uuid>`), not its inputs. Liquid cannot transform array
   # elements one by one, so the keys are joined, stripped of the prefix, and split
   # back. Size is computed on its own because comparison operators cannot follow a
   # filter chain.
@@ -104,14 +104,15 @@ steps:
       parsed_count: "${{ steps.list_active_proposals.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'rule-tuning-proposal-' | split: ',' | size }}"
       expected: "${{ steps.list_active_proposals.output.results | default: consts.no_rows | size }}"
 
-  # A rule_id containing the `,` separator would corrupt the split into fragments
-  # that could match unrelated rules, so the parse only counts when it yields exactly
-  # one id per execution. Skipped otherwise; the harvest then falls back to no filter.
+  # A key containing the `,` separator would corrupt the split into fragments that
+  # could match unrelated rules (uuids never do, but the keys are external data), so
+  # the parse only counts when it yields exactly one id per execution. Skipped
+  # otherwise; the harvest then falls back to no filter.
   - name: resolve_active_rules
     type: data.set
     if: "${{ steps.collect_active_rules.output.parsed_count == steps.collect_active_rules.output.expected }}"
     with:
-      rule_ids: "${{ steps.collect_active_rules.output.parsed }}"
+      rule_uuids: "${{ steps.collect_active_rules.output.parsed }}"
 
   # Scoped to one space because the tag API writes to the space's own alerts index, so
   # a cross-space harvest would keep rediagnosing alerts it can never mark.
@@ -146,7 +147,7 @@ steps:
             - exists:
                 field: kibana.alert.building_block_type
             - terms:
-                kibana.alert.rule.rule_id: "${{ steps.resolve_active_rules.output.rule_ids | default: consts.no_rows }}"
+                kibana.alert.rule.uuid: "${{ steps.resolve_active_rules.output.rule_uuids | default: consts.no_rows }}"
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
         | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
@@ -162,7 +163,7 @@ steps:
             fp_count = COUNT(*) WHERE is_unreviewed_fp,
             last_fp_at = MAX(@timestamp) WHERE is_unreviewed_fp,
             recent_keys = TOP(fp_recency_key, {{ consts.max_diagnosis_ids }}, "desc") WHERE is_unreviewed_fp
-          BY `kibana.alert.rule.uuid`, `kibana.alert.rule.rule_id`
+          BY `kibana.alert.rule.uuid`
         | WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
           AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
         | SORT fp_count DESC
@@ -172,9 +173,9 @@ steps:
         | STATS fp_count = MAX(fp_count),
             last_fp_at = MAX(last_fp_at),
             alert_ids = VALUES(alert_id)
-          BY `kibana.alert.rule.uuid`, `kibana.alert.rule.rule_id`
+          BY `kibana.alert.rule.uuid`
         | SORT fp_count DESC
-        | KEEP `kibana.alert.rule.uuid`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
+        | KEEP `kibana.alert.rule.uuid`, fp_count, last_fp_at, alert_ids
     on-failure:
       continue: true
 
@@ -207,16 +208,15 @@ steps:
           inputs:
             rule_uuid: "{{ foreach.item.0 }}"
             fp_count: "${{ foreach.item.1 }}"
-            rule_id: "{{ foreach.item.2 }}"
-            last_fp_at: "{{ foreach.item.3 }}"
-            alert_ids: "${{ foreach.item.4 }}"
+            last_fp_at: "{{ foreach.item.2 }}"
+            alert_ids: "${{ foreach.item.3 }}"
             analysis_window_days: "${{ inputs.analysis_window_days | default: consts.analysis_window_days }}"
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"
 
   # Fan-in: every branch has settled, so each child either resolved its gate and
   # tagged its alerts, or failed (its error stays in the aggregate results). A
-  # branch output is the child's workflow.output payload: rule_id, approved, applied.
+  # branch output is the child's workflow.output payload: rule_uuid, approved, applied.
   # Size is computed on its own because comparison operators cannot follow a filter chain.
   - name: summarize_decisions
     type: data.set

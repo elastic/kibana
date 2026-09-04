@@ -742,7 +742,7 @@ describe('project watch', () => {
         const filter = JSON.stringify(harvest.with?.filter);
         expect(filter).toContain('must_not');
         expect(filter).toContain(
-          '"kibana.alert.rule.rule_id":"${{ steps.resolve_active_rules.output.rule_ids | default: consts.no_rows }}"'
+          '"kibana.alert.rule.uuid":"${{ steps.resolve_active_rules.output.rule_uuids | default: consts.no_rows }}"'
         );
       });
 
@@ -811,12 +811,18 @@ describe('project watch', () => {
       });
 
       // The gate can stay open for 72h; a stale approval must not clobber an analyst
-      // edit made in the meantime.
+      // edit made in the meantime. Both reads go by saved-object id, so a rule
+      // deleted and recreated under the same signature 404s instead of matching.
       it('re-reads the rule after approval and applies only when it is unchanged', () => {
-        const diagnose = proposalSteps.find(({ name }) => name === 'diagnose_rule')!;
+        const fetches = proposalSteps.filter(({ name }) =>
+          ['fetch_rule', 'refetch_rule'].includes(name)
+        );
         const apply = proposalSteps.find(({ name }) => name === 'apply_query_tuning')!;
         const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
-        expect(diagnose.if).toContain('steps.fetch_rule.output.id == inputs.rule_uuid');
+        expect(fetches).toHaveLength(2);
+        for (const fetch of fetches) {
+          expect(String(fetch.with?.path)).toContain('?id={{ inputs.rule_uuid | url_encode }}');
+        }
         expect(String(eligibility.with?.eligible)).toContain(
           'steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at'
         );
@@ -1016,7 +1022,7 @@ describe('project watch', () => {
 
         const { concurrency } = (proposal as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { key: string; strategy: string; max: number } };
-        expect(concurrency.key).toContain('{{ inputs.rule_id }}');
+        expect(concurrency.key).toContain('{{ inputs.rule_uuid }}');
         expect(concurrency.strategy).toBe('drop');
         expect(concurrency.max).toBe(1);
       });
