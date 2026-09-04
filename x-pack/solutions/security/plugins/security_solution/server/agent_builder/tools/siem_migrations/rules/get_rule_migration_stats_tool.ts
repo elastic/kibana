@@ -17,7 +17,8 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
-import { createToolErrorResult } from '../common/tool_results';
+import { hasRuleMigrationPrivileges } from '../common/privileges';
+import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
@@ -26,18 +27,6 @@ const schema = z.object({
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_STATS_PATH.replace('{migration_id}', encodeURIComponent(migrationId));
-
-// The stats route returns 204 No Content when the migration has zero rule items
-// (stats.ts:47-49). Normalize that to an explicit empty shape so the skill/state-matrix
-// zero-checks (items.pending === 0, etc.) always have a readable shape.
-const emptyStats = (migrationId: string): GetRuleMigrationStatsResponse => ({
-  id: migrationId,
-  name: '',
-  status: 'finished',
-  items: { total: 0, pending: 0, processing: 0, completed: 0, failed: 0 },
-  created_at: '',
-  last_updated_at: '',
-});
 
 export const getRuleMigrationStatsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -68,6 +57,11 @@ Use this to inspect one migration's progress. Read-only.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {
+      const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
+      if (!hasPrivilege) {
+        return createMissingPrivilegeError('view rule migration stats');
+      }
+
       const response = await callSelfClient<GetRuleMigrationStatsResponse>(
         request,
         buildPath(migrationId),
@@ -81,8 +75,22 @@ Use this to inspect one migration's progress. Read-only.`,
         );
       }
 
-      // 204 No Content → normalize to empty shape (zero rule items).
-      const data = response.body ?? emptyStats(migrationId);
+      // 204 No Content → migration has no rule items; return an error so callers know the ID
+      // does not correspond to a migration with data (cannot verify identity or state).
+      if (!response.body) {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.error,
+              data: {
+                message: `Migration "${migrationId}" has no rule items. Verify the migration ID is correct.`,
+              },
+            },
+          ],
+        };
+      }
+      const data = response.body;
 
       return {
         results: [

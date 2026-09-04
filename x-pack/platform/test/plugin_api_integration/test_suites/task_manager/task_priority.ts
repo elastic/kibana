@@ -177,16 +177,60 @@ export default function ({ getService }: FtrProviderContext) {
       expect(normalLongRunningDocs.length).to.eql(0);
     });
 
+    // Smoke coverage for the `UserInteractive` tier: proves the new numeric value (100) is
+    // accepted by task-definition validation, persisted on the task SO, and handled by the
+    // priority sort in the claiming query. It deliberately does NOT assert preemption over
+    // `Standard` tasks — the saturation setup used elsewhere in this file does not actually
+    // exhaust the pool, so a starvation-based assertion here would not mean anything. See
+    // the claimSort unit tests for ordering coverage.
+    it('should claim and run a user interactive priority task', async () => {
+      const standardTasks = await Promise.all(
+        Array.from({ length: 5 }, () =>
+          scheduleTask(supertest, {
+            taskType: 'sampleTask',
+            schedule: { interval: `1s` },
+            params: {},
+          })
+        )
+      );
+
+      const userInteractiveTask = await scheduleTask(supertest, {
+        taskType: 'userInteractivePriorityTask',
+        schedule: { interval: `1s` },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const tasks = (await currentTasks(supertest)).docs;
+        expect(tasks.length).to.eql(6);
+
+        const taskIds = tasks.map((task) => task.id);
+        [...standardTasks, userInteractiveTask].forEach((scheduledTask) => {
+          expect(taskIds).to.contain(scheduledTask.id);
+        });
+      });
+
+      // `taskId` is a keyword field, so this lookup is exact
+      await retry.try(async () => {
+        const docs: RawDoc[] = await historyDocs({
+          es,
+          index: testHistoryIndex,
+          taskId: userInteractiveTask.id,
+        });
+        expect(docs.length).to.be.greaterThan(0);
+      });
+    });
+
     describe('per-task priority override', () => {
       it('should use instance priority when set, overriding definition priority', async () => {
         const task = await scheduleTask(supertest, {
           taskType: 'lowPriorityTask',
           schedule: { interval: '1d' },
           params: {},
-          priority: TaskPriority.Normal,
+          priority: TaskPriority.Standard,
         });
 
-        expect(task.priority).to.eql(TaskPriority.Normal);
+        expect(task.priority).to.eql(TaskPriority.Standard);
 
         await retry.try(async () => {
           const docs: RawDoc[] = await historyDocs({
@@ -217,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should use Normal priority by default when no instance or definition priority is set', async () => {
+      it('should use Standard priority by default when no instance or definition priority is set', async () => {
         const task = await scheduleTask(supertest, {
           taskType: 'sampleTask',
           schedule: { interval: '1d' },
@@ -241,10 +285,10 @@ export default function ({ getService }: FtrProviderContext) {
           taskType: 'sampleTask',
           schedule: { interval: '1d' },
           params: {},
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
         });
 
-        expect(task.priority).to.eql(TaskPriority.Low);
+        expect(task.priority).to.eql(TaskPriority.Maintenance);
 
         await retry.try(async () => {
           const docs: RawDoc[] = await historyDocs({

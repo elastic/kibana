@@ -8,14 +8,12 @@
 import {
   EuiBadge,
   type EuiBasicTableColumn,
-  EuiButton,
   EuiCallOut,
   EuiFlexGrid,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiPageSection,
   type EuiSearchBarOnChangeArgs,
   EuiSpacer,
@@ -23,6 +21,7 @@ import {
 import { debounce } from 'lodash';
 import React, { Component, lazy, Suspense } from 'react';
 
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type {
   ApplicationStart,
   Capabilities,
@@ -47,6 +46,15 @@ import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
+
+const spacesTitle = i18n.translate('xpack.spaces.management.spacesGridPage.spacesTitle', {
+  defaultMessage: 'Spaces',
+});
+
+const createSpaceButtonLabel = i18n.translate(
+  'xpack.spaces.management.spacesGridPage.createSpaceButtonLabel',
+  { defaultMessage: 'Create space' }
 );
 
 interface Props {
@@ -99,25 +107,36 @@ export class SpacesGridPage extends Component<Props, State> {
   public render() {
     return (
       <div className="spcGridPage" data-test-subj="spaces-grid-page">
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={
-            <FormattedMessage
-              id="xpack.spaces.management.spacesGridPage.spacesTitle"
-              defaultMessage="Spaces"
-            />
-          }
-          description={getSpacesFeatureDescription()}
-          rightSideItems={
-            !this.state.loading && this.canCreateSpaces()
-              ? [this.getPrimaryActionButton()]
-              : undefined
-          }
-        />
+        {this.renderHeader()}
         <EuiSpacer size="l" />
-        {this.getPageContent()}
+        <div>{this.getPageContent()}</div>
         {this.getConfirmDeleteModal()}
       </div>
+    );
+  }
+
+  private renderHeader() {
+    const showCreate = !this.state.loading && this.canCreateSpaces();
+    const menu: AppHeaderMenu | undefined = showCreate
+      ? {
+          primaryActionItem: {
+            id: 'createSpace',
+            label: createSpaceButtonLabel,
+            iconType: 'plusCircle',
+            testId: 'createSpace',
+            href: this.props.history.createHref({ pathname: '/create' }),
+            run: () => this.props.history.push('/create'),
+          },
+        }
+      : undefined;
+
+    return (
+      <AppHeader
+        title={spacesTitle}
+        description={getSpacesFeatureDescription()}
+        menu={menu}
+        spacing="bleed"
+      />
     );
   }
 
@@ -205,22 +224,6 @@ export class SpacesGridPage extends Component<Props, State> {
 
   private canCreateSpaces() {
     return this.props.maxSpaces > this.state.spaces.length;
-  }
-
-  public getPrimaryActionButton() {
-    return (
-      <EuiButton
-        fill
-        iconType="plusCircle"
-        {...reactRouterNavigate(this.props.history, '/create')}
-        data-test-subj="createSpace"
-      >
-        <FormattedMessage
-          id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
-          defaultMessage="Create space"
-        />
-      </EuiButton>
-    );
   }
 
   public getConfirmDeleteModal = () => {

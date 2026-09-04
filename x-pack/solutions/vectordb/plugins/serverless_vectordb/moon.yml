@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/deeplinks-vectordb'
   - '@kbn/core-security-common'
   - '@kbn/core-http-browser-mocks'
+  - '@kbn/features-plugin'
 tags:
   - plugin
   - prod

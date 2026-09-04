@@ -98,6 +98,10 @@ components:
         url:
           type: string
           description: URL associated with the entity.
+        created_by:
+          type: string
+          description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
+          example: 'risk_score_maintainer'
         EngineMetadata:
           $ref: '#/components/schemas/EngineMetadata'
         attributes:

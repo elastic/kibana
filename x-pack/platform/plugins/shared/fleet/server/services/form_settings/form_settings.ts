@@ -85,7 +85,10 @@ export function _getSettingsValuesForAgentPolicy(
 
     const val = agentPolicy.advanced_settings?.[setting.api_field.name];
     if (val !== undefined && val !== '') {
-      settingsValues[setting.name] = convertValue(val, setting.type);
+      const convertedVal = convertValue(val, setting.type);
+      if (convertedVal !== undefined) {
+        settingsValues[setting.name] = convertedVal;
+      }
     }
   });
   return settingsValues;
@@ -94,11 +97,13 @@ export function _getSettingsValuesForAgentPolicy(
 function convertValue(val: any, type?: string) {
   if (type === 'yaml') {
     const valJs = parse(val);
+    if (valJs == null) {
+      return undefined;
+    }
     if (valJs.agent?.internal) {
       return valJs.agent.internal;
-    } else {
-      return valJs;
     }
+    return valJs;
   }
   return val;
 }

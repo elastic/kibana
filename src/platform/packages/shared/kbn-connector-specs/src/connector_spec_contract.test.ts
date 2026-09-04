@@ -85,6 +85,15 @@ describe('connector spec contracts', () => {
     expect(mappedIconIds).toEqual(connectorIdsRequiringMappedIcons);
   });
 
+  it.each(allSpecs)(
+    '%s does not enable test unless it has outbound actions',
+    (_exportName, spec) => {
+      if (spec.test.enabled) {
+        expect(Object.keys(spec.actions).length).toBeGreaterThan(0);
+      }
+    }
+  );
+
   it.each(allSpecs)('%s does not declare events unless allowlisted', (_exportName, spec) => {
     if (spec.events === undefined) {
       return;

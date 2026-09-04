@@ -108,75 +108,18 @@ describe('reconcileInferredFeatures', () => {
     expect(result.remappedCount).toBe(1);
   });
 
-  it('remaps a stored alias to its canonical id', () => {
-    const existing = createStoredFeature({
-      id: 'opentelemetry',
-      properties: { name: 'opentelemetry' },
-      meta: { aliases: ['otel'] },
-    });
-    const raw = createRawFeature({
-      id: 'otel',
-      properties: { name: 'otel' },
-    });
-
+  it('prefers normalized ids over fingerprints', () => {
     const result = reconcile({
-      rawFeatures: [raw],
-      allKnownFeatures: [existing],
-    });
-
-    expect(result.updatedFeatures).toHaveLength(1);
-    expect(result.updatedFeatures[0].id).toBe('opentelemetry');
-    expect(result.remappedCount).toBe(1);
-  });
-
-  it.each([
-    {
-      precedence: 'exact ids over aliases',
-      raw: createRawFeature({ id: 'otel', properties: { source: 'raw' } }),
-      known: [
-        createStoredFeature({ id: 'otel', properties: { source: 'exact' } }),
-        createStoredFeature({
-          id: 'opentelemetry',
-          properties: { source: 'alias' },
-          meta: { aliases: ['otel'] },
-        }),
-      ],
-      expectedId: 'otel',
-      expectedRemappedCount: 0,
-    },
-    {
-      precedence: 'aliases over normalized ids',
-      raw: createRawFeature({ id: 'okta-3.15.0', properties: { source: 'raw' } }),
-      known: [
-        createStoredFeature({
-          id: 'okta-canonical',
-          properties: { source: 'alias' },
-          meta: { aliases: ['okta-3.15.0'] },
-        }),
-        createStoredFeature({ id: 'okta', properties: { source: 'normalized' } }),
-      ],
-      expectedId: 'okta-canonical',
-      expectedRemappedCount: 1,
-    },
-    {
-      precedence: 'normalized ids over fingerprints',
-      raw: createRawFeature({ id: 'java-1.2.3', properties: { language: 'java' } }),
-      known: [
+      rawFeatures: [createRawFeature({ id: 'java-1.2.3', properties: { language: 'java' } })],
+      allKnownFeatures: [
         createStoredFeature({ id: 'java', properties: { source: 'normalized' } }),
         createStoredFeature({ id: 'jvm', properties: { language: 'java' } }),
       ],
-      expectedId: 'java',
-      expectedRemappedCount: 1,
-    },
-  ])('prefers $precedence', ({ raw, known, expectedId, expectedRemappedCount }) => {
-    const result = reconcile({
-      rawFeatures: [raw],
-      allKnownFeatures: known,
     });
 
     expect(result.updatedFeatures).toHaveLength(1);
-    expect(result.updatedFeatures[0].id).toBe(expectedId);
-    expect(result.remappedCount).toBe(expectedRemappedCount);
+    expect(result.updatedFeatures[0].id).toBe('java');
+    expect(result.remappedCount).toBe(1);
   });
 
   it('picks the most recently updated candidate for a normalized match', () => {
@@ -345,41 +288,15 @@ describe('reconcileInferredFeatures', () => {
     expect(result.remappedCount).toBe(0);
   });
 
-  it.each([{ aliases: 'candidate' }, { aliases: { candidate: true } }])(
-    'ignores malformed aliases without throwing',
-    (meta) => {
-      const result = reconcile({
-        rawFeatures: [
-          createRawFeature({
-            id: 'candidate',
-            properties: { name: 'candidate' },
-          }),
-        ],
-        allKnownFeatures: [
-          createStoredFeature({
-            id: 'canonical',
-            properties: { name: 'canonical' },
-            meta,
-          }),
-        ],
-      });
-
-      expect(result.newFeatures[0].id).toBe('candidate');
-      expect(result.remappedCount).toBe(0);
-    }
-  );
-
   it('records version history for an exact-id match from a previous run', () => {
     const existing = createStoredFeature({
       id: 'okta',
       properties: { name: 'okta', version: '3.14.1' },
-      meta: { aliases: ['old-okta'] },
       run_id: 'previous-run',
     });
     const raw = createRawFeature({
       id: 'okta',
       properties: { name: 'okta', version: '3.15.0' },
-      meta: { aliases: ['new-okta'] },
     });
 
     const result = reconcile({
@@ -389,7 +306,6 @@ describe('reconcileInferredFeatures', () => {
     });
 
     expect(result.updatedFeatures[0].meta?.version_history).toEqual(['3.14.1']);
-    expect(result.updatedFeatures[0].meta?.aliases).toEqual(['old-okta', 'new-okta']);
     expect(result.remappedCount).toBe(0);
   });
 

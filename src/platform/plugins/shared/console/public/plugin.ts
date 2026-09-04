@@ -42,6 +42,7 @@ export class ConsoleUIPlugin
 {
   private readonly autocompleteInfo = new AutocompleteInfo();
   private _embeddableConsole: EmbeddableConsoleInfo;
+  private defaultEditorContent?: string;
 
   constructor(private ctx: PluginInitializerContext) {
     const storage = createStorage({
@@ -114,6 +115,7 @@ export class ConsoleUIPlugin
             history,
             autocompleteInfo: this.autocompleteInfo,
             isDevMode: this.ctx.env.mode.dev,
+            defaultEditorContent: this.defaultEditorContent,
           });
         },
       });
@@ -129,7 +131,12 @@ export class ConsoleUIPlugin
         },
       });
 
-      return { locator };
+      return {
+        locator,
+        setDefaultEditorContent: (content: string) => {
+          this.defaultEditorContent = content;
+        },
+      };
     }
 
     return {};
