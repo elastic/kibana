@@ -294,6 +294,20 @@ export interface TemplatesTelemetry {
   main: TemplatesSolutionTelemetry;
 }
 
+export interface FieldLibrarySolutionTelemetry {
+  total: number;
+  totalGlobal: number;
+  totalReusable: number;
+}
+
+export interface FieldLibraryTelemetry {
+  featureEnabled: boolean;
+  all: FieldLibrarySolutionTelemetry;
+  sec: FieldLibrarySolutionTelemetry;
+  obs: FieldLibrarySolutionTelemetry;
+  main: FieldLibrarySolutionTelemetry;
+}
+
 export type CasesTelemetryConnectorKeys =
   | 'itsm'
   | 'sir'
