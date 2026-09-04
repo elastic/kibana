@@ -46,13 +46,17 @@ export function getStateManagementForInlineEditing(
         ([, { isLoading, state }]) => !isLoading && state !== null && state !== undefined
       )
     );
+    // the active datasource must be the *first* key: getActiveDatasourceIdFromDoc
+    // resolves the active datasource from the first key of the serialized states
+    const { [activeDatasourceId]: _active, ...otherLoadedDatasourceStates } =
+      loadedDatasourceStates;
     const datasourceStates: DatasourceStates = {
-      ...loadedDatasourceStates,
       // always guarantee the active datasource state is present
       [activeDatasourceId]: {
         isLoading: false,
         state: datasourceState,
       },
+      ...otherLoadedDatasourceStates,
     };
     const newVis = mergeToNewDoc(
       vis,

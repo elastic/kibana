@@ -50,6 +50,25 @@ describe('getStateManagementForInlineEditing', () => {
     );
   });
 
+  it('places the active datasource state as the first key so it is re-derived as active on reload', () => {
+    const { updatePanelState } = getStateManagementForInlineEditing(
+      'textBased',
+      () => attributes,
+      jest.fn(),
+      {},
+      {},
+      jest.fn()
+    );
+
+    updatePanelState('activeState', 'newVisState', 'testVis', 'textBased', {
+      formBased: { isLoading: false, state: 'formBasedState' },
+      textBased: { isLoading: false, state: 'activeState' },
+    });
+
+    const [, , passedDatasourceStates] = jest.mocked(mergeToNewDoc).mock.lastCall!;
+    expect(Object.keys(passedDatasourceStates)).toEqual(['textBased', 'formBased']);
+  });
+
   it('serializes only the active datasource state when allDatasourceStates is not passed (legacy 4-arg call)', () => {
     const { updatePanelState } = getStateManagementForInlineEditing(
       'textBased',
