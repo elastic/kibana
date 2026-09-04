@@ -16,7 +16,7 @@ function runSync(payload: PiiRegexWorkerTaskPayload): PiiRegexMatch[] {
 }
 
 /**
- * Manages the Piscina worker pool for our standalone RE2-only PII regex executor.
+ * Manages the Piscina worker pool for the workflow-driven PII regex executor.
  *
  * Separate from the o11y `RegexWorkerService` in `chat_complete/anonymization/`.
  * This pool is exclusively used by the workflow-driven anonymization path.
