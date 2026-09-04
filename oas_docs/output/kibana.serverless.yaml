@@ -84493,6 +84493,7 @@ components:
             - tags
             - title
             - user
+            - workflow
           example: create_case
           type: string
         type: array
@@ -86719,6 +86720,54 @@ components:
               enum:
                 - user
               type: string
+    Cases_payload_workflow:
+      description: The payload for a workflow user action, recorded when a user runs a workflow from a case.
+      type: object
+      properties:
+        origin:
+          description: The context from which the workflow was triggered.
+          type: object
+          properties:
+            id:
+              description: The primary identifier of the case, observable, or alert from which the workflow was triggered (`caseId`, `observableId`, or `alertId`).
+              type: string
+            index:
+              description: For alert origins, the Elasticsearch index the alert lives in.
+              type: string
+            type:
+              description: The origin type.
+              enum:
+                - cases.case
+                - cases.observable
+                - cases.alert
+                - cases.alerts
+              type: string
+            typeKey:
+              description: For observable origins, the observable type key.
+              type: string
+            value:
+              description: For observable origins, the observable value.
+              type: string
+          required:
+            - type
+            - id
+        workflow:
+          description: Identifies the workflow that was run.
+          type: object
+          properties:
+            executionId:
+              description: The execution ID returned by the Workflows engine.
+              type: string
+            id:
+              description: The workflow ID.
+              type: string
+            name:
+              description: The workflow name at the time the run was triggered.
+              type: string
+          required:
+            - id
+            - name
+            - executionId
     Cases_related_case:
       description: |
         Summary of a case returned when listing cases that contain a given alert. This is a subset of the full case response.
@@ -87425,6 +87474,7 @@ components:
             - $ref: '#/components/schemas/Cases_payload_tags'
             - $ref: '#/components/schemas/Cases_payload_title'
             - $ref: '#/components/schemas/Cases_payload_user_comment'
+            - $ref: '#/components/schemas/Cases_payload_workflow'
         type:
           description: The type of action.
           enum:
@@ -87444,6 +87494,7 @@ components:
             - status
             - tags
             - title
+            - workflow
           example: create_case
           type: string
         version:
