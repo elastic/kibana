@@ -47,6 +47,7 @@ import {
   ensureESQLTimeFieldOnAdHocDataViews,
 } from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
+import { applyLegacySecondaryLabelIfMetric } from '../../visualizations/metric/runtime_state/apply_legacy_secondary_label';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
 // specific terms, and the palette assignment where the colors are assinged automatically
@@ -300,12 +301,12 @@ export async function initializeSources(
     references,
   });
 
-  return {
-    indexPatterns,
-    indexPatternRefs,
-    annotationGroups,
-    datasourceStates: initializedDatasourceStates,
-    visualizationState: initializeVisualization({
+  const {
+    visualizationState: runtimeVisualizationState,
+    datasourceStates: syncedDatasourceStates,
+  } = applyLegacySecondaryLabelIfMetric(
+    visualizationState.activeId,
+    initializeVisualization({
       visualizationMap,
       visualizationState,
       datasourceStates,
@@ -313,6 +314,15 @@ export async function initializeSources(
       initialContext,
       annotationGroups,
     }),
+    initializedDatasourceStates
+  );
+
+  return {
+    indexPatterns,
+    indexPatternRefs,
+    annotationGroups,
+    datasourceStates: syncedDatasourceStates,
+    visualizationState: runtimeVisualizationState,
   };
 }
 

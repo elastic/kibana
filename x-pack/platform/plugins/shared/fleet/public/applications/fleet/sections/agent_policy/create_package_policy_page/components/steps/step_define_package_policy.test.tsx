@@ -718,6 +718,30 @@ describe('StepDefinePackagePolicy', () => {
         });
       });
 
+      it('does not enable the other-policies query before initialization, preventing a spurious warning flash', () => {
+        // Regression test for a race between the async packageInfo load and the init effect:
+        // on the first render, initialized=false and namespaceCustomizationEnabled=false while
+        // isOptedIn is already true (packageInfo available synchronously in tests, or warm cache
+        // in production). Without the `initialized` guard the query fires immediately, and with a
+        // warm React Query cache the opt-out warning flashes on screen before the init effect
+        // corrects the state.
+        mockUseGetPackagePoliciesQuery.mockClear();
+        mockUseGetPackagePoliciesQuery.mockReturnValue({
+          data: { items: [{ id: 'other-policy-1' }] },
+        });
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          packageInfoOverride: {
+            installationInfo: {
+              namespace_customization_enabled_for: ['staging'],
+            } as any,
+          },
+        });
+        // The first render call must have enabled: false so the query never fires during
+        // the initialization window.
+        expect(mockUseGetPackagePoliciesQuery.mock.calls[0][1]).toMatchObject({ enabled: false });
+      });
+
       it('shows no warning when toggle is turned on but there are no other policies', async () => {
         mockUseGetPackagePoliciesQuery.mockReturnValue({ data: { items: [] } });
         renderResult = renderWithToggle({

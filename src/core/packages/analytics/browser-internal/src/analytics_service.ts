@@ -62,6 +62,7 @@ export class AnalyticsService {
 
   public setup({ injectedMetadata }: AnalyticsServiceSetupDeps): AnalyticsServiceSetup {
     this.registerElasticsearchInfoContext(injectedMetadata);
+    this.registerDisplayLanguageContext(injectedMetadata);
 
     return {
       optIn: this.analyticsClient.optIn,
@@ -170,6 +171,55 @@ export class AnalyticsService {
           items: {
             type: 'keyword',
             _meta: { description: 'List of the preferred languages of the browser.' },
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Enriches the events with the display language this page was rendered in and how it was chosen.
+   * @param injectedMetadata The injected metadata service.
+   * @internal
+   */
+  private registerDisplayLanguageContext(injectedMetadata: InternalInjectedMetadataSetup) {
+    const { locale, browserPreferredLocale, localeSource, configDefaultLocale } =
+      injectedMetadata.getI18nInfo();
+    this.analyticsClient.registerContextProvider({
+      name: 'display language',
+      context$: of({
+        display_language: locale,
+        ...(browserPreferredLocale !== undefined
+          ? { display_language_browser_preference: browserPreferredLocale }
+          : {}),
+        display_language_source: localeSource,
+        display_language_config_default: configDefaultLocale,
+      }),
+      schema: {
+        display_language: {
+          type: 'keyword',
+          _meta: { description: 'The language this page was shown in.' },
+        },
+        display_language_browser_preference: {
+          type: 'keyword',
+          _meta: {
+            optional: true,
+            description:
+              "The normalized locale the browser's Accept-Language header resolves to, regardless of what the display language resolved to. Absent when the browser's preference cannot be served.",
+          },
+        },
+        display_language_source: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'What chose `display_language`: `profile` (the user saved a language), `cookie` (a previous choice remembered in the browser), `config` (the deployment default, because the user has made no choice), `browser` (the Accept-Language header), or `default` (nothing else applied, so English).',
+          },
+        },
+        display_language_config_default: {
+          type: 'keyword',
+          _meta: {
+            description:
+              "The deployment's configured `i18n.defaultLocale`. Any value other than `en` means the deployment forces a non-English default on users who have made no choice of their own.",
           },
         },
       },
