@@ -47,6 +47,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
   actions: {
     getIpContext: {
       isTool: true,
+      scope: 'read',
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -67,6 +68,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
 
     quickLookup: {
       isTool: true,
+      scope: 'read',
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -84,6 +86,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
 
     getMetadata: {
       isTool: true,
+      scope: 'read',
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -104,6 +107,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
 
     riotLookup: {
       isTool: true,
+      scope: 'read',
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };

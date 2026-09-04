@@ -39,8 +39,20 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
         return { data: stepExecution.input, title: Titles.input };
       } else {
         if (stepExecution.error) {
+          // When a HITL timeout (or other failure) persists partial output, surface
+          // those fields alongside the error so channel / respondedBy / respondedAt
+          // appear in the same field table without a separate callout.
+          const partialOutput =
+            stepExecution.output &&
+            typeof stepExecution.output === 'object' &&
+            !Array.isArray(stepExecution.output)
+              ? (stepExecution.output as Record<string, JsonValue>)
+              : undefined;
           return {
-            data: { error: stepExecution.error as unknown as JsonValue },
+            data: {
+              ...(partialOutput ?? {}),
+              error: stepExecution.error as unknown as JsonValue,
+            },
             title: Titles.error,
           };
         }

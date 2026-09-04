@@ -80,7 +80,7 @@ export const EditTransformFlyout: FC<EditAction> = ({
         ) : (
           <>
             <EuiFlyoutHeader hasBorder>
-              <EuiTitle size="m">
+              <EuiTitle size="s">
                 <h2 id="transformEditFlyoutTitle">
                   {i18n.translate('xpack.transform.transformList.editFlyoutTitle', {
                     defaultMessage: 'Edit {transformId}',

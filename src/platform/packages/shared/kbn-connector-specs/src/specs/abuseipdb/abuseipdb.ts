@@ -44,6 +44,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
   actions: {
     checkIp: {
       isTool: true,
+      scope: 'read',
       description:
         'Check an IPv4 or IPv6 address against AbuseIPDB. Returns abuseConfidenceScore, totalReports, and lastReportedAt. Unknown or clean addresses return score 0 as data (do not treat as an error). Use getIpInfo when you need verbose geo/ISP/domain fields.',
       input: lazySchema(() =>
@@ -121,6 +122,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     getIpInfo: {
       isTool: true,
+      scope: 'read',
       description:
         'Verbose IP enrichment via /check?verbose=true. Prefer this over checkIp when workflows need isPublic, isWhitelisted, domain, or fuller geo/ISP context. Uses the same maxAgeInDays default (90) as checkIp so totalReports and lastReportedAt stay comparable.',
       input: lazySchema(() =>
@@ -157,6 +159,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     bulkCheck: {
       isTool: true,
+      scope: 'read',
       description:
         'Check a CIDR network block via /check-block. Returns network metadata and reported addresses within the block for subnet-level triage.',
       input: lazySchema(() =>
@@ -188,6 +191,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     getBlacklist: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch the AbuseIPDB blacklist feed of most-reported IPs at or above a confidence threshold. Use for blocklist generation and enrichment feeds. Prefer confidenceMinimum 75-100 for denial-of-service style blocking.',
       input: lazySchema(() =>

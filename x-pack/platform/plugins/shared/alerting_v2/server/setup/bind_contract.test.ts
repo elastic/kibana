@@ -17,6 +17,7 @@ import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import type { AlertingServerSetup, AlertingServerStart } from '../types';
 import { bindContract } from './bind_contract';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const AlertingStartToken = Start as ServiceToken<AlertingServerStart>;
 const AlertingSetupToken = Setup as ServiceToken<AlertingServerSetup>;
@@ -82,7 +83,7 @@ describe('bindContract', () => {
     const fakeRequest = { headers: {} } as unknown as KibanaRequest;
     const start = container.get(AlertingStartToken);
 
-    const client = await start.getRulesClientWithRequestInSpace(fakeRequest, 'my-space');
+    const client = await start.getRulesClientWithRequestInSpace(fakeRequest, asSpaceId('my-space'));
 
     expect(client).toBe(mockRulesClient);
     expect(scope.get(Request)).toBe(fakeRequest);
@@ -104,7 +105,10 @@ describe('bindContract', () => {
     const fakeRequest = { headers: {} } as unknown as KibanaRequest;
     const start = container.get(AlertingStartToken);
 
-    const client = await start.getActionPolicyClientWithRequestInSpace(fakeRequest, 'my-space');
+    const client = await start.getActionPolicyClientWithRequestInSpace(
+      fakeRequest,
+      asSpaceId('my-space')
+    );
 
     expect(client).toBe(mockActionPolicyClient);
     expect(scope.get(Request)).toBe(fakeRequest);

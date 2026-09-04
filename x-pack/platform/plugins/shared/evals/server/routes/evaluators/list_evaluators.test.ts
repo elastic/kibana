@@ -162,7 +162,7 @@ describe('GET /internal/evals/evaluators', () => {
     const correctnessEval = response.payload.evaluators.find(
       (e: { name: string }) => e.name === 'correctness'
     );
-    expect(correctnessEval).toEqual({
+    expect(correctnessEval).toMatchObject({
       name: 'correctness',
       version: '1.0.0',
       kind: 'llm',

@@ -8,18 +8,21 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
 import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../common';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useMaintenanceWindowsNavigation } from '../hooks/use_navigation';
+import { useKibana } from '../utils/kibana_react';
 import * as i18n from '../translations';
-import { PageHeader } from './page_header';
 import { CreateMaintenanceWindowForm } from './create_maintenance_windows_form';
 import { useGetMaintenanceWindow } from '../hooks/use_get_maintenance_window';
-import { CenterJustifiedSpinner } from './center_justified_spinner';
 
 export const MaintenanceWindowsEditPage = React.memo(() => {
-  const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();
+  const { docLinks } = useKibana().services;
+  const { navigateToMaintenanceWindows, getMaintenanceWindowsUrl } =
+    useMaintenanceWindowsNavigation();
 
   useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit);
 
@@ -31,22 +34,47 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
     navigateToMaintenanceWindows();
   }
 
+  const header = (
+    <>
+      <AppHeader
+        title={i18n.EDIT_MAINTENANCE_WINDOW}
+        back={{
+          href: getMaintenanceWindowsUrl(),
+          label: i18n.MAINTENANCE_WINDOWS,
+        }}
+        docLink={docLinks.links.alerting.maintenanceWindows}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+    </>
+  );
+
   if (!maintenanceWindow || isLoading) {
-    return <CenterJustifiedSpinner />;
+    return (
+      <>
+        {header}
+        <EuiPageSection alignment="center" color="subdued">
+          <SectionLoading inline data-test-subj="sectionLoading">
+            {i18n.LOADING_MAINTENANCE_WINDOW}
+          </SectionLoading>
+        </EuiPageSection>
+      </>
+    );
   }
 
   return (
-    <EuiPageSection restrictWidth={true}>
-      <PageHeader showBackButton={true} title={i18n.EDIT_MAINTENANCE_WINDOW} />
-      <EuiSpacer size="m" />
-      <CreateMaintenanceWindowForm
-        initialValue={maintenanceWindow}
-        maintenanceWindowId={maintenanceWindowId}
-        showMultipleSolutionsWarning={showMultipleSolutionsWarning}
-        onCancel={navigateToMaintenanceWindows}
-        onSuccess={navigateToMaintenanceWindows}
-      />
-    </EuiPageSection>
+    <>
+      {header}
+      <EuiPageSection restrictWidth>
+        <CreateMaintenanceWindowForm
+          initialValue={maintenanceWindow}
+          maintenanceWindowId={maintenanceWindowId}
+          showMultipleSolutionsWarning={showMultipleSolutionsWarning}
+          onCancel={navigateToMaintenanceWindows}
+          onSuccess={navigateToMaintenanceWindows}
+        />
+      </EuiPageSection>
+    </>
   );
 });
 MaintenanceWindowsEditPage.displayName = 'MaintenanceWindowsEditPage';

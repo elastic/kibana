@@ -11,6 +11,7 @@ import type { ConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import { EsApiKeyStrategy } from './es_api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
   id: 'task-1',
@@ -66,7 +67,11 @@ describe('EsApiKeyStrategy', () => {
 
     test('records a "none" task run for a user-scoped task without an ES apiKey', () => {
       const task = mockTaskInstance({
-        userScope: { apiKeyId: 'es-key-id', spaceId: 'default', apiKeyCreatedByUser: false },
+        userScope: {
+          apiKeyId: 'es-key-id',
+          spaceId: asSpaceId('default'),
+          apiKeyCreatedByUser: false,
+        },
       });
       expect(strategy.getApiKeyForFakeRequest(task)).toBeUndefined();
       expect(recordTaskRunSpy).toHaveBeenCalledWith('none', 'not_set');
@@ -79,7 +84,7 @@ describe('EsApiKeyStrategy', () => {
         apiKey: 'es-key',
         userScope: {
           apiKeyId: 'es-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
         },
       });
@@ -97,7 +102,7 @@ describe('EsApiKeyStrategy', () => {
         apiKey: 'es-key',
         userScope: {
           apiKeyId: 'es-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: true,
         },
       });
@@ -114,7 +119,7 @@ describe('EsApiKeyStrategy', () => {
         userScope: {
           apiKeyId: 'es-key-id',
           uiamApiKeyId: 'uiam-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
         },
       });
@@ -131,7 +136,7 @@ describe('EsApiKeyStrategy', () => {
         userScope: {
           apiKeyId: 'es-key-id',
           uiamApiKeyId: 'uiam-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
         },
       });
@@ -146,7 +151,7 @@ describe('EsApiKeyStrategy', () => {
         userScope: {
           apiKeyId: 'es-key-id',
           uiamApiKeyId: 'uiam-key-id',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: true,
         },
       });

@@ -39,8 +39,19 @@ import {
   isAutocorrectQueryAction,
   isExecuteQueryAction,
   isValidateQueryAction,
+  isRequestDocumentationAction,
 } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
+
+export const requestDocumentationSchema = z
+  .object({
+    commands: z
+      .array(z.string())
+      .optional()
+      .describe('ES|QL source and processing commands to get documentation for.'),
+    functions: z.array(z.string()).optional().describe('ES|QL functions to get documentation for.'),
+  })
+  .describe('Tool to use to request ES|QL documentation');
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -106,22 +117,12 @@ export const createNlToEsqlGraph = ({
 
   // request doc step - retrieve the list of relevant commands and functions that may be useful to generate the query
   const requestDocumentation = async (state: StateType) => {
+    if (state.actions.some(isRequestDocumentationAction)) {
+      return {}; // pre-computed by caller
+    }
+
     const requestDocModel = model.chatModel
-      .withStructuredOutput(
-        z
-          .object({
-            commands: z
-              .array(z.string())
-              .optional()
-              .describe('ES|QL source and processing commands to get documentation for.'),
-            functions: z
-              .array(z.string())
-              .optional()
-              .describe('ES|QL functions to get documentation for.'),
-          })
-          .describe('Tool to use to request ES|QL documentation'),
-        { name: 'request_documentation' }
-      )
+      .withStructuredOutput(requestDocumentationSchema, { name: 'request_documentation' })
       .withConfig(requestDocCallConfig);
 
     const { commands = [], functions = [] } = await requestDocModel.invoke(

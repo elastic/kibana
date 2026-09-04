@@ -9,9 +9,11 @@
 
 import React, { useMemo } from 'react';
 import { useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { CHARTS_TOOLBAR_EBT_ELEMENT, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
+import { METRICS_EBT_CLICK_ACTIONS } from '../../../analytics/ebt_constants';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { SortSelector } from '../sort_selector';
@@ -136,6 +138,10 @@ export const useToolbarActions = ({
               toolTipContent: editGridLabel,
               onClick: onOpenGridSettings,
               'data-test-subj': 'metricsExperienceEditGridButton',
+              ...getEbtProps({
+                action: METRICS_EBT_CLICK_ACTIONS.EDIT_GRID_SETTINGS,
+                element: CHARTS_TOOLBAR_EBT_ELEMENT,
+              }),
             },
           ]
         : []),

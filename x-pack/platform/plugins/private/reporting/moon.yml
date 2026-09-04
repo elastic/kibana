@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/private/reporting
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/actions-plugin'
   - '@kbn/core'
   - '@kbn/data-plugin'

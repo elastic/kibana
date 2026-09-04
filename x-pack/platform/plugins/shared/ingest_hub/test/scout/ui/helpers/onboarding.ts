@@ -13,10 +13,9 @@ import { test } from '../fixtures';
 export const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';
 export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 
-const STEP_TEST_SUBJ: Record<'service-settings' | 'authenticate-and-deploy', string> = {
-  'service-settings': 'onboardingStep-serviceSettings',
-  'authenticate-and-deploy': 'onboardingStep-authenticate-and-deploy',
-};
+// Derives the root test-subj for a step from its id, matching the convention used in each step's
+// root <div data-test-subj={`onboardingStep-${id}`}>.
+const stepSubj = (step: string) => `onboardingStep-${step}`;
 
 export async function mockAwsPackage(page: ScoutPage, response: unknown): Promise<void> {
   await page.route(
@@ -33,7 +32,7 @@ export async function mockAwsPackage(page: ScoutPage, response: unknown): Promis
 export async function navigateToOnboardingStep(
   browserAuth: BrowserAuthFixture,
   page: ScoutPage,
-  step: 'service-settings' | 'authenticate-and-deploy',
+  step: 'services' | 'service-settings' | 'authenticate-and-deploy' | 'detect-and-review',
   opts: {
     selectedServiceIds: string[];
     globalRegion?: string;
@@ -75,7 +74,7 @@ export async function navigateToOnboardingStep(
     }
   );
   await page.reload();
-  await expect(page.testSubj.locator(STEP_TEST_SUBJ[step])).toBeVisible();
+  await expect(page.testSubj.locator(stepSubj(step))).toBeVisible();
 }
 
 export function useOnboardingFeatureFlag(): void {
