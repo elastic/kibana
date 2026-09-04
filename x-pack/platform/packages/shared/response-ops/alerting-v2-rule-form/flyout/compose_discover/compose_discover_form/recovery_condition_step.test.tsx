@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { useForm, FormProvider, type UseFormReturn } from 'react-hook-form';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createTestQueryClient, createMockServices } from '../../../test_utils';
@@ -37,18 +37,23 @@ const BASE_COMPOSE_VALUES: FormValues = {
   stateTransitionRecoveryDelayMode: 'immediate',
 };
 
+let formMethodsRef: UseFormReturn<FormValues> | undefined;
+
 const createComposeFormWrapper = (
   queryOverride?: RuleQuery,
-  services: RuleFormServices = createMockServices()
+  services: RuleFormServices = createMockServices(),
+  recoveryStrategy?: FormValues['recoveryStrategy']
 ) => {
   const queryClient = createTestQueryClient();
   const defaultValues: FormValues = {
     ...BASE_COMPOSE_VALUES,
     ...(queryOverride ? { query: queryOverride } : {}),
+    ...(recoveryStrategy !== undefined ? { recoveryStrategy } : {}),
   };
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
     const form = useForm<FormValues>({ defaultValues });
+    formMethodsRef = form;
     return (
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
@@ -73,6 +78,7 @@ const CUSTOM_RECOVERY_QUERY: RuleQuery = {
 };
 
 const renderRecoveryStep = (
+  recoveryStrategy: FormValues['recoveryStrategy'],
   stateOverrides: Partial<ComposeDiscoverState> = {},
   queryOverride?: RuleQuery
 ) => {
@@ -91,7 +97,7 @@ const renderRecoveryStep = (
       onRecoveryTypeChange={onRecoveryTypeChange}
       renderCustomRecovery={EsqlRecoveryContent}
     />,
-    { wrapper: createComposeFormWrapper(queryOverride, services) }
+    { wrapper: createComposeFormWrapper(queryOverride, services, recoveryStrategy) }
   );
 
   return { dispatch, state, onRecoveryTypeChange, view, services };
@@ -99,13 +105,13 @@ const renderRecoveryStep = (
 
 describe('RecoveryConditionStep', () => {
   it('renders the recovery type selector in default mode', () => {
-    renderRecoveryStep({ recoveryType: 'default' });
+    renderRecoveryStep('no_breach');
 
     expect(screen.getByTestId('composeDiscoverRecoveryType')).toBeInTheDocument();
   });
 
   it('does not render query summaries or edit button in default mode', () => {
-    renderRecoveryStep({ recoveryType: 'default' });
+    renderRecoveryStep('no_breach');
 
     expect(screen.queryByText('Base query')).not.toBeInTheDocument();
     expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
@@ -113,7 +119,7 @@ describe('RecoveryConditionStep', () => {
   });
 
   it('does not render custom recovery content when recovery type is none', () => {
-    renderRecoveryStep({ recoveryType: 'none' });
+    renderRecoveryStep('none');
 
     expect(screen.queryByText('Base query')).not.toBeInTheDocument();
     expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
@@ -121,7 +127,7 @@ describe('RecoveryConditionStep', () => {
   });
 
   it('renders query summaries and edit button in custom mode', () => {
-    renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
+    renderRecoveryStep('query', {}, CUSTOM_RECOVERY_QUERY);
 
     expect(screen.getByText('Base query')).toBeInTheDocument();
     expect(screen.getByText('Recovery condition')).toBeInTheDocument();
@@ -129,14 +135,15 @@ describe('RecoveryConditionStep', () => {
   });
 
   it('disables the edit button when the child flyout is open', () => {
-    renderRecoveryStep({ recoveryType: 'custom', childOpen: true }, CUSTOM_RECOVERY_QUERY);
+    renderRecoveryStep('query', { childOpen: true }, CUSTOM_RECOVERY_QUERY);
 
     expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeDisabled();
   });
 
   it('dispatches OPEN_CHILD_FOR_STEP on edit button click', () => {
     const { dispatch, state } = renderRecoveryStep(
-      { recoveryType: 'custom', childOpen: false, step: 1 },
+      'query',
+      { childOpen: false, step: 1 },
       CUSTOM_RECOVERY_QUERY
     );
 
@@ -146,6 +153,7 @@ describe('RecoveryConditionStep', () => {
       type: 'OPEN_CHILD_FOR_STEP',
       step: state.step,
       isAlert: true,
+      focusedTab: 'recovery',
     });
   });
 
@@ -153,19 +161,11 @@ describe('RecoveryConditionStep', () => {
     // React reports a mismatched hook count as a console.error, not a thrown
     // exception — assert on the former; `.not.toThrow()` would pass either way.
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const { view, dispatch, onRecoveryTypeChange } = renderRecoveryStep(
-      { recoveryType: 'default' },
-      CUSTOM_RECOVERY_QUERY
-    );
+    renderRecoveryStep('no_breach', {}, CUSTOM_RECOVERY_QUERY);
 
-    view.rerender(
-      <RecoveryConditionStep
-        state={createState({ queryCommitted: true, recoveryType: 'custom' })}
-        dispatch={dispatch}
-        onRecoveryTypeChange={onRecoveryTypeChange}
-        renderCustomRecovery={EsqlRecoveryContent}
-      />
-    );
+    act(() => {
+      formMethodsRef?.setValue('recoveryStrategy', 'query', { shouldDirty: true });
+    });
 
     expect(consoleErrorSpy).not.toHaveBeenCalled();
     expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeInTheDocument();

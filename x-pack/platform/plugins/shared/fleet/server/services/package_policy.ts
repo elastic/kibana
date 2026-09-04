@@ -769,7 +769,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .create<PackagePolicySOAttributes>(
         savedObjectType,
         {
-          ...omit(enrichedPackagePolicy, 'cloud_connector_name'),
+          ...omit(enrichedPackagePolicy, 'cloud_connector_name', 'spaceIds'),
           ...(enrichedPackagePolicy.package
             ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -1056,8 +1056,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
-        // eslint-disable-next-line prefer-const
-        let { id, ...pkgPolicyWithoutId } = packagePolicy;
+        const {
+          id,
+          spaceIds: _spaceIds,
+          ...pkgPolicyWithoutIdInit
+        } = packagePolicy as NewPackagePolicyWithId & { spaceIds?: string[] };
+        let pkgPolicyWithoutId = pkgPolicyWithoutIdInit;
 
         const packageInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -1726,8 +1730,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       spaceId: soClient.getCurrentNamespace(),
     });
 
-    // eslint-disable-next-line prefer-const
-    let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+    // spaceIds is a runtime field; strip it so it cannot leak into SO attributes
+    const {
+      version,
+      id: _id,
+      spaceIds: _spaceIds,
+      ...restOfPackagePolicyInit
+    } = packagePolicy as typeof packagePolicy & { spaceIds?: string[] };
+    let restOfPackagePolicy = restOfPackagePolicyInit;
 
     // Internal callers can omit top-level fields (e.g. `vars`) when they only intend to touch
     // a subset of the policy. Without this backfill, `getPolicySecretPaths` and
@@ -2207,9 +2217,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         let secretReferences: SecretReference[] | undefined;
 
         const { version } = packagePolicyUpdate;
-        // id and version are not part of the saved object attributes
-        // eslint-disable-next-line prefer-const
-        let { version: _version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+        // id, version, and spaceIds are not part of the saved object attributes
+        const {
+          version: _version,
+          id: _id,
+          spaceIds: _spaceIds,
+          ...restOfPackagePolicyInit
+        } = packagePolicy as typeof packagePolicy & { spaceIds?: string[] };
+        let restOfPackagePolicy = restOfPackagePolicyInit;
 
         if (restOfPackagePolicy.vars === undefined) {
           restOfPackagePolicy.vars = oldPackagePolicy.vars;
