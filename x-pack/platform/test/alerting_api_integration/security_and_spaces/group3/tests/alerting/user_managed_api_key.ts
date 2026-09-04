@@ -43,7 +43,9 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
     after(() => objectRemover.removeAll());
 
     it('should successfully create rule using API key authorization', async () => {
-      const testRuleData = getTestRuleData({});
+      // The default rule name is shared with rules other suites create, and framework managed keys
+      // are named after the rule, so this rule needs a name of its own to assert against.
+      const testRuleData = getTestRuleData({ name: 'test_user_managed_api_key1' });
       const response = await superTestWithoutAuth
         .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
