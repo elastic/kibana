@@ -13,6 +13,8 @@ import {
   deleteIndex,
   createDataStream,
   deleteDataStream,
+  deleteIndexTemplate,
+  deleteComponentTemplate,
 } from '../../infra/elasticsearch';
 import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
@@ -25,17 +27,18 @@ import {
 } from '../../../common/domain/entity_index';
 import {
   getEntityDefinitionComponentTemplate,
-  getUpdatesEntityDefinitionComponentTemplate,
+  getUpdatesComponentTemplateName,
 } from './component_templates';
 import { getHistorySnapshotIndexTemplateConfig } from './history_snapshot_index_template';
 import {
   getHistorySnapshotIndexPattern,
   getLegacySecurityHistorySnapshotIndexPattern,
 } from './history_snapshot_index';
-import { getUpdatesEntityIndexTemplateConfig } from './updates_index_template';
 import {
   getUpdatesEntitiesDataStreamName,
   getLegacySecurityUpdatesEntitiesDataStreamName,
+  getLegacySecurityUpdatesIndexTemplateId,
+  getUpdatesIndexTemplateId,
 } from './updates_data_stream';
 import { installLatestIndexIngestPipeline } from './latest_index_ingest_pipeline';
 import { getMetadataComponentTemplate } from './metadata_component_templates';
@@ -79,11 +82,7 @@ interface InstallSharedElasticsearchAssetOptions extends SharedElasticsearchAsse
 /**
  * Installs all shared Elasticsearch assets and storage that must exist before per-entity
  * initialization begins: ingest pipeline, component templates (for ALL entity types),
- * index templates, the latest index, and the updates data stream.
- *
- * When Security-scoped `.entities.v2.*.security_{namespace}` assets are present and
- * `allowLegacyMigration` is true, they are migrated to the solution-neutral names
- * after the new templates are installed.
+ * index templates, and the latest index.
  */
 export async function installSharedElasticsearchAssets({
   esClient,
@@ -132,9 +131,7 @@ export async function installSharedElasticsearchAssets({
 }
 
 /**
- * Creates the latest index and updates data stream after the required templates are installed.
- * Does not create a neutral asset while its legacy concrete counterpart still exists, so
- * reads and writes stay on the old index until migration deletes it.
+ * Creates the latest index and data streams after the required templates are installed.
  */
 export async function installIndicesAndDataStreams(
   esClient: ElasticsearchClient,
@@ -143,8 +140,6 @@ export async function installIndicesAndDataStreams(
 ) {
   const targets = await resolveEntityStoreWriteTargets(esClient, namespace);
   const latestIndex = getLatestEntitiesIndexName(namespace);
-  const updatesDataStream = getUpdatesEntitiesDataStreamName(namespace);
-  const metadataDataStream = getMetadataEntitiesDataStreamName(namespace);
 
   await Promise.all([
     (async () => {
@@ -162,26 +157,7 @@ export async function installIndicesAndDataStreams(
     })(),
 
     (async () => {
-      if (targets.updatesDataStream !== updatesDataStream) {
-        logger.debug(
-          `Skipping create of ${updatesDataStream}; writes stay on ${targets.updatesDataStream} until migration deletes it`
-        );
-        return;
-      }
-      await createDataStream(esClient, updatesDataStream, {
-        throwIfExists: false,
-      });
-      logger.debug(`created updates entity data stream in ${namespace}`);
-    })(),
-
-    (async () => {
-      if (targets.metadataDataStream !== metadataDataStream) {
-        logger.debug(
-          `Skipping create of ${metadataDataStream}; writes stay on ${targets.metadataDataStream} until migration deletes it`
-        );
-        return;
-      }
-      await createDataStream(esClient, metadataDataStream, {
+      await createDataStream(esClient, getMetadataEntitiesDataStreamName(namespace), {
         throwIfExists: false,
       });
       logger.debug(`created metadata entity data stream in ${namespace}`);
@@ -198,11 +174,6 @@ async function installIndexTemplates(
     (async () => {
       await putIndexTemplate(esClient, getLatestEntityIndexTemplateConfig(namespace));
       logger.debug(`installed latest index template in ${namespace}`);
-    })(),
-
-    (async () => {
-      await putIndexTemplate(esClient, getUpdatesEntityIndexTemplateConfig(namespace));
-      logger.debug(`installed updates index template in ${namespace}`);
     })(),
 
     (async () => {
@@ -224,24 +195,15 @@ async function installAllComponentTemplates(
 ) {
   const definitions = ALL_ENTITY_TYPES.map((type) => getEntityDefinition(type, namespace));
   await Promise.all([
-    ...definitions.flatMap((definition) => [
+    ...definitions.map((definition) =>
       (async () => {
         await putComponentTemplate(
           esClient,
           getEntityDefinitionComponentTemplate(definition, namespace)
         );
         logger.debug(`installed latest component template for: ${definition.type} in ${namespace}`);
-      })(),
-      (async () => {
-        await putComponentTemplate(
-          esClient,
-          getUpdatesEntityDefinitionComponentTemplate(definition, namespace)
-        );
-        logger.debug(
-          `installed updates component template for: ${definition.type} in ${namespace}`
-        );
-      })(),
-    ]),
+      })()
+    ),
     (async () => {
       await putComponentTemplate(esClient, getMetadataComponentTemplate(namespace));
       logger.debug(`installed metadata component template in ${namespace}`);
@@ -293,6 +255,17 @@ async function uninstallIndicesAndDataStreams(
         await deleteDataStream(esClient, getLegacySecurityUpdatesEntitiesDataStreamName(namespace));
       }
       logger.debug(`deleted entity updates data stream`);
+      await Promise.all([
+        deleteIndexTemplate(esClient, getUpdatesIndexTemplateId(namespace)),
+        deleteIndexTemplate(esClient, getLegacySecurityUpdatesIndexTemplateId(namespace)),
+      ]);
+      logger.debug(`deleted entity updates index templates`);
+      await Promise.all(
+        ALL_ENTITY_TYPES.map((type) =>
+          deleteComponentTemplate(esClient, getUpdatesComponentTemplateName(type, namespace))
+        )
+      );
+      logger.debug(`deleted entity updates component templates`);
     })(),
     (async () => {
       await deleteDataStream(esClient, getMetadataEntitiesDataStreamName(namespace));

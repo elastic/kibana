@@ -21,8 +21,9 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { agentIdCondition, assignAgentById, UNASSIGNED_CONDITION } from './assign_by_condition';
+import { agentIdCondition, assignAgentById } from './assign_by_condition';
 import { PackagePolicyService } from './package_policy_service';
+import * as getPrivateLocationsModule from '../get_private_locations';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
@@ -541,7 +542,7 @@ describe('SyntheticsPrivateLocation', () => {
       expect(policy?.condition).toBe(assignAgentById(testConfig.id, agentIds)?.condition);
     });
 
-    it('uses the unassigned sentinel when no agent is enrolled', async () => {
+    it('omits condition when no agent is enrolled instead of stamping a sentinel pin', async () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
 
       const policy = await syntheticsPrivateLocation.generateNewPolicy(
@@ -556,7 +557,48 @@ describe('SyntheticsPrivateLocation', () => {
         { agentIds: [] }
       );
 
-      expect(policy?.condition).toBe(UNASSIGNED_CONDITION);
+      expect(policy?.condition).toBeUndefined();
+    });
+
+    it('omits condition when shard rebalance is disabled, even with enrolled agents', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds: ['agent-a', 'agent-b'] },
+        undefined,
+        false
+      );
+
+      expect(policy?.condition).toBeUndefined();
+    });
+
+    it('clears an existing pin when shard rebalance is disabled', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const existingCondition = agentIdCondition('agent-a');
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds: ['agent-a', 'agent-b'] },
+        existingCondition,
+        false
+      );
+
+      expect(policy?.condition).toBeNull();
     });
 
     it('preserves the classic payload when no scalable-location condition exists', async () => {
@@ -594,6 +636,275 @@ describe('SyntheticsPrivateLocation', () => {
       );
 
       expect(policy?.condition).toBeNull();
+    });
+
+    it('clears existing agent conditions when editing monitors on a location that is no longer sharded', async () => {
+      const policyId = 'testId-policyId';
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      jest.spyOn(syntheticsPrivateLocation, 'getExistingPolicies').mockResolvedValue({
+        policies: [{ id: policyId, condition: agentIdCondition('agent-a') }],
+        allSpaces: new Set(['default']),
+      });
+      const bulkUpdate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdate')
+        .mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkDelete').mockResolvedValue(undefined);
+
+      await syntheticsPrivateLocation.editMonitors(
+        [{ config: testConfig, globalParams: {} }],
+        [mockPrivateLocation],
+        'default',
+        []
+      );
+
+      expect(bulkUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          policiesToUpdate: [
+            expect.objectContaining({
+              id: policyId,
+              condition: null,
+            }),
+          ],
+        })
+      );
+    });
+
+    it('stamps agent conditions when editing monitors onto a newly sharded location', async () => {
+      const policyId = `testId-${conditionLocation.id}`;
+      const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const config = { ...testConfig, locations: [conditionLocation] };
+      jest.spyOn(syntheticsPrivateLocation, 'getExistingPolicies').mockResolvedValue({
+        policies: [{ id: policyId }],
+        allSpaces: new Set(['default']),
+      });
+      const bulkUpdate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdate')
+        .mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkDelete').mockResolvedValue(undefined);
+
+      await syntheticsPrivateLocation.editMonitors(
+        [{ config, globalParams: {} }],
+        [conditionLocation],
+        'default',
+        []
+      );
+
+      expect(bulkUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          policiesToUpdate: [
+            expect.objectContaining({
+              id: policyId,
+              condition: agentIdCondition('agent-a'),
+            }),
+          ],
+        })
+      );
+    });
+
+    it('does not stamp a sentinel condition when enabling sharding with no enrolled agents', async () => {
+      const policyId = `testId-${conditionLocation.id}`;
+      const listAgents = jest.fn().mockResolvedValue({ agents: [], total: 0 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const config = { ...testConfig, locations: [conditionLocation] };
+      jest.spyOn(syntheticsPrivateLocation, 'getExistingPolicies').mockResolvedValue({
+        policies: [{ id: policyId }],
+        allSpaces: new Set(['default']),
+      });
+      const bulkUpdate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdate')
+        .mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkDelete').mockResolvedValue(undefined);
+
+      await syntheticsPrivateLocation.editMonitors(
+        [{ config, globalParams: {} }],
+        [conditionLocation],
+        'default',
+        []
+      );
+
+      const updated = bulkUpdate.mock.calls[0][0].policiesToUpdate[0];
+      expect(updated.id).toBe(policyId);
+      expect(updated.condition).toBeUndefined();
+    });
+
+    it('does not add a condition when shard rebalance is disabled in settings', async () => {
+      const policyId = `testId-${conditionLocation.id}`;
+      const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          taskManager: {
+            get: jest.fn().mockResolvedValue({
+              state: { rebalancePrivateLocationShardsEnabled: false },
+            }),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const config = { ...testConfig, locations: [conditionLocation] };
+      jest.spyOn(syntheticsPrivateLocation, 'getExistingPolicies').mockResolvedValue({
+        policies: [{ id: policyId }],
+        allSpaces: new Set(['default']),
+      });
+      const bulkUpdate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdate')
+        .mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkDelete').mockResolvedValue(undefined);
+
+      await syntheticsPrivateLocation.editMonitors(
+        [{ config, globalParams: {} }],
+        [conditionLocation],
+        'default',
+        []
+      );
+
+      const updated = bulkUpdate.mock.calls[0][0].policiesToUpdate[0];
+      expect(updated.id).toBe(policyId);
+      expect(updated.condition).toBeUndefined();
+      expect(listAgents).not.toHaveBeenCalled();
+    });
+
+    it('clears an existing pin on edit when shard rebalance is disabled in settings', async () => {
+      const policyId = `testId-${conditionLocation.id}`;
+      const existingCondition = agentIdCondition('agent-a');
+      const listAgents = jest.fn().mockResolvedValue({
+        agents: [{ id: 'agent-a' }, { id: 'agent-b' }],
+        total: 2,
+      });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          taskManager: {
+            get: jest.fn().mockResolvedValue({
+              state: { rebalancePrivateLocationShardsEnabled: false },
+            }),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const config = { ...testConfig, locations: [conditionLocation] };
+      jest.spyOn(syntheticsPrivateLocation, 'getExistingPolicies').mockResolvedValue({
+        policies: [{ id: policyId, condition: existingCondition }],
+        allSpaces: new Set(['default']),
+      });
+      const bulkUpdate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdate')
+        .mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkDelete').mockResolvedValue(undefined);
+
+      await syntheticsPrivateLocation.editMonitors(
+        [{ config, globalParams: {} }],
+        [conditionLocation],
+        'default',
+        []
+      );
+
+      const updated = bulkUpdate.mock.calls[0][0].policiesToUpdate[0];
+      expect(updated.condition).toBeNull();
+      expect(listAgents).not.toHaveBeenCalled();
+    });
+
+    it('does not add a condition on create when shard rebalance is disabled in settings', async () => {
+      const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          taskManager: {
+            get: jest.fn().mockResolvedValue({
+              state: { rebalancePrivateLocationShardsEnabled: false },
+            }),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const bulkCreate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+        .mockResolvedValue({
+          created: [],
+          failed: [],
+        });
+
+      await syntheticsPrivateLocation.createPackagePolicies(
+        [{ config: { ...testConfig, locations: [conditionLocation] }, globalParams: {} }],
+        [conditionLocation],
+        'default',
+        []
+      );
+
+      const created = bulkCreate.mock.calls[0][0].newPolicies[0];
+      expect(created.condition).toBeUndefined();
+      expect(listAgents).not.toHaveBeenCalled();
     });
 
     it('resolves a scalable location once per batch and paginates its enrolled agents', async () => {
@@ -755,6 +1066,106 @@ describe('SyntheticsPrivateLocation', () => {
         })
       );
     });
+
+    it('omits condition when inspecting while shard rebalance is disabled', async () => {
+      const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          taskManager: {
+            get: jest.fn().mockResolvedValue({
+              state: { rebalancePrivateLocationShardsEnabled: false },
+            }),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const inspect = jest
+        .spyOn(PackagePolicyService.prototype, 'inspect')
+        .mockResolvedValue(testMonitorPolicy);
+
+      await syntheticsPrivateLocation.inspectPackagePolicy({
+        privateConfig: {
+          config: { ...testConfig, locations: [conditionLocation] },
+          globalParams: {},
+        },
+        allPrivateLocations: [conditionLocation],
+        maintenanceWindows: [],
+        spaceId: 'default',
+      });
+
+      expect(inspect.mock.calls[0][0].packagePolicy.condition).toBeUndefined();
+      expect(listAgents).not.toHaveBeenCalled();
+    });
+
+    it('clears agent pins only on scalable private-location package policies', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        { id: 'loc-1', agentPolicyId: 'ap-1', isAgentSharding: true },
+        { id: 'loc-2', agentPolicyId: 'ap-1', isAgentSharding: true },
+        { id: 'loc-3', agentPolicyId: 'ap-2', isAgentSharding: true },
+      ] as never);
+      const listByAgentPolicy = jest
+        .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
+        .mockResolvedValueOnce([
+          {
+            id: 'm1-loc-1',
+            condition: agentIdCondition('agent-a'),
+            spaceIds: ['default'],
+            version: 'WzAsMV0=',
+            revision: 1,
+          },
+          { id: 'm2-loc-1', spaceIds: ['default'], version: 'WzAsMV0=', revision: 1 },
+        ] as never)
+        .mockResolvedValueOnce([]);
+      const bulkUpdateInSpace = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockResolvedValue([]);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).clearShardConditions();
+
+      expect(listByAgentPolicy).toHaveBeenCalledTimes(2);
+      expect(listByAgentPolicy).toHaveBeenCalledWith({ agentPolicyId: 'ap-1' });
+      expect(listByAgentPolicy).toHaveBeenCalledWith({ agentPolicyId: 'ap-2' });
+      expect(bulkUpdateInSpace).toHaveBeenCalledWith({
+        spaceId: 'default',
+        policiesToUpdate: [
+          expect.objectContaining({
+            update: expect.objectContaining({
+              id: 'm1-loc-1',
+              attributes: expect.objectContaining({ condition: null }),
+            }),
+          }),
+        ],
+      });
+      expect(result.cleared).toBe(1);
+      expect(result.failed).toBe(0);
+    });
+
+    it('does not list Fleet policies for classic private locations', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        { id: 'classic', agentPolicyId: 'ap-classic' },
+        { id: 'sharded', agentPolicyId: 'ap-sharded', isAgentSharding: true },
+      ] as never);
+      const listByAgentPolicy = jest
+        .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
+        .mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace').mockResolvedValue([]);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).clearShardConditions();
+
+      expect(listByAgentPolicy).toHaveBeenCalledTimes(1);
+      expect(listByAgentPolicy).toHaveBeenCalledWith({ agentPolicyId: 'ap-sharded' });
+      expect(listByAgentPolicy).not.toHaveBeenCalledWith({ agentPolicyId: 'ap-classic' });
+      expect(result.cleared).toBe(0);
+      expect(result.failed).toBe(0);
+    });
   });
 
   it('formats monitors stream properly', () => {
@@ -778,8 +1189,7 @@ describe('SyntheticsPrivateLocation', () => {
       vars: {
         __ui: {
           type: 'yaml',
-          value:
-            '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":true}',
+          value: null,
         },
         config_id: {
           type: 'text',
@@ -800,6 +1210,10 @@ describe('SyntheticsPrivateLocation', () => {
         ignore_https_errors: {
           type: 'bool',
           value: false,
+        },
+        certificate_error_spki_allowlist: {
+          type: 'yaml',
+          value: null,
         },
         location_name: {
           type: 'text',
@@ -823,7 +1237,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         screenshots: {
           type: 'text',
-          value: 'on',
+          value: null,
         },
         'service.name': {
           type: 'text',
@@ -913,6 +1327,7 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   'filter_journeys.match': '',
   'filter_journeys.tags': [],
   ignore_https_errors: false,
+  certificate_error_spki_allowlist: [],
   throttling: { value: { download: '5', upload: '3', latency: '20' }, label: 'test', id: 'test' },
   id: '75cdd125-5b62-4459-870c-46f59bf37e89',
   config_id: '75cdd125-5b62-4459-870c-46f59bf37e89',

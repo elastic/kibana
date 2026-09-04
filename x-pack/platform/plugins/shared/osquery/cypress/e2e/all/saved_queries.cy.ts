@@ -127,7 +127,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
       // save new query from the detail page
       cy.contains('Exit full screen').should('not.exist');
-      navigateTo('/app/osquery/live_queries');
+      navigateTo('/app/osquery/history');
       cy.get('tbody tr', { timeout: 60000 })
         .first()
         .within(() => {
@@ -256,7 +256,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       // Navigate to page 2 where users_elastic is located
       cy.getBySel('pagination-button-1').click();
       cy.get(rowActionsMenuSelector('users_elastic')).click();
-      cy.contains('Edit query').click();
+      cy.contains('View query').click();
       cy.contains('Delete query').should('not.exist');
       navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
 

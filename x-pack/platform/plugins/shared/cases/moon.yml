@@ -109,6 +109,7 @@ dependsOn:
   - '@kbn/openapi-generator'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows'
+  - '@kbn/workflows-management-plugin'
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'

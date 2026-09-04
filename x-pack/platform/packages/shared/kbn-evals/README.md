@@ -363,6 +363,7 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
       {
         name: 'equals',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output, expected }) => ({
           score: output?.content === expected?.content ? 1 : 0,
           metadata: { output: output?.content, expected: expected?.content },
@@ -372,6 +373,14 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
   );
 });
 ```
+
+`direction` sets the optimization goal for this evaluator's score:
+
+| Value      | When to use                          |
+| ---------- | ------------------------------------ |
+| `maximize` | Higher is better (quality, accuracy) |
+| `minimize` | Lower is better (latency)            |
+| `neutral`  | No clear better direction            |
 
 ### Tagging datasets
 
@@ -423,7 +432,7 @@ Built-in evaluator factories you can use directly or as inspiration for custom e
   - `Groundedness` -- verifies claims are supported by provided context
 - **Trace-based** -- `createTraceBasedEvaluator` (token usage, latency, tool calls), `createSkillInvocationEvaluator` (checks agent skill reads)
 - **RAG** -- `createRagEvaluators` (Precision@K, Recall@K, F1@K)
-- **Code evaluators** -- any inline `{ name, kind: 'CODE', evaluate }` object
+- **Code evaluators** -- any inline `{ name, kind: 'CODE', direction, evaluate }` object
 
 You can use these as-is or build your own directly in the suite.
 

@@ -36,6 +36,12 @@ const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
 export const DEFAULT_TASK_SCHEDULE = `${MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}m`;
 
+/**
+ * Consecutive no-progress cleanup passes tolerated before cleanup gives up, so a
+ * recreate that can never succeed stops re-running every interval.
+ */
+export const DEFAULT_MAX_CLEANUP_RETRIES = 3;
+
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
   hasAlreadyDoneCleanup: boolean;
@@ -47,6 +53,12 @@ export interface SyncTaskState extends Record<string, unknown> {
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
   state: Partial<SyncTaskState>;
 };
+
+// TM forbids `runAt` and `schedule` on the same result object.
+export type SyncTaskRunResult =
+  | { state: SyncTaskState; error?: Error; schedule: IntervalSchedule | RruleSchedule }
+  | { state: SyncTaskState; error?: Error; runAt: Date }
+  | { state: SyncTaskState; error?: Error };
 
 export class SyncPrivateLocationMonitorsTask {
   public deployPackagePolicies: DeployPrivateLocationMonitors;
@@ -79,11 +91,11 @@ export class SyncPrivateLocationMonitorsTask {
     });
   }
 
-  public async runTask({ taskInstance }: { taskInstance: CustomTaskInstance }): Promise<{
-    state: SyncTaskState;
-    error?: Error;
-    schedule?: IntervalSchedule | RruleSchedule;
-  }> {
+  public async runTask({
+    taskInstance,
+  }: {
+    taskInstance: CustomTaskInstance;
+  }): Promise<SyncTaskRunResult> {
     this.debugLog(
       `Syncing private location monitors, current task state is ${JSON.stringify(
         taskInstance.state
@@ -224,6 +236,15 @@ export class SyncPrivateLocationMonitorsTask {
           );
         }
       }
+
+      // Only `updatedAt` after this run's start — missing IDs persist after a
+      // sync and would schedule follow-ups forever.
+      if (await this.haveMWsUpdatedSince(taskState.lastStartedAt, monitorMwsIds)) {
+        this.debugLog(
+          `Maintenance windows changed during this run; scheduling an immediate follow-up`
+        );
+        return { state: taskState, runAt: new Date() };
+      }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
       return { error, state: taskState, schedule: { interval } };
@@ -240,7 +261,7 @@ export class SyncPrivateLocationMonitorsTask {
       hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
       // `??`, not `||`: a persisted 0 means the budget is spent, and `||` would
       // silently hand back a fresh 3 and re-run cleanup on every interval forever
-      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries ?? 3,
+      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries ?? DEFAULT_MAX_CLEANUP_RETRIES,
       disableAutoSync: taskInstance.state.disableAutoSync ?? false,
     };
   }
@@ -352,6 +373,19 @@ export class SyncPrivateLocationMonitorsTask {
     };
   }
 
+  async haveMWsUpdatedSince(sinceIso: string, monitorMwsIds: string[]): Promise<boolean> {
+    const { syntheticsService } = this.syntheticsMonitorClient;
+    const maintenanceWindows = (await syntheticsService.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
+    const monitorMwIds = new Set(monitorMwsIds);
+    return maintenanceWindows.some((mw) => {
+      if (!monitorMwIds.has(mw.id)) {
+        return false;
+      }
+      const updatedAt = mw.updatedAt;
+      return Boolean(updatedAt) && moment(updatedAt).isAfter(moment(sinceIso));
+    });
+  }
+
   async cleanUpDuplicatedPackagePolicies(
     soClient: SavedObjectsClientContract,
     taskState: SyncTaskState
@@ -364,6 +398,16 @@ export class SyncPrivateLocationMonitorsTask {
   };
 }
 
+/**
+ * Asks task manager to run the private-location sync task now.
+ *
+ * Throws when scheduling ultimately fails (for example the task is already
+ * running and cannot be re-run within the retry window). Callers that answer an
+ * HTTP request must propagate that: a swallowed failure meant the caller was told
+ * the sync had been scheduled when nothing had been, and the work only happened
+ * whenever the periodic interval next came around. Fire-and-forget callers are
+ * expected to attach their own `catch`.
+ */
 export const runSynPrivateLocationMonitorsTaskSoon = async ({
   server,
   retries = 5,
@@ -391,15 +435,19 @@ export const runSynPrivateLocationMonitorsTaskSoon = async ({
       `Error scheduling Synthetics sync private location monitors task: ${error.message}`,
       { error }
     );
+    throw error;
   }
 };
 
 export const resetSyncPrivateCleanUpState = async ({
   server,
   hasAlreadyDoneCleanup = false,
+  retries,
 }: {
   server: SyntheticsServerSetup;
   hasAlreadyDoneCleanup: boolean;
+  /** Scheduling attempts before giving up; bounds how long the caller blocks. */
+  retries?: number;
 }) => {
   const {
     logger,
@@ -409,8 +457,13 @@ export const resetSyncPrivateCleanUpState = async ({
   await taskManager.bulkUpdateState([PRIVATE_LOCATIONS_SYNC_TASK_ID], (state) => ({
     ...state,
     hasAlreadyDoneCleanup,
+    // Requesting cleanup must also restore the retry budget. The budget is shared
+    // with the periodic runs, so without this an explicit request could inherit a
+    // budget those runs had already spent — cleanup would then be skipped outright
+    // while this call still reported success.
+    ...(hasAlreadyDoneCleanup ? {} : { maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES }),
   }));
-  await runSynPrivateLocationMonitorsTaskSoon({ server });
+  await runSynPrivateLocationMonitorsTaskSoon({ server, retries });
   logger.debug(`Synthetics sync private location monitors cleanup state reset successfully`);
 };
 
@@ -446,8 +499,14 @@ export const runTaskPerPrivateLocation = async ({
     pluginsStart: { taskManager },
   } = server;
 
-  await taskManager.ensureScheduled({
-    id: `${TASK_TYPE}:${privateLocationId}`,
+  // `schedule`, not `ensureScheduled`: this is one-shot work, and a fixed id made
+  // it unreliable. `ensureScheduled` only updates the schedule of an existing task
+  // (and only for interval schedules), so a still-pending or in-flight instance
+  // left by an earlier cleanup silently swallowed this request — the policies
+  // cleanup had just deleted were then never recreated. A fresh instance per
+  // request always runs; the sync itself is idempotent, and the cleanup retry
+  // budget bounds how many can be queued.
+  await taskManager.schedule({
     params: {},
     taskType: TASK_TYPE,
     runAt: new Date(Date.now() + 3 * 1000),

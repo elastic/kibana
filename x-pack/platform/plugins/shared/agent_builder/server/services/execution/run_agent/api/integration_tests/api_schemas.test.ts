@@ -5,10 +5,35 @@
  * 2.0.
  */
 
-import { toDescribedSchema } from '../describe_schema';
+import type { ApiTarget } from '@kbn/agent-builder-common';
+import { toDescribedDefinition, toDescribedSchema } from '../describe_schema';
 import { getRegistries } from '../registry';
 import { getValidator } from '../validate_params';
-import type { ApiTarget } from '../types';
+
+// Ceiling for a described API schema, and for the expansion of any type it stubs.
+const MAX_DESCRIBED_CHARS = 40_000;
+
+interface ApiInput {
+  id: string;
+  input: Record<string, unknown>;
+}
+
+const loadApiInputs = async (target: ApiTarget): Promise<ApiInput[]> => {
+  const registries = await getRegistries();
+  const registry = registries[target];
+  const inputs: ApiInput[] = [];
+
+  for (const meta of registry.manifest) {
+    const { definition } = await registry.loadApi(meta.id);
+    if (definition.input) {
+      inputs.push({ id: meta.id, input: definition.input });
+    }
+  }
+
+  return inputs;
+};
+
+const isLocalRef = (ref: string): boolean => ref === '#' || ref.startsWith('#/$defs/');
 
 const collectRefs = (node: unknown, found: string[]): string[] => {
   if (Array.isArray(node)) {
@@ -28,19 +53,17 @@ const collectRefs = (node: unknown, found: string[]): string[] => {
   return found;
 };
 
-const collectKeys = (node: unknown, found: Set<string>): Set<string> => {
+const crossFileRefs = (node: unknown): string[] =>
+  collectRefs(node, []).filter((ref) => !isLocalRef(ref));
+
+const containsKey = (node: unknown, key: string): boolean => {
   if (Array.isArray(node)) {
-    node.forEach((item) => collectKeys(item, found));
-    return found;
+    return node.some((item) => containsKey(item, key));
   }
   if (typeof node !== 'object' || node === null) {
-    return found;
+    return false;
   }
-  for (const [key, value] of Object.entries(node)) {
-    found.add(key);
-    collectKeys(value, found);
-  }
-  return found;
+  return Object.entries(node).some(([name, value]) => name === key || containsKey(value, key));
 };
 
 describe('@elastic/schemas registries', () => {
@@ -112,63 +135,35 @@ describe('@elastic/schemas registries', () => {
     it.each<ApiTarget>(['elasticsearch', 'kibana'])(
       'builds a validator for every %s API',
       async (target) => {
-        const registries = await getRegistries();
-        const registry = registries[target];
+        const problems: string[] = [];
 
-        for (const meta of registry.manifest) {
-          const { definition } = await registry.loadApi(meta.id);
-          if (!definition.input) {
-            continue;
+        for (const { id, input } of await loadApiInputs(target)) {
+          try {
+            await getValidator(target, input);
+          } catch (error) {
+            problems.push(`${id}: ${error instanceof Error ? error.message : String(error)}`);
           }
-          const validate = await getValidator(target, definition.input);
-          expect(typeof validate).toBe('function');
         }
+
+        expect(problems).toEqual([]);
       }
     );
   });
 
   describe('toDescribedSchema', () => {
-    it.each<ApiTarget>(['elasticsearch', 'kibana'])(
-      'leaves no cross-file reference in the described schema for any %s API',
-      async (target) => {
-        const registries = await getRegistries();
-        const registry = registries[target];
+    it('leaves no cross-file reference in the described schema for any elasticsearch API', async () => {
+      const problems: string[] = [];
 
-        for (const meta of registry.manifest) {
-          const { definition } = await registry.loadApi(meta.id);
-          if (!definition.input) {
-            continue;
-          }
-
-          const resolved = await toDescribedSchema(target, definition.input);
-          const unresolved = collectRefs(resolved, []).filter((ref) => !ref.startsWith('#/$defs/'));
-
-          expect({ api: meta.id, unresolved }).toEqual({ api: meta.id, unresolved: [] });
+      for (const { id, input } of await loadApiInputs('elasticsearch')) {
+        const { schema } = await toDescribedSchema('elasticsearch', input);
+        const unresolved = crossFileRefs(schema);
+        if (unresolved.length > 0) {
+          problems.push(`${id}: ${unresolved.join(', ')}`);
         }
       }
-    );
 
-    it.each<ApiTarget>(['elasticsearch', 'kibana'])(
-      'leaves no routing annotation in the described schema for any %s API',
-      async (target) => {
-        const registries = await getRegistries();
-        const registry = registries[target];
-
-        for (const meta of registry.manifest) {
-          const { definition } = await registry.loadApi(meta.id);
-          if (!definition.input) {
-            continue;
-          }
-
-          const described = await toDescribedSchema(target, definition.input);
-
-          expect({
-            api: meta.id,
-            routed: collectKeys(described, new Set()).has('x-found-in'),
-          }).toEqual({ api: meta.id, routed: false });
-        }
-      }
-    );
+      expect(problems).toEqual([]);
+    });
 
     it('keeps the description a parameter hangs off its own reference', async () => {
       // Every `$ref` parameter on this API documents itself, so dropping the keys that sit
@@ -176,8 +171,8 @@ describe('@elastic/schemas registries', () => {
       const { elasticsearch } = await getRegistries();
       const { definition } = await elasticsearch.loadApi('cluster.health');
 
-      const described = await toDescribedSchema('elasticsearch', definition.input!);
-      const properties = described.properties as Record<string, Record<string, unknown>>;
+      const { schema } = await toDescribedSchema('elasticsearch', definition.input!);
+      const properties = schema.properties as Record<string, Record<string, unknown>>;
 
       expect(properties.timeout).toEqual({
         $ref: '#/$defs/_types__Duration',
@@ -193,22 +188,59 @@ describe('@elastic/schemas registries', () => {
       const { elasticsearch } = await getRegistries();
       const { definition } = await elasticsearch.loadApi('cluster.health');
 
-      const resolved = await toDescribedSchema('elasticsearch', definition.input!);
-      const defs = resolved.$defs as Record<string, { description?: string }>;
+      const { schema } = await toDescribedSchema('elasticsearch', definition.input!);
+      const defs = schema.$defs as Record<string, { description?: string }>;
 
       expect(Object.keys(defs)).toContain('_types__Duration');
       expect(defs._types__Duration.description).toEqual(expect.any(String));
     });
 
-    it('keeps the recursive mapping types from exploding the described schema', async () => {
-      // `indices.create` closes over ~450 definitions. Inlining them all produces ~400k
-      // characters, so the budget has to stub the oversized ones out.
+    it.each<ApiTarget>(['elasticsearch', 'kibana'])(
+      'keeps the described schema of every %s API within the size ceiling',
+      async (target) => {
+        // `indices.create` alone closes over ~450 definitions. Inlining them all produces ~400k
+        // characters, so the budget has to stub the oversized ones out.
+        const problems: string[] = [];
+
+        for (const { id, input } of await loadApiInputs(target)) {
+          const { schema } = await toDescribedSchema(target, input);
+          const chars = JSON.stringify(schema).length;
+          if (chars > MAX_DESCRIBED_CHARS) {
+            problems.push(`${id}: ${chars}`);
+          }
+        }
+
+        expect(problems).toEqual([]);
+      }
+    );
+
+    it('conveys the query and aggregation types the search API accepts', async () => {
       const { elasticsearch } = await getRegistries();
-      const { definition } = await elasticsearch.loadApi('indices.create');
+      const { definition } = await elasticsearch.loadApi('search');
 
-      const resolved = await toDescribedSchema('elasticsearch', definition.input!);
+      const { schema, expandableTypes } = await toDescribedSchema(
+        'elasticsearch',
+        definition.input!
+      );
+      const properties = schema.properties as Record<string, Record<string, unknown>>;
+      const aggregations = properties.aggregations.additionalProperties as Record<string, unknown>;
 
-      expect(JSON.stringify(resolved).length).toBeLessThan(40_000);
+      expect(properties.query['x-expandable']).toBe('_types.query_dsl__QueryContainer');
+      expect(properties.query['x-properties']).toEqual(
+        expect.arrayContaining(['bool', 'range', 'term'])
+      );
+
+      expect(aggregations['x-expandable']).toBe('_types.aggregations__AggregationContainer');
+      expect(aggregations['x-properties']).toEqual(
+        expect.arrayContaining(['date_histogram', 'terms', 'avg'])
+      );
+
+      expect(expandableTypes).toEqual(
+        expect.arrayContaining([
+          '_types.aggregations__AggregationContainer',
+          '_types.query_dsl__QueryContainer',
+        ])
+      );
     });
 
     it('keeps definition names unique across shared files so a flat $defs block is safe', async () => {
@@ -218,23 +250,20 @@ describe('@elastic/schemas registries', () => {
       const owners = new Map<string, string>();
       const collisions: string[] = [];
 
-      const { elasticsearch } = await getRegistries();
-
-      for (const meta of elasticsearch.manifest) {
-        const { definition } = await elasticsearch.loadApi(meta.id);
-        if (!definition.input) {
-          continue;
-        }
-        for (const ref of collectRefs(definition.input, [])) {
+      for (const { input } of await loadApiInputs('elasticsearch')) {
+        for (const ref of crossFileRefs(input)) {
           const [file, pointer] = ref.split('#');
           const name = pointer?.replace('/$defs/', '');
           if (!file || !name) {
             continue;
           }
-          if (owners.has(name) && owners.get(name) !== file) {
-            collisions.push(`${name}: ${owners.get(name)} vs ${file}`);
+
+          const owner = owners.get(name);
+          if (!owner) {
+            owners.set(name, file);
+          } else if (owner !== file) {
+            collisions.push(`${name}: ${owner} vs ${file}`);
           }
-          owners.set(name, file);
         }
       }
 
@@ -243,14 +272,86 @@ describe('@elastic/schemas registries', () => {
     });
   });
 
-  describe('NDJSON APIs', () => {
-    it('still models no body parameter, which is why execute refuses them', async () => {
-      // If this starts failing, upstream has added a way to supply the payload and the NDJSON
-      // refusal in execute.ts can be revisited.
-      const { elasticsearch } = await getRegistries();
+  describe('toDescribedDefinition', () => {
+    it('describes every type stubbed by an elasticsearch API without leaking a cross-file reference', async () => {
+      const stubbedBy = new Map<string, ApiInput>();
 
-      for (const id of ['bulk', 'msearch']) {
+      for (const api of await loadApiInputs('elasticsearch')) {
+        const { expandableTypes } = await toDescribedSchema('elasticsearch', api.input);
+        for (const type of expandableTypes) {
+          if (!stubbedBy.has(type)) {
+            stubbedBy.set(type, api);
+          }
+        }
+      }
+
+      const problems: string[] = [];
+
+      for (const [type, api] of stubbedBy) {
+        const described = await toDescribedDefinition('elasticsearch', api.input, type);
+        if (!described) {
+          problems.push(`${type}: not found in the closure of "${api.id}"`);
+          continue;
+        }
+
+        const unresolved = crossFileRefs(described.schema);
+        if (unresolved.length > 0) {
+          problems.push(`${type}: unresolved ${unresolved.join(', ')}`);
+        }
+        if (containsKey(described.schema, 'x-found-in')) {
+          problems.push(`${type}: kept a routing annotation`);
+        }
+
+        const chars = JSON.stringify(described.schema).length;
+        if (chars > MAX_DESCRIBED_CHARS) {
+          problems.push(`${type}: ${chars}`);
+        }
+      }
+
+      expect(problems).toEqual([]);
+    });
+
+    it('spells out the query types the search API only stubbed', async () => {
+      const { elasticsearch } = await getRegistries();
+      const { definition } = await elasticsearch.loadApi('search');
+
+      const described = await toDescribedDefinition(
+        'elasticsearch',
+        definition.input!,
+        '_types.query_dsl__QueryContainer'
+      );
+
+      const properties = described!.schema.properties as Record<string, Record<string, unknown>>;
+      expect(Object.keys(properties)).toEqual(expect.arrayContaining(['bool', 'range', 'term']));
+
+      expect(properties.bool).toEqual(
+        expect.objectContaining({
+          'x-expandable': '_types.query_dsl__BoolQuery',
+          'x-properties': expect.arrayContaining(['filter', 'must', 'must_not', 'should']),
+        })
+      );
+      expect(described!.expandableTypes).toContain('_types.query_dsl__BoolQuery');
+    });
+
+    it('returns nothing for a type the API does not reach', async () => {
+      const { elasticsearch } = await getRegistries();
+      const { definition } = await elasticsearch.loadApi('cluster.health');
+
+      await expect(
+        toDescribedDefinition('elasticsearch', definition.input!, 'NotAType')
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('NDJSON APIs', () => {
+    it.each(['bulk', 'msearch'])(
+      '%s still models no body parameter, which is why execute refuses it',
+      async (id) => {
+        // If this starts failing, upstream has added a way to supply the payload and the NDJSON
+        // refusal in execute.ts can be revisited.
+        const { elasticsearch } = await getRegistries();
         const { definition } = await elasticsearch.loadApi(id);
+
         expect(definition.bodyFormat).toBe('ndjson');
 
         const properties = (definition.input?.properties ?? {}) as Record<
@@ -260,6 +361,6 @@ describe('@elastic/schemas registries', () => {
         const locations = Object.values(properties).map((spec) => spec['x-found-in']);
         expect(locations).not.toContain('body');
       }
-    });
+    );
   });
 });

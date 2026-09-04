@@ -9,8 +9,13 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
+import {
+  type WorkflowDetailDto,
+  type WorkflowExecutionEngineModel,
+  WorkflowsManagementApiActions,
+} from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,
@@ -18,16 +23,43 @@ import {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { z } from '@kbn/zod/v4';
+import {
+  resumeWorkflowExecutionExternallyViaGet,
+  resumeWorkflowExecutionExternallyWithInput,
+} from './external_resume/external_resume_service';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
+import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import {
+  type AlertPreprocessingContext,
+  type SmlIndexAttachmentFn,
+  WorkflowsManagementApi,
+} from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
+
+jest.mock('./external_resume/external_resume_service', () => ({
+  ...jest.requireActual('./external_resume/external_resume_service'),
+  resumeWorkflowExecutionExternallyViaGet: jest.fn(),
+  resumeWorkflowExecutionExternallyWithInput: jest.fn(),
+}));
+
+const mockResumeExternallyViaGet = resumeWorkflowExecutionExternallyViaGet as jest.MockedFunction<
+  typeof resumeWorkflowExecutionExternallyViaGet
+>;
+const mockResumeExternallyWithInput =
+  resumeWorkflowExecutionExternallyWithInput as jest.MockedFunction<
+    typeof resumeWorkflowExecutionExternallyWithInput
+  >;
+
+jest.mock('./routes/executions/utils/preprocess_alert_inputs');
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
   let mockWorkflowsService: jest.Mocked<WorkflowsService>;
   let mockRequest: KibanaRequest;
   let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
+  const logger = loggingSystemMock.createLogger();
+  const mockPreprocessAlertInputs = jest.mocked(preprocessAlertInputs);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,6 +71,7 @@ describe('WorkflowsManagementApi', () => {
       workflowExecutionId: 'sched-exec-id',
     });
     mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
+    mockPreprocessAlertInputs.mockImplementation(async (inputs) => inputs);
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
@@ -58,7 +91,7 @@ describe('WorkflowsManagementApi', () => {
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
     } as any;
 
-    api = new WorkflowsManagementApi(mockWorkflowsService, true);
+    api = new WorkflowsManagementApi(mockWorkflowsService, true, logger);
     const mockZodSchema = createMockZodSchema();
     mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
     mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
@@ -407,7 +440,14 @@ steps:
       it('should throw error when YAML validation fails', async () => {
         mockWorkflowsService.validateWorkflow.mockResolvedValue({
           valid: false,
-          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
+          diagnostics: [
+            {
+              severity: 'error',
+              message: 'Invalid YAML',
+              source: 'schema',
+              ruleId: 'schemaViolation',
+            },
+          ],
         });
 
         await expect(
@@ -548,7 +588,14 @@ steps:
         });
         mockWorkflowsService.validateWorkflow.mockResolvedValue({
           valid: false,
-          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
+          diagnostics: [
+            {
+              severity: 'error',
+              message: 'Invalid YAML',
+              source: 'schema',
+              ruleId: 'schemaViolation',
+            },
+          ],
         });
 
         await expect(
@@ -660,6 +707,112 @@ steps:
           mockRequest
         );
       });
+    });
+  });
+
+  describe('runWorkflowWithAlertPreprocessing', () => {
+    it('preprocesses alert inputs with the request context before starting the workflow', async () => {
+      const workflow = {
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Test workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+        },
+        yaml: 'name: Test workflow',
+      } as WorkflowExecutionEngineModel;
+      const inputs = {
+        event: {
+          triggerType: 'alert',
+          alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
+        },
+      };
+      const processedInputs = {
+        event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] },
+        investigation: 'case-1',
+      };
+      const context = {} as AlertPreprocessingContext;
+      const metadata = { caseIds: ['case-1'] };
+      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+
+      await expect(
+        api.runWorkflowWithAlertPreprocessing({
+          workflow,
+          spaceId: 'default',
+          inputs,
+          request: mockRequest,
+          preprocessingContext: context,
+          metadata,
+        })
+      ).resolves.toEqual({
+        workflowExecutionId: 'test-exec-id',
+      });
+
+      expect(mockPreprocessAlertInputs).toHaveBeenCalledWith(inputs, context, 'default', logger);
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        workflow,
+        {
+          event: processedInputs.event,
+          spaceId: 'default',
+          inputs: { investigation: 'case-1' },
+          triggeredBy: undefined,
+          metadata,
+        },
+        mockRequest
+      );
+    });
+
+    it('merges eventOverrides into event after preprocessing so caller-owned fields survive event replacement', async () => {
+      const workflow = {
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Test workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+        },
+        yaml: 'name: Test workflow',
+      } as WorkflowExecutionEngineModel;
+      const inputs = {
+        event: {
+          triggerType: 'alert',
+          alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
+        },
+      };
+      // preprocessAlertInputs replaces the whole event — caseIds would be lost without overrides.
+      const processedInputs = {
+        event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] },
+      };
+      const context = {} as AlertPreprocessingContext;
+      const eventOverrides = { caseIds: ['case-1'] };
+      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+
+      const result = await api.runWorkflowWithAlertPreprocessing({
+        workflow,
+        spaceId: 'default',
+        inputs,
+        request: mockRequest,
+        preprocessingContext: context,
+        eventOverrides,
+      });
+
+      // The engine receives the merged event (processedInputs.event + eventOverrides),
+      // not the bare preprocessed one — caseIds must survive the event replacement.
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        workflow,
+        expect.objectContaining({
+          event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }], caseIds: ['case-1'] },
+        }),
+        mockRequest
+      );
+      expect(result).toEqual({ workflowExecutionId: 'test-exec-id' });
     });
   });
 
@@ -892,7 +1045,13 @@ steps:
       const expectedResult = {
         valid: false,
         diagnostics: [
-          { severity: 'error' as const, message: 'Required', source: 'schema', path: ['name'] },
+          {
+            severity: 'error' as const,
+            message: 'Required',
+            source: 'schema',
+            path: ['name'],
+            ruleId: 'schemaViolation' as const,
+          },
         ],
       };
       mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
@@ -1140,7 +1299,7 @@ steps:
     });
 
     it('does not notify SML when setSmlIndexAttachment has not been called', async () => {
-      const freshApi = new WorkflowsManagementApi(mockWorkflowsService, true);
+      const freshApi = new WorkflowsManagementApi(mockWorkflowsService, true, logger);
       mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto());
 
       await freshApi.createWorkflow({ yaml: 'name: Test' }, 'default', mockRequest);
@@ -1541,7 +1700,7 @@ steps:
       expect(result).toEqual({ resumedBy: 'user' });
     });
 
-    it('resolves the waiting step and defaults the channel to "inbox" when none is supplied', async () => {
+    it('resolves the waiting step and leaves channel unset when none is supplied', async () => {
       (mockWorkflowsService.getWaitingStepExecutionId as jest.Mock).mockResolvedValue(
         'step-exec-9'
       );
@@ -1555,7 +1714,7 @@ steps:
       expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
         'step-exec-9',
         mockRequest,
-        'inbox',
+        undefined,
         'default'
       );
     });
@@ -1584,6 +1743,179 @@ steps:
         { approved: true },
         mockRequest
       );
+    });
+
+    it('emits resume audit via setAuditLog on success and failure', async () => {
+      const audit = {
+        logExecutionResumed: jest.fn(),
+        logExecutionCanceled: jest.fn(),
+      };
+      api.setAuditLog(audit as any);
+
+      await api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
+        channel: 'agent_builder',
+        stepExecutionId: 'step-exec-1',
+      });
+
+      expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        resumedBy: 'user',
+        channel: 'agent_builder',
+      });
+
+      audit.logExecutionResumed.mockClear();
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValueOnce(false);
+
+      await expect(
+        api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
+          channel: 'inbox',
+          stepExecutionId: 'step-exec-1',
+        })
+      ).rejects.toThrow(WorkflowExecutionInvalidStatusError);
+
+      expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        channel: 'inbox',
+        error: expect.any(WorkflowExecutionInvalidStatusError),
+      });
+    });
+  });
+
+  describe('cancelWorkflowExecution / cancelAllActiveWorkflowExecutions audit', () => {
+    it('emits cancel audit with channel on single cancel success and failure', async () => {
+      const audit = {
+        logExecutionResumed: jest.fn(),
+        logExecutionCanceled: jest.fn(),
+      };
+      api.setAuditLog(audit as any);
+      mockWorkflowsExecutionEngine.cancelWorkflowExecution.mockResolvedValue(undefined);
+
+      await api.cancelWorkflowExecution('run-1', 'default', mockRequest, {
+        channel: 'kibana_execution_view',
+      });
+
+      expect(audit.logExecutionCanceled).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        channel: 'kibana_execution_view',
+      });
+
+      audit.logExecutionCanceled.mockClear();
+      const boom = new Error('cancel failed');
+      mockWorkflowsExecutionEngine.cancelWorkflowExecution.mockRejectedValueOnce(boom);
+
+      await expect(
+        api.cancelWorkflowExecution('run-1', 'default', mockRequest, {
+          channel: 'kibana_execution_view',
+        })
+      ).rejects.toThrow(boom);
+
+      expect(audit.logExecutionCanceled).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        channel: 'kibana_execution_view',
+        error: boom,
+      });
+    });
+
+    it('emits cancel audit per cancelled id from cancelAll', async () => {
+      const audit = {
+        logExecutionResumed: jest.fn(),
+        logExecutionCanceled: jest.fn(),
+      };
+      api.setAuditLog(audit as any);
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ id: 'wf-1' } as WorkflowDetailDto);
+      mockWorkflowsExecutionEngine.cancelAllActiveWorkflowExecutions.mockImplementation(
+        async ({ onCancelled }) => {
+          onCancelled?.('run-a');
+          onCancelled?.('run-b');
+        }
+      );
+
+      await api.cancelAllActiveWorkflowExecutions('wf-1', 'default', mockRequest, {
+        channel: 'kibana_execution_view',
+      });
+
+      expect(audit.logExecutionCanceled).toHaveBeenCalledTimes(2);
+      expect(audit.logExecutionCanceled).toHaveBeenNthCalledWith(1, mockRequest, {
+        executionId: 'run-a',
+        channel: 'kibana_execution_view',
+      });
+      expect(audit.logExecutionCanceled).toHaveBeenNthCalledWith(2, mockRequest, {
+        executionId: 'run-b',
+        channel: 'kibana_execution_view',
+      });
+    });
+
+    it('emits bulk-cancel failure audit with workflowId, not executionId', async () => {
+      const audit = {
+        logExecutionResumed: jest.fn(),
+        logExecutionCanceled: jest.fn(),
+      };
+      api.setAuditLog(audit as any);
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ id: 'wf-1' } as WorkflowDetailDto);
+      const boom = new Error('bulk cancel failed');
+      mockWorkflowsExecutionEngine.cancelAllActiveWorkflowExecutions.mockRejectedValueOnce(boom);
+
+      await expect(
+        api.cancelAllActiveWorkflowExecutions('wf-1', 'default', mockRequest, {
+          channel: 'kibana_execution_view',
+        })
+      ).rejects.toThrow(boom);
+
+      expect(audit.logExecutionCanceled).toHaveBeenCalledWith(mockRequest, {
+        workflowId: 'wf-1',
+        channel: 'kibana_execution_view',
+        error: boom,
+      });
+    });
+  });
+
+  describe('external resume API-owned audit', () => {
+    it('emits resume audit with channel=external on success and failure', async () => {
+      const audit = {
+        logExecutionResumed: jest.fn(),
+        logExecutionCanceled: jest.fn(),
+      };
+      api.setAuditLog(audit as any);
+
+      mockResumeExternallyWithInput.mockResolvedValueOnce({
+        resumedBy: 'external_resume:step-1',
+      });
+
+      const result = await api.resumeWorkflowExecutionExternallyWithInput({
+        token: 'tok',
+        executionId: 'run-1',
+        stepId: 'step-1',
+        spaceId: 'default',
+        input: { approved: true },
+        request: mockRequest,
+      });
+
+      expect(result).toEqual({ resumedBy: 'external_resume:step-1' });
+      expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        resumedBy: 'external_resume:step-1',
+        channel: 'external',
+      });
+
+      audit.logExecutionResumed.mockClear();
+      mockResumeExternallyViaGet.mockRejectedValueOnce(new Error('external resume failed'));
+
+      await expect(
+        api.resumeWorkflowExecutionExternallyViaGet({
+          token: 'tok',
+          executionId: 'run-1',
+          stepId: 'step-1',
+          spaceId: 'default',
+          query: { approved: true },
+          request: mockRequest,
+        })
+      ).rejects.toThrow('external resume failed');
+
+      expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        channel: 'external',
+        error: expect.any(Error),
+      });
     });
   });
 });

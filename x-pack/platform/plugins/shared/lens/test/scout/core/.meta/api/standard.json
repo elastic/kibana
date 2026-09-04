@@ -1,9 +1,261 @@
 {
-  "sha1": "2ffbbe1cffb654be0a2201a26be9d899334c74d8",
+  "sha1": "0d234712e18d97d1e5a81fb0f0dec08e6aa21986",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "b80703b0fc233d1-3c7d9567f5c8810",
+      "title": "Lens metric trendline query execution executes trendline query: TS query with TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-cccf62caabcc97c",
+      "title": "Lens metric trendline query execution executes trendline query: TS query with aliased TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-fc9ae43952b6c4b",
+      "title": "Lens metric trendline query execution executes trendline query: regular source query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-df2cdc1fa035c7f",
+      "title": "Lens metric trendline query execution executes trendline query: raw query without STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-467aaecf2168fdc",
+      "title": "Lens metric trendline query execution executes trendline query: raw query with breakdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-5cc418dd40cce85",
+      "title": "Lens metric trendline query execution executes trendline query: TS query without TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-562b5975034b388",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with existing TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-c12c99724ae8ab8",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with aliased TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-a7d36af14df7b22",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with KEEP after STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-e42364b43999199",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with aliased BUCKET and KEEP after STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-8ba1c3fda8eb989",
+      "title": "Lens metric trendline query execution executes trendline query: TS query with renamed TBUCKET column",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-ea44c069c7660cd",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with renamed BUCKET column and KEEP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-4c82fb96ddb437a",
+      "title": "Lens metric trendline query execution executes trendline query: raw query with multiple metric fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-f2731ed3a973dff",
+      "title": "Lens metric trendline query execution executes trendline query: raw query without metric fields falls back to COUNT(*)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-01477fd8fe1bd72",
+      "title": "Lens metric trendline query execution executes trendline query: query with an existing BUCKET on the time field is unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-369063de0748786",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with KEEP before STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-139cf639c1b782b",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with TBUCKET renamed via assignment form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-aff6334ea31699c",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query with aliased BUCKET through chained RENAMEs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
     {
       "id": "9a20063fc72c8c5-e466439a83cf853",
       "title": "lens visualizations - create should create a lens visualization",

@@ -201,6 +201,10 @@ describe('runWorkflow', () => {
           isTestRun: false,
           workflowDefinition: { name: 'Test Workflow', steps: [] },
           triggeredBy: 'cases.caseCreated',
+          context: {
+            event: { caseId: 'case-1' },
+            metadata: { eventTriggerId: 'cases.caseCreated', eventId: 'evt-1' },
+          },
         });
         mockWorkflowExecutionEngine.triggerEvents.isEnabled = false;
 
@@ -295,6 +299,11 @@ describe('runWorkflow', () => {
         mockGetWorkflowExecutionFromState.mockReturnValue({
           ...baseExecution(),
           triggeredBy: 'cases.caseCreated',
+          context: {
+            event: { caseId: 'case-1' },
+            metadata: { eventTriggerId: 'cases.caseCreated', eventId: 'evt-1' },
+          },
+          metadata: { eventTriggerId: 'cases.caseCreated', eventId: 'evt-1' },
         });
         mockWorkflowExecutionEngine.triggerEvents.isEnabled = false;
 
@@ -320,8 +329,26 @@ describe('runWorkflow', () => {
         mockGetWorkflowExecutionFromState.mockReturnValue({
           ...baseExecution(),
           triggeredBy: 'cases.caseCreated',
+          context: {
+            event: { caseId: 'case-1' },
+            metadata: { eventTriggerId: 'cases.caseCreated', eventId: 'evt-1' },
+          },
         });
         mockWorkflowExecutionEngine.triggerEvents.isEnabled = true;
+
+        await runWorkflowWithDefaults();
+
+        expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+        expect(workflowRuntime.start).toHaveBeenCalled();
+        expect(mockWorkflowExecutionLoop).toHaveBeenCalled();
+      });
+
+      it('when custom provenance triggeredBy has no event evidence, continues even if trigger events are disabled', async () => {
+        mockGetWorkflowExecutionFromState.mockReturnValue({
+          ...baseExecution(),
+          triggeredBy: 'attack-discovery-pipeline',
+        });
+        mockWorkflowExecutionEngine.triggerEvents.isEnabled = false;
 
         await runWorkflowWithDefaults();
 
