@@ -7,6 +7,7 @@
 
 import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import {
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
@@ -68,6 +69,15 @@ describe('shouldRestoreSettingsBackedWorkflow', () => {
     expect(
       shouldRestoreSettingsBackedWorkflow(
         { id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID, spaceId: brandSpaceId('*') },
+        { continuousOnboardingWasEnabled: false, scheduledDiscoveryEnabledSpaceIds: [] }
+      )
+    ).toBe(true);
+    expect(
+      shouldRestoreSettingsBackedWorkflow(
+        {
+          id: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+          spaceId: asSpaceId('space-a'),
+        },
         { continuousOnboardingWasEnabled: false, scheduledDiscoveryEnabledSpaceIds: [] }
       )
     ).toBe(true);

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import CLEANUP_YAML from './cleanup.yaml';
 import INVESTIGATION_COMPLETED_YAML from './investigation_completed.yaml';
 import DETECTION_YAML from './significant_events/detection.yaml';
 import DISCOVERY_YAML from './significant_events/discovery.yaml';
@@ -22,6 +23,7 @@ export {
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
 export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID = 'system-significant-events-orchestrator';
+export const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID = 'system-significant-events-cleanup';
 export const SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID =
   'system-significant-events-investigation-completed';
 
@@ -32,6 +34,12 @@ const SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
   lifecycle: 'static',
   versionStrategy: 'auto',
   enablement: 'enforced',
+} as const;
+
+const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_MANAGEMENT = {
+  lifecycle: 'dynamic',
+  versionStrategy: 'auto',
+  enablement: 'restorable',
 } as const;
 
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
@@ -46,7 +54,7 @@ export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 19,
+  version: 20,
   billable: false,
   yaml: DISCOVERY_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
@@ -59,6 +67,15 @@ export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
   billable: false,
   yaml: ORCHESTRATOR_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
+  pluginId: 'significantEvents',
+  version: 1,
+  billable: false,
+  yaml: CLEANUP_YAML,
+  management: SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW = {
