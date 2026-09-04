@@ -59,6 +59,7 @@ export class ComposeDiscoverPage {
   public readonly noAlertConditionCallout: Locator;
   /** Callout shown after Apply when the query is empty. */
   public readonly emptyQueryCallout: Locator;
+  public readonly switchToEsqlToggle: Locator;
 
   private readonly modeSuperSelect: EuiSuperSelectWrapper;
   private readonly codeEditor: KibanaCodeEditorWrapper;
@@ -96,6 +97,7 @@ export class ComposeDiscoverPage {
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
     this.noAlertConditionCallout = this.page.testSubj.locator('esqlSummaryNoAlertConditionCallout');
     this.emptyQueryCallout = this.page.testSubj.locator('esqlSummaryEmptyCallout');
+    this.switchToEsqlToggle = this.page.testSubj.locator('composeDiscoverSwitchToEsql');
   }
 
   /**
