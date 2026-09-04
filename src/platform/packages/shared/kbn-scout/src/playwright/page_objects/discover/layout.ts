@@ -470,6 +470,8 @@ export abstract class LayoutMixin extends SaveMixin {
       await this.page.testSubj.fill('esqlControlLabel', label);
     }
     if (values) {
+      await this.page.testSubj.locator('esqlControlTypeDropdown').click();
+      await this.page.testSubj.locator('staticValues').click();
       const valuesComboBox = this.page.components.comboBox('esqlValuesOptions');
       for (const value of values) {
         await valuesComboBox.setCustomSelectedOptions([value]);

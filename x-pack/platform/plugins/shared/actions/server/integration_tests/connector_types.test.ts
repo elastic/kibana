@@ -13,7 +13,7 @@ import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionTypeConfig, Services } from '../types';
-import { connectorsSpecs } from '@kbn/connector-specs';
+import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 
 jest.mock('../action_type_registry', () => {
   const actual = jest.requireActual('../action_type_registry');
@@ -70,7 +70,10 @@ describe('Connector type config checks', () => {
   });
 
   test('ensure connector types list up to date', () => {
-    const connectorSpecIds = Object.values(connectorsSpecs).map(({ metadata }) => metadata.id);
+    const inboundEventsEnabled = actionTypeRegistry.getUtils().isInboundEventsEnabled();
+    const connectorSpecIds = Object.values(connectorsSpecs)
+      .filter((spec) => inboundEventsEnabled || !isInboundOnlyConnectorSpec(spec))
+      .map(({ metadata }) => metadata.id);
     expect([...connectorTypes, ...connectorSpecIds].sort()).toEqual(
       actionTypeRegistry.getAllTypes().sort()
     );
