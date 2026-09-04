@@ -1,5 +1,5 @@
 {
-  "sha1": "768247933eecdcff6ffaec7abfab98ec9de12036",
+  "sha1": "e2ac40622afe8251b08430c0eb8c94c2785bd4da",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -235,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 164,
+        "line": 168,
         "column": 7
       }
     },
@@ -432,8 +432,8 @@
       }
     },
     {
-      "id": "6697d27925b9def-79e01a18e79b2dd",
-      "title": "Streams layout shows a placeholder for the tabs that have no content yet",
+      "id": "6697d27925b9def-7203c017ee5c2ad",
+      "title": "Streams layout renders Sources and placeholders for tabs without content",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -459,8 +459,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 50,
-        "column": 13
+        "line": 51,
+        "column": 7
       }
     },
     {

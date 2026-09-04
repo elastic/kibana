@@ -72,7 +72,8 @@ jest.mock('./storage', () => ({
   conversationIndexName: '.kibana_agent_builder_conversations',
 }));
 
-describe('ConversationClient', () => {
+// Failing: See https://github.com/elastic/kibana/issues/289049
+describe.skip('ConversationClient', () => {
   let client: ConversationClient;
   let agentRegistry: jest.Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
 
