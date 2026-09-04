@@ -19,6 +19,7 @@
 - [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 - [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
 - [GitHub](/reference/connectors-kibana/github-action-type.md): Search code, issues, and pull requests, and access repository contents and metadata from GitHub.
+- [GitLab](/reference/connectors-kibana/gitlab-action-type.md): Manage issues, merge requests, branches, files, and CI/CD pipelines, and search code in GitLab.com or self-managed GitLab.
 - [Gmail](/reference/connectors-kibana/gmail-action-type.md): Search, read, label, quarantine, and send emails in Gmail.
 - [Google Calendar](/reference/connectors-kibana/google-calendar-action-type.md): Search and access events and calendars in Google Calendar.
 - [Google Cloud Monitoring](/reference/connectors-kibana/google-cloud-monitoring-action-type.md): Find, silence, and snooze GCP alerting policies, and enrich alerts with metric, uptime, and SLO data.
