@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { badge, codeBlock, itemList, text, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import React from 'react';
+import type { ViewSpec } from '@kbn/adaptive-ui';
+import { Badge, CodeBlock, ItemList, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 
 /**
  * Mirror of the `skill` attachment data (Agent Builder platform). Only the
@@ -36,33 +37,24 @@ export const toSkillViewSpec = ({
   content,
   tool_ids: toolIds,
   referenced_content: referencedContent,
-}: SkillData): ViewSpec => {
-  const body: BodyNode[] = [];
-
-  if (description) {
-    body.push(text({ body: description }));
-  }
-  if (content) {
-    body.push(
-      codeBlock({ language: 'markdown', code: content, title: 'Instructions', collapsible: true })
-    );
-  }
-  if (toolIds && toolIds.length > 0) {
-    body.push(
-      badge({ label: 'Tools', items: toolIds.map((label) => ({ label, variant: 'hollow' })) })
-    );
-  }
-  if (referencedContent && referencedContent.length > 0) {
-    body.push(
-      itemList({
-        label: 'Referenced content',
-        items: referencedContent.map((item) => ({ title: item.title, meta: item.type })),
-      })
-    );
-  }
-
-  return view({ title: name, subtitle: 'Skill', body });
-};
+}: SkillData): ViewSpec =>
+  toViewSpec(
+    <View title={name} subtitle="Skill">
+      {description && <Text body={description} />}
+      {content && (
+        <CodeBlock language="markdown" code={content} title="Instructions" collapsible />
+      )}
+      {toolIds && toolIds.length > 0 && (
+        <Badge label="Tools" items={toolIds.map((label) => ({ label, variant: 'hollow' }))} />
+      )}
+      {referencedContent && referencedContent.length > 0 && (
+        <ItemList
+          label="Referenced content"
+          items={referencedContent.map((item) => ({ title: item.title, meta: item.type }))}
+        />
+      )}
+    </View>
+  ) as ViewSpec;
 
 export const sampleSkill: SkillData = {
   name: 'Summarize on-call incident',

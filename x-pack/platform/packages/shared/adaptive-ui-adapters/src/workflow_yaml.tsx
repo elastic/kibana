@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { parse } from 'yaml';
-import { codeBlock, descriptionList, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import type { ViewSpec } from '@kbn/adaptive-ui';
+import { CodeBlock, DescriptionList, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 
 /**
  * The `workflow.yaml` attachment payload ([workflow_yaml_attachment_renderer.tsx](../../../../plugins/shared/agent_builder_workflows/public/attachment_types/workflow_yaml_attachment_renderer.tsx)).
@@ -40,20 +41,27 @@ export const toWorkflowYamlViewSpec = ({ yaml, name }: WorkflowYamlData): ViewSp
     parsed = undefined;
   }
 
-  const body: BodyNode[] = [];
-  if (parsed) {
-    const details = [
-      { title: 'Triggers', description: String(countOf(parsed.triggers)) },
-      { title: 'Steps', description: String(countOf(parsed.steps)) },
-    ];
-    if (parsed.tags && parsed.tags.length > 0) {
-      details.push({ title: 'Tags', description: parsed.tags.join(', ') });
-    }
-    body.push(descriptionList({ label: 'Workflow', layout: 'inline', items: details }));
-  }
-  body.push(codeBlock({ language: 'yaml', code: yaml, collapsible: true }));
+  const details: Array<{ title: string; description: string }> = parsed
+    ? [
+        { title: 'Triggers', description: String(countOf(parsed.triggers)) },
+        { title: 'Steps', description: String(countOf(parsed.steps)) },
+        ...(parsed.tags && parsed.tags.length > 0
+          ? [{ title: 'Tags', description: parsed.tags.join(', ') }]
+          : []),
+      ]
+    : [];
 
-  return view({ title: name ?? parsed?.name ?? 'Workflow', subtitle: 'Workflow definition', body });
+  return toViewSpec(
+    <View
+      title={name ?? parsed?.name ?? 'Workflow'}
+      subtitle="Workflow definition"
+    >
+      {details.length > 0 && (
+        <DescriptionList label="Workflow" layout="inline" items={details} />
+      )}
+      <CodeBlock language="yaml" code={yaml} collapsible />
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleWorkflowYaml: WorkflowYamlData = {

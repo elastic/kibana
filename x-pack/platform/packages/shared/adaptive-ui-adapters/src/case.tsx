@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { actions, badge, descriptionList, statGroup, text, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import React from 'react';
+import type { ViewSpec } from '@kbn/adaptive-ui';
+import { Actions, Badge, DescriptionList, StatGroup, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 import { severityTone, titleCase } from './shared';
 
 /**
@@ -46,26 +47,6 @@ const caseReference = ({ incremental_id: incrementalId }: CaseData): string | un
  */
 export const toCaseViewSpec = (data: CaseData): ViewSpec => {
   const reference = caseReference(data);
-  const body: BodyNode[] = [
-    badge({
-      items: [
-        { label: titleCase(data.status), tone: 'primary', variant: 'hollow' },
-        { label: titleCase(data.severity), tone: severityTone(data.severity), variant: 'fill' },
-      ],
-    }),
-    statGroup({
-      stats: [
-        { label: 'Alerts', value: String(data.totalAlerts ?? 0) },
-        { label: 'Comments', value: String(data.totalComment ?? 0) },
-        { label: 'Observables', value: String(data.total_observables ?? 0) },
-      ],
-    }),
-  ];
-
-  if (data.description) {
-    body.push(text({ body: data.description }));
-  }
-
   const metadata: Array<{ title: string; description: string }> = [];
   if (data.assignees && data.assignees.length > 0) {
     metadata.push({ title: 'Assignees', description: String(data.assignees.length) });
@@ -82,17 +63,32 @@ export const toCaseViewSpec = (data: CaseData): ViewSpec => {
   if (data.updated_at) {
     metadata.push({ title: 'Updated', description: data.updated_at });
   }
-  if (metadata.length > 0) {
-    body.push(descriptionList({ label: 'Details', layout: 'inline', items: metadata }));
-  }
 
-  body.push(actions({ items: [{ label: 'Go to case', href: caseHref(data), tone: 'primary' }] }));
-
-  return view({
-    title: reference ? `${reference} ${data.title}` : data.title,
-    subtitle: `${titleCase(data.severity)} severity · ${titleCase(data.status)}`,
-    body,
-  });
+  return toViewSpec(
+    <View
+      title={reference ? `${reference} ${data.title}` : data.title}
+      subtitle={`${titleCase(data.severity)} severity · ${titleCase(data.status)}`}
+    >
+      <Badge
+        items={[
+          { label: titleCase(data.status), tone: 'primary', variant: 'hollow' },
+          { label: titleCase(data.severity), tone: severityTone(data.severity), variant: 'fill' },
+        ]}
+      />
+      <StatGroup
+        stats={[
+          { label: 'Alerts', value: String(data.totalAlerts ?? 0) },
+          { label: 'Comments', value: String(data.totalComment ?? 0) },
+          { label: 'Observables', value: String(data.total_observables ?? 0) },
+        ]}
+      />
+      {data.description && <Text body={data.description} />}
+      {metadata.length > 0 && (
+        <DescriptionList label="Details" layout="inline" items={metadata} />
+      )}
+      <Actions items={[{ label: 'Go to case', href: caseHref(data), tone: 'primary' }]} />
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleCase: CaseData = {

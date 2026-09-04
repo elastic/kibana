@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { badge, codeBlock, descriptionList, text, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, Tone, ViewSpec } from '@kbn/adaptive-ui';
+import React from 'react';
+import type { Tone, ViewSpec } from '@kbn/adaptive-ui';
+import { Badge, CodeBlock, DescriptionList, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 
 /**
  * Mirror of the `platform.sig_event_detection` attachment data. The canonical
@@ -47,42 +48,30 @@ export const toSigEventDetectionViewSpec = ({
   description,
   esql_query: esqlQuery,
 }: SigEventDetectionData): ViewSpec => {
-  const body: BodyNode[] = [];
-
-  if (changePointType) {
-    body.push(
-      badge({
-        items: [
-          {
-            label: humanize(changePointType) ?? changePointType,
-            tone: changePointTone(changePointType),
-            variant: 'fill',
-          },
-        ],
-      })
-    );
-  }
-
-  if (description) {
-    body.push(text({ body: description }));
-  }
-
   const details: Array<{ title: string; description: string }> = [
     { title: 'Detection rule', description: ruleName },
   ];
-  if (streamName) {
-    details.push({ title: 'Stream', description: streamName });
-  }
-  if (timestamp) {
-    details.push({ title: 'Detected at', description: timestamp });
-  }
-  body.push(descriptionList({ label: 'Detection', layout: 'inline', items: details }));
+  if (streamName) details.push({ title: 'Stream', description: streamName });
+  if (timestamp) details.push({ title: 'Detected at', description: timestamp });
 
-  if (esqlQuery) {
-    body.push(codeBlock({ language: 'esql', code: esqlQuery, title: 'ES|QL', collapsible: true }));
-  }
-
-  return view({ title: ruleName, subtitle: 'Significant event detection', body });
+  return toViewSpec(
+    <View title={ruleName} subtitle="Significant event detection">
+      {changePointType && (
+        <Badge
+          items={[{
+            label: humanize(changePointType) ?? changePointType,
+            tone: changePointTone(changePointType),
+            variant: 'fill',
+          }]}
+        />
+      )}
+      {description && <Text body={description} />}
+      <DescriptionList label="Detection" layout="inline" items={details} />
+      {esqlQuery && (
+        <CodeBlock language="esql" code={esqlQuery} title="ES|QL" collapsible />
+      )}
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleSigEventDetection: SigEventDetectionData = {
