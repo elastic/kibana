@@ -40,7 +40,7 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
-      const verifiers = context.input.verifiers as string[] | undefined;
+      const { verifiers } = context.input;
 
       const summary = await withKiVerificationTelemetry({
         analyticsService,

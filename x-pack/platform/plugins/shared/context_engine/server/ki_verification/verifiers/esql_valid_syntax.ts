@@ -8,6 +8,7 @@
 import { validateQuery } from '@kbn/esql-language';
 import type { ESQLMessage } from '@kbn/esql-language';
 import type { EditorError } from '@elastic/esql/types';
+import { ESQL_VALID_SYNTAX_VERIFIER_ID } from '../../../common/ki_verification';
 import {
   getEsqlQueries,
   getOversizedQueryFailure,
@@ -16,7 +17,7 @@ import {
 } from './esql_attribute';
 import type { KiVerifier } from '../types';
 
-export const ESQL_VALID_SYNTAX_VERIFIER_ID = 'esql-valid-syntax';
+export { ESQL_VALID_SYNTAX_VERIFIER_ID };
 
 const formatValidationError = (error: ESQLMessage | EditorError): string =>
   'text' in error

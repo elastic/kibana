@@ -9,6 +9,7 @@ import type { errors } from '@elastic/elasticsearch';
 import { appendToESQLQuery } from '@kbn/esql-utils';
 import { isResponseError } from '@kbn/es-errors';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import { ESQL_VALID_RUNTIME_VERIFIER_ID } from '../../../common/ki_verification';
 import {
   getEsqlQueries,
   getOversizedQueryFailure,
@@ -18,7 +19,7 @@ import {
 import { withRetry } from './retry';
 import type { KiVerifier } from '../types';
 
-export const ESQL_VALID_RUNTIME_VERIFIER_ID = 'esql-valid-runtime';
+export { ESQL_VALID_RUNTIME_VERIFIER_ID };
 
 export const ESQL_EXECUTION_ROW_LIMIT = 1;
 

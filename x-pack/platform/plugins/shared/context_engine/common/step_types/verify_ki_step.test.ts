@@ -6,9 +6,14 @@
  */
 
 import { MAX_KI_ATTRIBUTES, MAX_KI_ATTRIBUTE_VALUE_LENGTH } from './ki';
+import {
+  ESQL_VALID_RUNTIME_VERIFIER_ID,
+  ESQL_VALID_SYNTAX_VERIFIER_ID,
+  KI_VERIFIER_IDS,
+} from '../ki_verification';
 import { VerifyKiInputSchema } from './verify_ki_step';
 
-const BASE = { verifiers: ['esql-valid-runtime'] };
+const BASE = { verifiers: [ESQL_VALID_RUNTIME_VERIFIER_ID] };
 
 describe('VerifyKiInputSchema', () => {
   it('accepts a KI with esql attributes', () => {
@@ -45,6 +50,44 @@ describe('VerifyKiInputSchema', () => {
     const result = VerifyKiInputSchema.safeParse({ ki: { type: 'detection' }, verifiers: [] });
 
     expect(result.success).toBe(false);
+  });
+
+  it.each(KI_VERIFIER_IDS)('accepts the built-in verifier id %s', (verifier) => {
+    const result = VerifyKiInputSchema.safeParse({
+      ki: { type: 'detection' },
+      verifiers: [verifier],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an unknown verifier id', () => {
+    const result = VerifyKiInputSchema.safeParse({
+      ki: { type: 'detection' },
+      verifiers: ['unknown-verifier'],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects duplicate verifier ids', () => {
+    const result = VerifyKiInputSchema.safeParse({
+      ki: { type: 'detection' },
+      verifiers: [
+        ESQL_VALID_SYNTAX_VERIFIER_ID,
+        ESQL_VALID_RUNTIME_VERIFIER_ID,
+        ESQL_VALID_SYNTAX_VERIFIER_ID,
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: 'Verifier ids must be unique.',
+        }),
+      ])
+    );
   });
 
   it('rejects attributes with too many entries', () => {
