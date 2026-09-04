@@ -8,10 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import DateMath from '@kbn/datemath';
 import { isNonLocalIndexName } from '@kbn/es-query';
-
-// Inlined: the constant lives in a non-public sub-path of `@kbn/spaces-plugin`
-// that the public bundle optimizer rejects. Stable saved-objects contract.
-const ALL_SPACES_ID = '*';
+import { ALL_SPACES_ID } from '@kbn/core-spaces-common';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,

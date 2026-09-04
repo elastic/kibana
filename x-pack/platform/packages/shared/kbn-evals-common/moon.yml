@@ -19,6 +19,7 @@ project:
   owner: '@elastic/nightshift-context-and-research-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-common
 dependsOn:
+  - '@kbn/core-spaces-common'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
 tags:

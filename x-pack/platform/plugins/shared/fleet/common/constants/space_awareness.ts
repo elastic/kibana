@@ -6,8 +6,7 @@
  */
 
 /**
- * The identifier in a saved object's `namespaces` array when it is shared to an unknown space (e.g., one that the end user is not authorized to see).
+ * Re-exported from `@kbn/core-spaces-common` rather than redeclared. Kept exported
+ * from this path so existing `@kbn/fleet-plugin/common` importers are unaffected.
  */
-export const UNKNOWN_SPACE = '?';
-
-export const ALL_SPACES_ID = '*';
+export { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/core-spaces-common';
