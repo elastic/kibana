@@ -160,7 +160,7 @@ function configureExperiment({
   };
 
   const irConfig = {
-    k: 10,
+    k: [10],
     relevanceThreshold: 1,
     extractRetrievedDocs: extractSearchRetrievedDocs,
     extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
