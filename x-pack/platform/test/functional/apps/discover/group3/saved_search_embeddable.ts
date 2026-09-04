@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIXED. The cross-app pieces (drilldown into Discover, tab-aware panel
+ * rendering) are worth a browser; the prompt-rendering pieces are already covered at the component
+ * layer in
+ * src/platform/plugins/shared/discover/public/embeddable/get_search_embeddable_factory.test.tsx.
+ * Migration target is
+ * x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/saved_search_embeddable.spec.ts,
+ * which already holds the ported first test.
+ */
+
 import expect from '@kbn/expect';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -100,6 +110,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
     };
 
+    /**
+     * Migration recommendation: DELETE. Already ported to Scout under the same name in
+     * x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/saved_search_embeddable.spec.ts,
+     * including the inline saved-search creation via `kbnClient`.
+     */
     it('should allow removing the dashboard panel after the underlying saved search has been deleted', async () => {
       const searchTitle = 'TempSearch';
       const searchId = '90943e30-9a47-11e8-b64d-95841ca0b247';
@@ -157,6 +172,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('embeddableError');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. A URL drilldown that templates panel context into
+     * a Discover URL and lands on the right hit count is a genuine cross-app contract with no
+     * coverage below the browser.
+     */
     it('should support URL drilldown', async () => {
       await addSearchEmbeddableToDashboard();
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
@@ -191,6 +211,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.getHitCount()).to.be('6');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Switching the embeddable tab must re-drive the
+     * search source, columns and sort together — that combination is not covered by the embeddable
+     * factory unit tests.
+     */
     it('should apply data, columns and sorting from selected Discover tab', async () => {
       await addSearchEmbeddableToDashboard('Discover embeddable multi tab');
 
@@ -227,6 +252,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(firstBytesValue <= secondBytesValue).to.be(true);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT, trimmed. That the prompt renders at all is
+     * already asserted by the 'deleted tab' block in get_search_embeddable_factory.test.tsx, and
+     * the three callout-text assertions are string checks that belong there too — extend that jest
+     * test to cover the view-mode and edit-mode copy variants. Keep in the browser only the
+     * recovery flow: open inline editing, pick a different tab, apply, and see the grid come back.
+     */
     it('should show deleted-tab warning in view and edit modes for editor users and dismiss it by selecting a different tab', async () => {
       const savedSearchTitle = 'Discover embeddable deleted tab editor';
       const dashboardName = 'Dashboard deleted tab editor';
@@ -275,6 +307,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('docTable');
     });
 
+    /**
+     * Migration recommendation: Cover with a unit test. The only difference from the editor case is
+     * which callout copy renders when the user lacks edit capabilities — parametrize the 'deleted
+     * tab' block in get_search_embeddable_factory.test.tsx over the capability instead. Doing so
+     * also removes the `skipFIPS` tag and the role swap, both of which exist purely because this
+     * runs in a browser.
+     */
     describe('read-only user tests', function () {
       // FIPS mode sets defaultRoles to superuser/kibana_admin so testUser.setRoles() cannot
       // reduce privileges to read-only, causing the wrong error message variant to appear
