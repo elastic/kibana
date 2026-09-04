@@ -70,6 +70,7 @@ export const TagsField = () => {
               placeholder={i18n.translate('xpack.alertingV2.ruleForm.tagsPlaceholder', {
                 defaultMessage: 'Add tags to organize and filter rules',
               })}
+              data-test-subj="ruleTagsInput"
               async
               isLoading={isLoading}
               options={tagOptions}

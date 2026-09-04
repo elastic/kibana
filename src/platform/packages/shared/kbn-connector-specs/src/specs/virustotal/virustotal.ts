@@ -166,6 +166,7 @@ export const VirusTotalConnector: ConnectorSpec = {
   actions: {
     scanFileHash: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           hash: z.string().min(32).describe('File hash (MD5, SHA-1, or SHA-256)'),
@@ -262,6 +263,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     getAnalysisResults: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         id: z
           .string()
@@ -353,6 +355,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     getIpReport: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           ip: z.ipv4().describe('IP address'),

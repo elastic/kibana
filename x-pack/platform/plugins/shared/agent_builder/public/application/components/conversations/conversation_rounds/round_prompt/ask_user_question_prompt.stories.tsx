@@ -50,7 +50,7 @@ export const MultiSelect: Story = {
         question: 'Which log levels should be included?',
         options: [
           { label: 'ERROR', description: 'Critical failures only' },
-          { label: 'WARN', description: 'Warnings and errors' },
+          { label: 'WARN' },
           { label: 'INFO', description: 'General operational messages' },
           { label: 'DEBUG', description: 'Verbose diagnostic output' },
         ],

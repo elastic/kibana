@@ -1,7 +1,7 @@
 {
   "type": "functional-tests",
   "id": "@kbn/fleet-plugin-cypress",
-  "owner": "@elastic/fleet",
+  "owner": "@elastic/streams-ui",
   "group": "platform",
   "visibility": "private",
   "devOnly": true

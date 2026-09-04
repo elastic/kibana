@@ -1,5 +1,5 @@
 {
-  "sha1": "b6350390618e8585f79248fc095f2ff45480929e",
+  "sha1": "b0b66f0dd511ef50ca20f710ecfe840b83c49fd8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 29,
-        "column": 25
+        "line": 24,
+        "column": 30
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 36,
-        "column": 7
+        "line": 32,
+        "column": 25
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 45,
+        "column": 18
       }
     },
     {
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 57,
-        "column": 13
+        "line": 54,
+        "column": 7
       }
     },
     {
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 67,
-        "column": 11
+        "line": 63,
+        "column": 13
       }
     },
     {
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 80,
-        "column": 7
+        "line": 76,
+        "column": 25
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 100,
-        "column": 13
+        "line": 97,
+        "column": 25
       }
     },
     {
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 111,
-        "column": 25
+        "line": 108,
+        "column": 13
       }
     },
     {
@@ -144,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 21,
-        "column": 25
+        "line": 27,
+        "column": 30
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 29,
-        "column": 25
+        "line": 34,
+        "column": 11
       }
     },
     {
@@ -176,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 40,
-        "column": 25
+        "line": 45,
+        "column": 7
       }
     },
     {
@@ -192,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 17,
-        "column": 63
+        "line": 19,
+        "column": 5
       }
     },
     {
@@ -202,16 +202,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@local-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 76,
-        "column": 26
+        "line": 37,
+        "column": 15
       }
     },
     {
@@ -220,34 +217,28 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@local-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 93,
-        "column": 38
+        "line": 55,
+        "column": 20
       }
     },
     {
-      "id": "bd77233fbb28a70-327b1fabac0e74c",
-      "title": "Onboarding UI Validation navigates correctly within Kubernetes OpenTelemetry flow using the keyboard only",
+      "id": "bd77233fbb28a70-75d66c9a960fc6c",
+      "title": "Onboarding UI Validation navigates to the Kubernetes OpenTelemetry flow from the landing tile",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@local-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 112,
-        "column": 26
+        "line": 73,
+        "column": 13
       }
     },
     {
@@ -255,13 +246,12 @@
       "title": "Onboarding UI Validation validates logs-essentials tier restrictions",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@local-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 154,
-        "column": 26
+        "line": 94,
+        "column": 18
       }
     }
   ]

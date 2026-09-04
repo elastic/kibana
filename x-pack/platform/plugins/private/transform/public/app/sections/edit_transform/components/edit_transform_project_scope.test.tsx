@@ -17,7 +17,14 @@ import { EditTransformFlyoutProvider } from '../state_management/edit_transform_
 
 import { EditTransformProjectScope } from './edit_transform_project_scope';
 
+const mockUseGetTransformCpsEnabled = jest.fn(
+  (_args?: { enabled: boolean }) => ({ data: true } as { data: boolean | undefined })
+);
+
 jest.mock('../../../app_dependencies');
+jest.mock('../../../hooks/use_get_transform_cps_enabled', () => ({
+  useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
+}));
 
 const originProject = {
   _id: 'origin-id',
@@ -60,6 +67,7 @@ const renderProjectScope = (projectRouting?: string) => {
 
 describe('EditTransformProjectScope', () => {
   beforeEach(() => {
+    mockUseGetTransformCpsEnabled.mockReturnValue({ data: true });
     const appDeps = appDependencies.useAppDependencies();
     appDeps.cps = {
       isTierEligible: true,
@@ -96,6 +104,17 @@ describe('EditTransformProjectScope', () => {
     renderProjectScope();
 
     expect(screen.queryByTestId('transformEditProjectScopeButton')).not.toBeInTheDocument();
+  });
+
+  it('does not render when the Elasticsearch cross-project feature flags are disabled', () => {
+    mockUseGetTransformCpsEnabled.mockReturnValue({ data: false });
+
+    renderProjectScope();
+
+    expect(screen.queryByTestId('transformEditProjectScopeButton')).not.toBeInTheDocument();
+    expect(
+      appDependencies.useAppDependencies().cps?.cpsManager?.fetchProjects
+    ).not.toHaveBeenCalled();
   });
 
   it('uses origin routing for display and opens the project scope flyout', async () => {

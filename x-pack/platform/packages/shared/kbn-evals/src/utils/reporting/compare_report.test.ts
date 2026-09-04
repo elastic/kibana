@@ -13,8 +13,8 @@ const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResu
   datasetName: 'Dataset One',
   evaluatorName: 'Correctness',
   sampleSize: 10,
-  meanA: 0.8,
-  meanB: 0.7,
+  meanTarget: 0.8,
+  meanBaseline: 0.7,
   pValue: 0.03,
   direction: 'maximize',
   ...overrides,
@@ -23,8 +23,8 @@ const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResu
 describe('formatPairedTTestReport', () => {
   it('returns correct header and summary for a single result', () => {
     const { header, summary, significantCount } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results: [makeResult()],
     });
 
@@ -45,8 +45,8 @@ describe('formatPairedTTestReport', () => {
     ];
 
     const { significantCount, summary } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -61,8 +61,8 @@ describe('formatPairedTTestReport', () => {
     ];
 
     const { significantCount, header } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
       significanceThreshold: 0.1,
     });
@@ -79,8 +79,8 @@ describe('formatPairedTTestReport', () => {
     ];
 
     const { tableOutput } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -100,8 +100,8 @@ describe('formatPairedTTestReport', () => {
     ];
 
     const { tableOutput } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -111,11 +111,11 @@ describe('formatPairedTTestReport', () => {
   });
 
   it('formats positive differences with a "+" prefix', () => {
-    const results = [makeResult({ meanA: 0.9, meanB: 0.5 })];
+    const results = [makeResult({ meanTarget: 0.9, meanBaseline: 0.5 })];
 
     const { tableOutput } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -123,11 +123,11 @@ describe('formatPairedTTestReport', () => {
   });
 
   it('formats negative differences without a "+" prefix', () => {
-    const results = [makeResult({ meanA: 0.3, meanB: 0.8 })];
+    const results = [makeResult({ meanTarget: 0.3, meanBaseline: 0.8 })];
 
     const { tableOutput } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -136,8 +136,8 @@ describe('formatPairedTTestReport', () => {
 
   it('handles empty results gracefully', () => {
     const { header, summary, tableOutput, significantCount } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results: [],
     });
 
@@ -151,8 +151,8 @@ describe('formatPairedTTestReport', () => {
     const results = [makeResult({ pValue: null })];
 
     const { significantCount } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
@@ -160,11 +160,11 @@ describe('formatPairedTTestReport', () => {
   });
 
   it('includes sample size and formatted means in the table', () => {
-    const results = [makeResult({ sampleSize: 42, meanA: 0.1234, meanB: 0.5678 })];
+    const results = [makeResult({ sampleSize: 42, meanTarget: 0.1234, meanBaseline: 0.5678 })];
 
     const { tableOutput } = formatPairedTTestReport({
-      experimentIdA: 'experiment-1',
-      experimentIdB: 'experiment-2',
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
       results,
     });
 
