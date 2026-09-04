@@ -71,13 +71,15 @@ describe('createSnoozeAction', () => {
   it('execute: opens modal, POSTs unique-by-group SNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
+    jest
+      .spyOn(bulk, 'bulkCreateSeriesAlertActions')
+      .mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
     await createSnoozeAction(deps).execute({
       episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],
       onSuccess,
     });
-    expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
+    expect(bulk.bulkCreateSeriesAlertActions).toHaveBeenCalledWith(deps.http, [
       { group_hash: 'g1', action_type: 'snooze', expiry: '2026-05-01T00:00:00Z' },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();

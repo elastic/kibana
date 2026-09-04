@@ -9,10 +9,10 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import {
   ALERT_EPISODE_ACTION_TYPE,
-  type BulkCreateAlertActionBody,
+  type BulkCreateSeriesAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
-import { bulkCreateAlertActions } from './bulk_create_alert_actions';
+import { bulkCreateSeriesAlertActions } from './bulk_create_alert_actions';
 import { uniqueByGroup, successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
@@ -31,14 +31,14 @@ export const createUnsnoozeAction = (deps: UnsnoozeActionDeps): EpisodeAction =>
     episodes.length > 0 &&
     episodes.some((ep) => isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
+    const items: BulkCreateSeriesAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
     }));
     if (!items.length) return;
 
     try {
-      const response = await bulkCreateAlertActions(deps.http, items);
+      const response = await bulkCreateSeriesAlertActions(deps.http, items);
       deps.notifications.toasts.add(successOrPartialToast(response));
       onSuccess?.();
     } catch {
