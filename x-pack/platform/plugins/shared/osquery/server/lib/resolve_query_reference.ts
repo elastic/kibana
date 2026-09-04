@@ -44,6 +44,12 @@ export interface ResolvedQueryReference {
   query?: string;
   queries?: string[];
   ecs_mapping?: Record<string, unknown>;
+  /**
+   * Set for packs. Packs hold `ecs_mapping` per query rather than at the top level, so a
+   * caller-supplied top-level mapping is matched against these instead of `ecs_mapping`.
+   */
+  queryEcsMappings?: Array<Record<string, unknown> | undefined>;
+  isPack?: boolean;
 }
 
 const toSavedQueryReference = (savedQuerySO: {
@@ -130,9 +136,15 @@ export const resolveQueryReference = async (
     if (trimmedPackId) {
       const packSO = await soClient.get<PackSavedObject>(packSavedObjectType, trimmedPackId);
 
+      const packQueries = packSO.attributes.queries ?? [];
+
       return {
         savedObjectId: packSO.id,
-        queries: (packSO.attributes.queries ?? []).map(({ query }) => query),
+        isPack: true,
+        queries: packQueries.map(({ query }) => query),
+        queryEcsMappings: packQueries.map(({ ecs_mapping: ecsMapping }) =>
+          toEcsMappingRecord(ecsMapping)
+        ),
       };
     }
 

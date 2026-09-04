@@ -150,11 +150,21 @@ const callerSuppliedQueryMatches = (
   }
 
   if (actionParams.ecs_mapping !== undefined) {
+    // `toEcsMappingRecord` collapses an empty mapping to `undefined`, so an explicit `{}` —
+    // which the rule response-action form always sends — compares equal to "no mapping".
     const suppliedMapping = toEcsMappingRecord(actionParams.ecs_mapping);
-    const storedMapping = toEcsMappingRecord(resolved.ecs_mapping);
 
-    if (!deepEqual(suppliedMapping, storedMapping)) {
-      return false;
+    if (suppliedMapping !== undefined) {
+      // Packs carry `ecs_mapping` per query, not at the top level. Accept a supplied mapping
+      // that matches any of the pack's queries; a pack with no mappings at all cannot be
+      // satisfied by a non-empty one, which is the intended deny.
+      const storedMappings = resolved.isPack
+        ? resolved.queryEcsMappings ?? []
+        : [toEcsMappingRecord(resolved.ecs_mapping)];
+
+      if (!storedMappings.some((stored) => deepEqual(suppliedMapping, stored))) {
+        return false;
+      }
     }
   }
 

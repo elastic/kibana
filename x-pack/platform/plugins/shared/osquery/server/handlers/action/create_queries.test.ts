@@ -9,7 +9,7 @@ import { createDynamicQueries } from './create_queries';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
+import { PARAMETER_NOT_FOUND, SAVED_QUERY_NOT_FOUND } from '../../../common/translations/errors';
 import type { SavedObjectsClient } from '@kbn/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
@@ -359,6 +359,37 @@ describe('create queries', () => {
       expect(queries[0].ecs_mapping).toEqual({ 'host.name': { field: 'name' } });
     });
 
+    it('records an error on the action instead of throwing when reportErrorsOnAction is set', async () => {
+      // Rule runs have no caller to receive a status code — `osqueryResponseAction` swallows a
+      // throw and the run still reports success. The failure has to land on the action document.
+      const get = jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(savedQuerySavedObjectType, 'sq-1')
+        );
+
+      const queries = await createDynamicQueries({
+        params: {
+          saved_query_id: 'sq-1',
+          query: 'select 42 as custom;',
+          agent_ids: [TEST_AGENT],
+        },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: soClientWithGet(get),
+        useStoredQuery: true,
+        reportErrorsOnAction: true,
+      });
+
+      expect(queries).toHaveLength(1);
+      expect(queries[0].error).toBe(SAVED_QUERY_NOT_FOUND);
+      // The caller's own SQL must not be dispatched as a fallback.
+      expect(queries[0].query).toBeUndefined();
+    });
+
     it('ignores caller queries[] when useStoredQuery is set with a saved_query_id', async () => {
       const get = jest.fn().mockResolvedValue({
         id: 'sq-1',
@@ -380,6 +411,7 @@ describe('create queries', () => {
         agents: [TEST_AGENT],
         osqueryContext: {
           service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+          logFactory: { get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
         } as unknown as OsqueryAppContext,
         spaceId,
         spaceScopedClient: soClientWithGet(get),

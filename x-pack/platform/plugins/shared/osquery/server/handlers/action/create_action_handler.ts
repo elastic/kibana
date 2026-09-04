@@ -49,6 +49,11 @@ interface CreateActionHandlerOptions {
   useStoredQuery?: boolean;
   /** Authz-resolved saved query; when set, dispatch skips a second lookup. */
   storedQuery?: ResolvedQueryReference;
+  /**
+   * Rule runs cannot surface a thrown status code to a caller, so unresolvable stored content
+   * is recorded on the action document instead of throwing.
+   */
+  reportErrorsOnAction?: boolean;
 }
 
 export const createActionHandler = async (
@@ -64,7 +69,7 @@ export const createActionHandler = async (
     options.space?.id ?? DEFAULT_SPACE_ID
   );
 
-  const { metadata, alertData, error, useStoredQuery, storedQuery } = options;
+  const { metadata, alertData, error, useStoredQuery, storedQuery, reportErrorsOnAction } = options;
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
   const {
     agent_all: agentAll,
@@ -123,8 +128,10 @@ export const createActionHandler = async (
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
-          // Pack SQL always comes from the stored pack saved object.
-          const replacedQuery = replacedQueries(packQuery.query, alertData, true);
+          // Only flag unsubstituted templates when this run is dispatching stored content on
+          // the caller's behalf. A `writeLiveQueries` caller running a pack ad hoc is entitled
+          // to send `{{...}}` through, exactly as before this change.
+          const replacedQuery = replacedQueries(packQuery.query, alertData, useStoredQuery);
 
           return pickBy(
             {
@@ -151,6 +158,7 @@ export const createActionHandler = async (
           spaceScopedClient: spaceScopedInternalSavedObjectsClient,
           useStoredQuery,
           storedQuery,
+          reportErrorsOnAction,
         }),
   };
 

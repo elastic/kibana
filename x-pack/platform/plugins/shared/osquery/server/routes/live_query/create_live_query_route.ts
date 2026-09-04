@@ -28,6 +28,7 @@ import {
   authorizeOsqueryResponseAction,
 } from '../../lib/check_response_action_authz';
 import { createLiveQueryResponseSchema } from './response_schemas';
+import type { ResolvedQueryReference } from '../../lib/resolve_query_reference';
 import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -86,19 +87,35 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           alertError = error;
         }
 
-        const { authorized, resolved } = await authorizeOsqueryResponseAction(
-          coreStartServices,
-          request,
-          {
-            saved_query_id: request.body.saved_query_id,
-            pack_id: request.body.pack_id,
-            query: request.body.query,
-            queries: request.body.queries,
-            ecs_mapping: request.body.ecs_mapping,
-          },
-          space?.id,
-          alertData
-        );
+        // Resolving the reference reads saved objects, so a transient ES/SO failure must not
+        // escape as an unhandled rejection on a request that only asked for an authz decision.
+        let authorized: boolean;
+        let resolved: ResolvedQueryReference | undefined;
+        try {
+          ({ authorized, resolved } = await authorizeOsqueryResponseAction(
+            coreStartServices,
+            request,
+            {
+              saved_query_id: request.body.saved_query_id,
+              pack_id: request.body.pack_id,
+              query: request.body.query,
+              queries: request.body.queries,
+              ecs_mapping: request.body.ecs_mapping,
+            },
+            space?.id,
+            alertData
+          ));
+        } catch (error) {
+          osqueryContext.logFactory
+            .get('liveQuery')
+            .error(`Failed to authorize osquery live query request: ${error.message}`, { error });
+
+          return response.customError({
+            statusCode: 500,
+            body: new Error('Error occurred while authorizing the live query request'),
+          });
+        }
+
         const isInvalid = !authorized;
 
         if (isInvalid) {

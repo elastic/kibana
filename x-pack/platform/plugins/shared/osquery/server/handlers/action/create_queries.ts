@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
-import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
+import { PARAMETER_NOT_FOUND, SAVED_QUERY_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import {
   containsDynamicQuery,
@@ -33,6 +33,12 @@ interface CreateDynamicQueriesParams {
   useStoredQuery?: boolean;
   /** Authz-resolved saved query; when set, skip a second SO lookup. */
   storedQuery?: ResolvedQueryReference;
+  /**
+   * Rule runs have no caller to return a status code to — a throw here is swallowed by
+   * `osqueryResponseAction` and the run still reports success. Record the failure on the
+   * action document instead so it surfaces in the alert's Osquery Results tab.
+   */
+  reportErrorsOnAction?: boolean;
 }
 
 export const createDynamicQueries = async ({
@@ -45,6 +51,7 @@ export const createDynamicQueries = async ({
   spaceScopedClient,
   useStoredQuery,
   storedQuery,
+  reportErrorsOnAction,
 }: CreateDynamicQueriesParams) => {
   const savedQueryId = params.saved_query_id?.trim();
   const enforceStoredSavedQuery = Boolean(useStoredQuery && savedQueryId);
@@ -54,18 +61,41 @@ export const createDynamicQueries = async ({
       ? undefined
       : await lookupSavedQuery(spaceScopedClient, savedQueryId ?? ''));
 
-  if (enforceStoredSavedQuery && !storedSavedQuery) {
-    throw new CustomHttpRequestError(`Saved query [${savedQueryId}] could not be resolved`, 400);
+  let unresolvedSavedQueryError: string | undefined;
+
+  if (enforceStoredSavedQuery && params.queries?.length) {
+    // An action carrying both a `saved_query_id` and a `queries[]` is ambiguous: the saved
+    // query wins, so the other entries would be dropped without a trace. Only rules created
+    // through the API or import can reach this, and they are never re-validated at run time.
+    osqueryContext.logFactory
+      .get('createDynamicQueries')
+      .warn(
+        `Response action specifies both saved_query_id [${savedQueryId}] and ${params.queries.length} inline queries; dispatching the saved query only.`
+      );
   }
 
-  const query = useStoredQuery
+  if (enforceStoredSavedQuery && !storedSavedQuery) {
+    if (!reportErrorsOnAction) {
+      throw new CustomHttpRequestError(`Saved query [${savedQueryId}] could not be resolved`, 400);
+    }
+
+    unresolvedSavedQueryError = SAVED_QUERY_NOT_FOUND;
+  }
+
+  // Never fall back to caller-supplied SQL when the stored query it named is gone.
+  const effectiveError = error ?? unresolvedSavedQueryError;
+
+  const query = unresolvedSavedQueryError
+    ? undefined
+    : useStoredQuery
     ? storedSavedQuery?.query ?? params.query
     : params.query ?? storedSavedQuery?.query;
   // True when the SQL below came from the saved object rather than the caller.
   const isStoredQueryDispatched = Boolean(useStoredQuery && storedSavedQuery?.query);
-  const ecsMapping = useStoredQuery
-    ? storedSavedQuery?.ecs_mapping ?? params.ecs_mapping
-    : params.ecs_mapping ?? storedSavedQuery?.ecs_mapping;
+  // Only the SQL has to come from the saved object — that is what authz vouched for. A mapping
+  // deliberately set on the rule action is the caller's own configuration and is not a way to
+  // widen what runs on the host, so it keeps precedence over the saved query's default.
+  const ecsMapping = params.ecs_mapping ?? storedSavedQuery?.ecs_mapping;
   const prebuiltId = storedSavedQuery?.savedObjectId ?? savedQueryId;
 
   if (params.queries?.length && !enforceStoredSavedQuery) {
@@ -76,7 +106,7 @@ export const createDynamicQueries = async ({
         {
           ...replacedQuery,
           ...restQuery,
-          ...(error ? { error } : {}),
+          ...(effectiveError ? { error: effectiveError } : {}),
           action_id: uuidv4(),
           alert_ids: params.alert_ids,
           agents,
@@ -105,7 +135,7 @@ export const createDynamicQueries = async ({
         alert_ids: params.alert_ids,
         timeout: params.timeout,
         agents,
-        ...(error ? { error } : {}),
+        ...(effectiveError ? { error: effectiveError } : {}),
       },
       (value) => !isEmpty(value) || isNumber(value)
     ),

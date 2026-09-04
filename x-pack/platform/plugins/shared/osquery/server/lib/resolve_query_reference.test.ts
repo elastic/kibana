@@ -138,7 +138,9 @@ describe('resolveQueryReference', () => {
       resolveQueryReference(coreStart, 'default', { pack_id: PACK_ID })
     ).resolves.toEqual({
       savedObjectId: PACK_ID,
+      isPack: true,
       queries: ['select 1;', 'select 2;'],
+      queryEcsMappings: [undefined, undefined],
     });
   });
 
@@ -202,7 +204,12 @@ describe('resolveQueryReference', () => {
         saved_query_id: SAVED_QUERY_ID,
         pack_id: PACK_ID,
       })
-    ).resolves.toEqual({ savedObjectId: PACK_ID, queries: ['select 2;'] });
+    ).resolves.toEqual({
+      savedObjectId: PACK_ID,
+      isPack: true,
+      queries: ['select 2;'],
+      queryEcsMappings: [undefined],
+    });
   });
 
   it('should look references up as their expected saved object types', async () => {

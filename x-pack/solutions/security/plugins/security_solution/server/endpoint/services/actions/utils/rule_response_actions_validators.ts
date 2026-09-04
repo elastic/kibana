@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual, keyBy, xorWith } from 'lodash';
+import { isEqual, keyBy, pickBy, xorWith } from 'lodash';
 import pMap from 'p-map';
 import type { Logger } from '@kbn/core/server';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
@@ -36,6 +36,65 @@ import {
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 
 type RuleResponseActions = Pick<RuleResponse, 'response_actions'>;
+
+/**
+ * Puts a response action into a single shape so that an unchanged action compares equal
+ * regardless of which side it came from.
+ *
+ * Existing rules persist `actionTypeId` and — for osquery — camelCase params
+ * (`savedQueryId`, `packId`, `ecsMapping`), while create/update payloads use snake_case
+ * throughout. Without normalizing the params too, `isEqual` never matches an osquery
+ * action, so every write re-validates it and a user who loses access to the referenced
+ * saved query can no longer edit the rule at all — not even to remove the action.
+ */
+const normalizeResponseActionForComparison = (
+  responseAction: ResponseAction | RuleResponseAction
+): ResponseAction => {
+  const {
+    actionTypeId,
+    action_type_id: actionTypeIdSnake,
+    params,
+    ...rest
+  } = responseAction as {
+    actionTypeId?: string;
+    action_type_id?: string;
+    params?: Record<string, unknown>;
+  };
+
+  const normalized = {
+    ...rest,
+    action_type_id: actionTypeIdSnake ?? actionTypeId,
+    ...(params == null ? {} : { params }),
+  } as Record<string, unknown>;
+
+  // Only osquery params differ in casing between the two sides. Endpoint params are stored
+  // as-is, so rewriting them here would change what the per-command validations below see.
+  if (params == null || !isOsqueryResponseAction(normalized as unknown as ResponseAction)) {
+    return normalized as unknown as ResponseAction;
+  }
+
+  const {
+    savedQueryId,
+    saved_query_id: savedQueryIdSnake,
+    packId,
+    pack_id: packIdSnake,
+    ecsMapping,
+    ecs_mapping: ecsMappingSnake,
+    ...restParams
+  } = params;
+
+  normalized.params = pickBy(
+    {
+      ...restParams,
+      saved_query_id: savedQueryIdSnake ?? savedQueryId,
+      pack_id: packIdSnake ?? packId,
+      ecs_mapping: ecsMappingSnake ?? ecsMapping,
+    },
+    (value) => value !== undefined
+  );
+
+  return normalized as unknown as ResponseAction;
+};
 
 export type CheckOsqueryResponseActionAuthz = (actionParams: {
   saved_query_id?: string;
@@ -101,15 +160,17 @@ export const validateRuleResponseActions = async <
     return;
   }
 
+  // Existing rules store the action type ID and the osquery params in camelCase, while the rule
+  // update/create payload uses snake_case, so both sides are normalized here and the comparison
+  // focuses only on real changes.
+  const normalizedPayloadActions = (ruleResponseActions ?? []).map(
+    normalizeResponseActionForComparison
+  );
   const responseActionsToValidate = xorWith<ResponseAction | RuleResponseAction>(
-    ruleResponseActions,
-    // Existing rule store the action type ID in a property that is CamelCase, while the rule update/create payload
-    // stores the action type ID in a snake_case property, so we just normalize that here so that the comparison
-    // focuses only on the `params`
-    (existingRuleResponseActions ?? []).map(({ actionTypeId, ...rest }) => ({
-      ...rest,
-      action_type_id: actionTypeId,
-    })) as unknown as Array<RuleResponseAction>,
+    normalizedPayloadActions,
+    (existingRuleResponseActions ?? []).map(
+      normalizeResponseActionForComparison
+    ) as unknown as RuleResponseAction[],
     isEqual
   );
 
@@ -121,6 +182,10 @@ export const validateRuleResponseActions = async <
   logger.debug(
     () => `Response actions needing validation: ${stringify(responseActionsToValidate)}`
   );
+
+  /** True when the action is present in the incoming payload, i.e. it is not being removed. */
+  const isActionInPayload = (actionData: ResponseAction | RuleResponseAction): boolean =>
+    normalizedPayloadActions.some((payloadAction) => isEqual(payloadAction, actionData));
 
   const isRunscriptAutomatedResponseActionEnabled =
     endpointService.experimentalFeatures.responseActionsEndpointAutomatedRunScript;
@@ -161,7 +226,9 @@ export const validateRuleResponseActions = async <
           // first update the rule to ensure the existing entry is valid if all they want to do is
           // remove the use of the script from the rule.
           if (
-            ruleResponseActions?.includes(actionData as ResponseAction) ||
+            // Compared by value: `responseActionsToValidate` holds normalized copies, so a
+            // reference check against the raw payload would never match.
+            isActionInPayload(actionData) ||
             isScriptIdReferencedInRunscriptResponseActions(
               ruleResponseActions ?? [],
               getScriptIdsFromRunscriptConfig(actionData.params.config)
@@ -183,7 +250,18 @@ export const validateRuleResponseActions = async <
           break;
       }
     } else if (isOsqueryResponseAction(actionData)) {
-      if (checkOsqueryResponseActionAuthz) {
+      // Mirrors the `runscript` carve-out above: an action that appears only on the existing
+      // rule is being *removed*, and there is nothing to authorize. Without this, a saved query
+      // that is later deleted or moved out of the space would pin the action in place forever,
+      // because the user could neither keep it (403) nor take it off the rule.
+      if (!isActionInPayload(actionData)) {
+        logger.debug(
+          () =>
+            `Skipping validation of osquery response action - not present in rule payload (being removed): ${stringify(
+              actionData
+            )}`
+        );
+      } else if (checkOsqueryResponseActionAuthz) {
         const params = actionData.params;
         // API payload is snake_case; existing rules in ES are camelCase.
         await checkOsqueryResponseActionAuthz({
