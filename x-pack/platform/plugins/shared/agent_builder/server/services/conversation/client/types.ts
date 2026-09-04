@@ -29,7 +29,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
+import type { TimelineEvent, UserIdAndName } from '@kbn/agent-builder-common';
 import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
@@ -50,6 +50,8 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       Conversation,
       | 'title'
       | 'rounds'
+      | 'events'
+      | 'schema_version'
       | 'attachments'
       | 'state'
       | 'status'
@@ -85,6 +87,40 @@ export interface UpsertRoundRequest {
   round: ConversationRound;
   /** `action: 'regenerate'` only: id of the round this one supersedes. */
   replacesRoundId?: string;
+  state?: ConversationInternalState;
+  /** Reconciled into the stored list; `snapshot` is what the round started from. */
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Applied only when the stored conversation has no workspace yet. */
+  workspaceId?: string;
+}
+
+/** Appends timeline events onto a conversation.*/
+export interface AppendEventsRequest {
+  id: string;
+  /** Timeline events to append; already materialized (ids, actor, created_at set). */
+  events: TimelineEvent[];
+  /** Generated title to persist in the same write (rides the END append). */
+  title?: string;
+  /** Round status to persist alongside the append. */
+  status?: Conversation['status'];
+  state?: ConversationInternalState;
+  /** Reconciled into the stored list; `snapshot` is what the round started from. */
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Applied only when the stored conversation has no workspace yet. */
+  workspaceId?: string;
+}
+
+export interface ReplaceRoundEventsRequest {
+  /** Conversation to update. */
+  id: string;
+  /** The round whose stored events should be replaced. */
+  roundId: string;
+  /** The fresh canonical projection for the round. */
+  events: TimelineEvent[];
+  /** Generated title to persist in the same write (rides the END append). */
+  title?: string;
+  /** Round status to persist alongside the write. */
+  status?: Conversation['status'];
   state?: ConversationInternalState;
   /** Reconciled into the stored list; `snapshot` is what the round started from. */
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };

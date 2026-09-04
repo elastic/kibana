@@ -10,6 +10,7 @@
 import { type Document, isPair, isScalar, type LineCounter, visit } from 'yaml';
 import { WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES } from '@kbn/workflows';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
+import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
 import type { ConnectorIdItem } from '../model/types';
 
 function isConnectorIdValue(node: unknown, lastAncestor: unknown): boolean {
@@ -90,10 +91,12 @@ export function collectAllConnectorIds(
       }
 
       const path = getPathFromAncestors(ancestors);
-      const connectorType =
+      const rawConnectorType =
         findConnectorTypeFromStepAncestor(ancestors ?? []) ??
         findConnectorTypeFromChannelsPath(path) ??
         'unknown';
+      const connectorType =
+        getConnectorTypeIdForTriggerEventId(rawConnectorType) ?? rawConnectorType;
 
       const [startOffset, endOffset] = node.range;
       const startPos = lineCounter.linePos(startOffset);

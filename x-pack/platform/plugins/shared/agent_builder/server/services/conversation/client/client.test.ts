@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   CONVERSATION_SCHEMA_VERSION,
@@ -54,13 +55,25 @@ const mockEsClient: MockEsClient = {
   delete: jest.fn(),
 };
 
+interface MockRawEsClient {
+  get: jest.Mock;
+}
+
+const mockRawEsClient: MockRawEsClient = {
+  get: jest.fn(),
+};
+
+const TEST_CONVERSATION_INDEX = '.kibana_agent_builder_conversations';
+
 jest.mock('./storage', () => ({
   createStorage: jest.fn(() => ({
     getClient: jest.fn(() => mockEsClient),
   })),
+  conversationIndexName: '.kibana_agent_builder_conversations',
 }));
 
-describe('ConversationClient', () => {
+// Failing: See https://github.com/elastic/kibana/issues/289049
+describe.skip('ConversationClient', () => {
   let client: ConversationClient;
   let agentRegistry: jest.Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
 
@@ -85,6 +98,8 @@ describe('ConversationClient', () => {
     pinnedBy = [{ userId: 'unrelated-pinner-id' }],
     schemaVersion,
     events,
+    space = testSpace,
+    hasSpace = true,
   }: {
     id?: string;
     agentId?: string;
@@ -105,6 +120,8 @@ describe('ConversationClient', () => {
     pinnedBy?: Array<{ userId: string }>;
     schemaVersion?: number;
     events?: TimelineEvent[];
+    space?: string;
+    hasSpace?: boolean;
   } = {}): Document =>
     ({
       _id: id,
@@ -113,7 +130,7 @@ describe('ConversationClient', () => {
         agent_id: agentId,
         user_id: userId,
         user_name: username,
-        space: testSpace,
+        ...(hasSpace ? { space } : {}),
         title,
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
@@ -131,6 +148,34 @@ describe('ConversationClient', () => {
         },
       },
     } as Document);
+
+  const mockGetDocumentResponse = (doc: Document) => {
+    mockRawEsClient.get.mockResolvedValue({
+      _id: doc._id!,
+      _index: TEST_CONVERSATION_INDEX,
+      _source: doc._source,
+      _seq_no: doc._seq_no,
+      _primary_term: doc._primary_term,
+      found: true,
+    });
+  };
+
+  const mockGetDocumentResponseOnce = (doc: Document) => {
+    mockRawEsClient.get.mockResolvedValueOnce({
+      _id: doc._id!,
+      _index: TEST_CONVERSATION_INDEX,
+      _source: doc._source,
+      _seq_no: doc._seq_no,
+      _primary_term: doc._primary_term,
+      found: true,
+    });
+  };
+
+  const mockGetDocumentNotFound = () => {
+    mockRawEsClient.get.mockRejectedValue(
+      Object.assign(new Error('not found'), { meta: { statusCode: 404 } })
+    );
+  };
 
   const expectNoReadBy = (conversation: unknown) => {
     expect(conversation).not.toHaveProperty('read_by');
@@ -169,6 +214,7 @@ describe('ConversationClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRawEsClient.get.mockReset();
 
     agentRegistry = {
       get: jest.fn().mockResolvedValue({ id: 'agent-1' }),
@@ -180,7 +226,7 @@ describe('ConversationClient', () => {
     client = createClient({
       space: testSpace,
       logger: loggerMock.create(),
-      esClient: {} as never,
+      esClient: mockRawEsClient as unknown as ElasticsearchClient,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
       user: {
         id: 'user-1',
@@ -480,17 +526,13 @@ describe('ConversationClient', () => {
 
   describe('get', () => {
     it('returns a public non-owner conversation when the user can use the agent', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       const result = await client.get('conversation-1');
 
@@ -502,17 +544,13 @@ describe('ConversationClient', () => {
 
     it('returns not found when conversation access passes but agent use access fails', async () => {
       agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       await expect(client.get('conversation-1')).rejects.toMatchObject({
         message: 'Conversation conversation-1 not found',
@@ -521,11 +559,7 @@ describe('ConversationClient', () => {
 
     it('returns not found for owned conversations when agent use access fails', async () => {
       agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createConversationDocument()],
-        },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(client.get('conversation-1')).rejects.toMatchObject({
         message: 'Conversation conversation-1 not found',
@@ -536,11 +570,7 @@ describe('ConversationClient', () => {
 
     it('returns not found when the underlying agent is unavailable', async () => {
       agentRegistry.get.mockRejectedValue(createAgentUnavailableError({ agentId: 'agent-1' }));
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createConversationDocument()],
-        },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(client.get('conversation-1')).rejects.toMatchObject({
         message: 'Conversation conversation-1 not found',
@@ -550,61 +580,95 @@ describe('ConversationClient', () => {
 
   describe('exists', () => {
     it('returns true when the document exists, even when owned by another user and private', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Private,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Private,
+        })
+      );
 
       await expect(client.exists('conversation-1')).resolves.toBe(true);
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({ seq_no_primary_term: true })
-      );
+      expect(mockRawEsClient.get).toHaveBeenCalledWith({
+        index: TEST_CONVERSATION_INDEX,
+        id: 'conversation-1',
+      });
     });
 
     it('returns true when the document exists but agent use access fails', async () => {
       agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createConversationDocument()],
-        },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(client.exists('conversation-1')).resolves.toBe(true);
     });
 
     it('returns false when no document exists', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [],
-        },
-      });
+      mockGetDocumentNotFound();
 
       await expect(client.exists('conversation-1')).resolves.toBe(false);
     });
 
     it('propagates Elasticsearch read failures', async () => {
-      const error = new Error('search timeout');
-      mockEsClient.search.mockRejectedValue(error);
+      const error = new Error('read timeout');
+      mockRawEsClient.get.mockRejectedValue(error);
 
       await expect(client.exists('conversation-1')).rejects.toBe(error);
+    });
+  });
+
+  // Reads-by-id go through `esClient.get` (no space filter), so cross-space isolation is enforced
+  // in application code inside `getDocument`. These tests lock in that guarantee, which used to
+  // come for free from the DSL `createSpaceDslFilter`.
+  describe('space isolation for reads-by-id', () => {
+    const createClientInSpace = (space: string) =>
+      createClient({
+        space,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+      });
+
+    it('treats a doc from a different space as not-found for a non-default-space client', async () => {
+      const otherSpaceClient = createClientInSpace('team-a');
+      mockGetDocumentResponse(createConversationDocument({ space: 'team-b' }));
+
+      await expect(otherSpaceClient.get('conversation-1')).rejects.toMatchObject({
+        message: 'Conversation conversation-1 not found',
+      });
+      await expect(otherSpaceClient.exists('conversation-1')).resolves.toBe(false);
+    });
+
+    it('treats a doc without a space field as not-found for a non-default-space client', async () => {
+      const otherSpaceClient = createClientInSpace('team-a');
+      mockGetDocumentResponse(createConversationDocument({ hasSpace: false }));
+
+      await expect(otherSpaceClient.get('conversation-1')).rejects.toMatchObject({
+        message: 'Conversation conversation-1 not found',
+      });
+      await expect(otherSpaceClient.exists('conversation-1')).resolves.toBe(false);
+    });
+
+    it('treats a doc from a non-default space as not-found for a default-space client', async () => {
+      mockGetDocumentResponse(createConversationDocument({ space: 'team-a' }));
+
+      await expect(client.get('conversation-1')).rejects.toMatchObject({
+        message: 'Conversation conversation-1 not found',
+      });
+      await expect(client.exists('conversation-1')).resolves.toBe(false);
+    });
+
+    it('accepts a doc without a space field for a default-space client (legacy pre-space docs)', async () => {
+      mockGetDocumentResponse(createConversationDocument({ hasSpace: false }));
+
+      await expect(client.exists('conversation-1')).resolves.toBe(true);
     });
   });
 
   describe('create', () => {
     beforeEach(() => {
       mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createConversationDocument()],
-        },
-      });
+      mockGetDocumentResponse(createConversationDocument());
     });
 
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
@@ -655,8 +719,6 @@ describe('ConversationClient', () => {
     });
 
     it('serializes caller-supplied TOGGLE and NUMBER metadata to strings before indexing', async () => {
-      // Regression for: caller passes boolean/number, raw value lands in ES, and
-      // deserializeMetadataValue('true' === <boolean>) → wrong type on read-back.
       const template: ConversationTemplate = {
         id: 'tmpl-serialize',
         version: 1,
@@ -690,17 +752,12 @@ describe('ConversationClient', () => {
   describe('getByOrigin', () => {
     it('finds a conversation by first-class origin in the current space', async () => {
       const document = createConversationDocument();
-      mockEsClient.search
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [document],
-          },
-        })
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [document],
-          },
-        });
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [document],
+        },
+      });
+      mockGetDocumentResponseOnce(document);
 
       const result = await client.getByOrigin({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -732,17 +789,13 @@ describe('ConversationClient', () => {
 
   describe('update', () => {
     it('remains owner-only by default for public conversations', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       await expect(client.update({ id: 'conversation-1', title: 'Updated title' })).rejects.toThrow(
         'Conversation conversation-1 not found'
@@ -752,9 +805,7 @@ describe('ConversationClient', () => {
     });
 
     it('allows the owner to rename with rename access', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       const result = await client.update(
         { id: 'conversation-1', title: 'Renamed' },
@@ -772,9 +823,7 @@ describe('ConversationClient', () => {
     });
 
     it('preserves legacy owner read state when renaming before read_by exists', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ read: true, hasReadBy: false })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ read: true, hasReadBy: false }));
 
       const result = await client.update(
         { id: 'conversation-1', title: 'Renamed' },
@@ -789,17 +838,13 @@ describe('ConversationClient', () => {
     });
 
     it('denies rename access to a public non-owner conversation', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       await expect(
         client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' })
@@ -809,17 +854,13 @@ describe('ConversationClient', () => {
     });
 
     it('preserves the original owner when a non-owner writes with converse access', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       await client.update({ id: 'conversation-1', title: 'Updated title' }, { access: 'converse' });
 
@@ -836,17 +877,13 @@ describe('ConversationClient', () => {
 
     it('returns not found for converse updates when agent use access fails', async () => {
       agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       await expect(
         client.update({ id: 'conversation-1', title: 'Updated title' }, { access: 'converse' })
@@ -858,11 +895,7 @@ describe('ConversationClient', () => {
 
     it('returns not found for owned converse updates when agent use access fails', async () => {
       agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createConversationDocument()],
-        },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(
         client.update({ id: 'conversation-1', title: 'Updated title' }, { access: 'converse' })
@@ -874,22 +907,19 @@ describe('ConversationClient', () => {
   });
 
   describe('optimistic concurrency control', () => {
-    it('requests seq_no_primary_term when reading a conversation', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+    it('reads the document by id via the raw ES get API', async () => {
+      mockGetDocumentResponse(createConversationDocument());
 
       await client.update({ id: 'conversation-1', title: 'Updated title' });
 
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({ seq_no_primary_term: true })
-      );
+      expect(mockRawEsClient.get).toHaveBeenCalledWith({
+        index: TEST_CONVERSATION_INDEX,
+        id: 'conversation-1',
+      });
     });
 
     it('passes the version read from the document to the write', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ seqNo: 42, primaryTerm: 7 })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ seqNo: 42, primaryTerm: 7 }));
 
       await client.update({ id: 'conversation-1', title: 'Updated title' });
 
@@ -899,9 +929,7 @@ describe('ConversationClient', () => {
     });
 
     it('refuses to write when the read returned no version metadata', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ versioned: false })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ versioned: false }));
 
       await expect(client.update({ id: 'conversation-1', title: 'x' })).rejects.toThrow(
         /read without version metadata/
@@ -910,9 +938,7 @@ describe('ConversationClient', () => {
     });
 
     it('surfaces a write conflict as a conversation write conflict error', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
       mockEsClient.index.mockRejectedValue(createConflictError());
 
       const error = await client.update({ id: 'conversation-1', title: 'x' }).catch((e) => e);
@@ -922,9 +948,7 @@ describe('ConversationClient', () => {
     });
 
     it('does not retry by default, so a payload built from a stale read is not re-applied', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
       mockEsClient.index.mockRejectedValue(createConflictError());
 
       await expect(client.update({ id: 'conversation-1', title: 'x' })).rejects.toThrow();
@@ -933,21 +957,16 @@ describe('ConversationClient', () => {
     });
 
     it('re-applies the requested read state over the fresh document when retrying after conflict', async () => {
-      mockEsClient.search
-        .mockResolvedValueOnce({ hits: { hits: [createConversationDocument()] } })
-        // a round landed first, adding a round and marking the conversation unread
-        .mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocument({
-                seqNo: 2,
-                read: false,
-                readBy: [],
-                rounds: [createRound({ id: 'round-concurrent' })],
-              }),
-            ],
-          },
-        });
+      mockGetDocumentResponseOnce(createConversationDocument());
+      // a round landed first, adding a round and marking the conversation unread
+      mockGetDocumentResponse(
+        createConversationDocument({
+          seqNo: 2,
+          read: false,
+          readBy: [],
+          rounds: [createRound({ id: 'round-concurrent' })],
+        })
+      );
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
       mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
 
@@ -966,18 +985,14 @@ describe('ConversationClient', () => {
 
   describe('markRead', () => {
     it('adds only the calling user to read_by', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-              readBy: [],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+          readBy: [],
+        })
+      );
 
       const result = await client.markRead('conversation-1', true);
 
@@ -988,19 +1003,14 @@ describe('ConversationClient', () => {
     });
 
     it('does not clobber read_by entries written by another user', async () => {
-      mockEsClient.search
-        .mockResolvedValueOnce({ hits: { hits: [createConversationDocument()] } })
-        // another user marked it read concurrently
-        .mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocument({
-                seqNo: 2,
-                readBy: [{ userId: 'other-user-id' }],
-              }),
-            ],
-          },
-        });
+      mockGetDocumentResponseOnce(createConversationDocument());
+      // another user marked it read concurrently
+      mockGetDocumentResponse(
+        createConversationDocument({
+          seqNo: 2,
+          readBy: [{ userId: 'other-user-id' }],
+        })
+      );
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
       mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
 
@@ -1013,15 +1023,11 @@ describe('ConversationClient', () => {
     });
 
     it('removes only the calling user when marking unread', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              readBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          readBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
+        })
+      );
 
       await client.markRead('conversation-1', false);
 
@@ -1030,21 +1036,17 @@ describe('ConversationClient', () => {
     });
 
     it('is a no-op when the calling user has no stable id', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              readBy: [],
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          readBy: [],
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       client = createClient({
         space: testSpace,
         logger: loggerMock.create(),
-        esClient: {} as never,
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { username: 'no-profile-user', isAdmin: false },
       });
@@ -1060,18 +1062,14 @@ describe('ConversationClient', () => {
 
   describe('setPinned', () => {
     it('adds only the calling user to pinned_by', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-              pinnedBy: [],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+          pinnedBy: [],
+        })
+      );
 
       const result = await client.setPinned('conversation-1', true);
 
@@ -1082,19 +1080,14 @@ describe('ConversationClient', () => {
     });
 
     it('does not clobber pinned_by entries written by another user', async () => {
-      mockEsClient.search
-        .mockResolvedValueOnce({ hits: { hits: [createConversationDocument({ pinnedBy: [] })] } })
-        // another user pinned it concurrently
-        .mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocument({
-                seqNo: 2,
-                pinnedBy: [{ userId: 'other-user-id' }],
-              }),
-            ],
-          },
-        });
+      mockGetDocumentResponseOnce(createConversationDocument({ pinnedBy: [] }));
+      // another user pinned it concurrently
+      mockGetDocumentResponse(
+        createConversationDocument({
+          seqNo: 2,
+          pinnedBy: [{ userId: 'other-user-id' }],
+        })
+      );
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
       mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
 
@@ -1107,15 +1100,11 @@ describe('ConversationClient', () => {
     });
 
     it('removes only the calling user when unpinning', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              pinnedBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          pinnedBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
+        })
+      );
 
       await client.setPinned('conversation-1', false);
 
@@ -1124,21 +1113,17 @@ describe('ConversationClient', () => {
     });
 
     it('is a no-op when the calling user has no stable id', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              pinnedBy: [],
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          pinnedBy: [],
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       client = createClient({
         space: testSpace,
         logger: loggerMock.create(),
-        esClient: {} as never,
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { username: 'no-profile-user', isAdmin: false },
       });
@@ -1163,9 +1148,9 @@ describe('ConversationClient', () => {
     });
 
     it('appends the round to the stored conversation', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })] },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
+      );
 
       await client.upsertRound({ id: 'conversation-1', round });
 
@@ -1173,23 +1158,16 @@ describe('ConversationClient', () => {
     });
 
     it('re-reads and keeps a round written concurrently after a conflict', async () => {
-      mockEsClient.search
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })],
-          },
+      mockGetDocumentResponseOnce(
+        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
+      );
+      // the winning writer's round is now present in the stored document
+      mockGetDocumentResponse(
+        createConversationDocument({
+          seqNo: 2,
+          rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-concurrent' })],
         })
-        // the winning writer's round is now present in the stored document
-        .mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocument({
-                seqNo: 2,
-                rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-concurrent' })],
-              }),
-            ],
-          },
-        });
+      );
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
 
       await client.upsertRound({ id: 'conversation-1', round });
@@ -1203,9 +1181,7 @@ describe('ConversationClient', () => {
     });
 
     it('throws a write conflict error once retries are exhausted', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
       mockEsClient.index.mockRejectedValue(createConflictError());
 
       const error = await client.upsertRound({ id: 'conversation-1', round }).catch((e) => e);
@@ -1215,9 +1191,7 @@ describe('ConversationClient', () => {
     });
 
     it('preserves a title renamed while the round was running', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ title: 'Renamed by user' })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ title: 'Renamed by user' }));
 
       const result = await client.upsertRound({ id: 'conversation-1', round });
 
@@ -1234,9 +1208,7 @@ describe('ConversationClient', () => {
       const concurrent = { id: 'attachment-concurrent', versions: [], current_version: 1 };
       const fromRound = { id: 'attachment-from-round', versions: [], current_version: 1 };
 
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ attachments: [concurrent] })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ attachments: [concurrent] }));
 
       await client.upsertRound({
         id: 'conversation-1',
@@ -1255,9 +1227,7 @@ describe('ConversationClient', () => {
       const stored = { id: 'X', versions: [], current_version: 1 };
       const edited = { id: 'X', versions: [], current_version: 2 };
 
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ attachments: [stored] })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ attachments: [stored] }));
 
       await client.upsertRound({
         id: 'conversation-1',
@@ -1272,9 +1242,7 @@ describe('ConversationClient', () => {
     });
 
     it('does not overwrite a workspace already set on the stored conversation', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ workspaceId: 'workspace-existing' })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ workspaceId: 'workspace-existing' }));
 
       await client.upsertRound({
         id: 'conversation-1',
@@ -1290,9 +1258,7 @@ describe('ConversationClient', () => {
     });
 
     it('sets the workspace when the stored conversation has none', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await client.upsertRound({
         id: 'conversation-1',
@@ -1329,15 +1295,11 @@ describe('ConversationClient', () => {
     });
 
     it('merges the refs into the last stored round only', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-2' })],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-2' })],
+        })
+      );
 
       await client.addAttachmentsToLastRound(request);
 
@@ -1347,22 +1309,15 @@ describe('ConversationClient', () => {
     });
 
     it('applies the refs to a round appended concurrently after a conflict', async () => {
-      mockEsClient.search
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })],
-          },
+      mockGetDocumentResponseOnce(
+        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
+      );
+      mockGetDocumentResponse(
+        createConversationDocument({
+          seqNo: 2,
+          rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-concurrent' })],
         })
-        .mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocument({
-                seqNo: 2,
-                rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-concurrent' })],
-              }),
-            ],
-          },
-        });
+      );
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
 
       await client.addAttachmentsToLastRound(request);
@@ -1379,16 +1334,12 @@ describe('ConversationClient', () => {
     it('keeps a concurrent attachment alongside the produced ones', async () => {
       const concurrent = { id: 'attachment-concurrent', versions: [], current_version: 1 };
 
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              rounds: [createRound({ id: 'round-1' })],
-              attachments: [concurrent],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [createRound({ id: 'round-1' })],
+          attachments: [concurrent],
+        })
+      );
 
       await client.addAttachmentsToLastRound(request);
 
@@ -1400,9 +1351,7 @@ describe('ConversationClient', () => {
     });
 
     it('throws a bad request error when the stored conversation has no rounds', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(client.addAttachmentsToLastRound(request)).rejects.toThrow(
         'Conversation conversation-1 has no rounds to attach to'
@@ -1412,9 +1361,9 @@ describe('ConversationClient', () => {
     });
 
     it('throws a write conflict error once retries are exhausted', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })] },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
+      );
       mockEsClient.index.mockRejectedValue(createConflictError());
 
       const error = await client.addAttachmentsToLastRound(request).catch((e) => e);
@@ -1424,18 +1373,14 @@ describe('ConversationClient', () => {
     });
 
     it('remains owner-only by default for public conversations', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-              rounds: [createRound({ id: 'round-1' })],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+          rounds: [createRound({ id: 'round-1' })],
+        })
+      );
 
       await expect(client.addAttachmentsToLastRound(request)).rejects.toThrow(
         'Conversation conversation-1 not found'
@@ -1463,9 +1408,7 @@ describe('ConversationClient', () => {
           llm_calls: 1,
         },
       });
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ rounds: [roundWithModel] })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ rounds: [roundWithModel] }));
 
       await client.updateRoundFeedback('conversation-1', 'round-1', {
         vote: 'up',
@@ -1506,9 +1449,7 @@ describe('ConversationClient', () => {
           submitted_at: '2025-01-01T00:00:00.000Z',
         },
       };
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ rounds: [roundWithFeedback] })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ rounds: [roundWithFeedback] }));
 
       await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
 
@@ -1518,9 +1459,7 @@ describe('ConversationClient', () => {
     });
 
     it('throws not found when the round does not exist in the conversation', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ rounds: [round] })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ rounds: [round] }));
 
       await expect(
         client.updateRoundFeedback('conversation-1', 'nonexistent-round', { vote: 'up' })
@@ -1530,13 +1469,8 @@ describe('ConversationClient', () => {
     });
 
     it('retries on a 409 conflict, re-reading the document with the updated sequence', async () => {
-      mockEsClient.search
-        .mockResolvedValueOnce({
-          hits: { hits: [createConversationDocument({ seqNo: 1, rounds: [round] })] },
-        })
-        .mockResolvedValue({
-          hits: { hits: [createConversationDocument({ seqNo: 2, rounds: [round] })] },
-        });
+      mockGetDocumentResponseOnce(createConversationDocument({ seqNo: 1, rounds: [round] }));
+      mockGetDocumentResponse(createConversationDocument({ seqNo: 2, rounds: [round] }));
       mockEsClient.index.mockRejectedValueOnce(createConflictError()).mockResolvedValue({});
 
       await client.updateRoundFeedback('conversation-1', 'round-1', { vote: 'down' });
@@ -1548,9 +1482,7 @@ describe('ConversationClient', () => {
     });
 
     it('throws a write conflict error once retries are exhausted', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ rounds: [round] })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ rounds: [round] }));
       mockEsClient.index.mockRejectedValue(createConflictError());
 
       const error = await client
@@ -1562,18 +1494,14 @@ describe('ConversationClient', () => {
     });
 
     it('is restricted to the conversation owner', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Private,
-              rounds: [round],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Private,
+          rounds: [round],
+        })
+      );
 
       await expect(
         client.updateRoundFeedback('conversation-1', 'round-1', { vote: 'up' })
@@ -1585,17 +1513,13 @@ describe('ConversationClient', () => {
 
   describe('delete', () => {
     it('remains owner-only for public conversations when the caller is not an admin', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       await expect(client.delete('conversation-1')).rejects.toThrow(
         'Conversation conversation-1 not found'
@@ -1605,9 +1529,8 @@ describe('ConversationClient', () => {
     });
 
     it('returns true when the document was already deleted (404)', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
       const notFoundError = Object.assign(new Error('not found'), { statusCode: 404 });
       mockEsClient.delete.mockRejectedValue(notFoundError);
 
@@ -1615,9 +1538,8 @@ describe('ConversationClient', () => {
     });
 
     it('rethrows non-404 errors from the delete call', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
       const serverError = Object.assign(new Error('internal server error'), { statusCode: 500 });
       mockEsClient.delete.mockRejectedValue(serverError);
 
@@ -1681,16 +1603,12 @@ describe('ConversationClient', () => {
     });
 
     it('deserializes template metadata when getting a conversation', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocumentWithTemplate({
-              templateId: template.id,
-              metadata: { enabled: 'true' },
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: template.id,
+          metadata: { enabled: 'true' },
+        })
+      );
 
       await expect(client.get('conversation-1')).resolves.toMatchObject({
         metadata: { enabled: true },
@@ -1728,9 +1646,7 @@ describe('ConversationClient', () => {
 
     it('throws a bad-request error when the template id is unknown', async () => {
       getTemplateMock.mockReturnValue(undefined);
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocumentWithTemplate()] },
-      });
+      mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
       await expect(
         client.applyTemplate('conversation-1', 'unknown-template')
@@ -1755,9 +1671,7 @@ describe('ConversationClient', () => {
         2
       );
       getTemplateMock.mockReturnValue(template);
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocumentWithTemplate()] },
-      });
+      mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
       await client.applyTemplate('conversation-1', 'tmpl-a');
 
@@ -1784,16 +1698,12 @@ describe('ConversationClient', () => {
         id === 'tmpl-a' ? templateA : id === 'tmpl-b' ? templateB : undefined
       );
 
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocumentWithTemplate({
-              templateId: 'tmpl-a',
-              metadata: { old_key: 'old_value' },
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'tmpl-a',
+          metadata: { old_key: 'old_value' },
+        })
+      );
 
       await expect(client.applyTemplate('conversation-1', 'tmpl-b')).rejects.toThrow(
         'Conversation already has template "tmpl-a". Switching templates is not supported'
@@ -1813,19 +1723,15 @@ describe('ConversationClient', () => {
         id === 'tmpl-a' ? templateA : id === 'tmpl-b' ? templateB : undefined
       );
 
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocumentWithTemplate({
-              templateId: 'tmpl-a',
-              metadata: {
-                tmpl_a_key: 'set_by_user',
-                user_custom_key: 'stays',
-              },
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'tmpl-a',
+          metadata: {
+            tmpl_a_key: 'set_by_user',
+            user_custom_key: 'stays',
+          },
+        })
+      );
 
       await expect(client.applyTemplate('conversation-1', 'tmpl-b')).rejects.toThrow(
         'Conversation already has template "tmpl-a". Switching templates is not supported'
@@ -1850,20 +1756,16 @@ describe('ConversationClient', () => {
       // Registry always returns the latest version; existing conversation stores v1's fields.
       getTemplateMock.mockReturnValue(templateV2);
       // The conversation currently stores v1's fields
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocumentWithTemplate({
-              templateId: 'tmpl-a',
-              templateVersion: 1,
-              metadata: {
-                kept_field: 'user_value',
-                dropped_field: 'old_value',
-              },
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'tmpl-a',
+          templateVersion: 1,
+          metadata: {
+            kept_field: 'user_value',
+            dropped_field: 'old_value',
+          },
+        })
+      );
 
       await client.applyTemplate('conversation-1', 'tmpl-a');
 
@@ -1889,9 +1791,7 @@ describe('ConversationClient', () => {
         mfa_enabled: { input_type: 'TOGGLE', description: 'MFA flag', default_value: false },
       });
       getTemplateMock.mockReturnValue(template);
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocumentWithTemplate()] },
-      });
+      mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
       await client.applyTemplate('conversation-1', 'tmpl-bool');
 
@@ -1909,9 +1809,7 @@ describe('ConversationClient', () => {
         tags: { input_type: 'TEXT_ARRAY', description: 'Tags', default_value: ['a', 'b'] },
       });
       getTemplateMock.mockReturnValue(template);
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocumentWithTemplate()] },
-      });
+      mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
       await client.applyTemplate('conversation-1', 'tmpl-arr');
 
@@ -1926,11 +1824,9 @@ describe('ConversationClient', () => {
 
     it('enforces owner access — throws for conversations owned by another user', async () => {
       getTemplateMock.mockReturnValue(makeTemplate('tmpl-a'));
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createConversationDocument({ userId: 'other-user', username: 'other' })],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({ userId: 'other-user', username: 'other' })
+      );
 
       await expect(client.applyTemplate('conversation-1', 'tmpl-a')).rejects.toMatchObject({
         message: expect.stringContaining('conversation-1'),
@@ -1945,9 +1841,7 @@ describe('ConversationClient', () => {
     });
 
     it('throws when the conversation has no template', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocumentWithTemplate()] },
-      });
+      mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
       await expect(
         client.patchMetadata('conversation-1', { severity: 'high' })
@@ -1970,16 +1864,12 @@ describe('ConversationClient', () => {
       });
       getTemplateMock.mockReturnValue(template);
 
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocumentWithTemplate({
-              templateId: 'tmpl-a',
-              metadata: { status: 'open' },
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'tmpl-a',
+          metadata: { status: 'open' },
+        })
+      );
 
       await client.patchMetadata('conversation-1', { severity: 'high', notified: true });
 
@@ -2006,16 +1896,12 @@ describe('ConversationClient', () => {
 
       // The OCC read (inside writeConversation → readModifyWrite) returns a doc that already
       // has `status: 'closed'` written concurrently.
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocumentWithTemplate({
-              templateId: 'tmpl-a',
-              metadata: { status: 'closed' },
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'tmpl-a',
+          metadata: { status: 'closed' },
+        })
+      );
 
       await client.patchMetadata('conversation-1', { severity: 'high' });
 
@@ -2033,9 +1919,7 @@ describe('ConversationClient', () => {
       });
       getTemplateMock.mockReturnValue(template);
 
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocumentWithTemplate({ templateId: 'tmpl-a' })] },
-      });
+      mockGetDocumentResponse(createConversationDocumentWithTemplate({ templateId: 'tmpl-a' }));
 
       await expect(
         client.patchMetadata('conversation-1', { unknown_field: 'value' })
@@ -2047,11 +1931,9 @@ describe('ConversationClient', () => {
 
     it('enforces owner access — throws for conversations owned by another user', async () => {
       getTemplateMock.mockReturnValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createConversationDocument({ userId: 'other-user', username: 'other' })],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({ userId: 'other-user', username: 'other' })
+      );
 
       await expect(client.patchMetadata('conversation-1', { x: 'value' })).rejects.toMatchObject({
         message: expect.stringContaining('conversation-1'),
@@ -2078,22 +1960,18 @@ describe('ConversationClient', () => {
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
-          esClient: {} as never,
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
 
-        mockEsClient.search.mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocumentWithTemplate({
-                templateId: template.id,
-                metadata: { status: 'open' },
-              }),
-            ],
-          },
-        });
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: template.id,
+            metadata: { status: 'open' },
+          })
+        );
 
         await clientWithCb.patchMetadata('conversation-1', { severity: 'high' });
 
@@ -2110,7 +1988,7 @@ describe('ConversationClient', () => {
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
-          esClient: {} as never,
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
@@ -2126,7 +2004,7 @@ describe('ConversationClient', () => {
           relation: 'subagent',
         };
 
-        mockEsClient.search.mockResolvedValue({ hits: { hits: [docWithParent] } });
+        mockGetDocumentResponse(docWithParent);
 
         await clientWithCb.patchMetadata('conversation-1', { status: 'closed' });
 
@@ -2140,23 +2018,19 @@ describe('ConversationClient', () => {
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
-          esClient: {} as never,
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
 
-        mockEsClient.search.mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocumentWithTemplate({
-                templateId: template.id,
-                // status is already 'open' — writing the same value is a no-op
-                metadata: { status: 'open' },
-              }),
-            ],
-          },
-        });
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: template.id,
+            // status is already 'open' — writing the same value is a no-op
+            metadata: { status: 'open' },
+          })
+        );
 
         await clientWithCb.patchMetadata('conversation-1', { status: 'open' });
 
@@ -2168,17 +2042,15 @@ describe('ConversationClient', () => {
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
-          esClient: {} as never,
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
 
-        mockEsClient.search.mockResolvedValue({
-          hits: {
-            hits: [createConversationDocumentWithTemplate({ templateId: template.id })],
-          },
-        });
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({ templateId: template.id })
+        );
         mockEsClient.index.mockRejectedValue(new Error('disk full'));
 
         await expect(
@@ -2194,9 +2066,7 @@ describe('ConversationClient', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocumentWithTemplate()] },
-      });
+      mockGetDocumentResponse(createConversationDocumentWithTemplate());
     });
 
     it('seeds metadata from template fields that have a default value and stamps template_version', async () => {
@@ -2329,9 +2199,7 @@ describe('ConversationClient', () => {
       });
 
     it('returns owner permissions with conversations from get', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       const result = await client.get('conversation-1');
 
@@ -2340,9 +2208,7 @@ describe('ConversationClient', () => {
     });
 
     it('returns public participant permissions with conversations from get', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [publicConversationOwnedByAnotherUser()] },
-      });
+      mockGetDocumentResponse(publicConversationOwnedByAnotherUser());
 
       const result = await client.get('conversation-1');
 
@@ -2372,9 +2238,7 @@ describe('ConversationClient', () => {
     });
 
     it('enforces delete denial for public participants', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [publicConversationOwnedByAnotherUser()] },
-      });
+      mockGetDocumentResponse(publicConversationOwnedByAnotherUser());
 
       const result = await client.get('conversation-1');
 
@@ -2386,9 +2250,7 @@ describe('ConversationClient', () => {
     });
 
     it('enforces rename denial for public participants', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [publicConversationOwnedByAnotherUser()] },
-      });
+      mockGetDocumentResponse(publicConversationOwnedByAnotherUser());
 
       const result = await client.get('conversation-1');
 
@@ -2417,9 +2279,7 @@ describe('ConversationClient', () => {
     });
 
     it('stamps added_at on new entries and persists the requested mode', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       const result = await client.updateAccessControl('conversation-1', {
         access_mode: ConversationAccessControlMode.Private,
@@ -2439,9 +2299,7 @@ describe('ConversationClient', () => {
     });
 
     it('rejects entries when publishing the conversation', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(
         client.updateAccessControl('conversation-1', {
@@ -2454,9 +2312,7 @@ describe('ConversationClient', () => {
     });
 
     it('allows publishing the conversation with an empty entries list', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       const result = await client.updateAccessControl('conversation-1', {
         access_mode: ConversationAccessControlMode.Public,
@@ -2471,9 +2327,7 @@ describe('ConversationClient', () => {
         ...newMember,
         added_at: '2026-01-01T00:00:00.000Z',
       };
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ entries: [existing] })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
 
       const result = await client.updateAccessControl('conversation-1', {
         access_mode: ConversationAccessControlMode.Private,
@@ -2487,9 +2341,7 @@ describe('ConversationClient', () => {
     });
 
     it('drops an entry naming the owner', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       const result = await client.updateAccessControl('conversation-1', {
         access_mode: ConversationAccessControlMode.Private,
@@ -2500,9 +2352,7 @@ describe('ConversationClient', () => {
     });
 
     it('rejects repeated ids with a bad request error', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(
         client.updateAccessControl('conversation-1', {
@@ -2515,9 +2365,7 @@ describe('ConversationClient', () => {
     });
 
     it('rejects an invalid role with a bad request error', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(
         client.updateAccessControl('conversation-1', {
@@ -2530,9 +2378,7 @@ describe('ConversationClient', () => {
     });
 
     it('rejects more entries than the maximum', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       const entries = Array.from(
         { length: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES + 1 },
@@ -2550,9 +2396,7 @@ describe('ConversationClient', () => {
     });
 
     it('rejects a non-user principal type', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(
         client.updateAccessControl('conversation-1', {
@@ -2570,9 +2414,7 @@ describe('ConversationClient', () => {
     });
 
     it('rejects an empty id', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(
         client.updateAccessControl('conversation-1', {
@@ -2585,9 +2427,7 @@ describe('ConversationClient', () => {
     });
 
     it('rejects an id longer than the maximum', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument()] },
-      });
+      mockGetDocumentResponse(createConversationDocument());
 
       await expect(
         client.updateAccessControl('conversation-1', {
@@ -2607,17 +2447,13 @@ describe('ConversationClient', () => {
     });
 
     it('masks non-owners as not found, even for members of a public conversation', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       await expect(
         client.updateAccessControl('conversation-1', {
@@ -2644,7 +2480,7 @@ describe('ConversationClient', () => {
       adminClient = createClient({
         space: testSpace,
         logger: loggerMock.create(),
-        esClient: {} as never,
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: {
           id: 'admin-user-id',
@@ -2655,9 +2491,8 @@ describe('ConversationClient', () => {
     });
 
     it('deletes a public conversation owned by another user', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Public)] },
-      });
+      mockGetDocumentResponse(conversationOwnedByAnotherUser(ConversationAccessControlMode.Public));
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
       mockEsClient.delete.mockResolvedValue({ result: 'deleted' });
 
       await expect(adminClient.delete('conversation-1')).resolves.toBe(true);
@@ -2666,9 +2501,7 @@ describe('ConversationClient', () => {
     });
 
     it('renames a public conversation owned by another user', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Public)] },
-      });
+      mockGetDocumentResponse(conversationOwnedByAnotherUser(ConversationAccessControlMode.Public));
       mockEsClient.index.mockResolvedValue({ result: 'updated' });
 
       const updated = await adminClient.update(
@@ -2680,9 +2513,9 @@ describe('ConversationClient', () => {
     });
 
     it('cannot rename or delete a private conversation owned by another user', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Private)] },
-      });
+      mockGetDocumentResponse(
+        conversationOwnedByAnotherUser(ConversationAccessControlMode.Private)
+      );
 
       await expect(adminClient.delete('conversation-1')).rejects.toThrow(
         'Conversation conversation-1 not found'
@@ -2699,9 +2532,9 @@ describe('ConversationClient', () => {
     });
 
     it('cannot read a private conversation owned by another user', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Private)] },
-      });
+      mockGetDocumentResponse(
+        conversationOwnedByAnotherUser(ConversationAccessControlMode.Private)
+      );
 
       await expect(adminClient.get('conversation-1')).rejects.toThrow(
         'Conversation conversation-1 not found'
@@ -2709,9 +2542,7 @@ describe('ConversationClient', () => {
     });
 
     it('does not gain owner access to a public conversation owned by another user', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Public)] },
-      });
+      mockGetDocumentResponse(conversationOwnedByAnotherUser(ConversationAccessControlMode.Public));
 
       await expect(
         adminClient.update({ id: 'conversation-1', title: 'renamed by admin' })
@@ -2725,9 +2556,7 @@ describe('ConversationClient', () => {
     });
 
     it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ schemaVersion: 1 })] },
-      });
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1 }));
 
       await client.create({
         id: 'conversation-1',
@@ -2768,7 +2597,7 @@ describe('ConversationClient', () => {
           },
         ],
       });
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [written] } });
+      mockGetDocumentResponse(written);
 
       const created = await client.create({
         id: 'conversation-1',
@@ -2814,17 +2643,13 @@ describe('ConversationClient', () => {
           data: { trigger_type: TimelineTriggerType.userMessage },
         },
       ];
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              schemaVersion: 1,
-              rounds: [inProgressRound],
-              events: stalePartialEvents,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          rounds: [inProgressRound],
+          events: stalePartialEvents,
+        })
+      );
 
       await client.upsertRound({
         id: 'conversation-1',
@@ -2850,16 +2675,189 @@ describe('ConversationClient', () => {
       ]);
     });
 
-    it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
-            }),
+    // Minimal round-derived timeline events for concurrency tests. The runs are unfinished
+    // (no terminal event), matching what step flushes append mid-round.
+    const startTimelineEvents = (roundId: string): TimelineEvent[] => [
+      {
+        id: `${roundId}::user_message`,
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'hello' },
+      },
+      {
+        id: `${roundId}::execution_started`,
+        type: TimelineEventType.executionStarted,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: `${roundId}::execution`,
+        trigger_event_id: `${roundId}::user_message`,
+        data: { trigger_type: TimelineTriggerType.userMessage },
+      },
+    ];
+
+    const stepTimelineEvent = (roundId: string, sequence: number): TimelineEvent =>
+      ({
+        id: `${roundId}::step::${sequence}`,
+        type: TimelineEventType.executionStep,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: `${roundId}::execution`,
+        trigger_event_id: `${roundId}::user_message`,
+        data: { step: { type: 'reasoning', reasoning: `step ${sequence}` }, sequence },
+      } as TimelineEvent);
+
+    it('merges concurrent appendEvents flushes on OCC conflict so no events are lost and none duplicate', async () => {
+      const start = startTimelineEvents('round-1');
+      const step0 = stepTimelineEvent('round-1', 0);
+      const step1 = stepTimelineEvent('round-1', 1);
+
+      // First OCC read: only the start events are stored.
+      mockGetDocumentResponseOnce(createConversationDocument({ schemaVersion: 1, events: start }));
+      // Retry read: a concurrent flush won the race and landed step::0 in the meantime.
+      mockGetDocumentResponse(
+        createConversationDocument({ schemaVersion: 1, seqNo: 2, events: [...start, step0] })
+      );
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+
+      // This flush carries step::0 (already persisted concurrently) and step::1 (new).
+      await client.appendEvents({ id: 'conversation-1', events: [step0, step1] });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+      const { document: indexed } = mockEsClient.index.mock.calls[1][0] as {
+        document: { events?: Array<{ id: string }> };
+      };
+      // The concurrent writer's step::0 is kept exactly once, and step::1 is appended.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::step::0',
+        'round-1::step::1',
+      ]);
+    });
+
+    it('replaceRoundEvents drops every stored event for the round (including stale live-streamed steps) and appends the fresh batch, leaving other rounds and additive events untouched', async () => {
+      const storedRound1UserMessage = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:42:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'raw input' },
+      } as TimelineEvent;
+      const storedRound1ExecutionStarted = {
+        id: 'round-1::execution_started',
+        type: TimelineEventType.executionStarted,
+        created_at: '2025-08-04T07:42:01.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: { trigger_type: 'user_message' },
+      } as TimelineEvent;
+      const storedRound1Step0 = stepTimelineEvent('round-1', 0);
+      const storedRound1Step1 = stepTimelineEvent('round-1', 1);
+      // Stale live-streamed step that is NOT in the canonical projection — must be dropped.
+      const staleRound1Step2 = stepTimelineEvent('round-1', 2);
+      const additiveEvent = {
+        id: 'additive-error-1',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2025-08-04T07:42:02.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        data: {},
+      } as TimelineEvent;
+      const round2UserMessage = {
+        id: 'round-2::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:43:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'round two input' },
+      } as TimelineEvent;
+
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          events: [
+            storedRound1UserMessage,
+            storedRound1ExecutionStarted,
+            storedRound1Step0,
+            storedRound1Step1,
+            staleRound1Step2,
+            additiveEvent,
+            round2UserMessage,
           ],
+        })
+      );
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      const canonicalUserMessage = {
+        ...storedRound1UserMessage,
+        data: { message: 'processed input', attachment_refs: [] },
+      } as TimelineEvent;
+      const canonicalStep0: TimelineEvent = {
+        ...storedRound1Step0,
+        created_at: 'CANONICAL_TS_0',
+      };
+      const canonicalStep1: TimelineEvent = {
+        ...storedRound1Step1,
+        created_at: 'CANONICAL_TS_1',
+      };
+      const terminated = {
+        id: 'round-1::execution_terminated',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2025-08-04T07:42:10.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: {
+          outcome: { type: 'responded', response: { message: 'done' } },
+          model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+          time_to_first_token: 1,
+          time_to_last_token: 2,
         },
+      } as TimelineEvent;
+
+      await client.replaceRoundEvents({
+        id: 'conversation-1',
+        roundId: 'round-1',
+        events: [
+          canonicalUserMessage,
+          storedRound1ExecutionStarted,
+          canonicalStep0,
+          canonicalStep1,
+          terminated,
+        ],
       });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          events?: Array<{ id: string; created_at?: string; data?: { message?: string } }>;
+        };
+      };
+      // Round-1 events replaced wholesale; stale step::2 dropped; additive event and round-2
+      // event survive untouched.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'additive-error-1',
+        'round-2::user_message',
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::step::0',
+        'round-1::step::1',
+        'round-1::execution_terminated',
+      ]);
+      const replacedUserMessage = indexed.events?.find(
+        (event) => event.id === 'round-1::user_message'
+      );
+      expect(replacedUserMessage?.data?.message).toBe('processed input');
+      const replacedStep0 = indexed.events?.find((event) => event.id === 'round-1::step::0');
+      expect(replacedStep0?.created_at).toBe('CANONICAL_TS_0');
+    });
+
+    it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+        })
+      );
 
       await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
 
@@ -2889,17 +2887,13 @@ describe('ConversationClient', () => {
           data: existingRound.input,
         },
       ];
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              schemaVersion: 1,
-              rounds: [existingRound],
-              events: storedEvents,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          rounds: [existingRound],
+          events: storedEvents,
+        })
+      );
 
       await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
 

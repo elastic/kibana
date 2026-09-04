@@ -38,7 +38,7 @@ spaceTest.describe('Graph listing page', { tag: tags.stateful.classic }, () => {
 
   spaceTest('renders the page header and saved graphs', async ({ pageObjects }) => {
     await pageObjects.graphListing.goto();
-    await expect(pageObjects.graphListing.contentList.pageHeader).toBeVisible();
+    await expect(pageObjects.graphListing.appHeader).toBeVisible();
     await expect(pageObjects.graphListing.contentList.itemLinks).toHaveCount(2);
   });
 
@@ -55,7 +55,7 @@ spaceTest.describe('Graph listing page', { tag: tags.stateful.classic }, () => {
     'create graph button navigates to the workspace editor',
     async ({ pageObjects, page }) => {
       await pageObjects.graphListing.goto();
-      await pageObjects.graphListing.createGraphButton.click();
+      await pageObjects.graphListing.clickCreateGraph();
       await expect(page.locator('[data-test-subj~="graphCurrentGraphBreadcrumb"]')).toBeVisible();
     }
   );
