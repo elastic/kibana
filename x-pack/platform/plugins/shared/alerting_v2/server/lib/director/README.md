@@ -217,6 +217,7 @@ Example:
 ```typescript
 import { CountTimeframeStrategy } from './count_timeframe_strategy';
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
   buildLatestAlertEvent,
   buildStrategyStateTransitionContext,
@@ -224,7 +225,8 @@ import {
 
 describe('CountTimeframeStrategy', () => {
   it('transitions pending to active when threshold is met', () => {
-    const strategy = new CountTimeframeStrategy();
+    const { loggerService } = createLoggerService();
+    const strategy = new CountTimeframeStrategy(loggerService);
 
     const result = strategy.getNextState(
       buildStrategyStateTransitionContext({

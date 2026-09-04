@@ -13,6 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/inference-common",
     "@kbn/actions-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/config-schema",

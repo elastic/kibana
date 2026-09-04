@@ -57,13 +57,14 @@ steps:
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
+      diskSizeGb: 50
+      buildDirectory: /dev/shm/bk
       zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 200
     key: build
     timeout_in_minutes: 60
     retry:
@@ -80,7 +81,6 @@ steps:
       machineType: n2d-standard-8
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
-      diskSizeGb: 105
     key: quick_checks
     timeout_in_minutes: 60
     retry:
@@ -97,7 +97,6 @@ steps:
       machineType: n2d-standard-2
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
-      diskSizeGb: 105
     key: checks
     timeout_in_minutes: 60
     retry:
@@ -115,7 +114,6 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -133,7 +131,6 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
     key: linting_with_types
     timeout_in_minutes: 60
     retry:
@@ -151,7 +148,6 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
     retry:
@@ -166,7 +162,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 105
     timeout_in_minutes: 10
     depends_on:
       - build

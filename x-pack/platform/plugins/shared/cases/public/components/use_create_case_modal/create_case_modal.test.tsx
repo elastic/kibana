@@ -62,7 +62,7 @@ describe('CreateCaseModal', () => {
     );
 
     wrapper.find('button.euiModal__closeIcon').first().simulate('click');
-    expect(onCloseCaseModal).toBeCalled();
+    expect(onCloseCaseModal).toHaveBeenCalled();
   });
 
   it('pass the correct props to getCreateCase method', () => {

@@ -36,12 +36,12 @@ describe('getResearchAgentPrompt', () => {
             } as any),
         }),
       },
-      configuration: { instructions: '' },
-      capabilities: { visualizations: false },
+      configuration: { instructions: '', aiIndices: [] },
+      spaceId: 'default',
       skills: [],
       actions: [],
       cycleLimit: 1,
-      experimentalFeatures: { bash: false, skills: false },
+      experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       relevantSkillsEnabled: false,
       toolManager: {} as any,
       resultTransformer: jest.fn(),
@@ -148,6 +148,75 @@ describe('getResearchAgentPrompt', () => {
     expect(messages.map(asText).some((t) => t.includes(NOTICE_MARKER))).toBe(false);
   });
 
+  it('omits the AI indices section when the agent declares no AI indices', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: { aiIndices: true, bash: false, skills: false },
+      })
+    );
+
+    expect(asText(messages[0])).not.toContain('## AI INDICES');
+  });
+
+  it('omits the AI indices section when AI index instructions are disabled', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic'],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+          ],
+        },
+        experimentalFeatures: { aiIndices: false, bash: false, skills: false },
+      })
+    );
+
+    expect(asText(messages[0])).not.toContain('## AI INDICES');
+  });
+
+  it('renders the AI indices section with the running space when the agent declares one', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic'],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+          ],
+        },
+        experimentalFeatures: { aiIndices: true, bash: false, skills: false },
+        spaceId: 'marketing',
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain('## AI INDICES');
+    expect(system).toContain('`sml-main`');
+    expect(system).toContain('This conversation runs in the space `marketing`');
+    expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
+  });
+
+  it('renders every catalog entry, including custom AI indices', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic', 'my-custom'],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+            { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets' },
+          ],
+        },
+        experimentalFeatures: { aiIndices: true, bash: false, skills: false },
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain('`sml-main`');
+    expect(system).toContain('`ai-index-idx-custom` — Support tickets');
+  });
+
   it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {
     const params = {
       conversationTimestamp: now,
@@ -167,12 +236,13 @@ describe('getResearchAgentPrompt', () => {
       },
       configuration: {
         instructions: '',
+        aiIndices: [],
       },
-      capabilities: { visualizations: false },
+      spaceId: 'default',
       skills: [],
       actions: [],
       cycleLimit: 1,
-      experimentalFeatures: { bash: false, skills: false },
+      experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       toolManager: {} as any,
       resultTransformer: jest.fn(),
     } as any;

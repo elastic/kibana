@@ -26,7 +26,7 @@ import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
 import type {
   CustomGridColumnsConfiguration,
-  SourceDisplayMode,
+  DocumentsDisplayMode,
   UnifiedDataTableSettings,
 } from '../types';
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
@@ -54,14 +54,14 @@ export const getColumnDisplayName = (
   columnName: string,
   dataViewFieldDisplayName: string | undefined,
   columnDisplay: string | undefined,
-  sourceDisplayMode: SourceDisplayMode
+  documentsDisplayMode: DocumentsDisplayMode
 ) => {
   if (columnDisplay) {
     return columnDisplay;
   }
 
   if (columnName === SOURCE_COLUMN) {
-    return sourceDisplayMode === 'summary'
+    return documentsDisplayMode === 'table'
       ? i18n.translate('unifiedDataTable.grid.documentHeader', {
           defaultMessage: 'Summary',
         })
@@ -134,7 +134,7 @@ function buildEuiGridColumn({
   disableCellActions = false,
   dataGridRef,
   hideFilteringOnComputedColumns,
-  sourceDisplayMode,
+  documentsDisplayMode,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -162,7 +162,7 @@ function buildEuiGridColumn({
   disableCellActions?: boolean;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
-  sourceDisplayMode: SourceDisplayMode;
+  documentsDisplayMode: DocumentsDisplayMode;
 }) {
   const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
     dataView,
@@ -197,7 +197,7 @@ function buildEuiGridColumn({
     columnName,
     dataViewField?.displayName,
     columnDisplay,
-    sourceDisplayMode
+    documentsDisplayMode
   );
 
   const isSorted = sortedColumns?.some((column) => column.id === columnName);
@@ -215,7 +215,7 @@ function buildEuiGridColumn({
             dataViewField,
             toastNotifications,
             valueToStringConverter,
-            sourceDisplayMode,
+            documentsDisplayMode,
             onFilter,
             dataGridRef,
             hideFilteringOnComputedColumns
@@ -293,10 +293,10 @@ function buildEuiGridColumn({
         columnDisplayName={columnDisplayName}
         headerRowHeight={headerRowHeight}
         // JSON mode do not display a tooltip, Summary mode sets undefined so the default one is displayed.
-        tooltipContent={sourceDisplayMode === 'json' ? null : undefined}
+        tooltipContent={documentsDisplayMode === 'json' ? null : undefined}
       />
     );
-    if (sourceDisplayMode === 'json') {
+    if (documentsDisplayMode === 'json') {
       column.isExpandable = false;
       column.cellActions = EMPTY_CELL_ACTIONS;
     }
@@ -336,7 +336,7 @@ function buildEuiGridColumn({
 
   if (customGridColumnsConfiguration && customGridColumnsConfiguration[column.id]) {
     // Do not allow overwrites to the JSON column.
-    if (column.id === SOURCE_COLUMN && sourceDisplayMode === 'json') {
+    if (column.id === SOURCE_COLUMN && documentsDisplayMode === 'json') {
       return column;
     }
     return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
@@ -382,7 +382,7 @@ export function getEuiGridColumns({
   sortedColumns,
   dataGridRef,
   hideFilteringOnComputedColumns,
-  sourceDisplayMode,
+  documentsDisplayMode,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -411,7 +411,7 @@ export function getEuiGridColumns({
   sortedColumns?: EuiDataGridColumnSortingConfig[];
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
-  sourceDisplayMode: SourceDisplayMode;
+  documentsDisplayMode: DocumentsDisplayMode;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -445,7 +445,7 @@ export function getEuiGridColumns({
       disableCellActions,
       dataGridRef,
       hideFilteringOnComputedColumns,
-      sourceDisplayMode,
+      documentsDisplayMode,
     })
   );
 }

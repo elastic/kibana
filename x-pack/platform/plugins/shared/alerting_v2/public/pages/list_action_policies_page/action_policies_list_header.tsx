@@ -39,7 +39,7 @@ const getActionPoliciesListMenu = ({
     testId: 'createActionPolicyButton',
     popoverTestId: 'createActionPolicyPopoverPanel',
     splitButtonProps: {
-      iconType: 'arrowDown',
+      iconType: 'chevronSingleDown',
       secondaryButtonAriaLabel: i18n.translate(
         'xpack.alertingV2.actionPoliciesList.createPolicyMoreOptions',
         { defaultMessage: 'More create options' }

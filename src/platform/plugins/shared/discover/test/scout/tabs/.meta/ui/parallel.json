@@ -1,21 +1,9 @@
 {
-  "sha1": "4548a64dd686cbd321a57ac07170dc78607c15f9",
+  "sha1": "a56d807169262adc6d6e6b470aae065bca603ee5",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "6c80b774cf64439-77a83c0bedb19bd",
-      "title": "Teardown tabs tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "11b6599941153f8-ebb8e7d98ca43bb",
       "title": "Setup tabs tests data",
@@ -233,6 +221,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/inspector.spec.ts",
         "line": 24,
         "column": 13
+      }
+    },
+    {
+      "id": "71f7ec98738b310-d006a1b3c051acc",
+      "title": "Discover tabs - keyboard navigation and reorder navigates and reorders tabs with the keyboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/keyboard_navigation.spec.ts",
+        "line": 23,
+        "column": 25
       }
     },
     {
@@ -844,6 +845,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/unsaved_local_state.spec.ts",
         "line": 55,
         "column": 25
+      }
+    },
+    {
+      "id": "6c80b774cf64439-77a83c0bedb19bd",
+      "title": "Teardown tabs tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

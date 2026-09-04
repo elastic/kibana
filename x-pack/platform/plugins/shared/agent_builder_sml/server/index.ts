@@ -30,9 +30,13 @@ export type {
   SmlIndexAction,
 } from './services/sml/types';
 
-export { kibanaSavedObjectPermissions } from './services/sml/permissions/kibana_saved_object';
+export { kibanaPermissions } from './services/sml/permissions/kibana';
 
-export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
+export {
+  smlAiIndexDescription,
+  smlElasticsearchIndexMappings,
+  smlIndexName,
+} from './services/sml/sml_storage';
 export { SmlSearchFilterType } from '../common/http_api/sml';
 
 export const plugin: PluginInitializer<

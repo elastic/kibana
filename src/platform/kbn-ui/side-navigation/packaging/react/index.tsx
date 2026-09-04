@@ -18,7 +18,6 @@ import type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
-  SideNavLogo,
 } from '../../types';
 
 // React import is needed for JSX transform.
@@ -31,7 +30,6 @@ export type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
-  SideNavLogo,
 };
 
 /** Alias for the external package. */

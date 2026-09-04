@@ -12,8 +12,10 @@ import type { IconType } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/ui-app-menu';
 import type { FavoriteButtonStatus } from '@kbn/ui-favorite-button';
 
-export type AppHeaderBack = string | AppHeaderBackTarget;
-
+/**
+ * Single back target. Points at the IA parent of the page, or at an explicit
+ * satellite origin. Never `history.back()`.
+ */
 export interface AppHeaderBackTarget {
   href: string;
   /**
@@ -21,9 +23,14 @@ export interface AppHeaderBackTarget {
    * Do not use it to navigate to `href`; Kibana handles same-origin links as SPA navigation.
    */
   onClick?: MouseEventHandler;
-  /** Destination name for accessibility (e.g. "Back to {label}"). */
-  label?: string;
+  /**
+   * Names the destination (parent page or satellite origin), never a category
+   * or the current page. Used as "Back to {label}".
+   */
+  label: string;
 }
+
+export type AppHeaderBack = AppHeaderBackTarget;
 
 export interface AppHeaderBadge {
   label: string;

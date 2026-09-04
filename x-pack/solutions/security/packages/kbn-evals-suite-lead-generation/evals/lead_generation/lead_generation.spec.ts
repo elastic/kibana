@@ -270,6 +270,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
             {
               name: 'Ran',
               kind: 'CODE',
+              direction: 'maximize',
               evaluate: async ({ output }) => ({
                 score: Array.isArray(output?.leads) && !output?.errors?.length ? 1 : 0,
               }),
@@ -333,6 +334,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
             {
               name: 'StatusMatchesExecution',
               kind: 'CODE',
+              direction: 'maximize',
               evaluate: async ({ output }) => {
                 const typedOutput = output as
                   | (typeof output & {

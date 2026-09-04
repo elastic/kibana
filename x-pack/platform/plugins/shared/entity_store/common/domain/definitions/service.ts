@@ -19,6 +19,8 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   identityField: { singleField: 'service.name' },
   indexPatterns: [],
   entityTypeFallback: 'Service',
+  // No additional condition: service identity is just `service.name`.
+  creatableFromSingleDocument: {},
   fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   fields: [
     newestValue({ destination: 'entity.name', source: 'service.name' }),

@@ -11,6 +11,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, TimeRange, Query, ProjectRouting } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 
 import { SearchAPI } from './data_model/search_api';
@@ -31,6 +32,7 @@ interface VegaRequestHandlerParams {
   projectRouting?: ProjectRouting;
   /** Only applies to ES|QL-backed vega data sources */
   isApproximate: boolean;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 interface VegaRequestHandlerContext {
@@ -59,6 +61,7 @@ export function createVegaRequestHandler(
     executionContext,
     projectRouting,
     isApproximate,
+    esqlVariables,
   }: VegaRequestHandlerParams) {
     const { search } = getData();
     const dataViews = getDataViews();
@@ -98,7 +101,8 @@ export function createVegaRequestHandler(
       timeCache,
       filtersDsl,
       getServiceSettings,
-      theme.getTheme()
+      theme.getTheme(),
+      esqlVariables
     );
     return await vp.parseAsync();
   };

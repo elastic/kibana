@@ -18,6 +18,7 @@ Embeddables require registration in both server and public.
 
 ### registerEmbeddableServerDefinition
 Server registration defines the embeddable schema and other information required to include embeddables in public REST APIs like "dashboards as code". 
+Dashboard’s public panel union and generated OpenAPI include only embeddable types with a registered server schema (for example: `markdown`, `image`, `vis`).
 
 ### registerEmbeddablePublicDefinition
 Public registration defines the embeddable's UI. Embeddable UI consumes and returns state in the shape defined by the embeddable schema registered in the server. 

@@ -16,6 +16,8 @@ export default createTestConfig({
     ])}`,
     '--xpack.securitySolution.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed=100',
   ],
+  // Entity analytics tests do not exercise prebuilt-rule management endpoints.
+  installMockPrebuiltRulesPackage: false,
   testFiles: [require.resolve('..')],
   junit: {
     reportName:

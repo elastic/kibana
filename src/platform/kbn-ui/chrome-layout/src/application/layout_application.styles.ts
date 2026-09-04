@@ -44,6 +44,12 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
         // use outline so it doesn't affect size/layout and cause a scrollbar
         outline: ${getHighContrastBorder(useEuiTheme)};
 
+        // Keep the decorative frame unchanged by global focus-ring styles.
+        &:focus:not(:focus-visible) {
+          outline: ${getHighContrastBorder(useEuiTheme)};
+          outline-offset: 0;
+        }
+
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
       `}
       ${!isFramedAppearance &&

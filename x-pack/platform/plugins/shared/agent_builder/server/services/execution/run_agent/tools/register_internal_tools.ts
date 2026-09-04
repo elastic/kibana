@@ -9,9 +9,8 @@ import {
   AgentExecutionMode,
   agentBuilderDefaultAgentId,
   ToolOrigin,
-  type AgentCapabilities,
   type ConversationTemplate,
-  type SerializedMetadataValue,
+  type MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
@@ -27,7 +26,12 @@ import { createAskUserQuestionTool } from './ask_user_question';
 import { createReadFileTool } from './read_file';
 import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
-import { createDiscoverApisTool, createDescribeApiTool, createExecuteApiTool } from './api';
+import {
+  createDiscoverApisTool,
+  createDescribeApiTool,
+  createDescribeApiTypeTool,
+  createExecuteApiTool,
+} from './api';
 import { createTodoTool } from '../../../tools/builtin/todo';
 import { createSetConversationMetadataTool } from '../../../tools/builtin/set_conversation_metadata';
 import { builtinToolToExecutable } from '../utils/select_tools';
@@ -38,11 +42,10 @@ export interface RegisterInternalToolsParams {
   context: AgentHandlerContext;
   agentId?: string;
   executionId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
   backgroundExecutionService: BackgroundExecutionService;
-  /** Callback to merge key/value updates into the active conversation's metadata. */
-  updateConversationMetadata?: (updates: Record<string, SerializedMetadataValue>) => Promise<void>;
+  /** Callback to patch key/value updates into the active conversation's metadata. */
+  updateConversationMetadata?: (updates: Record<string, MetadataFieldValue>) => Promise<unknown>;
   /** Active conversation template, used to validate values written by the LLM. */
   conversationTemplate?: ConversationTemplate;
   /** The agent's resolved skills, used by the `search_relevant_skills` tool. */
@@ -70,7 +73,6 @@ export const registerInternalTools = async ({
   context,
   agentId,
   executionId,
-  capabilities,
   abortSignal,
   backgroundExecutionService,
   updateConversationMetadata,
@@ -122,6 +124,7 @@ export const registerInternalTools = async ({
   if (experimentalFeatures.apiTools) {
     tools.push(createDiscoverApisTool());
     tools.push(createDescribeApiTool());
+    tools.push(createDescribeApiTypeTool());
     tools.push(createExecuteApiTool({ selfClient }));
   }
 
@@ -133,7 +136,6 @@ export const registerInternalTools = async ({
         agentId: agentId ?? agentBuilderDefaultAgentId,
         executionId: executionId ?? '',
         connectorId: defaultConnectorId,
-        capabilities,
         subAgentExecutor,
         abortSignal,
         backgroundExecutionService,
@@ -146,7 +148,6 @@ export const registerInternalTools = async ({
       createSendMessageTool({
         agentId: agentId ?? agentBuilderDefaultAgentId,
         executionId: executionId ?? '',
-        capabilities,
         subAgentExecutor,
         abortSignal,
         backgroundExecutionService,

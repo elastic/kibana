@@ -16,10 +16,14 @@ import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import type { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { AdHocRunStatus } from '../../common/constants';
 import { adHocRunStatus } from '../../common/constants';
-import type { RuleRunnerErrorStackTraceLog, RunRuleResult, TaskRunnerContext } from './types';
+import type {
+  RuleRunnerErrorStackTraceLog,
+  RuleTaskInstance,
+  RunRuleResult,
+  TaskRunnerContext,
+} from './types';
 import { getExecutorServices } from './get_executor_services';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import type {
@@ -195,9 +199,17 @@ export class AdHocTaskRunner implements CancellableTask {
 
     const { rule, apiKeyId } = adHocRunData;
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
-    // spaceId is persisted on the ad-hoc run saved object, written by validated
-    // request handlers. Brand it once here at the SO load boundary.
-    const spaceId = brandSpaceId(adHocRunData.spaceId);
+    // Already branded on SO → AdHocRun transform (transformAdHocRunToAdHocRunData).
+    const { spaceId } = adHocRunData;
+    // The shared alerts client / action scheduler read `params.spaceId` as a
+    // branded SpaceId, so carry it on the task instance passed to them
+    // (ad-hoc params otherwise only carry an unbranded, optional spaceId).
+    // `alertId` is not on ad-hoc task params; use the rule id so the shared
+    // RuleTaskInstance shape stays consistent with scheduled rule runs.
+    const taskInstance: RuleTaskInstance = {
+      ...this.taskInstance,
+      params: { ...this.taskInstance.params, alertId: rule.id, spaceId },
+    };
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
     const ruleTypeRunnerContext = {
@@ -238,7 +250,7 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleType,
       runTimestamp: this.runDate,
       startedAt: new Date(scheduleToRun.runAt),
-      taskInstance: this.taskInstance,
+      taskInstance,
     });
 
     const executorServices = getExecutorServices({
@@ -301,7 +313,7 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleType,
       logger: this.logger,
       taskRunnerContext: this.context,
-      taskInstance: this.taskInstance,
+      taskInstance,
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
       apiKeyId,
@@ -315,7 +327,7 @@ export class AdHocTaskRunner implements CancellableTask {
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
-      priority: TaskPriority.Low,
+      priority: TaskPriority.Maintenance,
     });
 
     if (this.shouldLogAndScheduleActionsForAlerts(ruleType)) {

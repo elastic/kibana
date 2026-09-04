@@ -95,7 +95,7 @@ describe('applyRulePatch', () => {
           existingRule,
           prebuiltRuleAssetClient,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'event_category_override: Invalid input: expected string, received number, tiebreaker_field: Invalid input: expected string, received number, timestamp_field: Invalid input: expected string, received number'
       );
     });
@@ -120,7 +120,7 @@ describe('applyRulePatch', () => {
           existingRule,
           prebuiltRuleAssetClient,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'alert_suppression.group_by: Invalid input: expected array, received string, alert_suppression.group_by: Too big: expected string to have <=3 characters'
       );
     });
@@ -157,7 +157,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'threat_query: Invalid input: expected string, received number, threat_indicator_path: Invalid input: expected string, received number'
     );
   });
@@ -193,7 +193,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'index.0: Invalid input: expected string, received number, language: Invalid option: expected one of "kuery"|"lucene'
     );
   });
@@ -229,7 +229,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'index.0: Invalid input: expected string, received number, language: Invalid option: expected one of "kuery"|"lucene"'
     );
   });
@@ -271,7 +271,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError('threshold.value: Invalid input: expected number, received string');
+    ).rejects.toThrow('threshold.value: Invalid input: expected number, received string');
   });
 
   test('should accept ES|QL alerts suppression params', async () => {
@@ -397,7 +397,7 @@ describe('applyRulePatch', () => {
           existingRule,
           prebuiltRuleAssetClient,
         })
-      ).rejects.toThrowError('anomaly_threshold: Invalid input: expected number, received string');
+      ).rejects.toThrow('anomaly_threshold: Invalid input: expected number, received string');
     });
 
     it('accepts suppression params', async () => {
@@ -453,7 +453,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError('new_terms_fields: Invalid input: expected array, received string');
+    ).rejects.toThrow('new_terms_fields: Invalid input: expected array, received string');
   });
 
   test('should retain existing required_fields when not present in rule patch body', async () => {

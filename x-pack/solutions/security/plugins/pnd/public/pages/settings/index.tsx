@@ -12,7 +12,7 @@ import * as i18n from './translations';
 export const SettingsPage: React.FC = () => (
   <PlaceholderPage
     title={i18n.PAGE_TITLE}
-    description={i18n.MOCK_DATA_NOTE}
+    description={i18n.WATCH_ENABLEMENT_NOTE}
     showBackToBrief={false}
   />
 );

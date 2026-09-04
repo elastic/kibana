@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import INVESTIGATION_COMPLETED_YAML from './investigation_completed.yaml';
 import DETECTION_YAML from './significant_events/detection.yaml';
 import DISCOVERY_YAML from './significant_events/discovery.yaml';
 import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
@@ -21,6 +22,8 @@ export {
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
 export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID = 'system-significant-events-orchestrator';
+export const SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID =
+  'system-significant-events-investigation-completed';
 
 // lifecycle: 'static' — instances are declared at startup; orphans are cleaned up on restart.
 // versionStrategy: 'auto' — version bumps are handled automatically on install.
@@ -43,7 +46,7 @@ export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 17,
+  version: 19,
   billable: false,
   yaml: DISCOVERY_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
@@ -55,5 +58,14 @@ export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
   version: 4,
   billable: false,
   yaml: ORCHESTRATOR_YAML,
+  management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
+  pluginId: 'significantEvents',
+  version: 1,
+  billable: false,
+  yaml: INVESTIGATION_COMPLETED_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

@@ -29,8 +29,10 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
+import type { ArtifactTypeDefinition } from './lib/artifact_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
@@ -39,19 +41,26 @@ export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
 export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
 
-export type AlertingServerSetup = void;
+export interface AlertingServerSetup {
+  /**
+   * Registers an artifact type owned by the calling plugin. Validation and
+   * declarative SO references are applied for this type on rule create/update/read.
+   * Unregistered types pass through unchanged.
+   */
+  registerArtifactType(definition: ArtifactTypeDefinition): void;
+}
 
 export interface AlertingServerStart {
   getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): Promise<RulesClientApi>;
 
   getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;
   getActionPolicyClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): Promise<ActionPolicyClientApi>;
 
   /**

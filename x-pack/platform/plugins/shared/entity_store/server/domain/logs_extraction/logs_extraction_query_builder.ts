@@ -150,7 +150,7 @@ export function buildLogsExtractionEsqlQuery({
   );
 
   // Lookup join to the latest index to perform data retention
-  parts.push(`| LOOKUP JOIN ${latestIndex}
+  parts.push(`| LOOKUP JOIN _coordinator:${latestIndex}
       ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}`);
 
   if (entityDefinition.postAggFilter) {

@@ -42,7 +42,12 @@ export function validateWorkflowYaml(
     const { error } = parseResult;
 
     if (error instanceof InvalidYamlSyntaxError) {
-      diagnostics.push({ severity: 'error', message: error.message, source: 'yaml-syntax' });
+      diagnostics.push({
+        severity: 'error',
+        message: error.message,
+        source: 'yaml-syntax',
+        ruleId: 'yamlSyntaxError',
+      });
     } else if (error instanceof InvalidYamlSchemaError) {
       if (error.formattedZodError?.issues) {
         for (const issue of error.formattedZodError.issues) {
@@ -51,13 +56,24 @@ export function validateWorkflowYaml(
             message: issue.message,
             source: 'schema',
             path: issue.path as (string | number)[],
+            ruleId: 'schemaViolation',
           });
         }
       } else {
-        diagnostics.push({ severity: 'error', message: error.message, source: 'schema' });
+        diagnostics.push({
+          severity: 'error',
+          message: error.message,
+          source: 'schema',
+          ruleId: 'schemaViolation',
+        });
       }
     } else {
-      diagnostics.push({ severity: 'error', message: error.message, source: 'yaml-syntax' });
+      diagnostics.push({
+        severity: 'error',
+        message: error.message,
+        source: 'yaml-syntax',
+        ruleId: 'yamlSyntaxError',
+      });
     }
   }
 
@@ -71,6 +87,7 @@ export function validateWorkflowYaml(
           severity: 'error',
           message: stepError.message,
           source: 'step-name',
+          ruleId: 'duplicateStepName',
         });
       }
     } catch {
@@ -84,6 +101,7 @@ export function validateWorkflowYaml(
           severity: 'error',
           message: triggerError.message,
           source: 'trigger',
+          ruleId: 'invalidTriggerCondition',
         });
       }
     }
@@ -102,7 +120,7 @@ export function validateWorkflowYaml(
       // diagnostic shape with graph-specific fields.
       const message =
         isGraphBuildError(error) || error instanceof Error ? error.message : String(error);
-      diagnostics.push({ severity: 'error', message, source: 'graph' });
+      diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
     }
   }
 
@@ -112,6 +130,7 @@ export function validateWorkflowYaml(
       severity: 'error',
       message: liquidError.message,
       source: 'liquid',
+      ruleId: 'liquidSyntaxError',
     });
   }
 

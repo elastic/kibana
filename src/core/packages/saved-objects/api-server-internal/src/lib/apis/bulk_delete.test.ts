@@ -463,7 +463,7 @@ describe('#bulkDelete', () => {
       it(`throws an error when options.namespace is '*'`, async () => {
         await expect(
           repository.bulkDelete([obj1], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"')
         );
       });
@@ -477,7 +477,7 @@ describe('#bulkDelete', () => {
         const mockedBulkResponse = undefined;
         // we have to cast here to test the assumption we always get a response.
         client.bulk.mockResponseOnce(mockedBulkResponse as unknown as estypes.BulkResponse);
-        await expect(repository.bulkDelete([obj1], { namespace })).rejects.toThrowError(
+        await expect(repository.bulkDelete([obj1], { namespace })).rejects.toThrow(
           'Unexpected error in bulkDelete saved objects: bulkDeleteResponse is undefined'
         );
       });

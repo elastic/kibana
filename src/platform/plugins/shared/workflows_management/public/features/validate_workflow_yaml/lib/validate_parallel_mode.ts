@@ -68,6 +68,7 @@ function validateStep(step: StepInfo, lineCounter: LineCounter): YamlValidationR
   return {
     id: `parallel-mode-${step.stepId}-${startPos.line}-${startPos.col}`,
     owner: 'parallel-mode-validation',
+    ruleId: 'invalidParallelMode',
     severity: 'error',
     message: PARALLEL_MODE_REFINEMENT_MESSAGE,
     hoverMessage: null,

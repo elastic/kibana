@@ -14,7 +14,7 @@ import type {
   DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import { applyDefaultDashboardTimeRange } from './apply_default_time_range';
-import { extractEsqlQueries } from './dataset_probe';
+import { extractEsqlQueries } from './extract_esql_queries';
 
 const NOW = new Date('2026-06-26T12:00:00.000Z').getTime();
 const DAY_MS = 24 * 60 * 60 * 1000;

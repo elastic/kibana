@@ -109,7 +109,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
 
     expect(getAttachmentViewProps).toHaveBeenCalled();
-    expect(getCreationActivity).toBeCalledWith(
+    expect(getCreationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
         ...viewProps,
         savedObjectId: attachment.id,
@@ -124,7 +124,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
 
     createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
 
-    expect(getCreationActivity).toBeCalledWith(
+    expect(getCreationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
         savedObjectId: attachment.id,
         attachmentId: refAttachmentId,

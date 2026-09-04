@@ -1,8 +1,7 @@
 {
-  "sha1": "a0f609e3f745613101b80bdffd558150dd7b5836",
+  "sha1": "a553c51928c3cf9555be8f33e9e8f2bd722ec7ec",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -488,7 +487,7 @@
     {
       "id": "ce6d2554bbcb1a3-35498c416011944",
       "title": "Observability alerts - overview alert table navigates to onboarding from the no-data \"Add data\" CTA",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -498,13 +497,13 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/overview_alert_table.spec.ts",
         "line": 33,
-        "column": 7
+        "column": 25
       }
     },
     {
       "id": "ce6d2554bbcb1a3-28cf5e151e58caf",
       "title": "Observability alerts - overview alert table renders the alerts section with alerts once a rule exists",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -514,7 +513,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/overview_alert_table.spec.ts",
         "line": 52,
-        "column": 26
+        "column": 96
       }
     },
     {
@@ -760,12 +759,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 10
       }
     },
@@ -776,12 +774,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 15
       }
     },
@@ -792,12 +789,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 61,
+        "line": 62,
         "column": 18
       }
     },
@@ -808,12 +804,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 75,
+        "line": 76,
         "column": 13
       }
     },
@@ -824,12 +819,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 93,
+        "line": 94,
         "column": 7
       }
     },
@@ -840,12 +834,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 100,
+        "line": 101,
         "column": 7
       }
     }

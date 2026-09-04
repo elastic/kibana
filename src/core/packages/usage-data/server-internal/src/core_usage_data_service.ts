@@ -23,6 +23,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { HttpConfigType, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import { createProvenanceTelemetryPostAuthHandler } from '@kbn/core-http-server-internal';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 import type { MetricsServiceSetup, OpsMetrics } from '@kbn/core-metrics-server';
@@ -518,6 +519,10 @@ export class CoreUsageDataService
         this.logger.debug(e);
       }
     };
+
+    http.registerOnPostAuth(
+      createProvenanceTelemetryPostAuthHandler(() => this.httpConfig, incrementUsageCounter)
+    );
 
     const registerDeprecatedUsageFetch = (fetchFn: DeprecatedApiUsageFetcher) => {
       this.deprecatedApiUsageFetcher = fetchFn;

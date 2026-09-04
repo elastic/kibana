@@ -19,7 +19,7 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-types';
 import { addSpanLabels } from '@kbn/apm-utils';
@@ -92,8 +92,10 @@ import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agen
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
 import { formatVerificationResultForSO } from './package_verification';
+import { brandInstallationSpaceId } from './brand_installation_space_id';
 import { getInstallation, getInstallationObject } from './get';
 import { getPackageSavedObjects } from './get';
+import { validatePackageUpload } from './validate_package_upload';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -943,9 +945,26 @@ async function installPackageByUpload({
     const installedPkg = await getInstallationObject({
       savedObjectsClient,
       pkgName,
+      failOnUnexpectedError: !isBundledPackage,
     });
 
     installType = getInstallType({ pkgVersion, installedPkg });
+
+    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
+      archiveBuffer,
+      contentType,
+      useStreaming,
+    });
+
+    if (!isBundledPackage) {
+      await validatePackageUpload({
+        packageInfo,
+        paths,
+        installedPkg,
+        savedObjectsClient,
+        esClient,
+      });
+    }
 
     // as we do not verify uploaded packages, we must invalidate the verification cache
     deleteVerificationResult(packageInfo);
@@ -954,12 +973,6 @@ async function installPackageByUpload({
       name: pkgName,
       version: pkgVersion,
       packageInfo,
-    });
-
-    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
-      archiveBuffer,
-      contentType,
-      useStreaming,
     });
 
     const packageInstallContext: PackageInstallContext = {
@@ -1339,7 +1352,7 @@ export async function createInstallation(options: {
 
   let savedObject: Installation = {
     installed_kibana: [],
-    installed_kibana_space_id: options.spaceId,
+    installed_kibana_space_id: brandSpaceId(options.spaceId),
     installed_kibana_version: appContextService.getKibanaVersion(),
     installed_es: [],
     package_assets: [],
@@ -1370,13 +1383,10 @@ export async function createInstallation(options: {
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  const created = await savedObjectsClient.create<Installation>(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    savedObject,
-    { id: pkgName, overwrite: true }
-  );
-
-  return created;
+  return savedObjectsClient.create<Installation>(PACKAGES_SAVED_OBJECT_TYPE, savedObject, {
+    id: pkgName,
+    overwrite: true,
+  });
 }
 
 export const kibanaAssetsToAssetsRef = (
@@ -1406,17 +1416,20 @@ export const saveKibanaAssetsRefs = async (
   // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
   await pRetry(
     async () => {
-      const installation =
-        saveAsAdditionnalSpace || append
-          ? await savedObjectsClient
-              .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-              .catch((e) => {
-                if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-                  return undefined;
-                }
-                throw e;
-              })
+      let installation: SavedObject<Installation> | undefined;
+      if (saveAsAdditionnalSpace || append) {
+        const installationSo = await savedObjectsClient
+          .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+          .catch((e) => {
+            if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+              return undefined;
+            }
+            throw e;
+          });
+        installation = installationSo
+          ? { ...installationSo, attributes: brandInstallationSpaceId(installationSo.attributes) }
           : undefined;
+      }
 
       if (saveAsAdditionnalSpace) {
         const primarySpaceId = installation?.attributes?.installed_kibana_space_id;

@@ -19,6 +19,7 @@ import { registerDeleteRoute } from './register_delete_route';
 import { registerGetRoute } from './register_get_route';
 import { registerCreateRoute } from './register_create_route';
 import { registerPostIndexDocCountRoute } from './register_post_index_doc_count';
+import { registerVectorCountRoute } from './register_vector_count_route';
 import { registerDocumentsSampleRoute } from './register_documents_sample_route';
 
 import { registerIndicesGet } from './indices_get';
@@ -42,4 +43,8 @@ export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerIndicesStats(dependencies);
   registerDocumentsSampleRoute(dependencies);
   registerUserStatusPrivilegeRoutes(dependencies);
+
+  if (dependencies.config.isVectorCountEnabled) {
+    registerVectorCountRoute(dependencies);
+  }
 }

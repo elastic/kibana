@@ -89,6 +89,15 @@ apiTest.describe(
 
         // Drops NOT applied — the auth realm/provider fields are retained.
         expect(e['kibana.authentication_provider']).toBeDefined();
+        expect(e['kibana.authentication_realm']).toBeDefined();
+
+        // user.domain is Serverless-only — the realm stays in kibana.authentication_realm here.
+        expect(e['user.domain']).toBeUndefined();
+
+        // user.id rewrite NOT applied — user.id keeps the user profile UID, not the login name.
+        expect(e['user.name']).toBeDefined();
+        expect(e['user.id']).toBeDefined();
+        expect(e['user.id']).not.toBe(e['user.name']);
 
         // event.type default NOT applied (user_login carries no ECS event.type).
         expect(e['event.type']).toBeUndefined();

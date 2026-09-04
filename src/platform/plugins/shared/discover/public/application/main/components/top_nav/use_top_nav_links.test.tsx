@@ -50,6 +50,7 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
   const uiSettingsGetMock = services.uiSettings.get;
 
   services.share = sharePluginMock.createStartContract();
+  jest.mocked(services.share.availableIntegrations).mockReturnValue([]);
   services.application.currentAppId$ = new BehaviorSubject('discover');
   services.capabilities.discover_v2 = {
     save: true,
@@ -112,7 +113,6 @@ describe('useTopNavLinks', () => {
           hasUnsavedChanges: false,
           isEsqlMode: false,
           adHocDataViews: [],
-          hasShareIntegration: false,
           persistedDiscoverSession: undefined,
           ...hookAttrs,
           onOpenSaveModal: hookAttrs.onOpenSaveModal ?? jest.fn(),
@@ -188,7 +188,7 @@ describe('useTopNavLinks', () => {
 
       jest.spyOn(services.share!, 'availableIntegrations').mockReturnValue([]);
 
-      const appMenuConfig = await setup({ hasShareIntegration: true, services });
+      const appMenuConfig = await setup({ services });
 
       expect(appMenuConfig.items).toBeDefined();
 
@@ -217,17 +217,56 @@ describe('useTopNavLinks', () => {
           return [];
         });
 
-      const appMenuConfig = await setup({ hasShareIntegration: true, services });
+      const appMenuConfig = await setup({ services });
 
       const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
       expect(exportItem).toBeDefined();
-      expect(exportItem?.label).toBe('Export tab results');
+      expect(exportItem?.label).toBe('Export');
 
-      expect(exportItem?.items).toBeDefined();
-      expect(exportItem?.items?.length).toBeGreaterThan(0);
+      const exportJsonItems = exportItem?.items?.filter(({ id }) => id === 'exportJson');
+      expect(exportJsonItems).toHaveLength(1);
+      expect(exportJsonItems?.[0]).toEqual(
+        expect.objectContaining({
+          label: 'Export JSON',
+          testId: 'exportMenuItem-JSON',
+          iconType: 'code',
+          order: 3,
+          run: expect.any(Function),
+        })
+      );
 
       const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
       expect(shareItem).toBeDefined();
+    });
+
+    it('should include unknown export integrations with fallback presentation', async () => {
+      const services = createTestServices();
+
+      jest
+        .spyOn(services.share!, 'availableIntegrations')
+        .mockImplementation((_objectType, groupId) => {
+          if (groupId === 'exportDerivatives') {
+            return [
+              {
+                id: 'newIntegration',
+                shareType: 'integration' as const,
+                groupId: 'exportDerivatives',
+                config: () => Promise.resolve({}),
+              },
+            ];
+          }
+          return [];
+        });
+
+      const appMenuConfig = await setup({ services });
+
+      const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
+      const fallbackItem = exportItem?.items?.find(({ id }) => id === 'newIntegration');
+
+      expect(fallbackItem).toBeDefined();
+      expect(fallbackItem?.label).toBe('newIntegration');
+      expect(fallbackItem?.testId).toBe('exportMenuItem-newIntegration');
+      expect(fallbackItem?.order).toBe(100);
     });
   });
 
@@ -432,7 +471,6 @@ describe('useTopNavLinks', () => {
             hasUnsavedChanges: false,
             isEsqlMode: true,
             adHocDataViews: [],
-            hasShareIntegration: false,
             persistedDiscoverSession: undefined,
             ...hookAttrs,
             onOpenSaveModal: hookAttrs.onOpenSaveModal ?? jest.fn(),
@@ -615,9 +653,7 @@ describe('useTopNavLinks', () => {
     it('should add the separator above the first tab-scoped app menu item', async () => {
       const services = createTestServices();
 
-      jest.spyOn(services.share!, 'availableIntegrations').mockReturnValue([]);
-
-      let appMenuConfig = await setup({ hasShareIntegration: true, services });
+      let appMenuConfig = await setup({ services });
 
       let exportItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.export);
       let inspectItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.inspect);
@@ -625,12 +661,13 @@ describe('useTopNavLinks', () => {
       expect(exportItem?.separator).toBe('above');
       expect(inspectItem?.separator).toBeUndefined();
 
-      appMenuConfig = await setup({ services });
+      const servicesWithoutShare = createTestServices({ share: undefined });
+      appMenuConfig = await setup({ services: servicesWithoutShare });
 
       exportItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.export);
       inspectItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.inspect);
 
-      expect(exportItem?.separator).toBeUndefined();
+      expect(exportItem).toBeUndefined();
       expect(inspectItem?.separator).toBe('above');
     });
   });

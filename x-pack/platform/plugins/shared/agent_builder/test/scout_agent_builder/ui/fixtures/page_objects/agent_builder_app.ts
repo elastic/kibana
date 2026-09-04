@@ -545,16 +545,7 @@ export class AgentBuilderApp {
   async getAgentLabels(agentId: string) {
     const row = this.page.testSubj.locator(this.agentListRowSelector(agentId));
     const labelsCell = row.getByTestId('agentBuilderAgentsListLabels');
-    const labelTexts = await labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-    const viewMore = labelsCell.getByTestId('agentBuilderLabelsViewMoreButton');
-    if (await viewMore.isVisible()) {
-      await viewMore.click();
-      const popover = this.page.testSubj.locator('agentBuilderLabelsViewMorePopover');
-      const hidden = await popover.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-      labelTexts.push(...hidden);
-      await viewMore.click();
-    }
-    return labelTexts;
+    return labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
   }
 
   async navigateToAgentOverview(agentId: string) {

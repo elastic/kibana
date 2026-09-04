@@ -8,7 +8,7 @@
 import type { SavedObject } from '@kbn/core/server';
 
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
-import { createCasesClientMock } from './client/mocks';
+import { createCasesClientMock, createCasesEventBusMock } from './client/mocks';
 import type { CaseSavedObjectTransformed } from './common/types/case';
 import type {
   ActionsAttachmentPayload,
@@ -774,6 +774,7 @@ const casesClientMock = createCasesClientMock();
 export const mockCasesContract = (): CasesServerStart => ({
   getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClientMock),
   getUnifiedAttachmentTypeRegistry: jest.fn(),
+  getCasesEventBus: jest.fn().mockReturnValue(createCasesEventBusMock()),
   config: {
     enabled: true,
     assigneeIdentity: { enabled: true },

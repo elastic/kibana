@@ -112,6 +112,9 @@ export const recalculateEntityRiskScore = async ({
     calculationRunId,
     writer,
     idBasedRiskScoringEnabled,
+    // The entity was already confirmed to exist in buildScoringContext above, so there's nothing
+    // for create-if-missing to do here.
+    createMissingEntities: false,
     refresh: 'wait_for',
     collectScores,
   });

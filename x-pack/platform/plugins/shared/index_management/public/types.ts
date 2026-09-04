@@ -72,6 +72,7 @@ export interface ClientConfigType {
   enableProjectLevelRetentionChecks?: boolean;
   enableFailureStoreRetentionDisabling?: boolean;
   enableIndexMode?: boolean;
+  enableVectorCount?: boolean;
   dev: {
     enableSemanticText?: boolean;
   };

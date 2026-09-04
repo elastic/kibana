@@ -65,6 +65,7 @@ export const AmazonS3: ConnectorSpec = {
   actions: {
     listBuckets: {
       isTool: true,
+      scope: 'read',
       description:
         'List available Amazon S3 buckets. Use this to discover which buckets exist before listing objects or downloading files.',
       input: lazySchema(() =>
@@ -110,6 +111,7 @@ export const AmazonS3: ConnectorSpec = {
 
     listBucketObjects: {
       isTool: true,
+      scope: 'read',
       description:
         'List objects (files and folders) in an Amazon S3 bucket. Supports filtering by prefix and pagination via continuation tokens.',
       input: lazySchema(() =>
@@ -161,6 +163,7 @@ export const AmazonS3: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a file from an Amazon S3 bucket. If the file content is small enough, returns the file content directly. If the file exceeds the size limit, returns a pre-signed URL for direct download from S3 instead.',
       input: lazySchema(() =>

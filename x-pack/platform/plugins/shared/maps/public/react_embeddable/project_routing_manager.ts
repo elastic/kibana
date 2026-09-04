@@ -12,7 +12,8 @@ import type { Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { ILayer } from '../classes/layers/layer';
 import type { SavedMap } from '../routes';
-import { getLayerList, getMapReady } from '../selectors/map_selectors';
+import { getLayerList } from '../selectors/map_selectors';
+import { getMapReady } from '../reducers/non_serializable_instances';
 
 async function getProjectRoutingOverrides(layers: ILayer[]) {
   const overrides: ProjectRoutingOverrides = [];

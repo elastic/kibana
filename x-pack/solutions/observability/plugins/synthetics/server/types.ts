@@ -42,6 +42,7 @@ import type {
   MaintenanceWindowsServerStart,
 } from '@kbn/maintenance-windows-plugin/server';
 import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import type { UptimeConfig } from './config';
 import type { SyntheticsEsClient } from './lib';
@@ -68,6 +69,8 @@ export interface SyntheticsServerSetup {
   alerting: AlertingServerSetup;
   pluginsStart: SyntheticsPluginsStartDependencies;
   isElasticsearchServerless: boolean;
+  /** Platform `cps.cpsEnabled` — serverless only. */
+  isCpsEnabled?: boolean;
   getMaintenanceWindowClientInternal: (
     request: KibanaRequest
   ) => MaintenanceWindowClient | undefined;
@@ -88,6 +91,7 @@ export interface SyntheticsPluginsSetupDependencies {
   share: SharePluginSetup;
   embeddable: EmbeddableSetup;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
+  cps?: CPSServerSetup;
 }
 
 export interface SyntheticsPluginsStartDependencies {

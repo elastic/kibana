@@ -1,8 +1,7 @@
 {
-  "sha1": "43de398fa9e94c3023f04e4edd5a29f752665946",
+  "sha1": "1daeef4ecbb0a7f4baaa0b099f37dfe6087aebc7",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -43,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rule_action_alerts_filter.spec.ts",
-        "line": 150,
+        "line": 151,
         "column": 86
       }
     },
@@ -113,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 25,
+        "line": 19,
         "column": 45
       }
     },
@@ -127,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 57,
+        "line": 52,
         "column": 13
       }
     },
@@ -141,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 93,
+        "line": 89,
         "column": 85
       }
     },
@@ -155,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 128,
-        "column": 7
+        "line": 124,
+        "column": 24
       }
     },
     {
@@ -169,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 167,
+        "line": 164,
         "column": 24
       }
     },
@@ -183,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 194,
-        "column": 24
+        "line": 193,
+        "column": 5
       }
     },
     {
@@ -197,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_flow.spec.ts",
-        "line": 51,
+        "line": 52,
         "column": 26
       }
     },
@@ -211,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_flow.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 11
       }
     },
@@ -225,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 66,
+        "line": 65,
         "column": 5
       }
     },
@@ -239,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 69,
+        "line": 68,
         "column": 23
       }
     },
@@ -253,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 76,
+        "line": 75,
         "column": 16
       }
     },
@@ -267,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 83,
+        "line": 82,
         "column": 20
       }
     },

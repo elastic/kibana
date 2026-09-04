@@ -16,7 +16,7 @@ const markReadBodySchema = z.object({ notification_id: notificationIdSchema }).s
 
 /**
  * `POST /internal/notification_center/notifications/_mark_read`
- * Append one `notification_id` to the user's individually-read list.
+ * Mark an individual notification as read by adding it to the user's overrides object.
  * Anonymous users (no `profile_uid`) have no read-state to write, so the call is forbidden.
  */
 export const registerMarkReadRoute = ({ router, core }: NotificationRouteDeps) => {

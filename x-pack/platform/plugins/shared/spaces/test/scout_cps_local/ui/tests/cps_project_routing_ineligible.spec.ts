@@ -108,10 +108,7 @@ test.describe(
       await test.step('unset custom routing back to all projects and save', async () => {
         await pageObjects.spaces.gotoEditSpace(spaceId);
         await pageObjects.spaces.waitForProjectRoutingPicker();
-        await expect(pageObjects.spaces.originProjectRoutingButtonLocator()).toHaveAttribute(
-          'aria-pressed',
-          'true'
-        );
+        await expect(pageObjects.spaces.originProjectSwitchLocator()).toBeChecked();
 
         await pageObjects.spaces.selectAllProjectsRouting();
         await pageObjects.spaces.saveSpace();

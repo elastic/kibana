@@ -30,9 +30,6 @@ export const CONVERSATION_CARD_LABELS = Object.freeze({
 });
 
 export const CONVERSATION_CARD_ACTIONS = Object.freeze({
-  openChat: i18n.translate('xpack.pnd.conversationCard.openChat', {
-    defaultMessage: 'Open in chat',
-  }),
   default: i18n.translate('xpack.pnd.conversationCard.defaultAction', {
     defaultMessage: 'Review',
   }),

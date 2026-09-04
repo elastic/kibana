@@ -81,7 +81,7 @@ describe('Flyout', () => {
     component.update();
 
     expect(component.state('file')).toBe(undefined);
-    component.find('EuiFilePickerClass').simulate('change', [mockFile]);
+    component.find('EuiFilePicker').simulate('change', [mockFile]);
     expect(component.state('file')).toBe(mockFile);
   });
 
@@ -94,9 +94,9 @@ describe('Flyout', () => {
     component.update();
 
     expect(component.state('file')).toBe(undefined);
-    component.find('EuiFilePickerClass').simulate('change', [mockFile]);
+    component.find('EuiFilePicker').simulate('change', [mockFile]);
     expect(component.state('file')).toBe(mockFile);
-    component.find('EuiFilePickerClass').simulate('change', []);
+    component.find('EuiFilePicker').simulate('change', []);
     expect(component.state('file')).toBe(undefined);
   });
 
@@ -113,7 +113,7 @@ describe('Flyout', () => {
       'EuiButton[data-test-subj="importSavedObjectsImportBtn"]'
     );
     expect(importButton.prop('isDisabled')).toBe(true);
-    component.find('EuiFilePickerClass').simulate('change', [mockFile]);
+    component.find('EuiFilePicker').simulate('change', [mockFile]);
 
     // Ensure state changes are reflected
     component.update();

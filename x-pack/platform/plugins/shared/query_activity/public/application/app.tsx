@@ -13,6 +13,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPageTemplate,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -128,8 +129,10 @@ const QueryActivityAppWithData: React.FC = () => {
   const queries = data?.queries ?? [];
 
   return (
-    <EuiPageTemplate restrictWidth={false}>
+    <>
       <EuiPageTemplate.Header
+        paddingSize="none"
+        bottomBorder
         pageTitle={PLUGIN_NAME}
         description={
           <FormattedMessage
@@ -190,22 +193,21 @@ const QueryActivityAppWithData: React.FC = () => {
           </EuiFlexGroup>,
         ]}
       />
-      <EuiPageTemplate.Section>
-        <QueryActivityTable
-          queries={queries}
-          onCancelQuery={handleCancelQuery}
-          onQueryNoLongerRunning={handleRefresh}
-          isLoading={isLoading}
-          error={
-            error
-              ? i18n.translate('xpack.queryActivity.loadError', {
-                  defaultMessage: 'Failed to load query activity.',
-                })
-              : undefined
-          }
-        />
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+      <EuiSpacer size="l" />
+      <QueryActivityTable
+        queries={queries}
+        onCancelQuery={handleCancelQuery}
+        onQueryNoLongerRunning={handleRefresh}
+        isLoading={isLoading}
+        error={
+          error
+            ? i18n.translate('xpack.queryActivity.loadError', {
+                defaultMessage: 'Failed to load query activity.',
+              })
+            : undefined
+        }
+      />
+    </>
   );
 };
 
@@ -216,16 +218,15 @@ export const QueryActivityApp: React.FC = () => {
 
   if (capabilities.isLoading) {
     return (
-      <EuiPageTemplate restrictWidth={false}>
-        <EuiPageTemplate.Header pageTitle={PLUGIN_NAME} />
-        <EuiPageTemplate.Section>
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageTemplate.Section>
-      </EuiPageTemplate>
+      <>
+        <EuiPageTemplate.Header paddingSize="none" bottomBorder pageTitle={PLUGIN_NAME} />
+        <EuiSpacer size="l" />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     );
   }
 

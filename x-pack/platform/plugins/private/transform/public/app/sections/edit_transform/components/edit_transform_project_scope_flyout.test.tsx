@@ -158,7 +158,7 @@ describe('EditTransformProjectScopeFlyout', () => {
     );
     expect(screen.queryByText('Using space defaults')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('projectPickerHeaderActionsButton'));
+    await userEvent.click(screen.getByTestId('projectPickerGlobalActionsButton'));
     await userEvent.click(screen.getByText('Revert to space defaults'));
 
     await waitFor(() => {

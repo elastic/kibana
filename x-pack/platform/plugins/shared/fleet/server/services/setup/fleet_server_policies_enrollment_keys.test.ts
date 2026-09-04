@@ -93,8 +93,8 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedGenerateEnrollmentAPIKey).toBeCalledTimes(2);
-    expect(mockedAgentPolicyService.deployPolicies).not.toBeCalled();
+    expect(mockedGenerateEnrollmentAPIKey).toHaveBeenCalledTimes(2);
+    expect(mockedAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalledWith(
       expect.stringContaining('has mismatched revisions')
     );
@@ -115,8 +115,8 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedGenerateEnrollmentAPIKey).toBeCalledTimes(1);
-    expect(mockedGenerateEnrollmentAPIKey).toBeCalledWith(
+    expect(mockedGenerateEnrollmentAPIKey).toHaveBeenCalledTimes(1);
+    expect(mockedGenerateEnrollmentAPIKey).toHaveBeenCalledWith(
       soClient,
       esClient,
       expect.objectContaining({ agentPolicyId: 'policy2', name: 'Default', forceRecreate: true })
@@ -135,8 +135,8 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedGenerateEnrollmentAPIKey).toBeCalledTimes(2);
-    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+    expect(mockedGenerateEnrollmentAPIKey).toHaveBeenCalledTimes(2);
+    expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledWith(undefined, [
       { id: 'policy2', spaceId: undefined },
     ]);
     expect(logger.warn).toHaveBeenCalledWith(
@@ -157,8 +157,8 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedGenerateEnrollmentAPIKey).toBeCalledTimes(2);
-    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+    expect(mockedGenerateEnrollmentAPIKey).toHaveBeenCalledTimes(2);
+    expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledWith(undefined, [
       { id: 'policy2', spaceId: undefined },
     ]);
   });
@@ -189,13 +189,13 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(
+    expect(mockedAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
       expect.anything(),
       ['fleet-server-policy'],
       undefined,
       { throwOnAnyError: true }
     );
-    expect(scheduleDeployAgentPoliciesTask).not.toBeCalled();
+    expect(scheduleDeployAgentPoliciesTask).not.toHaveBeenCalled();
   });
 
   it('should synchronously deploy preconfigured fleet server policies and schedule regular outdated policies async', async () => {
@@ -224,13 +224,13 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(
+    expect(mockedAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
       expect.anything(),
       ['fleet-server-policy'],
       undefined,
       { throwOnAnyError: true }
     );
-    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+    expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledWith(undefined, [
       { id: 'policy1', spaceId: undefined },
     ]);
   });
@@ -259,11 +259,11 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({ logger, esClient, soClient });
 
-    expect(logger.error).toBeCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to deploy fleet server policies [fleet-server-policy]')
     );
     // A fleet server deploy failure must not prevent regular outdated policies from being scheduled
-    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+    expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledWith(undefined, [
       { id: 'policy1', spaceId: undefined },
     ]);
   });
@@ -287,13 +287,13 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(
+    expect(mockedAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
       expect.anything(),
       ['custom-fs-policy'],
       undefined,
       { throwOnAnyError: true }
     );
-    expect(scheduleDeployAgentPoliciesTask).not.toBeCalled();
+    expect(scheduleDeployAgentPoliciesTask).not.toHaveBeenCalled();
   });
 
   it('should not synchronously deploy non-preconfigured fleet server policies', async () => {
@@ -321,8 +321,8 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     });
 
     // Non-preconfigured fleet server policy goes to the async task, not synchronous deploy
-    expect(mockedAgentPolicyService.deployPolicies).not.toBeCalled();
-    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+    expect(mockedAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
+    expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledWith(undefined, [
       { id: 'user-fs-policy', spaceId: undefined },
     ]);
   });

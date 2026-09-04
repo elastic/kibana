@@ -62,6 +62,9 @@ const createFetchProjectsByRouting = (projects: CPSProject[] = availableProjects
         const separatorIndex = clause.indexOf(':');
         const tag = clause.slice(0, separatorIndex) as keyof CPSProject;
         const value = clause.slice(separatorIndex + 1);
+        if (value === '*') {
+          return project[tag] != null && project[tag] !== '';
+        }
         return project[tag] === value;
       })
     );
@@ -184,7 +187,7 @@ describe('ProjectPickerFlyoutContent', () => {
 
     await user.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
 
-    expect(onApplyChanges).toHaveBeenCalledWith('_id:* AND NOT _id:linked1');
+    expect(onApplyChanges).toHaveBeenCalledWith('_alias:* AND (_id:* AND NOT _id:linked1)');
   });
 
   it('applies selected projects as explicit ids in snapshot mode', async () => {
@@ -205,9 +208,7 @@ describe('ProjectPickerFlyoutContent', () => {
     await user.click(
       screen.getByTestId(getProjectPickerListItemSwitchTestSubj(linkedProjectOne._id))
     );
-    await user.click(
-      screen.getByTestId(getProjectPickerListItemSwitchTestSubj(linkedProjectTwo._id))
-    );
+    await user.click(screen.getByTestId(getProjectPickerListItemSwitchTestSubj(originProject._id)));
 
     await waitFor(() => {
       expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeEnabled();
@@ -215,7 +216,7 @@ describe('ProjectPickerFlyoutContent', () => {
 
     await user.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
 
-    expect(onApplyChanges).toHaveBeenCalledWith('_id:origin');
+    expect(onApplyChanges).toHaveBeenCalledWith(`_alias:* AND _id:${linkedProjectTwo._id}`);
   });
 
   it('disables Discard and Apply after round-tripping back to the baseline selection', async () => {
@@ -292,7 +293,7 @@ describe('ProjectPickerFlyoutContent', () => {
       ).toHaveAttribute('aria-checked', 'false');
     });
 
-    await user.click(screen.getByTestId('projectPickerHeaderActionsButton'));
+    await user.click(screen.getByTestId('projectPickerGlobalActionsButton'));
     await user.click(screen.getByText('Revert to space defaults'));
 
     await waitFor(() => {

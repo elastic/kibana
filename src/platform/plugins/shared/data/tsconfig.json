@@ -19,6 +19,7 @@
     "@kbn/scout",
     "@kbn/core-http-common",
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/core-user-storage-common",
     "@kbn/ui-actions-plugin",
     "@kbn/share-plugin",
@@ -75,7 +76,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/date-range-picker-presets-common",
     "@kbn/zod",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
   ],
   "exclude": ["target/**/*"]
 }

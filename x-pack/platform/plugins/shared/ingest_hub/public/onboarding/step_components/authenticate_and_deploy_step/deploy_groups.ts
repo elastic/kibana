@@ -76,8 +76,8 @@ export function buildDeployGroups(
   for (const inst of resolved) {
     const service = servicesMap.get(inst.serviceId);
     if (!service) continue;
-    // TODO(follow-up): non-agentless duplicates are silently dropped here.
-    // ECF and agent-based duplicate deploy support are tracked in separate follow-up issues.
+    // TODO(agent-based): agent-based duplicate deploy support tracked in #9079.
+    // ECF duplicates are no longer possible — Duplicate action is hidden for ECF-only services.
     if (
       !service.deploymentMethods.some((dm) => dm.method === 'managed_integration' && dm.preferred)
     ) {
@@ -167,7 +167,10 @@ export async function deployGroup(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of group.members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? { enabledInputs: [], varsByInput: {} };
+      storedServiceVars[instance.serviceId] ?? {
+        enabledDataStreams: service.dataStreams,
+        varsByDataStream: {},
+      };
   }
 
   const services = group.members.map(({ service }) => service);
@@ -175,10 +178,16 @@ export async function deployGroup(
 
   // Explicitly disable all package inputs not in our selection to avoid Fleet defaulting
   // enabled inputs that would cause "not allowed for agentless" errors.
-  const pkgTemplates: Array<{ name?: string; type?: string; inputs?: Array<{ type: string }> }> =
-    (pkgInfo as any).policy_templates ?? [];
+  const pkgTemplates: Array<{
+    name?: string;
+    type?: string;
+    input?: string;
+    inputs?: Array<{ type: string }>;
+  }> = (pkgInfo as any).policy_templates ?? [];
   for (const template of pkgTemplates) {
-    const templateInputs = template.inputs ?? (template.type ? [{ type: template.type }] : []);
+    // Input-only templates have `input` (singular, the collector type e.g. 'otelcol') and
+    // `type` (signal type e.g. 'metrics'). Use `input` for the key — `type` is wrong here.
+    const templateInputs = template.inputs ?? (template.input ? [{ type: template.input }] : []);
     for (const input of templateInputs) {
       const key = template.name ? `${template.name}-${input.type}` : input.type;
       if (!inputs[key]) {

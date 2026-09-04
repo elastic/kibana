@@ -8,16 +8,37 @@
  */
 
 import type { MouseEventHandler, ReactNode } from 'react';
-import type { EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
+import type { EuiBadgeProps, EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
+import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
+
+/** Props for a single tab entry in the root `tabs` array. */
+export interface FlyoutTabProps {
+  /** Stable identifier, used to link the tab to its `Body.TabPanel`. */
+  id: string;
+  /** Tab label rendered inside `EuiTab`. */
+  label: ReactNode;
+  disabled?: boolean;
+  prepend?: ReactNode;
+  append?: ReactNode;
+  'data-test-subj'?: string;
+}
+
+/** Props for the declarative `FlyoutTemplate.Body.TabPanel` part. */
+export interface FlyoutBodyTabPanelProps {
+  /** The `id` of the root `tabs` entry this panel belongs to. Non-matching ids are silently ignored in tabbed mode. */
+  tabId: string;
+  children?: ReactNode;
+  'data-test-subj'?: string;
+}
 
 /** Props for the declarative `FlyoutTemplate.Header` zone. */
 export interface FlyoutHeaderProps {
-  /** Title rendered by the header as an H3. */
+  /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
   title: ReactNode;
   'data-test-subj'?: string;
   /**
-   * Reserved for future header parts (Header.Badge, Header.InfoBlock, etc.).
-   * Free-form content placed here is not rendered; put it in the Body instead.
+   * `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts.
+   * Free-form content is not rendered.
    */
   children?: ReactNode;
   /** Icon beside the title; defaults to `info` when `titleTooltip` is set. */
@@ -26,12 +47,61 @@ export interface FlyoutHeaderProps {
   titleTooltip?: ReactNode;
   /** Subdued text below the title. */
   description?: ReactNode;
+  /**
+   * When true, the header is permanently rendered in its compact collapsed layout regardless of
+   * scroll position. The description, meta blocks, badges, and info blocks are not shown.
+   */
+  collapsed?: boolean;
+}
+
+/** Props for the declarative `FlyoutTemplate.Header.MetaBlock` part. */
+export interface FlyoutHeaderMetaBlockProps {
+  /** Optional explicit instance id; auto-generated when omitted. */
+  id?: string;
+  /** The pair's key, rendered bold ahead of the value. */
+  title: ReactNode;
+  /** The pair's value; accepts rich content such as links. */
+  children: ReactNode;
+  'data-test-subj'?: string;
+}
+
+/**
+ * Props for the declarative `FlyoutTemplate.Header.Badge` part.
+ *
+ * The template composes the `EuiBadge` itself, so only presentational options are
+ * exposed. Badges in a flyout header label the subject; they are not controls.
+ */
+export interface FlyoutHeaderBadgeProps {
+  /** Optional explicit instance id; auto-generated when omitted. */
+  id?: string;
+  /** Badge label. */
+  children: ReactNode;
+  /** Palette color name or hex value. */
+  color?: EuiBadgeProps['color'];
+  /** Icon shown inside the badge. */
+  iconType?: EuiBadgeProps['iconType'];
+  /** Which side of the label the icon sits on. */
+  iconSide?: EuiBadgeProps['iconSide'];
+  'data-test-subj'?: string;
+}
+
+/** Props for the declarative `FlyoutTemplate.Header.InfoBlock` part. */
+export interface FlyoutHeaderInfoBlockProps {
+  /** Optional explicit instance id; auto-generated when omitted. */
+  id?: string;
+  /** Fixed-style text label rendered above the value. */
+  title: string;
+  /** The block's value content. */
+  children: ReactNode;
+  size?: InfoBlockItem['size'];
+  color?: InfoBlockItem['color'];
+  'data-test-subj'?: string;
 }
 
 /** Props for the declarative `FlyoutTemplate.Body` zone. */
 export interface FlyoutBodyProps {
   'data-test-subj'?: string;
-  /** Arbitrary content rendered in source order. */
+  /** `Body.TabPanel` parts, and/or arbitrary content rendered as-is in source order. */
   children?: ReactNode;
 }
 
@@ -88,4 +158,12 @@ export type FlyoutTemplateProps = Pick<
   'data-test-subj'?: string;
   /** Declarative zone children: `FlyoutTemplate.Header`, `.Body`, `.Footer`. */
   children?: ReactNode;
+  /** Tabs rendered in the header bar. Omit for a flyout with no tabs. */
+  tabs?: FlyoutTabProps[];
+  /** Initial selected tab id (uncontrolled); ignored when `selectedTabId` is provided. */
+  defaultSelectedTabId?: string;
+  /** Currently selected tab id (controlled); `onTabChange` fires on every click either way. */
+  selectedTabId?: string;
+  /** Called when the user clicks a tab. */
+  onTabChange?: (id: string) => void;
 };

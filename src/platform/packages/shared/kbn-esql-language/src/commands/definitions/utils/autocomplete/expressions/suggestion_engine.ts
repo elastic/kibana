@@ -27,7 +27,7 @@ import type {
   SuggestForExpressionParams,
   SuggestForExpressionResult,
 } from './types';
-import { getKqlSuggestionsIfApplicable, isExpressionParenthesized } from './utils';
+import { getKqlSuggestionsIfApplicable, getParenthesizedExpressionPosition } from './utils';
 import { isInsideMapExpression, parseMapParams } from '../../maps';
 
 // Matches tokens like "foo(" to recover function names when the AST is missing
@@ -126,7 +126,11 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
   const innerText = query.slice(0, cursorPosition);
   const isCursorFollowedByComma = query.slice(cursorPosition).trimStart().startsWith(',');
   const isCursorFollowedByParens = query.slice(cursorPosition).trimStart().startsWith('(');
-  const isExpressionRootParenthesized = isExpressionParenthesized(innerText, expressionRoot);
+  const parenthesizedExpressionPosition = getParenthesizedExpressionPosition(
+    query,
+    innerText,
+    expressionRoot
+  );
 
   const baseOptions: ExpressionContextOptions = params.options ?? ({} as ExpressionContextOptions);
   const options: ExpressionContextOptions = {
@@ -140,7 +144,7 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
     cursorPosition,
     innerText,
     expressionRoot,
-    isExpressionRootParenthesized,
+    parenthesizedExpressionPosition,
     location: params.location!,
     command: params.command,
     context: params.context,

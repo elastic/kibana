@@ -7,18 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, isBinaryExpression, isSubQuery, Walker } from '@elastic/esql';
+import { Builder, isBinaryExpression, isProperNode, isSubQuery, Walker } from '@elastic/esql';
 import type {
   ESQLAstAllCommands,
   ESQLAstForkCommand,
   ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
   ESQLCommand,
+  ESQLSingleAstItem,
 } from '@elastic/esql/types';
 import { inOperators } from '../../commands/definitions/all_operators';
 import { expandEvals } from '../shared/expand_evals';
 
-const COMMANDS_WITH_SUBQUERIES = new Set(['from', 'where', 'eval']);
+const COMMANDS_WITH_SUBQUERIES = new Set(['from', 'where', 'eval', 'stats', 'inline stats']);
+
+export interface InSubqueryReference {
+  left: ESQLSingleAstItem;
+  query: ESQLAstQueryExpression;
+}
 
 /**
  * Returns a list of subqueries to validate
@@ -107,7 +113,7 @@ function getCommandPrefixesForQuery(subquery: ESQLAstQueryExpression): ESQLComma
 }
 
 function getSubqueries(command: ESQLAstAllCommands): ESQLAstQueryExpression[] {
-  return [...getFromSubqueries(command), ...getInSubqueries(command)];
+  return [...getFromSubqueries(command), ...getInSubqueries(command).map(({ query }) => query)];
 }
 
 function getFromSubqueries(command: ESQLAstAllCommands): ESQLAstQueryExpression[] {
@@ -118,8 +124,8 @@ function getFromSubqueries(command: ESQLAstAllCommands): ESQLAstQueryExpression[
   return (command as ESQLCommand<'from'>).args.filter(isSubQuery).map(({ child }) => child);
 }
 
-function getInSubqueries(command: ESQLAstAllCommands): ESQLAstQueryExpression[] {
-  const results: ESQLAstQueryExpression[] = [];
+export function getInSubqueries(command: ESQLAstAllCommands): InSubqueryReference[] {
+  const results: InSubqueryReference[] = [];
 
   Walker.walk(command, {
     visitFunction: (node) => {
@@ -127,10 +133,10 @@ function getInSubqueries(command: ESQLAstAllCommands): ESQLAstQueryExpression[] 
         return;
       }
 
-      const rightArg = node.args[1];
+      const [leftArg, rightArg] = node.args;
 
-      if (!Array.isArray(rightArg) && isSubQuery(rightArg)) {
-        results.push(rightArg.child);
+      if (isProperNode(leftArg) && isSubQuery(rightArg)) {
+        results.push({ left: leftArg, query: rightArg.child });
       }
     },
     visitParens: (node, _parent, walker) => {

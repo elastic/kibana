@@ -1,8 +1,7 @@
 {
-  "sha1": "e04b253704ebe8867c865f6f75cae983639255f3",
+  "sha1": "7e980ff78ae4ff28cda153d3f20ccd32223d09e0",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -68,6 +67,19 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion_enabled.spec.ts",
         "line": 95,
         "column": 11
+      }
+    },
+    {
+      "id": "5377c51faf80b32-78f10f03c229085",
+      "title": "Lens legacy dual-written ES|QL slot self-heal (by-value inline editing) renders the layer query, self-heals the stale slot on save, and survives re-open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_legacy_slot_self_heal.spec.ts",
+        "line": 137,
+        "column": 10
       }
     },
     {

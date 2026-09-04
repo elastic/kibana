@@ -36,10 +36,14 @@ export const CustomContentEmptyPrompt = ({
         <EuiSpacer size="s" />
         <EuiText size="s">
           <p>
-            {i18n.translate('xpack.customContent.noContent.body', {
-              defaultMessage:
-                'You can use HTML, CSS, Liquid and ES|QL or you can let chat generate it for you.',
-            })}
+            {isAiAvailable
+              ? i18n.translate('xpack.customContent.noContent.bodyAi', {
+                  defaultMessage:
+                    'Examples: "Create a health status card for each of my hosts", "Create a banner with an animated image", "Show how data flows across my services".',
+                })
+              : i18n.translate('xpack.customContent.noContent.bodyNoAi', {
+                  defaultMessage: 'Use HTML, CSS, Liquid, and ES|QL to create your custom panel',
+                })}
           </p>
         </EuiText>
       </>

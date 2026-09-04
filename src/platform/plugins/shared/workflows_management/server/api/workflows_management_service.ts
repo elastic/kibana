@@ -40,6 +40,7 @@ import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
+  ManagedWorkflowInstanceState,
   ManagedWorkflowOperationOptions,
   ManagedWorkflowServiceInstallOptions,
   ManagedWorkflowStatusReport,
@@ -51,6 +52,7 @@ import type {
 } from '@kbn/workflows/types/v1';
 import type {
   LogSearchResult,
+  WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
 import type {
@@ -98,7 +100,11 @@ import type {
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
-import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
+import {
+  createStorage,
+  type WorkflowProperties,
+  type WorkflowStorage,
+} from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } from '../types';
 
@@ -150,6 +156,7 @@ export class WorkflowsService {
   private workflowStorage!: WorkflowStorage;
   private taskScheduler!: WorkflowTaskScheduler;
   private esClient!: ElasticsearchClient;
+  private workflowExecutionsDataClient!: WorkflowExecutionsDataClient;
   private validationService!: WorkflowValidationService;
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
@@ -246,9 +253,15 @@ export class WorkflowsService {
       getActionsClientWithRequest: this.getActionsClientWithRequest,
     });
 
+    const { workflowExecutionsDataClient, stepExecutionsDataClient } =
+      this.workflowsExecutionEngine.__internalStorage;
+    this.workflowExecutionsDataClient = workflowExecutionsDataClient;
+
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,
       esClient: this.esClient,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
+      stepExecutionsDataClient,
       workflowEventLoggerService: this.workflowsExecutionEngine.workflowEventLoggerService,
     });
 
@@ -256,13 +269,13 @@ export class WorkflowsService {
       logger: this.logger,
       workflowStorage: this.workflowStorage,
       esClient: this.esClient,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
     });
 
     await this.initializeChangeHistoryService(coreStart);
 
     this.crudService = new WorkflowCrudService({
       logger: this.logger,
-      esClient: this.esClient,
       workflowStorage: this.workflowStorage,
       getSecurity: () => this.coreStart.security,
       workflowsExtensions: this.workflowsExtensions,
@@ -271,6 +284,8 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
+      stepExecutionsDataClient,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -355,13 +370,48 @@ export class WorkflowsService {
     return this.crudService.getWorkflowsSourceByIds(ids, spaceId, source, options);
   }
 
+  public async getInstalledManagedWorkflowState(
+    id: string,
+    spaceId: string,
+    pluginId: string
+  ): Promise<ManagedWorkflowInstanceState | null> {
+    await this.ensureInitialized();
+    const source = await this.crudService.getWorkflowDocumentSource(id, spaceId);
+    if (!source?.managed || source.managedBy !== pluginId) {
+      return null;
+    }
+    return this.toManagedWorkflowInstanceState(id, source);
+  }
+
+  public async listInstalledManagedWorkflowStates(
+    pluginId: string
+  ): Promise<ManagedWorkflowInstanceState[]> {
+    await this.ensureInitialized();
+    const documents = await this.crudService.getManagedWorkflowDocumentsAllSpaces({ pluginId });
+    return documents.map(({ id, source }) => this.toManagedWorkflowInstanceState(id, source));
+  }
+
+  private toManagedWorkflowInstanceState(
+    id: string,
+    source: WorkflowProperties
+  ): ManagedWorkflowInstanceState {
+    return {
+      workflowId: id,
+      spaceId: source.spaceId,
+      definitionId: source.originManagedWorkflowId ?? null,
+      templateValues: source.managedTemplateValues ?? null,
+      documentVersion: source.version ?? null,
+    };
+  }
+
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { nameFallback?: string }
   ): Promise<WorkflowDetailDto> {
     await this.ensureInitialized();
-    return this.crudService.createWorkflow(workflow, spaceId, request);
+    return this.crudService.createWorkflow(workflow, spaceId, request, options);
   }
 
   public async bulkCreateWorkflows(
@@ -524,7 +574,7 @@ export class WorkflowsService {
   public async markStepAsResponded(
     stepExecutionId: string,
     request: KibanaRequest,
-    channel: string,
+    channel: string | undefined,
     spaceId: string
   ): Promise<boolean> {
     await this.ensureInitialized();

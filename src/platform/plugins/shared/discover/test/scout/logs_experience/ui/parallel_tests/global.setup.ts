@@ -10,7 +10,7 @@
 import { log as logDoc, timerange } from '@kbn/synthtrace-client';
 import { globalSetupHook } from '@kbn/scout';
 import { getSynthtraceClient } from '@kbn/scout-synthtrace';
-import { LOGS } from '../fixtures';
+import { deleteLogsExperienceData, LOGS } from '../fixtures';
 
 globalSetupHook('Setup logs experience tests data', async ({ esClient, log, config }) => {
   const from = new Date(LOGS.DEFAULT_START_TIME).getTime();
@@ -22,6 +22,8 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
     config,
   });
 
+  await deleteLogsExperienceData(esClient);
+
   await logsEsClient.index([
     timerange(from, to)
       .interval('1m')
@@ -29,7 +31,8 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
       .generator((timestamp: number) =>
         logDoc
           .create()
-          .message('Test log message for recommended fields')
+          .message(LOGS.SYNTH_LOGS_MESSAGE)
+          .hostName(LOGS.SYNTH_LOGS_HOST)
           .timestamp(timestamp)
           .dataset(LOGS.SYNTH_LOGS_DATASET)
           .namespace(LOGS.SYNTH_LOGS_NAMESPACE)
@@ -38,28 +41,48 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   ]);
   log.debug('[setup:logs] synthtrace logs data indexed');
 
+  // Doc-viewer data. Every document carries a stack trace and an oversized `log.level`, so every
+  // row offers both leading controls and no spec needs a query to narrow the grid. One document per
+  // minute keeps `@timestamp` unique, which makes "row 0" and "row 1" stable under the default sort.
+  await logsEsClient.index([
+    timerange(from, to)
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp: number) =>
+        logDoc
+          .create()
+          .message(LOGS.SYNTH_LOGS_MESSAGE)
+          .hostName(LOGS.SYNTH_LOGS_HOST)
+          .timestamp(timestamp)
+          .dataset(LOGS.SYNTH_DOCVIEWER_DATASET)
+          .namespace(LOGS.SYNTH_LOGS_NAMESPACE)
+          .logLevel(LOGS.OVERSIZED_LOG_LEVEL)
+          .defaults({ 'error.stack_trace': LOGS.STACK_TRACE })
+      ),
+  ]);
+  log.debug('[setup:logs] synthtrace doc viewer data indexed');
+
   // Metric-shaped data for the negative cases: a data source that must NOT match the logs
   // profile. Indexed directly rather than via `infraEsClient`, whose `metrics-*` data streams
   // are TSDB and reject timestamps outside a moving window around now.
-  await esClient.indices
-    .create({
-      index: LOGS.NON_LOGS_INDEX,
-      mappings: {
-        properties: {
-          '@timestamp': { type: 'date' },
-          'host.name': { type: 'keyword' },
-          'system.cpu.total.norm.pct': { type: 'float' },
-          'system.memory.actual.used.pct': { type: 'float' },
-        },
+  //
+  await esClient.indices.create({
+    index: LOGS.NON_LOGS_INDEX,
+    mappings: {
+      properties: {
+        '@timestamp': { type: 'date' },
+        'host.name': { type: 'keyword' },
+        'system.cpu.total.norm.pct': { type: 'float' },
+        'system.memory.actual.used.pct': { type: 'float' },
       },
-    })
-    .catch((err: Error) => {
-      // Idempotent: the index survives an interrupted run that skipped teardown.
-      if (!err.message.includes('resource_already_exists_exception')) throw err;
-    });
+    },
+  });
 
-  const intervalMs = 10 * 60 * 1000;
-  const documents = Array.from({ length: 1 + (to - from) / intervalMs }, (_, i) => ({
+  // 31 docs at a 2-minute interval over the 1 h window. EuiDataGrid hides the whole pagination row
+  // when rowCount < min(pageSizeOptions), so this must stay above ROWS_PER_PAGE_OPTIONS[0] = 10; it
+  // stays below 100 so the default rows-per-page still fits on a single page.
+  const intervalMs = 2 * 60 * 1000;
+  const documents = Array.from({ length: 31 }, (_, i) => ({
     '@timestamp': new Date(from + i * intervalMs).toISOString(),
     'host.name': LOGS.NON_LOGS_HOST,
     'system.cpu.total.norm.pct': 0.98,

@@ -230,12 +230,12 @@ export const useDiscoverHistogram = (
       breakdownField,
       timeInterval,
       esqlVariables,
-      esqlApproximation,
+      isApproximate: esqlApproximation,
       controlsState: getDefinedControlGroupState(currentTabControlState),
       // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,
-    };
+    } satisfies UnifiedHistogramFetchParamsExternal;
   }, [
     breakdownField,
     timeInterval,

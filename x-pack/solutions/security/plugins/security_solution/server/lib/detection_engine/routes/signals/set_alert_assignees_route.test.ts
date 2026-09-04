@@ -11,6 +11,7 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import { setAlertAssigneesRoute } from './set_alert_assignees_route';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 describe('setAlertAssigneesRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -122,6 +123,46 @@ describe('setAlertAssigneesRoute', () => {
         message: 'Test error',
         status_code: 500,
       });
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: { emitAlertAssigneesChanged: jest.Mock };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = { emitAlertAssigneesChanged: jest.fn() };
+      setAlertAssigneesRoute(server.router, mockEventBus as unknown as SecuritySolutionEventBus);
+    });
+
+    test('emits alertAssigneesChanged after a successful update', async () => {
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
+        body: getSetAlertAssigneesRequestMock(['user-1'], [], ['alert-1']),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          alertIds: ['alert-1'],
+          assigneesToAdd: ['user-1'],
+          assigneesToRemove: [],
+          truncated: false,
+        })
+      );
+    });
+
+    test('does not emit when validation fails', async () => {
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
+        body: getSetAlertAssigneesRequestMock(['user-1'], ['user-1'], ['alert-1']),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
     });
   });
 });

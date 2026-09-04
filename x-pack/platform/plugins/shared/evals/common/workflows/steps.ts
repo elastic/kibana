@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
+import { Direction } from '@kbn/evals-common';
 
 /**
  * Shared definitions for the evals workflow steps. Held in `common`
@@ -59,6 +60,7 @@ export const evaluatorResultSchema = z.object({
     version: z.string().optional(),
     kind: z.enum(['llm', 'code']).optional(),
     model: modelSchema.optional(),
+    direction: Direction.optional(),
   }),
   scores: z.array(
     z.object({

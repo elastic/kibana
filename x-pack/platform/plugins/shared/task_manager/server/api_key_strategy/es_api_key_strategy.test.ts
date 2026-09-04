@@ -10,6 +10,7 @@ import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import { EsApiKeyStrategy } from './es_api_key_strategy';
+import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
   id: 'task-1',
@@ -38,14 +39,37 @@ describe('EsApiKeyStrategy', () => {
   });
 
   describe('getApiKeyForFakeRequest', () => {
-    test('returns apiKey from task instance', () => {
-      const task = mockTaskInstance({ apiKey: 'es-encoded-key' });
-      expect(strategy.getApiKeyForFakeRequest(task)).toBe('es-encoded-key');
+    let recordTaskRunSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      recordTaskRunSpy = jest
+        .spyOn(taskManagerUiamTelemetry, 'recordTaskRun')
+        .mockImplementation(() => {});
     });
 
-    test('returns undefined when task has no apiKey', () => {
+    afterEach(() => {
+      recordTaskRunSpy.mockRestore();
+    });
+
+    test('returns apiKey from task instance and records an ES task run', () => {
+      const task = mockTaskInstance({ apiKey: 'es-encoded-key' });
+      expect(strategy.getApiKeyForFakeRequest(task)).toBe('es-encoded-key');
+      expect(recordTaskRunSpy).toHaveBeenCalledWith('es_api_key', 'config');
+    });
+
+    test('returns undefined and does not record a task run when task has no keys', () => {
       const task = mockTaskInstance();
       expect(strategy.getApiKeyForFakeRequest(task)).toBeUndefined();
+      // Non-user-scoped tasks must not be recorded on the task_run counter.
+      expect(recordTaskRunSpy).not.toHaveBeenCalled();
+    });
+
+    test('records a "none" task run for a user-scoped task without an ES apiKey', () => {
+      const task = mockTaskInstance({
+        userScope: { apiKeyId: 'es-key-id', spaceId: 'default', apiKeyCreatedByUser: false },
+      });
+      expect(strategy.getApiKeyForFakeRequest(task)).toBeUndefined();
+      expect(recordTaskRunSpy).toHaveBeenCalledWith('none', 'not_set');
     });
   });
 

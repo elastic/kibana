@@ -32,6 +32,12 @@ export interface IconButton {
   title?: string;
   /** Test subject for button */
   'data-test-subj'?: string;
+  /** EBT click action */
+  'data-ebt-action'?: string;
+  /** EBT click element */
+  'data-ebt-element'?: string;
+  /** Optional EBT click detail */
+  'data-ebt-detail'?: string;
   /** To disable the action **/
   isDisabled?: boolean;
   /** Tooltip content */

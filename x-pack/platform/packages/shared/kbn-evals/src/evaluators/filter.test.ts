@@ -12,6 +12,7 @@ describe('evaluator filter', () => {
   const createMockEvaluator = (name: string): Evaluator => ({
     name,
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: jest.fn(),
   });
 

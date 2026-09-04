@@ -9,6 +9,7 @@ import { of } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { AppUpdater, PluginInitializerContext } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -102,7 +103,7 @@ describe('IngestHubPlugin', () => {
       it('emits true with oblt space solution', async () => {
         const spaces = spacesPluginMock.createStartContract();
         spaces.getActiveSpace.mockResolvedValue({
-          id: 'default',
+          id: asSpaceId('default'),
           name: 'Default',
           solution: 'oblt',
           disabledFeatures: [],
@@ -115,7 +116,7 @@ describe('IngestHubPlugin', () => {
       it('emits false with es space solution', async () => {
         const spaces = spacesPluginMock.createStartContract();
         spaces.getActiveSpace.mockResolvedValue({
-          id: 'default',
+          id: asSpaceId('default'),
           name: 'Default',
           solution: 'es',
           disabledFeatures: [],

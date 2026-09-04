@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   CustomContentContextAttachmentData,
@@ -19,7 +20,26 @@ export const customContentContextAttachmentUiDefinition: AttachmentUIDefinition<
   getLabel: (attachment) =>
     attachment.data.panel_title ||
     i18n.translate('xpack.customContent.agentRefine.contextAttachmentLabel', {
-      defaultMessage: 'Custom content panel',
+      defaultMessage: 'Custom panel',
     }),
   getIcon: () => 'sparkles',
+  getActionButtons: ({ attachment, isCanvas }) => {
+    if (isCanvas) return [];
+
+    return [
+      {
+        label: i18n.translate('xpack.customContent.agentRefine.previewActionLabel', {
+          defaultMessage: 'Preview',
+        }),
+        icon: 'eye',
+        type: ActionButtonType.SECONDARY,
+        handler: async () => {
+          const { handlePanelPreview } = await import('./handle_panel_preview');
+          // `attachment.data` is the version the render tag selected, so this applies whichever
+          // version's card was clicked — that is what makes stepping through history work.
+          handlePanelPreview(attachment.data);
+        },
+      },
+    ];
+  },
 };

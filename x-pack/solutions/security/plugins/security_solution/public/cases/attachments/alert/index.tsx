@@ -64,6 +64,7 @@ const getCreationActivity = (props: SecurityAlertViewProps) => {
     event: (
       <Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <AlertEvent
+          key={savedObjectId}
           alertId={alertId ?? ''}
           totalAlerts={totalAlerts}
           savedObjectId={savedObjectId}

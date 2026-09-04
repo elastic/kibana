@@ -7,30 +7,34 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SubAgentExecutor } from '@kbn/agent-builder-server';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, createNonInteractiveConfig } from '@kbn/agent-builder-common';
+import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 
 export const createSubAgentExecutor = ({
   request,
   getExecutionService,
   projectRouting,
+  interactivity,
 }: {
   request: KibanaRequest;
   getExecutionService: () => AgentExecutionService;
   /** CPS routing of the parent run, inherited by every sub-agent it spawns. */
   projectRouting?: string;
+  interactivity: InteractivityConfig;
 }): SubAgentExecutor => {
+  const subAgentInteractivity = createNonInteractiveConfig(interactivity.auto_approved_apis);
+
   return {
     executeSubAgent: async (params) => {
       const executionService = getExecutionService();
       return executionService.executeAgent({
         mode: AgentExecutionMode.standalone,
-        interactive: { enabled: false },
+        interactive: subAgentInteractivity,
         request,
         params: {
           agentId: params.agentId,
           connectorId: params.connectorId,
-          capabilities: params.capabilities,
           parentExecutionId: params.parentExecutionId,
           nextInput: { message: params.prompt },
           projectRouting,
@@ -43,12 +47,11 @@ export const createSubAgentExecutor = ({
       const executionService = getExecutionService();
       return executionService.executeAgent({
         mode: AgentExecutionMode.conversation,
-        interactive: { enabled: false },
+        interactive: subAgentInteractivity,
         request,
         params: {
           agentId: params.agentId,
           connectorId: params.connectorId,
-          capabilities: params.capabilities,
           parentExecutionId: params.parentExecutionId,
           conversationId: params.conversationId,
           autoCreateConversationWithId: true,
@@ -67,11 +70,10 @@ export const createSubAgentExecutor = ({
       const executionService = getExecutionService();
       return executionService.executeAgent({
         mode: AgentExecutionMode.conversation,
-        interactive: { enabled: false },
+        interactive: subAgentInteractivity,
         request,
         params: {
           connectorId: params.connectorId,
-          capabilities: params.capabilities,
           parentExecutionId: params.parentExecutionId,
           conversationId: params.conversationId,
           autoCreateConversationWithId: false,

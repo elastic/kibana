@@ -10,6 +10,7 @@ import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
   deriveQueryType,
+  extractReferencedColumns,
   findOverBroadMatchPredicates,
   renderOverBroadMatchError,
   getSourcesForStream,
@@ -18,6 +19,7 @@ import {
   replaceFromSources,
 } from '@kbn/streams-schema';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { getMappingConflicts } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ChatCompletionTokenCount,
@@ -25,7 +27,10 @@ import type {
   ToolCallback,
   ToolDefinition,
 } from '@kbn/inference-common';
-import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import {
+  executeAsReasoningAgent,
+  type ReasoningPromptDiagnostics,
+} from '@kbn/inference-prompt-utils';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
@@ -209,6 +214,7 @@ export async function identifyKIQueries({
   existingQueries,
   maxExistingQueriesForContext = DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   maxSteps,
+  maxDurationMs,
   queryValidationTimeoutMs = DEFAULT_QUERY_VALIDATION_TIMEOUT_MS,
   requireQueryIntent = false,
   collectQueryAttempts = false,
@@ -234,6 +240,8 @@ export async function identifyKIQueries({
    * tools (e.g. code grounding) add round-trips.
    */
   maxSteps?: number;
+  /** Optional wall-clock budget for the reasoning loop. */
+  maxDurationMs?: number;
   queryValidationTimeoutMs?: number;
   /** Eval-only: require `expects_matches` on every add_queries item. */
   requireQueryIntent?: boolean;
@@ -243,6 +251,7 @@ export async function identifyKIQueries({
   queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
+  reasoningDiagnostics: ReasoningPromptDiagnostics;
   queryAttempts?: QueryAttempt[];
 }> {
   logger.debug('Starting Significant Events KI query generation');
@@ -256,12 +265,36 @@ export async function identifyKIQueries({
   });
   const targetSources = getSourcesForStream(stream);
 
-  const validationLookback = await computeValidationLookback({
-    esClient,
-    sources: targetSources,
-    signal,
-    logger,
-  });
+  const [validationLookback, mappingConflicts] = await Promise.all([
+    computeValidationLookback({
+      esClient,
+      sources: targetSources,
+      signal,
+      logger,
+    }),
+    // Best-effort source-wide probe; drives full-source validation below and must not fail generation.
+    getMappingConflicts({
+      esClient,
+      index: targetSources,
+      signal: AbortSignal.any([signal, AbortSignal.timeout(15_000)]),
+    }).catch((error) => {
+      logger.debug(
+        () =>
+          `Failed to probe mapping conflicts for [${targetSources.join(', ')}]: ${getErrorMessage(
+            error
+          )}`
+      );
+      return [];
+    }),
+  ]);
+
+  const conflictingFields = new Set(mappingConflicts.map(({ field }) => field));
+
+  // Relax the lookback filter only for candidates that actually reference a union field;
+  // a global toggle would force every validation to scan full history.
+  const validateOverFullSource = (esql: string): boolean =>
+    conflictingFields.size > 0 &&
+    extractReferencedColumns(esql).some((name) => conflictingFields.has(name));
 
   const existingQueriesList = existingQueries ?? [];
 
@@ -284,6 +317,7 @@ export async function identifyKIQueries({
   const returnedFeatureMap = new Map<string, string | undefined>();
   const validatedQueries: ParsedToolQuery[] = [];
   const queryAttempts: QueryAttempt[] | undefined = collectQueryAttempts ? [] : undefined;
+  const resolvedMaxSteps = maxSteps ?? (additionalToolCallbacks ? 6 : 4);
 
   logger.trace('Generating Significant Events KI queries via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
@@ -297,7 +331,8 @@ export async function identifyKIQueries({
         ),
         existing_queries: existingQueriesContext,
       },
-      maxSteps: maxSteps ?? (additionalToolCallbacks ? 6 : 4),
+      maxSteps: resolvedMaxSteps,
+      maxDurationMs,
       prompt,
       inferenceClient,
       toolCallbacks: {
@@ -464,14 +499,21 @@ export async function identifyKIQueries({
                 await esClient.esql.query(
                   {
                     query: `${rewritten}\n| LIMIT 0`,
-                    filter: {
-                      range: {
-                        '@timestamp': {
-                          gte: validationLookback,
-                          lte: 'now',
-                        },
-                      },
-                    },
+                    // The lookback filter prunes older indices via can_match, hiding a
+                    // union field's conflicting type so a bare reference passes here yet
+                    // breaks when run unbounded.
+                    ...(validateOverFullSource(rewritten)
+                      ? {}
+                      : {
+                          filter: {
+                            range: {
+                              '@timestamp': {
+                                gte: validationLookback,
+                                lte: 'now',
+                              },
+                            },
+                          },
+                        }),
                     format: 'json',
                   },
                   { signal, requestTimeout: queryValidationTimeoutMs }
@@ -554,12 +596,40 @@ export async function identifyKIQueries({
     })
   );
 
-  logger.debug(`Generated ${validatedQueries.length} Significant Event KI queries`);
+  if (validatedQueries.length === 0) {
+    const observed =
+      toolUsage.get_stream_features.calls === 0
+        ? 'no_get_stream_features_calls'
+        : toolUsage.get_stream_features.failures === toolUsage.get_stream_features.calls
+        ? 'get_stream_features_failed'
+        : toolUsage.add_queries.calls > 0
+        ? 'add_queries_called_no_accepted_queries'
+        : returnedFeatureMap.size === 0
+        ? 'no_features_returned'
+        : 'no_add_queries_calls';
+    const message =
+      `Generated 0 Significant Event KI queries: ` +
+      `observed=${observed}, max_steps=${resolvedMaxSteps}, ` +
+      `features_returned=${returnedFeatureMap.size}, ` +
+      `get_stream_features_calls=${toolUsage.get_stream_features.calls}, ` +
+      `get_stream_features_failures=${toolUsage.get_stream_features.failures}, ` +
+      `add_queries_calls=${toolUsage.add_queries.calls}, ` +
+      `add_queries_failures=${toolUsage.add_queries.failures}`;
+
+    if (observed === 'no_features_returned') {
+      logger.debug(message);
+    } else {
+      logger.warn(message);
+    }
+  } else {
+    logger.debug(`Generated ${validatedQueries.length} Significant Event KI queries`);
+  }
 
   return {
     queries: validatedQueries,
     tokensUsed: sumTokens({ added: response.tokens }),
     toolUsage,
+    reasoningDiagnostics: response.diagnostics,
     ...(collectQueryAttempts && queryAttempts ? { queryAttempts } : {}),
   };
 }

@@ -1,8 +1,7 @@
 {
-  "sha1": "bc87b067473ac65df746b61b86fa9233694637b9",
+  "sha1": "925fb4cba273c2049800335ea30a646e396ef634",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -3021,6 +3020,123 @@
       }
     },
     {
+      "id": "8a0f9c4b951e191-ea3ba7758654b28",
+      "title": "Rule artifacts API create: round-trips artifacts of registered types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 30,
+        "column": 86
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-63886d3245a8e7a",
+      "title": "Rule artifacts API create: an unregistered artifact type is stored as-is",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 44,
+        "column": 78
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-b1963f8aa4a55e9",
+      "title": "Rule artifacts API validation: rejects whitespace-only runbook content with INVALID_ARTIFACT_DATA",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 59,
+        "column": 81
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-a4b66a0f368e86b",
+      "title": "Rule artifacts API validation: rejects an undeclared field because registered schemas are closed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 76,
+        "column": 14
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-00195ad99bdf27b",
+      "title": "Rule artifacts API validation: rejects runbook content above the per-type limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 95,
+        "column": 10
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-0bcd1410580fbda",
+      "title": "Rule artifacts API validation: rejects a missing required field for a registered type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 109,
+        "column": 8
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-85ceec71ce5bb29",
+      "title": "Rule artifacts API validation: rejects duplicate artifact ids",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 126,
+        "column": 10
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-6f79e145da59d4a",
+      "title": "Rule artifacts API validation: an unregistered type is never rejected, even with large data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 163,
+        "column": 27
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-bbdfa5752bcd79d",
+      "title": "Rule artifacts API validation: a registered type accepts data at its declared limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 160,
+        "column": 84
+      }
+    },
+    {
       "id": "72d92ac0c91652a-e6b57e809ab5e8d",
       "title": "Run rule API run: returns 204 for an enabled rule",
       "expectedStatus": "passed",
@@ -3242,8 +3358,8 @@
       }
     },
     {
-      "id": "df929c73b65283e-244a6d2f7ec3675",
-      "title": "Update rule API status: should return 404 when the rule does not exist",
+      "id": "df929c73b65283e-237cc5c3238ebc5",
+      "title": "Update rule API update: should clear all tags when metadata.tags is set to null",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -3255,6 +3371,45 @@
       }
     },
     {
+      "id": "df929c73b65283e-c3c6582903bb58a",
+      "title": "Update rule API update: should replace tags when metadata.tags is a non-empty array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 329,
+        "column": 14
+      }
+    },
+    {
+      "id": "df929c73b65283e-3e0b7dfe3370995",
+      "title": "Update rule API validation: should reject metadata.tags as an empty array (null clears tags)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 354,
+        "column": 7
+      }
+    },
+    {
+      "id": "df929c73b65283e-244a6d2f7ec3675",
+      "title": "Update rule API status: should return 404 when the rule does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 378,
+        "column": 5
+      }
+    },
+    {
       "id": "df929c73b65283e-cecd6e9197dd0e5",
       "title": "Update rule API validation: should reject ids longer than ID_MAX_LENGTH with a 400",
       "expectedStatus": "passed",
@@ -3263,8 +3418,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 317,
-        "column": 29
+        "line": 385,
+        "column": 15
       }
     },
     {
@@ -3276,8 +3431,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 325,
-        "column": 32
+        "line": 395,
+        "column": 78
       }
     },
     {
@@ -3289,8 +3444,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 340,
-        "column": 7
+        "line": 408,
+        "column": 24
       }
     },
     {
@@ -3302,8 +3457,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 354,
-        "column": 14
+        "line": 421,
+        "column": 49
       }
     },
     {
@@ -3315,8 +3470,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 366,
-        "column": 69
+        "line": 434,
+        "column": 43
       }
     },
     {
@@ -3328,8 +3483,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 381,
-        "column": 27
+        "line": 448,
+        "column": 5
       }
     },
     {
@@ -3341,8 +3496,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 394,
-        "column": 24
+        "line": 457,
+        "column": 14
       }
     },
     {
@@ -3354,8 +3509,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 407,
-        "column": 49
+        "line": 470,
+        "column": 69
       }
     },
     {
@@ -3367,8 +3522,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 420,
-        "column": 43
+        "line": 485,
+        "column": 15
       }
     },
     {
@@ -3380,8 +3535,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 452,
-        "column": 49
+        "line": 515,
+        "column": 41
       }
     },
     {
@@ -3393,8 +3548,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 468,
-        "column": 9
+        "line": 534,
+        "column": 30
       }
     },
     {
@@ -3406,8 +3561,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 477,
-        "column": 21
+        "line": 541,
+        "column": 53
       }
     },
     {
@@ -3419,8 +3574,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 487,
-        "column": 4
+        "line": 555,
+        "column": 26
       }
     },
     {
@@ -3432,8 +3587,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 509,
-        "column": 15
+        "line": 574,
+        "column": 9
       }
     },
     {
@@ -3445,8 +3600,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 538,
-        "column": 4
+        "line": 603,
+        "column": 78
       }
     },
     {
@@ -3458,8 +3613,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 549,
-        "column": 9
+        "line": 617,
+        "column": 29
       }
     },
     {
@@ -3471,8 +3626,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 564,
-        "column": 52
+        "line": 630,
+        "column": 9
       }
     },
     {
@@ -3484,8 +3639,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 586,
-        "column": 19
+        "line": 650,
+        "column": 8
+      }
+    },
+    {
+      "id": "df929c73b65283e-0aca3362c154876",
+      "title": "Update rule API builder_type: should reject query change on a builder rule without explicit builder_type clear",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 669,
+        "column": 24
+      }
+    },
+    {
+      "id": "df929c73b65283e-f77a16dfe0afde9",
+      "title": "Update rule API builder_type: should allow query change on a builder rule when builder_type is explicitly cleared",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 686,
+        "column": 54
       }
     },
     {

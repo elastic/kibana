@@ -1,8 +1,7 @@
 {
-  "sha1": "22d4af09b89d76fb8ca3ee76ec038fb0a00c48dd",
+  "sha1": "bf9c1637f90800425b07bb0ea069b8d1690f4622",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -427,13 +426,12 @@
       "title": "index based random sampler controls with small data sets",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_random_sampler.spec.ts",
-        "line": 82,
-        "column": 32
+        "line": 86,
+        "column": 15
       }
     },
     {

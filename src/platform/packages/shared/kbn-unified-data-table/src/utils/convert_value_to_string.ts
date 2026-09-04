@@ -17,7 +17,7 @@ import type {
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
-import type { SourceDisplayMode } from '../types';
+import type { DocumentsDisplayMode } from '../types';
 import { SOURCE_COLUMN } from './columns';
 import { sourceDocumentToJsonString } from './build_document_tree';
 
@@ -36,7 +36,7 @@ export const convertValueToString = ({
   fieldFormats,
   columnsMeta,
   options,
-  sourceDisplayMode,
+  documentsDisplayMode,
   shouldShowFieldHandler,
   selectedColumns,
 }: {
@@ -50,7 +50,7 @@ export const convertValueToString = ({
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
     compatibleWithMarkdown?: boolean; // values as one-liner
   };
-  sourceDisplayMode?: SourceDisplayMode;
+  documentsDisplayMode?: DocumentsDisplayMode;
   shouldShowFieldHandler?: ShouldShowFieldInTableHandler;
   selectedColumns?: string[];
 }): ConvertedResult => {
@@ -62,7 +62,7 @@ export const convertValueToString = ({
     };
   }
 
-  if (sourceDisplayMode === 'json' && columnId === SOURCE_COLUMN && shouldShowFieldHandler) {
+  if (documentsDisplayMode === 'json' && columnId === SOURCE_COLUMN && shouldShowFieldHandler) {
     const multiline = !(options?.compatibleWithCSV || options?.compatibleWithMarkdown);
     return {
       formattedString: sourceDocumentToJsonString(

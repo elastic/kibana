@@ -5,22 +5,31 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { MessageRole } from '@kbn/inference-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { appendLimitToQuery } from '@kbn/esql-utils';
+import { appendLimitToQuery, getStartEndParams } from '@kbn/esql-utils';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   stripMarkdownFences,
 } from '@kbn/custom-content-common';
 
-const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the correct EUI palette for both light and dark themes at render time:
-- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: var(--cc-color-text); background: var(--cc-color-background); }
+const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the host application's real design tokens for both light and dark themes at render time. Use them for EVERY space, radius and font declaration and for every UI color — surfaces, text, borders, chrome and data marks. Never hardcode a pixel spacing value or a font stack, and never hardcode one of those colors, or the panel will look foreign next to the charts beside it. (Illustrations are the exception; see below.)
+- Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
 - Card/surface backgrounds: var(--cc-color-surface).
-- Accent colors: var(--cc-color-primary) (blue), var(--cc-color-accent) (teal), var(--cc-color-accent-2) (pink), var(--cc-color-warning) (yellow).
-- Danger/error: var(--cc-color-danger). Border color: var(--cc-color-border).`;
+- Accent colors for UI emphasis: var(--cc-color-primary) (blue), var(--cc-color-accent) (teal), var(--cc-color-accent-2) (pink), var(--cc-color-warning) (yellow).
+- Chart series colors: var(--cc-vis-0) through var(--cc-vis-9), in order. Use these for bars, lines, slices and any per-category color — they are the host's colorblind-safe visualization palette. Do NOT use the semantic accent colors above for data series; they are UI chrome and read heavy when used as data.
+- Danger/error: var(--cc-color-danger). Border color: var(--cc-color-border).
+- Spacing (margins, padding, gaps): var(--cc-space-xs) < var(--cc-space-s) < var(--cc-space-m) < var(--cc-space-l) < var(--cc-space-xl). Pick from this scale only — no arbitrary values like 10px or 1.25rem.
+- Corner rounding: var(--cc-radius) for cards and containers, var(--cc-radius-s) for small elements like badges, pills and tags. Use one of these two rather than a literal value.
+- Type scale: 0.75rem for secondary/label text, 0.875rem for body, 1.5rem or more for a headline KPI number. Use font-weight 600 for emphasis rather than a larger size.
+- This applies to SVG charts too. In a chart, \`fill\`, \`stroke\`, \`stop-color\` and every other color attribute must be a token — var(--cc-vis-N) for data marks, var(--cc-color-*) for chrome like axes and gridlines. For example \`<path fill="var(--cc-vis-0)">\`. Charts are where hardcoded palettes creep in; there is no exception for a chart.
+- Illustration is the one exception. The tokens above are the panel's UI vocabulary: surfaces, text, chrome, borders and data marks. They are not for pictures. When you are drawing a thing rather than charting it — an animal, a plant, a vehicle, a scene — pick colors that are plausible for the subject itself. Do NOT color an illustration from var(--cc-vis-N) or the accent tokens: those are a data palette, and an animal or object rendered in chart colors looks wrong. Literal colors are correct here, because a depicted thing looks the same in light and dark mode. The page background, all text, and any card behind the illustration still use tokens.
+- Never re-declare \`background\` or \`color\` on \`body\`. The panel frame already sets both from the active theme, and overriding them makes the panel render dark in light mode (or the reverse) for every user.
+- Motion durations: var(--cc-motion-fast), var(--cc-motion-normal), var(--cc-motion-slow), with var(--cc-ease) for easing. No arbitrary values like 1.6s or one-off cubic-bezier curves.`;
 
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
@@ -45,6 +54,39 @@ LIQUID SYNTAX:
 import { sanitizeCellValue } from './sanitize_cell_value';
 
 const SAMPLE_ROW_COUNT = 3;
+const SAMPLE_TIME_RANGE = { from: 'now-5y', to: 'now' };
+
+const getEsErrorReason = (error: unknown): string => {
+  const reason = (error as { body?: { error?: { reason?: string } } })?.body?.error?.reason;
+  return reason ?? (error instanceof Error ? error.message : String(error));
+};
+
+/**
+ * Turns a failed schema sample into the message reported back to the caller.
+ *
+ * Sampling is the only source of the real column names, so a template generated after it fails is
+ * built on invented columns no matter why it failed. Persisting that produces a panel that renders
+ * broken with no explanation, which is worse than a reported failure the caller can retry — so
+ * every cause fails, and the message distinguishes them so the agent does not act on the wrong one.
+ *
+ * ES|QL reports a missing index as `verification_exception` rather than a 404, so that type covers
+ * both bad syntax and unknown indices.
+ */
+const describeSamplingFailure = (error: unknown): string => {
+  const reason = getEsErrorReason(error);
+  const type =
+    error instanceof errors.ResponseError
+      ? (error.body as { error?: { type?: string } } | undefined)?.error?.type
+      : undefined;
+
+  if (type === 'verification_exception' || type === 'parsing_exception') {
+    return `ES|QL query is invalid: ${reason}. Build the query with the generate_esql tool instead of writing it directly, then retry.`;
+  }
+  if (type === 'security_exception') {
+    return `No access to the index targeted by this ES|QL query: ${reason}. Use an index the current user can read.`;
+  }
+  return `Could not sample the ES|QL query schema: ${reason}. This is likely transient — retry the operation.`;
+};
 
 function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]): string {
   const header = columns.map((c) => sanitizeCellValue(c.name)).join(' | ');
@@ -55,7 +97,12 @@ function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]):
 
 function colorSection(): string {
   return `VISUAL DESIGN — ${CSS_VARS_GUIDANCE}
-- Clean, modern design. Comfortable padding. Do NOT add a border around cards, containers, or the panel by default — separate elements using background-color contrast and spacing only. Only add a border (e.g. var(--cc-color-border)) if the user explicitly asks for one.`;
+- The panel sits on a dashboard beside Lens and Vega charts: same type scale, same spacing rhythm, same corner rounding.
+- Borders on cards and containers are fine, but every border is var(--cc-color-border). A border is never tinted with a series or accent color to color-code a card. To show which category a card belongs to, color the data itself — the value, a bar, a dot, a small swatch — and leave the card's edge neutral.
+- Do NOT put a border around the panel itself: the dashboard already frames it, and a second frame reads as doubled.
+- Separating cards with a soft shadow instead of a border is fine and often reads better. No custom accent colors outside the tokens above.
+- Default to no motion. Add an animation or transition only where it communicates something — a state change, a value updating — never as decoration, and never looping or infinite: the panel sits among still charts and one that never settles pulls the eye off the data.
+- When you do animate, animate \`opacity\` and \`transform\` only. Animating width, height, margin or top/left shifts the elements around it and costs far more to render.`;
 }
 
 function buildSystemPromptStatic(): string {
@@ -132,11 +179,16 @@ export const createCustomContentTemplateResolver = ({
     if (esqlQuery) {
       try {
         const sampledQuery = appendLimitToQuery(esqlQuery, SAMPLE_ROW_COUNT);
-        const result = await esClient.asCurrentUser.esql.query({ query: sampledQuery });
+        const params = getStartEndParams(sampledQuery, SAMPLE_TIME_RANGE);
+        const result = await esClient.asCurrentUser.esql.query({
+          query: sampledQuery,
+          ...(params.length ? { params } : {}),
+        });
         columns = (result.columns ?? []) as Array<{ name: string; type: string }>;
         values = (result.values ?? []) as unknown[][];
       } catch (err) {
-        logger.debug(`custom_content template resolver: ES|QL sample fetch failed — ${err}`);
+        logger.warn(`custom_content template resolver: ES|QL sample fetch failed — ${err}`);
+        throw new Error(describeSamplingFailure(err));
       }
     }
 
@@ -148,12 +200,16 @@ export const createCustomContentTemplateResolver = ({
       const promptPrefix = prompt ? `${prompt}\n\n` : '';
       let schemaSection: string;
       if (columns.length > 0) {
-        const schemaLines = columns.map((c) => `  - ${c.name} (${c.type})`).join('\n');
+        const schemaLines = columns
+          .map((c) => `  - ${sanitizeCellValue(c.name)} (${sanitizeCellValue(c.type)})`)
+          .join('\n');
         const sampleSection =
           values.length > 0
             ? `\n\nSample rows:\n${formatSampleTable(columns, values)}`
             : '\n\nNote: no rows available for the current time range.';
-        schemaSection = `Data schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${columns[0].name}"].value.`;
+        schemaSection = `Data schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${sanitizeCellValue(
+          columns[0].name
+        )}"].value.`;
       } else {
         schemaSection =
           'Note: schema unavailable. Generate a suitable template for this ES|QL query.';

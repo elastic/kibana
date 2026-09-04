@@ -169,6 +169,15 @@ export const signalEvidenceSchema = z.object({
     .describe(
       '"found" = query returned rows; "empty" = 0 rows returned (non-confirming); "error" = query failed to execute.'
     ),
+  time_range: z
+    .object({
+      from: z.iso.datetime({ offset: true }).describe('Inclusive window start bound to ?_tstart.'),
+      to: z.iso.datetime({ offset: true }).describe('Exclusive window end bound to ?_tend.'),
+    })
+    .optional()
+    .describe(
+      'Absolute time window the query was executed against. Required to interpret an esql_query that uses ?_tstart/?_tend placeholders.'
+    ),
 });
 
 export const SIGNAL_VERDICTS = [
@@ -201,7 +210,7 @@ const signalBaseSchema = z.object({
   verdict: z
     .enum(SIGNAL_VERDICTS)
     .describe(
-      'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion; not_checked = no query was available.'
+      'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation at a newly elevated rate; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion (empty or errored evidence, or matching rows whose pre/post rate shows no new elevation); not_checked = no query was available.'
     ),
   collected_at: z.iso
     .datetime({ offset: true })
@@ -255,11 +264,12 @@ const detectionSignalSchema = signalBaseSchema
         message: 'A refuting verdict requires found or empty query evidence.',
       });
     }
-    if (signal.verdict === 'inconclusive' && result !== 'empty' && result !== 'error') {
+    if (signal.verdict === 'inconclusive' && result === undefined) {
       context.addIssue({
         code: 'custom',
         path: ['verdict'],
-        message: 'An inconclusive verdict requires empty or error query evidence.',
+        message:
+          'An inconclusive verdict requires query evidence (found rate-flat rows, empty, or error).',
       });
     }
     if (
@@ -298,6 +308,8 @@ export const SEVERITY_CONTRACT_RULE = dedent`
     2. "60-high" when grounding confirms the rule's target operation fails or is blocked on the verified path, or is broadly degraded / intermittent / partially failing for a significant subset — and no "80-critical" criterion above holds. A single endpoint or lookup path that blocks only that operation (even for every caller who reaches it) stays here.
     3. "40-medium" when grounding shows only minor confirmed degradation with limited reach, or has not confirmed whether the affected operation fails versus only slows.
     4. "20-low" for recovery, noise, false alarm, or non-issue.
+
+    Known-ongoing exception: may cap an otherwise higher tier at "40-medium" only when current grounding confirms the exact mechanism documented as a known ongoing or transient background condition in memory, at its documented background rate. The cap does not apply to a different mechanism on the same component, nor when current rate evidence shows the documented mechanism newly elevated over that baseline — a clear rate step-up lifts the cap and the ordinary tier applies.
 
     Tie-break: when two adjacent tiers both match the same grounding evidence, choose the lower only when rows leave whether the operation still completes on the affected path genuinely unresolved.
   `;

@@ -1,8 +1,7 @@
 {
-  "sha1": "1249c0d8a98ee6d30603e1b8d1d584e62ae200d9",
+  "sha1": "18d8e0533604d6db7c148035f072be92e2566928",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -165,7 +164,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_read.spec.ts",
-        "line": 35,
+        "line": 38,
         "column": 7
       }
     },
@@ -179,7 +178,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_read.spec.ts",
-        "line": 51,
+        "line": 54,
         "column": 24
       }
     },

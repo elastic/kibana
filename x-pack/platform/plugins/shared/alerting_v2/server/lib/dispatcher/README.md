@@ -125,17 +125,19 @@ DispatcherService
 DispatcherPipeline
    |
    +--> WaitForResourcesStep
-   +--> FetchEpisodesStep          (keys-only scan)
+   +--> FetchEpisodesStep           (keys-only scan)
    +--> FetchSuppressionsStep
    +--> ApplySuppressionStep
-   +--> HydrateEpisodeDataStep     (lazy data fetch for survivors)
+   +--> HydrateEpisodeDataStep      (lazy data fetch for survivors)
    +--> FetchRulesStep
+   +--> ApplyMaintenanceWindowStep
    +--> FetchPoliciesStep
    +--> EvaluateMatchersStep
    +--> BuildGroupsStep
    +--> ApplyThrottlingStep
    +--> DispatchStep
    +--> StoreActionsStep
+   +--> StoreExecutionHistoryStep
 ```
 
 Unlike the rule executor, the dispatcher is not streaming. Each step receives one immutable-looking state snapshot and returns either:
@@ -176,43 +178,42 @@ An empty matcher is a catch-all.
 
 ## Important pipeline state
 
-The dispatcher carries state forward through `DispatcherPipelineState` in `types.ts`.
+The dispatcher carries state forward through `DispatcherPipelineState` in `types.ts`. Most fields are value objects (classes under `state/`) that name a pipeline concept and carry the behavior that belongs to it.
 
-| Field                         | Produced by              | Meaning                                                                                               |
-| ----------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| Field                         | Produced by              | Meaning                                                                                               |
-| ---                           | ---                      | ---                                                                                                   |
-| `input`                       | Pipeline                 | Window anchors (`eventWatermark`, `windowStart`, `windowEnd`) and execution context.                  |
-| `episodes`                    | `FetchEpisodesStep`      | Candidate `AlertEpisode` rows fetched within `[windowStart, windowEnd]`.                              |
-| `truncated`                   | `FetchEpisodesStep`      | `true` when the fetch hit `EPISODE_QUERY_LIMIT`; watermark advances to the last row, not `windowEnd`. |
-| `suppressions`                | `FetchSuppressionsStep`  | Suppression facts from `.alert-actions`.                                                              |
-| `dispatchable` / `suppressed` | `ApplySuppressionStep`   | Split of episodes that may continue vs those that must not notify.                                    |
-| `dispatchable` (with `data`)  | `HydrateEpisodeDataStep` | Replaces `dispatchable` with the same episodes enriched with their `data` payload.                    |
-| `rules`                       | `FetchRulesStep`         | Rule metadata keyed by rule id.                                                                       |
-| `policies`                    | `FetchPoliciesStep`      | Enabled action policies keyed by id.                                                                  |
-| `matched`                     | `EvaluateMatchersStep`   | Concrete `(episode, policy)` matches.                                                                 |
-| `groups`                      | `BuildGroupsStep`        | Action groups to consider for delivery.                                                               |
-| `dispatch` / `throttled`      | `ApplyThrottlingStep`    | Groups that may send now vs groups held back.                                                         |
-| `recordedEpisodes`            | `StoreActionsStep`       | Count of episodes that received an `.alert-actions` record this tick.                                 |
+| Field              | Type               | Produced by                                                                        | Meaning                                                                                                                                                        |
+| ------------------ | ------------------ | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input`            | plain object       | Pipeline                                                                            | Window anchors (`eventWatermark`, `windowStart`, `windowEnd`) and execution context.                                                                            |
+| `scan`             | `EpisodeScan`      | `FetchEpisodesStep`                                                                 | Candidate episodes fetched within `[windowStart, windowEnd]` plus the truncation flag; `truncationEdge()` is the watermark target on a truncated tick.          |
+| `suppressions`     | `SuppressionIndex` | `FetchSuppressionsStep`                                                             | Suppression facts from `.alert-actions`, indexed for per-episode reason lookup.                                                                                 |
+| `triage`           | `EpisodeTriage`    | `ApplySuppressionStep`; enriched by `HydrateEpisodeDataStep` (`mapDispatchable`), re-partitioned by `ApplyMaintenanceWindowStep` (`suppressDispatchableWhere`) | The evolving verdict: episodes that may still notify (`dispatchable`) vs those that must not (`suppressed`, with reasons).                                      |
+| `rules`            | `RuleCatalog`      | `FetchRulesStep`                                                                    | Rule metadata keyed by rule id; owns the orphaned-internal-episode guard.                                                                                       |
+| `policies`         | `PolicyCatalog`    | `FetchPoliciesStep`                                                                 | Enabled action policies keyed by id and grouped by space.                                                                                                       |
+| `matched`          | plain array        | `EvaluateMatchersStep`                                                              | Concrete `(episode, policy)` matches.                                                                                                                          |
+| `groups`           | plain array        | `BuildGroupsStep`                                                                   | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
+| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, plus the `unmatched` episodes that landed in no group.                                            |
+| `outcome`          | `DispatchOutcome`  | `DispatchStep`                                                                      | What happened: workflow execution ids per group and failed (group, destination) attempts; `deliveredDestinationsFor()` filters totally-failed groups.           |
+| `recordedEpisodes` | plain number       | `StoreActionsStep`                                                                  | Count of episodes that received an `.alert-actions` record this tick.                                                                                          |
 
 ## Execution steps
 
 Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
-| #   | Step                     | Responsibility                                                                                   |
-| --- | ------------------------ | ------------------------------------------------------------------------------------------------ |
-| 1   | `WaitForResourcesStep`   | Block the run until the dispatcher's required plugin resources are ready.                        |
-| 2   | `FetchEpisodesStep`      | Load episodes via a keys-only scan (no `_source`/`data` payload). Halts on empty result.         |
-| 3   | `FetchSuppressionsStep`  | Load alert-action facts needed for suppression decisions.                                        |
-| 4   | `ApplySuppressionStep`   | Mark each episode as dispatchable or suppressed, preserving reasons.                             |
-| 5   | `HydrateEpisodeDataStep` | Fetch `data` payloads for the surviving dispatchable episodes only, via `getEpisodeDataQueries`. |
-| 6   | `FetchRulesStep`         | Load rule metadata for the remaining dispatchable set.                                           |
-| 7   | `FetchPoliciesStep`      | Load enabled action policies for the space.                                                      |
-| 8   | `EvaluateMatchersStep`   | Evaluate each policy matcher against each episode context.                                       |
-| 9   | `BuildGroupsStep`        | Build `ActionGroup` objects based on policy grouping settings.                                   |
-| 10  | `ApplyThrottlingStep`    | Compare candidate groups with action history and split them into dispatch vs throttled.          |
-| 11  | `DispatchStep`           | Perform delivery side effects for eligible groups.                                               |
-| 12  | `StoreActionsStep`       | Persist the execution outcome to `.alert-actions`.                                               |
+| #   | Step                         | Responsibility                                                                                   |
+| --- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| 1   | `WaitForResourcesStep`       | Block the run until the dispatcher's required plugin resources are ready.                        |
+| 2   | `FetchEpisodesStep`          | Load episodes via a keys-only scan (no `_source`/`data` payload). Halts on empty result.         |
+| 3   | `FetchSuppressionsStep`      | Load alert-action facts needed for suppression decisions.                                        |
+| 4   | `ApplySuppressionStep`       | Mark each episode as dispatchable or suppressed, preserving reasons.                             |
+| 5   | `HydrateEpisodeDataStep`     | Fetch `data` payloads for the surviving dispatchable episodes only, via `getEpisodeDataQueries`. |
+| 6   | `FetchRulesStep`             | Load rule metadata for the remaining dispatchable set.                                           |
+| 7   | `ApplyMaintenanceWindowStep` | Suppress episodes whose timestamp falls within an active maintenance window in the same space.   |
+| 8   | `FetchPoliciesStep`          | Load enabled action policies for the space.                                                      |
+| 9   | `EvaluateMatchersStep`       | Evaluate each policy matcher against each episode context.                                       |
+| 10  | `BuildGroupsStep`            | Build `ActionGroup` objects based on policy grouping settings.                                   |
+| 11  | `ApplyThrottlingStep`        | Compare candidate groups with action history and split them into dispatch vs throttled.          |
+| 12  | `DispatchStep`               | Perform delivery side effects for eligible groups.                                               |
+| 13  | `StoreActionsStep`           | Persist the execution outcome to `.alert-actions`.                                               |
+| 14  | `StoreExecutionHistoryStep`  | Emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries. |
 
 ## Halt reasons
 
@@ -271,17 +272,14 @@ Do **not** add a step when:
 ### Step 1: Create the step class
 
 ```typescript
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import type {
   AlertEpisode,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
 } from '../types';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 @injectable()
 export class MyNewStep implements DispatcherStep {
@@ -290,12 +288,14 @@ export class MyNewStep implements DispatcherStep {
   constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    if (!state.episodes?.length) {
+    // Every state VO has an `empty()` null object, so steps never null-check state fields.
+    const { scan = EpisodeScan.empty() } = state;
+    if (scan.isEmpty()) {
       this.logger.debug({ message: `[${this.name}] No episodes available` });
       return { type: 'continue' };
     }
 
-    const myResult = await this.doSomething(state.episodes);
+    const myResult = await this.doSomething(scan.episodes);
 
     return {
       type: 'continue',
@@ -303,29 +303,30 @@ export class MyNewStep implements DispatcherStep {
     };
   }
 
-  private async doSomething(_episodes: AlertEpisode[]): Promise<string> {
+  private async doSomething(_episodes: readonly AlertEpisode[]): Promise<string> {
     return 'ok';
   }
 }
 ```
 
+The pipeline hands each step a logger already labelled with the step name and the tick's `task_id`, so keep messages static and put anything variable in labels instead.
+
 ### Step 2: Extend pipeline state if needed
 
-If the step produces new state, add a field to `DispatcherPipelineState` in `types.ts`:
+If the step produces new state, add a field to `DispatcherPipelineState` in `types.ts`. Prefer a value object (a class under `state/` with a private constructor and static factories, like `EpisodeScan` or `DispatchPlan`) when the new state groups related data or carries behavior; a plain field is fine for a single scalar or pass-through array:
 
 ```typescript
 export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
-  readonly episodes?: AlertEpisode[];
-  readonly suppressions?: AlertEpisodeSuppression[];
-  readonly dispatchable?: AlertEpisode[];
-  readonly suppressed?: Array<AlertEpisode & { reason: string }>;
-  readonly rules?: Map<RuleId, Rule>;
-  readonly policies?: Map<ActionPolicyId, ActionPolicy>;
+  readonly scan?: EpisodeScan;
+  readonly suppressions?: SuppressionIndex;
+  readonly triage?: EpisodeTriage;
+  readonly rules?: RuleCatalog;
+  readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
   readonly groups?: ActionGroup[];
-  readonly dispatch?: ActionGroup[];
-  readonly throttled?: ActionGroup[];
+  readonly plan?: DispatchPlan;
+  readonly outcome?: DispatchOutcome;
   readonly myNewMetadata?: string;
 }
 ```
@@ -348,18 +349,21 @@ Binding order is execution order.
 
 ```typescript
 import { MyNewStep } from './my_new_step';
-import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import {
+  createAlertEpisode,
+  createDispatcherPipelineState,
+  createStepLogger,
+} from '../fixtures/test_utils';
 
 describe('MyNewStep', () => {
   it('adds state when episodes exist', async () => {
-    const { loggerService } = createLoggerService();
-    const step = new MyNewStep(loggerService);
+    const step = new MyNewStep();
 
     const result = await step.execute(
       createDispatcherPipelineState({
         episodes: [createAlertEpisode({ rule_id: 'rule-1' })],
-      })
+      }),
+      createStepLogger()
     );
 
     expect(result.type).toBe('continue');
@@ -368,6 +372,8 @@ describe('MyNewStep', () => {
   });
 });
 ```
+
+To assert on log output, pass `createLoggerService().loggerService` instead and inspect its `mockLogger`.
 
 ## Adding a new destination type
 

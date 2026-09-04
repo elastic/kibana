@@ -51,9 +51,9 @@ describe('createActionPolicyAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns pagesSelect', () => {
+    it('returns workflow', () => {
       const definition = createActionPolicyAttachmentDefinition(createMockServices());
-      expect(definition.getIcon!()).toBe('pagesSelect');
+      expect(definition.getIcon!()).toBe('workflow');
     });
   });
 

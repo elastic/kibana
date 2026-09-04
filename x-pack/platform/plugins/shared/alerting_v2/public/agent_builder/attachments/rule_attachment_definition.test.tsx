@@ -84,11 +84,11 @@ describe('createRuleAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns bell', () => {
+    it('returns watchesApp', () => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
 
-      expect(definition.getIcon!()).toBe('bell');
+      expect(definition.getIcon!()).toBe('watchesApp');
     });
   });
 

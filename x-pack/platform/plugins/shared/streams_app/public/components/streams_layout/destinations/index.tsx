@@ -6,8 +6,29 @@
  */
 
 import React from 'react';
-import { TabPlaceholder } from '../tab_placeholder';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
+import { DestinationsTable } from './destinations_table';
+import { DestinationsTableProvider } from './state_management/use_destinations_table';
 
-export const DestinationsTab = () => (
-  <TabPlaceholder data-test-subj="streamsLayoutDestinationsPlaceholder" />
-);
+export const DestinationsTab = () => {
+  const {
+    core,
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
+
+  return (
+    <DestinationsTableProvider
+      core={core}
+      urlStateStorageContainer={urlStateStorageContainer}
+      streamsRepositoryClient={streamsRepositoryClient}
+    >
+      <DestinationsTable />
+    </DestinationsTableProvider>
+  );
+};

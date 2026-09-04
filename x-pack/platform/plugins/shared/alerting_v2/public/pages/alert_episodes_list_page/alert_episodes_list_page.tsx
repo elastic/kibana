@@ -15,6 +15,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
@@ -45,17 +46,19 @@ import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_al
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import {
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
+  EpisodeRuleTagsCell,
   EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
+import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -85,10 +88,18 @@ const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): 
   },
 });
 
+// Neither tag column is in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a sort on them
+// falls back to `@timestamp` and only looks like it works.
 const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
-    displayAsText: i18n.EPISODES_LIST_COLUMN_TAGS,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_ALERT_TAGS,
+    isSortable: false,
+  }),
+  rule_tags: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_RULE_TAGS,
+    isSortable: false,
   }),
   assignees: ({ column }) => ({
     ...column,
@@ -100,6 +111,20 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
 // only fits one or two rows, so we keep a floor that shows a usable number of rows and let the page
 // scroll instead.
 const MIN_TABLE_HEIGHT = 400;
+
+/**
+ * Two reasons this is a whole pixel value rather than the `1.6em` default:
+ *
+ * - The grid derives its row height from `parseInt` of the cell's computed line height, so the
+ *   default (19.199px at the grid font size) under-allocates every row by ~1.6px.
+ * - The row is one pixel taller than its cells (the row border is not part of the row height
+ *   calculation), so the last line of a cell always loses a pixel to `overflow: hidden`.
+ *
+ * 24px leaves a 20px badge two pixels of slack per side, which survives that lost pixel. Other
+ * data tables with badges in cells (asset inventory, entity analytics, cloud security) land on
+ * the same value.
+ */
+const TABLE_ROW_LINE_HEIGHT = '24px';
 
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
   height: 100%;
@@ -173,6 +198,28 @@ export const AlertEpisodesListPage = () => {
   } = useEpisodesTableConfig(services.storage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
+  const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
+  const closeRuleFlyout = useCallback(() => setRuleIdToView(null), []);
+  const {
+    flyout: composeFlyout,
+    confirmationModal,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
+
+  // The rule and the episode flyout occupy the same edge of the screen, so only one of them
+  // can be open at a time.
+  const openRuleFlyout = useCallback((ruleId: string) => {
+    setExpandedDoc(undefined);
+    setRuleIdToView(ruleId);
+  }, []);
+
+  const expandDoc = useCallback((doc?: DataTableRecord) => {
+    if (doc) {
+      setRuleIdToView(null);
+    }
+    setExpandedDoc(doc);
+  }, []);
 
   const {
     data: episodesData,
@@ -186,9 +233,8 @@ export const AlertEpisodesListPage = () => {
     timeRange,
   });
 
-  const { data: kpis } = useEpisodesKpisQuery({ services, filterState, timeRange });
-
-  const alertEpisodesCount = kpis?.alertsCount ?? 0;
+  const loadedEpisodesCount = episodesData?.length ?? 0;
+  const isEpisodeListCapped = loadedEpisodesCount >= ALERT_EPISODES_LIST_PAGE_SIZE;
 
   const sort: SortOrder[] = useMemo(
     () => [[sortState.sortField, sortState.sortDirection]],
@@ -257,9 +303,21 @@ export const AlertEpisodesListPage = () => {
             `}
           >
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
-                {i18n.EPISODES_LIST_ITEM_COUNT(alertEpisodesCount)}
-              </EuiText>
+              {isEpisodeListCapped ? (
+                <EuiToolTip
+                  content={i18n.EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP(
+                    ALERT_EPISODES_LIST_PAGE_SIZE
+                  )}
+                >
+                  <EuiText size="xs" data-test-subj="alertEpisodesItemCount" tabIndex={0}>
+                    {i18n.EPISODES_LIST_ITEM_COUNT_CAPPED(ALERT_EPISODES_LIST_PAGE_SIZE)}
+                  </EuiText>
+                </EuiToolTip>
+              ) : (
+                <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
+                  {i18n.EPISODES_LIST_ITEM_COUNT(loadedEpisodesCount)}
+                </EuiText>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
@@ -281,7 +339,13 @@ export const AlertEpisodesListPage = () => {
           </EuiFlexGroup>
         ),
       }),
-    [euiTheme.size.s, alertEpisodesCount, handleClearFilters, hasActiveFilters]
+    [
+      euiTheme.size.s,
+      handleClearFilters,
+      hasActiveFilters,
+      isEpisodeListCapped,
+      loadedEpisodesCount,
+    ]
   );
 
   const episodeActions: EpisodeAction[] = useMemo(
@@ -381,17 +445,27 @@ export const AlertEpisodesListPage = () => {
     [setVisibleColumns]
   );
 
+  const getRuleDetailsHref = useCallback(
+    (ruleId: string) => services.http.basePath.prepend(paths.ruleDetails(ruleId)),
+    [services.http.basePath]
+  );
+
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
+      rule_tags: (props) => (
+        <EpisodeRuleTagsCell {...props} rulesCache={rulesCache} isLoadingRules={isLoadingRules} />
+      ),
       'rule.id': (props) => (
         <EpisodeRuleCell
           {...props}
           rulesCache={rulesCache}
           isLoadingRules={isLoadingRules}
           rowHeight={rowHeight}
+          getRuleDetailsHref={getRuleDetailsHref}
+          onRuleNameClick={openRuleFlyout}
           sourceDataViewsByRule={sourceDataViewsByRule}
         />
       ),
@@ -402,7 +476,15 @@ export const AlertEpisodesListPage = () => {
         );
       },
     }),
-    [rulesCache, isLoadingRules, rowHeight, services.userProfile, sourceDataViewsByRule]
+    [
+      rulesCache,
+      isLoadingRules,
+      rowHeight,
+      getRuleDetailsHref,
+      openRuleFlyout,
+      services.userProfile,
+      sourceDataViewsByRule,
+    ]
   );
 
   const episodesMenu = useMemo(
@@ -501,6 +583,7 @@ export const AlertEpisodesListPage = () => {
                       cellPadding: 'l',
                       header: 'shade',
                     }}
+                    rowLineHeightOverride={TABLE_ROW_LINE_HEIGHT}
                     dataView={dataView}
                     columns={visibleColumns}
                     onSetColumns={onSetColumns}
@@ -528,7 +611,7 @@ export const AlertEpisodesListPage = () => {
                     enableComparisonMode={false}
                     services={services}
                     expandedDoc={expandedDoc}
-                    setExpandedDoc={setExpandedDoc}
+                    setExpandedDoc={expandDoc}
                     renderDocumentView={renderDocumentView}
                     renderCustomToolbar={renderCustomToolbar}
                   />
@@ -538,6 +621,23 @@ export const AlertEpisodesListPage = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {ruleIdToView ? (
+        <RuleSummaryFlyoutContainer
+          ruleId={ruleIdToView}
+          type="overlay"
+          onClose={closeRuleFlyout}
+          onEdit={(rule) => {
+            setRuleIdToView(null);
+            openEditFlyout(rule);
+          }}
+          onClone={(rule) => {
+            setRuleIdToView(null);
+            openCloneFlyout(rule);
+          }}
+        />
+      ) : null}
+      {composeFlyout}
+      {confirmationModal}
     </div>
   );
 };

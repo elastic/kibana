@@ -258,6 +258,9 @@ describe('test transform install with legacy schema', () => {
       ],
     ]);
 
+    // Single SO update: assetsToAdd and assetsToRemove are applied in one call so the old
+    // ref is removed and the new refs are added atomically. The previous code used two
+    // separate calls which wiped the new refs on same-version reinstalls (elastic/kibana#217503).
     expect(savedObjectsClient.update.mock.calls).toEqual([
       [
         'epm-packages',
@@ -269,10 +272,6 @@ describe('test transform install with legacy schema', () => {
               type: 'ingest_pipeline',
             },
             {
-              id: 'endpoint.metadata_current-default-0.15.0-dev.0',
-              type: 'transform',
-            },
-            {
               id: 'endpoint.metadata-default-0.16.0-dev.0',
               type: 'transform',
             },
@@ -286,29 +285,75 @@ describe('test transform install with legacy schema', () => {
           refresh: false,
         },
       ],
-      [
-        'epm-packages',
-        'endpoint',
+    ]);
+  });
+
+  test('same-version reinstall keeps transform refs in installed_es', async () => {
+    // Regression test for elastic/kibana#217503: force-reinstalling the same package version
+    // produced legacy transform ids byte-identical to the previous refs. The old two-call SO
+    // update pattern added the refs first, then removed the "previous" refs — wiping the freshly
+    // added ones and leaving installed_es with zero transform entries while ES still had the
+    // live transforms. On the next upgrade nothing was deleted and duplicates accumulated.
+    const version = '0.16.0-dev.0';
+    const transformId = `endpoint.metadata_current-default-${version}`;
+
+    const installation: Installation = {
+      installed_es: [
         {
-          installed_es: [
+          id: transformId,
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown as Installation;
+
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+      Promise.resolve(installation)
+    );
+    currentAttributes = { installed_es: installation.installed_es };
+
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version,
+          data_streams: [
             {
-              id: 'metrics-endpoint.policy-0.16.0-dev.0',
-              type: 'ingest_pipeline',
-            },
-            {
-              id: 'endpoint.metadata-default-0.16.0-dev.0',
-              type: 'transform',
-            },
-            {
-              id: 'endpoint.metadata_current-default-0.16.0-dev.0',
-              type: 'transform',
+              type: 'metrics',
+              dataset: 'endpoint.metadata_current',
+              title: 'Endpoint Metadata Current',
+              release: 'experimental',
+              package: 'endpoint',
+              ingest_pipeline: 'default',
+              elasticsearch: { 'index_template.mappings': { dynamic: false } },
+              path: 'metadata_current',
             },
           ],
         },
-        {
-          refresh: false,
-        },
-      ],
+        paths: [`endpoint-${version}/elasticsearch/transform/metadata_current/default.json`],
+        assetsMap: new Map([
+          [
+            `endpoint-${version}/elasticsearch/transform/metadata_current/default.json`,
+            Buffer.from('{"content": "data"}'),
+          ],
+        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `endpoint-${version}/elasticsearch/transform/metadata_current/default.json`,
+              Buffer.from('{"content": "data"}'),
+            ],
+          ])
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: installation.installed_es,
+    });
+
+    // The transform ref must still be present — not wiped by the reinstall.
+    expect(currentAttributes.installed_es).toEqual([
+      { id: transformId, type: ElasticsearchAssetType.transform },
     ]);
   });
 

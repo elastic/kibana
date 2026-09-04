@@ -109,16 +109,23 @@ const EDIT_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.editMo
 });
 
 const CLONE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.cloneTitleLabel', {
-  defaultMessage: 'Clone alert rule',
+  defaultMessage: 'Clone rule',
 });
 
-const CREATE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.createTitleLabel', {
-  defaultMessage: 'Create alert rule',
-});
+const CREATE_ESQL_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.createEsqlTitleLabel',
+  { defaultMessage: 'Create ES|QL rule' }
+);
 
-const EDIT_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.editTitleLabel', {
-  defaultMessage: 'Edit alert rule',
-});
+const CREATE_RULE_FALLBACK_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.createTitleLabel',
+  { defaultMessage: 'Create rule' }
+);
+
+const EDIT_RULE_FALLBACK_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.editTitleLabel',
+  { defaultMessage: 'Edit rule' }
+);
 
 const YAML_ONLY_TOOLTIP = i18n.translate(
   'xpack.alertingV2.composeDiscover.editMode.yamlOnlyTooltip',
@@ -132,6 +139,24 @@ const SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP = i18n.translate(
   'xpack.alertingV2.composeDiscover.editMode.sandboxOpenTooltip',
   { defaultMessage: 'Close the query editor to switch views' }
 );
+
+const BUILDER_VIEW_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.builderMode.builderView',
+  { defaultMessage: 'Builder view' }
+);
+
+const ESQL_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.builderMode.esqlView', {
+  defaultMessage: 'ES|QL view',
+});
+
+const BUILDER_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.builderMode.legend', {
+  defaultMessage: 'Edit mode selection',
+});
+
+const BUILDER_MODE_OPTIONS = [
+  { id: 'builder', label: BUILDER_VIEW_LABEL, iconType: 'table' },
+  { id: 'esql', label: ESQL_VIEW_LABEL, iconType: 'kqlFunction' },
+];
 
 const EDIT_MODE_OPTIONS = [
   { id: 'form', label: FORM_VIEW_LABEL, iconType: 'table' },
@@ -147,10 +172,32 @@ const getQuerySandboxTitle = (isBuilderMode: boolean) =>
         defaultMessage: 'Query sandbox: Edit queries',
       });
 
-const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
-  if (mode === 'clone') return CLONE_TITLE;
-  if (mode === 'edit') return EDIT_TITLE;
-  return CREATE_TITLE;
+const getFlyoutTitle = ({
+  mode,
+  builderType,
+  ruleName,
+}: {
+  mode: ComposeDiscoverMode;
+  builderType?: string;
+  ruleName?: string;
+}): string => {
+  if (mode === 'clone') {
+    return CLONE_TITLE;
+  }
+  if (mode === 'edit') {
+    const trimmedName = ruleName?.trim();
+    if (!trimmedName) {
+      return EDIT_RULE_FALLBACK_TITLE;
+    }
+    return i18n.translate('xpack.alertingV2.composeDiscover.flyout.editNamedTitleLabel', {
+      defaultMessage: 'Edit {ruleName}',
+      values: { ruleName: trimmedName },
+    });
+  }
+  if (builderType) {
+    return RULE_BUILDER_REGISTRY[builderType]?.createFlyoutTitle ?? CREATE_RULE_FALLBACK_TITLE;
+  }
+  return CREATE_ESQL_TITLE;
 };
 
 const getInitialRecoveryType = (
@@ -205,6 +252,8 @@ export interface ComposeDiscoverFlyoutProps {
   initialQuery?: string;
   /** ES|QL control variables from Discover — inlined into initialQuery when provided. */
   esqlVariables?: ESQLControlVariable[];
+  /** Callback to switch from builder mode to ES|QL mode. */
+  onSwitchToEsql?: () => void;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -224,6 +273,16 @@ const composeDiscoverYamlFlyoutBodyCss = css`
     display: flex;
     flex-direction: column;
   }
+`;
+
+const flyoutTitleCss = css`
+  min-width: 0;
+`;
+
+const flyoutTitleTextCss = css`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['status'] => {
@@ -263,6 +322,7 @@ export function ComposeDiscoverFlyout({
   initialBuilderState,
   initialQuery,
   esqlVariables,
+  onSwitchToEsql,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -274,8 +334,7 @@ export function ComposeDiscoverFlyout({
    */
   const baseServices = services;
 
-  const initialMapped =
-    (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
+  const initialMapped = rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
   const hasInitialCustomRecovery =
     initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
@@ -299,12 +358,15 @@ export function ComposeDiscoverFlyout({
   const isDiscoverQueryPopulated = Boolean(
     discoverComposedQuery && getBreachQuery(discoverComposedQuery).trim()
   );
+  const isRuleQueryPopulated = Boolean(
+    initialMapped?.query && getBreachQuery(initialMapped.query).trim()
+  );
 
   const [uiState, rawDispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType,
-    isQueryPrePopulated: isDiscoverQueryPopulated,
+    isQueryPrePopulated: isDiscoverQueryPopulated || (mode === 'create' && isRuleQueryPopulated),
     forceYamlMode,
   });
 
@@ -475,6 +537,7 @@ export function ComposeDiscoverFlyout({
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
   const watchedTimeField = useWatch({ control: methods.control, name: 'timeField' });
+  const watchedRuleName = useWatch({ control: methods.control, name: 'metadata.name' });
   /*
    * One-way RHF -> sandbox draft push. `sandboxTimeField` must stay out of the deps:
    * with it, the effect re-fires on its own output and reverts the user's in-progress
@@ -745,7 +808,7 @@ export function ComposeDiscoverFlyout({
   const isEditing = mode === 'edit';
   /** Create, edit, and clone share the unified ↔ split-tab sandbox toggle. */
   const supportsUnifiedEditorToggle = isCreate || isEditing;
-  const title = getFlyoutTitle(mode);
+  const title = getFlyoutTitle({ mode, builderType, ruleName: watchedRuleName });
 
   const { steps } = getSteps(isAlert, builderType);
   const currentStep = steps[uiState.step];
@@ -1189,11 +1252,15 @@ export function ComposeDiscoverFlyout({
             historyKey={historyKey}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
-            size={480}
+            size={540}
+            minWidth={480}
+            resizable
           >
             <EuiFlyoutHeader hasBorder>
-              <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-                <h2>{title}</h2>
+              <EuiTitle size="s" id={FLYOUT_TITLE_ID} css={flyoutTitleCss}>
+                <h2 title={title} css={flyoutTitleTextCss}>
+                  {title}
+                </h2>
               </EuiTitle>
 
               <EuiFlexGroup
@@ -1217,6 +1284,21 @@ export function ComposeDiscoverFlyout({
                           status: getStepStatus(uiState.step, i),
                         })
                       )}
+                    />
+                  </EuiFlexItem>
+                )}
+                {isBuilderMode && isEditing && onSwitchToEsql && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonGroup
+                      legend={BUILDER_MODE_LEGEND}
+                      options={BUILDER_MODE_OPTIONS}
+                      idSelected="builder"
+                      onChange={(id) => {
+                        if (id === 'esql') onSwitchToEsql();
+                      }}
+                      isIconOnly
+                      buttonSize="compressed"
+                      data-test-subj="composeDiscoverSwitchToEsql"
                     />
                   </EuiFlexItem>
                 )}

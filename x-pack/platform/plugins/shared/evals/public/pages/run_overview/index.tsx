@@ -147,7 +147,7 @@ export const RunOverviewPage: React.FC = () => {
     return (
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiEmptyPrompt
-          iconType="iInCircle"
+          iconType="info"
           title={<h2>{i18n.EMPTY_TITLE}</h2>}
           body={<p>{i18n.EMPTY_BODY}</p>}
           actions={

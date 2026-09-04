@@ -1,5 +1,8 @@
 {
-  "sha1": "7fb379f736a0c45f3ff7120b9cb520d2262459ea",
+  "sha1": "498a21e193974237e8b240f03be8b69205afd30e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "98effaf1263dcb1-f461af45e6d8b43",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_completion.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 28,
+        "column": 47
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 28,
+        "column": 47
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 38,
+        "column": 28
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 59,
+        "column": 14
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 74,
-        "column": 12
+        "line": 67,
+        "column": 13
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 88,
+        "column": 23
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 123,
-        "column": 12
+        "line": 112,
+        "column": 18
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 146,
-        "column": 12
+        "line": 132,
+        "column": 22
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 206,
-        "column": 12
+        "line": 154,
+        "column": 7
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 226,
-        "column": 12
+        "line": 176,
+        "column": 28
       }
     },
     {
@@ -151,8 +154,50 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_permissions.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 30,
+        "column": 16
+      }
+    },
+    {
+      "id": "60f7b08f83daab5-5ef681c6f88830b",
+      "title": "search session - searches integration (stateful only) keeps an unsaved session short-lived and extends it once the session is saved and extended",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_searches_integration.spec.ts",
+        "line": 43,
+        "column": 13
+      }
+    },
+    {
+      "id": "60f7b08f83daab5-0951fe094ebe1af",
+      "title": "search session - searches integration (stateful only) deletes the async searches it grouped when the session is deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_searches_integration.spec.ts",
+        "line": 80,
+        "column": 15
+      }
+    },
+    {
+      "id": "60f7b08f83daab5-88b0f46e64b286c",
+      "title": "search session - searches integration (stateful only) records a search submitted after the session's existing searches have already completed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_searches_integration.spec.ts",
+        "line": 118,
+        "column": 20
       }
     },
     {
@@ -165,8 +210,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_security.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 38,
+        "column": 42
       }
     },
     {
@@ -179,8 +224,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_security.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 57,
+        "column": 18
       }
     },
     {
@@ -193,8 +238,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_security.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 74,
+        "column": 25
       }
     },
     {
@@ -208,7 +253,7 @@
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_security.spec.ts",
         "line": 92,
-        "column": 12
+        "column": 82
       }
     },
     {
@@ -221,8 +266,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_security.spec.ts",
-        "line": 112,
-        "column": 12
+        "line": 110,
+        "column": 7
       }
     },
     {
@@ -235,8 +280,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_spaces.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 60
       }
     }
   ]

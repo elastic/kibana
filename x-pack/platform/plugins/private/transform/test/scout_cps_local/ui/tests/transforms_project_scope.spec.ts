@@ -27,7 +27,7 @@ const TRANSFORM_IDS = [
   LINKED_ONLY_TRANSFORM_ID,
   ...BULK_EDITED_TRANSFORM_IDS,
 ];
-const ORIGIN_PROJECT_ROUTING = `_id:${testData.ORIGIN_PROJECT_ID}`;
+
 const LINKED_PROJECT_ROUTING = `_id:${testData.LINKED_PROJECT_ID}`;
 
 const DATA_VIEW_API_PATH = 'api/data_views/data_view';
@@ -160,7 +160,7 @@ test.describe(
         await transform.gotoCreate(testData.DATA_VIEW_ID);
         await transform.selectCreateProjectScope(testData.ORIGIN_PROJECT_ID, testData.PROJECT_IDS);
         await expect(page.testSubj.locator('transformProjectScopePicker')).toHaveText(
-          '1/2 projects'
+          'This project'
         );
         await transform.useFullData();
         await transform.configureBasicPivot();
@@ -170,7 +170,7 @@ test.describe(
       await test.step('verify project routing was saved', async () => {
         await expect
           .poll(() => getProjectRouting(apiServices.transform, CREATED_TRANSFORM_ID))
-          .toBe(ORIGIN_PROJECT_ROUTING);
+          .toBe(PROJECT_ROUTING.ORIGIN);
       });
 
       await test.step('verify the project scope column and expanded details', async () => {
@@ -186,7 +186,7 @@ test.describe(
           'Project routing'
         );
         await expect(page.testSubj.locator('transformExpandedRowTabbedContent')).toContainText(
-          ORIGIN_PROJECT_ROUTING
+          PROJECT_ROUTING.ORIGIN
         );
       });
     });
@@ -240,7 +240,7 @@ test.describe(
 
         await transform.selectEditProjectScope(testData.ORIGIN_PROJECT_ID, testData.PROJECT_IDS);
         await expect(page.testSubj.locator('transformEditProjectScopeButton')).toHaveText(
-          '1/2 projects'
+          'This project'
         );
         await transform.updateTransform();
       });
@@ -248,7 +248,7 @@ test.describe(
       await test.step('verify the updated project routing', async () => {
         await expect
           .poll(() => getProjectRouting(apiServices.transform, EDITED_TRANSFORM_ID))
-          .toBe(ORIGIN_PROJECT_ROUTING);
+          .toBe(PROJECT_ROUTING.ORIGIN);
       });
     });
 
@@ -288,7 +288,11 @@ test.describe(
 
         await transform.confirmBulkProjectScopeUpdate();
 
+        await expect(page.testSubj.locator('transformBulkActionsMenuButton')).toBeHidden();
         for (const transformId of BULK_EDITED_TRANSFORM_IDS) {
+          await expect(
+            transform.getTransformRow(transformId).getByRole('checkbox')
+          ).not.toBeChecked();
           await expect(
             transform.getTransformRow(transformId).getByTestId('transformListProjectScopeButton')
           ).toHaveText('This project');
@@ -304,7 +308,7 @@ test.describe(
               )
             )
           )
-          .toStrictEqual(BULK_EDITED_TRANSFORM_IDS.map(() => ORIGIN_PROJECT_ROUTING));
+          .toStrictEqual(BULK_EDITED_TRANSFORM_IDS.map(() => PROJECT_ROUTING.ORIGIN));
       });
     });
   }

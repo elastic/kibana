@@ -63,7 +63,7 @@ describe('TagsField', () => {
     await user.paste(`${sampleTags[0]}`);
     await user.keyboard('{enter}');
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith([sampleTags[0]]));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith([sampleTags[0]]));
     expect(screen.queryByTestId('template-field-confirm-tags')).not.toBeInTheDocument();
     expect(screen.queryByTestId('template-field-cancel-tags')).not.toBeInTheDocument();
   });
@@ -75,7 +75,7 @@ describe('TagsField', () => {
     await user.paste('dude      ');
     await user.keyboard('{enter}');
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(['dude']));
   });
 
   it('adds a new tag to the tags already on the case', async () => {
@@ -85,7 +85,7 @@ describe('TagsField', () => {
     await user.paste('new');
     await user.keyboard('{enter}');
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith(['a', 'new']));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(['a', 'new']));
   });
 
   it('shows error when tag is empty', async () => {

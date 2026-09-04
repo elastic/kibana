@@ -8,7 +8,7 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: GetWatch
-      description: Get a single Security Watch by id
+      description: Get a single Security Watch catalog grouping by id. Watches store no settings.
       summary: Get watch
       tags:
         - PND API
@@ -29,10 +29,5 @@ paths:
                 properties:
                   watch:
                     $ref: '../components/watch.schema.yaml#/components/schemas/Watch'
-                  settings:
-                    $ref: '../components/watch_settings.schema.yaml#/components/schemas/WatchSettings'
-                    description: >-
-                      Omitted when the watch has no settings to expose, which is the case for live
-                      projected watches until settings are applied to the managed workflow definition.
                 required:
                   - watch

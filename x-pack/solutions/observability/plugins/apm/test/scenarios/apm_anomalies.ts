@@ -31,13 +31,19 @@
  *      a dedicated service trips each detector (latency, throughput, failure
  *      rate) in both environments, critical in prod and major in dev.
  *
- *   4. All three detectors on ONE service, in BOTH environments, overlapping in
- *      time: `synth-anomaly-all-metrics` (production + development) trips latency,
- *      failure rate and throughput, each in its own sub-window at a DIFFERENT time
- *      but with intentional OVERLAPS and different intensities (failure rate ramps
- *      from major to critical). The two environments use shifted windows, so some
- *      anomalous times line up across environments and others do not. Some buckets
- *      are anomalous on two or three detectors at once.
+ *   4. All three spike detectors on ONE service, in BOTH environments, overlapping
+ *      in time: `synth-anomaly-all-metrics` (production + development) trips
+ *      latency, failure rate and throughput, each in its own sub-window at a
+ *      DIFFERENT time but with intentional OVERLAPS and different intensities
+ *      (failure rate ramps from major to critical). The two environments use
+ *      shifted windows, so some anomalous times line up across environments and
+ *      others do not. Some buckets are anomalous on two or three detectors at once.
+ *
+ *   5. Low transaction count (drop to zero): `synth-anomaly-drop` emits a flat
+ *      baseline, then emits NO events in the per-environment anomaly window so
+ *      `low_count` sees empty buckets. Production goes silent in the earlier half
+ *      then resumes; development goes silent in the later half through the end of
+ *      the range (the classic "service stopped sending data" case).
  *
  * ANOMALY WINDOWS
  * ---------------
@@ -49,16 +55,19 @@
  *
  * APM ML DETECTORS (what each service is engineered to trip)
  * ---------------------------------------------------------
- * APM anomaly jobs run three detectors, all `by "transaction.type"` and
+ * APM anomaly jobs run four detectors, all `by "transaction.type"` and
  * `partition_field_name="service.name"` (indices match
  * common/anomaly_detection/apm_ml_detectors.ts):
  *
  *   - index 0  high_mean(transaction_latency)       -> latency, HIGH only
  *   - index 1  mean(transaction_throughput)         -> throughput, EITHER way
  *   - index 2  high_mean(failed_transaction_rate)   -> failure rate, HIGH only
+ *   - index 3  low_count                            -> document count, LOW only
+ *                                                    (empty buckets count as 0)
  *
  * Because latency and failure rate use `high_mean`, their anomalies must be
  * UPWARD deviations; throughput uses `mean`, so a large UP spike works too.
+ * `low_count` is the opposite: omit events entirely so the bucket is empty.
  * Detector -> service/environment mapping engineered below (critical in prod,
  * major in dev, at different times):
  *   - detector 2 (failure rate) + detector 0 (latency, minor)
@@ -67,8 +76,11 @@
  *       -> synth-anomaly-environments / production (critical) + development (major)
  *   - detector 1 (throughput)
  *       -> synth-anomaly-throughput / production (critical) + development (major)
- *   - detectors 0 + 1 + 2 (all three, overlapping in time)
+ *   - detectors 0 + 1 + 2 (all three spike detectors, overlapping in time)
  *       -> synth-anomaly-all-metrics / production + development (shifted windows)
+ *   - detector 3 (low count)
+ *       -> synth-anomaly-drop / production (earlier half silent) + development
+ *          (later half silent through end)
  *
  * DATA SHAPE
  * ----------
@@ -278,6 +290,23 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             return Math.random() < failProbability ? tx.failure() : tx.success();
           });
 
+      // Low-count detector (index 3, low_count). Baseline traffic, then no
+      // events in the anomaly window so the ML bucket is empty (count = 0).
+      const dropEvents = (instance: Instance, isDropped: AnomalyPredicate) =>
+        range
+          .interval('1m')
+          .rate(baselineRate)
+          .generator((timestamp) => {
+            if (isDropped(timestamp)) {
+              return [];
+            }
+            return instance
+              .transaction({ transactionName: TRANSACTION_NAME })
+              .timestamp(timestamp)
+              .duration(BASELINE_DURATION)
+              .success();
+          });
+
       // Throughput detector (index 1, mean). The anomaly window multiplies the
       // number of transactions per bucket by `anomalyBurst`.
       const throughputEvents = (
@@ -413,6 +442,15 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         ),
       ];
 
+      // 5) Drop-to-zero across environments at different times. Production
+      //    emits no events in the earlier half of the span (then resumes);
+      //    development goes silent from the later half through the end of
+      //    the range.
+      const dropEventsByEnv = [
+        dropEvents(instanceFor('synth-anomaly-drop', PRODUCTION), isProductionAnomaly),
+        dropEvents(instanceFor('synth-anomaly-drop', DEVELOPMENT), isDevelopmentAnomaly),
+      ];
+
       // In single-environment mode, keep only the production stream of each
       // [production, development] pair (production is always the first entry).
       const selectEnvironments = <T>(streams: T[]): T[] =>
@@ -424,6 +462,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         ...selectEnvironments(sideBySideEvents),
         ...selectEnvironments(throughputEventsByEnv),
         ...selectEnvironments(allMetricsEventsByEnv),
+        ...selectEnvironments(dropEventsByEnv),
       ]);
     },
   };

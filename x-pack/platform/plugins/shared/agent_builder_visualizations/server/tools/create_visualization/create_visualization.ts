@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { getDateRange } from '@kbn/timerange';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -19,6 +20,7 @@ import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/to
 import {
   buildLensConfig,
   buildVegaConfig,
+  selectDefaultTimeRange,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
 
@@ -46,10 +48,7 @@ const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): str
 
 const createVisualizationSchema = z
   .object({
-    query: z
-      .string()
-      .max(2048)
-      .describe('A natural language query describing the desired visualization.'),
+    query: z.string().max(2048).describe('A natural language query describing the visualization.'),
     index: z
       .string()
       .max(1024)
@@ -68,7 +67,7 @@ const createVisualizationSchema = z
       .enum(['lens', 'vega'])
       .optional()
       .describe(
-        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Omit this field when updating an existing attachment; edits keep the existing renderer.'
+        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Omit this field when updating an existing attachment; edits keep the existing renderer.'
       ),
     chartType: z
       .nativeEnum(SupportedChartType)
@@ -82,6 +81,36 @@ const createVisualizationSchema = z
       .optional()
       .describe(
         '(optional) An ES|QL query. If not provided, the tool will automatically generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
+      ),
+    time_range: z
+      .object({
+        from: z
+          .string()
+          .max(256)
+          .describe(
+            'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-7d") or an ISO 8601 string for an absolute start.'
+          ),
+        to: z
+          .string()
+          .max(256)
+          .describe(
+            'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
+          ),
+      })
+      .check((ctx) => {
+        try {
+          getDateRange(ctx.value);
+        } catch (err) {
+          ctx.issues.push({
+            code: 'custom',
+            message: err instanceof Error ? err.message : 'Invalid time_range',
+            input: ctx.value,
+          });
+        }
+      })
+      .optional()
+      .describe(
+        '(optional) Only set this when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.'
       ),
   })
   .check((ctx) => {
@@ -120,6 +149,8 @@ You choose how to render the request via the "renderer" parameter:
 
 When updating via "attachment_id", omit "renderer" because the existing visualization determines it. "chartType" is optional on updates.
 
+Only pass "time_range" when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise: create applies a data-aware default, and edits keep the existing range.
+
 This tool will:
 1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)
 2. Generate an ES|QL query if not provided
@@ -144,6 +175,7 @@ Ground first: make sure the target index exists and every field you reference is
         chartType,
         esql,
         attachment_id: attachmentId,
+        time_range: requestedTimeRange,
       },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
@@ -206,27 +238,40 @@ Ground first: make sure the target index exists and every field you reference is
           const existingConfig = parsedExistingConfig
             ? JSON.stringify(parsedExistingConfig)
             : undefined;
-          const { selectedChartType, validatedConfig, esqlQuery, timeRange } =
-            await buildLensConfig({
-              nlQuery,
-              index,
-              chartType,
-              esql,
-              existingConfig,
-              parsedExistingConfig,
-              modelProvider,
-              logger,
-              events,
-              esClient,
-            });
+          const { selectedChartType, validatedConfig, esqlQuery } = await buildLensConfig({
+            nlQuery,
+            index,
+            chartType,
+            esql,
+            existingConfig,
+            parsedExistingConfig,
+            modelProvider,
+            logger,
+            events,
+            esClient,
+          });
           visualizationData = {
             renderer: 'lens',
             query: nlQuery,
             visualization: validatedConfig,
             chart_type: selectedChartType,
             esql: esqlQuery,
-            ...(timeRange && { time_range: timeRange }),
           };
+        }
+
+        if (requestedTimeRange) {
+          visualizationData.time_range = requestedTimeRange;
+        } else if (existingData?.time_range) {
+          visualizationData.time_range = existingData.time_range;
+        } else if (!existingData) {
+          const timeRange = await selectDefaultTimeRange({
+            esqlQueries: visualizationData.esql ? [visualizationData.esql] : [],
+            esClient,
+            logger,
+          });
+          if (timeRange) {
+            visualizationData.time_range = { from: timeRange.from, to: timeRange.to };
+          }
         }
 
         // Step 4: Persist as an attachment so the agent can render it inline

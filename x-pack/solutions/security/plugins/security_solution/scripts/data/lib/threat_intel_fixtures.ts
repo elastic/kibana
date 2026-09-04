@@ -13,14 +13,15 @@ import { getStatusCode } from './type_guards';
 
 /**
  * Mustard TI hub index names (PR 275243). Keep aligned with
- * `common/threat_intelligence/hub/constants.ts` on the mustard branch.
- * This generator branch cannot import those constants.
+ * `common/threat_intel/constants.ts` on the supply branch.
+ * This generator cannot import those constants from here.
  */
 export const THREAT_INTEL_SOURCES_INDEX = '.kibana-threat-intel-sources';
-export const THREAT_INTEL_SUBSCRIPTIONS_INDEX = '.kibana-threat-intel-subscriptions';
-export const THREAT_REPORTS_DATA_STREAM = '.kibana-threat-reports';
+export const THREAT_REPORTS_INDEX = '.kibana-threat-reports';
 
-export const THREAT_INTEL_SUBSCRIPTION_ID = 'threat-intel-digest';
+/** Leftover mustard digest index. `--clean` still deletes docs if the index exists. */
+const THREAT_INTEL_SUBSCRIPTIONS_INDEX = '.kibana-threat-intel-subscriptions';
+const THREAT_INTEL_SUBSCRIPTION_ID = 'threat-intel-digest';
 
 /** Previous TI fixture ids (pre-rename). Still deleted by --clean. */
 const LEGACY_THREAT_INTEL_SOURCE_IDS = [
@@ -677,7 +678,6 @@ export interface HistoricThreatReportDoc {
     ttps: { techniques: string[] };
     iocs: Array<{ type: string; value: string; defanged?: string }>;
     relevance: number;
-    detection_actionability: 'rule_candidate';
   };
   geography?: { regions: string[] };
   lineage: {
@@ -941,7 +941,6 @@ export const buildHistoricThreatReportDoc = ({
         ...(ioc.defanged ? { defanged: ioc.defanged } : {}),
       })),
       relevance: 0.72,
-      detection_actionability: 'rule_candidate',
     };
     doc.geography = { regions: [region] };
     doc.lineage.extracted_at = item.reportTimestamp;
@@ -1049,7 +1048,7 @@ export const cleanThreatIntelFixtures = async ({
   await deleteByIds(THREAT_INTEL_SUBSCRIPTIONS_INDEX, subscriptionIds);
 
   for (const sourceId of sourceIds) {
-    await deleteByQuery(THREAT_REPORTS_DATA_STREAM, {
+    await deleteByQuery(THREAT_REPORTS_INDEX, {
       term: { 'source.adapter_id': `rss:${sourceId}` },
     });
   }
@@ -1111,10 +1110,7 @@ const seedHistoricThreatReports = async ({
   if (docs.length === 0) return 0;
 
   try {
-    const bulkBody = docs.flatMap((doc) => [
-      { create: { _index: THREAT_REPORTS_DATA_STREAM } },
-      doc,
-    ]);
+    const bulkBody = docs.flatMap((doc) => [{ create: { _index: THREAT_REPORTS_INDEX } }, doc]);
     const bulkResponse = await esClient.bulk({ refresh: true, body: bulkBody });
     if (bulkResponse.errors) {
       const firstError = bulkResponse.items.find((item) => item.create?.error)?.create?.error;
@@ -1128,15 +1124,15 @@ const seedHistoricThreatReports = async ({
     const status = getStatusCode(e);
     if (status === 404) {
       throw new Error(
-        `Cannot seed historic threat reports: data stream ${THREAT_REPORTS_DATA_STREAM} does not exist. ` +
-          `Start mustard Kibana against this Elasticsearch first so the Hub index template is installed.`
+        `Cannot seed historic threat reports: index ${THREAT_REPORTS_INDEX} does not exist. ` +
+          `Start Kibana against this Elasticsearch first so the threat intel index templates are installed.`
       );
     }
     throw e;
   }
 
   log.info(
-    `Seeded ${docs.length} historic threat report(s) into ${THREAT_REPORTS_DATA_STREAM} ` +
+    `Seeded ${docs.length} historic threat report(s) into ${THREAT_REPORTS_INDEX} ` +
       `across [${new Date(historicStartMs).toISOString()}, ${new Date(
         historicEndMs
       ).toISOString()}] ` +
@@ -1177,15 +1173,12 @@ export const seedThreatIntelForPacks = async ({
   log.info(`Seeding threat-intel RSS fixtures for packs: ${resolved.join(', ')}`);
 
   await ensurePlainIndex({ esClient, index: THREAT_INTEL_SOURCES_INDEX, log });
-  await ensurePlainIndex({ esClient, index: THREAT_INTEL_SUBSCRIPTIONS_INDEX, log });
   await cleanThreatIntelFixtures({ esClient, log, packIds: resolved });
 
   const sourceTimestamp = new Date(endMs).toISOString();
-  const allTags = new Set<string>(['threat-intel']);
   let reportItemCount = 0;
 
   for (const scenario of scenarios) {
-    for (const tag of scenario.tags) allTags.add(tag);
     // RSS stays current-only so workflow ingest does not replay the historic archive.
     const reportItems = buildPackRssCurrentReportItems({ endMs });
     reportItemCount += reportItems.length;
@@ -1207,24 +1200,6 @@ export const seedThreatIntelForPacks = async ({
     });
   }
 
-  await esClient.index({
-    index: THREAT_INTEL_SUBSCRIPTIONS_INDEX,
-    id: THREAT_INTEL_SUBSCRIPTION_ID,
-    refresh: true,
-    document: {
-      owner: 'threat-intel',
-      tags: [...allTags],
-      severity_threshold: 'medium',
-      schedule_rrule: 'FREQ=DAILY;BYHOUR=9;BYMINUTE=0',
-      delivery: { type: 'email', target: 'security-ops@example.com' },
-      human_summary: 'Daily digest of medium+ severity reports tagged for Technology Watch packs.',
-      template_id: 'threat-intel',
-      space_id: spaceId,
-      created_at: sourceTimestamp,
-      updated_at: sourceTimestamp,
-    },
-  });
-
   let historicReportCount = 0;
   if (historicReportsPerPack !== undefined) {
     if (!Number.isFinite(historicReportsPerPack) || historicReportsPerPack < 1) {
@@ -1245,7 +1220,7 @@ export const seedThreatIntelForPacks = async ({
 
   log.info(
     `Seeded ${scenarios.length} threat-intel RSS source(s) (${reportItemCount} current RSS item(s) ` +
-      `for workflow ingest) and 1 digest subscription${
+      `for workflow ingest)${
         historicReportCount > 0 ? `, plus ${historicReportCount} historic Hub report(s)` : ''
       }. Environment telemetry is the Technology Watch pack indices (not logs-aws.local). ` +
       `On mustard Kibana: run threat-intel.source_ingestion to fill the live ${

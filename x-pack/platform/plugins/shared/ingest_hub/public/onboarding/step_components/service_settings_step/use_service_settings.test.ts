@@ -42,10 +42,12 @@ function makeEntry(
     id,
     name: id,
     category: 'compute',
-    signalType: 'logs',
+    signalTypes: ['logs'],
+    dataStreams: [],
     deploymentMethods: [],
     showInUI: true,
     defaultEnabled: true,
+    defaultEnabledInputs: [],
     packageName: 'aws',
     ...overrides,
   } as AwsServiceMatrixEntry;
@@ -59,10 +61,20 @@ function makeTextVarDef(name: string): RegistryVarsEntry {
 
 describe('useServiceSettings — incompleteInstances', () => {
   const svcWithRequired = makeEntry('svc_a', {
-    signalType: 'logs',
+    signalTypes: ['logs'],
+    dataStreams: ['svc_a'],
     inputs: ['aws-s3'],
+    defaultEnabledInputs: ['aws-s3'],
     requiredConfig: ['bucket_arn'],
     varDefsByInput: { 'aws-s3': { bucket_arn: makeTextVarDef('bucket_arn') } },
+    varDefsByDataStream: {
+      svc_a: {
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        varDefsByInput: { 'aws-s3': { bucket_arn: makeTextVarDef('bucket_arn') } },
+        requiredConfig: ['bucket_arn'],
+      },
+    },
   });
 
   beforeEach(() => {
@@ -91,8 +103,13 @@ describe('useServiceSettings — incompleteInstances', () => {
     act(() =>
       result.current.setServiceFieldsAndInputs(
         'svc_a',
-        { 'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket' } },
-        ['aws-s3']
+        {
+          svc_a: {
+            enabledInputs: ['aws-s3'],
+            varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket' } },
+          },
+        },
+        ['svc_a']
       )
     );
     expect(result.current.incompleteInstances).toHaveLength(0);
@@ -110,8 +127,8 @@ describe('useServiceSettings — incompleteInstances', () => {
 // --- signal filter ---
 
 describe('useServiceSettings — signal filter', () => {
-  const svcLogs = makeEntry('svc_logs', { signalType: 'logs', inputs: [] });
-  const svcMetrics = makeEntry('svc_metrics', { signalType: 'metrics', inputs: [] });
+  const svcLogs = makeEntry('svc_logs', { signalTypes: ['logs'], dataStreams: [] });
+  const svcMetrics = makeEntry('svc_metrics', { signalTypes: ['metrics'], dataStreams: [] });
 
   beforeEach(() => {
     mockUseSessionStorage.mockImplementation((_key: string, initial: unknown) => useState(initial));

@@ -73,6 +73,16 @@ export const executionTranslations = Object.freeze({
     });
   },
 
+  argDoesNotAcceptAnyValue: (argName: string): string => {
+    return i18n.translate(
+      'xpack.securitySolution.console.commandValidation.argDoesNotAcceptAnyValue',
+      {
+        defaultMessage: 'Invalid argument usage: --{argName} does not accept a value',
+        values: { argName },
+      }
+    );
+  },
+
   missingArguments: (missingArgs: string): string => {
     return i18n.translate('xpack.securitySolution.console.commandValidation.mustHaveArgs', {
       defaultMessage: 'Missing required arguments: {missingArgs}',

@@ -9,17 +9,9 @@ import React, { useEffect, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import {
-  EuiPageHeader,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiSpacer,
-  EuiPageTemplate,
-  EuiContextMenu,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import type { Location } from 'history';
 
 import type { Pipeline } from '../../../../common/types';
@@ -32,6 +24,7 @@ import {
   getCreatePath,
   getManageProcessorsPath,
 } from '../../services/navigation';
+import { ingestPipelinesListTitle } from '../../components';
 import { useCheckManageProcessorsPrivileges } from '../manage_processors';
 
 import { EmptyList } from './empty_list';
@@ -39,6 +32,39 @@ import { PipelineTable } from './table';
 import { PipelineDeleteModal } from './delete_modal';
 import { getErrorText } from '../utils';
 import { PipelineFlyout } from './pipeline_flyout';
+
+const listDescription = i18n.translate('xpack.ingestPipelines.list.pipelinesDescription', {
+  defaultMessage:
+    'Use ingest pipelines to remove or transform fields, extract values from text, and enrich your data before indexing into Elasticsearch.',
+});
+
+const createPipelineLabel = i18n.translate(
+  'xpack.ingestPipelines.list.table.createPipelineDropdownLabel',
+  {
+    defaultMessage: 'Create pipeline',
+  }
+);
+
+const newPipelineLabel = i18n.translate(
+  'xpack.ingestPipelines.list.table.createPipelineButtonLabel',
+  {
+    defaultMessage: 'New pipeline',
+  }
+);
+
+const newPipelineFromCsvLabel = i18n.translate(
+  'xpack.ingestPipelines.list.table.createPipelineFromCsvButtonLabel',
+  {
+    defaultMessage: 'New pipeline from CSV',
+  }
+);
+
+const manageProcessorsLabel = i18n.translate(
+  'xpack.ingestPipelines.list.manageProcessorsLinkText',
+  {
+    defaultMessage: 'Manage processors',
+  }
+);
 
 const getPipelineNameFromLocation = (location: Location) => {
   const params = new URLSearchParams(location.search);
@@ -51,7 +77,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
   const pipelineNameFromLocation = getPipelineNameFromLocation(history.location);
 
   const [showFlyout, setShowFlyout] = useState<boolean>(pipelineNameFromLocation !== null);
-  const [showPopover, setShowPopover] = useState<boolean>(false);
 
   const [pipelinesToDelete, setPipelinesToDelete] = useState<Pipeline[]>([]);
 
@@ -99,8 +124,55 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
     });
   };
 
+  const showCreateInHeader = Boolean(data && data.length > 0) && !error;
+  const createPath = getCreatePath();
+  const createFromCsvPath = getCreateFromCsvPath();
+  const manageProcessorsPath = getManageProcessorsPath();
+
+  let menu: AppHeaderMenu | undefined;
+  if (showCreateInHeader) {
+    menu = {
+      primaryActionItem: {
+        id: 'createPipeline',
+        label: createPipelineLabel,
+        iconType: 'plusCircle',
+        testId: 'createPipelineDropdown',
+        items: [
+          {
+            id: 'createNewPipeline',
+            label: newPipelineLabel,
+            href: history.createHref({ pathname: createPath }),
+            run: () => history.push(createPath),
+            testId: 'createNewPipeline',
+          },
+          {
+            id: 'createPipelineFromCsv',
+            label: newPipelineFromCsvLabel,
+            href: history.createHref({ pathname: createFromCsvPath }),
+            run: () => history.push(createFromCsvPath),
+            testId: 'createPipelineFromCsv',
+          },
+        ],
+      },
+    };
+
+    if (services.config.enableManageProcessors && hasManageProcessorsPrivileges) {
+      menu.items = [
+        {
+          id: 'manageProcessors',
+          label: manageProcessorsLabel,
+          iconType: 'wrench',
+          testId: 'manageProcessorsLink',
+          href: history.createHref({ pathname: manageProcessorsPath }),
+          run: () => history.push(manageProcessorsPath),
+        },
+      ];
+    }
+  }
+
+  let body: React.ReactNode;
   if (error) {
-    return (
+    body = (
       <EuiPageTemplate.EmptyPrompt
         color="danger"
         iconType="warning"
@@ -123,10 +195,8 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
         }
       />
     );
-  }
-
-  if (isLoading && !data) {
-    return (
+  } else if (isLoading && !data) {
+    body = (
       <SectionLoading data-test-subj="sectionLoading">
         <FormattedMessage
           id="xpack.ingestPipelines.list.loadingMessage"
@@ -134,164 +204,70 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
         />
       </SectionLoading>
     );
-  }
-
-  if (data && data.length === 0) {
-    return <EmptyList />;
-  }
-
-  const createMenuItems = [
-    /**
-     * Create pipeline
-     */
-    {
-      name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
-        defaultMessage: 'New pipeline',
-      }),
-      ...reactRouterNavigate(history, getCreatePath()),
-      'data-test-subj': `createNewPipeline`,
-    },
-    /**
-     * Create pipeline from CSV
-     */
-    {
-      name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineFromCsvButtonLabel', {
-        defaultMessage: 'New pipeline from CSV',
-      }),
-      ...reactRouterNavigate(history, getCreateFromCsvPath()),
-      'data-test-subj': `createPipelineFromCsv`,
-    },
-  ];
-  const titleActionButtons = [
-    <EuiPopover
-      key="createPipelinePopover"
-      isOpen={showPopover}
-      closePopover={() => setShowPopover(false)}
-      aria-label={i18n.translate(
-        'xpack.ingestPipelines.list.table.createPipelinePopoverAriaLabel',
-        { defaultMessage: 'Create pipeline options' }
-      )}
-      button={
-        <EuiButton
-          fill
-          iconSide="right"
-          iconType="chevronSingleDown"
-          data-test-subj="createPipelineDropdown"
-          key="createPipelineDropdown"
-          onClick={() => setShowPopover((previousBool) => !previousBool)}
-        >
-          {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
-            defaultMessage: 'Create pipeline',
-          })}
-        </EuiButton>
-      }
-      panelPaddingSize="none"
-      repositionOnScroll
-    >
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={[
-          {
-            id: 0,
-            items: createMenuItems,
-          },
-        ]}
-      />
-    </EuiPopover>,
-  ];
-  if (services.config.enableManageProcessors && hasManageProcessorsPrivileges) {
-    titleActionButtons.push(
-      <EuiButtonEmpty
-        iconType="wrench"
-        data-test-subj="manageProcessorsLink"
-        {...reactRouterNavigate(history, getManageProcessorsPath())}
-      >
-        <FormattedMessage
-          id="xpack.ingestPipelines.list.manageProcessorsLinkText"
-          defaultMessage="Manage processors"
+  } else if (data && data.length === 0) {
+    body = <EmptyList />;
+  } else {
+    body = (
+      <>
+        <PipelineTable
+          isLoading={isLoading}
+          onReloadClick={resendRequest}
+          onEditPipelineClick={goToEditPipeline}
+          onDeletePipelineClick={setPipelinesToDelete}
+          onClonePipelineClick={goToClonePipeline}
+          pipelines={data as Pipeline[]}
+          openFlyout={(name) => {
+            const params = new URLSearchParams(history.location.search);
+            params.set('pipeline', name);
+            history.push({
+              pathname: '',
+              search: params.toString(),
+            });
+            setShowFlyout(true);
+          }}
         />
-      </EuiButtonEmpty>
+
+        {showFlyout && pipelineNameFromLocation && (
+          <PipelineFlyout
+            ingestPipeline={pipelineNameFromLocation}
+            onClose={goHome}
+            onCreateClick={goToCreatePipeline}
+            onEditClick={goToEditPipeline}
+            onCloneClick={goToClonePipeline}
+            onDeleteClick={setPipelinesToDelete}
+          />
+        )}
+
+        {pipelinesToDelete?.length > 0 ? (
+          <PipelineDeleteModal
+            callback={(deleteResponse) => {
+              if (deleteResponse?.hasDeletedPipelines) {
+                // reload pipelines list
+                resendRequest();
+                goHome();
+              }
+              setPipelinesToDelete([]);
+            }}
+            pipelinesToDelete={pipelinesToDelete}
+          />
+        ) : null}
+      </>
     );
   }
-  titleActionButtons.push(
-    <EuiButtonEmpty
-      href={services.documentation.getIngestNodeUrl()}
-      target="_blank"
-      iconType="question"
-      data-test-subj="documentationLink"
-    >
-      <FormattedMessage
-        id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
-        defaultMessage="Documentation"
-      />
-    </EuiButtonEmpty>
-  );
 
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="appTitle">
-            <FormattedMessage
-              id="xpack.ingestPipelines.list.listTitle"
-              defaultMessage="Ingest pipelines"
-            />
-          </span>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.ingestPipelines.list.pipelinesDescription"
-            defaultMessage="Use ingest pipelines to remove or transform fields, extract values from text, and enrich your data before indexing into Elasticsearch."
-          />
-        }
-        rightSideItems={titleActionButtons}
+      <AppHeader
+        title={ingestPipelinesListTitle}
+        description={listDescription}
+        menu={menu}
+        docLink={services.documentation.getIngestNodeUrl()}
+        spacing="bleed"
       />
 
       <EuiSpacer size="l" />
 
-      <PipelineTable
-        isLoading={isLoading}
-        onReloadClick={resendRequest}
-        onEditPipelineClick={goToEditPipeline}
-        onDeletePipelineClick={setPipelinesToDelete}
-        onClonePipelineClick={goToClonePipeline}
-        pipelines={data as Pipeline[]}
-        openFlyout={(name) => {
-          const params = new URLSearchParams(history.location.search);
-          params.set('pipeline', name);
-          history.push({
-            pathname: '',
-            search: params.toString(),
-          });
-          setShowFlyout(true);
-        }}
-      />
-
-      {showFlyout && pipelineNameFromLocation && (
-        <PipelineFlyout
-          ingestPipeline={pipelineNameFromLocation}
-          onClose={goHome}
-          onCreateClick={goToCreatePipeline}
-          onEditClick={goToEditPipeline}
-          onCloneClick={goToClonePipeline}
-          onDeleteClick={setPipelinesToDelete}
-        />
-      )}
-
-      {pipelinesToDelete?.length > 0 ? (
-        <PipelineDeleteModal
-          callback={(deleteResponse) => {
-            if (deleteResponse?.hasDeletedPipelines) {
-              // reload pipelines list
-              resendRequest();
-              goHome();
-            }
-            setPipelinesToDelete([]);
-          }}
-          pipelinesToDelete={pipelinesToDelete}
-        />
-      ) : null}
+      {body}
       {services.consolePlugin?.EmbeddableConsole ? (
         <services.consolePlugin.EmbeddableConsole />
       ) : null}

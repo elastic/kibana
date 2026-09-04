@@ -11,6 +11,14 @@ import {
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
 
+/**
+ * Deterministic per-panel attachment id. Attachments are merged by `id` and anything without one is
+ * appended, so a stable id lets a re-pushed panel context replace the previous snapshot instead of
+ * accumulating duplicates — which the update tool would then read the stalest of.
+ */
+const getCustomContentAttachmentId = (embeddableId: string) =>
+  `${CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE}-${embeddableId}`;
+
 export const buildCustomContentContextAttachment = (
   template: string,
   esqlQuery: string | undefined,
@@ -20,6 +28,7 @@ export const buildCustomContentContextAttachment = (
   typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   CustomContentContextAttachmentData
 > => ({
+  id: getCustomContentAttachmentId(embeddableId),
   type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   data: {
     panel_template: template,

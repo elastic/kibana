@@ -54,7 +54,8 @@
       "observabilityAIAssistant",
       "agentBuilder",
       "observabilityAgentBuilder",
-      "maintenanceWindows"
+      "maintenanceWindows",
+      "cps"
     ],
     "requiredBundles": [
       "data",

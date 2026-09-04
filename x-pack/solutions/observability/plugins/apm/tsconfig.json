@@ -179,7 +179,8 @@
     "@kbn/apm-shared",
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu-components",
-    "@kbn/core-chrome-browser-hooks"
+    "@kbn/core-chrome-browser-hooks",
+    "@kbn/lens-common"
   ],
   "exclude": ["target/**/*"]
 }

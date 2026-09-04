@@ -11,12 +11,11 @@ import type {
   ConverseInput,
   Conversation,
   ChatAgentEvent,
-  AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
   AgentExecutionMode,
   ConversationRoundAuthor,
-  InteractivityConfig,
+  InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
@@ -27,7 +26,6 @@ export const executeAgent$ = ({
   agentId,
   executionId,
   request,
-  capabilities,
   structuredOutput,
   outputSchema,
   runAgent,
@@ -46,11 +44,11 @@ export const executeAgent$ = ({
   interactivity,
   parentExecutionId,
   projectRouting,
+  roundId,
 }: {
   agentId: string;
   executionId: string;
   request: KibanaRequest;
-  capabilities?: AgentCapabilities;
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   runAgent: RunAgentFn;
@@ -66,9 +64,10 @@ export const executeAgent$ = ({
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
   executionMode?: AgentExecutionMode;
-  interactivity?: InteractivityConfig;
+  interactivity?: InteractivityConfigInput;
   parentExecutionId?: string;
   projectRouting?: string;
+  roundId?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -88,13 +87,13 @@ export const executeAgent$ = ({
         conversation,
         origin,
         author,
-        capabilities,
         browserApiTools,
         configurationOverrides,
         structuredOutput,
         outputSchema,
         action,
         executionId,
+        roundId,
       },
       onEvent: (event) => {
         observer.next(event);

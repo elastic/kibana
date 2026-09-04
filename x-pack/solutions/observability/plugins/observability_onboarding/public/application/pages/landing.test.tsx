@@ -50,6 +50,21 @@ jest.mock('../shared/use_managed_otlp_service_availability', () => ({
   useManagedOtlpServiceAvailability: () => false,
 }));
 
+jest.mock('@elastic/eui-illustrations', () => {
+  const stub = (id: string, title: string) => ({
+    id,
+    title,
+    light: '<svg></svg>',
+    dark: '<svg></svg>',
+  });
+  return {
+    observabilityVideo: stub('observability-video', 'Observability video'),
+    globalPeopleNetwork: stub('global-people-network', 'Global people network'),
+    projectsGear: stub('projects-gear', 'Projects gear'),
+    supportLaptop: stub('support-laptop', 'Support laptop'),
+  };
+});
+
 const mockOpenCollectionCallbacks: Array<(groupId: string) => void> = [];
 
 jest.mock('../add_data_page/observability_search_results', () => ({

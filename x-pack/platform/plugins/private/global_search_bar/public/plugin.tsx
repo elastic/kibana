@@ -18,7 +18,6 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchBar } from './components/search_bar';
 import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
 import type { SearchProps } from './components/types';
@@ -115,15 +114,8 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
       });
     };
 
-    if (core.chrome.next.isEnabled) {
-      core.chrome.next.globalSearch.set({
-        onClick: toggleSearchModal,
-      });
-    }
-
-    core.chrome.navControls.registerCenter({
-      order: 1000,
-      content: <SearchBar {...searchProps} chromeStyle$={core.chrome.getChromeStyle$()} />,
+    core.chrome.next.globalSearch.set({
+      onClick: toggleSearchModal,
     });
 
     return {};

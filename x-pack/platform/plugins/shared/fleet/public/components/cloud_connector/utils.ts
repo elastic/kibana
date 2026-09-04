@@ -515,10 +515,6 @@ export const isCloudConnectorReusableEnabled = (
     if (templateName === 'asset_inventory') {
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
     }
-
-    if (templateName === 'aws') {
-      return true;
-    }
   } else if (provider === AZURE_PROVIDER) {
     if (templateName === 'cspm') {
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION);
@@ -535,7 +531,11 @@ export const isCloudConnectorReusableEnabled = (
     }
   }
 
-  return false;
+  // Any other integration reaching this point uses Fleet's var_groups UI, which only
+  // renders cloud connector setup when the package manifest declares identity
+  // federation support — so reuse is enabled for every valid provider without
+  // requiring per-package registration in Kibana.
+  return isCloudProvider(provider);
 };
 
 /**

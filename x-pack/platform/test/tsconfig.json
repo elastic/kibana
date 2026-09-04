@@ -27,6 +27,7 @@
   ],
   "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/change-history",
     "@kbn/test-suites-src",
     "@kbn/telemetry-collection-manager-plugin",

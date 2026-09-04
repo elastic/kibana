@@ -39,7 +39,7 @@ const EXECUTE_HEADERS = {
  * Chat looks up SML records by executing `platform.core.sml_search`, whose
  * public `_execute` route is gated on `agentBuilder:read` — not the
  * `agentBuilderSml` feature. Each alerting v2 SML type then stamps
- * `api:read_alerting-v2-*` on indexed entries, so a caller still needs the
+ * `ai_index:<kiType>/read` on indexed entries, so a caller still needs the
  * matching alerting v2 read privilege to see those hits.
  */
 const LIMITED_ALERTING_V2_CHAT_ROLE: KibanaRole = {
@@ -62,7 +62,7 @@ const LIMITED_ALERTING_V2_CHAT_ROLE: KibanaRole = {
 
 /**
  * Same Agent Builder execute privilege as chat, without alerting v2 reads.
- * Hits stamped with `api:read_alerting-v2-*` must be filtered out.
+ * Hits stamped with the alerting v2 `ai_index:<kiType>/read` actions must be filtered out.
  */
 const AGENT_BUILDER_READ_WITHOUT_ALERTING_V2_ROLE: KibanaRole = {
   elasticsearch: {
@@ -303,6 +303,39 @@ apiTest.describe(
         const attachmentIds = hits.map((hit) => hit.attachment_id);
         expect(attachmentIds).not.toContain(ruleAttachmentId);
         expect(attachmentIds).not.toContain(policyAttachmentId);
+      }
+    );
+
+    /*
+     * `*` takes the other ES|QL branch: a plain sorted scan instead of the FORK/FUSE plan every
+     * other case here builds. The authorization filter is pushed into `_query`'s `filter`
+     * parameter, and the two plans consume it differently — a filter that denies on one branch
+     * has already been observed to be a no-op on the other. Both branches need coverage.
+     */
+    apiTest(
+      'user without alerting v2 read cannot see rule or action policy SML hits on a wildcard search',
+      async ({ apiClient }) => {
+        const hits = getSearchHits(
+          await executeSmlSearch(apiClient, agentBuilderOnlyCredentials, {
+            query: '*',
+            size: 50,
+          })
+        );
+        const attachmentIds = hits.map((hit) => hit.attachment_id);
+        expect(attachmentIds).not.toContain(ruleAttachmentId);
+        expect(attachmentIds).not.toContain(policyAttachmentId);
+      }
+    );
+
+    apiTest(
+      'limited privilege user still sees both types on a wildcard search',
+      async ({ apiClient }) => {
+        const hits = getSearchHits(
+          await executeSmlSearch(apiClient, limitedCredentials, { query: '*', size: 50 })
+        );
+        const attachmentIds = hits.map((hit) => hit.attachment_id);
+        expect(attachmentIds).toContain(ruleAttachmentId);
+        expect(attachmentIds).toContain(policyAttachmentId);
       }
     );
   }

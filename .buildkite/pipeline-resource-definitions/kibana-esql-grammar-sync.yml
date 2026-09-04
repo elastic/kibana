@@ -19,7 +19,7 @@ spec:
       description: Opens a PR if anything changes in the ES|QL grammar in Elasticsearch
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-esql-project-team'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-esql'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: false
       branch_configuration: main
@@ -52,7 +52,7 @@ spec:
           access_level: BUILD_AND_READ
       schedules:
         Weekly build:
-          cronline: 0 0 * * 1 America/New_York
+          cronline: 0 0 * * 2 America/New_York
           message: Weekly build
           branch: main
       tags:

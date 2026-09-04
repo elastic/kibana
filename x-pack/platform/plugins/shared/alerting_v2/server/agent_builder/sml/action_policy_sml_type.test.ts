@@ -17,7 +17,6 @@ import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
 } from '../../saved_objects';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { createActionPolicySmlType } from './action_policy_sml_type';
 
 const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
@@ -248,10 +247,10 @@ describe('createActionPolicySmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the action-policies-read API privilege', () => {
+    it('returns the registered ai_index read action for action policies', () => {
       // This is the security-critical assertion the original review
       // flagged as missing. The action policies API gates reads on
-      // `api:read_action_policies` (via ALERTING_V2_API_PRIVILEGES);
+      // `ai_index:<kiType>/read` (via ALERTING_V2_API_PRIVILEGES);
       // the SML entry MUST stamp the same privilege so a user without
       // it cannot see policy entries in agent context.
       //
@@ -266,7 +265,7 @@ describe('createActionPolicySmlType', () => {
       const permissions = buildDefinition().getPermissions!('policy-1', buildSmlContext());
       expect(permissions).toEqual({
         kibana: {
-          privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
+          privileges: { name: [`ai_index:${ACTION_POLICY_KI_TYPE}/read`] },
         },
       });
     });

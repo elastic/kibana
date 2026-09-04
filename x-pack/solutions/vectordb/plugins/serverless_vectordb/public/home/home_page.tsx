@@ -46,10 +46,11 @@ export const HomePage = () => {
   return (
     <EuiPageTemplate restrictWidth panelled={false} grow={false}>
       <EuiPageTemplate.Section paddingSize="xl" grow={false}>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
               responsive={false}
+              wrap
               alignItems="center"
               gutterSize="s"
               data-test-subj="vectordbHomepageHeaderLeftsideGroup"
@@ -96,11 +97,11 @@ export const HomePage = () => {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <HomePageStatPanel {...dataCard} />
+            <HomePageStatPanel {...dataCard} newIndex={stats.newIndex} />
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="m">
+            <EuiFlexGroup gutterSize="l">
               {secondaryCards.map((card) => (
                 <EuiFlexItem key={card.testSubj}>
                   <HomePageStatPanel {...card} />

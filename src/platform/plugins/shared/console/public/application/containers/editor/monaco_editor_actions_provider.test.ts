@@ -209,6 +209,50 @@ describe('Editor actions provider', () => {
     );
   });
 
+  it('SHOULD keep an unfinished triple-quoted request selected from request-like content', async () => {
+    const lines = ['POST _query', '{', '  "script": """', '  GET _all', '  {', '', '  }'];
+    const model = createModel(lines);
+    const highlightedLines = {
+      clear: jest.fn(),
+      set: jest.fn(),
+    } as unknown as monaco.editor.IEditorDecorationsCollection;
+    const setEditorActionsCss = jest.fn();
+    const parsedRequests = createParser()(lines.join('\n'))?.requests;
+
+    expect(parsedRequests).toEqual([{ startOffset: 0 }]);
+    mockGetParsedRequests.mockResolvedValue(parsedRequests);
+    editor.getModel.mockReturnValue(model);
+    editor.getSelection.mockReturnValue({
+      startLineNumber: 4,
+      endLineNumber: 4,
+    } as unknown as monaco.Selection);
+    editor.getTopForLineNumber.mockReturnValue(100);
+    editor.getScrollTop.mockReturnValue(0);
+    editor.createDecorationsCollection = jest.fn(
+      () => highlightedLines
+    ) as unknown as typeof editor.createDecorationsCollection;
+    editorActionsProvider = new MonacoEditorActionsProvider(
+      editor,
+      setEditorActionsCss,
+      '.sampleHighlightedLinesClassName'
+    );
+
+    await (
+      editorActionsProvider as unknown as {
+        highlightRequests: (highlightedLinesClassName: string) => Promise<void>;
+      }
+    ).highlightRequests('.sampleHighlightedLinesClassName');
+
+    expect(editor.getTopForLineNumber).toHaveBeenCalledWith(1);
+    expect(setEditorActionsCss).toHaveBeenCalledWith({
+      visibility: 'visible',
+      top: 101,
+    });
+    const [{ range }] = (highlightedLines.set as jest.Mock).mock.calls[0][0];
+    expect(range.startLineNumber).toBe(1);
+    expect(range.endLineNumber).toBe(7);
+  });
+
   describe('WHEN auto-indenting comments', () => {
     const setEditorText = (text: string) => {
       const lines = text.split('\n');
@@ -1736,6 +1780,43 @@ describe('Editor actions provider', () => {
     } as unknown as jest.Mocked<monaco.editor.ITextModel>;
     const mockPosition = { lineNumber: 1, column: 1 } as jest.Mocked<monaco.Position>;
     const mockContext = {} as jest.Mocked<monaco.languages.CompletionContext>;
+    const setupParserBackedBodyCompletion = (lines: string[]) => {
+      const parserResult = createParser()(lines.join('\n'));
+      if (!parserResult) {
+        throw new Error('Expected Console parser result');
+      }
+      mockGetParsedRequests.mockResolvedValue(parserResult.requests);
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = [{ name: 'columnar' }];
+      });
+      return createModel(lines);
+    };
+
+    it('uses body completion below an inline triple-quoted value', async () => {
+      const lines = ['POST _query', '{', '  "query": """ FROM my-index | """,', '', '}'];
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        setupParserBackedBodyCompletion(lines),
+        { lineNumber: 4, column: 1 } as monaco.Position,
+        mockContext
+      );
+
+      expect(mockPopulateContext).toHaveBeenCalled();
+      expect(completionItems.suggestions.map(({ label }) => label)).toEqual(['columnar']);
+    });
+
+    it('uses body completion inside an unfinished key after a multiline triple-quoted value', async () => {
+      const lines = ['POST _query', '{', '  "script": """', '  some content', '  """,', '  "', '}'];
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        setupParserBackedBodyCompletion(lines),
+        { lineNumber: 6, column: 4 } as monaco.Position,
+        mockContext
+      );
+
+      expect(mockPopulateContext).toHaveBeenCalled();
+      expect(completionItems.suggestions.map(({ label }) => label)).toEqual(['columnar']);
+    });
+
     it('returns completion items for method if no requests', async () => {
       mockGetParsedRequests.mockResolvedValue([]);
       const completionItems = await editorActionsProvider.provideCompletionItems(
@@ -2539,6 +2620,24 @@ describe('Editor actions provider', () => {
         const { suggestions } = await provideCompletionItems(model, { lineNumber: 4, column: 1 });
 
         expect(suggestions).toHaveLength(0);
+      });
+
+      it('passes ES|QL triple-quote context to body completion filtering', async () => {
+        mockGetParsedRequests.mockResolvedValue(unterminatedRequest);
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [{ name: false }, { name: 'false' }];
+        });
+        const line = '  "query": """f';
+        const model = setup(['POST _query', '{', line], 3, line.length + 1);
+
+        const { suggestions } = await provideCompletionItems(model, {
+          lineNumber: 3,
+          column: line.length + 1,
+        });
+
+        expect(suggestions).toHaveLength(1);
+        expect(suggestions[0].label).toBe('false');
       });
 
       it('still returns method completion items on an empty line outside triple quotes', async () => {

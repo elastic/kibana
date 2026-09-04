@@ -13,10 +13,20 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
+  PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+  PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+  PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/pnd/dark_continuous_threat_hunt.yaml';
+import DETECTION_RULE_CREATION_YAML from './definitions/pnd/detection_rule_creation.yaml';
+import DETECTION_RULE_TUNING_YAML from './definitions/pnd/detection_rule_tuning.yaml';
+import FLOOR_ALERT_TRIAGE_YAML from './definitions/pnd/floor_alert_triage.yaml';
+import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/pnd/floor_attack_discovery.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -39,6 +49,26 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
+  },
+  [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
   },
   [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
     detectionIntervalMinutes: 30,
@@ -104,6 +134,41 @@ function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
 
 /** Matches the `__SCREAMING_SNAKE__` placeholders that yamlTemplate definitions substitute. */
 const UNREPLACED_TOKEN_PATTERN = /__[A-Z][A-Z0-9_]*__/g;
+
+function createContentFingerprint(content: string): string {
+  let fingerprint = 0;
+  for (const character of content) {
+    fingerprint = (fingerprint * 31 + character.charCodeAt(0)) % 0xffffffff;
+  }
+  return fingerprint.toString(16).padStart(8, '0');
+}
+
+it.each([
+  [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '1:d6a82eff'],
+  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '1:149ca943'],
+  [
+    PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+    DARK_CONTINUOUS_THREAT_HUNT_YAML,
+    '2:de85a75a',
+  ],
+  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '1:f39d6360'],
+  [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID, DETECTION_RULE_CREATION_YAML, '1:a6804a44'],
+] as const)(
+  'requires bumping %s definition.version together with the imported YAML fingerprint',
+  (workflowId, importedYaml, expectedFingerprint) => {
+    const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
+    if (!definition) throw new Error(`Managed worker "${workflowId}" is not registered`);
+    const actualFingerprint = `${definition.version}:${createContentFingerprint(importedYaml)}`;
+    if (actualFingerprint === expectedFingerprint) {
+      return;
+    }
+    throw new Error(
+      `Imported YAML for '${workflowId}' changed (${actualFingerprint}, expected ${expectedFingerprint}). ` +
+        `yamlTemplate hashing covers only the function source, not this imported string, so already-installed spaces will not receive the edit until definition.version is bumped. ` +
+        `Bump version in the worker module and update this expected fingerprint in the same change.`
+    );
+  }
+);
 
 function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): void {
   let parsedYaml: unknown;

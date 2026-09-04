@@ -402,6 +402,48 @@ export enum ConversationDisplayStatus {
 }
 
 /**
+ * Stable identifier for a feedback chip. These values are stored in Elasticsearch;
+ * the display label is resolved at render time via i18n so feedback data is
+ * locale-independent and safe to use in cross-locale analytics.
+ */
+export type FeedbackChipId =
+  | 'inaccurate'
+  | 'incomplete'
+  | 'didnt_follow_instructions'
+  | 'accurate'
+  | 'useful'
+  | 'well_explained';
+
+/**
+ * User feedback submitted for a conversation round.
+ *
+ * Note: each new submission overwrites the previous one.
+ */
+export interface ConversationRoundFeedback {
+  /** Thumbs up or thumbs down */
+  vote: 'up' | 'down';
+  /**
+   * Stable chip IDs selected by the user. Stored as IDs (not display labels)
+   * so they are locale-independent and safe to use in cross-locale analytics.
+   */
+  chips?: FeedbackChipId[];
+  /** Optional free-text comment */
+  comment?: string;
+  /** ISO timestamp when the feedback was (most recently) submitted */
+  submitted_at: string;
+  /**
+   * Connector ID from the round's model_usage at submission time.
+   * Present whenever model_usage is available on the round.
+   */
+  connector_id?: string;
+  /**
+   * Model identifier. Only populated when the LLM provider returns the model
+   * in its response — many connectors omit it.
+   */
+  model?: string;
+}
+
+/**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */
@@ -436,6 +478,8 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
+  /** User feedback for this round, if submitted. */
+  feedback?: ConversationRoundFeedback;
 }
 
 export interface ConversationOrigin {
@@ -451,6 +495,20 @@ export interface ConversationRoundAuthor {
   /** Optional display name. */
   full_name?: string;
 }
+
+export const getConversationRoundAuthorDisplayName = (
+  author?: ConversationRoundAuthor
+): string | undefined => {
+  if (!author) {
+    return undefined;
+  }
+
+  if (author.full_name) {
+    return author.full_name;
+  }
+
+  return author.username;
+};
 
 /** External system the message comes from, for example Slack or GitHub. */
 export enum ConversationOriginType {
@@ -654,6 +712,11 @@ export type ConversationWithPermissions = Conversation & {
 export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
   permissions: ConversationPermissions;
 };
+
+export interface ConversationListResult {
+  results: ConversationWithoutRoundsWithPermissions[];
+  total: number;
+}
 
 export type ConversationAction = 'regenerate';
 

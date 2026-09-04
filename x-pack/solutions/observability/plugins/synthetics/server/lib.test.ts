@@ -143,6 +143,22 @@ describe('SyntheticsEsClient', () => {
         { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
     });
+
+    it('forwards project_routing on search when set', async () => {
+      const client = new SyntheticsEsClient(savedObjectsClient, esClient, {
+        projectRouting: '_alias:*',
+      });
+
+      await client.search({ query: { match_all: {} } });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          project_routing: '_alias:*',
+          query: { match_all: {} },
+        }),
+        expect.any(Object)
+      );
+    });
   });
 
   describe('count', () => {

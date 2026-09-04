@@ -55,7 +55,7 @@ describe('useWorkflowsSolutionNav', () => {
     const { result } = renderSolutionNav();
 
     expect(result.current).toEqual(
-      expect.objectContaining({ name: 'Workflows', icon: 'workflowsApp' })
+      expect.objectContaining({ name: 'Workflows', icon: 'workflow' })
     );
   });
 

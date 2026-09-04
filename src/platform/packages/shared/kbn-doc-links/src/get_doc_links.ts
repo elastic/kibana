@@ -52,7 +52,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgradingStackOnCloud: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
     },
     apm: {
-      kibanaSettings: `${ELASTIC_DOCS}solutions/observability/apm/applications-ui-settings`,
+      kibanaSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#observability-advanced-settings`,
       supportedServiceMaps: `${ELASTIC_DOCS}solutions/observability/apm/service-map`,
       supportedServiceMapsLegend: `${ELASTIC_DOCS}solutions/observability/apm/service-map#service-maps-legend`,
       customLinks: `${ELASTIC_DOCS}solutions/observability/apm/create-custom-links`,
@@ -671,6 +671,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     alerting: {
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
       actionTypes: `${ELASTIC_DOCS}reference/kibana/connectors-kibana`,
+      actionPolicies: `${ELASTIC_DOCS}explore-analyze/alerting/experimental-alerting-system/action-policies/about-action-policies`,
       apmRulesErrorCount: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-error-count-threshold-rule`,
       apmRulesTransactionDuration: `${ELASTIC_DOCS}solutions/observability/incident-management/create-latency-threshold-rule`,
       apmRulesTransactionError: `${ELASTIC_DOCS}solutions/observability/incident-management/create-failed-transaction-rate-threshold-rule`,
@@ -733,6 +734,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       apiKeyServiceSettings: `${ELASTIC_DOCS}reference/elasticsearch/configuration-reference/security-settings#api-key-service-settings`,
       clusterPrivileges: `${ELASTIC_DOCS}reference/elasticsearch/security-privileges#privileges-list-cluster`,
       definingRoles: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/defining-roles`,
+      elasticCloudApiKeys: `${ELASTIC_DOCS}deploy-manage/api-keys/elastic-cloud-api-keys#project-access`,
       elasticsearchSettings: `${ELASTIC_DOCS}reference/elasticsearch/configuration-reference/security-settings`,
       elasticsearchEnableSecurity: `${ELASTIC_DOCS}deploy-manage/deploy/self-managed/installing-elasticsearch`,
       elasticsearchEnableApiKeys: `${ELASTIC_DOCS}reference/elasticsearch/configuration-reference/security-settings#api-key-service-settings`,
@@ -1093,6 +1095,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     telemetry: {
       settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/telemetry-settings`,
+      securityData: `${ELASTIC_DOCS}reference/kibana/configuration-reference/telemetry-settings#security-telemetry`,
     },
     playground: {
       chatPlayground: `${ELASTIC_DOCS}solutions/search/rag/playground`,

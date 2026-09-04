@@ -51,6 +51,27 @@ describe('createCaseStepDefinition', () => {
     });
   });
 
+  it('passes extended_fields through to client.cases.create', async () => {
+    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest
+      .fn()
+      .mockResolvedValue({ cases: { create } } as unknown as CasesClient);
+    const definition = createCaseStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        ...createCaseRequestFixture,
+        extended_fields: { priority_as_keyword: 'high' },
+      })
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extended_fields: { priority_as_keyword: 'high' },
+      })
+    );
+  });
+
   it('returns error when client.cases.create throws', async () => {
     const createError = new Error('create failed');
     const create = jest.fn().mockRejectedValue(createError);

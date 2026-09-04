@@ -10,6 +10,7 @@ import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 import { getHistogramQuery } from '@kbn/aiops-log-rate-analysis/queries/get_histogram_query';
+import { getRequestBase } from '@kbn/aiops-log-rate-analysis/queries/get_request_base';
 import {
   getMiniHistogramAgg,
   type MiniHistogramAgg,
@@ -44,7 +45,7 @@ export const overallHistogramHandlerFactory =
     try {
       resp = await esClient.search(
         {
-          index: requestBody.index,
+          ...getRequestBase(requestBody),
           size: 0,
           query: overallHistogramQuery,
           aggs: wrap(miniHistogramAgg),

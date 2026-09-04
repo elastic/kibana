@@ -1773,6 +1773,7 @@ describe('executeDashboardOperations', () => {
         prompt: 'updated prompt',
         esqlQuery: undefined,
         existingTemplate: '<div>Old template</div>',
+        hasExistingQuery: false,
       });
       expect(result.failures).toEqual([]);
 
@@ -1782,8 +1783,7 @@ describe('executeDashboardOperations', () => {
           id: 'cc-1',
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
           config: {
-            prompt: 'updated prompt',
-            esqlQuery: undefined,
+            esql_query: undefined,
             template: '<div>Server generated</div>',
           },
           grid: { x: 0, y: 0, w: 24, h: 6 },
@@ -1801,7 +1801,7 @@ describe('executeDashboardOperations', () => {
         type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
         config: {
           prompt: 'old prompt',
-          esqlQuery: 'FROM logs | STATS count = COUNT(*)',
+          esql_query: ['FROM logs | STATS count = COUNT(*)'],
           template: '<div>Old</div>',
         },
         grid: { x: 0, y: 0, w: 24, h: 6 },
@@ -1831,7 +1831,7 @@ describe('executeDashboardOperations', () => {
         expect.objectContaining({ esqlQuery: undefined })
       );
       const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
-      expect(topLevelPanels[0].config).toMatchObject({ esqlQuery: undefined });
+      expect(topLevelPanels[0].config).toMatchObject({ esql_query: undefined });
     });
 
     it('records a failure when a custom_content config-source edit targets a non-custom_content panel', async () => {
@@ -1886,7 +1886,7 @@ describe('executeDashboardOperations', () => {
       const existingPanel: AttachmentPanel = {
         id: 'cc-1',
         type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-        config: { prompt: 'old prompt', template: '<div>Existing</div>' },
+        config: { template: '<div>Existing</div>' },
         grid: { x: 0, y: 0, w: 24, h: 6 },
       };
 
@@ -1912,10 +1912,7 @@ describe('executeDashboardOperations', () => {
 
       expect(result.failures).toEqual([]);
       const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
-      expect(topLevelPanels[0].config).toEqual({
-        prompt: 'updated prompt',
-        template: '<div>Existing</div>',
-      });
+      expect(topLevelPanels[0].config).toEqual({ template: '<div>Existing</div>' });
     });
 
     it('mixes markdown and visualization edits in one op, parallelizing only the visualization resolves', async () => {
