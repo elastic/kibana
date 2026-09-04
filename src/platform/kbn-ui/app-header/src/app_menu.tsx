@@ -9,10 +9,14 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense } from 'react';
-import type { AppMenuConfig, AppMenuStaticItem } from '@kbn/ui-app-menu';
+import type {
+  AppMenuBeforePrimaryAction,
+  AppMenuConfig,
+  AppMenuStaticItem,
+} from '@kbn/ui-app-menu';
 
-const AppMenuComponent = lazy(async () => {
-  const { AppMenuComponent: Component } = await import('@kbn/ui-app-menu');
+const AppMenuComponentInternal = lazy(async () => {
+  const { AppMenuComponentInternal: Component } = await import('@kbn/ui-app-menu');
   return { default: Component };
 });
 
@@ -20,24 +24,32 @@ export interface AppMenuProps {
   menu?: AppMenuConfig;
   staticItems?: AppMenuStaticItem[];
   fallbackMenu?: ReactNode;
+  /** Temporary Dashboard-only escape hatch. Do not adopt. */
+  beforePrimaryAction?: AppMenuBeforePrimaryAction;
 }
 
-export const AppMenu = React.memo<AppMenuProps>(({ menu, staticItems, fallbackMenu }) => {
-  const hasStaticItems = !!staticItems?.some((item) => !item.global);
+export const AppMenu = React.memo<AppMenuProps>(
+  ({ menu, staticItems, fallbackMenu, beforePrimaryAction }) => {
+    const hasStaticItems = !!staticItems?.some((item) => !item.global);
 
-  if (!menu && fallbackMenu) {
-    return <>{fallbackMenu}</>;
+    if (!menu && fallbackMenu) {
+      return <>{fallbackMenu}</>;
+    }
+
+    if (menu || hasStaticItems || beforePrimaryAction) {
+      return (
+        <Suspense>
+          <AppMenuComponentInternal
+            config={menu}
+            staticItems={staticItems}
+            beforePrimaryAction={beforePrimaryAction}
+          />
+        </Suspense>
+      );
+    }
+
+    return null;
   }
-
-  if (menu || hasStaticItems) {
-    return (
-      <Suspense>
-        <AppMenuComponent config={menu} staticItems={staticItems} />
-      </Suspense>
-    );
-  }
-
-  return null;
-});
+);
 
 AppMenu.displayName = 'AppMenu';

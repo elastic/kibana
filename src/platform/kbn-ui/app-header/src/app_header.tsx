@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
-import type { AppMenuStaticItem } from '@kbn/ui-app-menu';
+import type { AppMenuBeforePrimaryAction, AppMenuStaticItem } from '@kbn/ui-app-menu';
 import type { AppHeaderBack, AppHeaderConfig } from './types';
 import { AppHeaderShell } from './app_header_shell';
 import { AppBadges } from './app_badges';
@@ -42,6 +42,8 @@ export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back'> & {
    */
   titleAppend?: ReactNode;
   borderless?: boolean;
+  /** Temporary Dashboard-only escape hatch. Do not add callers outside `@kbn/app-header/dashboard`. */
+  beforePrimaryAction?: AppMenuBeforePrimaryAction;
 };
 
 const getPublicAppHeaderViewProps = ({
@@ -60,6 +62,7 @@ const getPublicAppHeaderViewProps = ({
   fallbackMenu,
   titleAppend,
   borderless,
+  beforePrimaryAction,
 }: AppHeaderViewProps): AppHeaderViewProps => {
   const secondaryContent = description ? { description } : metadata ? { metadata } : {};
 
@@ -78,6 +81,7 @@ const getPublicAppHeaderViewProps = ({
     fallbackMenu,
     titleAppend,
     borderless,
+    beforePrimaryAction,
   };
 };
 
@@ -98,6 +102,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
     borderless,
     staticItems,
     fallbackMenu,
+    beforePrimaryAction,
   }) => {
     const hasStaticItems = !!staticItems?.some((item) => !item.global);
 
@@ -131,7 +136,8 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
       !!description ||
       !!metadata?.length ||
       hasStaticItems ||
-      !!fallbackMenu;
+      !!fallbackMenu ||
+      !!beforePrimaryAction;
 
     if (!show) {
       return null;
@@ -150,7 +156,14 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
         badges={<AppBadges badges={badges} />}
         titleActions={<TitleActions shareAction={share} favorite={favorite} />}
         titleAppend={titleAppend}
-        trailing={<AppMenu menu={menu} staticItems={staticItems} fallbackMenu={fallbackMenu} />}
+        trailing={
+          <AppMenu
+            menu={menu}
+            staticItems={staticItems}
+            fallbackMenu={fallbackMenu}
+            beforePrimaryAction={beforePrimaryAction}
+          />
+        }
         secondaryContent={
           description ? (
             <AppHeaderDescription description={description} />

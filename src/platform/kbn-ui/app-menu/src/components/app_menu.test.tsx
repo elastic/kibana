@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { EuiBreakpointSize } from '@elastic/eui';
-import { AppMenuComponent } from './app_menu';
+import { AppMenuComponent, AppMenuComponentInternal } from './app_menu';
 import type { AppMenuConfig, AppMenuItemType } from '../types';
-import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
+import { APP_MENU_TEST_SUBJECTS, getAppMenuActionButtonTestSubj } from '../test_subjects';
 
 let mockCurrentBreakpoint: EuiBreakpointSize | undefined = 'xl';
 let mockViewportBreakpoint: EuiBreakpointSize = 'xl';
@@ -288,6 +288,118 @@ describe('AppMenu', () => {
       );
 
       expect(screen.getByTestId('test-switch').closest('.euiToolTipAnchor')).toBeInTheDocument();
+    });
+  });
+
+  describe('beforePrimaryAction', () => {
+    const inlineSentinel = <button type="button" data-test-subj="inline-sentinel" />;
+    const collapsedSentinel = <button type="button" data-test-subj="collapsed-sentinel" />;
+    const beforePrimaryAction = { inline: inlineSentinel, collapsed: collapsedSentinel };
+    const primaryActionItem = {
+      id: 'save',
+      label: 'Save',
+      run: jest.fn(),
+      iconType: 'save' as const,
+    };
+    const configWithPrimary: AppMenuConfig = {
+      items: defaultItems,
+      primaryActionItem,
+    };
+
+    const documentIndex = (element: HTMLElement): number =>
+      Array.from(document.body.querySelectorAll('*')).indexOf(element);
+
+    const expectFollows = (earlier: HTMLElement, later: HTMLElement) => {
+      expect(documentIndex(earlier)).toBeLessThan(documentIndex(later));
+    };
+
+    it('places the inline action after More and before the primary action at s', () => {
+      mockCurrentBreakpoint = 's';
+
+      render(
+        <AppMenuComponentInternal
+          config={configWithPrimary}
+          beforePrimaryAction={beforePrimaryAction}
+        />
+      );
+
+      expectFollows(
+        screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton),
+        screen.getByTestId('inline-sentinel')
+      );
+      expectFollows(
+        screen.getByTestId('inline-sentinel'),
+        screen.getByTestId(getAppMenuActionButtonTestSubj('save'))
+      );
+      expect(screen.queryByTestId('collapsed-sentinel')).not.toBeInTheDocument();
+    });
+
+    it('places the inline action after displayed items and More and before the primary action at xl', () => {
+      const overflowConfig: AppMenuConfig = {
+        items: [
+          ...defaultItems,
+          {
+            id: 'overflowItem',
+            label: 'Overflow item',
+            run: jest.fn(),
+            iconType: 'gear',
+            order: 3,
+            overflow: true,
+          },
+        ],
+        primaryActionItem,
+      };
+
+      render(
+        <AppMenuComponentInternal
+          config={overflowConfig}
+          beforePrimaryAction={beforePrimaryAction}
+        />
+      );
+
+      expectFollows(
+        screen.getByText('Item 1'),
+        screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)
+      );
+      expectFollows(
+        screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton),
+        screen.getByTestId('inline-sentinel')
+      );
+      expectFollows(
+        screen.getByTestId('inline-sentinel'),
+        screen.getByTestId(getAppMenuActionButtonTestSubj('save'))
+      );
+    });
+
+    it('places the collapsed action after More and keeps the primary action in the popover at xs', () => {
+      mockCurrentBreakpoint = 'xs';
+
+      render(
+        <AppMenuComponentInternal
+          config={configWithPrimary}
+          beforePrimaryAction={beforePrimaryAction}
+        />
+      );
+
+      expectFollows(
+        screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton),
+        screen.getByTestId('collapsed-sentinel')
+      );
+      expect(screen.queryByTestId('inline-sentinel')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(getAppMenuActionButtonTestSubj('save'))).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+
+      expect(screen.getByTestId(getAppMenuActionButtonTestSubj('save'))).toBeInTheDocument();
+    });
+
+    it('renders when only beforePrimaryAction is supplied', () => {
+      const { container } = render(
+        <AppMenuComponentInternal beforePrimaryAction={beforePrimaryAction} />
+      );
+
+      expect(container).not.toBeEmptyDOMElement();
+      expect(screen.getByTestId('inline-sentinel')).toBeInTheDocument();
     });
   });
 });

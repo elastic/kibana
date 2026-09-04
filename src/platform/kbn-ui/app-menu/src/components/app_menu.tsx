@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
@@ -39,15 +39,31 @@ export interface AppMenuItemsProps {
   staticItems?: AppMenuStaticItem[];
 }
 
+/** Temporary Dashboard-only insertion seam. Do not adopt. */
+export interface AppMenuBeforePrimaryAction {
+  inline: ReactNode;
+  collapsed: ReactNode;
+}
+
+export type AppMenuComponentInternalProps = AppMenuItemsProps & {
+  /** Temporary Dashboard-only escape hatch. Not part of the public App Menu API. */
+  beforePrimaryAction?: AppMenuBeforePrimaryAction;
+};
+
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.switch;
 
-export const AppMenuComponent = ({
+export const AppMenuComponent = (props: AppMenuItemsProps) => {
+  return <AppMenuComponentInternal {...props} />;
+};
+
+export const AppMenuComponentInternal = ({
   config,
   visible = true,
   breakpointSource = 'application',
   staticItems,
-}: AppMenuItemsProps) => {
+  beforePrimaryAction,
+}: AppMenuComponentInternalProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
 
   /**
@@ -59,7 +75,7 @@ export const AppMenuComponent = ({
    */
   const hasVisibleStaticItems = hasNonGlobalStaticItems(staticItems);
 
-  if ((!config || hasNoItems(config)) && !hasVisibleStaticItems) {
+  if ((!config || hasNoItems(config)) && !hasVisibleStaticItems && !beforePrimaryAction) {
     return null;
   }
 
@@ -141,13 +157,19 @@ export const AppMenuComponent = ({
             )}
           </div>
         )}
+        {beforePrimaryAction?.inline}
         {primaryActionComponent}
       </>
     );
   };
 
   const content: Record<AppMenuLayout, React.ReactNode> = {
-    collapsed: collapsedComponent,
+    collapsed: (
+      <>
+        {collapsedComponent}
+        {beforePrimaryAction?.collapsed}
+      </>
+    ),
     minimal: renderInlineContent(0),
     expanded: renderInlineContent(displayedItems.length),
   };

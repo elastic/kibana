@@ -113,6 +113,13 @@ the title. This is a Discover-specific layout exception; other apps should use t
 this internal title slot cannot be forced through a type suppression. When the tabs bar is present,
 it owns the bottom separator and title actions remain visible without hovering.
 
+## Dashboard AI action
+
+`DashboardAppHeader` from `@kbn/app-header/dashboard` is a temporary, Dashboard-only escape hatch
+for an inline AI control in the App Menu cluster. It is standalone/inline-only: registered and
+embedded Chrome headers cannot use it. Other apps must keep using `AppHeader`. Remove the wrapper
+when the Dashboard canvas overlay replaces the header action.
+
 ## Loading skeleton
 
 When the page title and menu are not ready yet, mount `AppHeaderLoading` instead of gating the
