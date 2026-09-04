@@ -271,6 +271,35 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       expect(secondBucket.per_node.buckets).toHaveLength(3);
     });
 
+    test('one rawDoc in data always produces exactly one entry in the result', async () => {
+      // unflatten() always returns a plain object — never an array — so each rawDoc maps
+      // to exactly one filtered doc, regardless of its internal shape.
+      const aggDoc = {
+        buckets: [
+          { key: 'a', doc_count: 1 },
+          { key: 'b', doc_count: 2 },
+        ],
+        sum_other_doc_count: 0,
+      };
+      const rules = { 'buckets.key': Action.KEEP, 'buckets.doc_count': Action.KEEP };
+
+      const result = await applyFilterlist([aggDoc], rules, mockSalt);
+
+      expect(result).toHaveLength(1);
+    });
+
+    test('two rawDocs in data produce exactly two entries in the result', async () => {
+      const doc1 = { 'user.name': 'alice', 'user.email': 'alice@example.com' };
+      const doc2 = { 'user.name': 'bob', 'user.email': 'bob@example.com' };
+      const rules = { 'user.name': Action.KEEP };
+
+      const result = await applyFilterlist([doc1, doc2], rules, mockSalt);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ user: { name: 'alice' } });
+      expect(result[1]).toEqual({ user: { name: 'bob' } });
+    });
+
     test('should skip non-existent fields', async () => {
       const data = [{ user: 'john', email: 'john@example.com' }];
       const rules = {

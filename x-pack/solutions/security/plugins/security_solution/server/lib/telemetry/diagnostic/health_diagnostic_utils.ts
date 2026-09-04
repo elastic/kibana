@@ -198,17 +198,7 @@ export async function applyFilterlist(
 
   for (const rawDoc of data) {
     const doc = unflatten(rawDoc as AnyObject);
-    if (Array.isArray(doc)) {
-      const docs = doc as unknown[];
-      const result = await Promise.all(
-        docs.map((d) => {
-          return applyFilterToDoc(d);
-        })
-      );
-      filteredResult.push(result);
-    } else {
-      filteredResult.push(await applyFilterToDoc(doc));
-    }
+    filteredResult.push(await applyFilterToDoc(doc));
   }
 
   dek?.fill(0);
