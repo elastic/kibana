@@ -265,6 +265,15 @@ apiTest.describe(
 
       assertNoRawSecret(apiResponse);
 
+      // The `synthetics` Fleet package omits `enabled` (when true, the Heartbeat
+      // default) and `check.request.method` (when unset) from the compiled stream
+      // instead of always emitting them - tolerate either representation rather
+      // than pinning the test to one package version.
+      expect(compiledStream.enabled ?? true).toBe(true);
+      expect(compiledStream['check.request.method'] ?? null).toBeNull();
+      delete compiledStream.enabled;
+      delete compiledStream['check.request.method'];
+
       expect(enabledStream?.compiled_stream).toStrictEqual({
         __ui: { is_tls_enabled: false },
         type: 'http',
@@ -272,7 +281,6 @@ apiTest.describe(
         origin: 'ui',
         'run_from.id': location.id,
         'run_from.geo.name': location.label,
-        enabled: true,
         urls: 'https://nextjs-test-synthetics.vercel.app/api/users',
         schedule: '@every 5m',
         timeout: '180s',
@@ -285,7 +293,6 @@ apiTest.describe(
         'response.include_headers': true,
         'response.include_body': 'never',
         'response.include_body_max_bytes': 1024,
-        'check.request.method': null,
         'check.request.headers': '********',
         'check.request.body': '********',
         'check.response.status': ['200', '201'],
