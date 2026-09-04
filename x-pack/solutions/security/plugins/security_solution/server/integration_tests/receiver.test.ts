@@ -20,9 +20,6 @@ import { Plugin as SecuritySolutionPlugin } from '../plugin';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Nullable } from '../lib/telemetry/types';
 
-// not needed, but it avoids some error messages like "Error: Cross origin http://localhost forbidden"
-jest.mock('axios');
-
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 const securitySolutionPlugin = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');

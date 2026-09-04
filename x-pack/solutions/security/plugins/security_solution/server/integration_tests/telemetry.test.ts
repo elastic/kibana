@@ -5,7 +5,6 @@
  * 2.0.
  */
 import Path from 'path';
-import axios, { type AxiosRequestConfig } from 'axios';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
@@ -24,9 +23,10 @@ import {
   eventually,
   setupTestServers,
   removeFile,
-  mockAxiosGet,
-  mockAxiosPost,
+  mockFetchGet,
+  mockFetchPost,
   DEFAULT_GET_ROUTES,
+  createFetchResponse,
 } from './lib/helpers';
 import {
   cleanupMockedAlerts,
@@ -65,14 +65,16 @@ import type { ITelemetryReceiver, TelemetryReceiver } from '../lib/telemetry/rec
 import type { TaskMetric } from '../lib/telemetry/task_metrics.types';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 
-jest.mock('axios');
-
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 const securitySolutionStartSpy = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
-const mockedAxiosGet = jest.spyOn(axios, 'get');
-const mockedAxiosPost = jest.spyOn(axios, 'post');
+const mockedFetchGet = jest.fn();
+const mockedFetchPost = jest.fn();
+jest.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+  const mock = init?.method === 'POST' ? mockedFetchPost : mockedFetchGet;
+  return createFetchResponse(await mock(input.toString(), init?.body, init));
+});
 
 const securitySolutionPlugin = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
 
@@ -143,8 +145,8 @@ describe('telemetry tasks', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    mockAxiosPost(mockedAxiosPost);
-    mockAxiosGet(mockedAxiosGet, [
+    mockFetchPost(mockedFetchPost);
+    mockFetchGet(mockedFetchGet, [
       ...DEFAULT_GET_ROUTES,
       [
         /.*telemetry-buffer-and-batch-sizes-v1.*/,
@@ -186,7 +188,7 @@ describe('telemetry tasks', () => {
 
       // wait until the events are sent to the telemetry server
       const body = await eventually(async () => {
-        const found = mockedAxiosPost.mock.calls.find(([url]) => {
+        const found = mockedFetchPost.mock.calls.find(([url]) => {
           return url.startsWith(ENDPOINT_STAGING) && url.endsWith('security-lists-v2');
         });
 
@@ -221,15 +223,17 @@ describe('telemetry tasks', () => {
       requests.forEach((r) => {
         expect(r.requestConfig).not.toBeFalsy();
         if (r.requestConfig && r.requestConfig.headers) {
-          expect(r.requestConfig.headers['X-Telemetry-Sender']).not.toEqual('async');
+          expect(new Headers(r.requestConfig.headers).get('X-Telemetry-Sender')).not.toEqual(
+            'async'
+          );
         }
       });
     });
 
     it('should use new sender when configured', async () => {
-      mockAxiosPost(mockedAxiosPost);
+      mockFetchPost(mockedFetchPost);
 
-      mockAxiosGet(mockedAxiosGet, [
+      mockFetchGet(mockedFetchGet, [
         ...DEFAULT_GET_ROUTES,
         [
           /.*telemetry-buffer-and-batch-sizes-v1.*/,
@@ -246,7 +250,7 @@ describe('telemetry tasks', () => {
       requests.forEach((r) => {
         expect(r.requestConfig).not.toBeFalsy();
         if (r.requestConfig && r.requestConfig.headers) {
-          expect(r.requestConfig.headers['X-Telemetry-Sender']).toEqual('async');
+          expect(new Headers(r.requestConfig.headers).get('X-Telemetry-Sender')).toEqual('async');
         }
       });
     });
@@ -254,8 +258,8 @@ describe('telemetry tasks', () => {
     it('should update sender queue config', async () => {
       const expectedConfig = fakeBufferAndSizesConfigWithQueues.sender_channels['task-metrics'];
 
-      mockAxiosPost(mockedAxiosPost);
-      mockAxiosGet(mockedAxiosGet, [
+      mockFetchPost(mockedFetchPost);
+      mockFetchGet(mockedFetchGet, [
         ...DEFAULT_GET_ROUTES,
         [
           /.*telemetry-buffer-and-batch-sizes-v1.*/,
@@ -293,7 +297,7 @@ describe('telemetry tasks', () => {
 
       // wait until the events are sent to the telemetry server
       const body = await eventually(async () => {
-        const found = mockedAxiosPost.mock.calls.find(([url]) => {
+        const found = mockedFetchPost.mock.calls.find(([url]) => {
           return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TelemetryChannel.ENDPOINT_ALERTS);
         });
 
@@ -311,7 +315,7 @@ describe('telemetry tasks', () => {
 
       // wait until the events are sent to the telemetry server
       const body = await eventually(async () => {
-        const found = mockedAxiosPost.mock.calls.find(([url]) => {
+        const found = mockedFetchPost.mock.calls.find(([url]) => {
           return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TelemetryChannel.ENDPOINT_ALERTS);
         });
 
@@ -755,7 +759,7 @@ describe('telemetry tasks', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function getEndpointMetaRequests(atLeast: number = 1): Promise<any[]> {
     return eventually(async () => {
-      const found = mockedAxiosPost.mock.calls.filter(([url]) => {
+      const found = mockedFetchPost.mock.calls.filter(([url]) => {
         return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_ENDPOINT_META);
       });
 
@@ -777,7 +781,7 @@ describe('telemetry tasks', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function getAlertsDetectionsRequests(atLeast: number = 1): Promise<any[]> {
     return eventually(async () => {
-      const found = mockedAxiosPost.mock.calls.filter(([url]) => {
+      const found = mockedFetchPost.mock.calls.filter(([url]) => {
         return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_DETECTION_ALERTS);
       });
 
@@ -866,12 +870,12 @@ describe('telemetry tasks', () => {
   ): Promise<
     Array<{
       taskMetric: TaskMetric;
-      requestConfig: AxiosRequestConfig<unknown> | undefined;
+      requestConfig: RequestInit | undefined;
     }>
   > {
     const taskType = getTelemetryTaskType(task);
     return eventually(async () => {
-      const calls = mockedAxiosPost.mock.calls.flatMap(([url, data, config]) => {
+      const calls = mockedFetchPost.mock.calls.flatMap(([url, data, config]) => {
         return (data as string).split('\n').map((body) => {
           return { url, body, config };
         });
