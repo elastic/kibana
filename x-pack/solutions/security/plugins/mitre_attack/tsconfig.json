@@ -20,6 +20,7 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/security-mitre-attack-common",
     "@kbn/security-mitre-attack-server",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/logging-mocks"
   ]
 }
