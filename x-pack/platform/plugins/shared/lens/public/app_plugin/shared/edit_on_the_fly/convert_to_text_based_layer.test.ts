@@ -268,6 +268,69 @@ describe('convertFormBasedToTextBasedLayer', () => {
     ]);
   });
 
+  it('creates one column per original column when several share one ES|QL column', () => {
+    // A primary and a secondary metric that are both "Average of bytes" collapse to a single
+    // ES|QL column, but each Lens dimension still needs its own column to reference.
+    const duplicateMetricColumn = {
+      operationType: 'average',
+      sourceField: 'bytes',
+      label: 'Average of bytes',
+      dataType: 'number',
+      isBucketed: false,
+      scale: 'ratio',
+    };
+    const duplicateMetricState = {
+      layers: {
+        [layerId]: {
+          indexPatternId: 'test-index-pattern',
+          columnOrder: ['col1', 'col2'],
+          columns: { col1: duplicateMetricColumn, col2: duplicateMetricColumn },
+        },
+      },
+      currentIndexPatternId: 'test-index-pattern',
+    } as unknown as FormBasedPrivateState;
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: [
+        createConvertibleLayer('FROM test-index | STATS AVG(bytes)', {
+          'AVG(bytes)': [
+            ...createColumnMapping('col1', 'Primary', 'number', {
+              operationType: 'average',
+              sourceField: 'bytes',
+              customLabel: true,
+            }),
+            ...createColumnMapping('col2', 'Secondary', 'number', {
+              operationType: 'average',
+              sourceField: 'bytes',
+              customLabel: true,
+            }),
+          ],
+        }),
+      ],
+      attributes: mockAttributes,
+      visualizationState: { layerId, layerType: 'data', metricAccessor: 'col1' },
+      datasourceStates: { formBased: { state: duplicateMetricState, isLoading: false } },
+      framePublicAPI: createFrameAPI(),
+    });
+
+    expect(result?.state.datasourceStates.textBased?.layers[layerId]?.columns).toEqual([
+      {
+        columnId: 'col1',
+        customLabel: true,
+        fieldName: 'AVG(bytes)',
+        label: 'Primary',
+        meta: { type: 'number' },
+      },
+      {
+        columnId: 'col2',
+        customLabel: true,
+        fieldName: 'AVG(bytes)',
+        label: 'Secondary',
+        meta: { type: 'number' },
+      },
+    ]);
+  });
+
   it('works with visualization states without layers array', () => {
     const metricVisualizationState = { layerId, layerType: 'data', accessor: 'col2' };
     const result = convertFormBasedToTextBasedLayer({
