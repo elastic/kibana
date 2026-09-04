@@ -25,18 +25,17 @@ import { getRelatedEntitySignificance } from './attach_related_entities';
 
 export const POOL_SIZE = 150;
 
+/**
+ * Upper bound on the rendered pool payload handed to the LLM. Guards against
+ * context-window pressure and latency when entities are unusually dense.
+ * ~480k chars is ~155k tokens on the heaviest tokenizer observed (Claude,
+ * ~3.09 chars/token) = ~78% of a 200k-context model, and ~13% of a 1M model,
+ * so it only ever trims pathologically dense pools. Tunable.
+ */
+export const MAX_POOL_PAYLOAD_CHARS = 480_000;
+
 const relationshipsScore = (candidate: LeadCandidate): number =>
   candidate.topRelatedEntities.reduce((sum, r) => sum + getRelatedEntitySignificance(r), 0);
-
-/**
- * Ranks exploratory candidates by related-entity significance so High/Critical
- * (and other strong) relationships are included, then caps at {@link POOL_SIZE}.
- * Candidates without those relationships still fill remaining slots.
- */
-const buildExploratoryPool = (exploratory: readonly LeadCandidate[]): LeadCandidate[] =>
-  [...exploratory]
-    .sort((a, b) => relationshipsScore(b) - relationshipsScore(a))
-    .slice(0, POOL_SIZE);
 
 const formatPoolEntity = (candidate: LeadCandidate, index: number): string => {
   const { entity, observations, topRelatedEntities, relatedEntityCounts } = candidate;
@@ -69,8 +68,31 @@ const formatPoolEntity = (candidate: LeadCandidate, index: number): string => {
     .filter(Boolean)
     .join('\n');
 };
-const formatPoolPayload = (pool: readonly LeadCandidate[]): string =>
-  pool.map((c, i) => formatPoolEntity(c, i)).join('\n\n');
+
+/**
+ * Ranks exploratory candidates by related-entity significance so High/Critical
+ * (and other strong) relationships are included, then caps at {@link POOL_SIZE}
+ * and {@link MAX_POOL_PAYLOAD_CHARS}. Candidates without those relationships
+ * still fill remaining slots.
+ */
+const buildExploratoryPool = (
+  exploratory: readonly LeadCandidate[]
+): { pool: LeadCandidate[]; poolPayload: string } => {
+  const ranked = [...exploratory].sort((a, b) => relationshipsScore(b) - relationshipsScore(a));
+  const pool: LeadCandidate[] = [];
+  const blocks: string[] = [];
+  let chars = 0;
+  for (const candidate of ranked) {
+    if (pool.length >= POOL_SIZE) break;
+    const block = formatPoolEntity(candidate, pool.length);
+    const added = block.length + (pool.length > 0 ? 2 : 0);
+    if (chars + added > MAX_POOL_PAYLOAD_CHARS) break;
+    chars += added;
+    pool.push(candidate);
+    blocks.push(block);
+  }
+  return { pool, poolPayload: blocks.join('\n\n') };
+};
 
 const PROMOTION_PROMPT = `You are a senior security analyst seeding a threat hunt.
 
@@ -118,12 +140,19 @@ export const buildExploratoryLeads = async (
   candidates: readonly LeadCandidate[],
   { chatModel, logger }: { chatModel: InferenceChatModel; logger: Logger }
 ): Promise<LeadCandidate[]> => {
-  const pool = buildExploratoryPool(candidates);
+  const { pool, poolPayload } = buildExploratoryPool(candidates);
   logger.debug(
     `[LeadGeneration] Exploratory pool: ${pool.length} of ${candidates.length} exploratory candidates`
   );
   if (pool.length === 0) {
     return [];
+  }
+
+  const countCap = Math.min(candidates.length, POOL_SIZE);
+  if (pool.length < countCap) {
+    logger.info(
+      `[LeadGeneration][Telemetry] Exploratory pool trimmed by payload budget: ${pool.length}/${countCap} candidates, ${poolPayload.length}/${MAX_POOL_PAYLOAD_CHARS} chars`
+    );
   }
 
   const llmSelectionStart = Date.now();
@@ -141,7 +170,7 @@ export const buildExploratoryLeads = async (
 
     const { selections } = await chain.invoke({
       max_selections: String(MAX_PROMOTED_LEADS),
-      pool_payload: formatPoolPayload(pool),
+      pool_payload: poolPayload,
     });
 
     if (!Array.isArray(selections)) {
