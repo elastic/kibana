@@ -53,7 +53,6 @@ import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_pan
 import {
   useEntitiesWithAlertsCount,
   useEntitiesWithAnomaliesCount,
-  useHiddenRiskCount,
   useWatchlistedCount,
   useNewEntityCount,
   useRiskMoversCount,
@@ -218,8 +217,6 @@ const EntityAnalyticsHomePageContent = () => {
     useEntitiesWithAlertsCount({ spaceId: resolvedSpaceId });
   const { count: anomaliesCount, entityIds: anomaliesEntityIds, isLoading: anomaliesLoading } =
     useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId });
-  const { count: hiddenRiskCount, entityIds: hiddenRiskEntityIds, isLoading: hiddenRiskLoading } =
-    useHiddenRiskCount({ spaceId: resolvedSpaceId });
   const { count: watchlistedCount, isLoading: watchlistedLoading } =
     useWatchlistedCount({ spaceId: resolvedSpaceId });
   const { count: newEntityCount, isLoading: newEntityLoading } =
@@ -245,8 +242,6 @@ const EntityAnalyticsHomePageContent = () => {
         return alertsEntityIds.length > 0 ? { terms: { 'entity.id': alertsEntityIds } } : null;
       case 'entitiesWithAnomalies':
         return anomaliesEntityIds.length > 0 ? { terms: { 'entity.id': anomaliesEntityIds } } : null;
-      case 'hiddenRisk':
-        return hiddenRiskEntityIds.length > 0 ? { terms: { 'entity.id': hiddenRiskEntityIds } } : null;
       case 'riskMovers':
         return riskMoversEntityIds.length > 0 ? { terms: { 'entity.id': riskMoversEntityIds } } : null;
       case 'newlyHighCritical':
@@ -254,7 +249,7 @@ const EntityAnalyticsHomePageContent = () => {
       default:
         return getCardEntityFilter(activeFilter.cardId);
     }
-  }, [activeFilter, alertsEntityIds, anomaliesEntityIds, hiddenRiskEntityIds, riskMoversEntityIds, newlyHCEntityIds]);
+  }, [activeFilter, alertsEntityIds, anomaliesEntityIds, riskMoversEntityIds, newlyHCEntityIds]);
 
   const signalCards = useMemo((): SignalCardData[] => [
     {
@@ -286,13 +281,6 @@ const EntityAnalyticsHomePageContent = () => {
       filterLabel: 'Newly high/critical',
     },
     {
-      id: 'hiddenRisk',
-      title: 'Early warning',
-      value: hiddenRiskLoading ? 0 : hiddenRiskCount,
-      description: 'Non-H/C entities with a max alert risk score ≥70 in the last 30 days',
-      filterLabel: 'Early warning',
-    },
-    {
       id: 'watchlisted',
       title: 'Watchlisted',
       value: watchlistedLoading ? 0 : watchlistedCount,
@@ -311,7 +299,6 @@ const EntityAnalyticsHomePageContent = () => {
     anomaliesCount, anomaliesLoading,
     riskMoversCount, riskMoversLoading,
     newlyHCCount, newlyHCLoading,
-    hiddenRiskCount, hiddenRiskLoading,
     watchlistedCount, watchlistedLoading,
     newEntityCount, newEntityLoading,
   ]);

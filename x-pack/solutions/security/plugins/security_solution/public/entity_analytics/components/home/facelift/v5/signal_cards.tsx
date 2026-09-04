@@ -39,7 +39,7 @@ export interface SignalCardsProps {
   onAddCardToTimeline?: (cardId: SignalCardId) => void;
 }
 
-/** 7 tiles in a 4-column × 2-row grid — same height as the original 6-tile layout. */
+/** 6 tiles in a 3-column × 2-row grid — same height as the original 6-tile layout. */
 const CARDS_HEIGHT = METRIC_CHARTS_BODY_HEIGHT;
 /**
  * Match Elastic Charts `Metric` defaults for a ~156px tile
@@ -69,7 +69,6 @@ const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
   entitiesWithAnomalies: 'Entities with anomalies',
   riskMovers: 'Risk movers',
   newlyHighCritical: 'Newly high/critical',
-  hiddenRisk: 'Early warning',
   watchlisted: 'Watchlisted',
   newEntity: 'New entity',
 };
@@ -80,7 +79,6 @@ const V5_CARD_DESCRIPTIONS: Partial<Record<SignalCardId, string>> = {
   entitiesWithAnomalies: 'Entities with at least one ML anomaly in the last 24h',
   riskMovers: 'Entities whose risk score rose ≥10 points vs yesterday',
   newlyHighCritical: 'Entities that crossed into High or Critical risk since yesterday',
-  hiddenRisk: 'Non-H/C entities with a max alert risk score ≥70 in the last 30 days',
   watchlisted: 'Entities on a watchlist with a risk score above zero',
   newEntity: 'Entities first seen in the last 7 days with a risk score above zero',
 };
@@ -512,7 +510,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
       <div
         css={css`
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           grid-template-rows: repeat(2, minmax(0, 1fr));
           block-size: 100%;
         `}
@@ -520,7 +518,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
         {cards.map((card, index) => {
           const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
           const dimmed = Boolean(anySelected && !selected);
-          const col = index % 4;
+          const col = index % 3;
           const row = Math.floor(index / 3);
 
           return (

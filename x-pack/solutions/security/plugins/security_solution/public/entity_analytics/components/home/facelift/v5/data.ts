@@ -10,7 +10,6 @@ export type SignalCardId =
   | 'entitiesWithAnomalies'
   | 'riskMovers'
   | 'newlyHighCritical'
-  | 'hiddenRisk'
   | 'watchlisted'
   | 'newEntity';
 
