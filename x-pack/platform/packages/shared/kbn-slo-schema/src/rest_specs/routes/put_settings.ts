@@ -4,25 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { serverlessSloSettingsSchema, sloSettingsSchema } from '../../schema/settings';
+import { z } from '@kbn/zod';
 
-const putSLOSettingsParamsSchema = t.type({
+import { serverlessSloSettingsSchema, sloSettingsSchema } from '../../schema/zod/settings';
+
+const putSLOSettingsParamsSchema = z.object({
   body: sloSettingsSchema,
 });
 
-const putSLOServerlessSettingsParamsSchema = t.type({
+const putSLOServerlessSettingsParamsSchema = z.object({
   body: serverlessSloSettingsSchema,
 });
 
 const putSLOSettingsResponseSchema = sloSettingsSchema;
 
-type PutSLOSettingsParams = t.TypeOf<typeof putSLOSettingsParamsSchema.props.body>;
-type PutServerlessSLOSettingsParams = t.TypeOf<
-  typeof putSLOServerlessSettingsParamsSchema.props.body
+type PutSLOSettingsParams = z.output<typeof putSLOSettingsParamsSchema.shape.body>;
+type PutServerlessSLOSettingsParams = z.output<
+  typeof putSLOServerlessSettingsParamsSchema.shape.body
 >;
-type PutSLOSettingsResponse = t.OutputOf<typeof putSLOSettingsResponseSchema>;
-type GetSLOSettingsResponse = t.OutputOf<typeof sloSettingsSchema>;
+type PutSLOSettingsResponse = z.output<typeof putSLOSettingsResponseSchema>;
+type GetSLOSettingsResponse = z.output<typeof sloSettingsSchema>;
 
 export {
   putSLOServerlessSettingsParamsSchema,

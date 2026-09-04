@@ -6,11 +6,9 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import type { Indicator } from '@kbn/slo-schema';
-import { indicatorSchema, sloDefinitionSchema } from '@kbn/slo-schema';
+import { indicatorSchemaZod, sloDefinitionSchemaZod } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import { isLeft } from 'fp-ts/Either';
 import type { SLODefinition } from '../../domain/models';
 import type { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 
@@ -18,7 +16,7 @@ export function fromRemoteSummaryDocumentToSloDefinition(
   summaryDoc: EsSummaryDocument,
   logger: Logger
 ): SLODefinition | undefined {
-  const res = sloDefinitionSchema.decode({
+  const res = sloDefinitionSchemaZod.safeParse({
     id: summaryDoc.slo.id,
     name: summaryDoc.slo.name,
     description: summaryDoc.slo.description,
@@ -49,34 +47,32 @@ export function fromRemoteSummaryDocumentToSloDefinition(
     updatedBy: summaryDoc.slo.updatedBy,
   });
 
-  if (isLeft(res)) {
-    const errors = formatErrors(res.left);
+  if (!res.success) {
     logger.debug(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
-    logger.debug(errors.join('|'));
+    logger.debug(res.error.message);
 
     return undefined;
   }
 
-  return res.right;
+  return res.data;
 }
 
 /**
  * Temporary documents priors to 8.14 don't have indicator.params, therefore we need to fallback to a dummy
  */
 function getIndicator(summaryDoc: EsSummaryDocument, logger: Logger): Indicator {
-  const res = indicatorSchema.decode(summaryDoc.slo.indicator);
+  const res = indicatorSchemaZod.safeParse(summaryDoc.slo.indicator);
 
-  if (isLeft(res)) {
-    const errors = formatErrors(res.left);
+  if (!res.success) {
     logger.debug(
       `Invalid indicator from remote summary SLO id [${summaryDoc.slo.id}] - Fallback on dummy indicator`
     );
-    logger.debug(errors.join('|'));
+    logger.debug(res.error.message);
 
     return getDummyIndicator(summaryDoc);
   }
 
-  return res.right;
+  return res.data;
 }
 
 function getDummyIndicator(summaryDoc: EsSummaryDocument): Indicator {

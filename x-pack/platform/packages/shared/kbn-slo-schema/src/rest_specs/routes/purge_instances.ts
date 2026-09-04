@@ -4,14 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { durationType, sloIdSchema } from '../../schema';
+import { z } from '@kbn/zod';
 
-const purgeInstancesParamsSchema = t.type({
-  body: t.partial({
-    list: t.array(sloIdSchema),
-    staleDuration: durationType,
-    force: t.boolean,
+import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
+import { durationType } from '../../schema/zod/duration';
+import { sloIdSchema } from '../../schema/zod/slo';
+
+const purgeInstancesParamsSchema = z.object({
+  body: z.object({
+    list: z.array(sloIdSchema).optional(),
+    staleDuration: durationType.optional(),
+    force: z.boolean().optional(),
   }),
 });
 
@@ -19,12 +22,12 @@ interface PurgeInstancesResponse {
   taskId?: string;
 }
 
-type PurgeInstancesInput = t.OutputOf<typeof purgeInstancesParamsSchema.props.body>;
-type PurgeInstancesParams = t.TypeOf<typeof purgeInstancesParamsSchema.props.body>;
+type PurgeInstancesInput = z.input<typeof purgeInstancesParamsSchema.shape.body>;
+type PurgeInstancesParams = z.output<typeof purgeInstancesParamsSchema.shape.body>;
 
-const purgeInstancesStatusParamsSchema = t.type({
-  path: t.type({
-    taskId: t.string,
+const purgeInstancesStatusParamsSchema = z.object({
+  path: z.object({
+    taskId: z.string().max(MAX_KEYWORD_LENGTH),
   }),
 });
 

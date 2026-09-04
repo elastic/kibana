@@ -4,52 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { boundedProjectRoutingSchema, indicatorSchema, objectiveSchema } from '../../schema';
-import { dateType, groupingsSchema } from '../../schema/common';
+import { z } from '@kbn/zod';
 
-const getPreviewDataParamsSchema = t.type({
-  body: t.intersection([
-    t.type({
-      indicator: indicatorSchema,
-      range: t.type({
-        from: dateType,
-        to: dateType,
-      }),
+import { boundedProjectRoutingSchema, objectiveSchema } from '../../schema/zod/slo';
+import { indicatorSchema } from '../../schema/zod/indicators';
+import { dateType, groupingsSchema } from '../../schema/zod/common';
+
+const getPreviewDataParamsSchema = z.object({
+  body: z.object({
+    indicator: indicatorSchema,
+    range: z.object({
+      from: dateType,
+      to: dateType,
     }),
-    t.partial({
-      objective: objectiveSchema,
-      remoteName: t.string,
-      groupings: groupingsSchema,
-      groupBy: t.array(t.string),
-      projectRoutings: t.union([boundedProjectRoutingSchema, t.null]),
-    }),
-  ]),
+    objective: objectiveSchema.optional(),
+    remoteName: z.string().optional(),
+    groupings: groupingsSchema.optional(),
+    groupBy: z.array(z.string()).optional(),
+    projectRoutings: boundedProjectRoutingSchema.nullable().optional(),
+  }),
 });
 
-const previewDataResponseSchema = t.intersection([
-  t.type({
-    date: dateType,
-    sliValue: t.union([t.number, t.null]),
-  }),
-  t.partial({
-    events: t.type({
-      good: t.number,
-      bad: t.number,
-      total: t.number,
-    }),
-  }),
-]);
+const previewDataResponseSchema = z.object({
+  date: dateType,
+  sliValue: z.number().nullable(),
+  events: z
+    .object({
+      good: z.number(),
+      bad: z.number(),
+      total: z.number(),
+    })
+    .optional(),
+});
 
-const getPreviewDataResponseSchema = t.intersection([
-  t.type({
-    results: t.array(previewDataResponseSchema),
-  }),
-  t.partial({ groups: t.record(t.string, t.array(previewDataResponseSchema)) }),
-]);
+const getPreviewDataResponseSchema = z.object({
+  results: z.array(previewDataResponseSchema),
+  groups: z.record(z.string(), z.array(previewDataResponseSchema)).optional(),
+});
 
-type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
-type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
+type GetPreviewDataParams = z.output<typeof getPreviewDataParamsSchema.shape.body>;
+type GetPreviewDataResponse = z.input<typeof getPreviewDataResponseSchema>;
 
 export { getPreviewDataParamsSchema, getPreviewDataResponseSchema, previewDataResponseSchema };
 export type { GetPreviewDataParams, GetPreviewDataResponse };
