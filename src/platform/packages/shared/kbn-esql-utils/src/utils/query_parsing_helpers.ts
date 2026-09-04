@@ -329,7 +329,9 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 };
 
 /**
- * Returns ES|QL parameter names without `?`/`??` prefixes, optionally filtered by Identifier (`??`) or Value (`?`) `paramKind`.
+ * Returns the names of ES|QL variables used in a query, without `?`/`??` prefixes.
+ * @param esql The ESQL query string
+ * @param prefix Keep only Identifier (`??`) or Value (`?`) variables; omit for both.
  */
 export const getESQLQueryVariables = (esql: string, prefix?: VariableNamePrefix): string[] => {
   const { root } = Parser.parse(esql);
