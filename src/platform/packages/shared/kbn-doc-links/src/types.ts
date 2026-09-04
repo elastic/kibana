@@ -539,6 +539,7 @@ export interface DocLinks {
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
+    esqlDataFederationSecurityPrivileges: string;
     indicesPrivileges: string;
     kibanaTLS: string;
     kibanaPrivileges: string;

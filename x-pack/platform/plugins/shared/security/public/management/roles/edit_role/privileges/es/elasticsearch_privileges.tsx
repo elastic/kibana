@@ -53,9 +53,6 @@ interface Props {
 }
 
 export class ElasticsearchPrivileges extends Component<Props, {}> {
-  private static readonly dataSourceDocLink =
-    'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-security#privileges';
-
   private ensureGlobalPrivilege = (): estypes.SecurityGlobalPrivilege => {
     // @ts-expect-error SecurityGlobalPrivilege expects application attribute but it should be optional
     return this.props.role.elasticsearch.global ?? {};
@@ -288,16 +285,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
                   id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesDescription"
                   defaultMessage="Control access to ES|QL data sources. "
                 />
-                <EuiLink
-                  className="editRole__learnMore"
-                  href={ElasticsearchPrivileges.dataSourceDocLink}
-                  target={'_blank'}
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.elasticSearchPrivileges.dataSourcePrivilegesLearnMoreLinkText"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
+                {this.learnMore(docLinks.links.security.esqlDataFederationSecurityPrivileges)}
               </p>
             </EuiText>
             <DataSourcePrivileges
