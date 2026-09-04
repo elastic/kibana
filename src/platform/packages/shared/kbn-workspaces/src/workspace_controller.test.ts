@@ -61,6 +61,15 @@ async function ensureBaseClone(context: Awaited<ReturnType<typeof createContext>
 }
 
 describe('@kbn/workspaces controller', () => {
+  test('fromSourceRepo works when the workspaces root does not exist yet', async () => {
+    const context = await createContext();
+    // no ensureBaseClone: nothing has created workspacesRoot
+    const controller = new WorkspaceController(context);
+    const source = await controller.fromSourceRepo();
+    expect(source).toBeInstanceOf(SourceRepoWorkspace);
+    await expect(Fs.readFile(context.stateFilepath, 'utf8')).resolves.toContain('_source');
+  });
+
   test('cache key changes when diff changes', async () => {
     const context = await createContext();
     await ensureBaseClone(context);
