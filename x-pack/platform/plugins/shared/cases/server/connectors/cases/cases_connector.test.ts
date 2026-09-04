@@ -127,7 +127,7 @@ describe('CasesConnector', () => {
       autoPushCase,
     });
 
-    expect(CasesConnectorExecutorMock).toBeCalledWith({
+    expect(CasesConnectorExecutorMock).toHaveBeenCalledWith({
       logger,
       casesClient: { foo: 'bar' },
       actionsClient: {},
@@ -160,7 +160,7 @@ describe('CasesConnector', () => {
       autoPushCase,
     });
 
-    expect(CasesConnectorExecutorMock).toBeCalledWith(
+    expect(CasesConnectorExecutorMock).toHaveBeenCalledWith(
       expect.objectContaining({ isTemplatesEnabled: true })
     );
   });
@@ -208,7 +208,7 @@ describe('CasesConnector', () => {
       autoPushCase,
     });
 
-    expect(mockExecute).toBeCalledWith({
+    expect(mockExecute).toHaveBeenCalledWith({
       alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupedAlerts,
       groupingBy,
@@ -289,7 +289,7 @@ describe('CasesConnector', () => {
       autoPushCase,
     });
 
-    expect(mockExecute).toBeCalledWith(
+    expect(mockExecute).toHaveBeenCalledWith(
       expect.objectContaining({
         internallyManagedAlerts: true,
         maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
@@ -336,7 +336,7 @@ describe('CasesConnector', () => {
       autoPushCase,
     });
 
-    expect(getCasesClient).toBeCalled();
+    expect(getCasesClient).toHaveBeenCalled();
   });
 
   it('throws the same error if the executor throws a CasesConnectorError error', async () => {
@@ -474,8 +474,8 @@ describe('CasesConnector', () => {
       autoPushCase,
     });
 
-    expect(nextBackOff).toBeCalledTimes(2);
-    expect(mockExecute).toBeCalledTimes(3);
+    expect(nextBackOff).toHaveBeenCalledTimes(2);
+    expect(mockExecute).toHaveBeenCalledTimes(3);
   });
 
   it('throws if the kibana request is not defined', async () => {
@@ -509,8 +509,8 @@ describe('CasesConnector', () => {
       '[CasesConnector][run] Execution of case connector failed. Message: Kibana request is not defined. Status code: 400'
     );
 
-    expect(nextBackOff).toBeCalledTimes(0);
-    expect(mockExecute).toBeCalledTimes(0);
+    expect(nextBackOff).toHaveBeenCalledTimes(0);
+    expect(mockExecute).toHaveBeenCalledTimes(0);
   });
 
   it('does not execute with no alerts', async () => {
@@ -529,9 +529,9 @@ describe('CasesConnector', () => {
       autoPushCase,
     });
 
-    expect(getCasesClient).not.toBeCalled();
-    expect(CasesConnectorExecutorMock).not.toBeCalled();
-    expect(mockExecute).not.toBeCalled();
-    expect(nextBackOff).not.toBeCalled();
+    expect(getCasesClient).not.toHaveBeenCalled();
+    expect(CasesConnectorExecutorMock).not.toHaveBeenCalled();
+    expect(mockExecute).not.toHaveBeenCalled();
+    expect(nextBackOff).not.toHaveBeenCalled();
   });
 });

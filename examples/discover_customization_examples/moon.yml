@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/control-group-renderer'
   - '@kbn/i18n'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -38,5 +39,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout_examples/**/*
     - '!target/**/*'
 tasks: {}
