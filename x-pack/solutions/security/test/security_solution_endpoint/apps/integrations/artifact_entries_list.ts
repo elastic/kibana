@@ -153,12 +153,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.click(formAction.selector);
         } else if (formAction.type === 'input') {
           const newValue = (formAction.value || '') + (suffix ? suffix : '');
-          await testSubjects.setValue(formAction.selector, newValue);
-          await testSubjects.getAttribute(formAction.selector, 'value').then((value) => {
-            if (value !== newValue) {
-              return testSubjects.setValue(formAction.selector, newValue);
-            }
-          });
+          await testSubjects.setValue(formAction.selector, newValue, { clearWithKeyboard: true });
         } else if (formAction.type === 'clear') {
           await (
             await (await testSubjects.find(formAction.selector)).findByCssSelector('button')
