@@ -22,6 +22,13 @@ const sandboxConfigSchema = schema.object({
   client_key: schema.string(),
   // Optional org identifier forwarded to containermanager.
   organization_id: schema.string({ defaultValue: 'default' }),
+  // S3/MinIO workspace persistence — optional. When set, sandbox /workspace is
+  // snapshotted to S3 after each write tool call and restored on reconnect.
+  sandbox_workspace_bucket: schema.maybe(schema.string()),
+  s3_endpoint: schema.maybe(schema.string()),
+  s3_access_key_id: schema.maybe(schema.string()),
+  s3_secret_access_key: schema.maybe(schema.string()),
+  s3_region: schema.string({ defaultValue: 'us-east-1' }),
 });
 
 const configSchema = schema.object({
