@@ -33,4 +33,4 @@ export type {
   AppHeaderTitleSaveResult,
   ChromeNext,
 } from './chrome_next';
-export type { GlobalHeaderAiButton, GlobalSearchConfig } from '../controls';
+export type { ChromeAiButton, GlobalSearchConfig } from '../controls';

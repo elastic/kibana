@@ -12,8 +12,8 @@ import { distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type {
   ChromeAppHeaderConfig,
+  ChromeAiButton,
   ChromeNewsfeedHandler,
-  GlobalHeaderAiButton,
 } from '@kbn/core-chrome-browser';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
@@ -88,7 +88,7 @@ export function createChromeApi({
   const controls: InternalChromeStart['controls'] = {
     aiButton: {
       get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
-      register: (button: GlobalHeaderAiButton) => {
+      register: (button: ChromeAiButton) => {
         state.aiButton.update((prev) => new Set([...prev, button]));
         return () => {
           state.aiButton.update((prev) => {

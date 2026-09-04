@@ -20,11 +20,11 @@ import type {
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
+  ChromeAiButton,
   ChromeControls,
   ChromeHelp,
   ChromeNewsfeedHandler,
   ChromeNext,
-  GlobalHeaderAiButton,
   ChromeUserBanner,
   GlobalSearchConfig,
   NavigationCustomization,
@@ -163,7 +163,7 @@ export interface InternalChromeStart extends ChromeStart {
 /** @internal */
 export interface InternalChromeControls extends ChromeControls {
   aiButton: ChromeControls['aiButton'] & {
-    get$(): Observable<GlobalHeaderAiButton[]>;
+    get$(): Observable<ChromeAiButton[]>;
   };
   globalSearch: ChromeControls['globalSearch'] & {
     get$(): Observable<GlobalSearchConfig | undefined>;

@@ -21,7 +21,7 @@ import type { ChromeExtensionContent } from '@kbn/core-mount-utils-browser';
  *
  * @public
  */
-export interface GlobalHeaderAiButton {
+export interface ChromeAiButton {
   content: ChromeExtensionContent;
 }
 
@@ -46,18 +46,11 @@ export interface ChromeControls {
      * Global — persists across app changes.
      *
      * @remarks
-     * Stop-gap for the Chrome-Next transition. The end goal is a single, chrome-owned
-     * AI button with one registration point. We are not there yet: the legacy header
-     * lets every solution register its own button and self-manage visibility, so apps
-     * can have more than one in flight at a time. To migrate those apps without
-     * regressing behavior, `register` mirrors that model — it accepts multiple
-     * registrations and renders each registered button as-is (each owner remains
-     * responsible for its own visibility). Once the single-button model lands, this
-     * should collapse to one registration and the multi-button handling can be removed.
-     *
-     * Tech debt: https://github.com/elastic/kibana/issues/272279
+     * Multiple plugins still register AI controls and manage their own visibility.
+     * `register` accepts each registration and renders it as-is until
+     * https://github.com/elastic/kibana/issues/272279 establishes a single owner.
      */
-    register(button: GlobalHeaderAiButton): () => void;
+    register(button: ChromeAiButton): () => void;
   };
   /** Global search configuration. */
   globalSearch: {
