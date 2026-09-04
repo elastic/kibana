@@ -55,7 +55,7 @@ describe('useWorkflowExecutions', () => {
       },
     ],
     page: 1,
-    size: 100,
+    size: 50,
     total: 2,
   };
 
@@ -93,7 +93,7 @@ describe('useWorkflowExecutions', () => {
       'wf-1',
       expect.objectContaining({
         page: 1,
-        size: 100,
+        size: 50,
       })
     );
   });
@@ -242,12 +242,13 @@ describe('useWorkflowExecutions', () => {
     expect(result.current.hasNextPage).toBe(false);
   });
 
-  it('should expose hasNextPage as true when total exceeds page size', async () => {
+  it('should expose hasNextPage as true when the page returns a searchAfter cursor', async () => {
     mockGetWorkflowExecutions.mockResolvedValue({
       results: [executionsPage1.results[0]],
       page: 1,
       size: 1,
       total: 3,
+      searchAfter: ['2024-01-01T10:00:00Z', 'exec-1'],
     });
 
     const { result } = renderExecutionsHook({ workflowId: 'wf-1', size: 1 });
