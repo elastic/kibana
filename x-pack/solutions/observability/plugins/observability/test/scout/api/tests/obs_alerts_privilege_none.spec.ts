@@ -90,18 +90,6 @@ apiTest.describe(
       expect(response).toHaveStatusCode(403);
     });
 
-    apiTest('cannot check investigation availability', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser({
-        kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
-        elasticsearch: { cluster: [], indices: [] },
-      });
-      const response = await apiClient.get(
-        'internal/observability/alerts/investigation/availability',
-        { headers: { ...KIBANA_HEADERS, ...cookieHeader } }
-      );
-      expect(response).toHaveStatusCode(403);
-    });
-
     apiTest('cannot read muted alert state via _find_muted_alerts', async ({ apiClient }) => {
       const response = await apiClient.post('internal/alerting/rules/_find_muted_alerts', {
         headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },

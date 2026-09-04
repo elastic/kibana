@@ -286,6 +286,13 @@ describe('NightshiftInvestigationsClient.list()', () => {
     );
   });
 
+  it('maps concurrency_key onto the stored investigation filter', async () => {
+    await makeClient().list({ concurrency_key: 'alert-1' });
+    expect(repository.find).toHaveBeenCalledWith(
+      expect.objectContaining({ concurrencyKey: 'alert-1' })
+    );
+  });
+
   it('omits sortField when sort_field is not given so the store default applies', async () => {
     await makeClient().list({});
     expect(repository.find).toHaveBeenCalledWith(expect.objectContaining({ sortField: undefined }));

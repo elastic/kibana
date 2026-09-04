@@ -14,6 +14,7 @@ import type {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
@@ -32,6 +33,7 @@ export interface NightshiftInvestigationsSetupDeps {
 
 export interface NightshiftInvestigationsStartDeps {
   agentBuilder?: AgentBuilderPluginStart;
+  ruleRegistry?: RuleRegistryPluginStartContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
