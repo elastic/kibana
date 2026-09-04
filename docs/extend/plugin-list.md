@@ -201,6 +201,7 @@ mapped_pages:
 | [maintenanceWindows](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/maintenance_windows/README.md) | A Kibana plugin providing functionalities to manage maintenance windows. |
 | [maps](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/maps/README.md) | Visualize geo data from Elasticsearch or 3rd party geo-services. |
 | [metricsDataAccess](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/metrics_data_access/README.md) | Exposes utilities to access metrics data. |
+| [mitreAttack](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/mitre_attack/README.md) | Managed MITRE ATT&CK data source for Kibana. |
 | [ml](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ml/readme.md) | This plugin provides access to the machine learning features provided by Elastic. |
 | [monitoring](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/monitoring/readme.md) | This plugin provides the Stack Monitoring kibana application. |
 | [monitoringCollection](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/monitoring_collection/README.md) | This plugin allows for other plugins to add data to Kibana stack monitoring documents. |
