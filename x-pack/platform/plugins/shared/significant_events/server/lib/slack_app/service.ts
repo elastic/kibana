@@ -146,7 +146,7 @@ export class SlackAppService {
     let bearerToken: string | undefined;
 
     if (this.server.core.security.serviceAccounts.isEnabled()) {
-      if (existingConnection?.serviceAccountId) {
+      if (false && existingConnection?.serviceAccountId) {
         serviceAccountId = existingConnection.serviceAccountId;
         this.logger.debug(`Reusing existing UIAM service account ${serviceAccountId}`);
       } else {
@@ -154,16 +154,16 @@ export class SlackAppService {
           const account = await this.server.core.security.serviceAccounts.create(request, {
             name: RELAY_SERVICE_ACCOUNT_NAME,
             assumable_by: [
-              {
-                type: 'platform-service-account',
-                service_account_id: RELAY_SERVICE_ACCOUNT_ID,
-              },
               // Hardcoded for POC
               {
                 type: 'project-service-account',
                 organization_id: 'org1234567890',
                 project_type: 'elasticsearch', // matches local dev cert EIDENT SAN
                 project_id: 'abcdef12345678901234567890123456',
+              },
+              {
+                type: 'platform-service-account',
+                service_account_id: RELAY_SERVICE_ACCOUNT_ID,
               },
             ],
           });
@@ -172,6 +172,12 @@ export class SlackAppService {
           this.logger.error(`Failed to create UIAM service account: ${this.toErrorMessage(error)}`);
           throw error;
         }
+
+        const token = await this.server.core.security.serviceAccounts.exchangeToken(
+          serviceAccountId
+        );
+
+        bearerToken = token.token;
       }
 
       try {
