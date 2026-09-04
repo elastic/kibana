@@ -9,74 +9,16 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
-  type BulkItem,
-  type BulkItemResponse,
-  type BulkItemResult,
-  type BulkPlainItem,
-  type BulkRequestOptions,
-  type BulkResponse,
-  type BulkUpdaterItem,
-  isBulkUpdaterItem,
+import type {
+  BulkItem,
+  BulkItemResponse,
+  BulkItemResult,
+  BulkPlainItem,
+  BulkRequestOptions,
+  BulkResponse,
+  BulkUpdaterItem,
 } from '../types';
-
-export type SharedBulkItem<TExecution extends { id: string }> = BulkPlainItem<TExecution>;
-
-export interface SharedBulkRequestOptions<TExecution extends { id: string }>
-  extends BulkRequestOptions<TExecution> {
-  items: SharedBulkItem<TExecution>[];
-}
-
-type BulkOperation<TExecution extends { id: string }> = NonNullable<
-  estypes.BulkRequest<TExecution, Partial<TExecution> & { id: string }>['operations']
->[number];
-
-const toBulkOperations = <TExecution extends { id: string }>(
-  item: SharedBulkItem<TExecution>
-): Array<BulkOperation<TExecution>> => {
-  const actionMeta = {
-    _id: item.document.id,
-    _index: item.index,
-    ...(item.seqNo !== undefined ? { if_seq_no: item.seqNo } : {}),
-    ...(item.primaryTerm !== undefined ? { if_primary_term: item.primaryTerm } : {}),
-  };
-
-  switch (item.operation) {
-    case 'create':
-      return [{ create: actionMeta }, item.document as BulkOperation<TExecution>];
-
-    case 'update':
-      return [
-        {
-          update: {
-            ...actionMeta,
-            // retry_on_conflict is mutually exclusive with if_seq_no/if_primary_term —
-            // ES ignores it when version-based CAS fields are present.
-            ...(item.retryOnConflict !== undefined && item.seqNo === undefined
-              ? { retry_on_conflict: item.retryOnConflict }
-              : {}),
-          },
-        },
-        { doc: item.document },
-      ];
-
-    case 'upsert':
-      return [
-        {
-          update: {
-            ...actionMeta,
-            ...(item.retryOnConflict !== undefined && item.seqNo === undefined
-              ? { retry_on_conflict: item.retryOnConflict }
-              : {}),
-          },
-        },
-        { doc: item.document, doc_as_upsert: true },
-      ];
-
-    default:
-      throw new Error(`Invalid operation: ${(item as SharedBulkItem<TExecution>).operation}`);
-  }
-};
+import { isBulkUpdaterItem } from '../types';
 
 interface QueueItem<TExecution extends { id: string }> {
   item: BulkItem<TExecution>;
@@ -93,23 +35,12 @@ interface DocumentVersion {
 const fetchFreshVersions = async (
   esClient: ElasticsearchClient,
   logger: Logger,
-  ids: {
-    id: string;
-    index?: string;
-  }[],
-  fallbackIndexes: string[]
+  ids: string[],
+  indexes: string[]
 ): Promise<Map<string, DocumentVersion>> => {
-  const mgetDocs = ids.flatMap(({ id, index }) => {
-    if (index) {
-      return [{ _id: id, _index: index, _source: false as const }];
-    }
-
-    return fallbackIndexes.map((fallbackIndex) => ({
-      _id: id,
-      _index: fallbackIndex,
-      _source: false as const,
-    }));
-  });
+  const mgetDocs = ids.flatMap((id) =>
+    indexes.map((index) => ({ _id: id, _index: index, _source: false as const }))
+  );
 
   const mgetResponse = await esClient.mget({ docs: mgetDocs });
 
@@ -133,36 +64,20 @@ const fetchFreshVersions = async (
   return versionById;
 };
 
-const sendBulkRequest = async <TExecution extends { id: string }>(
+export async function retryOnConflicts<TExecution extends { id: string }>(
   esClient: ElasticsearchClient,
-  request: SharedBulkRequestOptions<TExecution>,
-  logger: Logger
-): Promise<estypes.BulkResponse> => {
-  const operations = request.items.flatMap(toBulkOperations);
-
-  return esClient.bulk<TExecution, Partial<TExecution> & { id: string }>({
-    refresh: request.refresh,
-    operations,
-  });
-};
-
-export async function sharedBulk<TExecution extends { id: string }>(
-  esClient: ElasticsearchClient,
-  request: BulkRequestOptions<TExecution>,
   logger: Logger,
-  fallbackIndexes: string[] = []
+  indexes: string[],
+  options: BulkRequestOptions<TExecution>,
+  action: (request: BulkRequestOptions<TExecution>) => Promise<estypes.BulkResponse>
 ): Promise<BulkResponse> {
-  if (request.items.length === 0) {
-    return { items: [], errors: false };
-  }
-
-  let queuedItems: Array<QueueItem<TExecution>> = request.items.map((item, index) => ({
+  let queuedItems: Array<QueueItem<TExecution>> = options.items.map((item, index) => ({
     item,
     originalIndex: index,
     remainingRetries: item.retryOnConflict ?? 0,
   }));
 
-  const result = new Array<BulkItemResponse>(request.items.length);
+  const result = new Array<BulkItemResponse>(options.items.length);
   let hasErrors = false;
 
   while (queuedItems.length > 0) {
@@ -182,7 +97,7 @@ export async function sharedBulk<TExecution extends { id: string }>(
 
     if (updaterBatch.length > 0) {
       const mgetDocs = updaterBatch.flatMap(({ item }) =>
-        fallbackIndexes.map((index) => ({
+        indexes.map((index) => ({
           _id: item.documentId,
           _index: index,
           ...(item.sourceFields.length > 0 ? { _source_includes: [...item.sourceFields] } : {}),
@@ -226,7 +141,7 @@ export async function sharedBulk<TExecution extends { id: string }>(
         if (!found) {
           result[qi.originalIndex] = {
             id: updaterItem.documentId,
-            index: fallbackIndexes[0] ?? '',
+            index: indexes[0] ?? '',
             error: {
               type: 'document_missing_exception',
               reason: `[_doc][${updaterItem.documentId}]: document missing`,
@@ -265,30 +180,21 @@ export async function sharedBulk<TExecution extends { id: string }>(
     }
 
     if (toSend.length > 0) {
-      const esResponse = await sendBulkRequest(
-        esClient,
-        { ...request, items: toSend.map(({ plainItem }) => plainItem) },
-        logger
-      );
+      const esResponse = await action({
+        ...options,
+        items: toSend.map(({ plainItem }) => plainItem),
+      });
 
-      // Separate conflicts into four buckets:
+      // Separate conflicts into three buckets:
       // - updater-origin: re-queue original BulkUpdaterItem so the next iteration re-mgets
       // - plain OCC (seqNo set): mget fresh seqNo/primaryTerm before re-queuing
-      // - create already-exists: mget backing index and retry as update (data streams
-      //   convert version-miss upserts to create; retrying create can never succeed)
       // - plain non-OCC (no seqNo, using retry_on_conflict): re-queue unchanged
       const conflictingUpdaters: Array<QueueItem<TExecution>> = [];
       interface ConflictingPlainOcc {
         qi: QueueItem<TExecution>;
         plainItem: BulkPlainItem<TExecution>;
       }
-      interface ConflictingCreate {
-        qi: QueueItem<TExecution>;
-        plainItem: BulkPlainItem<TExecution>;
-        responseItem: BulkItemResponse;
-      }
       const conflictingOcc: ConflictingPlainOcc[] = [];
-      const conflictingCreates: ConflictingCreate[] = [];
       const nextQueue: Array<QueueItem<TExecution>> = [];
 
       esResponse.items.forEach((esItem, idx) => {
@@ -315,8 +221,6 @@ export async function sharedBulk<TExecution extends { id: string }>(
             conflictingUpdaters.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
           } else if (plainItem.seqNo !== undefined) {
             conflictingOcc.push({ qi, plainItem });
-          } else if (plainItem.operation === 'create') {
-            conflictingCreates.push({ qi, plainItem, responseItem });
           } else {
             nextQueue.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
           }
@@ -329,16 +233,8 @@ export async function sharedBulk<TExecution extends { id: string }>(
       nextQueue.push(...conflictingUpdaters);
 
       if (conflictingOcc.length > 0) {
-        const docsToRefetch = conflictingOcc.map(({ plainItem }) => ({
-          id: plainItem.document.id,
-          index: plainItem.index,
-        }));
-        const versionById = await fetchFreshVersions(
-          esClient,
-          logger,
-          docsToRefetch,
-          fallbackIndexes
-        );
+        const ids = conflictingOcc.map(({ plainItem }) => plainItem.document.id);
+        const versionById = await fetchFreshVersions(esClient, logger, ids, indexes);
 
         conflictingOcc.forEach(({ qi, plainItem }) => {
           const version = versionById.get(plainItem.document.id);
@@ -347,35 +243,6 @@ export async function sharedBulk<TExecution extends { id: string }>(
             originalIndex: qi.originalIndex,
             remainingRetries: qi.remainingRetries - 1,
           });
-        });
-      }
-
-      if (conflictingCreates.length > 0) {
-        const docsToRefetch = conflictingCreates.map(({ plainItem, responseItem }) => ({
-          id: plainItem.document.id,
-          // Prefer the backing index ES already named on the conflict; mget
-          // against a data-stream alias is not reliable.
-          index: responseItem.index || undefined,
-        }));
-        const versionById = await fetchFreshVersions(
-          esClient,
-          logger,
-          docsToRefetch,
-          fallbackIndexes
-        );
-
-        conflictingCreates.forEach(({ qi, plainItem, responseItem }) => {
-          const version = versionById.get(plainItem.document.id);
-          if (version) {
-            nextQueue.push({
-              item: { ...plainItem, operation: 'update', ...version },
-              originalIndex: qi.originalIndex,
-              remainingRetries: qi.remainingRetries - 1,
-            });
-            return;
-          }
-          result[qi.originalIndex] = responseItem;
-          hasErrors = true;
         });
       }
 

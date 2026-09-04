@@ -1389,57 +1389,55 @@ describe('WorkflowExecutionQueryService', () => {
       channel: 'inbox',
     };
 
-    it('issues a scripted partial update guarded on spaceId with refresh: wait_for', async () => {
-      mockStepDataClient.scriptUpdate.mockResolvedValueOnce({ result: 'updated' });
+    it('issues a bulk updater guarded on spaceId with refresh: wait_for', async () => {
+      mockStepDataClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        items: [{ id: 'step-exec-1', index: '.workflows-step-executions', result: 'updated' }],
+      });
 
       const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
 
       expect(ok).toBe(true);
-      const args = mockStepDataClient.scriptUpdate.mock.calls[0][0];
-      expect(args.id).toBe('step-exec-1');
-      expect(args.refresh).toBe('wait_for');
-      expect(args.retryOnConflict).toBeGreaterThan(0);
-      expect(args.script).toContain('ctx._source.spaceId != params.spaceId');
-      expect(args.script).toContain('ctx._source.finishedAt != null');
-      expect(args.script).toContain('params.settledStatuses.contains(ctx._source.status)');
-      expect(args.script).toContain('ctx._source.hitl.respondedAt != null');
-      expect(args.script).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
-      expect(args.script).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
-      expect(args.script).toContain(
-        'if (params.channel != null) { ctx._source.hitl.channel = params.channel; }'
+      expect(mockStepDataClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          refresh: 'wait_for',
+          items: [
+            expect.objectContaining({
+              operation: 'update',
+              documentId: 'step-exec-1',
+              retryOnConflict: 3,
+              updater: expect.any(Function),
+            }),
+          ],
+        })
       );
-      expect(args.script).toContain('ctx._source.input.remove(params.tokenHashField)');
-      expect(args.script).toContain('ctx._source.input.remove(params.tokenExpiresAtField)');
-      expect(args.params).toEqual({
-        spaceId: 'default',
-        ...audit,
-        settledStatuses: expect.arrayContaining([
-          'completed',
-          'failed',
-          'cancelled',
-          'timed_out',
-          'skipped',
-        ]),
-        tokenHashField: '_hitlTokenHash',
-        tokenExpiresAtField: '_hitlTokenExpiresAt',
-      });
     });
 
-    it('returns false when the scripted update no-ops', async () => {
-      // A noop means either the space guard failed or another responder
-      // already set hitl.respondedAt. The provider treats both as a conflict
-      // and does not schedule a second resume.
-      mockStepDataClient.scriptUpdate.mockResolvedValueOnce({ result: 'noop' });
+    it('returns false when the bulk updater no-ops', async () => {
+      mockStepDataClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        items: [{ id: 'step-exec-1', index: '.workflows-step-executions', result: 'noop' }],
+      });
 
       const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
 
       expect(ok).toBe(false);
     });
 
-    it('returns false when the step doc is gone (not_found result)', async () => {
-      // The data client converts 404 errors to { result: 'not_found' } so this
-      // surfaces as a normal response, not a thrown error.
-      mockStepDataClient.scriptUpdate.mockResolvedValueOnce({ result: 'not_found' });
+    it('returns false when the step doc is gone (document_missing_exception)', async () => {
+      mockStepDataClient.bulk.mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            id: 'step-exec-gone',
+            index: '',
+            error: {
+              type: 'document_missing_exception',
+              reason: '[_doc][step-exec-gone]: document missing',
+            },
+          },
+        ],
+      });
 
       const ok = await service.markStepAsResponded('step-exec-gone', audit, 'default');
 
@@ -1447,10 +1445,19 @@ describe('WorkflowExecutionQueryService', () => {
     });
 
     it('logs and rethrows on any other ES failure so the caller can decide', async () => {
-      mockStepDataClient.scriptUpdate.mockRejectedValueOnce(new Error('boom'));
+      mockStepDataClient.bulk.mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            id: 'step-exec-1',
+            index: '.workflows-step-executions',
+            error: { type: 'cluster_block_exception', reason: 'boom' },
+          },
+        ],
+      });
 
       await expect(service.markStepAsResponded('step-exec-1', audit, 'default')).rejects.toThrow(
-        'boom'
+        'Bulk updater write failed'
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to mark step execution step-exec-1 as responded')

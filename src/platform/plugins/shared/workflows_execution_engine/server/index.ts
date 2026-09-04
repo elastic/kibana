@@ -30,6 +30,9 @@ export type {
 } from './types';
 
 export { getStepExecutionsByWorkflowExecution } from './repositories/data_access_layer/lib/get_step_executions_by_workflow_execution';
+export { getBulkUpdaterWriteResult } from './repositories/data_access_layer/lib/bulk_updater_write_result';
+export type { BulkUpdaterWriteResult } from './repositories/data_access_layer/lib/bulk_updater_write_result';
+export { bulkUpdaterItem } from './repositories/data_access_layer/types';
 
 export {
   registerHitlLifecycleAuditor,

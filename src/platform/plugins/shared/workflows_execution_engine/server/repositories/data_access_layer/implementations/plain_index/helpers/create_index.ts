@@ -9,7 +9,6 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { retryTransientEsErrors } from '../../../../../lib/retry_transient_es_errors';
 
 interface CreateIndexOptions {
   esClient: ElasticsearchClient;
@@ -26,10 +25,7 @@ export const createIndexWithMappings = async ({
 }: CreateIndexOptions): Promise<void> => {
   try {
     // Check if index already exists
-    const indexExists = await retryTransientEsErrors(
-      () => esClient.indices.exists({ index: indexName }),
-      { logger }
-    );
+    const indexExists = await esClient.indices.exists({ index: indexName });
 
     if (indexExists) {
       logger?.debug(`Index ${indexName} already exists`);
@@ -39,14 +35,10 @@ export const createIndexWithMappings = async ({
     logger?.debug(`Creating index ${indexName} with mappings`);
 
     // Create the index with proper mappings
-    await retryTransientEsErrors(
-      () =>
-        esClient.indices.create({
-          index: indexName,
-          mappings,
-        }),
-      { logger }
-    );
+    await esClient.indices.create({
+      index: indexName,
+      mappings,
+    });
 
     logger?.debug(`Successfully created index ${indexName}`);
   } catch (error) {
@@ -68,13 +60,9 @@ export const createOrUpdateIndex = async ({
   logger,
 }: CreateIndexOptions): Promise<void> => {
   try {
-    const indexExists = await retryTransientEsErrors(
-      () =>
-        esClient.indices.exists({
-          index: indexName,
-        }),
-      { logger }
-    );
+    const indexExists = await esClient.indices.exists({
+      index: indexName,
+    });
 
     if (!indexExists) {
       // Create new index
@@ -87,14 +75,10 @@ export const createOrUpdateIndex = async ({
     } else {
       // Index exists, check if we need to update mappings
       try {
-        await retryTransientEsErrors(
-          () =>
-            esClient.indices.putMapping({
-              index: indexName,
-              ...mappings,
-            }),
-          { logger }
-        );
+        await esClient.indices.putMapping({
+          index: indexName,
+          ...mappings,
+        });
         logger?.debug(`Updated mappings for existing index ${indexName}`);
       } catch (mappingError) {
         logger?.warn(`Failed to update mappings for index ${indexName}: ${mappingError.message}`);

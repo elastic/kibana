@@ -13,7 +13,7 @@ import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 
 /** Backing store for execution documents. */
-export type ExecutionStorageSource = 'system_index' | 'data_stream';
+export type ExecutionStorageSource = 'plain_index' | 'data_stream';
 
 /** Search body without index — DAL resolves the target. */
 export type ExecutionsSearchRequest = Omit<estypes.SearchRequest, 'index'>;
@@ -29,6 +29,7 @@ export type UpsertDocument<TDoc extends { id: string }> = Partial<TDoc> & { id: 
 
 export interface CreateDataClientDeps {
   source: ExecutionStorageSource;
+  dataRetention: string;
   logger: Logger;
 }
 
@@ -93,16 +94,6 @@ export interface WritableDataClient<TExecution extends { id: string }> {
   bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse>;
 
   /**
-   * Applies a conditional script update to a single execution document by ID.
-   * Returns:
-   *   - `'updated'`   — script ran and modified the document.
-   *   - `'noop'`      — script ran but made no changes (e.g. condition not met).
-   *   - `'not_found'` — no document exists for the given ID; no write performed.
-   * Throws on storage errors other than not-found.
-   */
-  scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse>;
-
-  /**
    * Deletes all execution documents matching the given query.
    * Throws on storage errors.
    */
@@ -144,41 +135,64 @@ export type StepExecutionSourceProjectionField =
 export type GetWorkflowExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowExecution>;
 export type GetStepExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowStepExecution>;
 
-export interface BulkItem<TDocument extends { id: string }> {
+export interface BulkPlainItem<TDocument extends { id: string }> {
   operation: 'create' | 'update' | 'upsert';
   document: Partial<TDocument> & { id: string };
+  index?: string;
   seqNo?: number;
   primaryTerm?: number;
   retryOnConflict?: number;
+  documentId?: never;
+  sourceFields?: never;
+  updater?: never;
 }
+
+export interface BulkUpdaterItem<
+  TDocument extends { id: string },
+  K extends keyof TDocument & string = keyof TDocument & string
+> {
+  document?: never;
+  operation: 'update';
+  documentId: string;
+  retryOnConflict?: number;
+  sourceFields: readonly K[];
+  updater: (current: Pick<TDocument, K>) => Partial<TDocument> | 'noop';
+}
+
+export function isBulkUpdaterItem<TDocument extends { id: string }>(
+  item: BulkItem<TDocument>
+): item is BulkUpdaterItem<TDocument> {
+  return 'updater' in item;
+}
+
+/** Preserves `K` at array boundaries where `BulkItem` union inference would widen it. */
+export function bulkUpdaterItem<
+  TDocument extends { id: string },
+  K extends keyof TDocument & string
+>(item: BulkUpdaterItem<TDocument, K>): BulkUpdaterItem<TDocument, K> {
+  return item;
+}
+
+export type BulkItem<TDocument extends { id: string }> =
+  | BulkPlainItem<TDocument>
+  | BulkUpdaterItem<TDocument>;
 
 export interface BulkRequestOptions<TDocument extends { id: string }> {
   refresh?: boolean | 'wait_for';
   items: BulkItem<TDocument>[];
 }
 
+export type BulkItemResult = 'created' | 'updated' | 'noop';
+
 /** Per-document outcome aligned with ES bulk item fields (update/index/create). */
 export interface BulkItemResponse extends DocumentVersionFields {
   id: string;
   error?: estypes.ErrorCause;
+  result?: BulkItemResult;
 }
 
 /** Always bulk-shaped: `items.length ===` normalized document count, input order preserved. */
 export interface BulkResponse {
   items: BulkItemResponse[];
   errors: boolean;
-}
-
-export type ScriptUpdateResult = 'updated' | 'not_found' | 'noop';
-
-export interface ScriptUpdateRequest {
-  id: string;
-  script: string;
-  params: Record<string, unknown>;
-  retryOnConflict?: number;
-  refresh?: boolean | 'wait_for';
-}
-
-export interface ScriptUpdateResponse {
-  result: ScriptUpdateResult;
 }
