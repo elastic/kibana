@@ -100,7 +100,7 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
   {
     id: SYSTEM_SECURITY_WATCH_DARK_ID,
     deepLinkId: SecurityPageName.pndWatchDark,
-    name: 'Dark Watch',
+    name: 'Hunt Watch',
     color: '#f59e0b',
     isBeta: true,
   },

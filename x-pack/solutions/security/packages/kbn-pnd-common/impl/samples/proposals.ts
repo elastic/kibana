@@ -141,7 +141,7 @@ export const MOCK_PROPOSALS: Proposal[] = [
     type: 'contain',
     confidence: 0.91,
     reasoning:
-      'Dark Watch corroboration raised confidence to 0.94. Containment draft ready once analyst takes over.',
+      'Hunt Watch corroboration raised confidence to 0.94. Containment draft ready once analyst takes over.',
     evidenceRefs: [
       { id: 'evidence-c2', type: 'enrichment', label: 'Shared C2 endpoint' },
       { id: 'evidence-persist', type: 'edr', label: 'Shared persistence mechanism' },

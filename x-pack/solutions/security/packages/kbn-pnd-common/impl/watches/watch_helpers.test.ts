@@ -90,14 +90,14 @@ describe('compareWatchesForDisplay', () => {
   it('orders by sortOrder then name', () => {
     const watches = [
       { sortOrder: Number.MAX_SAFE_INTEGER, name: 'Custom' },
-      { sortOrder: 30, name: 'Dark Watch' },
+      { sortOrder: 30, name: 'Hunt Watch' },
       { sortOrder: 10, name: 'Watch Floor' },
       { sortOrder: 20, name: 'Watch Officer' },
     ];
     expect(watches.sort(compareWatchesForDisplay).map((w) => w.name)).toEqual([
       'Watch Floor',
       'Watch Officer',
-      'Dark Watch',
+      'Hunt Watch',
       'Custom',
     ]);
   });
