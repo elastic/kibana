@@ -791,7 +791,7 @@ export const Linear: ConnectorSpec = {
               }),
               helpText: i18n.translate('core.kibanaConnectorSpecs.linear.auth.apiKey.helpText', {
                 defaultMessage:
-                  'Paste the raw personal API key from Linear settings. Do not add Bearer; Linear expects the key itself as the Authorization header value. Read is required for reads. Broad Write permits createIssue, updateIssue, createComment, and createAttachment and was live-tested. If updateIssue is not needed, Create issues permits createIssue and createAttachment, and Create comments permits createComment. Admin is not required.',
+                  'Paste the raw personal API key from Linear settings. Do not add Bearer; Linear expects the key itself as the Authorization header value. Select Read for connector testing and all list and get actions. Select both Read and Write to use every action. If updateIssue is not needed, keep Read for connectivity and discovery, then add only the mutation permissions you need: Create issues permits createIssue and createAttachment, and Create comments permits createComment. Admin is not required.',
               }),
             },
             headerField: { hidden: true },

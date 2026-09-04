@@ -549,7 +549,7 @@ describe('Linear', () => {
       expect(Linear.skill).toContain('planned Workflows activation');
     });
 
-    it('fixes and hides the raw Authorization header name', () => {
+    it('fixes the Authorization header and explains additive permission scopes', () => {
       const authType = Linear.auth?.types[0];
       expect(authType).not.toEqual('api_key_header');
       if (!authType || typeof authType === 'string') {
@@ -559,7 +559,7 @@ describe('Linear', () => {
       expect(authType.defaults).toEqual({ headerField: 'Authorization' });
       expect(authType.overrides?.meta?.headerField).toEqual({ hidden: true });
       expect(authType.overrides?.meta?.Authorization?.helpText).toContain(
-        'Read is required for reads. Broad Write permits createIssue, updateIssue, createComment, and createAttachment and was live-tested. If updateIssue is not needed, Create issues permits createIssue and createAttachment, and Create comments permits createComment. Admin is not required.'
+        'Select Read for connector testing and all list and get actions. Select both Read and Write to use every action. If updateIssue is not needed, keep Read for connectivity and discovery, then add only the mutation permissions you need: Create issues permits createIssue and createAttachment, and Create comments permits createComment. Admin is not required.'
       );
     });
 

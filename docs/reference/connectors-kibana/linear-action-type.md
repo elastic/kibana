@@ -22,7 +22,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Linear connectors have the following configuration property:
 
 API key
-:   A personal API key created in Linear **Settings > Security & access**. Enter the raw key. Do not add a `Bearer` prefix. Read is required for reads. Broad Write permits `createIssue`, `updateIssue`, `createComment`, and `createAttachment` and was live-tested. If `updateIssue` is not needed, Create issues permits `createIssue` and `createAttachment`, and Create comments permits `createComment`. Admin is not required.
+:   A personal API key created in Linear **Settings > Security & access**. Enter the raw key. Do not add a `Bearer` prefix. Select Read for connector testing and all list and get actions. Select both Read and Write to use every action. If `updateIssue` is not needed, keep Read for connectivity and discovery, then add only the mutation permissions you need: Create issues permits `createIssue` and `createAttachment`, and Create comments permits `createComment`. Admin is not required.
 
 The endpoint is always `https://api.linear.app/graphql` and cannot be changed in the connector configuration.
 
@@ -92,7 +92,7 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 ## Get API credentials [linear-api-credentials]
 
 1. In Linear, open **Settings > Security & access**.
-2. Select Read for reads. Broad Write permits all four mutation actions and was live-tested. If you do not need `updateIssue`, use Create issues for `createIssue` and `createAttachment`, and Create comments for `createComment`. Admin is not required.
+2. Select Read for connector testing and all list and get actions. Select both Read and Write to use every action. If you do not need `updateIssue`, keep Read for connectivity and discovery, then add only the mutation permissions you need: Create issues for `createIssue` and `createAttachment`, and Create comments for `createComment`. Admin is not required.
 3. Copy the key into the connector's **API key** field without a prefix.
 
 Personal API keys act with the permissions of the user who created them. Store and rotate the key as a credential.
