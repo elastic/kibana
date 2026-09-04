@@ -75,6 +75,5 @@ export interface ClientConfigType {
   enableVectorCount?: boolean;
   dev: {
     enableSemanticText?: boolean;
-    enableSemanticField?: boolean;
   };
 }

@@ -933,7 +933,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'semantic',
     documentation: {
-      main: 'semantic',
+      main: 'semantic-field',
     },
     description: () => (
       <p>

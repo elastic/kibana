@@ -62,7 +62,6 @@ export interface InferenceToModelIdMap {
 
 export interface SemanticTextInfo {
   isSemanticTextEnabled?: boolean;
-  isSemanticFieldEnabled?: boolean;
   indexName?: string;
   ml?: MlPluginStart;
   setErrorsInTrainedModelDeployment: React.Dispatch<
@@ -90,7 +89,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   semanticTextInfo,
   createFieldFormRef,
 }: Props) {
-  const { isSemanticTextEnabled, isSemanticFieldEnabled } = semanticTextInfo ?? {};
+  const { isSemanticTextEnabled } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
   const { fields, mappingViewFields } = useMappingsState();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
@@ -226,7 +225,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
           isMultiField={isMultiField}
           showDocLink
           isSemanticTextEnabled={isSemanticTextEnabled}
-          isSemanticFieldEnabled={isSemanticFieldEnabled}
           fieldTypeInputRef={fieldTypeInputRef}
         />
       </EuiFlexItem>

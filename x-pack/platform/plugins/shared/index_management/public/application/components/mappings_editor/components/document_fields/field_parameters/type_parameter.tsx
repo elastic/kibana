@@ -24,7 +24,6 @@ interface Props {
   isMultiField?: boolean | null;
   showDocLink?: boolean;
   isSemanticTextEnabled?: boolean;
-  isSemanticFieldEnabled?: boolean;
   fieldTypeInputRef?: React.MutableRefObject<HTMLInputElement | null>;
 }
 
@@ -33,7 +32,6 @@ export const TypeParameter = ({
   isRootLevelField,
   showDocLink = false,
   isSemanticTextEnabled = true,
-  isSemanticFieldEnabled = false,
   fieldTypeInputRef,
 }: Props) => {
   const fieldTypeOptions = useMemo(() => {
@@ -47,12 +45,8 @@ export const TypeParameter = ({
       options = options.filter((option) => option.value !== 'semantic_text');
     }
 
-    if (!isSemanticFieldEnabled) {
-      options = options.filter((option) => option.value !== 'semantic');
-    }
-
     return options;
-  }, [isMultiField, isRootLevelField, isSemanticTextEnabled, isSemanticFieldEnabled]);
+  }, [isMultiField, isRootLevelField, isSemanticTextEnabled]);
 
   return (
     <UseField<ComboBoxOption[]> path="type" config={getFieldConfig<ComboBoxOption[]>('type')}>
