@@ -89,28 +89,39 @@ describe('executeRegexRules', () => {
     });
   });
 
-  describe('invalid RE2 patterns throw immediately (fail closed)', () => {
-    // The legacy o11y executor silently returned [] on invalid patterns — a PII leak.
-    // Ours must throw so the caller can apply its own failure-mode policy.
+  describe('native RegExp fallback for RE2-unsupported constructs', () => {
+    // RE2 does not support lookahead, lookbehind, or backreferences.
+    // Those patterns fall back to native RegExp and must still produce matches.
 
-    it('throws for a lookahead pattern (not supported by RE2)', () => {
-      // (?=…) is valid PCRE but not RE2
+    it('matches a lookahead pattern via native RegExp fallback', () => {
+      // (?=[a-z]) is valid PCRE/native but not RE2
       const rules = [r('HOST', '(?=[a-z])\\w+')];
       const records = [{ content: 'somehost' }];
-      expect(() => executeRegexRules({ rules, records })).toThrow();
+      const results = executeRegexRules({ rules, records });
+      expect(results.length).toBeGreaterThan(0);
+      expect(results[0].matchValue).toBe('somehost');
     });
 
-    it('throws for a lookbehind pattern (not supported by RE2)', () => {
+    it('matches a lookbehind pattern via native RegExp fallback', () => {
       const rules = [r('AFTER_AT', '(?<=@)\\w+')];
-      const records = [{ content: 'user@example.com' }];
-      expect(() => executeRegexRules({ rules, records })).toThrow();
+      const records = [{ content: 'user@example' }];
+      const results = executeRegexRules({ rules, records });
+      expect(results.length).toBe(1);
+      expect(results[0].matchValue).toBe('example');
     });
 
-    it('throws for a backreference pattern (not supported by RE2)', () => {
+    it('matches a backreference pattern via native RegExp fallback', () => {
       const rules = [r('REPEATED', '(\\w+)\\s+\\1')];
       const records = [{ content: 'hello hello' }];
-      expect(() => executeRegexRules({ rules, records })).toThrow();
+      const results = executeRegexRules({ rules, records });
+      expect(results.length).toBe(1);
+      expect(results[0].matchValue).toBe('hello hello');
     });
+  });
+
+  describe('truly invalid patterns throw (fail closed)', () => {
+    // Patterns that are invalid in both RE2 and native RegExp must still throw so
+    // the caller can apply its own failure-mode policy.
 
     it('throws for an unclosed group', () => {
       const rules = [r('BAD', '(unclosed')];
