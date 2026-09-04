@@ -209,13 +209,17 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: apacheAccessDataStreamName,
         });
 
-        const { docsCountTotal, degradedDocs, services, hosts, size } =
-          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
-        expect(parseInt(docsCountTotal, 10)).to.be(226);
-        expect(parseInt(degradedDocs, 10)).to.be(1);
-        expect(parseInt(services, 10)).to.be(3);
-        expect(parseInt(hosts, 10)).to.be(52);
-        expect(parseInt(size, 10)).to.be.greaterThan(0);
+        // The `size` KPI is backed by the metering stats API, which can lag behind
+        // the other KPIs, so retry until every value has populated to avoid a NaN read.
+        await retry.tryForTime(30 * 1000, async () => {
+          const { docsCountTotal, degradedDocs, services, hosts, size } =
+            await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
+          expect(parseInt(docsCountTotal, 10)).to.be(226);
+          expect(parseInt(degradedDocs, 10)).to.be(1);
+          expect(parseInt(services, 10)).to.be(3);
+          expect(parseInt(hosts, 10)).to.be(52);
+          expect(parseInt(size, 10)).to.be.greaterThan(0);
+        });
       });
     });
 
