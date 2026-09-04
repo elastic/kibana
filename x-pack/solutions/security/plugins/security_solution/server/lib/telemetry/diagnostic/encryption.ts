@@ -103,3 +103,21 @@ function encryptFieldWithAES(
 
   return { iv, ciphertext, authTag };
 }
+
+/**
+ * Encrypt a document as JSON using AES-256-GCM and return formatted string
+ *
+ * @param doc - Document to encrypt
+ * @param dek - Data Encryption Key (ephemeral, one per query execution)
+ * @param encryptedDEK - DEK encrypted with RSA public key
+ * @param keyId - Identifier for the RSA key pair used
+ * @returns Formatted encrypted string
+ */
+export function encryptDocumentAsJson(
+  doc: unknown,
+  dek: Buffer,
+  encryptedDEK: Buffer,
+  keyId: string
+): string {
+  return encryptField(JSON.stringify(doc), dek, encryptedDEK, keyId);
+}

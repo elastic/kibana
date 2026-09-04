@@ -14,7 +14,7 @@ import {
 } from './health_diagnostic_service.types';
 import { unflatten } from '../helpers';
 import type { AnyObject, Nullable } from '../types';
-import { generateDEK, encryptDEKWithRSA, encryptField } from './encryption';
+import { generateDEK, encryptDEKWithRSA, encryptField, encryptDocumentAsJson } from './encryption';
 
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
   const nextDate = intervalFromDate(startDate, interval);
@@ -65,17 +65,19 @@ export async function applyFilterlist(
   data: unknown[],
   rules: Record<string, Action>,
   salt: string,
-  query?: { encryptionKeyId?: string },
+  query?: { encryptionKeyId?: string; encryptDocument?: true },
   encryptionPublicKeys?: Record<string, string>
 ): Promise<unknown[]> {
   const filteredResult: unknown[] = [];
 
-  const hasEncryptAction = Object.values(rules).some((action) => action === Action.ENCRYPT);
+  const needsDEK =
+    query?.encryptDocument === true ||
+    Object.values(rules).some((action) => action === Action.ENCRYPT);
   let dek: Nullable<Buffer>;
   let encryptedDEK: Nullable<Buffer>;
   let keyId: string | undefined;
 
-  if (hasEncryptAction) {
+  if (needsDEK) {
     if (!query?.encryptionKeyId) {
       throw new Error('encryptionKeyId is required when filterlist contains encrypt actions');
     }
@@ -83,7 +85,6 @@ export async function applyFilterlist(
       throw new Error(`Public key not found for encryptionKeyId: ${query.encryptionKeyId}`);
     }
 
-    // same DEK for all the data
     keyId = query.encryptionKeyId;
     const publicKey = encryptionPublicKeys[keyId];
     dek = generateDEK();
@@ -180,21 +181,27 @@ export async function applyFilterlist(
     }
   };
 
-  for (const rawDoc of data) {
-    const doc = unflatten(rawDoc as AnyObject);
-    if (Array.isArray(doc)) {
-      const docs = doc as unknown[];
-      const result = await Promise.all(
-        docs.map((d) => {
-          return applyFilterToDoc(d);
-        })
-      );
-      filteredResult.push(result);
-    } else {
-      filteredResult.push(await applyFilterToDoc(doc));
+  if (query?.encryptDocument === true) {
+    if (!dek || !encryptedDEK || !keyId) {
+      throw new Error('Encryption configuration not initialized');
     }
+    const hasRules = Object.keys(rules).length > 0;
+    const result: string[] = [];
+    for (const rawDoc of data) {
+      const doc = unflatten(rawDoc as AnyObject);
+      const subDoc = hasRules ? await applyFilterToDoc(doc) : doc;
+      result.push(encryptDocumentAsJson(subDoc, dek, encryptedDEK, keyId));
+    }
+    dek.fill(0);
+    return result;
   }
 
+  for (const rawDoc of data) {
+    const doc = unflatten(rawDoc as AnyObject);
+    filteredResult.push(await applyFilterToDoc(doc));
+  }
+
+  dek?.fill(0);
   return filteredResult;
 }
 
