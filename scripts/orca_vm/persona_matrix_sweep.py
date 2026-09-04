@@ -191,6 +191,19 @@ HTTP_HANDLER_REMOTE = (
 # withRetry (retry_utils), NOT the http handler above -- patching only the
 # handler leaves the live path untouched and the run still dies on the first
 # EIS 500. Deploy both or the fix is a no-op on the VM.
+# chat_client itself must also ship: main's version has no withRetry wrapper
+# (kbn-client retries=0 -> 'attempt=1/0' instant death) and no final-answer
+# fallback for terse models. Without it the run is one transient away from
+# a deterministic 14/42 shard failure.
+PATCHED_CHAT_CLIENT = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/src/chat_client.ts"
+)
+CHAT_CLIENT_REMOTE = (
+    "Projects/kibana/x-pack/solutions/security/packages/"
+    "kbn-evals-suite-security-persona-matrix/src/chat_client.ts"
+)
 PATCHED_RETRY_UTILS = (
     KIBANA_MAIN.parent
     / "kibana.worktrees/evals-ext-matrix"
@@ -527,6 +540,17 @@ def deploy(ip: str) -> None:
     scp(str(PATCHED_EXECUTOR_TYPES), ip, EXECUTOR_TYPES_REMOTE)
     scp(str(PATCHED_HTTP_HANDLER), ip, HTTP_HANDLER_REMOTE)
     scp(str(PATCHED_RETRY_UTILS), ip, RETRY_UTILS_REMOTE)
+    scp(str(PATCHED_CHAT_CLIENT), ip, CHAT_CLIENT_REMOTE)
+    _gate = ssh(
+        ip,
+        f"grep -c withRetry ~/{CHAT_CLIENT_REMOTE}; "
+        f"grep -c messageSource ~/{CHAT_CLIENT_REMOTE}",
+    )
+    if _gate.split() != ["1", "1"]:
+        raise RuntimeError(
+            f"chat_client overlay did not land on {ip} (withRetry/messageSource "
+            f"missing): {_gate!r} -- VM would run main's retries=0 converse path"
+        )
     scp(str(PATCHED_TRACE_FACTORY), ip, TRACE_FACTORY_REMOTE)
     scp(str(PATCHED_PROFILES), ip, PROFILES_REMOTE)
     scp(str(PATCHED_SCOUT_TRACING_CONFIG), ip, SCOUT_TRACING_CONFIG_REMOTE)
