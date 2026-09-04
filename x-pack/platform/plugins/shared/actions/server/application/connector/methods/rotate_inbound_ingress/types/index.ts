@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { transformUpdateConnectorResponse } from './v1';
+export type { RotateInboundIngressParams, RotateInboundIngressResult } from './types';
