@@ -50,8 +50,14 @@ const createCore = () => {
   return core;
 };
 
-const mockContextEngineHttpGet = (core: CoreStart, aiIndices: AiIndexHttpItem[], kiTotal = 9) => {
-  core.http.get.mockImplementation((path: string) => {
+const mockContextEngineHttpGet = (
+  core: ReturnType<typeof coreMock.createStart>,
+  aiIndices: AiIndexHttpItem[],
+  kiTotal = 9
+) => {
+  core.http.get.mockImplementation((pathOrOptions) => {
+    const path = typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
+
     if (path.includes('/kis')) {
       return Promise.resolve({
         kis: [],

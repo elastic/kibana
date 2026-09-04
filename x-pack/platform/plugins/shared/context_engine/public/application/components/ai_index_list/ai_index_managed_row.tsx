@@ -46,8 +46,6 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
     values: { name: aiIndex.id },
   });
 
-  const knowledgeIndicatorCount = isKiLoading ? '—' : String(summary.total);
-
   return (
     <EuiPanel
       hasBorder
@@ -104,7 +102,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
             />
           </EuiText>
           <EuiText size="s" data-test-subj="contextAiIndexManagedRowKnowledgeIndicators">
-            {knowledgeIndicatorCount}
+            {isKiLoading ? '' : String(summary.total)}
           </EuiText>
         </EuiFlexItem>
 
