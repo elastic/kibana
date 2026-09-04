@@ -105,18 +105,18 @@ public class BulkVectorIngestion {
             BulkIngester<Void> ingester = BulkIngester.of(b -> b.client(esClient))) {
 
             esClient.indices().create(c -> c
-               .index("my_dense_vectors")
-               .mappings(m -> m
-                   .properties("text", p -> p.text(t -> t))
-                   .properties("vector", p -> p.denseVector(d -> d))
-               )
+                .index("my_dense_vectors")
+                .mappings(m -> m
+                    .properties("text", p -> p.text(t -> t))
+                    .properties("vector", p -> p.denseVector(d -> d))
+                )
             );
 
             DOCS.forEach(doc -> ingester.add(op -> op
-               .index(idx -> idx
-                   .index("my_dense_vectors")
-                   .document(doc)
-               )
+                .index(idx -> idx
+                    .index("my_dense_vectors")
+                    .document(doc)
+                )
             ));
         }
     }
@@ -566,7 +566,6 @@ public class DenseHybridSearchFixed {
                                 )
                             )
                             .normalizer(ScoreNormalizer.Minmax)
-                            .weight(1.0f)
                         )
                         .retrievers(st -> st
                             .retriever(ir -> ir
@@ -575,7 +574,6 @@ public class DenseHybridSearchFixed {
                                 )
                             )
                             .normalizer(ScoreNormalizer.Minmax)
-                            .weight(1.0f)
                         )
                     )
                 ),
@@ -614,19 +612,15 @@ func main() {
 		Retriever(esdsl.NewLinearRetriever().
 			Retrievers(
 				esdsl.NewInnerRetriever(
-					scorenormalizer.Minmax,
 					esdsl.NewRetrieverContainer().
 						Knn(esdsl.NewKnnRetriever("vector", 10).
 							QueryVector(0.10, -0.02, 0.91, 0.18, 0.60)),
-					1.0,
-				),
+				).Normalizer(scorenormalizer.Minmax),
 				esdsl.NewInnerRetriever(
-					scorenormalizer.Minmax,
 					esdsl.NewRetrieverContainer().
 						Standard(esdsl.NewStandardRetriever().
 							Query(esdsl.NewMatchQuery("text", "What is a good national park for backpacking?"))),
-					1.0,
-				),
+				).Normalizer(scorenormalizer.Minmax),
 			)).
 		Do(ctx)
 	if err != nil {
@@ -663,7 +657,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     "k": 10
                                 }
                             },
-                            "weight": 1.0,
                             "normalizer": "minmax"
                         },
                         {
@@ -672,7 +665,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     "query": { "match": { "text": "What is a good national park for backpacking?" } }
                                 }
                             },
-                            "weight": 1.0,
                             "normalizer": "minmax"
                         }
                     ]
@@ -699,26 +691,25 @@ var client = new ElasticsearchClient(settings);
 var response = await client.SearchAsync<object>(s => s
     .Indices("my_dense_vectors")
     .Retriever(r => r
-      .Linear(l => l
-          .Retrievers(
-              ir => ir
-                  .Retriever(rr => rr.Knn(k => k
-                      .Field("vector")
-                      .QueryVector(0.10f, -0.02f, 0.91f, 0.18f, 0.60f)
-                      .K(10)
-                      .NumCandidates(10)))
-                  .Normalizer(ScoreNormalizer.Minmax)
-                  .Weight(1.0f),
-              ir => ir
-                  .Retriever(rr => rr.Standard(st => st
-                      .Query(q => q.Match(m => m
-                          .Field("text")
-                          .Query("What is a good national park for backpacking?")))))
-                  .Normalizer(ScoreNormalizer.Minmax)
-                  .Weight(1.0f)
-          )
-      )
-  )
+        .Linear(l => l
+            .Retrievers(
+                ir => ir
+                    .Retriever(rr => rr.Knn(k => k
+                        .Field("vector")
+                        .QueryVector(0.10f, -0.02f, 0.91f, 0.18f, 0.60f)
+                        .K(10)))
+                    .Normalizer(ScoreNormalizer.Minmax)
+                    .Weight(1f),
+                ir => ir
+                    .Retriever(rr => rr.Standard(st => st
+                        .Query(q => q.Match(m => m
+                            .Field("text")
+                            .Query("What is a good national park for backpacking?")))))
+                    .Normalizer(ScoreNormalizer.Minmax)
+                    .Weight(1f)
+            )
+        )
+    )
 );
 
 if (!response.IsValidResponse)
