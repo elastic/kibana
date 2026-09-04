@@ -23,9 +23,9 @@
 @elastic/esql-traversal@4.23.0
 @elastic/esql-types@4.23.0
 @elastic/esql@4.23.0
-@elastic/eui-theme-borealis@8.0.0
-@elastic/eui-theme-common@10.0.0
-@elastic/eui@120.0.0
+@elastic/eui-theme-borealis@8.0.0-snapshot.1788517095354
+@elastic/eui-theme-common@10.0.0-snapshot.1788517095354
+@elastic/eui@120.0.0-snapshot.1788517095354
 @elastic/numeral@2.5.1
 @elastic/pretty-printer@4.23.0
 @elastic/prismjs-esql@4.14.0
