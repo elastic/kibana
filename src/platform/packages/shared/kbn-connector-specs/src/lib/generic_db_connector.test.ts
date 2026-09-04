@@ -64,6 +64,8 @@ describe('isReadOnlySql', () => {
       ['multi-statement', 'SELECT 1; DROP TABLE users'],
       ['executable comment bypass', '/*!11111 DELETE FROM users -- */ SELECT 1'],
       ['executable comment no version', '/*! DROP TABLE users */ SELECT 1'],
+      ['UPDATE schema-qualified table', 'WITH x AS (SELECT 1) UPDATE mydb.users SET is_admin = 1'],
+      ['UPDATE backtick-quoted table', 'WITH x AS (SELECT 1) UPDATE `users` SET admin = 1'],
     ];
 
     it.each(rejected)('rejects %s', (_label, sql) => {

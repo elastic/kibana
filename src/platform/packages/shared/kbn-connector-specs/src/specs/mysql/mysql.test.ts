@@ -147,9 +147,7 @@ describe('MysqlConnector', () => {
         sql: 'SELECT id, name FROM users ORDER BY name LIMIT 20',
       });
 
-      expect(pool.execute).toHaveBeenCalledWith(
-        'SELECT id, name FROM users ORDER BY name LIMIT 20'
-      );
+      expect(pool.query).toHaveBeenCalledWith('SELECT id, name FROM users ORDER BY name LIMIT 20');
     });
 
     it('rejects a write statement before leasing a connection', async () => {
@@ -198,7 +196,7 @@ describe('MysqlConnector', () => {
 
       await MysqlConnector.actions.listDatabases.handler(ctx, {});
 
-      expect(pool.execute).toHaveBeenCalledWith('SHOW DATABASES');
+      expect(pool.query).toHaveBeenCalledWith('SHOW DATABASES');
     });
   });
 
@@ -208,7 +206,7 @@ describe('MysqlConnector', () => {
 
       await MysqlConnector.actions.listTables.handler(ctx, {});
 
-      expect(pool.execute).toHaveBeenCalledWith('SHOW TABLES FROM `my_db`');
+      expect(pool.query).toHaveBeenCalledWith('SHOW TABLES FROM `my_db`');
     });
 
     it('uses the explicitly provided database over the configured default', async () => {
@@ -216,7 +214,7 @@ describe('MysqlConnector', () => {
 
       await MysqlConnector.actions.listTables.handler(ctx, { database: 'other_db' });
 
-      expect(pool.execute).toHaveBeenCalledWith('SHOW TABLES FROM `other_db`');
+      expect(pool.query).toHaveBeenCalledWith('SHOW TABLES FROM `other_db`');
     });
 
     it('throws when no database is provided or configured', async () => {
@@ -242,7 +240,7 @@ describe('MysqlConnector', () => {
 
       await MysqlConnector.actions.describeTable.handler(ctx, { table: 'orders' });
 
-      expect(pool.execute).toHaveBeenCalledWith('DESCRIBE `my_db`.`orders`');
+      expect(pool.query).toHaveBeenCalledWith('DESCRIBE `my_db`.`orders`');
     });
 
     it('escapes backticks embedded in an identifier', async () => {
@@ -250,7 +248,7 @@ describe('MysqlConnector', () => {
 
       await MysqlConnector.actions.describeTable.handler(ctx, { table: 'weird`table' });
 
-      expect(pool.execute).toHaveBeenCalledWith('DESCRIBE `my_db`.`weird``table`');
+      expect(pool.query).toHaveBeenCalledWith('DESCRIBE `my_db`.`weird``table`');
     });
   });
 
@@ -332,7 +330,7 @@ describe('MysqlConnector', () => {
         sql: 'DROP TABLE users',
       });
 
-      expect(pool.execute).toHaveBeenCalledWith('DROP TABLE users');
+      expect(pool.query).toHaveBeenCalledWith('DROP TABLE users');
     });
 
     it('runs INSERT statements', async () => {
@@ -342,7 +340,7 @@ describe('MysqlConnector', () => {
         sql: "INSERT INTO users (name) VALUES ('alice')",
       });
 
-      expect(pool.execute).toHaveBeenCalledWith("INSERT INTO users (name) VALUES ('alice')");
+      expect(pool.query).toHaveBeenCalledWith("INSERT INTO users (name) VALUES ('alice')");
     });
   });
 
@@ -352,13 +350,13 @@ describe('MysqlConnector', () => {
 
       const result = await MysqlConnector.test?.handler(ctx);
 
-      expect(pool.execute).toHaveBeenCalledWith('SELECT 1');
+      expect(pool.query).toHaveBeenCalledWith('SELECT 1');
       expect(result?.message).toMatch(/connected/i);
     });
 
     it('throws when the connection fails', async () => {
       const pool = createMockPool();
-      pool.execute.mockRejectedValue(new Error('connect ECONNREFUSED'));
+      pool.query.mockRejectedValue(new Error('connect ECONNREFUSED'));
       const ctx = makeContext(makeConfig(), pool);
 
       await expect(MysqlConnector.test?.handler(ctx)).rejects.toThrow('connect ECONNREFUSED');

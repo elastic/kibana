@@ -34,11 +34,9 @@ const extractBasicCredentials = async (
   };
 };
 
-const toMysqlSslOptions = (ctx: BuildContext, host: string, port: number): SslOptions => {
+const toMysqlSslOptions = (ctx: BuildContext): SslOptions => {
   const sslSettings = ctx.networkSettings.getSslSettings();
-  const customHost = ctx.networkSettings.getCustomHostSettings(`mysql://${host}:${port}`);
-  const verificationMode =
-    customHost?.ssl?.verificationMode ?? sslSettings.verificationMode ?? 'full';
+  const verificationMode = sslSettings.verificationMode ?? 'full';
   const nodeSsl = getNodeSSLOptions(ctx.logger, verificationMode, sslSettings);
 
   const ssl: SslOptions = {
@@ -80,7 +78,7 @@ export const mysqlClientType: ClientTypeSpec<Mysql2Pool> = {
       queueLimit: 100,
       connectTimeout: timeout,
       disableEval: true,
-      ...(sslMode === 'required' ? { ssl: toMysqlSslOptions(ctx, host, port) } : {}),
+      ...(sslMode === 'required' ? { ssl: toMysqlSslOptions(ctx) } : {}),
     });
   },
 

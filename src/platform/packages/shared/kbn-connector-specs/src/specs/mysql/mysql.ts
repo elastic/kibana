@@ -63,7 +63,7 @@ const runSql = async (
   params?: readonly string[]
 ): Promise<unknown> => {
   const pool = await ctx.getClient('mysql');
-  const [rows] = params ? await pool.execute(sql, [...params]) : await pool.execute(sql);
+  const [rows] = params ? await pool.execute(sql, [...params]) : await pool.query(sql);
   return rows;
 };
 
