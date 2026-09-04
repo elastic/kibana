@@ -48,6 +48,13 @@ Available views:
 ${describeViews() || '- (none registered)'}`,
     schema: requestRegisteredViewSchema,
     tags: ['adaptive-ui'],
+    annotations: {
+      title: 'Request registered Adaptive UI view',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     handler: async ({ viewId, input }, { attachments, logger }) => {
       if (!registry.get(viewId)) {
         const available = registry
