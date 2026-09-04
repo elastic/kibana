@@ -637,6 +637,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       lensPanels: `${ELASTIC_DOCS}explore-analyze/visualize/lens`,
       maps: `${ELASTIC_WEBSITE_URL}maps`,
       vega: `${ELASTIC_DOCS}explore-analyze/visualize/custom-visualizations-with-vega`,
+      customPanels: `${ELASTIC_DOCS}explore-analyze/visualize/custom-panels`,
       tsvbIndexPatternMode: `${ELASTIC_DOCS}explore-analyze/visualize/legacy-editors/tsvb#tsvb-data-view-mode`,
     },
     observability: {
