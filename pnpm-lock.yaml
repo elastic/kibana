@@ -4803,865 +4803,862 @@ importers:
         specifier: 29.6.3
         version: 29.6.3
       '@kbn/ai-tools-cli':
-        specifier: link:x-pack/platform/packages/shared/kbn-ai-tools-cli
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ai-tools-cli
       '@kbn/alerting-api-integration-helpers':
-        specifier: link:x-pack/platform/test/alerting_api_integration/packages/helpers
+        specifier: workspace:*
         version: link:x-pack/platform/test/alerting_api_integration/packages/helpers
       '@kbn/ambient-common-types':
-        specifier: link:src/platform/packages/private/kbn-ambient-common-types
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ambient-common-types
       '@kbn/ambient-ftr-types':
-        specifier: link:src/platform/packages/private/kbn-ambient-ftr-types
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ambient-ftr-types
       '@kbn/ambient-storybook-types':
-        specifier: link:src/platform/packages/shared/kbn-ambient-storybook-types
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ambient-storybook-types
       '@kbn/ambient-ui-types':
-        specifier: link:src/platform/packages/shared/kbn-ambient-ui-types
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ambient-ui-types
       '@kbn/api-contracts':
-        specifier: link:packages/kbn-api-contracts
+        specifier: workspace:*
         version: link:packages/kbn-api-contracts
       '@kbn/axe-config':
-        specifier: link:src/platform/packages/shared/kbn-axe-config
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-axe-config
       '@kbn/babel-preset':
-        specifier: link:packages/kbn-babel-preset
+        specifier: workspace:*
         version: link:packages/kbn-babel-preset
       '@kbn/bench':
-        specifier: link:src/platform/packages/shared/kbn-bench
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-bench
       '@kbn/cache-cli':
-        specifier: link:src/platform/packages/shared/kbn-cache-cli
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-cache-cli
       '@kbn/capture-oas-snapshot-cli':
-        specifier: link:packages/kbn-capture-oas-snapshot-cli
+        specifier: workspace:*
         version: link:packages/kbn-capture-oas-snapshot-cli
       '@kbn/chart-test-jest-helpers':
-        specifier: link:src/platform/packages/shared/chart-test-jest-helpers
+        specifier: workspace:*
         version: link:src/platform/packages/shared/chart-test-jest-helpers
       '@kbn/check-kibana-settings-cli':
-        specifier: link:packages/kbn-check-kibana-settings-cli
+        specifier: workspace:*
         version: link:packages/kbn-check-kibana-settings-cli
       '@kbn/check-prod-native-modules-cli':
-        specifier: link:packages/kbn-check-prod-native-modules-cli
+        specifier: workspace:*
         version: link:packages/kbn-check-prod-native-modules-cli
       '@kbn/check-saved-objects-cli':
-        specifier: link:packages/kbn-check-saved-objects-cli
+        specifier: workspace:*
         version: link:packages/kbn-check-saved-objects-cli
       '@kbn/ci-stats-core':
-        specifier: link:src/platform/packages/private/kbn-ci-stats-core
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ci-stats-core
       '@kbn/ci-stats-performance-metrics':
-        specifier: link:packages/kbn-ci-stats-performance-metrics
+        specifier: workspace:*
         version: link:packages/kbn-ci-stats-performance-metrics
       '@kbn/ci-stats-reporter':
-        specifier: link:src/platform/packages/private/kbn-ci-stats-reporter
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ci-stats-reporter
       '@kbn/ci-stats-shipper-cli':
-        specifier: link:packages/kbn-ci-stats-shipper-cli
+        specifier: workspace:*
         version: link:packages/kbn-ci-stats-shipper-cli
       '@kbn/cli-dev-mode':
-        specifier: link:packages/kbn-cli-dev-mode
+        specifier: workspace:*
         version: link:packages/kbn-cli-dev-mode
       '@kbn/code-editor-mock':
-        specifier: link:src/platform/packages/shared/shared-ux/code_editor/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/code_editor/mocks
       '@kbn/code-owners':
-        specifier: link:src/platform/packages/private/kbn-code-owners
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-code-owners
       '@kbn/connector-cli':
-        specifier: link:src/platform/packages/shared/kbn-connector-cli
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-connector-cli
       '@kbn/content-list-docs':
-        specifier: link:src/platform/packages/shared/content-management/content_list/kbn-content-list-docs
+        specifier: workspace:*
         version: link:src/platform/packages/shared/content-management/content_list/kbn-content-list-docs
       '@kbn/content-list-mock-data':
-        specifier: link:src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data
+        specifier: workspace:*
         version: link:src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data
       '@kbn/content-list-scout':
-        specifier: link:src/platform/packages/shared/content-management/content_list/kbn-content-list-scout
+        specifier: workspace:*
         version: link:src/platform/packages/shared/content-management/content_list/kbn-content-list-scout
       '@kbn/content-management-storybook':
-        specifier: link:src/platform/packages/shared/content-management/kbn-content-management-storybook
+        specifier: workspace:*
         version: link:src/platform/packages/shared/content-management/kbn-content-management-storybook
       '@kbn/core-analytics-browser-mocks':
-        specifier: link:src/core/packages/analytics/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/analytics/browser-mocks
       '@kbn/core-analytics-server-mocks':
-        specifier: link:src/core/packages/analytics/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/analytics/server-mocks
       '@kbn/core-application-browser-mocks':
-        specifier: link:src/core/packages/application/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/application/browser-mocks
       '@kbn/core-apps-browser-mocks':
-        specifier: link:src/core/packages/apps/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/apps/browser-mocks
       '@kbn/core-base-browser-mocks':
-        specifier: link:src/core/packages/base/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/base/browser-mocks
       '@kbn/core-base-server-mocks':
-        specifier: link:src/core/packages/base/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/base/server-mocks
       '@kbn/core-capabilities-browser-mocks':
-        specifier: link:src/core/packages/capabilities/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/capabilities/browser-mocks
       '@kbn/core-capabilities-server-mocks':
-        specifier: link:src/core/packages/capabilities/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/capabilities/server-mocks
       '@kbn/core-chrome-browser-context-mocks':
-        specifier: link:src/core/packages/chrome/browser-context-mocks
+        specifier: workspace:*
         version: link:src/core/packages/chrome/browser-context-mocks
       '@kbn/core-chrome-browser-mocks':
-        specifier: link:src/core/packages/chrome/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/chrome/browser-mocks
       '@kbn/core-custom-branding-browser-mocks':
-        specifier: link:src/core/packages/custom-branding/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/custom-branding/browser-mocks
       '@kbn/core-custom-branding-server-mocks':
-        specifier: link:src/core/packages/custom-branding/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/custom-branding/server-mocks
       '@kbn/core-deprecations-browser-mocks':
-        specifier: link:src/core/packages/deprecations/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/deprecations/browser-mocks
       '@kbn/core-deprecations-server-mocks':
-        specifier: link:src/core/packages/deprecations/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/deprecations/server-mocks
       '@kbn/core-di-mocks':
-        specifier: link:src/core/packages/di/mocks
+        specifier: workspace:*
         version: link:src/core/packages/di/mocks
       '@kbn/core-doc-links-browser-mocks':
-        specifier: link:src/core/packages/doc-links/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/doc-links/browser-mocks
       '@kbn/core-doc-links-server-mocks':
-        specifier: link:src/core/packages/doc-links/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/doc-links/server-mocks
       '@kbn/core-elasticsearch-client-server-mocks':
-        specifier: link:src/core/packages/elasticsearch/client-server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/elasticsearch/client-server-mocks
       '@kbn/core-elasticsearch-server-mocks':
-        specifier: link:src/core/packages/elasticsearch/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/elasticsearch/server-mocks
       '@kbn/core-environment-server-mocks':
-        specifier: link:src/core/packages/environment/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/environment/server-mocks
       '@kbn/core-execution-context-browser-mocks':
-        specifier: link:src/core/packages/execution-context/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/execution-context/browser-mocks
       '@kbn/core-execution-context-server-mocks':
-        specifier: link:src/core/packages/execution-context/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/execution-context/server-mocks
       '@kbn/core-fatal-errors-browser-mocks':
-        specifier: link:src/core/packages/fatal-errors/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/fatal-errors/browser-mocks
       '@kbn/core-http-browser-mocks':
-        specifier: link:src/core/packages/http/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/http/browser-mocks
       '@kbn/core-http-context-server-mocks':
-        specifier: link:src/core/packages/http/context-server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/http/context-server-mocks
       '@kbn/core-http-resources-server-mocks':
-        specifier: link:src/core/packages/http/resources-server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/http/resources-server-mocks
       '@kbn/core-http-router-server-mocks':
-        specifier: link:src/core/packages/http/router-server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/http/router-server-mocks
       '@kbn/core-http-server-mocks':
-        specifier: link:src/core/packages/http/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/http/server-mocks
       '@kbn/core-i18n-browser-mocks':
-        specifier: link:src/core/packages/i18n/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/i18n/browser-mocks
       '@kbn/core-i18n-server-mocks':
-        specifier: link:src/core/packages/i18n/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/i18n/server-mocks
       '@kbn/core-injected-metadata-browser-mocks':
-        specifier: link:src/core/packages/injected-metadata/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/injected-metadata/browser-mocks
       '@kbn/core-integrations-browser-mocks':
-        specifier: link:src/core/packages/integrations/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/integrations/browser-mocks
       '@kbn/core-lifecycle-browser-mocks':
-        specifier: link:src/core/packages/lifecycle/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/lifecycle/browser-mocks
       '@kbn/core-lifecycle-server-mocks':
-        specifier: link:src/core/packages/lifecycle/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/lifecycle/server-mocks
       '@kbn/core-logging-browser-mocks':
-        specifier: link:src/core/packages/logging/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/logging/browser-mocks
       '@kbn/core-logging-server-mocks':
-        specifier: link:src/core/packages/logging/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/logging/server-mocks
       '@kbn/core-metrics-collectors-server-mocks':
-        specifier: link:src/core/packages/metrics/collectors-server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/metrics/collectors-server-mocks
       '@kbn/core-metrics-server-mocks':
-        specifier: link:src/core/packages/metrics/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/metrics/server-mocks
       '@kbn/core-node-server-mocks':
-        specifier: link:src/core/packages/node/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/node/server-mocks
       '@kbn/core-notifications-browser-mocks':
-        specifier: link:src/core/packages/notifications/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/notifications/browser-mocks
       '@kbn/core-overlays-browser-mocks':
-        specifier: link:src/core/packages/overlays/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/overlays/browser-mocks
       '@kbn/core-plugins-browser-mocks':
-        specifier: link:src/core/packages/plugins/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/plugins/browser-mocks
       '@kbn/core-plugins-server-mocks':
-        specifier: link:src/core/packages/plugins/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/plugins/server-mocks
       '@kbn/core-preboot-server-mocks':
-        specifier: link:src/core/packages/preboot/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/preboot/server-mocks
       '@kbn/core-pricing-browser-mocks':
-        specifier: link:src/core/packages/pricing/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/pricing/browser-mocks
       '@kbn/core-pricing-server-mocks':
-        specifier: link:src/core/packages/pricing/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/pricing/server-mocks
       '@kbn/core-rendering-browser-mocks':
-        specifier: link:src/core/packages/rendering/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/rendering/browser-mocks
       '@kbn/core-rendering-server-mocks':
-        specifier: link:src/core/packages/rendering/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/rendering/server-mocks
       '@kbn/core-saved-objects-api-server-mocks':
-        specifier: link:src/core/packages/saved-objects/api-server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/saved-objects/api-server-mocks
       '@kbn/core-saved-objects-base-server-mocks':
-        specifier: link:src/core/packages/saved-objects/base-server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/saved-objects/base-server-mocks
       '@kbn/core-saved-objects-import-export-server-mocks':
-        specifier: link:src/core/packages/saved-objects/import-export-server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/saved-objects/import-export-server-mocks
       '@kbn/core-saved-objects-migration-server-mocks':
-        specifier: link:src/core/packages/saved-objects/migration-server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/saved-objects/migration-server-mocks
       '@kbn/core-saved-objects-server-mocks':
-        specifier: link:src/core/packages/saved-objects/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/saved-objects/server-mocks
       '@kbn/core-server-benchmarks':
-        specifier: link:src/platform/packages/shared/kbn-core-server-benchmarks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-core-server-benchmarks
       '@kbn/core-status-server-mocks':
-        specifier: link:src/core/packages/status/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/status/server-mocks
       '@kbn/core-test-helpers-kbn-server':
-        specifier: link:src/core/test-helpers/kbn-server
+        specifier: workspace:*
         version: link:src/core/test-helpers/kbn-server
       '@kbn/core-test-helpers-model-versions':
-        specifier: link:src/core/test-helpers/model-versions
+        specifier: workspace:*
         version: link:src/core/test-helpers/model-versions
       '@kbn/core-theme-browser-mocks':
-        specifier: link:src/core/packages/theme/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/theme/browser-mocks
       '@kbn/core-ui-settings-browser-mocks':
-        specifier: link:src/core/packages/ui-settings/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/ui-settings/browser-mocks
       '@kbn/core-ui-settings-server-mocks':
-        specifier: link:src/core/packages/ui-settings/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/ui-settings/server-mocks
       '@kbn/core-usage-data-server-mocks':
-        specifier: link:src/core/packages/usage-data/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/usage-data/server-mocks
       '@kbn/core-user-activity-server-mocks':
-        specifier: link:src/core/packages/user-activity/server-mocks
+        specifier: workspace:*
         version: link:src/core/packages/user-activity/server-mocks
       '@kbn/core-user-storage-browser-mocks':
-        specifier: link:src/core/packages/user-storage/browser-mocks
+        specifier: workspace:*
         version: link:src/core/packages/user-storage/browser-mocks
       '@kbn/cypress-config':
-        specifier: link:src/platform/packages/shared/kbn-cypress-config
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-cypress-config
       '@kbn/cypress-test-helper':
-        specifier: link:src/platform/packages/shared/kbn-cypress-test-helper
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-cypress-test-helper
       '@kbn/dependency-ownership':
-        specifier: link:packages/kbn-dependency-ownership
+        specifier: workspace:*
         version: link:packages/kbn-dependency-ownership
       '@kbn/dependency-usage':
-        specifier: link:packages/kbn-dependency-usage
+        specifier: workspace:*
         version: link:packages/kbn-dependency-usage
       '@kbn/detections-response-ftr-services':
-        specifier: link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response
+        specifier: workspace:*
         version: link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response
       '@kbn/dev':
-        specifier: link:src/dev
+        specifier: workspace:*
         version: link:src/dev
       '@kbn/dev-cli-errors':
-        specifier: link:src/platform/packages/shared/kbn-dev-cli-errors
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-cli-errors
       '@kbn/dev-cli-runner':
-        specifier: link:src/platform/packages/shared/kbn-dev-cli-runner
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-cli-runner
       '@kbn/dev-proc-runner':
-        specifier: link:src/platform/packages/shared/kbn-dev-proc-runner
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-proc-runner
       '@kbn/dev-utils':
-        specifier: link:src/platform/packages/shared/kbn-dev-utils
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-utils
       '@kbn/dev-validation-runner':
-        specifier: link:src/platform/packages/shared/kbn-dev-validation-runner
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-validation-runner
       '@kbn/docs-utils':
-        specifier: link:packages/kbn-docs-utils
+        specifier: workspace:*
         version: link:packages/kbn-docs-utils
       '@kbn/dot-text':
-        specifier: link:src/platform/packages/private/kbn-dot-text
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-dot-text
       '@kbn/dot-text-loader':
-        specifier: link:src/platform/packages/private/kbn-dot-text-loader
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-dot-text-loader
       '@kbn/edot-collector':
-        specifier: link:src/platform/packages/shared/kbn-edot-collector
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-edot-collector
       '@kbn/es':
-        specifier: link:src/platform/packages/shared/kbn-es
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-es
       '@kbn/es-archiver':
-        specifier: link:src/platform/packages/shared/kbn-es-archiver
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-es-archiver
       '@kbn/es-snapshot-loader':
-        specifier: link:x-pack/platform/packages/shared/kbn-es-snapshot-loader
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-es-snapshot-loader
       '@kbn/eslint-config':
-        specifier: link:packages/kbn-eslint-config
+        specifier: workspace:*
         version: link:packages/kbn-eslint-config
       '@kbn/eslint-plugin-alerting-v2':
-        specifier: link:packages/kbn-eslint-plugin-alerting-v2
+        specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-alerting-v2
       '@kbn/eslint-plugin-disable':
-        specifier: link:packages/kbn-eslint-plugin-disable
+        specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-disable
       '@kbn/eslint-plugin-eslint':
-        specifier: link:packages/kbn-eslint-plugin-eslint
+        specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-eslint
       '@kbn/eslint-plugin-i18n':
-        specifier: link:packages/kbn-eslint-plugin-i18n
+        specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-i18n
       '@kbn/eslint-plugin-imports':
-        specifier: link:packages/kbn-eslint-plugin-imports
+        specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-imports
       '@kbn/eslint-plugin-kbn-ui':
-        specifier: link:packages/kbn-eslint-plugin-kbn-ui
+        specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-kbn-ui
       '@kbn/eslint-plugin-telemetry':
-        specifier: link:packages/kbn-eslint-plugin-telemetry
+        specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-telemetry
       '@kbn/esql-resource-browser-storybook-config':
-        specifier: link:src/platform/packages/shared/kbn-esql-resource-browser/.storybook
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-esql-resource-browser/.storybook
       '@kbn/esql-scripts':
-        specifier: link:src/platform/packages/private/kbn-esql-scripts
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-esql-scripts
       '@kbn/evals':
-        specifier: link:x-pack/platform/packages/shared/kbn-evals
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals
       '@kbn/evals-extensions':
-        specifier: link:x-pack/platform/packages/shared/kbn-evals-extensions
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals-extensions
       '@kbn/evals-suite-agent-builder':
-        specifier: link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder
       '@kbn/evals-suite-agent-builder-dashboards':
-        specifier: link:x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards
       '@kbn/evals-suite-agent-builder-visualizations':
-        specifier: link:x-pack/platform/packages/shared/agent_builder_visualizations/kbn-evals-suite-agent-builder-visualizations
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent_builder_visualizations/kbn-evals-suite-agent-builder-visualizations
       '@kbn/evals-suite-alert-analysis-workflow':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow
       '@kbn/evals-suite-alerting-v2':
-        specifier: link:x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2
       '@kbn/evals-suite-alerts-rag':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag
       '@kbn/evals-suite-attack-discovery':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery
       '@kbn/evals-suite-attack-discovery-agent-builder':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder
       '@kbn/evals-suite-detection-watch-rule-creation':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
       '@kbn/evals-suite-endpoint':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint
       '@kbn/evals-suite-entity-analytics':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics
       '@kbn/evals-suite-lead-generation':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-lead-generation
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-lead-generation
       '@kbn/evals-suite-llm-tasks':
-        specifier: link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks
       '@kbn/evals-suite-ml':
-        specifier: link:x-pack/platform/plugins/shared/ml/evals
+        specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/ml/evals
       '@kbn/evals-suite-obs-ai-assistant':
-        specifier: link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
+        specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
       '@kbn/evals-suite-observability-ai':
-        specifier: link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai
+        specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai
       '@kbn/evals-suite-pci-compliance':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance
       '@kbn/evals-suite-security-ai-rules':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
       '@kbn/evals-suite-security-alert-triage':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage
       '@kbn/evals-suite-security-automatic-migrations':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations
       '@kbn/evals-suite-security-esql-generation-regression':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression
       '@kbn/evals-suite-security-persona-matrix':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix
       '@kbn/evals-suite-siem-readiness':
-        specifier: link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness
       '@kbn/evals-suite-significant-events':
-        specifier: link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events
       '@kbn/evals-suite-smoke-tests':
-        specifier: link:x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests
       '@kbn/evals-suite-streams':
-        specifier: link:x-pack/platform/packages/shared/kbn-evals-suite-streams
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals-suite-streams
       '@kbn/evals-suite-workflows':
-        specifier: link:src/platform/packages/shared/kbn-evals-suite-workflows
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-evals-suite-workflows
       '@kbn/expect':
-        specifier: link:src/platform/packages/shared/kbn-expect
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-expect
       '@kbn/extract-plugin-translations':
-        specifier: link:packages/kbn-extract-plugin-translations
+        specifier: workspace:*
         version: link:packages/kbn-extract-plugin-translations
       '@kbn/failed-test-reporter-cli':
-        specifier: link:packages/kbn-failed-test-reporter-cli
+        specifier: workspace:*
         version: link:packages/kbn-failed-test-reporter-cli
       '@kbn/find-used-node-modules':
-        specifier: link:packages/kbn-find-used-node-modules
+        specifier: workspace:*
         version: link:packages/kbn-find-used-node-modules
       '@kbn/fleet-plugin-cypress':
-        specifier: link:x-pack/platform/plugins/shared/fleet/cypress
+        specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/fleet/cypress
       '@kbn/ftr-benchmarks':
-        specifier: link:src/platform/packages/shared/kbn-ftr-benchmarks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ftr-benchmarks
       '@kbn/ftr-common-functional-services':
-        specifier: link:src/platform/packages/shared/kbn-ftr-common-functional-services
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ftr-common-functional-services
       '@kbn/ftr-common-functional-ui-services':
-        specifier: link:src/platform/packages/shared/kbn-ftr-common-functional-ui-services
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ftr-common-functional-ui-services
       '@kbn/ftr-screenshot-filename':
-        specifier: link:src/platform/packages/private/kbn-ftr-screenshot-filename
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ftr-screenshot-filename
       '@kbn/gen-ai-functional-testing':
-        specifier: link:src/platform/packages/private/kbn-gen-ai-functional-testing
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-gen-ai-functional-testing
       '@kbn/generate':
-        specifier: link:packages/kbn-generate
+        specifier: workspace:*
         version: link:packages/kbn-generate
       '@kbn/generate-console-definitions':
-        specifier: link:packages/kbn-generate-console-definitions
+        specifier: workspace:*
         version: link:packages/kbn-generate-console-definitions
       '@kbn/get-repo-files':
-        specifier: link:src/platform/packages/private/kbn-get-repo-files
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-get-repo-files
       '@kbn/heap-snapshot-analyzer-cli':
-        specifier: link:packages/kbn-heap-snapshot-analyzer-cli
+        specifier: workspace:*
         version: link:packages/kbn-heap-snapshot-analyzer-cli
       '@kbn/import-locator':
-        specifier: link:packages/kbn-import-locator
+        specifier: workspace:*
         version: link:packages/kbn-import-locator
       '@kbn/import-resolver':
-        specifier: link:src/platform/packages/private/kbn-import-resolver
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-import-resolver
       '@kbn/inference-cli':
-        specifier: link:x-pack/platform/packages/shared/kbn-inference-cli
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-inference-cli
       '@kbn/ink':
-        specifier: link:x-pack/platform/packages/shared/kbn-ink
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ink
       '@kbn/jest-benchmarks':
-        specifier: link:src/platform/packages/shared/kbn-jest-benchmarks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-jest-benchmarks
       '@kbn/jest-serializers':
-        specifier: link:src/platform/packages/private/kbn-jest-serializers
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-jest-serializers
       '@kbn/journeys':
-        specifier: link:src/platform/packages/private/kbn-journeys
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-journeys
       '@kbn/json-ast':
-        specifier: link:packages/kbn-json-ast
+        specifier: workspace:*
         version: link:packages/kbn-json-ast
       '@kbn/kbn-client':
-        specifier: link:src/platform/packages/shared/kbn-kbn-client
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-kbn-client
       '@kbn/kbn-genai-cli':
-        specifier: link:x-pack/solutions/observability/packages/kbn-genai-cli
+        specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-genai-cli
       '@kbn/kibana-manifest-schema':
-        specifier: link:packages/kbn-kibana-manifest-schema
+        specifier: workspace:*
         version: link:packages/kbn-kibana-manifest-schema
       '@kbn/lazy-object':
-        specifier: link:src/platform/packages/shared/kbn-lazy-object
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-lazy-object
       '@kbn/lens-test-helpers':
-        specifier: link:src/platform/packages/shared/kbn-lens-test-helpers
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-lens-test-helpers
       '@kbn/lint-cli':
-        specifier: link:packages/kbn-lint-cli
+        specifier: workspace:*
         version: link:packages/kbn-lint-cli
       '@kbn/lint-packages-cli':
-        specifier: link:packages/kbn-lint-packages-cli
+        specifier: workspace:*
         version: link:packages/kbn-lint-packages-cli
       '@kbn/lint-ts-projects-cli':
-        specifier: link:packages/kbn-lint-ts-projects-cli
+        specifier: workspace:*
         version: link:packages/kbn-lint-ts-projects-cli
       '@kbn/managed-vscode-config':
-        specifier: link:packages/kbn-managed-vscode-config
+        specifier: workspace:*
         version: link:packages/kbn-managed-vscode-config
       '@kbn/managed-vscode-config-cli':
-        specifier: link:packages/kbn-managed-vscode-config-cli
+        specifier: workspace:*
         version: link:packages/kbn-managed-vscode-config-cli
       '@kbn/management-storybook-config':
-        specifier: link:src/platform/packages/shared/kbn-management/storybook/config
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-management/storybook/config
       '@kbn/manifest':
-        specifier: link:packages/kbn-manifest
+        specifier: workspace:*
         version: link:packages/kbn-manifest
       '@kbn/migrator-test-kit':
-        specifier: link:src/platform/packages/private/kbn-migrator-test-kit
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-migrator-test-kit
       '@kbn/mock-idp-plugin':
-        specifier: link:packages/kbn-mock-idp-plugin
+        specifier: workspace:*
         version: link:packages/kbn-mock-idp-plugin
       '@kbn/mock-idp-utils':
-        specifier: link:src/platform/packages/private/kbn-mock-idp-utils
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-mock-idp-utils
       '@kbn/moon':
-        specifier: link:packages/kbn-moon
+        specifier: workspace:*
         version: link:packages/kbn-moon
       '@kbn/observability-synthetics-test-data':
-        specifier: link:x-pack/solutions/observability/packages/synthetics-test-data
+        specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/synthetics-test-data
       '@kbn/openapi-bundler':
-        specifier: link:src/platform/packages/shared/kbn-openapi-bundler
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-openapi-bundler
       '@kbn/openapi-generator':
-        specifier: link:src/platform/packages/shared/kbn-openapi-generator
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-openapi-generator
       '@kbn/optimizer':
-        specifier: link:packages/kbn-optimizer
+        specifier: workspace:*
         version: link:packages/kbn-optimizer
       '@kbn/optimizer-webpack-helpers':
-        specifier: link:src/platform/packages/private/kbn-optimizer-webpack-helpers
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-optimizer-webpack-helpers
       '@kbn/osquery-plugin-cypress':
-        specifier: link:x-pack/platform/plugins/shared/osquery/cypress
+        specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/osquery/cypress
       '@kbn/otel-demo':
-        specifier: link:src/platform/packages/shared/kbn-otel-demo
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-otel-demo
       '@kbn/peggy':
-        specifier: link:src/platform/packages/private/kbn-peggy
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-peggy
       '@kbn/peggy-loader':
-        specifier: link:packages/kbn-peggy-loader
+        specifier: workspace:*
         version: link:packages/kbn-peggy-loader
       '@kbn/perf-page-load':
-        specifier: link:packages/kbn-perf-page-load
+        specifier: workspace:*
         version: link:packages/kbn-perf-page-load
       '@kbn/performance-testing-dataset-extractor':
-        specifier: link:packages/kbn-performance-testing-dataset-extractor
+        specifier: workspace:*
         version: link:packages/kbn-performance-testing-dataset-extractor
       '@kbn/picomatcher':
-        specifier: link:packages/kbn-picomatcher
+        specifier: workspace:*
         version: link:packages/kbn-picomatcher
       '@kbn/plugin-check':
-        specifier: link:packages/kbn-plugin-check
+        specifier: workspace:*
         version: link:packages/kbn-plugin-check
       '@kbn/plugin-generator':
-        specifier: link:packages/kbn-plugin-generator
+        specifier: workspace:*
         version: link:packages/kbn-plugin-generator
       '@kbn/plugin-helpers':
-        specifier: link:packages/kbn-plugin-helpers
+        specifier: workspace:*
         version: link:packages/kbn-plugin-helpers
       '@kbn/product-doc-artifact-builder':
-        specifier: link:x-pack/packages/ai-infra/product-doc-artifact-builder
+        specifier: workspace:*
         version: link:x-pack/packages/ai-infra/product-doc-artifact-builder
       '@kbn/profiler':
-        specifier: link:src/platform/packages/shared/kbn-profiler
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-profiler
       '@kbn/relocate':
-        specifier: link:packages/kbn-relocate
+        specifier: workspace:*
         version: link:packages/kbn-relocate
       '@kbn/repo-file-maps':
-        specifier: link:packages/kbn-repo-file-maps
+        specifier: workspace:*
         version: link:packages/kbn-repo-file-maps
       '@kbn/repo-linter':
-        specifier: link:packages/kbn-repo-linter
+        specifier: workspace:*
         version: link:packages/kbn-repo-linter
       '@kbn/repo-path':
-        specifier: link:src/platform/packages/private/kbn-repo-path
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-repo-path
       '@kbn/repo-source-classifier':
-        specifier: link:packages/kbn-repo-source-classifier
+        specifier: workspace:*
         version: link:packages/kbn-repo-source-classifier
       '@kbn/repo-source-classifier-cli':
-        specifier: link:packages/kbn-repo-source-classifier-cli
+        specifier: workspace:*
         version: link:packages/kbn-repo-source-classifier-cli
       '@kbn/reporting-mocks-server':
-        specifier: link:src/platform/packages/private/kbn-reporting/mocks_server
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-reporting/mocks_server
       '@kbn/rspack-optimizer':
-        specifier: link:packages/kbn-rspack-optimizer
+        specifier: workspace:*
         version: link:packages/kbn-rspack-optimizer
       '@kbn/sample-log-parser':
-        specifier: link:x-pack/platform/packages/shared/kbn-sample-parser
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-sample-parser
       '@kbn/scout':
-        specifier: link:src/platform/packages/shared/kbn-scout
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-scout
       '@kbn/scout-info':
-        specifier: link:src/platform/packages/private/kbn-scout-info
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-scout-info
       '@kbn/scout-oblt':
-        specifier: link:x-pack/solutions/observability/packages/kbn-scout-oblt
+        specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-scout-oblt
       '@kbn/scout-release-testing':
-        specifier: link:x-pack/platform/packages/private/kbn-scout-release-testing
+        specifier: workspace:*
         version: link:x-pack/platform/packages/private/kbn-scout-release-testing
       '@kbn/scout-reporting':
-        specifier: link:src/platform/packages/private/kbn-scout-reporting
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-scout-reporting
       '@kbn/scout-search':
-        specifier: link:x-pack/solutions/search/packages/kbn-scout-search
+        specifier: workspace:*
         version: link:x-pack/solutions/search/packages/kbn-scout-search
       '@kbn/scout-security':
-        specifier: link:x-pack/solutions/security/packages/kbn-scout-security
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-scout-security
       '@kbn/scout-synthtrace':
-        specifier: link:src/platform/packages/shared/kbn-scout-synthtrace
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-scout-synthtrace
       '@kbn/security-api-integration-helpers':
-        specifier: link:x-pack/platform/test/security_api_integration/packages/helpers
+        specifier: workspace:*
         version: link:x-pack/platform/test/security_api_integration/packages/helpers
       '@kbn/security-evals-alerts-snapshot':
-        specifier: link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot
       '@kbn/security-evals-workflow-traces':
-        specifier: link:x-pack/solutions/security/packages/kbn-security-evals-workflow-traces
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-workflow-traces
       '@kbn/security-labs-artifact-builder':
-        specifier: link:x-pack/packages/ai-infra/security-labs-artifact-builder
+        specifier: workspace:*
         version: link:x-pack/packages/ai-infra/security-labs-artifact-builder
       '@kbn/security-solution-test-api-clients':
-        specifier: link:x-pack/solutions/security/packages/test-api-clients
+        specifier: workspace:*
         version: link:x-pack/solutions/security/packages/test-api-clients
       '@kbn/set-map':
-        specifier: link:packages/kbn-set-map
+        specifier: workspace:*
         version: link:packages/kbn-set-map
       '@kbn/shared-ux-card-no-data-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/card/no_data/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/card/no_data/mocks
       '@kbn/shared-ux-file-image-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/file/image/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/file/image/mocks
       '@kbn/shared-ux-file-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/file/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/file/mocks
       '@kbn/shared-ux-markdown-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/markdown/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/markdown/mocks
       '@kbn/shared-ux-page-analytics-no-data-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks
       '@kbn/shared-ux-page-kibana-no-data-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/page/kibana_no_data/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/page/kibana_no_data/mocks
       '@kbn/shared-ux-page-kibana-template-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/page/kibana_template/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/page/kibana_template/mocks
       '@kbn/shared-ux-page-no-data-config-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/page/no_data_config/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/page/no_data_config/mocks
       '@kbn/shared-ux-page-no-data-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/page/no_data/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/page/no_data/mocks
       '@kbn/shared-ux-prompt-no-data-views-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks
       '@kbn/shared-ux-router-mocks':
-        specifier: link:src/platform/packages/shared/shared-ux/router/mocks
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/router/mocks
       '@kbn/shared-ux-storybook-config':
-        specifier: link:src/platform/packages/private/shared-ux/storybook/config
+        specifier: workspace:*
         version: link:src/platform/packages/private/shared-ux/storybook/config
       '@kbn/shared-ux-storybook-mock':
-        specifier: link:src/platform/packages/shared/shared-ux/storybook/mock
+        specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/storybook/mock
       '@kbn/some-dev-log':
-        specifier: link:src/platform/packages/private/kbn-some-dev-log
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-some-dev-log
       '@kbn/sort-package-json':
-        specifier: link:packages/kbn-sort-package-json
+        specifier: workspace:*
         version: link:packages/kbn-sort-package-json
       '@kbn/stdio-dev-helpers':
-        specifier: link:src/platform/packages/private/kbn-stdio-dev-helpers
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-stdio-dev-helpers
       '@kbn/storybook':
-        specifier: link:src/platform/packages/shared/kbn-storybook
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-storybook
       '@kbn/streamlang-tests':
-        specifier: link:x-pack/platform/packages/shared/kbn-streamlang-tests
+        specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-streamlang-tests
       '@kbn/styled-components-mapping-cli':
-        specifier: link:packages/kbn-styled-components-mapping-cli
+        specifier: workspace:*
         version: link:packages/kbn-styled-components-mapping-cli
       '@kbn/swc-config':
-        specifier: link:packages/kbn-swc-config
+        specifier: workspace:*
         version: link:packages/kbn-swc-config
       '@kbn/swc-register':
-        specifier: link:src/platform/packages/shared/kbn-swc-register
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-swc-register
       '@kbn/synthetics-forge':
-        specifier: link:x-pack/solutions/observability/packages/kbn-synthetics-forge
+        specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-synthetics-forge
       '@kbn/synthetics-private-location':
-        specifier: link:x-pack/packages/kbn-synthetics-private-location
+        specifier: workspace:*
         version: link:x-pack/packages/kbn-synthetics-private-location
       '@kbn/synthtrace':
-        specifier: link:src/platform/packages/shared/kbn-synthtrace
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-synthtrace
       '@kbn/synthtrace-client':
-        specifier: link:src/platform/packages/shared/kbn-synthtrace-client
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-synthtrace-client
       '@kbn/telemetry-tools':
-        specifier: link:src/platform/packages/private/kbn-telemetry-tools
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-telemetry-tools
       '@kbn/test':
-        specifier: link:src/platform/packages/shared/kbn-test
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-test
       '@kbn/test-docker-servers':
-        specifier: link:src/platform/packages/shared/kbn-test-docker-servers
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-test-docker-servers
       '@kbn/test-es-server':
-        specifier: link:src/platform/packages/shared/kbn-test-es-server
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-test-es-server
       '@kbn/test-eui-helpers':
-        specifier: link:src/platform/packages/private/kbn-test-eui-helpers
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-test-eui-helpers
       '@kbn/test-jest-helpers':
-        specifier: link:src/platform/packages/shared/kbn-test-jest-helpers
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-test-jest-helpers
       '@kbn/test-kibana-server':
-        specifier: link:src/platform/packages/shared/kbn-test-kibana-server
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-test-kibana-server
       '@kbn/test-saml-auth':
-        specifier: link:src/platform/packages/shared/kbn-test-saml-auth
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-test-saml-auth
       '@kbn/test-subj-selector':
-        specifier: link:src/platform/packages/shared/kbn-test-subj-selector
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-test-subj-selector
       '@kbn/test-suites-security-solution-apis':
-        specifier: link:x-pack/solutions/security/test/security_solution_api_integration
+        specifier: workspace:*
         version: link:x-pack/solutions/security/test/security_solution_api_integration
       '@kbn/test-suites-src':
-        specifier: link:src/platform/test
+        specifier: workspace:*
         version: link:src/platform/test
       '@kbn/test-suites-xpack-observability':
-        specifier: link:x-pack/solutions/observability/test
+        specifier: workspace:*
         version: link:x-pack/solutions/observability/test
       '@kbn/test-suites-xpack-performance':
-        specifier: link:x-pack/performance
+        specifier: workspace:*
         version: link:x-pack/performance
       '@kbn/test-suites-xpack-platform':
-        specifier: link:x-pack/platform/test
+        specifier: workspace:*
         version: link:x-pack/platform/test
       '@kbn/test-suites-xpack-search':
-        specifier: link:x-pack/solutions/search/test
+        specifier: workspace:*
         version: link:x-pack/solutions/search/test
       '@kbn/test-suites-xpack-security':
-        specifier: link:x-pack/solutions/security/test
+        specifier: workspace:*
         version: link:x-pack/solutions/security/test
       '@kbn/test-suites-xpack-security-endpoint':
-        specifier: link:x-pack/solutions/security/test/security_solution_endpoint
+        specifier: workspace:*
         version: link:x-pack/solutions/security/test/security_solution_endpoint
       '@kbn/test-suites-xpack-vectordb':
-        specifier: link:x-pack/solutions/vectordb/test
+        specifier: workspace:*
         version: link:x-pack/solutions/vectordb/test
       '@kbn/test-suites-xpack-workplace-ai':
-        specifier: link:x-pack/solutions/workplaceai/test
+        specifier: workspace:*
         version: link:x-pack/solutions/workplaceai/test
       '@kbn/tooling-log':
-        specifier: link:src/platform/packages/shared/kbn-tooling-log
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-tooling-log
       '@kbn/transpiler-config':
-        specifier: link:packages/kbn-transpiler-config
+        specifier: workspace:*
         version: link:packages/kbn-transpiler-config
       '@kbn/ts-projects':
-        specifier: link:packages/kbn-ts-projects
+        specifier: workspace:*
         version: link:packages/kbn-ts-projects
       '@kbn/ts-type-check-cli':
-        specifier: link:packages/kbn-ts-type-check-cli
+        specifier: workspace:*
         version: link:packages/kbn-ts-type-check-cli
       '@kbn/ts-type-check-oblt-cli':
-        specifier: link:x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli
+        specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli
       '@kbn/tsconfig-base':
-        specifier: link:packages/kbn-tsconfig/base
+        specifier: workspace:*
         version: link:packages/kbn-tsconfig/base
       '@kbn/ui-storybook-config':
-        specifier: link:src/platform/kbn-ui/storybook-config
+        specifier: workspace:*
         version: link:src/platform/kbn-ui/storybook-config
       '@kbn/validate-next-docs-cli':
-        specifier: link:packages/kbn-validate-next-docs-cli
+        specifier: workspace:*
         version: link:packages/kbn-validate-next-docs-cli
       '@kbn/validate-oas':
-        specifier: link:src/platform/packages/private/kbn-validate-oas
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-validate-oas
       '@kbn/web-worker-stub':
-        specifier: link:packages/kbn-web-worker-stub
+        specifier: workspace:*
         version: link:packages/kbn-web-worker-stub
       '@kbn/whereis-pkg-cli':
-        specifier: link:packages/kbn-whereis-pkg-cli
+        specifier: workspace:*
         version: link:packages/kbn-whereis-pkg-cli
       '@kbn/workflow-graph-screenshot-cli':
-        specifier: link:src/platform/packages/private/kbn-workflow-graph-screenshot-cli
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-workflow-graph-screenshot-cli
       '@kbn/workflow-step-schema-cli':
-        specifier: link:src/platform/packages/private/kbn-workflow-step-schema-cli
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-workflow-step-schema-cli
       '@kbn/workflow-yaml-validate-cli':
-        specifier: link:src/platform/packages/private/kbn-workflow-yaml-validate-cli
+        specifier: workspace:*
         version: link:src/platform/packages/private/kbn-workflow-yaml-validate-cli
       '@kbn/workspaces':
-        specifier: link:src/platform/packages/shared/kbn-workspaces
+        specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workspaces
-      '@kbn/yarn-install-scripts':
-        specifier: link:packages/kbn-yarn-install-scripts
-        version: link:packages/kbn-yarn-install-scripts
       '@kbn/yarn-lock-validator':
-        specifier: link:packages/kbn-yarn-lock-validator
+        specifier: workspace:*
         version: link:packages/kbn-yarn-lock-validator
       '@mswjs/http-middleware':
         specifier: 0.10.3
