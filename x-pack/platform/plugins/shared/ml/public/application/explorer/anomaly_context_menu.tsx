@@ -23,7 +23,6 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiToolTip,
-  formatDate,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -48,7 +47,8 @@ import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
-import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
+import { getSelectionInfluencers } from './explorer_utils';
+import { getTimeRangeToPlot } from './get_time_range_to_plot';
 import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/utils';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 
@@ -114,24 +114,17 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     chartsStateService.getChartsData()
   );
 
-  const timeRangeToPlot: TimeRange = useMemo(() => {
-    if (chartsData.seriesToPlot.length > 0) {
-      return {
-        from: formatDate(chartsData.seriesToPlot[0].plotEarliest, 'MMM D, YYYY @ HH:mm:ss.SSS'),
-        to: formatDate(chartsData.seriesToPlot[0].plotLatest, 'MMM D, YYYY @ HH:mm:ss.SSS'),
-      } as TimeRange;
-    }
-    if (!!selectedCells && interval !== undefined && bounds !== undefined) {
-      const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, bounds);
-      return {
-        from: formatDate(earliestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
-        to: formatDate(latestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
-        mode: 'absolute',
-      };
-    }
-
-    return globalTimeRange;
-  }, [chartsData.seriesToPlot, globalTimeRange, selectedCells, bounds, interval]);
+  const timeRangeToPlot: TimeRange = useMemo(
+    () =>
+      getTimeRangeToPlot({
+        seriesToPlot: chartsData.seriesToPlot,
+        selectedCells,
+        bounds,
+        interval,
+        globalTimeRange,
+      }),
+    [chartsData.seriesToPlot, globalTimeRange, selectedCells, bounds, interval]
+  );
 
   const isMaxSeriesToPlotValid =
     typeof maxSeriesToPlot === 'number' &&
