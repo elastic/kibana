@@ -32,7 +32,6 @@
     "@kbn/shared-ux-router",
     "@kbn/core-http-common",
     "@kbn/core-http-browser",
-    "@kbn/react-kibana-context-theme",
     "@kbn/css-utils",
     "@kbn/shared-ux-utility",
     "@kbn/ui-callout",

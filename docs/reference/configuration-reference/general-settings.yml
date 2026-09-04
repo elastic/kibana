@@ -49,9 +49,9 @@ groups:
         datatype: string
         default: "*"
         applies_to:
-          - "stack: preview"
-          - "ech: unavailable"
-          - "self: ga"
+          stack: ga
+          ech: unavailable
+          self: ga
 
       - setting: notifications.connectors.default.email
         description: |
@@ -1163,9 +1163,9 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          - "stack: preview"
-          - "ech: unavailable"
-          - "self: ga"
+          stack: ga
+          ech: unavailable
+          self: ga
 
       - setting: server.cors.allowCredentials
         description: |
@@ -1173,9 +1173,9 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          - "stack: preview"
-          - "ech: unavailable"
-          - "self: ga"
+          stack: ga
+          ech: unavailable
+          self: ga
 
       - setting: server.cors.allowOrigin
         description: |
@@ -1183,9 +1183,9 @@ groups:
         datatype: string
         default: '["*"]'
         applies_to:
-          - "stack: preview"
-          - "ech: unavailable"
-          - "self: ga"
+          stack: ga
+          ech: unavailable
+          self: ga
 
   - group: Server rate limiter settings
     id: server-rate-limiter-settings

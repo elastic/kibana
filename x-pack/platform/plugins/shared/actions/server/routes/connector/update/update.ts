@@ -11,6 +11,7 @@ import { BASE_ACTION_API_PATH } from '../../../../common';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
+import { transformConnectorResponseV1 } from '../common_transforms';
 import type {
   UpdateConnectorBodyV1,
   UpdateConnectorParamsV1,
@@ -19,7 +20,6 @@ import {
   updateConnectorBodySchemaV1,
   updateConnectorParamsSchemaV1,
 } from '../../../../common/routes/connector/apis/update';
-import { transformUpdateConnectorResponseV1 } from './transforms';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 import { errorHandler } from '../error_handler';
 
@@ -60,7 +60,7 @@ export const updateConnectorRoute = (
           const { name, config, secrets }: UpdateConnectorBodyV1 = req.body;
 
           return res.ok({
-            body: transformUpdateConnectorResponseV1(
+            body: transformConnectorResponseV1(
               await actionsClient.update({
                 id,
                 action: { name, config, secrets },

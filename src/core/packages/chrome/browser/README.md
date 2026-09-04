@@ -10,7 +10,6 @@ Public type definitions for Core's browser-side Chrome service. This is the pack
 | `ChromeSetup` | Plugin-facing Chrome contract returned by `core.chrome` in `setup()` |
 | `ChromeBreadcrumb` | Breadcrumb item set via `chrome.setBreadcrumbs()` |
 | `ChromeNavLink` | Navigation link registered by plugins |
-| `ChromeNavControl` | Arbitrary UI controls rendered in the header |
 | `ChromeHelpExtension` | Help-menu extension registered by plugins |
 | `ChromeStyle` | `'classic'` or `'project'` layout mode |
 | `NavigationTreeDefinition` | Project-style navigation tree definition |
