@@ -107,10 +107,8 @@ steps:
               workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
                 'fake_workflow_execution_id'
               );
-            // Duration should be at least 1s (at least one retry delay)
+            // At least 1s (one retry delay); no upper bound as the real-timer delays make any wall-clock ceiling flaky, and runaway runs are caught by the retry-count/per-retry-delay tests below.
             expect(workflowExecutionDoc?.duration).toBeGreaterThanOrEqual(999);
-            // But less than 2.5s to allow CI/timer variance while still catching runaway runs
-            expect(workflowExecutionDoc?.duration).toBeLessThan(2500);
           });
 
           it('should have 3 executions of constantlyFailingStep (1 initial + 2 retries)', async () => {
