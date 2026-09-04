@@ -78,7 +78,6 @@ export const parseIndicatorList = (body: string): IndicatorBlock[] => {
         );
       }
     }
-    // blank lines and non-reference # comments: fall through (no-op)
   }
 
   if (currentBlock.iocs.length > 0 || seenFirstReference) {

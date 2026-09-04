@@ -463,8 +463,6 @@ describe('textIndicatorListAdapter', () => {
   });
 });
 
-// ── Attribution and credential handling ──────────────────────────────────────
-
 describe('textIndicatorListAdapter — attribution and credentials', () => {
   const runWith = async (source: SourceHit) => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);

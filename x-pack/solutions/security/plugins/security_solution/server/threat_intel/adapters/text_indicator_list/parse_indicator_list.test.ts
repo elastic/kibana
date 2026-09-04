@@ -272,8 +272,6 @@ describe('parseIndicatorList', () => {
   });
 });
 
-// ── Tier elevation ───────────────────────────────────────────────────────────
-
 describe('parseIndicatorList — tier elevation', () => {
   // Appearing in a curated trail file is a strong signal, so an uncertain or
   // contextual value is elevated. It is not strong enough to override a verdict
