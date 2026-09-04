@@ -25,6 +25,67 @@ import {
   initialLoadReported,
 } from './actions';
 import { getNextWindowRefreshPage, restrictOverviewPageToExistingKeys } from './window_refresh';
+import type { MonitorOverviewPageState } from '../overview/models';
+
+export interface OverviewStatusRequestContext {
+  scopeStatusByLocation?: boolean;
+  statusFilter?: string;
+  query?: string;
+  sortField?: MonitorOverviewPageState['sortField'];
+  sortOrder?: MonitorOverviewPageState['sortOrder'];
+  tags?: string[];
+  locations?: string[];
+  monitorTypes?: string[];
+  projects?: string[];
+  schedules?: string[];
+  remoteNames?: string[];
+  monitorQueryIds?: string[];
+  showFromAllSpaces?: boolean;
+  includeHeartbeatMonitors?: boolean;
+  useLogicalAndFor?: MonitorOverviewPageState['useLogicalAndFor'];
+  dateRangeStart?: string;
+  dateRangeEnd?: string;
+}
+
+const emptyToUndefined = <T>(value: T | undefined): T | undefined => {
+  if (value == null) {
+    return undefined;
+  }
+  if (typeof value === 'string' && value.length === 0) {
+    return undefined;
+  }
+  if (Array.isArray(value) && value.length === 0) {
+    return undefined;
+  }
+  return value;
+};
+
+const toRequestContext = (payload: {
+  pageState: MonitorOverviewPageState;
+  scopeStatusByLocation?: boolean;
+  statusFilter?: string;
+}): OverviewStatusRequestContext => {
+  const { pageState } = payload;
+  return {
+    scopeStatusByLocation: payload.scopeStatusByLocation,
+    statusFilter: emptyToUndefined(payload.statusFilter),
+    query: emptyToUndefined(pageState.query),
+    sortField: pageState.sortField,
+    sortOrder: pageState.sortOrder,
+    tags: emptyToUndefined(pageState.tags),
+    locations: emptyToUndefined(pageState.locations),
+    monitorTypes: emptyToUndefined(pageState.monitorTypes),
+    projects: emptyToUndefined(pageState.projects),
+    schedules: emptyToUndefined(pageState.schedules),
+    remoteNames: emptyToUndefined(pageState.remoteNames),
+    monitorQueryIds: emptyToUndefined(pageState.monitorQueryIds),
+    showFromAllSpaces: pageState.showFromAllSpaces,
+    includeHeartbeatMonitors: pageState.includeHeartbeatMonitors,
+    useLogicalAndFor: emptyToUndefined(pageState.useLogicalAndFor),
+    dateRangeStart: pageState.dateRangeStart,
+    dateRangeEnd: pageState.dateRangeEnd,
+  };
+};
 
 export interface OverviewStatusStateReducer {
   loading: boolean;
@@ -49,12 +110,13 @@ export interface OverviewStatusStateReducer {
   settled: boolean;
   isInitialLoad: boolean;
   total?: number;
-  // The scope/filter the current status was fetched with, so the card view's
-  // infinite scroll can request the next page with the exact same parameters.
-  lastRequest?: { scopeStatusByLocation?: boolean; statusFilter?: string };
-  // Filter context of an in-flight append. Compared on success so a page
-  // requested under the previous filters is not merged into a newer result.
-  pendingAppendRequest?: { scopeStatusByLocation?: boolean; statusFilter?: string };
+  // Result-set identity the current status was fetched with, so the card view's
+  // infinite scroll can request the next page with the exact same parameters
+  // and a late append from a previous query/sort/filter is dropped.
+  lastRequest?: OverviewStatusRequestContext;
+  // Result-set identity of an in-flight append. Compared on success so a page
+  // requested under a previous query/sort/filter is not merged into a newer result.
+  pendingAppendRequest?: OverviewStatusRequestContext;
   // Set while a silent (timer) replace is in flight. A late page-1 response
   // must merge into the card view's accumulated window instead of shrinking it;
   // table paging is non-silent and must always replace.
@@ -173,18 +235,41 @@ const applyStaleBeforeWindow = (state: OverviewStatusStateReducer) => {
   }
 };
 
-const requestContextEquals = (
-  a?: { scopeStatusByLocation?: boolean; statusFilter?: string },
-  b?: { scopeStatusByLocation?: boolean; statusFilter?: string }
-) => a?.scopeStatusByLocation === b?.scopeStatusByLocation && a?.statusFilter === b?.statusFilter;
+const requestContextEquals = (a?: OverviewStatusRequestContext, b?: OverviewStatusRequestContext) =>
+  JSON.stringify(a) === JSON.stringify(b);
+
+const CONFIG_BUCKETS = [
+  'upConfigs',
+  'downConfigs',
+  'pendingConfigs',
+  'staleConfigs',
+  'disabledConfigs',
+] as const;
+
+const collectConfigKeys = (status: PaginatedOverviewStatus): Set<string> => {
+  const keys = new Set<string>();
+  for (const config of status.configs ?? []) {
+    keys.add(getOverviewConfigKey(config));
+  }
+  for (const bucket of CONFIG_BUCKETS) {
+    for (const config of Object.values(status[bucket] ?? {})) {
+      keys.add(getOverviewConfigKey(config));
+    }
+  }
+  return keys;
+};
 
 const mergeBucketRecords = (
   existing: Record<string, OverviewStatusMetaData> | undefined,
-  incoming: Record<string, OverviewStatusMetaData> | undefined
+  incoming: Record<string, OverviewStatusMetaData> | undefined,
+  incomingKeys: Set<string>
 ): Record<string, OverviewStatusMetaData> => {
   const merged: Record<string, OverviewStatusMetaData> = {};
   for (const config of Object.values(existing ?? {})) {
-    merged[getOverviewConfigKey(config)] = config;
+    const key = getOverviewConfigKey(config);
+    if (!incomingKeys.has(key)) {
+      merged[key] = config;
+    }
   }
   for (const config of Object.values(incoming ?? {})) {
     merged[getOverviewConfigKey(config)] = config;
@@ -200,13 +285,22 @@ const mergePaginatedStatus = (
   for (const config of incoming.configs!) {
     byKey.set(getOverviewConfigKey(config), config);
   }
+  const incomingKeys = collectConfigKeys(incoming);
   return {
     ...incoming,
-    upConfigs: mergeBucketRecords(existing.upConfigs, incoming.upConfigs),
-    downConfigs: mergeBucketRecords(existing.downConfigs, incoming.downConfigs),
-    pendingConfigs: mergeBucketRecords(existing.pendingConfigs, incoming.pendingConfigs),
-    staleConfigs: mergeBucketRecords(existing.staleConfigs, incoming.staleConfigs),
-    disabledConfigs: mergeBucketRecords(existing.disabledConfigs, incoming.disabledConfigs),
+    upConfigs: mergeBucketRecords(existing.upConfigs, incoming.upConfigs, incomingKeys),
+    downConfigs: mergeBucketRecords(existing.downConfigs, incoming.downConfigs, incomingKeys),
+    pendingConfigs: mergeBucketRecords(
+      existing.pendingConfigs,
+      incoming.pendingConfigs,
+      incomingKeys
+    ),
+    staleConfigs: mergeBucketRecords(existing.staleConfigs, incoming.staleConfigs, incomingKeys),
+    disabledConfigs: mergeBucketRecords(
+      existing.disabledConfigs,
+      incoming.disabledConfigs,
+      incomingKeys
+    ),
     configs: Array.from(byKey.values()),
   };
 };
@@ -287,10 +381,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.refreshThrough = undefined;
       state.fillThrough = undefined;
       state.fillAllInFlight = Boolean(action.payload.fillAll);
-      state.lastRequest = {
-        scopeStatusByLocation: action.payload.scopeStatusByLocation,
-        statusFilter: action.payload.statusFilter,
-      };
+      state.lastRequest = toRequestContext(action.payload);
     })
     .addCase(quietFetchOverviewStatusAction.get, (state, action) => {
       // Timer refreshes pass `silent` so the compact table / progress bar
@@ -307,10 +398,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
         state.refreshThrough = action.payload.refreshThrough;
         state.fillThrough = undefined;
       }
-      state.lastRequest = {
-        scopeStatusByLocation: action.payload.scopeStatusByLocation,
-        statusFilter: action.payload.statusFilter,
-      };
+      state.lastRequest = toRequestContext(action.payload);
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       const incoming = action.payload;
@@ -373,18 +461,15 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
         state.fillAllInFlight = false;
       }
       state.pendingFillAppend = Boolean(action.payload.fillAll);
-      state.pendingAppendRequest = {
-        scopeStatusByLocation: action.payload.scopeStatusByLocation,
-        statusFilter: action.payload.statusFilter,
-      };
+      state.pendingAppendRequest = toRequestContext(action.payload);
     })
     .addCase(appendOverviewStatusAction.success, (state, action) => {
       const pending = state.pendingAppendRequest;
       const wasFill = state.pendingFillAppend;
       state.pendingAppendRequest = undefined;
       state.pendingFillAppend = undefined;
-      // Drop a page that was requested under a previous filter/scope so it
-      // cannot land on top of a newer replace (e.g. status-filter change).
+      // Drop a page that was requested under a previous query/sort/filter so it
+      // cannot land on top of a newer replace.
       if (pending && !requestContextEquals(pending, state.lastRequest)) {
         return;
       }

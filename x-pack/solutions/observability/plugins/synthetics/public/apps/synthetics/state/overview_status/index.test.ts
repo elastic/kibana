@@ -397,6 +397,43 @@ describe('overviewStatusReducer', () => {
       expect(merged.loaded).toBe(true);
     });
 
+    it('moves a config out of its previous status bucket when a merged page updates it', () => {
+      const down = makeMeta({
+        configId: 'mon1',
+        overallStatus: 'down',
+        locations: [{ id: 'us_east', label: 'US East', status: 'down' }],
+      });
+      const up = makeMeta({
+        configId: 'mon1',
+        overallStatus: 'up',
+        locations: [{ id: 'us_east', label: 'US East', status: 'up' }],
+      });
+
+      const initial = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(
+          makePaginated([down], {
+            downConfigs: { mon1: down },
+            total: 2,
+          })
+        )
+      );
+      expect(initial.status?.downConfigs.mon1).toBeDefined();
+
+      const merged = overviewStatusReducer(
+        initial,
+        appendOverviewStatusAction.success(
+          makePaginated([up], {
+            upConfigs: { mon1: up },
+            total: 2,
+          })
+        )
+      );
+
+      expect(merged.status?.upConfigs.mon1?.overallStatus).toBe('up');
+      expect(merged.status?.downConfigs.mon1).toBeUndefined();
+    });
+
     it('drops an appended page whose filter no longer matches lastRequest', () => {
       const pageState = { page: 1, perPage: 20 } as any;
       let state = overviewStatusReducer(
@@ -468,6 +505,36 @@ describe('overviewStatusReducer', () => {
       );
 
       expect(state.allConfigs?.map((config) => config.configId)).toEqual(['down1']);
+    });
+
+    it('drops an appended page whose query no longer matches lastRequest', () => {
+      const pageState = { page: 1, perPage: 20, query: 'alpha' } as any;
+      let state = overviewStatusReducer(undefined, fetchOverviewStatusAction.get({ pageState }));
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'alpha1' })], { total: 4 })
+        )
+      );
+      state = overviewStatusReducer(state, appendOverviewStatusAction.get({ pageState }));
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.get({ pageState: { ...pageState, query: 'beta' } })
+      );
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'beta1' })], { total: 1 })
+        )
+      );
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'alpha2' })], { total: 4 })
+        )
+      );
+
+      expect(state.allConfigs?.map((config) => config.configId)).toEqual(['beta1']);
     });
   });
 

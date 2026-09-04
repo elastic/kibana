@@ -133,13 +133,16 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       }
     })
     .addCase(setOverviewViewAction, (state, action) => {
-      // The card view grows `perPage` as the user scrolls (infinite scroll)
-      // while the compact table paginates with a fixed page size. Reset
-      // pagination on a real view switch so neither view inherits the other's
-      // window.
+      // Reset pagination on a real view switch so neither view inherits the
+      // other's window. Always assign a new `pageState` object: card infinite
+      // scroll never writes page/perPage, so Immer would keep the same
+      // reference and `useOverviewStatus` would not refetch.
       if (state.view !== action.payload) {
-        state.pageState.page = 1;
-        state.pageState.perPage = DEFAULT_OVERVIEW_PER_PAGE;
+        state.pageState = {
+          ...state.pageState,
+          page: 1,
+          perPage: DEFAULT_OVERVIEW_PER_PAGE,
+        };
       }
       state.view = action.payload;
     })

@@ -10,6 +10,7 @@ import type { OverviewStatusMetaData } from '../../../../../common/runtime_types
 import {
   getCardWindowRefreshPayload,
   getGroupedFillPageState,
+  getNextOverviewAppendPage,
   getNextWindowRefreshPage,
   isOverviewGrouped,
   restrictOverviewPageToExistingKeys,
@@ -61,6 +62,25 @@ describe('getCardWindowRefreshPayload', () => {
       pageState: { ...pageState, page: 1, perPage: OVERVIEW_STATUS_MAX_PER_PAGE },
       refreshThrough: loadedCount,
     });
+  });
+});
+
+describe('getNextOverviewAppendPage', () => {
+  it('requests the next page after a full window', () => {
+    expect(getNextOverviewAppendPage(40, 20, 100)).toBe(3);
+  });
+
+  it('does not stall when a refresh drops a monitor and loaded is no longer a multiple of perPage', () => {
+    expect(getNextOverviewAppendPage(39, 20, 100)).toBe(3);
+  });
+
+  it('returns null when the loaded window already covers total', () => {
+    expect(getNextOverviewAppendPage(40, 20, 40)).toBeNull();
+    expect(getNextOverviewAppendPage(39, 20, 39)).toBeNull();
+  });
+
+  it('returns null when the next page would start past total', () => {
+    expect(getNextOverviewAppendPage(39, 20, 40)).toBeNull();
   });
 });
 

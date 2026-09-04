@@ -30,6 +30,7 @@ import {
   selectOverviewView,
 } from '../../../../../state';
 import { appendOverviewStatusAction } from '../../../../../state/overview_status';
+import { getNextOverviewAppendPage } from '../../../../../state/overview_status/window_refresh';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { useInfiniteOverviewTrendsRequests } from '../../../hooks/use_infinite_overview_trends_requests';
 import { useOverviewStatusState } from '../../../hooks/use_overview_status';
@@ -133,6 +134,7 @@ const UnGroupedCardView = ({
     loading,
     loadedMonitors,
     perPage,
+    total,
     pageState,
     lastRequest,
     refreshThrough,
@@ -143,6 +145,7 @@ const UnGroupedCardView = ({
     loading,
     loadedMonitors,
     perPage,
+    total,
     pageState,
     lastRequest,
     refreshThrough,
@@ -154,13 +157,10 @@ const UnGroupedCardView = ({
     if (!s.hasMore || s.loading || s.refreshThrough || s.fillThrough) {
       return;
     }
-    // Only whole pages are appended, so a non-multiple means the last (partial)
-    // page is already loaded — nothing more to fetch. The `loading` guard above
-    // also stops a burst of scroll events from requesting the same page twice.
-    if (s.perPage <= 0 || s.loadedMonitors % s.perPage !== 0) {
+    const nextPage = getNextOverviewAppendPage(s.loadedMonitors, s.perPage, s.total ?? 0);
+    if (nextPage == null) {
       return;
     }
-    const nextPage = s.loadedMonitors / s.perPage + 1;
     dispatch(
       appendOverviewStatusAction.get({
         pageState: { ...s.pageState, page: nextPage, perPage: s.perPage },

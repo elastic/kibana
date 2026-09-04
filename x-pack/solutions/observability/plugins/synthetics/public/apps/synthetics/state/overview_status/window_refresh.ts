@@ -40,6 +40,27 @@ export function getCardWindowRefreshPayload<T extends { page?: number; perPage?:
 }
 
 /**
+ * Next infinite-scroll page for the ungrouped card view, or `null` when there
+ * is nothing more to fetch. Uses `ceil(loaded / perPage) + 1` so a silent
+ * refresh that drops a monitor (loaded is no longer a multiple of `perPage`)
+ * still advances instead of stalling.
+ */
+export function getNextOverviewAppendPage(
+  loadedMonitors: number,
+  perPage: number,
+  total: number
+): number | null {
+  if (perPage <= 0 || loadedMonitors <= 0 || loadedMonitors >= total) {
+    return null;
+  }
+  const nextPage = Math.ceil(loadedMonitors / perPage) + 1;
+  if ((nextPage - 1) * perPage >= total) {
+    return null;
+  }
+  return nextPage;
+}
+
+/**
  * Next page of a clamped window refresh, or `null` when `refreshThrough` is
  * already covered. Keeps `perPage` stable so offsets stay aligned with page 1.
  */
