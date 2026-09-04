@@ -62,6 +62,29 @@ export const panelOverridesSchema = z
       description:
         'Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
     }),
+    documents_display_mode: z
+      .union([z.literal('table'), z.literal('json')])
+      .optional()
+      .meta({
+        description:
+          'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.',
+      }),
+    json_mode_settings: z
+      .object({
+        hide_nulls: z.boolean().optional().meta({
+          description: 'When true, fields with null values are hidden while in JSON mode.',
+        }),
+        wrap_lines: z.boolean().optional().meta({
+          description:
+            'When false, long values are truncated to a single line instead of wrapping while in JSON mode.',
+        }),
+      })
+      .strict()
+      .optional()
+      .meta({
+        description:
+          'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).',
+      }),
   })
   .strict()
   .default({});
