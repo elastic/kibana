@@ -6,6 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  GAP_AUTO_FILL_STATUS,
+  gapAutoFillSchedulerLimits,
+} from '../../../../../../../common/constants';
+
+const statusValues = Object.values(GAP_AUTO_FILL_STATUS);
+const { maxRuleTypesSize } = gapAutoFillSchedulerLimits;
 
 export const findGapAutoFillSchedulerLogsParamsSchema = schema.object({
   id: schema.string(),
@@ -24,7 +31,8 @@ export const findGapAutoFillSchedulerLogsParamsSchema = schema.object({
         schema.literal('error'),
         schema.literal('skipped'),
         schema.literal('no_gaps'),
-      ])
+      ]),
+      { maxSize: statusValues.length }
     )
   ),
 });
@@ -41,13 +49,14 @@ export const gapAutoFillSchedulerLogEntrySchema = schema.object({
         processedGaps: schema.maybe(schema.number()),
         status: schema.maybe(schema.string()),
         error: schema.maybe(schema.string()),
-      })
+      }),
+      { maxSize: maxRuleTypesSize }
     )
   ),
 });
 
 export const gapAutoFillSchedulerLogsResultSchema = schema.object({
-  data: schema.arrayOf(gapAutoFillSchedulerLogEntrySchema),
+  data: schema.arrayOf(gapAutoFillSchedulerLogEntrySchema, { maxSize: 100 }),
   total: schema.number(),
   page: schema.number(),
   perPage: schema.number(),
