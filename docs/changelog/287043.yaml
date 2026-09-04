@@ -6,8 +6,4 @@ products:
 - product: kibana
 title: Add cases.extendedFieldsUpdated workflow trigger
 description: >-
-  ```
-
-  Added the `cases.extendedFieldsUpdated` workflow trigger. This trigger fires whenever one or more extended-field values change on a case — including changes driven by a linked custom-field patch — and carries the list of changed field keys in its payload. Use a `cases.getCase` step to read current values.
-
-  ```
+  Adds the `cases.extendedFieldsUpdated` workflow trigger. This trigger fires whenever one or more extended-field values change on a case — including changes driven by a linked custom-field patch — and carries the list of changed field keys in its payload. Use a `cases.getCase` step to read current values.
