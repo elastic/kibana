@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { getRouterLinkProps } from '@kbn/router-utils';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -102,6 +103,11 @@ export interface EpisodeRuleCellProps extends CellRendererProps {
   rowHeight: number;
   /** Builds the href of the rule details page for a rule id. */
   getRuleDetailsHref: (ruleId: string) => string;
+  /**
+   * Called when the rule name is clicked, for hosts that show the rule somewhere on the page
+   * instead of navigating to it. Modified and non-left clicks still follow the link.
+   */
+  onRuleNameClick?: (ruleId: string) => void;
   /** Source data views keyed by rule id, used to format grouping values via `fieldFormats`. */
   sourceDataViewsByRule?: Map<string, DataView>;
 }
@@ -123,6 +129,7 @@ export const EpisodeRuleCell = ({
   isLoadingRules,
   rowHeight,
   getRuleDetailsHref,
+  onRuleNameClick,
   sourceDataViewsByRule,
 }: EpisodeRuleCellProps) => {
   const { euiTheme } = useEuiTheme();
@@ -231,14 +238,15 @@ export const EpisodeRuleCell = ({
   const groupingFields = rule.grouping?.fields ?? [];
   // Single line rows have no room for the query. `auto` (-1) grows to fit whatever we render.
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
+  const detailsHref = getRuleDetailsHref(ruleId);
+  // The href stays on the link either way, so opening the rule page in a new tab keeps working.
+  const nameLinkProps = onRuleNameClick
+    ? getRouterLinkProps({ href: detailsHref, onClick: () => onRuleNameClick(ruleId) })
+    : { href: detailsHref };
 
   return (
     <span data-test-subj="episodeRuleCell">
-      <EuiLink
-        href={getRuleDetailsHref(ruleId)}
-        css={nameCss}
-        data-test-subj="episodeRuleCellNameLink"
-      >
+      <EuiLink {...nameLinkProps} css={nameCss} data-test-subj="episodeRuleCellNameLink">
         {rule.metadata.name}
       </EuiLink>
       {groupingFields.length > 0 ? (
