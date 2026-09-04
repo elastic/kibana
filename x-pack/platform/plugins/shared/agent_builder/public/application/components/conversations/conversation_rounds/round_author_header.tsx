@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -79,10 +79,19 @@ const RoundOrigin: React.FC<{ origin: ConversationRoundOrigin }> = ({ origin }) 
   );
 };
 
-const RoundTime: React.FC<{ time: string }> = ({ time }) => {
+const RoundTime: React.FC<{ startedAt: string }> = ({ startedAt }) => {
   const euiThemeContext = useEuiTheme();
+  const m = moment(startedAt).locale(i18n.getLocale());
+  const displayTime = m.format('LT');
+  const fullDateTime = m.format('LLL');
 
-  return <span css={roundAuthorDetailItemStyles(euiThemeContext)}>{time}</span>;
+  return (
+    <EuiToolTip content={fullDateTime}>
+      <span css={roundAuthorDetailItemStyles(euiThemeContext)} tabIndex={0}>
+        {displayTime}
+      </span>
+    </EuiToolTip>
+  );
 };
 
 interface RoundAuthorHeaderProps {
@@ -99,7 +108,6 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   startedAt,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const time = moment(startedAt).format('LT');
 
   return (
     <EuiText
@@ -132,7 +140,7 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
             <RoundAuthorSeparator />
           </>
         )}
-        <RoundTime time={time} />
+        <RoundTime startedAt={startedAt} />
       </span>
     </EuiText>
   );
