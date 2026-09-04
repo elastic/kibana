@@ -9,9 +9,13 @@ if [[ "${BUILDKITE_LABEL:-}" == *"Run Dynamic Pipeline"* || "${BUILDKITE_LABEL:-
 <summary>Agent information from gobld</summary>
 EOF
 
-  # We don't need to run the pre_command.sh for pipeline uploads
+fi
+
+if [[ "${BUILDKITE_LABEL:-}" == *"Upload Pipeline"* ]]; then
+  # We only need to run the pre_command.sh for dynamic pipelines
   exit 0
 fi
+
 
 if [[ -f .buildkite/scripts/lifecycle/pre_command.sh ]]; then
   source .buildkite/scripts/lifecycle/pre_command.sh
