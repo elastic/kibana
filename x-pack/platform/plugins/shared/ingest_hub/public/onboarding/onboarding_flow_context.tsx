@@ -103,32 +103,37 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       : undefined
   );
 
+  // Ref holds the latest persisted value so setConnectorId/setStaticKeys can spread it
+  // without closing over the state value — keeping both callbacks stable across renders.
+  const persistedAuthStepRef = useRef(persistedAuthenticateAndDeployStep);
+  persistedAuthStepRef.current = persistedAuthenticateAndDeployStep;
+
   const setConnectorId = useCallback(
     (id: string | undefined, name?: string) => {
       setStaticKeysState(undefined);
       setPersistedAuthenticateAndDeployStep({
-        ...persistedAuthenticateAndDeployStep,
+        ...persistedAuthStepRef.current,
         connectorId: id,
         connectorName: id ? name : undefined,
         authType: id ? 'identity_federation' : undefined,
         accessKeyId: undefined,
       });
     },
-    [persistedAuthenticateAndDeployStep, setPersistedAuthenticateAndDeployStep]
+    [setPersistedAuthenticateAndDeployStep]
   );
 
   const setStaticKeys = useCallback(
     (keys: AwsStaticKeyCredentials | undefined) => {
       setStaticKeysState(keys);
       setPersistedAuthenticateAndDeployStep({
-        ...persistedAuthenticateAndDeployStep,
+        ...persistedAuthStepRef.current,
         connectorId: undefined,
         connectorName: undefined,
         authType: keys ? 'static_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
     },
-    [persistedAuthenticateAndDeployStep, setPersistedAuthenticateAndDeployStep]
+    [setPersistedAuthenticateAndDeployStep]
   );
 
   const setSelectedServiceIds = useCallback(
