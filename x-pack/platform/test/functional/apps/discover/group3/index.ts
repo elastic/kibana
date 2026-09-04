@@ -13,10 +13,10 @@
  *
  * Audit summary — see each file for the per-test rationale:
  * - saved_queries: MIXED (1 migrate, 1 delete)
- * - saved_searches: DELETE, fully ported to Scout
+ * - saved_searches: DELETED (both tests were already ported to Scout)
  * - visualize_field: MIXED (12 tests; 2 delete, 2 hand to Lens, rest migrate)
- * - value_suggestions: DELETE, fully ported to Scout
- * - value_suggestions_non_timebased: DELETE, fully ported to Scout
+ * - value_suggestions: DELETED (fully ported to Scout)
+ * - value_suggestions_non_timebased: DELETED (fully ported to Scout)
  * - saved_search_embeddable: MIXED (1 delete, 1 cover with unit test, 3 migrate)
  * - esql_starred: MIXED, mostly covered by existing jest and Scout API tests
  * - rule_creation: cover with a unit test, then DELETE
@@ -27,10 +27,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('discover - group 3', function () {
     loadTestFile(require.resolve('./saved_queries'));
-    loadTestFile(require.resolve('./saved_searches'));
     loadTestFile(require.resolve('./visualize_field'));
-    loadTestFile(require.resolve('./value_suggestions'));
-    loadTestFile(require.resolve('./value_suggestions_non_timebased'));
     loadTestFile(require.resolve('./saved_search_embeddable'));
     loadTestFile(require.resolve('./esql_starred'));
     loadTestFile(require.resolve('./rule_creation'));

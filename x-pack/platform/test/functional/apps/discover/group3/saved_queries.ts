@@ -54,12 +54,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Manage saved queries', () => {
       /**
-       * Migration recommendation: MIGRATE TO SCOUT. Deleting a saved query that is shared into a
-       * second space is a real multi-space saved-object contract with no other coverage. Belongs
-       * next to the existing saved-query specs in
-       * src/platform/plugins/shared/unified_search/test/scout/ui/tests. The Saved Objects
-       * management leg (navigate to settings, open the share-to-space flyout) can be replaced by a
-       * `kbnClient` share call so only the Discover delete + reload stays in the browser.
+       * Migration recommendation: API TEST, then DELETE. The multi-space saved-object contract
+       * (create query, share to second space, delete space, verify query survives) is entirely
+       * expressible via `kbnClient` calls without a browser: create the SO, share it with the
+       * Spaces API, delete the space, assert the SO still exists and is accessible in the original
+       * space. The Discover UI itself has no unique rendering logic for this scenario, so a browser
+       * test would duplicate what the SO/Spaces API contract already guarantees.
        */
       it('delete saved query shared in multiple spaces', async () => {
         // Navigate to Discover & create a saved query
