@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { donut, itemList, statGroup, table, text, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, Tone, ViewSpec } from '@kbn/adaptive-ui';
+import React from 'react';
+import type { Tone, ViewSpec } from '@kbn/adaptive-ui';
+import { Donut, ItemList, StatGroup, Table, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 import { severityTone, titleCase } from './shared';
 
 /**
@@ -71,80 +72,67 @@ export const toEntityAnalyticsDashboardViewSpec = ({
   entities,
   anomaly_highlights: anomalyHighlights,
 }: EntityAnalyticsDashboardData): ViewSpec => {
-  const body: BodyNode[] = [];
   const donutSegments =
     distribution && distribution.length > 0
       ? distribution
       : segmentsFromSeverityCount(severityCount ?? {});
 
-  if (severityCount) {
-    body.push(
-      statGroup({
-        label: 'Entities by risk level',
-        stats: [
-          { label: 'Critical', value: String(severityCount.critical ?? 0), tone: 'danger' },
-          { label: 'High', value: String(severityCount.high ?? 0), tone: 'risk' },
-          { label: 'Medium', value: String(severityCount.medium ?? 0), tone: 'warning' },
-          { label: 'Low', value: String(severityCount.low ?? 0), tone: 'success' },
-        ],
-      })
-    );
-  }
-
-  if (donutSegments.length > 0) {
-    body.push(
-      donut({
-        label: 'Risk distribution',
-        segments: donutSegments.map((segment) => ({
-          label: titleCase(segment.label),
-          value: segment.value,
-          tone: DISTRIBUTION_TONE[segment.label.toLowerCase()] ?? 'neutral',
-        })),
-      })
-    );
-  }
-
-  if (entities && entities.length > 0) {
-    body.push(
-      table({
-        label: 'Top risky entities',
-        columns: [
-          { id: 'entity', label: 'Entity' },
-          { id: 'type', label: 'Type' },
-          { id: 'score', label: 'Risk score' },
-          { id: 'level', label: 'Level' },
-        ],
-        rows: entities.map((entity) => ({
-          entity: entity.name,
-          type: entity.type ?? '—',
-          score: String(entity.risk_score),
-          level: {
-            type: 'badge' as const,
-            label: titleCase(entity.risk_level ?? 'unknown'),
-            tone: severityTone(entity.risk_level),
-          },
-        })),
-      })
-    );
-  }
-
-  if (summary) {
-    body.push(text({ body: summary }));
-  }
-
-  if (anomalyHighlights && anomalyHighlights.length > 0) {
-    body.push(
-      itemList({
-        label: 'Anomaly highlights',
-        items: anomalyHighlights.map((anomaly) => ({
-          title: anomaly.title,
-          body: anomaly.description,
-        })),
-      })
-    );
-  }
-
-  return view({ title: 'Entity analytics', subtitle: 'Risk overview', body });
+  return toViewSpec(
+    <View title="Entity analytics" subtitle="Risk overview">
+      {severityCount && (
+        <StatGroup
+          label="Entities by risk level"
+          stats={[
+            { label: 'Critical', value: String(severityCount.critical ?? 0), tone: 'danger' },
+            { label: 'High', value: String(severityCount.high ?? 0), tone: 'risk' },
+            { label: 'Medium', value: String(severityCount.medium ?? 0), tone: 'warning' },
+            { label: 'Low', value: String(severityCount.low ?? 0), tone: 'success' },
+          ]}
+        />
+      )}
+      {donutSegments.length > 0 && (
+        <Donut
+          label="Risk distribution"
+          segments={donutSegments.map((segment) => ({
+            label: titleCase(segment.label),
+            value: segment.value,
+            tone: DISTRIBUTION_TONE[segment.label.toLowerCase()] ?? 'neutral',
+          }))}
+        />
+      )}
+      {entities && entities.length > 0 && (
+        <Table
+          label="Top risky entities"
+          columns={[
+            { id: 'entity', label: 'Entity' },
+            { id: 'type', label: 'Type' },
+            { id: 'score', label: 'Risk score' },
+            { id: 'level', label: 'Level' },
+          ]}
+          rows={entities.map((entity) => ({
+            entity: entity.name,
+            type: entity.type ?? '—',
+            score: String(entity.risk_score),
+            level: {
+              type: 'badge' as const,
+              label: titleCase(entity.risk_level ?? 'unknown'),
+              tone: severityTone(entity.risk_level),
+            },
+          }))}
+        />
+      )}
+      {summary && <Text body={summary} />}
+      {anomalyHighlights && anomalyHighlights.length > 0 && (
+        <ItemList
+          label="Anomaly highlights"
+          items={anomalyHighlights.map((anomaly) => ({
+            title: anomaly.title,
+            body: anomaly.description,
+          }))}
+        />
+      )}
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleEntityAnalyticsDashboard: EntityAnalyticsDashboardData = {

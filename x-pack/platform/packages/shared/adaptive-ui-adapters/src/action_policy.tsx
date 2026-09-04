@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { badge, descriptionList, text, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import React from 'react';
+import type { ViewSpec } from '@kbn/adaptive-ui';
+import { Badge, DescriptionList, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 
 /**
  * Mirror of `ActionPolicyAttachmentData` from
@@ -40,48 +41,35 @@ export const toActionPolicyViewSpec = ({
   tags,
   enabled,
 }: ActionPolicyData): ViewSpec => {
-  const body: BodyNode[] = [
-    badge({
-      items: [
-        {
-          label: enabled === false ? 'Disabled' : 'Enabled',
-          tone: enabled === false ? 'neutral' : 'success',
-          variant: 'fill',
-        },
-        ...(throttle
-          ? [
-              {
-                label: `Throttle ${throttle}`,
-                tone: 'primary' as const,
-                variant: 'hollow' as const,
-              },
-            ]
-          : []),
-        ...(groupingMode
-          ? [{ label: groupingMode, tone: 'neutral' as const, variant: 'hollow' as const }]
-          : []),
-      ],
-    }),
-  ];
-
   const details: Array<{ title: string; description: string }> = [];
-  if (matcher) {
-    details.push({ title: 'Matcher', description: matcher });
-  }
-  if (groupBy && groupBy.length > 0) {
-    details.push({ title: 'Group by', description: groupBy.join(', ') });
-  }
+  if (matcher) details.push({ title: 'Matcher', description: matcher });
+  if (groupBy && groupBy.length > 0) details.push({ title: 'Group by', description: groupBy.join(', ') });
   details.push({ title: 'Destinations', description: String(destinations?.length ?? 0) });
-  body.push(descriptionList({ label: 'Policy', layout: 'inline', items: details }));
 
-  if (description) {
-    body.push(text({ body: description }));
-  }
-  if (tags && tags.length > 0) {
-    body.push(badge({ label: 'Tags', items: tags.map((label) => ({ label })) }));
-  }
-
-  return view({ title: name ?? 'Action policy', subtitle: 'Action policy', body });
+  return toViewSpec(
+    <View title={name ?? 'Action policy'} subtitle="Action policy">
+      <Badge
+        items={[
+          {
+            label: enabled === false ? 'Disabled' : 'Enabled',
+            tone: enabled === false ? 'neutral' : 'success',
+            variant: 'fill',
+          },
+          ...(throttle
+            ? [{ label: `Throttle ${throttle}`, tone: 'primary' as const, variant: 'hollow' as const }]
+            : []),
+          ...(groupingMode
+            ? [{ label: groupingMode, tone: 'neutral' as const, variant: 'hollow' as const }]
+            : []),
+        ]}
+      />
+      <DescriptionList label="Policy" layout="inline" items={details} />
+      {description && <Text body={description} />}
+      {tags && tags.length > 0 && (
+        <Badge label="Tags" items={tags.map((label) => ({ label }))} />
+      )}
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleActionPolicy: ActionPolicyData = {

@@ -5,18 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
+import type { Tone, ViewSpec } from '@kbn/adaptive-ui';
 import {
-  actions,
-  badge,
-  callout,
-  descriptionList,
-  list,
-  statGroup,
-  table,
-  text,
-  view,
-} from '@kbn/adaptive-ui/builders';
-import type { BodyNode, Tone, ViewSpec } from '@kbn/adaptive-ui';
+  Action,
+  Actions,
+  Badge,
+  Callout,
+  DescriptionList,
+  List,
+  Stat,
+  StatGroup,
+  Table,
+  Text,
+  View,
+  toViewSpec,
+} from '@kbn/adaptive-ui/jsx';
 import { buildNightshiftEventHref, titleCase } from './shared';
 
 // Fields mirror the canonical `SigEvent` Zod schema in `@kbn/streams-schema`:
@@ -94,15 +98,9 @@ export const significantEventFixture: SignificantEventInput = {
 // Thresholds mirror Kibana's `SeverityBadge` (`<40 low, <60 medium, <80 high,
 // else critical`) so the bucket matches what Streams shows.
 const severityFor = (criticality: number): { label: string; tone: Tone } => {
-  if (criticality < 40) {
-    return { label: 'Low', tone: 'success' };
-  }
-  if (criticality < 60) {
-    return { label: 'Medium', tone: 'warning' };
-  }
-  if (criticality < 80) {
-    return { label: 'High', tone: 'risk' };
-  }
+  if (criticality < 40) return { label: 'Low', tone: 'success' };
+  if (criticality < 60) return { label: 'Medium', tone: 'warning' };
+  if (criticality < 80) return { label: 'High', tone: 'risk' };
   return { label: 'Critical', tone: 'danger' };
 };
 
@@ -127,109 +125,88 @@ const EVIDENCE_RESULT_TONE: Record<string, Tone> = {
  */
 export const buildSignificantEventSpec = (event: SignificantEventInput): ViewSpec => {
   const severity = severityFor(event.criticality);
-
-  // Only the categorical stats carry a tone; the numeric ones stay untinted so
-  // severity and status read as the two graded dimensions.
-  const body: BodyNode[] = [
-    text({ title: 'Assessment', body: event.summary }),
-    statGroup({
-      stats: [
-        { label: 'Criticality', value: String(event.criticality) },
-        { label: 'Confidence', value: `${event.confidence}%` },
-        { label: 'Severity', value: severity.label, tone: severity.tone },
-        { label: 'Status', value: titleCase(event.status), tone: STATUS_TONE[event.status] },
-      ],
-    }),
-    callout({ title: 'Root cause', body: event.root_cause, tone: 'neutral' }),
-  ];
-
-  if (event.recommendations.length > 0) {
-    body.push(
-      list({
-        label: 'Recommended remediations',
-        ordered: true,
-        items: event.recommendations.map((content) => ({ content })),
-      })
-    );
-  }
-
-  if (event.evidences.length > 0) {
-    body.push(
-      table({
-        label: 'Evidence',
-        columns: [
-          { id: 'signal', label: 'Signal' },
-          { id: 'stream', label: 'Stream' },
-          { id: 'result', label: 'Result' },
-          { id: 'detail', label: 'Detail' },
-        ],
-        rows: event.evidences.map((evidence) => ({
-          signal: evidence.rule_name,
-          stream: evidence.stream_name ?? '—',
-          result: {
-            type: 'badge' as const,
-            label: evidence.result ?? 'observed',
-            tone: EVIDENCE_RESULT_TONE[evidence.result ?? ''] ?? 'neutral',
-          },
-          detail: evidence.description ?? '',
-        })),
-      })
-    );
-  }
-
-  if (event.cause_kis.length > 0) {
-    body.push(
-      descriptionList({
-        label: 'Contributing factors',
-        layout: 'inline',
-        items: event.cause_kis.map((ki) => ({
-          title: ki.name,
-          description: ki.stream_name ?? '—',
-          tone: 'warning',
-        })),
-      })
-    );
-  }
-
-  if (event.stream_names.length > 0) {
-    body.push(
-      badge({
-        label: 'Streams',
-        items: event.stream_names.map((stream) => ({ label: stream, variant: 'hollow' })),
-      })
-    );
-  }
-
-  if (event.rule_names.length > 0) {
-    body.push(
-      badge({
-        label: 'Detection rules',
-        items: event.rule_names.map((rule) => ({ label: rule, variant: 'hollow' })),
-      })
-    );
-  }
-
   const nightshiftHref = buildNightshiftEventHref({
     eventId: event.event_id,
     eventUuid: event.event_uuid,
   });
-  const actionItems: Array<{ label: string; href: string; tone?: Tone }> = [];
-  if (nightshiftHref) {
-    actionItems.push({ label: 'View in Nightshift', href: nightshiftHref, tone: 'primary' });
-  }
-  actionItems.push({
-    label: 'Open in Streams',
-    href: `/app/streams/significant_events/${event.event_id}`,
-    tone: 'neutral',
-  });
-  body.push(actions({ items: actionItems }));
 
-  return view({
-    title: event.title,
-    theme: 'auto',
-    meta: { source: 'registry', ariaLabel: event.title },
-    body,
-  });
+  return toViewSpec(
+    <View
+      title={event.title}
+      theme="auto"
+      meta={{ source: 'registry', ariaLabel: event.title }}
+    >
+      <Text title="Assessment" body={event.summary} />
+      <StatGroup>
+        <Stat label="Criticality" value={String(event.criticality)} />
+        <Stat label="Confidence" value={`${event.confidence}%`} />
+        <Stat label="Severity" value={severity.label} tone={severity.tone} />
+        <Stat label="Status" value={titleCase(event.status)} tone={STATUS_TONE[event.status]} />
+      </StatGroup>
+      <Callout title="Root cause" tone="neutral">{event.root_cause}</Callout>
+      {event.recommendations.length > 0 && (
+        <List
+          label="Recommended remediations"
+          ordered
+          items={event.recommendations.map((content) => ({ content }))}
+        />
+      )}
+      {event.evidences.length > 0 && (
+        <Table
+          label="Evidence"
+          columns={[
+            { id: 'signal', label: 'Signal' },
+            { id: 'stream', label: 'Stream' },
+            { id: 'result', label: 'Result' },
+            { id: 'detail', label: 'Detail' },
+          ]}
+          rows={event.evidences.map((evidence) => ({
+            signal: evidence.rule_name,
+            stream: evidence.stream_name ?? '—',
+            result: {
+              type: 'badge' as const,
+              label: evidence.result ?? 'observed',
+              tone: EVIDENCE_RESULT_TONE[evidence.result ?? ''] ?? 'neutral',
+            },
+            detail: evidence.description ?? '',
+          }))}
+        />
+      )}
+      {event.cause_kis.length > 0 && (
+        <DescriptionList
+          label="Contributing factors"
+          layout="inline"
+          items={event.cause_kis.map((ki) => ({
+            title: ki.name,
+            description: ki.stream_name ?? '—',
+            tone: 'warning',
+          }))}
+        />
+      )}
+      {event.stream_names.length > 0 && (
+        <Badge
+          label="Streams"
+          items={event.stream_names.map((stream) => ({ label: stream, variant: 'hollow' }))}
+        />
+      )}
+      {event.rule_names.length > 0 && (
+        <Badge
+          label="Detection rules"
+          items={event.rule_names.map((rule) => ({ label: rule, variant: 'hollow' }))}
+        />
+      )}
+      <Actions>
+        {nightshiftHref && (
+          <Action label="View in Nightshift" href={nightshiftHref} tone="primary" />
+        )}
+        <Action
+          label="Open in Streams"
+          href={`/app/streams/significant_events/${event.event_id}`}
+          tone="neutral"
+        />
+      </Actions>
+    </View>
+  ) as ViewSpec;
 };
 
 export const significantEventSpec = buildSignificantEventSpec(significantEventFixture);

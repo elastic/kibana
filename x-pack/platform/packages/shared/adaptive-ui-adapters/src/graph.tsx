@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { callout, graph, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import React from 'react';
+import type { ViewSpec } from '@kbn/adaptive-ui';
+import { Callout, Graph, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 import { graphOmissionNote, toGraphTopology } from './shared';
 
 /**
@@ -38,8 +39,6 @@ export interface GraphData {
  * status dots.
  */
 export const toGraphViewSpec = ({ title, nodes, edges }: GraphData): ViewSpec => {
-  const body: BodyNode[] = [];
-
   const topology = toGraphTopology(
     nodes.map(({ id, label, type }) => ({ id, label: label ?? id, group: type })),
     edges.map(({ source, target, label, weight }) => ({
@@ -49,18 +48,20 @@ export const toGraphViewSpec = ({ title, nodes, edges }: GraphData): ViewSpec =>
       ...(weight != null && weight >= 0 ? { weight } : {}),
     }))
   );
+  const omissionNote = graphOmissionNote(topology);
 
-  if (topology.nodes.length === 0) {
-    body.push(callout({ tone: 'neutral', body: 'This graph has no nodes to draw.' }));
-  } else {
-    body.push(graph({ label: 'Topology', nodes: topology.nodes, edges: topology.edges }));
-    const note = graphOmissionNote(topology);
-    if (note) {
-      body.push(callout({ tone: 'warning', body: note }));
-    }
-  }
-
-  return view({ title: title ?? 'Graph', subtitle: 'Topology', body });
+  return toViewSpec(
+    <View title={title ?? 'Graph'} subtitle="Topology">
+      {topology.nodes.length === 0 ? (
+        <Callout tone="neutral">This graph has no nodes to draw.</Callout>
+      ) : (
+        <>
+          <Graph label="Topology" nodes={topology.nodes} edges={topology.edges} />
+          {omissionNote && <Callout tone="warning">{omissionNote}</Callout>}
+        </>
+      )}
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleGraph: GraphData = {
