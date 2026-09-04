@@ -131,5 +131,5 @@ export interface BaseStepDefinition<
    * Execution modes supported by this step. Omitted means both modes.
    * Durable or asynchronously resumed steps must explicitly declare async-only support.
    */
-  supportedExecutionModes?: readonly StepExecutionMode[];
+  supportedExecutionModes?: readonly [StepExecutionMode, ...StepExecutionMode[]];
 }
