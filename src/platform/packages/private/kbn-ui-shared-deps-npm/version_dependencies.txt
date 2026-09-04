@@ -29,7 +29,7 @@
 @elastic/eui@119.1.0
 @elastic/numeral@2.5.1
 @elastic/pretty-printer@4.21.1
-@elastic/prismjs-esql@4.15.0
+@elastic/prismjs-esql@4.23.0
 @emotion/babel-plugin@11.13.5
 @emotion/cache@11.14.0
 @emotion/hash@0.9.2
@@ -47,7 +47,7 @@
 @jridgewell/gen-mapping@0.3.13
 @jridgewell/resolve-uri@3.1.2
 @jridgewell/source-map@0.3.11
-@jridgewell/sourcemap-codec@1.5.5
+@jridgewell/sourcemap-codec@1.6.0
 @jridgewell/trace-mapping@0.3.31
 @mapbox/hast-util-table-cell-style@0.2.1
 @popperjs/core@2.11.8
@@ -98,7 +98,7 @@
 @webassemblyjs/wast-printer@1.14.1
 @xtuc/ieee754@1.2.0
 @xtuc/long@4.2.2
-acorn@8.17.0
+acorn@8.18.0
 ajv-formats@2.1.1
 ajv-keywords@3.5.2
 ajv-keywords@5.1.0
@@ -120,9 +120,9 @@ balanced-match@4.0.4
 base64-js@1.5.1
 baseline-browser-mapping@2.9.14
 bezier-easing@2.1.0
-bn.js@4.12.4
-bn.js@5.2.4
-brace-expansion@1.1.15
+bn.js@4.12.5
+bn.js@5.2.5
+brace-expansion@1.1.18
 brace-expansion@5.0.9
 brorand@1.1.0
 browser-resolve@2.0.0
@@ -197,10 +197,10 @@ detect-node-es@1.1.0
 diffie-hellman@5.0.3
 domain-browser@4.22.0
 dunder-proto@1.0.1
-electron-to-chromium@1.5.414
+electron-to-chromium@1.5.420
 elliptic@6.6.1
 emoticon@3.2.0
-enhanced-resolve@5.24.1
+enhanced-resolve@5.24.5
 error-ex@1.3.4
 error-stack-parser@1.3.6
 es-define-property@1.0.1
@@ -218,7 +218,7 @@ evp_bytestokey@1.0.3
 extend@3.0.2
 fast-deep-equal@3.1.3
 fast-json-stable-stringify@2.1.0
-fast-uri@3.1.2
+fast-uri@3.1.7
 fastest-levenshtein@1.0.16
 file-selector@0.4.0
 find-root@1.1.0
@@ -327,7 +327,7 @@ moment@2.30.1
 ms@2.1.3
 neo-async@2.6.2
 node-emoji@1.11.0
-node-releases@2.0.53
+node-releases@2.0.54
 node-stdlib-browser@1.3.1
 numeral@2.0.6
 object-assign@4.1.1
@@ -461,7 +461,7 @@ symbol-observable@4.0.0
 tabbable@5.3.3
 tapable@2.3.3
 terser-webpack-plugin@5.3.17
-terser@5.48.0
+terser@5.51.2
 text-diff@1.0.1
 timers-browserify@2.0.12
 tiny-invariant@1.3.3
@@ -488,7 +488,7 @@ unist-util-visit-parents@2.1.2
 unist-util-visit-parents@3.1.1
 unist-util-visit@1.4.1
 unist-util-visit@2.0.3
-update-browserslist-db@1.3.1
+update-browserslist-db@1.3.2
 uri-js@4.4.1
 url-parse@1.5.10
 url@0.11.4

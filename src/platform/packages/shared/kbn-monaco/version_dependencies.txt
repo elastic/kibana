@@ -1,7 +1,7 @@
 @jridgewell/gen-mapping@0.3.13
 @jridgewell/resolve-uri@3.1.2
 @jridgewell/source-map@0.3.11
-@jridgewell/sourcemap-codec@1.5.5
+@jridgewell/sourcemap-codec@1.6.0
 @jridgewell/trace-mapping@0.3.31
 @types/eslint-scope@3.7.7
 @types/eslint@8.44.2
@@ -25,7 +25,7 @@
 @webassemblyjs/wast-printer@1.14.1
 @xtuc/ieee754@1.2.0
 @xtuc/long@4.2.2
-acorn@8.17.0
+acorn@8.18.0
 ajv-formats@2.1.1
 ajv-keywords@3.5.2
 ajv-keywords@5.1.0
@@ -39,8 +39,8 @@ caniuse-lite@1.0.30001810
 chrome-trace-event@1.0.4
 commander@2.20.3
 common-path-prefix@3.0.0
-electron-to-chromium@1.5.414
-enhanced-resolve@5.24.1
+electron-to-chromium@1.5.420
+enhanced-resolve@5.24.5
 es-module-lexer@1.7.0
 escalade@3.2.0
 eslint-scope@5.1.1
@@ -50,7 +50,7 @@ estraverse@5.3.0
 events@3.3.0
 fast-deep-equal@3.1.3
 fast-json-stable-stringify@2.1.0
-fast-uri@3.1.2
+fast-uri@3.1.7
 find-cache-dir@4.0.0
 find-up@6.3.0
 glob-to-regexp@0.4.1
@@ -73,7 +73,7 @@ monaco-types@0.1.2
 monaco-worker-manager@2.0.1
 monaco-yaml@5.1.0
 neo-async@2.6.2
-node-releases@2.0.53
+node-releases@2.0.54
 p-limit@4.0.0
 p-locate@6.0.0
 path-browserify@1.0.1
@@ -90,15 +90,15 @@ source-map@0.6.1
 supports-color@8.1.1
 tapable@2.3.3
 terser-webpack-plugin@5.3.17
-terser@5.48.0
+terser@5.51.2
 undici-types@7.16.0
-update-browserslist-db@1.3.1
+update-browserslist-db@1.3.2
 uri-js@4.4.1
-vscode-jsonrpc@9.0.0
-vscode-languageserver-protocol@3.18.1
+vscode-jsonrpc@9.0.2
+vscode-languageserver-protocol@3.18.3
 vscode-languageserver-textdocument@1.0.12
 vscode-languageserver-types@3.17.5
-vscode-uri@3.1.0
+vscode-uri@3.2.0
 watchpack@2.5.2
 webpack-sources@3.2.3
 webpack@5.96.1
