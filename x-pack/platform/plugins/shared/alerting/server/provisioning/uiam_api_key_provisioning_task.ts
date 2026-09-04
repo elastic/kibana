@@ -28,6 +28,7 @@ import {
   getExcludeRulesFilter,
   buildRuleUpdatesForUiam,
   mapConvertResponseToResult,
+  deleteLegacyProvisioningStatusDocs,
   prepareProvisioningStatusWrite,
   statusDocsAndOrphanedKeysFromBulkUpdate,
   type ProvisioningStatusWritePayload,
@@ -398,20 +399,30 @@ export class UiamApiKeyProvisioningTask {
     }
     try {
       const result = await context.savedObjectsClient.bulkCreate(docs, { overwrite: true });
+      const persistedIds = new Set<string>();
       for (const so of result?.saved_objects ?? []) {
         if (isSavedObjectErrorResult(so)) {
           // Per-item SOR failure: next run will re-attempt the same id via `overwrite: true`.
           // We surface it as a warn so operators can spot systematically broken docs instead
           // of the failure being silently swallowed inside the bulk response.
           this.logger.warn(
-            `Failed to persist UIAM provisioning status for rule ${so.id}: ${so.error.message}`,
+            `Failed to persist UIAM provisioning status ${so.id}: ${so.error.message}`,
             { tags: TAGS }
           );
+        } else {
+          persistedIds.add(so.id);
         }
       }
       this.logger.info(
         `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
         { tags: TAGS }
+      );
+      // Only for docs whose write is confirmed persisted: deleting the legacy doc after a
+      // failed (or unconfirmed) namespaced write would lose that entity's only status.
+      await deleteLegacyProvisioningStatusDocs(
+        context.savedObjectsClient,
+        this.logger,
+        docs.filter(({ id }) => persistedIds.has(id))
       );
     } catch (e) {
       // Whole-call failure is tagged so log pipelines can alert on 'status-write-failed'
