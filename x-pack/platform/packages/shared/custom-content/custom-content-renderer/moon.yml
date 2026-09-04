@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/ui-callout'
+  - '@kbn/core'
 tags:
   - shared-browser
   - package
