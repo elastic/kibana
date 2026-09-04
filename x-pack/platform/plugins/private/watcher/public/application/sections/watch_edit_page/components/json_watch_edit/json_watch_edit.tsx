@@ -7,12 +7,15 @@
 
 import React, { useContext, useState } from 'react';
 
-import { EuiPageHeader, EuiSpacer, EuiPageSection } from '@elastic/eui';
+import { EuiSpacer, EuiPageSection } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { ExecuteDetails } from '../../../../models/execute_details';
 import { getActionType } from '../../../../../../common/lib/get_action_type';
 import type { BaseWatch, ExecutedWatchDetails } from '../../../../../../common/types/watch_types';
 import { ACTION_MODES, TIME_UNITS } from '../../../../../../common/constants';
+import { getWatcherListBack } from '../../../../lib/watcher_app_header';
+import { useAppContext } from '../../../../app_context';
 import { JsonWatchEditForm } from './json_watch_edit_form';
 import { JsonWatchEditSimulate } from './json_watch_edit_simulate';
 import { WatchContext } from '../../watch_context';
@@ -74,6 +77,7 @@ function getActionModes(items: WatchAction[]) {
 }
 
 export const JsonWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
+  const { history } = useAppContext();
   const { watch } = useContext(WatchContext);
   const watchActions = getActions(watch);
   // hooks
@@ -90,11 +94,16 @@ export const JsonWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   );
 
   return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      <EuiPageHeader
-        pageTitle={<span data-test-subj="pageTitle">{pageTitle}</span>}
-        bottomBorder
-        tabs={WATCH_TABS.map((tab, index) => ({
+    <>
+      <AppHeader
+        title={pageTitle}
+        back={getWatcherListBack(history)}
+        spacing="bleed"
+        tabs={WATCH_TABS.map((tab) => ({
+          id: tab.id,
+          label: tab.name,
+          isSelected: tab.id === selectedTab,
+          'data-test-subj': 'tab',
           onClick: () => {
             setSelectedTab(tab.id);
             setExecuteDetails(
@@ -104,26 +113,24 @@ export const JsonWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
               })
             );
           },
-          isSelected: tab.id === selectedTab,
-          key: index,
-          'data-test-subj': 'tab',
-          label: tab.name,
         }))}
       />
 
       <EuiSpacer size="l" />
 
-      {selectedTab === WATCH_SIMULATE_TAB && (
-        <JsonWatchEditSimulate
-          executeDetails={executeDetails}
-          setExecuteDetails={(details: ExecutedWatchDetails) => setExecuteDetails(details)}
-          executeWatchErrors={executeWatchErrors}
-          hasExecuteWatchErrors={hasExecuteWatchErrors}
-          watchActions={watchActions}
-        />
-      )}
+      <EuiPageSection restrictWidth style={{ width: '100%' }}>
+        {selectedTab === WATCH_SIMULATE_TAB && (
+          <JsonWatchEditSimulate
+            executeDetails={executeDetails}
+            setExecuteDetails={(details: ExecutedWatchDetails) => setExecuteDetails(details)}
+            executeWatchErrors={executeWatchErrors}
+            hasExecuteWatchErrors={hasExecuteWatchErrors}
+            watchActions={watchActions}
+          />
+        )}
 
-      {selectedTab === WATCH_EDIT_TAB && <JsonWatchEditForm />}
-    </EuiPageSection>
+        {selectedTab === WATCH_EDIT_TAB && <JsonWatchEditForm />}
+      </EuiPageSection>
+    </>
   );
 };
