@@ -159,6 +159,7 @@ export const getExpandedDocLocatorParams = ({
     viewMode: savedSearch.viewMode,
     hideAggregatedPreview: savedSearch.hideAggregatedPreview,
     breakdownField: savedSearch.breakdownField,
+    sampleSize: savedSearch.sampleSize,
     ...(isEsql
       ? {
           esqlControls: getEsqlControlsFromApi(api),
