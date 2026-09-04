@@ -16,6 +16,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext, LogEntryFlyout } from '@kbn/logs-shared-plugin/public';
+import { useShouldRenderInfraMlCpsUi } from '../../../hooks/use_infra_ml_cps';
 import type { IdFormatByJobType } from '../../../../common/http_api/latest';
 import {
   isJobStatusWithResults,
@@ -241,6 +242,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     [setSelectedTimeRange]
   );
 
+  const shouldRenderCpsUi = useShouldRenderInfraMlCpsUi();
+
   return (
     <LogsPageTemplate
       data-test-subj="logEntryRateResultsPage"
@@ -263,20 +266,22 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <JobProjectScopes
-                  jobs={[
-                    {
-                      name: logEntryCategoriesModuleDescriptor.moduleName,
-                      projectRouting: logEntryCategoriesProjectRouting,
-                    },
-                    {
-                      name: logEntryRateModuleDescriptor.moduleName,
-                      projectRouting: logEntryRateProjectRouting,
-                    },
-                  ]}
-                />
-              </EuiFlexItem>
+              {shouldRenderCpsUi !== false && (
+                <EuiFlexItem grow={false}>
+                  <JobProjectScopes
+                    jobs={[
+                      {
+                        name: logEntryCategoriesModuleDescriptor.moduleName,
+                        projectRouting: logEntryCategoriesProjectRouting,
+                      },
+                      {
+                        name: logEntryRateModuleDescriptor.moduleName,
+                        projectRouting: logEntryRateProjectRouting,
+                      },
+                    ]}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem>
                 <DatasetsSelector
                   availableDatasets={datasets}

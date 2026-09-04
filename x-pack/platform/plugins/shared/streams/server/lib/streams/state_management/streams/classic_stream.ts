@@ -585,7 +585,12 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       const mappings = getClassicFieldOverrideMappings(
         this._definition.ingest.classic.field_overrides
       );
-      if (mappings) {
+      const previousMappings = getClassicFieldOverrideMappings(
+        startingStateStream.definition.ingest.classic.field_overrides
+      );
+      // Only write or reset when Streams previously wrote an override, or is
+      // writing one now. undefined -> {} must stay a no-op.
+      if (mappings || previousMappings) {
         actions.push({
           type: 'update_data_stream_mappings',
           request: {

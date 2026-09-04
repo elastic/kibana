@@ -16,6 +16,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { useShouldRenderInfraMlCpsUi } from '../../../hooks/use_infra_ml_cps';
 import { logEntryCategoriesJobType } from '../../../../common/log_analysis';
 import type { TimeRange } from '../../../../common/time/time_range';
 import {
@@ -216,6 +217,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     },
   });
 
+  const shouldRenderCpsUi = useShouldRenderInfraMlCpsUi();
+
   return (
     <ViewLogInContextProvider
       logViewReference={{ type: 'log-view-reference', logViewId }}
@@ -241,9 +244,11 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <JobProjectScopes jobs={[{ projectRouting }]} />
-                </EuiFlexItem>
+                {shouldRenderCpsUi !== false && (
+                  <EuiFlexItem grow={false}>
+                    <JobProjectScopes jobs={[{ projectRouting }]} />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem>
                   <DatasetsSelector
                     availableDatasets={logEntryCategoryDatasets}
