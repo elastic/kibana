@@ -1005,6 +1005,8 @@
       "@kbn/custom-content-common/*": ["./x-pack/platform/packages/shared/custom-content/custom-content-common/*"],
       "@kbn/custom-content-plugin": ["./x-pack/platform/plugins/shared/custom_content"],
       "@kbn/custom-content-plugin/*": ["./x-pack/platform/plugins/shared/custom_content/*"],
+      "@kbn/custom-content-renderer": ["./x-pack/platform/packages/shared/custom-content/custom-content-renderer"],
+      "@kbn/custom-content-renderer/*": ["./x-pack/platform/packages/shared/custom-content/custom-content-renderer/*"],
       "@kbn/custom-content-server": ["./x-pack/platform/packages/shared/custom-content/custom-content-server"],
       "@kbn/custom-content-server/*": ["./x-pack/platform/packages/shared/custom-content/custom-content-server/*"],
       "@kbn/custom-icons": ["./src/platform/packages/shared/kbn-custom-icons"],

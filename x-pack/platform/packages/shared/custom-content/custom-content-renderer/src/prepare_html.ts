@@ -8,7 +8,7 @@
 import DOMPurify from 'dompurify';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
+import { CUSTOM_CONTENT_CSP_META } from './constants';
 
 export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
   if (html.includes(CUSTOM_CONTENT_CSP_META)) return html;
