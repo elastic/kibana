@@ -34,6 +34,8 @@ const cellValue = (cell: MatrixCell): string => {
       return `Excluded: ${cell.reason}`;
     case 'insufficient-coverage':
       return `Insufficient: ${cell.covered}/${cell.required}`;
+    case 'insufficient-evaluators':
+      return `Unmeasured (${cell.evaluators.join(', ')} errored)`;
     case 'missing':
       return 'Unmeasured';
   }

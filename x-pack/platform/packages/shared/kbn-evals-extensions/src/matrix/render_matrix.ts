@@ -65,6 +65,10 @@ const cellToString = (cell: MatrixCell, notRecommendedLabel: string): string => 
     // to a full row, and publishing one as a score invites a false ranking.
     case 'insufficient-coverage':
       return `insufficient-coverage:${cell.covered}/${cell.required}`;
+    // Same principle applied to the evaluator axis: an evaluator that errored
+    // on every example means the instrument failed, not that the model earned this.
+    case 'insufficient-evaluators':
+      return `insufficient-evaluators:${cell.evaluators.join('+')}`;
     case 'missing':
     default:
       return '';

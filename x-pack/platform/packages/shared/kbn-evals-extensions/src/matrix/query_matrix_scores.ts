@@ -102,6 +102,13 @@ export interface AggregatedDatasetScores {
   datasetId: string;
   datasetName: string;
   evaluators: AggregatedEvaluatorScore[];
+  /**
+   * Evaluators that produced `label=error` documents for this dataset and no
+   * numeric score at all. Their absence from `evaluators` would otherwise be
+   * invisible, letting the dataset's mean rest on whichever evaluators
+   * survived a broken instrument.
+   */
+  erroredOutEvaluators?: string[];
 }
 
 export interface AggregatedSuiteScores {
@@ -202,6 +209,12 @@ export const scoresByPrefixToDatasets = (
   options: ScoreAggregationOptions = {}
 ): AggregatedDatasetScores[] => {
   const byPrefix = new Map<string, Map<string, { sum: number; count: number }>>();
+  // Evaluators that produced an error label but no score for a prefix. A
+  // trace-metric evaluator erroring (Latency racing span ingestion) is noise;
+  // a cell-relevant judge evaluator erroring out entirely (Trajectory,
+  // SkillInvoked) means the cell's mean silently rests on the evaluators that
+  // survived. Track the names so the builder can refuse to publish that cell.
+  const erroredByPrefix = new Map<string, Map<string, { errored: number; scored: number }>>();
   const excluded: ExcludedScoreCounts = {
     nonQuality: 0,
     nonEis: 0,
@@ -250,12 +263,29 @@ export const scoresByPrefixToDatasets = (
       ? resolveVerdictScore(evaluatorName, doc)
       : doc.evaluator?.score;
 
+    // Record whether this evaluator ever errored or ever scored for the
+    // prefix, so a judge evaluator that failed for every example is visible to
+    // the builder instead of silently absent from the mean's denominator.
+    let errTrack = erroredByPrefix.get(prefix);
+    if (!errTrack) {
+      errTrack = new Map();
+      erroredByPrefix.set(prefix, errTrack);
+    }
+    const tally = errTrack.get(evaluatorName) ?? { errored: 0, scored: 0 };
+    if (doc.evaluator?.label === 'error') {
+      tally.errored += 1;
+      errTrack.set(evaluatorName, tally);
+    }
+
     if (typeof score !== 'number') {
       if (options.useVerdictLadder && typeof doc.evaluator?.score === 'number') {
         excluded.unmappedVerdict += 1;
       }
       continue;
     }
+
+    tally.scored += 1;
+    errTrack.set(evaluatorName, tally);
 
     let evaluators = byPrefix.get(prefix);
     if (!evaluators) {
@@ -270,15 +300,24 @@ export const scoresByPrefixToDatasets = (
 
   options.onExcluded?.(excluded);
 
-  return [...byPrefix.entries()].map(([prefix, evaluators]) => ({
-    datasetId: `prefix:${prefix}`,
-    datasetName: prefix,
-    evaluators: [...evaluators.entries()].map(([evaluatorName, agg]) => ({
-      evaluatorName,
-      mean: agg.sum / agg.count,
-      count: agg.count,
-    })),
-  }));
+  return [...byPrefix.entries()].map(([prefix, evaluators]) => {
+    // Only evaluators that errored AND never scored count: one that recovered
+    // on retry still produced a grade, so its partial history is noise, not a
+    // broken instrument.
+    const erroredOut = [...(erroredByPrefix.get(prefix)?.entries() ?? [])]
+      .filter(([, tally]) => tally.errored > 0 && tally.scored === 0)
+      .map(([name]) => name);
+    return {
+      datasetId: `prefix:${prefix}`,
+      datasetName: prefix,
+      evaluators: [...evaluators.entries()].map(([evaluatorName, agg]) => ({
+        evaluatorName,
+        mean: agg.sum / agg.count,
+        count: agg.count,
+      })),
+      ...(erroredOut.length > 0 ? { erroredOutEvaluators: erroredOut } : {}),
+    };
+  });
 };
 
 /**

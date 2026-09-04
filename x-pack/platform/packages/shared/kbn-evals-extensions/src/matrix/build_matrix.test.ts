@@ -943,3 +943,112 @@ describe('buildMatrix withheld-vs-never-ran', () => {
     expect(matrix.proprietary[0].cells.migrations).toEqual({ kind: 'missing' });
   });
 });
+
+describe('errored-evaluator guard', () => {
+  // A judge/quality evaluator that ERRORS is absent from the aggregate rather
+  // than scored, narrowing the mean to the survivors. When the survivors are
+  // the saturated contract checks (all 1.0), the cell is INFLATED. A
+  // trace-cluster permission fault nulled Trajectory + SkillInvoked for
+  // DeepSeek and lifted alert-analysis-a to 8.89 against 6.86 for models
+  // graded on the full set -- a 2pt "win" that was pure instrument failure.
+  //
+  // A raw evaluator-count floor cannot catch this: a healthy frontier cell
+  // legitimately has 4 scored evaluators, same as the broken row. The signal
+  // that separates them is the errored-out evaluator NAME.
+  const guardConfig: MatrixConfig = parseMatrixConfig({
+    columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+    models: [{ id: 'model-partial', label: 'Partial Model' }],
+  });
+
+  const withDatasets = (
+    evaluators: Array<{ evaluatorName: string; mean: number; count: number }>,
+    erroredOutEvaluators?: string[]
+  ): AggregatedModelScores[] => [
+    {
+      modelId: 'model-partial',
+      provider: 'openrouter',
+      suites: [
+        {
+          suiteId: 'suite-a',
+          experimentId: 'run-partial',
+          datasets: [
+            {
+              datasetId: 'd1',
+              datasetName: 'D1',
+              evaluators,
+              ...(erroredOutEvaluators ? { erroredOutEvaluators } : {}),
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  // The exact shape of the DeepSeek bug: the discriminating judged evaluators
+  // errored away, leaving only saturated 1.0 contract checks behind.
+  const survivingSaturatedOnly = [
+    { evaluatorName: 'MinExpectedSteps', mean: 1, count: 3 },
+    { evaluatorName: 'FinalAnswerPresent', mean: 1, count: 3 },
+  ];
+
+  it('refuses to publish a score when a cell-relevant evaluator errored out', () => {
+    const matrix = buildMatrix(
+      withDatasets(survivingSaturatedOnly, ['Trajectory', 'SkillInvoked']),
+      guardConfig
+    );
+    const cell = matrix.proprietary[0].cells.triage;
+
+    expect(cell.kind).toBe('insufficient-evaluators');
+    expect(cell).toEqual({
+      kind: 'insufficient-evaluators',
+      evaluators: ['Trajectory', 'SkillInvoked'],
+    });
+  });
+
+  it('publishes the score when no cell-relevant evaluator errored out', () => {
+    const matrix = buildMatrix(withDatasets(survivingSaturatedOnly), guardConfig);
+    expect(matrix.proprietary[0].cells.triage.kind).toBe('score');
+  });
+
+  // Without the guard the broken row scores HIGHER than a fully-measured one.
+  // This is the regression that let 8.89 outrank 6.86.
+  it('is what stops a partial instrument from outranking a full measurement', () => {
+    const fullSet = [
+      { evaluatorName: 'Factuality', mean: 0.75, count: 3 },
+      { evaluatorName: 'Groundedness', mean: 0.85, count: 3 },
+      { evaluatorName: 'Relevance', mean: 0.66, count: 3 },
+      { evaluatorName: 'MinExpectedSteps', mean: 1, count: 3 },
+      { evaluatorName: 'FinalAnswerPresent', mean: 1, count: 3 },
+    ];
+    const partial = buildMatrix(withDatasets(survivingSaturatedOnly), guardConfig).proprietary[0]
+      .cells.triage;
+    const complete = buildMatrix(withDatasets(fullSet), guardConfig).proprietary[0].cells.triage;
+
+    // Demonstrate the inflation is real before asserting the fix suppresses it.
+    expect(partial.kind).toBe('score');
+    expect(complete.kind).toBe('score');
+    if (partial.kind === 'score' && complete.kind === 'score') {
+      expect(partial.value).toBeGreaterThan(complete.value);
+    }
+
+    // With the errored-out evaluators named, the inflated cell no longer publishes.
+    const guarded = buildMatrix(withDatasets(survivingSaturatedOnly, ['Trajectory']), guardConfig)
+      .proprietary[0].cells.triage;
+    expect(guarded.kind).toBe('insufficient-evaluators');
+  });
+
+  // Latency racing span ingestion is the norm, not a fault: it must never flag
+  // a cell. The guard keys only on evaluators that reach the cell (excluded
+  // trace metrics are filtered out before the check).
+  it('ignores errors on excluded trace-metric evaluators', () => {
+    const matrix = buildMatrix(withDatasets(survivingSaturatedOnly, ['Latency']), guardConfig);
+    expect(matrix.proprietary[0].cells.triage.kind).toBe('score');
+  });
+
+  it('does not let an unmeasured cell contribute to Overall', () => {
+    const matrix = buildMatrix(withDatasets(survivingSaturatedOnly, ['Trajectory']), guardConfig);
+    const overall = matrix.proprietary[0].overall;
+
+    expect(overall.kind).not.toBe('score');
+  });
+});

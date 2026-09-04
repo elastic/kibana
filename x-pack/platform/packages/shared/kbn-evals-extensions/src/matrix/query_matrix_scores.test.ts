@@ -879,3 +879,59 @@ describe('queryMatrixScores with examplePrefixes', () => {
     expect(result[0].suites[0].datasets.map((d) => d.datasetId)).toEqual(['d1']);
   });
 });
+
+describe('scoresByPrefixToDatasets errored-out tracking', () => {
+  const doc = (exampleId: string, evaluatorName: string, s: number | undefined, label?: string) =>
+    ({
+      example: { id: exampleId, index: 0, dataset: { id: 'ds', name: 'DS' } },
+      task: { model: { id: 'm1' }, trace_id: 't' },
+      evaluator: {
+        name: evaluatorName,
+        ...(s !== undefined ? { score: s } : {}),
+        ...(label ? { label } : {}),
+      },
+      metadata: {},
+    } as unknown as EvaluationScoreDocument);
+
+  it('names evaluators that errored on every example and never scored', () => {
+    // The DeepSeek alert-analysis-a failure shape: Trajectory and SkillInvoked
+    // wrote label=error docs for all examples, so they vanish from the mean.
+    const datasets = scoresByPrefixToDatasets(
+      [
+        doc('alert-analysis-a', 'MinExpectedSteps', 1),
+        doc('alert-analysis-a', 'FinalAnswerPresent', 1),
+        doc('alert-analysis-a', 'Trajectory', undefined, 'error'),
+        doc('alert-analysis-b', 'Trajectory', undefined, 'error'),
+        doc('alert-analysis-a', 'SkillInvoked', undefined, 'error'),
+      ],
+      ['alert-analysis']
+    );
+
+    expect(datasets[0].erroredOutEvaluators).toEqual(
+      expect.arrayContaining(['Trajectory', 'SkillInvoked'])
+    );
+    // Saturated survivors still score — the guard flags the broken ones.
+    expect(datasets[0].evaluators).toHaveLength(2);
+  });
+
+  it('does not flag an evaluator that errored once but recovered', () => {
+    const datasets = scoresByPrefixToDatasets(
+      [
+        doc('alert-analysis-a', 'Latency', undefined, 'error'),
+        doc('alert-analysis-b', 'Latency', 900),
+        doc('alert-analysis-a', 'correctness', 1),
+      ],
+      ['alert-analysis']
+    );
+
+    expect(datasets[0].erroredOutEvaluators ?? []).toEqual([]);
+  });
+
+  it('omits the field when nothing errored out', () => {
+    const datasets = scoresByPrefixToDatasets(
+      [doc('alert-analysis-a', 'correctness', 1)],
+      ['alert-analysis']
+    );
+    expect(datasets[0].erroredOutEvaluators).toBeUndefined();
+  });
+});

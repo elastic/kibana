@@ -307,6 +307,14 @@ const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
     // number, or a thin run silently reads as a missing one.
     case 'insufficient-coverage':
       return `<span class="status warn" title="scored on ${cell.covered} of ${cell.required} required columns — too thin to aggregate">${cell.covered}/${cell.required} cols</span>`;
+    // A partial instrument, not a model result. Naming the errored-out
+    // evaluators keeps a broken pipeline from reading as a score the model earned.
+    case 'insufficient-evaluators':
+      return `<span class="status warn" title="evaluator(s) errored on every example and were dropped from the mean: ${cell.evaluators.join(
+        ', '
+      )} — a score here would rest on the surviving (often saturated) evaluators">⚠ ${cell.evaluators.join(
+        ', '
+      )} errored</span>`;
     case 'missing':
     default:
       return '<span class="sub-num">—</span>';

@@ -40,6 +40,14 @@ export type MatrixCell =
    * averaging 10.0 must not outrank a 22-of-24 run averaging 8.5.
    */
   | { kind: 'insufficient-coverage'; covered: number; required: number }
+  /**
+   * A cell-relevant evaluator errored on every example (e.g. a trace-cluster
+   * permission fault nulling Trajectory/SkillInvoked). Its absence from the
+   * aggregate would let the mean rest on whichever evaluators survived —
+   * usually the saturated contract checks — and publish a flattering number
+   * derived from a broken instrument. Refusing beats flattering.
+   */
+  | { kind: 'insufficient-evaluators'; evaluators: string[] }
   | { kind: 'missing' };
 
 /** Synthetic id for the legacy single "Overall" column. */
@@ -181,6 +189,33 @@ function* columnEvaluators(
   }
 }
 
+const columnErroredOutEvaluators = (
+  modelScores: AggregatedModelScores,
+  column: MatrixColumnConfig
+): string[] => {
+  const suiteSet = new Set(column.suites);
+  const datasetSet = column.examplePrefixes
+    ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
+    : column.datasetIds
+    ? new Set(column.datasetIds)
+    : undefined;
+
+  const names = new Set<string>();
+  for (const suite of modelScores.suites) {
+    if (!suiteSet.has(suite.suiteId)) {
+      continue;
+    }
+    for (const dataset of suite.datasets) {
+      if (!datasetSet || datasetSet.has(dataset.datasetId)) {
+        for (const name of dataset.erroredOutEvaluators ?? []) {
+          names.add(name);
+        }
+      }
+    }
+  }
+  return [...names];
+};
+
 /**
  * Weighted mean (by sample count) of the evaluator scores mapped to a column.
  * Returns `undefined` when no scores contribute.
@@ -224,7 +259,8 @@ const buildCell = (
   {
     selfJudged = false,
     excludedSelfJudged = 0,
-  }: { selfJudged?: boolean; excludedSelfJudged?: number } = {}
+    erroredOutEvaluators = [],
+  }: { selfJudged?: boolean; excludedSelfJudged?: number; erroredOutEvaluators?: string[] } = {}
 ): MatrixCell => {
   if (mean === undefined) {
     // A blank because the judge policy threw the scores away is a different
@@ -233,6 +269,24 @@ const buildCell = (
     return excludedSelfJudged > 0
       ? { kind: 'excluded', reason: 'self-judged', docs: excludedSelfJudged }
       : { kind: 'missing' };
+  }
+
+  // A judge/quality evaluator that errored on EVERY example is absent from the
+  // aggregate rather than scored, so the cell's mean silently rests on
+  // whichever evaluators survived — usually the saturated contract checks.
+  // That is how a trace-cluster permission fault lifted DeepSeek's
+  // alert-analysis-a to 8.89 over models graded on the full set: its Trajectory
+  // and SkillInvoked evaluators errored out, leaving a mean over the 1.0s.
+  // Counting evaluators cannot catch this — a healthy frontier cell legitimately
+  // has 4 — so refuse to publish a number when a cell-relevant evaluator
+  // errored out entirely. Errors on excluded trace metrics (Latency et al.) are
+  // noise and never reach here.
+  const erroredOut = erroredOutEvaluators.filter(
+    (name) =>
+      column.evaluators?.includes(name) ?? !isExcludedEvaluator(name, config.excludeEvaluators)
+  );
+  if (erroredOut.length > 0) {
+    return { kind: 'insufficient-evaluators', evaluators: erroredOut };
   }
 
   const scale = column.scale ?? config.defaultScale;
@@ -255,7 +309,8 @@ const axisCell = (
     cell: buildCell(
       computeColumnMean(modelScores, column, config.excludeEvaluators, includeEvaluator),
       column,
-      config
+      config,
+      { erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column) }
     ),
     weight: config.overall.mode === 'weighted' ? column.weight : 1,
   }));
@@ -286,7 +341,11 @@ const aggregateCells = (
 
     hasAnyData = true;
 
-    if (cell.kind === 'not-recommended' || cell.kind === 'insufficient-coverage') {
+    if (
+      cell.kind === 'not-recommended' ||
+      cell.kind === 'insufficient-coverage' ||
+      cell.kind === 'insufficient-evaluators'
+    ) {
       if (config.notRecommendedCountsAsZeroInOverall && cell.kind === 'not-recommended') {
         totalWeight += weight;
       }
@@ -549,6 +608,7 @@ export const buildMatrix = (
           excludedSelfJudged: modelScores.suites
             .filter((suite) => columnSuites.has(suite.suiteId))
             .reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
+          erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column),
         }
       );
     }
