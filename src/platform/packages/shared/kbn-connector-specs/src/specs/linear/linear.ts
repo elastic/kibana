@@ -301,15 +301,23 @@ const QUERIES = {
       }
       team {
         id
+        name
+        key
       }
       state {
         id
+        name
+        type
       }
       project {
         id
+        name
+        url
       }
       assignee {
         id
+        name
+        displayName
       }
       createdAt
       updatedAt
@@ -341,15 +349,23 @@ const QUERIES = {
     }
     team {
       id
+      name
+      key
     }
     state {
       id
+      name
+      type
     }
     project {
       id
+      name
+      url
     }
     assignee {
       id
+      name
+      displayName
     }
     createdAt
     updatedAt
@@ -381,15 +397,23 @@ const QUERIES = {
       }
       team {
         id
+        name
+        key
       }
       state {
         id
+        name
+        type
       }
       project {
         id
+        name
+        url
       }
       assignee {
         id
+        name
+        displayName
       }
       createdAt
       updatedAt
@@ -422,15 +446,23 @@ const QUERIES = {
       }
       team {
         id
+        name
+        key
       }
       state {
         id
+        name
+        type
       }
       project {
         id
+        name
+        url
       }
       assignee {
         id
+        name
+        displayName
       }
       createdAt
       updatedAt
@@ -693,9 +725,11 @@ const createIssueVariables = (input: CreateIssueInput): Record<string, unknown> 
 
 const updateIssueVariables = (input: UpdateIssueInput): Record<string, unknown> => {
   const variables: Record<string, unknown> = {};
+  if (input.description !== undefined) {
+    variables.description = input.description ?? '';
+  }
   for (const key of [
     'title',
-    'description',
     'assigneeId',
     'projectId',
     'cycleId',
@@ -733,7 +767,8 @@ export const Linear: ConnectorSpec = {
     id: '.linear',
     displayName: 'Linear',
     description: i18n.translate('core.kibanaConnectorSpecs.linear.metadata.description', {
-      defaultMessage: 'Search and inspect Linear teams, projects, users, and issues.',
+      defaultMessage:
+        'Find Linear teams, projects, users, and issues, then create issues, update issues, add comments, and link evidence.',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -756,7 +791,7 @@ export const Linear: ConnectorSpec = {
               }),
               helpText: i18n.translate('core.kibanaConnectorSpecs.linear.auth.apiKey.helpText', {
                 defaultMessage:
-                  'Paste the raw personal API key from Linear settings. Do not add Bearer; Linear expects the key itself as the Authorization header value.',
+                  'Paste the raw personal API key from Linear settings. Do not add Bearer; Linear expects the key itself as the Authorization header value. Read is required for reads. Broad Write permits createIssue, updateIssue, createComment, and createAttachment and was live-tested. If updateIssue is not needed, Create issues permits createIssue and createAttachment, and Create comments permits createComment. Admin is not required.',
               }),
             },
             headerField: { hidden: true },

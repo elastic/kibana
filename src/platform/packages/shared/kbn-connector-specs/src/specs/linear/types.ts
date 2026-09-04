@@ -108,10 +108,38 @@ export interface LinearParentIssueReference {
   title: string;
 }
 
+export interface LinearTeamReference {
+  id: string;
+  name: string;
+  key: string;
+}
+
+export interface LinearStateReference {
+  id: string;
+  name: string;
+  type: string;
+}
+
+export interface LinearProjectReference {
+  id: string;
+  name: string;
+  url: string;
+}
+
+export interface LinearAssigneeReference {
+  id: string;
+  name: string;
+  displayName: string;
+}
+
 export interface LinearIssueResponse extends Record<string, unknown> {
   id: string;
   identifier: string;
   title: string;
+  team: LinearTeamReference;
+  state: LinearStateReference;
+  project: LinearProjectReference | null;
+  assignee: LinearAssigneeReference | null;
   cycle: LinearCycleReference | null;
   parent: LinearParentIssueReference | null;
 }

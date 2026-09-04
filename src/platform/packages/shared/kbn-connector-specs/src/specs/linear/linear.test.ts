@@ -276,15 +276,23 @@ const QUERIES = {
       }
       team {
         id
+        name
+        key
       }
       state {
         id
+        name
+        type
       }
       project {
         id
+        name
+        url
       }
       assignee {
         id
+        name
+        displayName
       }
       createdAt
       updatedAt
@@ -316,15 +324,23 @@ const QUERIES = {
     }
     team {
       id
+      name
+      key
     }
     state {
       id
+      name
+      type
     }
     project {
       id
+      name
+      url
     }
     assignee {
       id
+      name
+      displayName
     }
     createdAt
     updatedAt
@@ -356,15 +372,23 @@ const QUERIES = {
       }
       team {
         id
+        name
+        key
       }
       state {
         id
+        name
+        type
       }
       project {
         id
+        name
+        url
       }
       assignee {
         id
+        name
+        displayName
       }
       createdAt
       updatedAt
@@ -397,15 +421,23 @@ const QUERIES = {
       }
       team {
         id
+        name
+        key
       }
       state {
         id
+        name
+        type
       }
       project {
         id
+        name
+        url
       }
       assignee {
         id
+        name
+        displayName
       }
       createdAt
       updatedAt
@@ -503,7 +535,7 @@ describe('Linear', () => {
       expect(Linear.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
       expect(Linear.metadata.minimumLicense).toBe('enterprise');
       expect(Linear.metadata.description).toBe(
-        'Search and inspect Linear teams, projects, users, and issues.'
+        'Find Linear teams, projects, users, and issues, then create issues, update issues, add comments, and link evidence.'
       );
       expect(Linear.actions.createIssue.description).toContain('Returns selected issue fields');
       expect(Linear.actions.updateIssue.description).toContain('Returns selected issue fields');
@@ -526,6 +558,9 @@ describe('Linear', () => {
       expect(authType.type).toBe('api_key_header');
       expect(authType.defaults).toEqual({ headerField: 'Authorization' });
       expect(authType.overrides?.meta?.headerField).toEqual({ hidden: true });
+      expect(authType.overrides?.meta?.Authorization?.helpText).toContain(
+        'Read is required for reads. Broad Write permits createIssue, updateIssue, createComment, and createAttachment and was live-tested. If updateIssue is not needed, Create issues permits createIssue and createAttachment, and Create comments permits createComment. Admin is not required.'
+      );
     });
 
     it('makes reads tools and all mutations workflow-only', () => {
@@ -877,7 +912,7 @@ describe('Linear', () => {
       expect(result).toEqual(issue);
     });
 
-    it('updates only fields that are present and preserves explicit null and empty arrays', async () => {
+    it('updates only fields that are present and preserves nullable clears and empty arrays', async () => {
       const issue = {
         id: 'issue-1',
         identifier: 'ENG-42',
@@ -902,7 +937,7 @@ describe('Linear', () => {
       expectRequest(QUERIES.updateIssue, {
         id: 'ENG-42',
         input: {
-          description: null,
+          description: '',
           assigneeId: null,
           cycleId: null,
           parentId: null,
@@ -912,6 +947,31 @@ describe('Linear', () => {
       });
       expect(mockClient.post.mock.calls[0][1].variables.input).not.toHaveProperty('title');
       expect(result).toEqual(issue);
+    });
+
+    it('translates an explicit null description to the empty string Linear uses to clear it', async () => {
+      const issue = {
+        id: 'issue-1',
+        identifier: 'ENG-42',
+        title: 'Investigate',
+        description: null,
+        cycle: null,
+        parent: null,
+      };
+      mockClient.post.mockResolvedValue({
+        data: { data: { issueUpdate: { success: true, issue } } },
+      });
+
+      const result = await getAction('updateIssue').handler(mockContext, {
+        id: 'ENG-42',
+        description: null,
+      });
+
+      expectRequest(QUERIES.updateIssue, {
+        id: 'ENG-42',
+        input: { description: '' },
+      });
+      expect(result.description).toBeNull();
     });
 
     it('supports incremental label changes without sending labelIds replacement', async () => {
