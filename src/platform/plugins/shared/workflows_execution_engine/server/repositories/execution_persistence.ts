@@ -59,7 +59,11 @@ export class InMemoryExecutionPersistence
     const { id: _id, spaceId: _spaceId, ...update } = workflowExecution;
     this.execution = { ...this.execution, ...update };
   }
-  public async getStepExecutionsByIds(ids: string[]): Promise<EsWorkflowStepExecution[]> {
+  public async getStepExecutionsByIds(
+    ids: string[],
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[]
+  ): Promise<EsWorkflowStepExecution[]> {
     return ids.flatMap((id) => {
       const execution = this.stepExecutions.get(id);
       if (!execution) {
@@ -70,7 +74,20 @@ export class InMemoryExecutionPersistence
           `Step execution ${id} was read before its required fields were initialized`
         );
       }
-      return [{ ...execution }];
+      const copy: Record<string, unknown> = { ...execution };
+      if (sourceIncludes?.length) {
+        for (const key of Object.keys(copy)) {
+          if (!sourceIncludes.includes(key as StepExecutionField)) {
+            delete copy[key];
+          }
+        }
+      }
+      if (sourceExcludes?.length) {
+        for (const key of sourceExcludes) {
+          delete copy[key];
+        }
+      }
+      return [copy as EsWorkflowStepExecution];
     });
   }
 
