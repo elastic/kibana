@@ -1121,4 +1121,77 @@ describe('#toExpression', () => {
 
     expect(ast.chain[0].arguments.areaFill[0]).toEqual('solid');
   });
+
+  it('should include a points layer in the expression when present in state', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar',
+            xAccessor: 'a',
+            accessors: ['b'],
+            splitAccessors: [],
+          },
+          {
+            layerId: 'points-layer',
+            layerType: LayerTypes.POINTS,
+            query: 'FROM metrics.exemplars-* | LIMIT 100',
+            yAccessor: 'system.cpu.total.norm.pct',
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const layers = expression.chain[0].arguments.layers as Ast[];
+    const pointsLayerAst = layers.find((l) => l.chain[0].function === 'pointsLayer');
+
+    expect(pointsLayerAst).toBeDefined();
+    expect(pointsLayerAst!.chain[0].arguments).toEqual({
+      layerId: ['points-layer'],
+      query: ['FROM metrics.exemplars-* | LIMIT 100'],
+      yAccessor: ['system.cpu.total.norm.pct'],
+    });
+  });
+
+  it('should exclude a points layer with missing query or yAccessor', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar',
+            xAccessor: 'a',
+            accessors: ['b'],
+            splitAccessors: [],
+          },
+          {
+            layerId: 'bad-points',
+            layerType: LayerTypes.POINTS,
+            query: '',
+            yAccessor: 'some.metric',
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const layers = expression.chain[0].arguments.layers as Ast[];
+    const pointsLayerAst = layers.find((l) => l.chain[0].function === 'pointsLayer');
+
+    expect(pointsLayerAst).toBeUndefined();
+  });
 });
