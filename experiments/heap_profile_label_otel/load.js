@@ -25,6 +25,7 @@ const usage = () => {
   --heavy M         heavy requests per batch (default 1)
   --latency ms      applied to both routes
   --heavy-bytes     bytes query for the heavy route
+  --light-bytes     bytes query for the light route
   --concurrency     max in-flight requests (default = batch size)
   --repeat          times to run the batch (default 1)
 `);
@@ -38,6 +39,7 @@ const parseArgs = (argv) => {
     heavy: 1,
     latency: undefined,
     heavyBytes: undefined,
+    lightBytes: undefined,
     concurrency: undefined,
     repeat: 1,
   };
@@ -68,6 +70,9 @@ const parseArgs = (argv) => {
         break;
       case '--heavy-bytes':
         opts.heavyBytes = takeNumber();
+        break;
+      case '--light-bytes':
+        opts.lightBytes = takeNumber();
         break;
       case '--concurrency':
         opts.concurrency = takeNumber();
@@ -163,7 +168,7 @@ const main = async () => {
   for (let i = 0; i < opts.light; i++) {
     jobs.push({
       kind: 'light',
-      url: buildUrl(opts.baseUrl, LIGHT_PATH, { latency: opts.latency }),
+      url: buildUrl(opts.baseUrl, LIGHT_PATH, { latency: opts.latency, bytes: opts.lightBytes }),
     });
   }
   for (let i = 0; i < opts.heavy; i++) {
