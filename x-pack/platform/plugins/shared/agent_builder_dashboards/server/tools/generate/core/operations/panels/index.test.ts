@@ -85,7 +85,7 @@ describe('custom_content panel schemas', () => {
         source: 'config' as const,
         type: 'vis' as const,
         panelId: 'panel-123',
-        config: { title: '' },
+        config: { changes: [{ operation: 'set', path: 'title', value: '' }] },
       }).success
     ).toBe(true);
   });

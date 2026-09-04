@@ -14,9 +14,12 @@ import {
 } from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
+import {
+  editLensPresentation,
+  lensPresentationEditSchema,
+} from '@kbn/agent-builder-visualizations-server';
 import { definePanelType } from '../panel_type';
 import type { PanelResolutionRequestBase } from '../../../resolve_panel';
-import { deepMergeConfig } from './deep_merge';
 
 /**
  * Lens visualization panel logic.
@@ -192,91 +195,23 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
 
 export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
 
-const VIS_DATA_PATH_KEYS = ['datasourceStates', 'query', 'filters'] as const;
-
-const visPanelConfigPatchSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
-  const config = ctx.value;
-
-  if (Object.keys(config).length === 0) {
-    ctx.issues.push({
-      code: 'custom',
-      message: 'config patch must include at least one field.',
-      input: config,
-    });
-    return;
-  }
-
-  if (
-    'visualization' in config &&
-    ('esql' in config || 'chart_type' in config || 'chartType' in config)
-  ) {
-    ctx.issues.push({
-      code: 'custom',
-      message:
-        'config looks like a whole visualization attachment. Pass a partial Lens/Vega config patch, not the entire attachment.',
-      input: config,
-    });
-    return;
-  }
-
-  for (const key of VIS_DATA_PATH_KEYS) {
-    if (key in config) {
-      ctx.issues.push({
-        code: 'custom',
-        message: `Do not patch "${key}" via source: "config". Use source: "request" to change the query or data.`,
-        input: config,
-        path: [key],
-      });
-    }
-  }
-
-  if ('spec' in config) {
-    const { spec } = config as { spec?: unknown };
-    if (typeof spec !== 'string' || spec.length === 0) {
-      ctx.issues.push({
-        code: 'custom',
-        message: 'Vega panel config must provide a non-empty `spec` string.',
-        input: config,
-      });
-    } else if (spec.length > MAX_VEGA_SPEC_LENGTH) {
-      ctx.issues.push({
-        code: 'custom',
-        message: `Vega panel \`spec\` must be at most ${MAX_VEGA_SPEC_LENGTH} characters.`,
-        input: config,
-      });
-    }
-  }
-});
-
-/**
- * The vis variant of an `edit_panels` config item: a presentation patch merged
- * onto an existing Lens or Vega panel. Query and chart-family changes stay on
- * `source: "request"`.
- */
+/** Visualization edits apply explicit set/remove operations and validate the resulting config. */
 export const editVisPanelConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('vis'),
   panelId: z.string().max(256).describe('Existing Lens or Vega panel id to update.'),
-  config: visPanelConfigPatchSchema.describe(
-    'Partial visualization config to merge onto the existing panel. Supply only fields that change (e.g. title, visualization.legend). Do not invent datasourceStates, query, filters, or layers. Do not pass a whole visualization attachment.'
+  config: lensPresentationEditSchema.describe(
+    'Explicit Lens presentation changes, e.g. { changes: [{ operation: "set", path: "legend.visibility", value: "hidden" }] }. Unmentioned settings remain unchanged. Follow the shared chart guidance; queries, data sources, filters, and chart families must stay unchanged. Vega supports only title, description, and hide_title changes; spec editing requires source: "request".'
   ),
 });
 
-/**
- * Registry entry for the `vis` panel type. A by-value (`source: 'config'`) vis
- * panel can carry either a Lens API config or a Vega `{ spec }` config, so the
- * embeddable is chosen from the config shape: a `spec` string routes to the Vega
- * embeddable, everything else stays Lens. Config edits are presentation patches
- * merged onto the existing panel; query and chart-family edits stay on
- * `source: 'request'`.
- */
 export const visPanelDefinition = definePanelType({
   embeddableType: LENS_EMBEDDABLE_TYPE,
   buildPanelContent: (config) => {
     const isVegaConfig = typeof (config as { spec?: unknown })?.spec === 'string';
     return { type: isVegaConfig ? VEGA_VIS_TYPE : LENS_EMBEDDABLE_TYPE, config };
   },
-  validateConfigEdit: (existingPanel, patch = {}) => {
+  validateConfigEdit: (existingPanel) => {
     const isLens = existingPanel.type === LENS_EMBEDDABLE_TYPE;
     const isVega = existingPanel.type === VEGA_VIS_TYPE;
     if (!isLens && !isVega) {
@@ -286,21 +221,12 @@ export const visPanelDefinition = definePanelType({
       };
     }
 
-    if (isLens && 'spec' in patch) {
-      return {
-        ok: false,
-        error: `Panel "${existingPanel.id}" is a Lens panel and cannot take a Vega spec patch.`,
-      };
-    }
-
-    if (isVega && 'type' in patch) {
-      return {
-        ok: false,
-        error: `Panel "${existingPanel.id}" is a Vega panel and cannot take a Lens type patch.`,
-      };
-    }
-
     return { ok: true };
   },
-  applyConfigEdit: (existingPanel, patch) => deepMergeConfig(existingPanel.config, patch),
+  applyConfigEdit: (existingPanel, edit) =>
+    editLensPresentation(
+      existingPanel.config,
+      lensPresentationEditSchema.parse(edit),
+      existingPanel.type === VEGA_VIS_TYPE
+    ),
 });

@@ -38,10 +38,10 @@ export const editPanelsOperation = defineOperation({
   schema: z
     .object({
       operation: z.literal('edit_panels'),
-      panels: z.array(editPanelItemSchema).min(1),
+      panels: z.array(editPanelItemSchema).min(1).max(100),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request" for query/chart-family changes; source: "config", type: "vis" for a presentation patch such as title or legend), markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). DSL, form-based, and other non-ES|QL visualization panels are not supported for query edits and should be recreated as new ES|QL-based panels instead.'
+      'Edit existing panels in place by panelId. Supports Lens API presentation edits, including form-based charts (source: "config", type: "vis", config.changes). Vega supports only title, description, and hide_title changes. Use source: "request" for ES|QL/Vega query or chart-family changes, markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). DSL, form-based, and other non-ES|QL visualization panels are not supported for query edits and may be recreated as ES|QL panels only with explicit user permission.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -167,7 +167,7 @@ export const editPanelsOperation = defineOperation({
         const updateResult = updatePanelInDashboard({
           dashboardData: nextDashboardData,
           panelId: panelInput.panelId,
-          transformPanel: (panel) => ({ ...panel, ...panelContent }),
+          transformPanel: (panel) => ({ ...panel, ...panelContent, type: panel.type }),
         });
 
         if (!updateResult.updated) {

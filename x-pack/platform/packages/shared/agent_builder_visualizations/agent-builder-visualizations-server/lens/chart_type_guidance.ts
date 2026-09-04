@@ -6,11 +6,10 @@
  */
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  getColorPalettesPromptContent,
-  getSharedColorPalettesPromptContent,
-} from './color_palettes';
+import { CHART_DEFAULTS } from './chart_defaults';
 import { titleRulesPromptContent, numberFormatRulesPromptContent } from './config_rules';
+import { getSharedColorPalettesPromptContent } from './color_palettes';
+import { getLensPresentationEditGuidance } from './presentation';
 import { chartTypeRegistry } from './chart_type_registry';
 
 export const getChartTypeSelectionPromptContent = () =>
@@ -34,41 +33,23 @@ export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) =
   ].join('\n');
 };
 
-/**
- * Compiles the full vis-author pack for review/prettify: title and number-format
- * rules, per-chart coloring, `config.rules`, and `review.critical` /
- * `review.suggestions`. The visualization author still sees only the
- * per-request slices ({@link getChartTypeConfigPromptContent},
- * {@link getColorPalettesPromptContent}).
- */
-export const getChartTypeReviewPromptContent = (): string => {
-  const sections = Object.entries(chartTypeRegistry).flatMap(([chartType, { prompt }]) => {
-    const coloring = getColorPalettesPromptContent(chartType as SupportedChartType, {
-      includeShared: false,
-    });
-    const configRules: string[] = prompt.config?.rules ?? [];
-    const critical: string[] = prompt.review?.critical ?? [];
-    const suggestions: string[] = prompt.review?.suggestions ?? [];
-
-    if (!coloring && !configRules.length && !critical.length && !suggestions.length) {
-      return [];
-    }
-
-    return [
-      `### ${chartType}`,
-      coloring,
-      ...configRules.map((rule) => `- ${rule}`),
-      ...(critical.length ? ['Critical:', ...critical.map((rule) => `- ${rule}`)] : []),
-      ...(suggestions.length ? ['Suggestions:', ...suggestions.map((rule) => `- ${rule}`)] : []),
-    ];
-  });
-
+/** Compiles the same visual preferences for the chart generator and dashboard agent. */
+export const getChartDefaultsPromptContent = (chartType?: SupportedChartType): string => {
+  const entries = chartType
+    ? [[chartType, CHART_DEFAULTS[chartType]] as const]
+    : Object.entries(CHART_DEFAULTS);
   return [
-    'CHART REVIEW RULES:',
+    'CHART DEFAULTS:',
+    'Apply these chart rules when generating or improving charts. Use the data and user request to evaluate conditional rules; follow explicit requirements even when existing settings conflict with them.',
     titleRulesPromptContent,
     numberFormatRulesPromptContent,
-    '### shared',
-    getSharedColorPalettesPromptContent({ includeMechanics: true }),
-    ...sections,
+    getSharedColorPalettesPromptContent(),
+    ...entries.flatMap(([type, defaults]) =>
+      defaults ? [`### ${type}`, ...defaults.rules.map((rule) => `- ${rule}`)] : []
+    ),
   ].join('\n');
 };
+
+/** Shared chart guidance plus the explicit presentation-edit interface for Prettify. */
+export const getChartTypeReviewPromptContent = (): string =>
+  [getChartDefaultsPromptContent(), getLensPresentationEditGuidance()].join('\n');

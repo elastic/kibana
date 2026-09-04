@@ -55,125 +55,60 @@ describe('visualization panel request schemas', () => {
   });
 });
 
-describe('editVisPanelConfigInputSchema', () => {
-  const baseEdit = {
-    source: 'config' as const,
-    type: 'vis' as const,
-    panelId: 'panel-1',
-  };
-
-  it('accepts a title-only presentation patch', () => {
-    expect(
-      editVisPanelConfigInputSchema.safeParse({
-        ...baseEdit,
-        config: { title: '' },
-      }).success
-    ).toBe(true);
-  });
-
-  it('accepts a nested visualization styling patch', () => {
-    expect(
-      editVisPanelConfigInputSchema.safeParse({
-        ...baseEdit,
-        config: { visualization: { legend: { isVisible: false } } },
-      }).success
-    ).toBe(true);
-  });
-
-  it('rejects an empty config patch', () => {
-    expect(
-      editVisPanelConfigInputSchema.safeParse({
-        ...baseEdit,
-        config: {},
-      }).success
-    ).toBe(false);
-  });
-
-  it('rejects an attachment-shaped config', () => {
-    expect(
-      editVisPanelConfigInputSchema.safeParse({
-        ...baseEdit,
-        config: {
-          visualization: { type: 'metric' },
-          esql: 'FROM logs | STATS count = COUNT(*)',
-          chart_type: 'metric',
-        },
-      }).success
-    ).toBe(false);
-  });
-
-  it.each(['datasourceStates', 'query', 'filters'] as const)(
-    'rejects a top-level %s data-path patch',
-    (key) => {
-      expect(
-        editVisPanelConfigInputSchema.safeParse({
-          ...baseEdit,
-          config: { [key]: {} },
-        }).success
-      ).toBe(false);
-    }
-  );
-});
-
-describe('visPanelDefinition config edits', () => {
-  const lensPanel = {
+describe('visualization presentation edits', () => {
+  const baseEdit = { source: 'config', type: 'vis', panelId: 'panel-1' };
+  const panel = {
     id: 'panel-1',
     type: LENS_EMBEDDABLE_TYPE,
-    config: { type: 'xy', title: 'Errors', visualization: { layers: [{ id: 'layer-1' }] } },
-    grid: { x: 0, y: 0, w: 24, h: 10 },
-  };
-
-  const vegaPanel = {
-    id: 'vega-1',
-    type: VEGA_VIS_TYPE,
-    config: { spec: '{"mark":"line"}', title: 'Requests' },
-    grid: { x: 0, y: 0, w: 24, h: 10 },
-  };
-
-  it('accepts a config edit of a Lens panel', () => {
-    expect(visPanelDefinition.validateConfigEdit?.(lensPanel, { title: '' })).toEqual({ ok: true });
-  });
-
-  it('accepts a config edit of a Vega panel', () => {
-    expect(visPanelDefinition.validateConfigEdit?.(vegaPanel, { title: 'New' })).toEqual({
-      ok: true,
-    });
-  });
-
-  it('rejects a config edit of a non-visualization panel', () => {
-    const result = visPanelDefinition.validateConfigEdit?.(
-      { ...lensPanel, type: 'markdown' },
-      { title: '' }
-    );
-
-    expect(result?.ok).toBe(false);
-    expect((result as { ok: false; error: string }).error).toMatch(/panel-1.*markdown/);
-  });
-
-  it('rejects a Vega spec patch on a Lens panel', () => {
-    const result = visPanelDefinition.validateConfigEdit?.(lensPanel, { spec: '{"mark":"bar"}' });
-
-    expect(result?.ok).toBe(false);
-    expect((result as { ok: false; error: string }).error).toMatch(/Lens/);
-  });
-
-  it('rejects a Lens type patch on a Vega panel', () => {
-    const result = visPanelDefinition.validateConfigEdit?.(vegaPanel, { type: 'xy' });
-
-    expect(result?.ok).toBe(false);
-    expect((result as { ok: false; error: string }).error).toMatch(/Vega/);
-  });
-
-  it('deep-merges a visualization patch onto the existing config', () => {
-    expect(
-      visPanelDefinition.applyConfigEdit?.(lensPanel, {
-        title: '',
-        visualization: { legend: { isVisible: false } },
-      })
-    ).toEqual({
+    config: {
       type: 'xy',
-      title: '',
-      visualization: { layers: [{ id: 'layer-1' }], legend: { isVisible: false } },
+      layers: [
+        {
+          type: 'line',
+          data_source: { type: 'esql', query: 'ROW count=1' },
+          y: [{ column: 'count' }],
+        },
+      ],
+    },
+    grid: { x: 0, y: 0, w: 24, h: 10 },
+  };
+
+  it('accepts explicit supported changes without filling other settings', () => {
+    const config = { changes: [{ operation: 'set', path: 'axis.x.title.visible', value: false }] };
+    expect(editVisPanelConfigInputSchema.safeParse({ ...baseEdit, config }).success).toBe(true);
+    expect(visPanelDefinition.applyConfigEdit?.(panel, config)).toEqual({
+      ...panel.config,
+      axis: { x: { title: { visible: false } } },
     });
+  });
+
+  it.each([
+    {},
+    { defaults: ['axes'] },
+    { defaults: ['axes'], changes: [{ operation: 'set', path: 'title', value: 'Title' }] },
+    { type: 'pie' },
+    { visualization: { legend: { isVisible: false } } },
+    { layers: [] },
+    { spec: 'invalid' },
+  ])('rejects arbitrary config patches: %j', (config) => {
+    expect(editVisPanelConfigInputSchema.safeParse({ ...baseEdit, config }).success).toBe(false);
+  });
+
+  it('restricts Vega to panel chrome', () => {
+    const vega = { ...panel, type: VEGA_VIS_TYPE, config: { spec: '{"mark":"line"}' } };
+    expect(
+      visPanelDefinition.applyConfigEdit?.(vega, {
+        changes: [{ operation: 'set', path: 'title', value: 'Requests' }],
+      })
+    ).toEqual({ spec: vega.config.spec, title: 'Requests' });
+    expect(() =>
+      visPanelDefinition.applyConfigEdit?.(vega, {
+        changes: [{ operation: 'set', path: 'spec', value: 'invalid' }],
+      })
+    ).toThrow();
+  });
+
+  it('rejects a non-visualization panel', () => {
+    expect(visPanelDefinition.validateConfigEdit?.({ ...panel, type: 'markdown' })?.ok).toBe(false);
   });
 });

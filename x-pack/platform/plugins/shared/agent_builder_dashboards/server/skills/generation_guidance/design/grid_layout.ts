@@ -34,7 +34,7 @@ Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 **Grid Packing Rules:**
 
-- **Stretch the last panel in a row:** Table sizes are the default when panels pack evenly. If leftover columns remain, the last panel in that row — any chart type except a datatable that would end up narrower than \`w: 24\` — stretches so the row sums to 48. A single panel on a row is last, so it is full-width (e.g. the breakdown \`xy-bar\` at \`w: 48\` in the example). Do not leave unused columns beside the last panel. Metric and gauge still must not sit alone at \`w: 48\` — keep those small. If leftover columns are fewer than 24 and the next panel is a datatable, start a new row at \`w: 48\` instead of squeezing the table into the sliver.
+- **Pack comparable panels evenly:** Prefer equal widths and heights within a row. A lone trend or table may use the full width. A sparse final KPI/gauge row may leave trailing space; keep its panels equally sized rather than stretching only the last one. Never add charts just to fill a row.
 - **Eliminate Dead Space:** Always calculate the bottom edge (\`y + h\`) of every panel. When starting a new row or
   placing panels below a row, set the new row's \`y\` to **previous row's \`y + max(h)\`** across all panels in that row — do not use only one neighbor's \`y + h\`.
 - **Align Row Heights:** If multiple panels are placed side-by-side in a row (e.g., sharing the same \`y\` coordinate),
@@ -43,7 +43,7 @@ Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 ### Positioning rules
 
-Always set \`x\` and \`y\` so panels tile with **no gaps**:
+Avoid interior gaps and overlaps; trailing space on sparse KPI rows is allowed:
 
 1. **Fill rows left to right.** Start at \`x: 0\`. The next panel's \`x\` = previous panel's \`x + w\`. When a panel would exceed column 48, start a new row.
 2. **New row \`y\`** = previous row's \`y + max(h)\` of all panels in that row.
@@ -54,9 +54,9 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 
 ### Reflow after removals
 
-- If removing a panel leaves a gap in a row, shift the affected neighboring panels left by re-adding them with updated \`x\` values.
-- If removing a panel leaves later rows with unnecessary empty space above them, re-add the affected panels with updated \`y\` values.
-- On update or prettify, review grid positions and composition together. If anything violates, rethink where panels live and reflow every existing panel — do not resize a subset and leave empty space.
+- If removing a panel leaves a gap in a row, shift the affected neighboring panels left with \`update_panel_layouts\` and updated \`x\` values.
+- If removing a panel leaves later rows with unnecessary empty space above them, move the affected panels with \`update_panel_layouts\` and updated \`y\` values.
+- On update or prettify, inspect the whole dashboard but reflow only affected rows and sections. Preserve already-good placement.
 - Do not invent custom packing: never leave a hole under a shorter panel, never stretch a table or trend to fill leftover height next to KPIs. Put KPIs in one even row; other chart types start on the next row.
 
 ### Section grid rules

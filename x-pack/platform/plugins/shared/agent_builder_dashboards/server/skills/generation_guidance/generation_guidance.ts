@@ -40,14 +40,14 @@ For a new dashboard:
 
 For an existing dashboard:
 - Prefer \`edit_panels\` to change existing panel content in place rather than removing and re-adding a panel.
-- If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
+- Form-based Lens API charts support presentation edits. Query/data changes on non-ES|QL panels require explicit permission to replace the panel with an ES|QL chart.
 - To wrap existing panels in a new section, use \`update_panel_layouts\` with \`newSections\` and \`newSectionKey\`. Do not recreate those panels on \`add_section.panels\` and \`remove_panels\` the old copies.
 - Use \`update_panel_layouts\` to resize or reposition panels, move them into an existing section (\`sectionId\`), or wrap them in a new section (\`newSections\` + \`newSectionKey\`).
 
 ## Panel Inputs
 
 - Use \`source: "request"\` to create or edit a Lens or Vega panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization, or to change an existing chart's query or chart family. Never hand-build a visualization \`config\` for a new visualization.
-- Use \`source: "config"\` for markdown, custom content, or a **presentation patch** on an existing Lens/Vega panel (\`type: "vis"\`, \`panelId\`, partial \`config\`). The generation tool never reads an attachment or saved-object store, so a full new visualization config must be supplied directly — do not invent one.
+- Use \`source: "config"\` for markdown, custom content, or supported Lens presentation changes. For new visualizations, pass only a config obtained from a visualization attachment.
 
 ## Panel Type Selection
 
@@ -80,8 +80,8 @@ Reach for custom content only when nothing above fits:
 
 **Editing a visualization panel:**
 - Use \`source: "request"\` to change what the chart shows (query or chart family).
-- Use \`source: "config"\`, \`type: "vis"\`, and a partial \`config\` to change presentation only — title, legend, colors, or other existing styling keys. The server deep-merges the patch onto the existing panel.
-- Supply only the keys that change. Do not send \`datasourceStates\`, \`query\`, \`filters\`, or invented \`layers\`. Do not pass a whole visualization attachment. A Vega \`spec\` is a full spec replace and only when you already have the spec.
+- Use \`source: "config"\`, \`type: "vis"\`, and \`config: { changes: [...] }\` for presentation only. Changes use \`{ operation: "set", path, value }\` or \`{ operation: "remove", path }\` against Lens API fields. Never change queries, data sources, filters, aggregations, chart families, or layer membership through this flow. Preserve column bindings except for optional gauge binding removals required by the chart rules. Line-to-area restyling follows the shared XY guidance. Vega supports only title, description, and hide_title changes.
+- Emit individual field changes, not data-bearing objects/arrays, a whole visualization attachment, or a Vega spec. Read the Prettify reference for shared chart guidance and edit syntax.
 
 ## Chart Type Guidance
 
@@ -104,9 +104,9 @@ Omit the \`esql\` field on visualization panels unless you received a validated 
 
 - Never invent a \`source: "config"\` payload for content you have not actually resolved. A title or legend patch on an existing visualization is not a new config. If you cannot obtain a full visualization configuration, report it clearly instead of fabricating one.
 - Use \`update_panel_layouts\` when the user wants to resize or reposition panels without changing panel content, or to wrap existing panels in new sections (\`newSections\` + \`newSectionKey\`).
-- If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens and Vega panels (\`source: "request"\` for query/chart-family changes, or \`source: "config"\`, \`type: "vis"\` for a presentation patch), markdown panels (\`source: "config"\`, \`type: "markdown"\`), and custom content panels (\`source: "config"\`, \`type: "custom_content"\`).
-- A dashboard can include DSL-based, form-based, or other non-ES|QL Lens panels. Do not attempt to edit those panels directly.
-- If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
+- If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens and Vega panels (\`source: "request"\` for query/chart-family changes, or \`source: "config"\`, \`type: "vis"\` for supported presentation changes), markdown panels (\`source: "config"\`, \`type: "markdown"\`), and custom content panels (\`source: "config"\`, \`type: "custom_content"\`).
+- Supported Lens API presentation edits work on both ES|QL and form-based charts. Raw/unconverted Lens state is unsupported; leave it intact and report the limitation.
+- If the user asks to change data or chart type on a non-ES|QL panel, explain the limitation and ask before recreating it as an ES|QL chart.
 - Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before regenerating the dashboard with replacement operations.`;
 
 /**

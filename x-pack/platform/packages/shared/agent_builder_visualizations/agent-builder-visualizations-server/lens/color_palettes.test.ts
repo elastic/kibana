@@ -6,7 +6,7 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { chartTypeRegistry } from './chart_type_registry';
+import { CHART_DEFAULTS } from './chart_defaults';
 import {
   INVENTED_COLOR_BAN,
   LEGACY_PALETTE_BAN,
@@ -15,76 +15,42 @@ import {
 } from './color_palettes';
 
 describe('getColorPalettesPromptContent', () => {
-  it.each(Object.values(SupportedChartType))(
-    'includes the shared palette bans for %s',
-    (chartType) => {
-      const content = getColorPalettesPromptContent(chartType);
-      expect(content).toContain(LEGACY_PALETTE_BAN);
-      expect(content).toContain(INVENTED_COLOR_BAN);
-    }
-  );
-
-  it('does not repeat the legacy palette ban on per-chart coloringRules', () => {
-    for (const { prompt } of Object.values(chartTypeRegistry)) {
-      expect(prompt.config?.coloringRules ?? []).not.toContain(LEGACY_PALETTE_BAN);
+  it('keeps shared policy out of chart-specific rules and palette examples', () => {
+    for (const chartType of Object.values(SupportedChartType)) {
+      expect(CHART_DEFAULTS[chartType]?.rules ?? []).not.toContain(LEGACY_PALETTE_BAN);
+      expect(getColorPalettesPromptContent(chartType)).not.toContain(LEGACY_PALETTE_BAN);
     }
   });
 
-  it('omits shared bans when includeShared is false', () => {
-    const content = getColorPalettesPromptContent(SupportedChartType.Metric, {
-      includeShared: false,
-    });
-    expect(content).not.toContain(LEGACY_PALETTE_BAN);
-    expect(content).toContain('METRIC COLORING RULES');
-  });
-
-  it('omits dynamic-step mechanics when includeShared is false', () => {
-    const content = getColorPalettesPromptContent(SupportedChartType.Metric, {
-      includeShared: false,
-    });
-    expect(content).not.toContain('DYNAMIC STEPS');
-    expect(content).not.toContain('Available dynamic palettes');
-    expect(content).toContain('METRIC COLORING RULES');
-  });
-
-  it('keeps per-chart step previews when includeShared is true', () => {
+  it('keeps exact per-chart step previews', () => {
     const content = getColorPalettesPromptContent(SupportedChartType.Metric);
     expect(content).toContain('DYNAMIC STEPS');
     expect(content).toContain('exactly 3 steps');
     expect(content).toContain('a metric chart uses');
   });
 
-  it('compiles shared bans once for the review section', () => {
+  it('compiles color policy shared by generation and Prettify', () => {
     const content = getSharedColorPalettesPromptContent();
     expect(content).toContain(LEGACY_PALETTE_BAN);
     expect(content).toContain(INVENTED_COLOR_BAN);
     expect(content).toContain('DEFAULT POLICY');
+    expect(content).toContain('Drop invented static hex colors, per-value `color_code` mappings');
+    expect(content).toContain('unless the user asked for those colors');
+    expect(content).not.toContain('Preserve meaningful existing colors');
   });
 
-  it('compiles shared dynamic-step mechanics when includeMechanics is true', () => {
-    const content = getSharedColorPalettesPromptContent({ includeMechanics: true });
-    expect(content).toContain('DYNAMIC STEPS');
-    expect(content).toContain('canonical 5-stop');
-    expect(content).toMatch(/metric:\s*3/);
-    expect(content).toMatch(/gauge:\s*4/);
-    expect(content).not.toContain('a metric chart uses');
-  });
-
-  it('lists every registry recommendedStepCount in shared mechanics', () => {
-    const content = getSharedColorPalettesPromptContent({ includeMechanics: true });
-    const stepLine = content.split('\n').find((line) => line.includes('Step count by chart type'));
-
-    expect(stepLine).toBeDefined();
-
-    for (const [chartType, { prompt }] of Object.entries(chartTypeRegistry)) {
-      const count = prompt.config?.options?.coloring?.dynamic?.recommendedStepCount;
-
-      if (count === undefined) {
-        expect(stepLine).not.toContain(`${chartType}:`);
-        continue;
-      }
-
-      expect(stepLine).toContain(`${chartType}: ${count}`);
-    }
+  it.each([
+    [SupportedChartType.Metric, 3],
+    [SupportedChartType.Gauge, 4],
+    [SupportedChartType.Heatmap, 5],
+  ] as const)('samples the full Status palette at the correct count for %s', (chartType, count) => {
+    const line = getColorPalettesPromptContent(chartType)
+      .split('\n')
+      .find((entry) => entry.startsWith('- Status:'));
+    const colors = line?.slice('- Status: '.length).split(', ');
+    expect(colors).toHaveLength(count);
+    expect(colors?.[0]).toBe('#24c292');
+    expect(colors?.[count - 1]).toBe('#f6726a');
+    expect(getColorPalettesPromptContent(chartType)).not.toContain('first N');
   });
 });

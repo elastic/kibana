@@ -6,6 +6,7 @@
  */
 
 export { buildLensConfig } from './lens/build_lens_config';
+export { editLensPresentation, lensPresentationEditSchema } from './lens/presentation';
 export {
   getChartTypeReviewPromptContent,
   getChartTypeSelectionPromptContent,

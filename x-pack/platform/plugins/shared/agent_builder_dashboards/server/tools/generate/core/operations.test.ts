@@ -1894,7 +1894,7 @@ describe('executeDashboardOperations', () => {
       );
     });
 
-    it('patches a Lens panel title and nested visualization styling without replacing the config', async () => {
+    it('edits a Lens API title and legend without replacing data or calling the resolver', async () => {
       const resolvePanelContent = jest.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
@@ -1911,7 +1911,14 @@ describe('executeDashboardOperations', () => {
               config: {
                 type: 'xy',
                 title: 'Errors',
-                visualization: { legend: { isVisible: true }, layers: [{ id: 'layer-1' }] },
+                legend: { visibility: 'visible' },
+                layers: [
+                  {
+                    type: 'line',
+                    data_source: { type: 'esql', query: 'ROW count=1' },
+                    y: [{ column: 'count' }],
+                  },
+                ],
               },
               grid: { x: 0, y: 5, w: 24, h: 9 },
             },
@@ -1926,8 +1933,10 @@ describe('executeDashboardOperations', () => {
                 type: 'vis',
                 panelId: 'panel-1',
                 config: {
-                  title: '',
-                  visualization: { legend: { isVisible: false } },
+                  changes: [
+                    { operation: 'set', path: 'title', value: '' },
+                    { operation: 'set', path: 'legend.visibility', value: 'hidden' },
+                  ],
                 },
               },
             ],
@@ -1946,7 +1955,14 @@ describe('executeDashboardOperations', () => {
         config: {
           type: 'xy',
           title: '',
-          visualization: { legend: { isVisible: false }, layers: [{ id: 'layer-1' }] },
+          legend: { visibility: 'hidden' },
+          layers: [
+            {
+              type: 'line',
+              data_source: { type: 'esql', query: 'ROW count=1' },
+              y: [{ column: 'count' }],
+            },
+          ],
         },
       });
     });
@@ -1973,7 +1989,9 @@ describe('executeDashboardOperations', () => {
                 source: 'config',
                 type: 'vis',
                 panelId: 'vega-1',
-                config: { title: 'Requests over time' },
+                config: {
+                  changes: [{ operation: 'set', path: 'title', value: 'Requests over time' }],
+                },
               },
             ],
           },
@@ -2005,7 +2023,7 @@ describe('executeDashboardOperations', () => {
                 source: 'config',
                 type: 'vis',
                 panelId: 'md-1',
-                config: { title: '' },
+                config: { changes: [{ operation: 'set', path: 'title', value: '' }] },
               },
             ],
           },
@@ -2025,11 +2043,19 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when a Lens panel is patched with a Vega spec', async () => {
+      const panel: AttachmentPanel = {
+        ...createLensPanel('panel-1'),
+        config: {
+          type: 'metric',
+          data_source: { type: 'esql', query: 'ROW count=1' },
+          metrics: [{ type: 'primary', column: 'count' }],
+        },
+      };
       const result = await executeDashboardOperations({
         dashboardData: {
           title: 'Test',
           description: 'Desc',
-          panels: [createLensPanel('panel-1')],
+          panels: [panel],
         },
         operations: [
           {
@@ -2039,7 +2065,7 @@ describe('executeDashboardOperations', () => {
                 source: 'config',
                 type: 'vis',
                 panelId: 'panel-1',
-                config: { spec: '{"mark":"bar"}' },
+                config: { changes: [{ operation: 'set', path: 'spec', value: '{"mark":"bar"}' }] },
               },
             ],
           },
@@ -2051,12 +2077,10 @@ describe('executeDashboardOperations', () => {
         {
           type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
           identifier: 'panel-1',
-          error: 'Panel "panel-1" is a Lens panel and cannot take a Vega spec patch.',
+          error: expect.stringContaining('Lens'),
         },
       ]);
-      expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(
-        expect.objectContaining({ id: 'panel-1', config: { type: 'metric' } })
-      );
+      expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(panel);
     });
 
     it('records a failure when a markdown config-source edit targets a non-markdown panel', async () => {

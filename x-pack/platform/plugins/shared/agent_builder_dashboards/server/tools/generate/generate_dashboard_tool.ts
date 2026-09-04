@@ -41,7 +41,7 @@ const generateDashboardSchema = z.object({
     .describe(
       '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
     ),
-  operations: z.array(dashboardOperationSchema).min(1),
+  operations: z.array(dashboardOperationSchema).min(1).max(100),
 });
 
 /**
@@ -114,7 +114,7 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 Use operations[] to:
 1. set metadata
 2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
-3. edit existing Lens, Vega, or markdown panel content (request for query/chart-family changes; config patch for visualization presentation)
+3. edit existing Lens, Vega, or markdown panel content (request for query/chart-family changes; explicit set/remove changes for visualization presentation)
 4. update panel layouts without changing content, including wrapping existing panels in new sections
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
@@ -153,12 +153,14 @@ Use operations[] to:
           }),
         });
 
-        // Data-aware default time range computation
-        const finalDashboardData = await applyDefaultDashboardTimeRange({
-          dashboardData,
-          esClient,
-          logger,
-        });
+        // Only new dashboards need data-aware time range selection.
+        const finalDashboardData = isNewDashboard
+          ? await applyDefaultDashboardTimeRange({
+              dashboardData,
+              esClient,
+              logger,
+            })
+          : dashboardData;
 
         const description = `Dashboard: ${finalDashboardData.title}`;
         const attachment = isNewDashboard

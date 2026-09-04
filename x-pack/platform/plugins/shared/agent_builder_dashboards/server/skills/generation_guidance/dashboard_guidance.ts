@@ -8,70 +8,22 @@
 import { getChartTypeReviewPromptContent } from '@kbn/agent-builder-visualizations-server';
 import { dashboardRuleRegistry } from './dashboard_rule_registry';
 
-const compileTopicRules = (
-  topic: string,
-  rules: string[],
-  review: { critical?: string[]; suggestions?: string[] } = {}
-): string[] => {
-  const { critical = [], suggestions = [] } = review;
-
-  if (!rules.length && !critical.length && !suggestions.length) {
-    return [];
-  }
-
-  const needsTopicHeading = !(rules.length === 1 && rules[0].trimStart().startsWith('#'));
-
-  return [
-    ...(needsTopicHeading ? [`### ${topic}`] : []),
-    ...rules.map((rule) => (rule.includes('\n') ? rule.trim() : `- ${rule}`)),
-    ...(critical.length ? ['Critical:', ...critical.map((rule) => `- ${rule}`)] : []),
-    ...(suggestions.length ? ['Suggestions:', ...suggestions.map((rule) => `- ${rule}`)] : []),
-  ];
-};
-
-/**
- * HOW rules for the dashboard agent. Inlined in the skill body.
- * Review critical issues and suggestions are omitted so they are not paid twice
- * when a later review loop compiles {@link getDashboardReviewPromptContent}.
- */
-export const getDashboardDesignPromptContent = (): string => {
-  const sections = Object.entries(dashboardRuleRegistry).flatMap(([topic, { prompt }]) =>
-    compileTopicRules(topic, prompt.config?.rules ?? [])
+/** Dashboard layout and composition instructions, shared by creation and updates. */
+export const getDashboardDesignPromptContent = (): string =>
+  ['## Dashboard Design', ...Object.values(dashboardRuleRegistry).map(({ design }) => design)].join(
+    '\n'
   );
 
-  if (!sections.length) {
-    return '';
-  }
+/** Dashboard-level visual review, without duplicating the skill's layout reference. */
+export const getDashboardReviewTopicsContent = (): string =>
+  [
+    '## Dashboard Review',
+    ...Object.entries(dashboardRuleRegistry).flatMap(([topic, { review }]) => [
+      `### ${topic}`,
+      ...review.map((rule) => `- ${rule}`),
+    ]),
+  ].join('\n');
 
-  return ['## Dashboard Design', ...sections].join('\n');
-};
-
-/** Dashboard-registry review topics only — no chart-type review. */
-export const getDashboardReviewTopicsContent = (): string => {
-  const sections = Object.entries(dashboardRuleRegistry).flatMap(([topic, { prompt }]) =>
-    compileTopicRules(topic, [], prompt.review)
-  );
-
-  if (!sections.length) {
-    return '';
-  }
-
-  return ['## Dashboard Review', ...sections].join('\n');
-};
-
-/**
- * Painted failures and judge-only exceptions from the dashboard registry,
- * plus chart-type review from {@link getChartTypeReviewPromptContent}.
- * Dashboard `config.rules` are already in the skill body via
- * {@link getDashboardDesignPromptContent} — do not compile them again here.
- */
-export const getDashboardReviewPromptContent = (): string => {
-  const topics = getDashboardReviewTopicsContent();
-  const chartReview = getChartTypeReviewPromptContent();
-
-  if (!topics && !chartReview) {
-    return '';
-  }
-
-  return [topics || '## Dashboard Review', ...(chartReview ? [chartReview] : [])].join('\n');
-};
+/** Shared visual defaults and dashboard review guidance for the main agent. */
+export const getDashboardReviewPromptContent = (): string =>
+  [getDashboardReviewTopicsContent(), getChartTypeReviewPromptContent()].join('\n');
