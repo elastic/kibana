@@ -20,6 +20,13 @@ import type { ConversationActions } from '../context/conversation/use_conversati
 const noOp = () => {};
 const noOpAsync = () => Promise.resolve([] as never[]);
 
+const mockUserProfile = {
+  uid: 'user-1',
+  enabled: true,
+  user: { username: 'elastic', full_name: 'Elastic User' },
+  data: {},
+};
+
 const kibanaServices = {
   analytics: {
     reportEvent: noOp,
@@ -72,6 +79,12 @@ const kibanaServices = {
     getUrlForApp: () => '/',
     navigateToUrl: () => Promise.resolve(),
   },
+  userProfile: {
+    getCurrent: () => Promise.resolve(mockUserProfile),
+    bulkGet: () => Promise.resolve([mockUserProfile]),
+    getUserProfile: () => Promise.resolve(mockUserProfile),
+    suggest: () => Promise.resolve([mockUserProfile]),
+  },
   appParams: { history: {} },
   plugins: {},
 } as unknown as StartServices;
@@ -82,7 +95,13 @@ const agentBuilderServices = {
       Promise.resolve([
         { id: agentBuilderDefaultAgentId, type: 'chat', name: 'Elastic AI Agent', description: '' },
       ]),
-    get: () => Promise.resolve(null),
+    get: () =>
+      Promise.resolve({
+        id: agentBuilderDefaultAgentId,
+        type: 'chat',
+        name: 'Elastic AI Agent',
+        description: '',
+      }),
     create: () => Promise.resolve({}),
     update: () => Promise.resolve({}),
     delete: () => Promise.resolve({}),
