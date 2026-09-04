@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const BANNER_DISMISSED_KEY = 'vectordb.home.banner.dismissed';
+export const NEW_INDEX_DISMISSED_KEY = 'vectordb.home.newIndex.dismissed';
 
 export const STAT_TILE_LABELS = {
   totalIndices: i18n.translate('xpack.serverlessVectordb.home.stats.totalIndices', {

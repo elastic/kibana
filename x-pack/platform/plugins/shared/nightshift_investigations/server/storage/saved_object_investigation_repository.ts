@@ -19,11 +19,11 @@ import type {
   InvestigationRepository,
 } from './types';
 
-const toRecord = ({
+const toRecord = <Attributes extends Partial<InvestigationAttributes>>({
   id,
   version,
   attributes,
-}: SavedObject<InvestigationAttributes>): InvestigationRecord => ({
+}: SavedObject<Attributes>): Attributes & Pick<InvestigationRecord, 'id' | 'version'> => ({
   id,
   version,
   ...attributes,
@@ -105,7 +105,9 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     }
   }
 
-  async find(query: FindInvestigationsQuery): Promise<FindInvestigationsResult> {
+  async find<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
+    query: FindInvestigationsQuery<Fields>
+  ): Promise<FindInvestigationsResult<Fields>> {
     const filters: string[] = [];
     const attr = (field: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${field}`;
 
@@ -123,6 +125,8 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     const rangeFilters: Array<[string, string | undefined, '>=' | '<=']> = [
       ['created_at', query.createdAfter, '>='],
       ['created_at', query.createdBefore, '<='],
+      ['started_at', query.startedAfter, '>='],
+      ['started_at', query.startedBefore, '<='],
       ['completed_at', query.completedAfter, '>='],
       ['completed_at', query.completedBefore, '<='],
     ];
@@ -133,13 +137,14 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
       }
     }
 
-    const result = await this.savedObjectsClient.find<InvestigationAttributes>({
+    const result = await this.savedObjectsClient.find<Pick<InvestigationAttributes, Fields>>({
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
       filter: filters.length > 0 ? filters.join(' AND ') : undefined,
       sortField: query.sortField ?? 'created_at',
       sortOrder: query.sortOrder ?? 'desc',
       page: query.page,
       perPage: query.perPage,
+      fields: query.fields,
     });
 
     return {

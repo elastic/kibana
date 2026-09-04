@@ -75,6 +75,7 @@ import { getEsPackage } from '../archive/storage';
 import { normalizeKuery } from '../../saved_object';
 import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
+import { brandInstallationSpaceId } from './brand_installation_space_id';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
@@ -349,6 +350,7 @@ export async function getPackageSavedObjects(
   });
 
   for (const savedObject of result.saved_objects) {
+    savedObject.attributes = brandInstallationSpaceId(savedObject.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
@@ -413,6 +415,7 @@ export async function getInstalledPackageSavedObjects(
   });
 
   for (const savedObject of result.saved_objects) {
+    savedObject.attributes = brandInstallationSpaceId(savedObject.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
@@ -827,6 +830,8 @@ export async function getInstallationObject(options: {
     return;
   }
 
+  installation.attributes = brandInstallationSpaceId(installation.attributes);
+
   auditLoggingService.writeCustomSoAuditLog({
     action: 'find',
     id: installation.id,
@@ -851,6 +856,7 @@ async function getInstallationObjects(options: {
   );
 
   for (const installation of installations) {
+    installation.attributes = brandInstallationSpaceId(installation.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: installation.id,
