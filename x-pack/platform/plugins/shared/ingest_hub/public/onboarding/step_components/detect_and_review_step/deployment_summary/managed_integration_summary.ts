@@ -17,9 +17,11 @@ export interface SummaryField {
 export function getManagedIntegrationSummaryFields({
   globalRegion,
   cfnStackName,
+  connectorName,
 }: {
   globalRegion: string | undefined;
   cfnStackName: string | undefined;
+  connectorName: string | undefined;
 }): SummaryField[] {
   return [
     {
@@ -39,6 +41,11 @@ export function getManagedIntegrationSummaryFields({
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.cloudFormationStack',
       defaultMessage: 'CloudFormation stack',
       value: cfnStackName || null,
+    },
+    {
+      labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.federatedIdentityName',
+      defaultMessage: 'Federated Identity Name',
+      value: connectorName || null,
     },
   ];
 }

@@ -13,13 +13,28 @@ import { useDeploymentSummary } from './use_deployment_summary';
 
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 
+const AUTH_STEP_KEY = 'onboarding.aws.authenticateAndDeployStep';
+
+function mockStorageValues({
+  globalRegion = 'us-east-1',
+  connectorName,
+}: {
+  globalRegion?: string;
+  connectorName?: string;
+} = {}) {
+  mockUseSessionStorage.mockImplementation((key: string) => {
+    if (key === AUTH_STEP_KEY) {
+      return [{ connectorName }, jest.fn()];
+    }
+    // SERVICE_SETTINGS_KEY and any other key
+    return [{ globalRegion, serviceVars: {} }, jest.fn()];
+  });
+}
+
 describe('useDeploymentSummary', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSessionStorage.mockReturnValue([
-      { globalRegion: 'us-east-1', serviceVars: {} },
-      jest.fn(),
-    ]);
+    mockStorageValues();
   });
 
   describe('managed_integration', () => {
@@ -38,15 +53,24 @@ describe('useDeploymentSummary', () => {
     });
 
     it('omits Region when globalRegion is empty', () => {
-      mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
+      mockStorageValues({ globalRegion: '' });
       const { result } = renderHook(() => useDeploymentSummary('managed_integration'));
       expect(result.current.find((f) => f.defaultMessage === 'Region')).toBeUndefined();
     });
 
-    it('does not include Federated Identity Name', () => {
+    it('includes Federated Identity Name when connectorName is set', () => {
+      mockStorageValues({ connectorName: 'my-prod-connector' });
+      const { result } = renderHook(() => useDeploymentSummary('managed_integration'));
+      const field = result.current.find((f) => f.defaultMessage === 'Federated Identity Name');
+      expect(field).toBeDefined();
+      expect(field?.value).toBe('my-prod-connector');
+    });
+
+    it('omits Federated Identity Name when connectorName is absent', () => {
+      mockStorageValues({ connectorName: undefined });
       const { result } = renderHook(() => useDeploymentSummary('managed_integration'));
       expect(
-        result.current.find((f) => f.defaultMessage.toLowerCase().includes('federated'))
+        result.current.find((f) => f.defaultMessage === 'Federated Identity Name')
       ).toBeUndefined();
     });
   });

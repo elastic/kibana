@@ -41,7 +41,7 @@ export interface AwsIdentityFederationSetupProps {
   isEditPage?: boolean;
   initialConnectorId?: string;
   onReadyChange?: (isReady: boolean) => void;
-  onConnectorIdChange?: (connectorId: string | undefined) => void;
+  onConnectorIdChange?: (connectorId: string | undefined, connectorName?: string) => void;
 }
 
 export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProps> = ({
@@ -64,8 +64,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
   const [roleArn, setRoleArn] = useState('');
   const [connectorName, setConnectorName] = useState('');
-  const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>(
-    initialConnectorId
+  const [selected, setSelected] = useState<{ id: string; name?: string } | undefined>(
+    initialConnectorId ? { id: initialConnectorId } : undefined
   );
 
   const hasSetInitialTab = useRef(false);
@@ -80,10 +80,24 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     }
   }, [cloudConnectors.length, isEditPage]);
 
+  // When opening an edit page with an initialConnectorId the name isn't available yet — resolve
+  // it from the connector list once loaded, without overwriting a name already set by a user action.
   useEffect(() => {
-    onReadyChange?.(!!selectedConnectorId);
-    onConnectorIdChange?.(selectedConnectorId);
-  }, [selectedConnectorId, onReadyChange, onConnectorIdChange]);
+    if (!selected?.id || selected.name) return;
+    const match = cloudConnectors.find((c) => c.id === selected.id);
+    if (match) setSelected({ id: match.id, name: match.name });
+  }, [cloudConnectors, selected]);
+
+  // A selection made in this component always carries its name, so an id without a name can only
+  // be the initialConnectorId seed whose name is still being resolved above. Hold the emission
+  // until it lands, otherwise consumers persist an id with no name and render an empty summary.
+  const isAwaitingInitialName = !!selected?.id && !selected.name && isLoadingConnectors;
+
+  useEffect(() => {
+    onReadyChange?.(!!selected?.id);
+    if (isAwaitingInitialName) return;
+    onConnectorIdChange?.(selected?.id, selected?.name);
+  }, [selected, isAwaitingInitialName, onReadyChange, onConnectorIdChange]);
 
   const cloudFormationUrl = cloud
     ? getCloudConnectorRemoteRoleTemplate({
@@ -95,7 +109,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
 
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
     (connector) => {
-      setSelectedConnectorId(connector.id);
+      setSelected({ id: connector.id, name: connector.name });
       setSelectedTabId(TABS.EXISTING_CONNECTION);
       setRoleArn('');
       setConnectorName('');
@@ -123,7 +137,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const handleTabClick = (tab: { id: string }) => {
     setSelectedTabId(tab.id);
     if (tab.id === TABS.NEW_CONNECTION) {
-      setSelectedConnectorId(undefined);
+      setSelected(undefined);
     }
   };
 
@@ -227,11 +241,11 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       content: (
         <CloudConnectorSelector
           provider="aws"
-          cloudConnectorId={selectedConnectorId}
-          credentials={selectedConnectorId ? { cloudConnectorId: selectedConnectorId } : {}}
+          cloudConnectorId={selected?.id}
+          credentials={selected?.id ? { cloudConnectorId: selected.id } : {}}
           setCredentials={(creds) => {
             if (creds.cloudConnectorId) {
-              setSelectedConnectorId(creds.cloudConnectorId);
+              setSelected({ id: creds.cloudConnectorId, name: creds.name });
             }
           }}
           accountType={accountType}

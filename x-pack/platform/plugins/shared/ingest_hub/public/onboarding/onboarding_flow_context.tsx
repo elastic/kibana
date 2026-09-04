@@ -16,6 +16,7 @@ import { getOnboardingSessionKey } from './onboarding_session_storage';
 
 export interface AuthenticateAndDeployStepState {
   connectorId?: string;
+  connectorName?: string;
   staticKeys?: AwsStaticKeyCredentials;
 }
 
@@ -32,6 +33,7 @@ export interface DetectAndReviewStepState {
 // Only non-sensitive fields are persisted — password values are never written to session storage
 interface PersistedAuthenticateAndDeployStep {
   connectorId?: string;
+  connectorName?: string;
   authType?: 'identity_federation' | 'static_keys';
   accessKeyId?: string;
   deploymentMethod?: DeploymentMethod;
@@ -59,7 +61,7 @@ const DEFAULT_SELECTED_IDS: string[] = [];
 
 interface OnboardingFlowState {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
-  setConnectorId: (id: string | undefined) => void;
+  setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
   deploymentMethod: DeploymentMethod;
   setDeploymentMethod: (method: DeploymentMethod) => void;
@@ -101,12 +103,20 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       : undefined
   );
 
+  // Ref holds the latest persisted value so setConnectorId/setStaticKeys can spread it
+  // without closing over the state value — keeping both callbacks stable across renders.
+  const persistedAuthStepRef = useRef(persistedAuthenticateAndDeployStep);
+  persistedAuthStepRef.current = persistedAuthenticateAndDeployStep;
+
   const setConnectorId = useCallback(
-    (id: string | undefined) => {
+    (id: string | undefined, name?: string) => {
       setStaticKeysState(undefined);
       setPersistedAuthenticateAndDeployStep({
+        ...persistedAuthStepRef.current,
         connectorId: id,
+        connectorName: id ? name : undefined,
         authType: id ? 'identity_federation' : undefined,
+        accessKeyId: undefined,
       });
     },
     [setPersistedAuthenticateAndDeployStep]
@@ -116,6 +126,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     (keys: AwsStaticKeyCredentials | undefined) => {
       setStaticKeysState(keys);
       setPersistedAuthenticateAndDeployStep({
+        ...persistedAuthStepRef.current,
+        connectorId: undefined,
+        connectorName: undefined,
         authType: keys ? 'static_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
@@ -252,6 +265,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const authenticateAndDeployStep: AuthenticateAndDeployStepState = {
     connectorId: persistedAuthenticateAndDeployStep?.connectorId,
+    connectorName: persistedAuthenticateAndDeployStep?.connectorName,
     staticKeys,
   };
 
