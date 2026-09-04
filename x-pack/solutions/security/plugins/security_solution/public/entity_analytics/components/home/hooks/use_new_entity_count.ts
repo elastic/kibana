@@ -25,7 +25,7 @@ export const useNewEntityCount = ({
 
   const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
   const query = `FROM ${index}
-| WHERE entity.lifecycle.first_seen >= NOW() - 7 days AND entity.risk.calculated_score > 0
+| WHERE entity.lifecycle.first_seen >= NOW() - 7 days AND entity.risk.calculated_score > 0 AND \`entity.relationships.resolution.resolved_to\` IS NULL
 | STATS value = COUNT(*)`;
 
   const isEnabled =

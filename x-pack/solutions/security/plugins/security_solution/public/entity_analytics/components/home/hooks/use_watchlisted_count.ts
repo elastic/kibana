@@ -25,7 +25,7 @@ export const useWatchlistedCount = ({
 
   const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
   const query = `FROM ${index}
-| WHERE entity.attributes.watchlists IS NOT NULL AND entity.risk.calculated_score > 0
+| WHERE entity.attributes.watchlists IS NOT NULL AND entity.risk.calculated_score > 0 AND \`entity.relationships.resolution.resolved_to\` IS NULL
 | STATS value = COUNT(*)`;
 
   const isEnabled =
