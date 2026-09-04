@@ -48,7 +48,7 @@ export class InMemoryExecutionPersistence
     if (this.execution.id !== workflowExecutionId || this.execution.spaceId !== spaceId) {
       return null;
     }
-    return this.execution;
+    return { ...this.execution };
   }
 
   public async updateWorkflowExecution(
@@ -68,7 +68,7 @@ export class InMemoryExecutionPersistence
           `Step execution ${id} was read before its required fields were initialized`
         );
       }
-      return [execution];
+      return [{ ...execution }];
     });
   }
 

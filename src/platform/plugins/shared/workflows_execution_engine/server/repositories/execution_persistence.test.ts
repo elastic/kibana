@@ -50,6 +50,16 @@ describe('InMemoryExecutionPersistence', () => {
     ).resolves.toBeNull();
   });
 
+  it('returns a defensive copy from getWorkflowExecutionById', async () => {
+    const persistence = new InMemoryExecutionPersistence(execution);
+    const result = await persistence.getWorkflowExecutionById(execution.id, execution.spaceId);
+    result!.status = ExecutionStatus.RUNNING;
+
+    await expect(
+      persistence.getWorkflowExecutionById(execution.id, execution.spaceId)
+    ).resolves.toEqual(expect.objectContaining({ status: ExecutionStatus.PENDING }));
+  });
+
   it('does not share state between execution-scoped instances', async () => {
     const first = new InMemoryExecutionPersistence(execution);
     const secondExecution = { ...execution, id: 'execution-2' };
@@ -60,6 +70,31 @@ describe('InMemoryExecutionPersistence', () => {
     await expect(
       second.getWorkflowExecutionById(secondExecution.id, secondExecution.spaceId)
     ).resolves.toEqual(expect.objectContaining({ status: ExecutionStatus.PENDING }));
+  });
+
+  it('returns a defensive copy from getStepExecutionsByIds', async () => {
+    const persistence = new InMemoryExecutionPersistence(execution);
+    await persistence.bulkUpsert([
+      {
+        id: 'step-copy',
+        spaceId: 'space-1',
+        stepId: 'step-copy',
+        scopeStack: [],
+        workflowRunId: execution.id,
+        workflowId: execution.workflowId,
+        status: ExecutionStatus.RUNNING,
+        startedAt: '2026-07-21T00:00:00.000Z',
+        topologicalIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+      },
+    ]);
+    const [result] = await persistence.getStepExecutionsByIds(['step-copy']);
+    result.status = ExecutionStatus.COMPLETED;
+
+    await expect(persistence.getStepExecutionsByIds(['step-copy'])).resolves.toEqual([
+      expect.objectContaining({ status: ExecutionStatus.RUNNING }),
+    ]);
   });
 
   it('merges step lifecycle and IO updates without an external repository', async () => {
