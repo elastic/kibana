@@ -41,6 +41,7 @@ export const createLeadGenerationBasicEvaluator = (): Evaluator<
 > => ({
   name: LEAD_GENERATION_BASIC_EVALUATOR_NAME,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const errors = output?.errors;
     if (errors && errors.length > 0) {

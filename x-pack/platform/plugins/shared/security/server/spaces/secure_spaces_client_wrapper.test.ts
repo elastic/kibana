@@ -274,9 +274,7 @@ describe('SecureSpacesClientWrapper', () => {
           } as unknown as CheckPrivilegesResponse);
           authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces: checkPrivileges });
 
-          await expect(wrapper.getAll({ purpose: scenario.purpose })).rejects.toThrowError(
-            'Forbidden'
-          );
+          await expect(wrapper.getAll({ purpose: scenario.purpose })).rejects.toThrow('Forbidden');
 
           expect(baseClient.getAll).toHaveBeenCalledWith({ purpose: scenario.purpose ?? 'any' });
           expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
@@ -508,6 +506,167 @@ describe('SecureSpacesClientWrapper', () => {
       expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
         id: asSpaceId(spaceId),
+      });
+    });
+  });
+
+  describe('#isInitialSolutionSetupRequired', () => {
+    it('delegates to base client when security is not enabled', async () => {
+      const { wrapper, baseClient, authorization, auditLogger } = setup({
+        securityEnabled: false,
+      });
+      baseClient.isInitialSolutionSetupRequired.mockResolvedValue(true);
+
+      const response = await wrapper.isInitialSolutionSetupRequired();
+      expect(baseClient.isInitialSolutionSetupRequired).toHaveBeenCalledTimes(1);
+      expect(response).toEqual(true);
+      expectNoAuthorizationCheck(authorization);
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+
+    test(`throws a forbidden error when unauthorized`, async () => {
+      const username = 'some_user';
+
+      const { wrapper, baseClient, authorization, request, auditLogger } = setup({
+        securityEnabled: true,
+      });
+
+      const checkPrivileges = jest.fn().mockResolvedValue({
+        username,
+        hasAllRequested: false,
+        privileges: {
+          kibana: [{ privilege: authorization.actions.space.manage, authorized: false }],
+        },
+      } as CheckPrivilegesResponse);
+      authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
+
+      await expect(
+        wrapper.isInitialSolutionSetupRequired()
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to get initial solution setup state"`
+      );
+
+      expect(baseClient.isInitialSolutionSetupRequired).not.toHaveBeenCalled();
+      expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: authorization.actions.space.manage,
+      });
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'failure', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+
+    it('returns setup state when authorized', async () => {
+      const username = 'some_user';
+
+      const { wrapper, baseClient, authorization, request, auditLogger } = setup({
+        securityEnabled: true,
+      });
+      baseClient.isInitialSolutionSetupRequired.mockResolvedValue(true);
+
+      const checkPrivileges = jest.fn().mockResolvedValue({
+        username,
+        hasAllRequested: true,
+        privileges: {
+          kibana: [{ privilege: authorization.actions.space.manage, authorized: true }],
+        },
+      } as CheckPrivilegesResponse);
+      authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
+
+      const response = await wrapper.isInitialSolutionSetupRequired();
+
+      expect(baseClient.isInitialSolutionSetupRequired).toHaveBeenCalledTimes(1);
+      expect(response).toEqual(true);
+      expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: authorization.actions.space.manage,
+      });
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+  });
+
+  describe('#completeInitialSolutionSetup', () => {
+    it('delegates to base client when security is not enabled', async () => {
+      const { wrapper, baseClient, authorization, auditLogger } = setup({
+        securityEnabled: false,
+      });
+
+      await wrapper.completeInitialSolutionSetup('es');
+      expect(baseClient.completeInitialSolutionSetup).toHaveBeenCalledTimes(1);
+      expect(baseClient.completeInitialSolutionSetup).toHaveBeenCalledWith('es');
+      expectNoAuthorizationCheck(authorization);
+      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'unknown', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+
+    test(`throws a forbidden error when unauthorized`, async () => {
+      const username = 'some_user';
+
+      const { wrapper, baseClient, authorization, request, auditLogger } = setup({
+        securityEnabled: true,
+      });
+
+      const checkPrivileges = jest.fn().mockResolvedValue({
+        username,
+        hasAllRequested: false,
+        privileges: {
+          kibana: [{ privilege: authorization.actions.space.manage, authorized: false }],
+        },
+      } as CheckPrivilegesResponse);
+      authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
+
+      await expect(
+        wrapper.completeInitialSolutionSetup('security')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to complete initial solution setup"`
+      );
+
+      expect(baseClient.completeInitialSolutionSetup).not.toHaveBeenCalled();
+      expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: authorization.actions.space.manage,
+      });
+      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'failure', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+
+    it('completes setup when authorized', async () => {
+      const username = 'some_user';
+
+      const { wrapper, baseClient, authorization, request, auditLogger } = setup({
+        securityEnabled: true,
+      });
+
+      const checkPrivileges = jest.fn().mockResolvedValue({
+        username,
+        hasAllRequested: true,
+        privileges: {
+          kibana: [{ privilege: authorization.actions.space.manage, authorized: true }],
+        },
+      } as CheckPrivilegesResponse);
+      authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
+
+      await wrapper.completeInitialSolutionSetup('oblt');
+
+      expect(baseClient.completeInitialSolutionSetup).toHaveBeenCalledWith('oblt');
+      expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: authorization.actions.space.manage,
+      });
+      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'unknown', {
+        type: 'space',
+        id: 'default',
       });
     });
   });

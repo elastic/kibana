@@ -157,18 +157,21 @@ describe('connector attachment type', () => {
           actions: {
             searchMessages: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Search Slack messages',
               input: inputSchema,
               handler: jest.fn(),
             },
             sendMessage: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Send a message to a channel',
               input: inputSchema,
               handler: jest.fn(),
             },
             internalAction: {
               isTool: false,
+              scope: 'read' as const,
               description: 'Internal only',
               input: inputSchema,
               handler: jest.fn(),
@@ -212,6 +215,7 @@ describe('connector attachment type', () => {
           actions: {
             sendMessage: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Send a message',
               input: inputSchema,
               handler: jest.fn(),
@@ -263,6 +267,7 @@ describe('connector attachment type', () => {
               },
               searchMessages: {
                 isTool: true,
+                scope: 'read' as const,
                 description: 'Search messages',
                 input: inputSchema,
                 handler: jest.fn(),
@@ -328,6 +333,7 @@ describe('connector attachment type', () => {
             actions: {
               searchMessages: {
                 isTool: true,
+                scope: 'read' as const,
                 description: 'Search messages',
                 input: inputSchema,
                 handler: jest.fn(),
@@ -376,6 +382,7 @@ describe('connector attachment type', () => {
           actions: {
             searchMessages: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Search messages',
               input: inputSchema,
               handler: jest.fn(),

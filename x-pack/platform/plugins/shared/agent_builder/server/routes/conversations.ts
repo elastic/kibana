@@ -16,6 +16,7 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   agentBuilderDefaultAgentId,
+  agentIdMaxLength,
   isAgentNotFoundError,
   isAgentUnavailableError,
   isConversationAlreadyExistsError,
@@ -32,7 +33,11 @@ import type {
   UpdateConversationAccessControlResponse,
 } from '../../common/http_api/conversations';
 import { apiPrivileges } from '../../common/features';
-import { publicApiPath } from '../../common/constants';
+import {
+  publicApiPath,
+  MAX_CONVERSATIONS_PER_PAGE,
+  MAX_RESULT_WINDOW,
+} from '../../common/constants';
 
 const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   [
@@ -114,15 +119,50 @@ export function registerConversationRoutes({
         version: '2023-10-31',
         validate: {
           request: {
-            query: schema.object({
-              agent_id: schema.maybe(
-                schema.string({
+            query: schema.object(
+              {
+                agent_id: schema.maybe(
+                  schema.string({
+                    maxLength: agentIdMaxLength,
+                    meta: {
+                      description: 'Optional agent ID to filter conversations by a specific agent.',
+                    },
+                  })
+                ),
+                page: schema.number({
+                  defaultValue: 1,
+                  min: 1,
+                  meta: { description: 'Page number, 1-based.' },
+                }),
+                per_page: schema.number({
+                  defaultValue: MAX_CONVERSATIONS_PER_PAGE,
+                  min: 1,
+                  max: MAX_CONVERSATIONS_PER_PAGE,
                   meta: {
-                    description: 'Optional agent ID to filter conversations by a specific agent.',
+                    description: `Number of results per page. Maximum ${MAX_CONVERSATIONS_PER_PAGE}.`,
                   },
-                })
-              ),
-            }),
+                }),
+                sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+                  defaultValue: 'desc',
+                  meta: { description: 'Sort direction for results, ordered by updated_at.' },
+                }),
+                pinned: schema.maybe(
+                  schema.boolean({
+                    meta: {
+                      description:
+                        'Filter to pinned (true) or unpinned (false) conversations. Omit to return all.',
+                    },
+                  })
+                ),
+              },
+              {
+                validate: ({ page, per_page: perPage }) => {
+                  if (page * perPage > MAX_RESULT_WINDOW) {
+                    return `page * per_page must not exceed ${MAX_RESULT_WINDOW}; conversations beyond that are not reachable through this API`;
+                  }
+                },
+              }
+            ),
           },
         },
         options: {
@@ -131,14 +171,21 @@ export function registerConversationRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { conversations: conversationsService } = getInternalServices();
-        const { agent_id: agentId } = request.query;
+        const {
+          agent_id: agentId,
+          page,
+          per_page: perPage,
+          sort_order: sortOrder,
+          pinned,
+        } = request.query;
 
         const client = await conversationsService.getScopedClient({ request });
-        const conversations = await client.list({ agentId });
+        const { results, total } = await client.list({ agentId, page, perPage, sortOrder, pinned });
 
         return response.ok<ListConversationsResponse>({
           body: {
-            results: conversations,
+            pagination: { total, page, per_page: perPage },
+            results,
           },
         });
       })
@@ -266,7 +313,7 @@ export function registerConversationRoutes({
             body: schema.object({
               agent_id: schema.maybe(
                 schema.string({
-                  maxLength: 256,
+                  maxLength: agentIdMaxLength,
                   meta: {
                     description:
                       'The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.',

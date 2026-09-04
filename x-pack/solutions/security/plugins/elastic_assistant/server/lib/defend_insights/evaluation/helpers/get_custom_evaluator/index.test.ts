@@ -25,6 +25,6 @@ describe('getDefendInsightsCustomEvaluator', () => {
       getDefendInsightsCustomEvaluator({
         insightType: 'some_unknown_type' as DefendInsightType,
       })
-    ).toThrowError(new InvalidDefendInsightTypeError());
+    ).toThrow(new InvalidDefendInsightTypeError());
   });
 });

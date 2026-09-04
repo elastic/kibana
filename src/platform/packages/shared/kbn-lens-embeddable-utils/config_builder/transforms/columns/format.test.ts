@@ -255,7 +255,7 @@ describe('Format Transforms', () => {
         });
       });
 
-      it('should omit default decimals', () => {
+      it('should preserve decimals even when they match the default', () => {
         const input = {
           id: 'number',
           params: { decimals: 2 },

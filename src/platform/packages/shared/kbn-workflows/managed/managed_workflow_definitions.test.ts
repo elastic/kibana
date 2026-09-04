@@ -13,20 +13,20 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
-  PND_WATCH_DARK_WORKFLOW_ID,
-  PND_WATCH_DEEP_WORKFLOW_ID,
-  PND_WATCH_DETECTION_WORKFLOW_ID,
-  PND_WATCH_FLOOR_WORKFLOW_ID,
-  PND_WATCH_OFFICER_WORKFLOW_ID,
+  PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+  PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+  PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
-import WATCH_DARK_YAML from './definitions/pnd/watch_dark.yaml';
-import WATCH_DEEP_YAML from './definitions/pnd/watch_deep.yaml';
-import WATCH_DETECTION_YAML from './definitions/pnd/watch_detection.yaml';
-import WATCH_FLOOR_YAML from './definitions/pnd/watch_floor.yaml';
-import WATCH_OFFICER_YAML from './definitions/pnd/watch_officer.yaml';
+import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/pnd/dark_continuous_threat_hunt.yaml';
+import DETECTION_RULE_CREATION_YAML from './definitions/pnd/detection_rule_creation.yaml';
+import DETECTION_RULE_TUNING_YAML from './definitions/pnd/detection_rule_tuning.yaml';
+import FLOOR_ALERT_TRIAGE_YAML from './definitions/pnd/floor_alert_triage.yaml';
+import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/pnd/floor_attack_discovery.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -50,23 +50,23 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
-  [PND_WATCH_FLOOR_WORKFLOW_ID]: {
+  [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WATCH_OFFICER_WORKFLOW_ID]: {
+  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WATCH_DARK_WORKFLOW_ID]: {
+  [PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WATCH_DEEP_WORKFLOW_ID]: {
+  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WATCH_DETECTION_WORKFLOW_ID]: {
+  [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
@@ -144,16 +144,20 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '1:29aa5f25'],
-  [PND_WATCH_OFFICER_WORKFLOW_ID, WATCH_OFFICER_YAML, '1:9b3f3d18'],
-  [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '1:4f835cad'],
-  [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '1:79b46054'],
-  [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '1:c23724c4'],
+  [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '1:d6a82eff'],
+  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '1:149ca943'],
+  [
+    PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+    DARK_CONTINUOUS_THREAT_HUNT_YAML,
+    '2:de85a75a',
+  ],
+  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '1:f39d6360'],
+  [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID, DETECTION_RULE_CREATION_YAML, '1:a6804a44'],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {
     const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
-    if (!definition) throw new Error(`Managed watch "${workflowId}" is not registered`);
+    if (!definition) throw new Error(`Managed worker "${workflowId}" is not registered`);
     const actualFingerprint = `${definition.version}:${createContentFingerprint(importedYaml)}`;
     if (actualFingerprint === expectedFingerprint) {
       return;
@@ -161,7 +165,7 @@ it.each([
     throw new Error(
       `Imported YAML for '${workflowId}' changed (${actualFingerprint}, expected ${expectedFingerprint}). ` +
         `yamlTemplate hashing covers only the function source, not this imported string, so already-installed spaces will not receive the edit until definition.version is bumped. ` +
-        `Bump version in the watch module and update this expected fingerprint in the same change.`
+        `Bump version in the worker module and update this expected fingerprint in the same change.`
     );
   }
 );

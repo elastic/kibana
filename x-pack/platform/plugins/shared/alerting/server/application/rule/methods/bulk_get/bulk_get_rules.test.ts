@@ -105,7 +105,7 @@ describe('bulkGetRules', () => {
     checkAuthorizationAndGetTotalMock.mockRejectedValueOnce(authError);
     await expect(
       bulkGetRules(rulesClientContext, { ids: ruleIds } as unknown as BulkGetRulesParams)
-    ).rejects.toThrowError(authError);
+    ).rejects.toThrow(authError);
   });
 
   it('should attempt to resolve rules', () => {

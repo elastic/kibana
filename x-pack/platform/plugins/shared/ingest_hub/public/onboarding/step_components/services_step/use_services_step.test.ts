@@ -98,12 +98,13 @@ const MATRIX = buildAwsServiceMatrix(MOCK_PACKAGES, AWS_SERVICES_STATIC);
 function setupFlow(initial: string[] = []) {
   let ids = initial;
   mockUseOnboardingFlow.mockImplementation(() => ({
-    servicesStep: { selectedServiceIds: ids },
+    servicesStep: { selectedServiceIds: ids, dataFormat: 'ecs' as const },
     setSelectedServiceIds: jest.fn((next: string[]) => {
       ids = next;
       // Re-mock so next render picks up the new ids.
       setupFlow(ids);
     }),
+    setDataFormat: jest.fn(),
     awsServiceMatrix: MATRIX,
   }));
 }
@@ -220,8 +221,9 @@ describe('useServicesStep — categories hidden when signal has no matching serv
 
   beforeEach(() => {
     mockUseOnboardingFlow.mockImplementation(() => ({
-      servicesStep: { selectedServiceIds: [] },
+      servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
       setSelectedServiceIds: jest.fn(),
+      setDataFormat: jest.fn(),
       awsServiceMatrix: SPLIT_MATRIX,
     }));
   });

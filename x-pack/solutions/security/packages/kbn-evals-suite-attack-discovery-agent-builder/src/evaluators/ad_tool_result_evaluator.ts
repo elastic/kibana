@@ -20,6 +20,7 @@ export const createAdToolResultEvaluator = (): Evaluator<
 > => ({
   name: AD_TOOL_RESULT_EVALUATOR_NAME,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     if (!expectsAttackDiscovery(expected?.expectedToolPath)) {
       return {

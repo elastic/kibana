@@ -82,7 +82,7 @@ describe('getExampleAttackDiscoveriesWithReplacements', () => {
   });
 
   it('throws when an example is undefined', () => {
-    expect(() => getExampleAttackDiscoveriesWithReplacements(undefined)).toThrowError();
+    expect(() => getExampleAttackDiscoveriesWithReplacements(undefined)).toThrow();
   });
 
   it('throws when the example is missing attackDiscoveries', () => {
@@ -93,9 +93,7 @@ describe('getExampleAttackDiscoveriesWithReplacements', () => {
       },
     };
 
-    expect(() =>
-      getExampleAttackDiscoveriesWithReplacements(missingAttackDiscoveries)
-    ).toThrowError();
+    expect(() => getExampleAttackDiscoveriesWithReplacements(missingAttackDiscoveries)).toThrow();
   });
 
   it('throws when attackDiscoveries is null', () => {
@@ -107,7 +105,7 @@ describe('getExampleAttackDiscoveriesWithReplacements', () => {
       },
     };
 
-    expect(() => getExampleAttackDiscoveriesWithReplacements(nullAttackDiscoveries)).toThrowError();
+    expect(() => getExampleAttackDiscoveriesWithReplacements(nullAttackDiscoveries)).toThrow();
   });
 
   it('returns the original attack discoveries when replacements are missing', () => {

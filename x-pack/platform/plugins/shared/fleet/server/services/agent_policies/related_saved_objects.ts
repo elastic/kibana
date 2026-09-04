@@ -10,6 +10,7 @@ import { uniq } from 'lodash';
 
 import type { AgentPolicy, FleetProxy } from '../../types';
 import { outputService } from '../output';
+import { isBeatsOutput } from '../../../common/services/output_helpers';
 
 import { getDownloadSourceForAgentPolicy } from '../../routes/agent/source_uri_utils';
 
@@ -81,7 +82,7 @@ export async function fetchRelatedSavedObjects(
 
   const proxyIds = uniq(
     outputs
-      .flatMap((output) => output.proxy_id)
+      .flatMap((output) => (isBeatsOutput(output) ? output.proxy_id : undefined))
       .filter((proxyId): proxyId is string => typeof proxyId !== 'undefined' && proxyId !== null)
       .concat(fleetServerHosts?.proxy_id ? [fleetServerHosts.proxy_id] : [])
       .concat(downloadSourceProxyId ? [downloadSourceProxyId] : [])

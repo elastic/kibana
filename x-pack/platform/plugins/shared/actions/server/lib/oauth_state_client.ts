@@ -10,6 +10,7 @@ import { omitBy, isUndefined } from 'lodash';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { escapeQuotes } from '@kbn/es-query';
 import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
@@ -20,7 +21,7 @@ interface OAuthStateAttributes {
   codeVerifier: string;
   connectorId: string;
   kibanaReturnUrl?: string;
-  spaceId: string;
+  spaceId: SpaceId;
   createdAt: string;
   expiresAt: string;
   createdBy?: string;
@@ -164,6 +165,7 @@ export class OAuthStateClient {
       return {
         id: stateObject.id,
         ...decrypted.attributes,
+        spaceId: brandSpaceId(decrypted.attributes.spaceId),
       };
     } catch (err) {
       this.logger.error(

@@ -56,7 +56,7 @@ describe('useBulkDelete', () => {
     result.current.mutate({ ids: ['random_schedule_report_1'] });
 
     await waitFor(() => {
-      expect(bulkDeleteScheduledReports).toBeCalledWith({
+      expect(bulkDeleteScheduledReports).toHaveBeenCalledWith({
         http,
         ids: ['random_schedule_report_1'],
       });
@@ -79,7 +79,7 @@ describe('useBulkDelete', () => {
     result.current.mutate({ ids: [] });
 
     await waitFor(() => {
-      expect(bulkDeleteScheduledReports).toBeCalledWith({
+      expect(bulkDeleteScheduledReports).toHaveBeenCalledWith({
         http,
         ids: [],
       });

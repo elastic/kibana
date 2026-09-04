@@ -125,7 +125,7 @@ describe('SummaryActions', () => {
 
     await userEvent.click(button);
 
-    expect(addSuccessToast).toBeCalledWith({
+    expect(addSuccessToast).toHaveBeenCalledWith({
       title: 'Copied results to the clipboard',
     });
   });

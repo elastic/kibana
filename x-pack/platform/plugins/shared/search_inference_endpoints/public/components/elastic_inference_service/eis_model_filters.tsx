@@ -27,7 +27,7 @@ interface FilterControlProps {
 
 const MODEL_FAMILY_FILTER_TITLE = i18n.translate(
   'xpack.searchInferenceEndpoints.modelFamilyFilter.buttonLabel',
-  { defaultMessage: 'Model family' }
+  { defaultMessage: 'Model provider' }
 );
 
 const ModelFamilyOptionsContext = createContext<Array<{ key: string; label: string }>>([]);

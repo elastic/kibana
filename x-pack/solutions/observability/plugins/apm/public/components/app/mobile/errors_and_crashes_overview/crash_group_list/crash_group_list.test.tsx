@@ -14,6 +14,6 @@ const { Example } = composeStories(stories);
 
 describe('MobileCrashGroupList', () => {
   it('renders', () => {
-    expect(() => renderWithTheme(<Example />)).not.toThrowError();
+    expect(() => renderWithTheme(<Example />)).not.toThrow();
   });
 });

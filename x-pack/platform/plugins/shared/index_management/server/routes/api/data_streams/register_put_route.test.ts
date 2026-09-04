@@ -308,7 +308,7 @@ describe('registerPutDataStreamFailureStore', () => {
     const error = new Error('Elasticsearch error');
     updateDataStreamOptions.mockRejectedValue(error);
 
-    await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+    await expect(router.runRequest(mockRequest)).rejects.toThrow(error);
   });
 
   it('should disable failure store retention', async () => {

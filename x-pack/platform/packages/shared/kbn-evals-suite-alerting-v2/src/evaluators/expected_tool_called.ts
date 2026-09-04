@@ -20,6 +20,7 @@ export const createExpectedToolCalledEvaluator = (): Evaluator<
 > => ({
   name: 'ExpectedToolCalled',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const requiredToolIds = requireNonEmptyStringList(
       expected?.expectedToolIds,
@@ -46,6 +47,7 @@ export const createExpectedAnyOfToolIdsEvaluator = (): Evaluator<
 > => ({
   name: 'ExpectedAnyOfToolIds',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const alternatives = requireNonEmptyStringList(
       expected?.expectedAnyOfToolIds,
