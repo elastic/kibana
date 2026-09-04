@@ -1332,6 +1332,14 @@ describe('Mattermost connector', () => {
       });
     });
 
+    it('normalizes a null reaction collection to an empty array', async () => {
+      mockGet.mockResolvedValue({ data: null, status: 200 });
+
+      await expect(
+        Mattermost.actions.listReactions.handler(mockContext, { postId: POST_ID })
+      ).resolves.toEqual({ reactions: [] });
+    });
+
     it('rejects malformed successful post, reaction, status, and collection responses', async () => {
       mockPost.mockResolvedValueOnce({ data: { ...rawPost, channel_id: 42 }, status: 201 });
       await expect(

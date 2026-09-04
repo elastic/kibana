@@ -1027,15 +1027,16 @@ Permissions and safety:
             `${getBaseUrl(ctx)}/api/v4/posts/${encodeURIComponent(input.postId)}/reactions`
           )
         );
-        if (!Array.isArray(response.data)) {
+        const reactionData = response.data === null ? [] : response.data;
+        if (!Array.isArray(reactionData)) {
           throw new Error('Mattermost listReactions failed: expected an array response');
         }
-        const reactions = response.data
+        const reactions = reactionData
           .slice(0, MAX_LIST_ITEMS)
           .map((reaction) => trimReaction(reaction, 'listReactions'));
         return {
           reactions,
-          ...(response.data.length > MAX_LIST_ITEMS ? { truncated: true } : {}),
+          ...(reactionData.length > MAX_LIST_ITEMS ? { truncated: true } : {}),
         };
       },
     },
