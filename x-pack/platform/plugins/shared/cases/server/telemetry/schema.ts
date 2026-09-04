@@ -17,6 +17,7 @@ import type {
   AttachmentFrameworkSchema,
   AttachmentTypeStatsSchema,
   CustomFieldsSolutionTelemetrySchema,
+  FieldLibrarySolutionTelemetrySchema,
   ObservablesSchema,
 } from './types';
 
@@ -145,6 +146,30 @@ const latestDatesSchema: LatestDatesSchema = {
   closedAt: string,
 };
 
+const fieldLibrarySolutionTelemetrySchema: FieldLibrarySolutionTelemetrySchema = {
+  total: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of field definitions in the Field Library for this scope. The all scope spans every owner, including owners outside the three reported solutions, so the solution scopes need not sum to it',
+    },
+  },
+  totalGlobal: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of field definitions applied to every case. Includes the global definitions created by the templates v1 to v2 migration to mirror pre-existing custom fields, which cannot be distinguished from author-created ones',
+    },
+  },
+  totalReusable: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of field definitions available to be referenced by a template rather than applied to every case. Counts availability, not actual template references',
+    },
+  },
+};
+
 export const casesSchema: CasesTelemetrySchema = {
   cases: {
     all: {
@@ -257,5 +282,18 @@ export const casesSchema: CasesTelemetrySchema = {
   casesSystemAction: {
     totalCasesCreated: long,
     totalRules: long,
+  },
+  fieldLibrary: {
+    featureEnabled: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'Whether xpack.cases.templates.enabled is on. When it is off the field definitions are not queried and the counts report zero, even though a deployment that disabled the feature keeps any definitions it already created',
+      },
+    },
+    all: fieldLibrarySolutionTelemetrySchema,
+    sec: fieldLibrarySolutionTelemetrySchema,
+    obs: fieldLibrarySolutionTelemetrySchema,
+    main: fieldLibrarySolutionTelemetrySchema,
   },
 };
