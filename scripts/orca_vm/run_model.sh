@@ -278,7 +278,17 @@ echo "=== Running eval: $MODEL ==="
 # retry the whole step; a genuine failure (bad model, real eval failure)
 # fails identically on every attempt and still surfaces.
 run_eval() {
-  node scripts/evals start --profile local --suite "${EVAL_SUITE:-security-persona-matrix}" --model "$MODEL" 2>&1 | tail -40
+  # Trace-evaluator query target as AMBIENT env (belt-and-braces): the vault
+  # config.local.json also sets it via profileEnvOverrides, but on the 2026-09-04
+  # 17-model sweep that propagation silently failed on 14/17 VMs -- the
+  # Playwright worker fell back to the local scout esClient, whose limited
+  # privileges cannot see the hidden .ds-traces-* backing indices, and every
+  # trace evaluator errored with `Unknown column [trace.id]` (0/17 examples on
+  # all 5 trace metrics). Ambient env is read directly by evaluate.ts:477.
+  export TRACING_ES_URL="${GOLDEN_ES_URL:?GOLDEN_ES_URL required}"
+  export TRACING_ES_API_KEY="${GOLDEN_ES_API_KEY:?GOLDEN_ES_API_KEY required}"
+  echo "trace evaluators will query: $TRACING_ES_URL"
+  node scripts/evals start --profile local --suite "${EVAL_SUITE:-security-persona-matrix}" --model "$MODEL" 2>&1 | tee /tmp/evals-start.log | tail -40
   return ${PIPESTATUS[0]}
 }
 
