@@ -20,6 +20,20 @@ export interface DispatchApiRequestParams {
   request: KibanaRequest;
 }
 
+// Matches POST /api/alerting/rule and /api/alerting/rule/{id} (create with a caller-chosen id).
+const ALERTING_RULE_CREATE_PATH = /^\/api\/alerting\/rule(?:\/[^/]+)?$/;
+
+const isAlertingRuleCreate = (method: string, path: string): boolean =>
+  method.toUpperCase() === 'POST' && ALERTING_RULE_CREATE_PATH.test(path);
+
+// The agent's requests authenticate with the API key Task Manager granted for this run-agent
+// task, which TM invalidates once the task drains. Alerting persists an API-key caller's
+// credential on created rules by default ("the user owns this key"), which for this borrowed key
+// would kill every rule from the conversation about an hour after the task completes. The
+// `clone_api_key` flag tells alerting to mint the rule its own framework-managed key instead.
+const withRuleCreateBodyOverrides = (body: unknown): unknown =>
+  isRecord(body) ? { ...body, clone_api_key: true } : body;
+
 /**
  * Sends a prepared API request to its backend on behalf of the current user.
  *
@@ -41,7 +55,7 @@ export const dispatchApiRequest = async ({
     return selfClient.asScoped(request).fetch(path, {
       method,
       query: toSelfFetchQuery(querystring),
-      body,
+      body: isAlertingRuleCreate(method, path) ? withRuleCreateBodyOverrides(body) : body,
       access: path.startsWith('/internal') ? 'internal' : 'public',
     });
   }

@@ -91,7 +91,6 @@ export const getRulesClientMockParams = (
     kibanaVersion: 'v7.10.0',
     auditLogger,
     isAuthenticationTypeAPIKey: jest.fn(),
-    isAuthenticationInternalAPIKey: jest.fn(),
     getAuthenticationAPIKey: jest.fn(),
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     getAlertIndicesAlias: jest.fn(),

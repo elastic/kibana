@@ -96,15 +96,6 @@ export interface RulesClientContext {
   readonly eventLogger?: IEventLogger;
   readonly changeTrackingService?: IScopedChangeTrackingService;
   readonly isAuthenticationTypeAPIKey: () => boolean;
-  /**
-   * Whether the request was authenticated with an *internal* API key, i.e. one that Elastic
-   * services (Kibana itself, Task Manager on behalf of a background task, ...) granted for their
-   * own use rather than a key a user created in the Cloud UI. Internal keys have service
-   * lifecycles: whoever granted them also invalidates them, without any knowledge of the rules
-   * that may have been created while holding them. Such a key must therefore never be persisted
-   * on a rule — see {@link resolveRuleAPIKey}.
-   */
-  readonly isAuthenticationInternalAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly cloneAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   readonly cloneApiKeysOnCreate?: boolean;

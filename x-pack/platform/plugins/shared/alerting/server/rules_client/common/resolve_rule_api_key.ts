@@ -56,11 +56,9 @@ export const resolveRuleAPIKey = async (
 
   // The caller declared that the API key it authenticated with is not the rule's to keep — it is
   // borrowed, e.g. granted by Task Manager for a background task and invalidated on that service's
-  // schedule — so mint the rule a framework-owned key with the same privileges instead. This is
-  // the caller-declared counterpart of the internal-key verdict below, which only UIAM reports:
-  // for Elasticsearch API keys there is no verdict, so this flag is the only way a caller can
-  // prevent its borrowed credential from being persisted. Without API-key authentication there is
-  // nothing to take ownership of and the flag is a no-op, so callers may set it unconditionally.
+  // schedule — so mint the rule a framework-owned key with the same privileges instead of
+  // persisting the caller's credential below. Without API-key authentication there is nothing to
+  // take ownership of and the flag is a no-op, so callers may set it unconditionally.
   if (cloneApiKey && !apiKeyOwnership && isApiKeyAuth) {
     return cloneKey(context, name);
   }
@@ -72,17 +70,12 @@ export const resolveRuleAPIKey = async (
   }
 
   if (isApiKeyAuth) {
-    // Only a *user-created* key may be persisted on the rule, where it is flagged
-    // `apiKeyCreatedByUser` and left alone: the user owns its rotation and revocation. An
-    // internal key belongs to an Elastic service instead (e.g. the key Task Manager grants for a
-    // background task, which it invalidates once that task completes), so a rule holding it would
-    // silently die when the service cleans up — and `apiKeyCreatedByUser` would then block
-    // rotation, invalidation, repair and provisioning alike. Mint a framework-owned key instead,
-    // making such rules indistinguishable from ones created from the UI.
-    if (context.isAuthenticationInternalAPIKey()) {
-      return cloneKey(context, name);
-    }
-
+    // The caller's key is persisted on the rule and flagged `apiKeyCreatedByUser`: the user owns
+    // its rotation and revocation, and alerting leaves it alone. This treatment is only correct
+    // for a credential the caller actually owns — a caller holding a borrowed key (e.g. one Task
+    // Manager granted for a background task, which it invalidates once the task drains) must
+    // declare it via `cloneApiKey` above, or the rule dies with the key, unrepairably:
+    // `apiKeyCreatedByUser` also gates rotation, invalidation, repair and provisioning.
     return {
       createdAPIKey: context.getAuthenticationAPIKey(`${name}-user-created`),
       isAuthTypeApiKey: true,

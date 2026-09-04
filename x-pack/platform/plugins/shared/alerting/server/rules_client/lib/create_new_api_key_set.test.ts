@@ -56,7 +56,6 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   minimumScheduleIntervalInMs: 1,
   isAuthenticationTypeAPIKey: jest.fn(),
-  isAuthenticationInternalAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   cloneAPIKey: jest.fn(),
   cloneApiKeysOnCreate: false,

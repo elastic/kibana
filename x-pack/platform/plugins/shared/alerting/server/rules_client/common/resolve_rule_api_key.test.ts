@@ -25,7 +25,6 @@ const createMockContext = (overrides: Partial<RulesClientContext> = {}): RulesCl
   ({
     createAPIKey: jest.fn().mockResolvedValue(grantedKey),
     isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(false),
-    isAuthenticationInternalAPIKey: jest.fn().mockReturnValue(false),
     getAuthenticationAPIKey: jest.fn().mockReturnValue(userKey),
     cloneAPIKey: jest.fn().mockResolvedValue(clonedKey),
     cloneApiKeysOnCreate: false,
@@ -189,61 +188,6 @@ describe('resolveRuleAPIKey', () => {
       expect(result).toEqual({ createdAPIKey: userKey, isAuthTypeApiKey: true });
       expect(context.getAuthenticationAPIKey).toHaveBeenCalledWith('test-rule-user-created');
       expect(context.cloneAPIKey).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('internal (service-owned) API key caller', () => {
-    test('mints a framework-owned key instead of persisting the caller credential', async () => {
-      const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
-        isAuthenticationInternalAPIKey: jest.fn().mockReturnValue(true),
-      });
-
-      const result = await resolveRuleAPIKey(context, 'test-rule', true);
-
-      expect(result).toEqual({ createdAPIKey: clonedKey, isAuthTypeApiKey: false });
-      expect(context.cloneAPIKey).toHaveBeenCalledWith('test-rule');
-      expect(context.getAuthenticationAPIKey).not.toHaveBeenCalled();
-    });
-
-    test('also applies when regenerating the key of an existing user-managed rule', async () => {
-      const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
-        isAuthenticationInternalAPIKey: jest.fn().mockReturnValue(true),
-      });
-
-      const result = await resolveRuleAPIKey(context, 'test-rule', true, {
-        apiKeyOwnership: { apiKeyCreatedByUser: true },
-      });
-
-      expect(result).toEqual({ createdAPIKey: clonedKey, isAuthTypeApiKey: false });
-      expect(context.cloneAPIKey).toHaveBeenCalledWith('test-rule');
-      expect(context.getAuthenticationAPIKey).not.toHaveBeenCalled();
-    });
-
-    test('leaves user-created (external) keys with the caller credential', async () => {
-      const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
-        isAuthenticationInternalAPIKey: jest.fn().mockReturnValue(false),
-      });
-
-      const result = await resolveRuleAPIKey(context, 'test-rule', true);
-
-      expect(result).toEqual({ createdAPIKey: userKey, isAuthTypeApiKey: true });
-      expect(context.getAuthenticationAPIKey).toHaveBeenCalledWith('test-rule-user-created');
-      expect(context.cloneAPIKey).not.toHaveBeenCalled();
-    });
-
-    test('is not consulted when the request is not API-key-authed', async () => {
-      const context = createMockContext({
-        isAuthenticationInternalAPIKey: jest.fn().mockReturnValue(true),
-      });
-
-      const result = await resolveRuleAPIKey(context, 'test-rule', true);
-
-      expect(result).toEqual({ createdAPIKey: grantedKey, isAuthTypeApiKey: false });
-      expect(context.isAuthenticationInternalAPIKey).not.toHaveBeenCalled();
-      expect(context.createAPIKey).toHaveBeenCalledWith('test-rule');
     });
   });
 

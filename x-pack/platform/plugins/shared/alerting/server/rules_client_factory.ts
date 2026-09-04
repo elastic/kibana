@@ -403,8 +403,8 @@ export class RulesClientFactory {
      * service's schedule), `false` for a user-created Cloud API key, and `undefined` when
      * internality is not reported — session tokens and keys managed by Elasticsearch itself.
      *
-     * Both consumers below therefore compare explicitly instead of relying on truthiness, so that
-     * an unreported verdict keeps the internal-key treatment (fail closed).
+     * The consumer below compares against `false` explicitly instead of relying on truthiness, so
+     * that an unreported verdict keeps the internal-key treatment (fail closed).
      */
     const getAuthenticatedApiKeyInternality = (): boolean | undefined =>
       securityPluginStart
@@ -504,9 +504,6 @@ export class RulesClientFactory {
         }
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         return authorizationHeader?.scheme.toLowerCase() === 'apikey';
-      },
-      isAuthenticationInternalAPIKey() {
-        return getAuthenticatedApiKeyInternality() === true;
       },
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
