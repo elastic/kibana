@@ -116,9 +116,13 @@ function configureExperiment({
 } {
   const task: ExperimentTask<DatasetExample, TaskOutput> = async ({ input, output, metadata }) => {
     const agentId = getStringMeta(metadata, 'agentId');
+    const autoConfirm = getBooleanMeta(metadata, 'autoConfirm');
     const response = await chatClient.converse({
       messages: [{ message: input.question }],
-      options: agentId ? { agentId } : undefined,
+      options: {
+        ...(agentId ? { agentId } : {}),
+        ...(autoConfirm ? { autoConfirm } : {}),
+      },
     });
 
     // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
@@ -286,7 +290,7 @@ function configureExperiment({
       latency: createSpanLatencyEvaluator({
         traceEsClient,
         log,
-        spanName: 'Converse',
+        spanNamePattern: 'invoke_agent*',
       }),
     }),
     createSkillInvocationEvaluator({

@@ -39,6 +39,7 @@ const _allowedExperimentalValues = {
   enableIncludeTagsInEvents: false, // When enabled, the include_tags_in_events agent policy advanced setting is available in the UI.
   enableOtlpOutput: false, // When enabled, OTLP output type is available for creation and management via the Fleet outputs API.
   enableIntegrationCollectionTiles: true, // When enabled, packages sharing a `group` id are collapsed into a single collection tile in the integrations marketplace.
+  enableIntegrationTileClickToAdd: false, // When enabled, clicking an integration tile navigates directly to the add-integration page instead of the overview page.
 };
 
 /**

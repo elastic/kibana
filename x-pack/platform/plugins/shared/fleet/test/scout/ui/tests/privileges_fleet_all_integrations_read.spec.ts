@@ -15,6 +15,9 @@ test.describe(
   'When the user has All privilege for Fleet but Read for integrations',
   { tag: tags.stateful.classic },
   () => {
+    // Creating the agent policy with sys_monitoring installs the system package, which is
+    // slower on ECH than locally and can exceed the default 60 s hook budget.
+    test.setTimeout(2 * 60 * 1000); // 2 minutes
     const agentPolicyName = 'Test Agent Policy';
     let policyId: string;
 

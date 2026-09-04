@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { Query } from '@kbn/es-query';
 import moment from 'moment';
 import { stringify } from 'query-string';
@@ -15,6 +16,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext, LogEntryFlyout } from '@kbn/logs-shared-plugin/public';
+import { useShouldRenderInfraMlCpsUi } from '../../../hooks/use_infra_ml_cps';
 import type { IdFormatByJobType } from '../../../../common/http_api/latest';
 import {
   isJobStatusWithResults,
@@ -22,11 +24,13 @@ import {
   logEntryRateJobType,
 } from '../../../../common/log_analysis';
 import type { TimeKey } from '../../../../common/time';
+import { INFRA_EBT_ACTIONS, INFRA_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import {
   CategoryJobNoticesSection,
   JobStoppedCallout,
   LogAnalysisJobProblemIndicator,
 } from '../../../components/logging/log_analysis_job_status';
+import { JobProjectScopes } from '../../../components/logging/log_analysis_project_scope';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
 import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
@@ -74,6 +78,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     setupStatus: logEntryRateSetupStatus,
     jobStatus: logEntryRateJobStatus,
     jobIds: logEntryRateJobIds,
+    projectRouting: logEntryRateProjectRouting,
   } = useLogEntryRateModuleContext();
 
   const {
@@ -85,6 +90,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     setupStatus: logEntryCategoriesSetupStatus,
     jobStatus: logEntryCategoriesJobStatus,
     jobIds: logEntryCategoriesJobIds,
+    projectRouting: logEntryCategoriesProjectRouting,
   } = useLogEntryCategoriesModuleContext();
 
   const jobIds = useMemo(() => {
@@ -115,6 +121,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     closeFlyout: closeLogEntryFlyout,
     isFlyoutOpen: isLogEntryFlyoutOpen,
     logEntryId: flyoutLogEntryId,
+    projectRouting: flyoutProjectRouting,
   } = useLogEntryFlyoutContext();
 
   const linkToLogStream = useCallback(
@@ -141,6 +148,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   const {
     isLoadingLogEntryAnomalies,
+    hasFailedLoadingLogEntryAnomalies,
+    getLogEntryAnomalies,
     logEntryAnomalies,
     page,
     fetchNextPage,
@@ -151,6 +160,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     paginationOptions,
     datasets,
     isLoadingDatasets,
+    hasFailedLoadingDatasets,
+    getLogEntryAnomaliesDatasets,
   } = useLogEntryAnomaliesResults({
     logViewReference,
     idFormats,
@@ -211,8 +222,14 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
         logEntryCategoriesSetupStatus.type === 'succeeded' ||
         (logEntryRateSetupStatus.type === 'skipped' && !!logEntryRateSetupStatus.newlyCreated) ||
         logEntryRateSetupStatus.type === 'succeeded') &&
-      !hasAnomalyResults,
-    [hasAnomalyResults, logEntryCategoriesSetupStatus, logEntryRateSetupStatus]
+      !hasAnomalyResults &&
+      !hasFailedLoadingLogEntryAnomalies,
+    [
+      hasAnomalyResults,
+      hasFailedLoadingLogEntryAnomalies,
+      logEntryCategoriesSetupStatus,
+      logEntryRateSetupStatus,
+    ]
   );
 
   const handleSelectedTimeRangeChange = useCallback(
@@ -225,26 +242,57 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     [setSelectedTimeRange]
   );
 
+  const shouldRenderCpsUi = useShouldRenderInfraMlCpsUi();
+
   return (
     <LogsPageTemplate
       data-test-subj="logEntryRateResultsPage"
       hasData={logViewStatus?.index !== 'missing'}
       pageHeader={{
         pageTitle,
-        rightSideItems: [<ManageJobsButton onClick={showModuleList} size="s" />],
+        rightSideItems: [
+          <ManageJobsButton
+            onClick={showModuleList}
+            size="s"
+            {...getEbtProps({
+              action: INFRA_EBT_ACTIONS.MANAGE_ML_JOBS,
+              element: INFRA_EBT_ELEMENTS.LOG_ANALYSIS_PAGE_HEADER,
+            })}
+          />,
+        ],
       }}
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <DatasetsSelector
-                availableDatasets={datasets}
-                isLoading={isLoadingDatasets}
-                selectedDatasets={selectedDatasets}
-                onChangeDatasetSelection={setSelectedDatasets}
-              />
-            </EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+              {shouldRenderCpsUi !== false && (
+                <EuiFlexItem grow={false}>
+                  <JobProjectScopes
+                    jobs={[
+                      {
+                        name: logEntryCategoriesModuleDescriptor.moduleName,
+                        projectRouting: logEntryCategoriesProjectRouting,
+                      },
+                      {
+                        name: logEntryRateModuleDescriptor.moduleName,
+                        projectRouting: logEntryRateProjectRouting,
+                      },
+                    ]}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <DatasetsSelector
+                  availableDatasets={datasets}
+                  isLoading={isLoadingDatasets}
+                  hasFailedLoading={hasFailedLoadingDatasets}
+                  onRetry={getLogEntryAnomaliesDatasets}
+                  selectedDatasets={selectedDatasets}
+                  onChangeDatasetSelection={setSelectedDatasets}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiSuperDatePicker
                 start={friendlyTimeRange.startTime}
@@ -283,6 +331,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
         <EuiFlexItem grow={false}>
           <AnomaliesResults
             isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
+            hasFailedLoadingAnomaliesResults={hasFailedLoadingLogEntryAnomalies}
+            onRetryAnomaliesResults={getLogEntryAnomalies}
             anomalies={logEntryAnomalies}
             timeRange={timeRange.value}
             page={page}
@@ -304,6 +354,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
           onCloseFlyout={closeLogEntryFlyout}
           onSetFieldFilter={linkToLogStream}
           logViewReference={logViewReference}
+          projectRouting={flyoutProjectRouting}
         />
       ) : null}
     </LogsPageTemplate>

@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HeaderHelpMenu } from '../../shared/header_help_menu';
+import { HeaderHelpMenu, type HeaderHelpMenuButtonProps } from '../../shared/header_help_menu';
 import { HeaderActionButton } from './header_action_button';
 
 const HELP_ARIA_LABEL = i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel', {
@@ -19,7 +19,7 @@ const HELP_ARIA_LABEL = i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuB
 
 export const HelpButton = React.memo(() => {
   const renderButton = useCallback(
-    ({ isOpen, toggleMenu }: { isOpen: boolean; toggleMenu: () => void }) => (
+    ({ isOpen, toggleMenu, hasUnreadNews }: HeaderHelpMenuButtonProps) => (
       <HeaderActionButton
         variant="bordered"
         onClick={toggleMenu}
@@ -27,6 +27,7 @@ export const HelpButton = React.memo(() => {
         aria-haspopup={true}
         aria-label={HELP_ARIA_LABEL}
         data-test-subj="chromeNextGlobalHeaderHelpButton"
+        notification={hasUnreadNews}
       >
         <EuiIcon type="question" size="m" color="subdued" aria-hidden />
       </HeaderActionButton>

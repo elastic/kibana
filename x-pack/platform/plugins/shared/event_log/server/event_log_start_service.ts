@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { EsContext } from './es';
 import type { IEventLogClientService } from './types';
 import { EventLogClient } from './event_log_client';
@@ -47,7 +48,7 @@ export class EventLogClientService implements IEventLogClientService {
     });
   }
 
-  getClientWithRequestInSpace(request: KibanaRequest, spaceId: string) {
+  getClientWithRequestInSpace(request: KibanaRequest, spaceId: SpaceId) {
     return new EventLogClient({
       esContext: this.esContext,
       savedObjectGetter: this.savedObjectProviderRegistry.getProvidersClientWithRequestInSpace(

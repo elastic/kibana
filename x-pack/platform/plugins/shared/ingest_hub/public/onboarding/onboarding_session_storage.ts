@@ -9,9 +9,10 @@
 export const SESSION_KEY_SUFFIXES = [
   'authenticateAndDeployStep',
   'servicesStep',
-  'deployAndDetectStep',
+  'detectAndReviewStep',
   'serviceSettingsStep',
   'stepState',
+  'ecfLaunchStep',
 ] as const;
 
 export type SessionKeySuffix = (typeof SESSION_KEY_SUFFIXES)[number];

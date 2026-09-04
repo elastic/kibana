@@ -11,7 +11,6 @@
     "requiredPlugins": ["actions", "data", "features", "security", "share", "esql", "triggersActionsUi", "taskManager", "workflowsExtensions"],
     "optionalPlugins": ["console", "spaces", "workflowsManagement"],
     "runtimePluginDependencies": ["agentBuilder"],
-    "requiredBundles": ["kibanaReact", "actions"],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": ["kibanaReact", "actions"]
   }
 }
