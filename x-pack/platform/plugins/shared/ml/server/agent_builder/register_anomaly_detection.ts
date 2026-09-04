@@ -10,8 +10,14 @@ import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../common/license';
 import type { MlFeatures } from '../../common/constants/app';
 import type { MlAuthorizationService } from '../lib/capabilities/check_capabilities';
-import { registerAnomalyDetectionTools } from './tools';
+import type { MlClientFactoryDeps } from './ml_client_factory';
+import { createMlClientFactory, createDataRecognizerFactory } from './ml_client_factory';
 import { createAnomalyDetectionSkill } from './skills/anomaly_detection';
+import {
+  createAnomalySwimLaneAttachmentType,
+  createAnomalyChartsAttachmentType,
+  createSingleMetricViewerAttachmentType,
+} from './attachment_types';
 
 export const registerAnomalyDetectionAgentBuilder = ({
   agentBuilder,
@@ -19,19 +25,30 @@ export const registerAnomalyDetectionAgentBuilder = ({
   authorization,
   mlLicense,
   enabledFeatures,
+  mlClientFactoryDeps,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   resolveMlCapabilities: ResolveMlCapabilities;
   authorization?: MlAuthorizationService;
   mlLicense?: MlLicense;
   enabledFeatures?: MlFeatures;
+  mlClientFactoryDeps: MlClientFactoryDeps;
 }): void => {
-  registerAnomalyDetectionTools(
-    agentBuilder,
-    resolveMlCapabilities,
-    authorization,
-    mlLicense,
-    enabledFeatures
+  const buildMlClient = createMlClientFactory(mlClientFactoryDeps);
+  const buildDataRecognizer = createDataRecognizerFactory(mlClientFactoryDeps);
+
+  agentBuilder.attachments.registerType(createAnomalySwimLaneAttachmentType());
+  agentBuilder.attachments.registerType(createAnomalyChartsAttachmentType());
+  agentBuilder.attachments.registerType(createSingleMetricViewerAttachmentType());
+
+  agentBuilder.skills.register(
+    createAnomalyDetectionSkill(
+      resolveMlCapabilities,
+      authorization,
+      mlLicense,
+      enabledFeatures,
+      buildMlClient,
+      buildDataRecognizer
+    )
   );
-  agentBuilder.skills.register(createAnomalyDetectionSkill());
 };

@@ -22,6 +22,14 @@ import {
   editMarkdownPanelConfigInputSchema,
 } from './markdown';
 import {
+  anomalyChartsPanelConfigInputSchema,
+  anomalyChartsPanelDefinition,
+  anomalySwimlaneConfigInputSchema,
+  anomalySwimlaneDefinition,
+  singleMetricViewerConfigInputSchema,
+  singleMetricViewerPanelDefinition,
+} from './ml_panels';
+import {
   customContentPanelConfigInputSchema,
   customContentPanelDefinition,
   editCustomContentPanelConfigInputSchema,
@@ -58,6 +66,9 @@ export type { CustomContentPanelConfig } from './custom_content';
 const configPanelInputSchema = z.discriminatedUnion('type', [
   visPanelConfigInputSchema,
   markdownPanelConfigInputSchema,
+  anomalyChartsPanelConfigInputSchema,
+  anomalySwimlaneConfigInputSchema,
+  singleMetricViewerConfigInputSchema,
   customContentPanelConfigInputSchema,
 ]);
 
@@ -68,6 +79,9 @@ export type PanelType = ConfigPanelInput['type'];
 export const PANEL_TYPE_DEFINITIONS: Record<PanelType, PanelTypeDefinition> = {
   vis: visPanelDefinition,
   markdown: markdownPanelDefinition,
+  ml_anomaly_charts: anomalyChartsPanelDefinition,
+  ml_anomaly_swimlane: anomalySwimlaneDefinition,
+  ml_single_metric_viewer: singleMetricViewerPanelDefinition,
   custom_content: customContentPanelDefinition,
 };
 
@@ -84,6 +98,9 @@ export const addPanelsItemSchema = z.discriminatedUnion('source', [
   z.discriminatedUnion('type', [
     visPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
     markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+    anomalyChartsPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+    anomalySwimlaneConfigInputSchema.extend({ sectionId: sectionIdField }),
+    singleMetricViewerConfigInputSchema.extend({ sectionId: sectionIdField }),
     customContentPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
   ]),
   z.discriminatedUnion('renderer', [
