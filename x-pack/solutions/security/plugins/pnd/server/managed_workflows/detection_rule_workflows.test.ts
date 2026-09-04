@@ -288,12 +288,21 @@ describe('detection rule workflows', () => {
 
         const [dismissed, applied, handoff] = tagSteps;
         expect(dismissed.if).toContain('steps.review_tuning.output.response.approved == false');
-        expect(dismissed.with?.tags_to_add).toBe('${{ consts.dismissed_tags }}');
+        expect(dismissed.with?.tags_to_add).toEqual([
+          '{{ consts.reviewed_tag }}',
+          '{{ consts.dismissed_tag }}',
+        ]);
         for (const step of [applied, handoff]) {
           expect(step.if).toContain('steps.review_tuning.output.response.approved == true');
         }
-        expect(applied.with?.tags_to_add).toBe('${{ consts.applied_tags }}');
-        expect(handoff.with?.tags_to_add).toBe('${{ consts.handoff_tags }}');
+        expect(applied.with?.tags_to_add).toEqual([
+          '{{ consts.reviewed_tag }}',
+          '{{ consts.applied_tag }}',
+        ]);
+        expect(handoff.with?.tags_to_add).toEqual([
+          '{{ consts.reviewed_tag }}',
+          '{{ consts.handoff_tag }}',
+        ]);
         for (const step of tagSteps) {
           expect(step).not.toHaveProperty('on-failure');
         }
@@ -422,30 +431,31 @@ describe('detection rule workflows', () => {
         );
       });
 
-      // The tag API requires an array; only a value that is exactly one `${{ }}`
-      // expression survives templating as an array instead of a string.
-      it('passes tags_to_add as a single expression, never a template', () => {
+      // security.setAlertTags declares its inputs as a zod union, so a whole-array
+      // template lands the validation error on `with` instead of the templated field
+      // and is not recognised as a template. Each tag must be its own list item.
+      it('lists tags_to_add item by item, never as one array template', () => {
         for (const step of tagSteps) {
-          expect(String(step.with?.tags_to_add)).toMatch(/^\$\{\{ [\w.]+ \}\}$/);
+          const tags = step.with?.tags_to_add as string[];
+          expect(Array.isArray(tags)).toBe(true);
+          for (const tag of tags) {
+            expect(tag).toMatch(/^\{\{ consts\.\w+ \}\}$/);
+          }
         }
       });
 
-      it('declares the decision tag sets, each carrying the reviewed tag the harvest filters', () => {
+      it('declares one const per decision tag, alongside the reviewed tag the harvest filters', () => {
         expect(proposal.consts).toEqual(
           expect.objectContaining({
-            dismissed_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-dismissed'],
-            applied_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-applied'],
-            handoff_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-handoff'],
+            reviewed_tag: reviewedTag,
+            dismissed_tag: 'detection-watch:tuning-dismissed',
+            applied_tag: 'detection-watch:tuning-applied',
+            handoff_tag: 'detection-watch:tuning-handoff',
           })
         );
 
-        const tagConsts = proposal.consts as Record<string, string[]>;
-        for (const tags of [
-          tagConsts.dismissed_tags,
-          tagConsts.applied_tags,
-          tagConsts.handoff_tags,
-        ]) {
-          expect(tags).toContain(reviewedTag);
+        for (const step of tagSteps) {
+          expect(step.with?.tags_to_add).toContain('{{ consts.reviewed_tag }}');
         }
       });
 

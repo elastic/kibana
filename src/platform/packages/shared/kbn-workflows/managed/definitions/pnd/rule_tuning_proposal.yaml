@@ -84,19 +84,14 @@ consts:
   # consts in rule_tuning.yaml.
   analysis_window_days: 14
   preview_invocation_count: 2
-  # Written onto every alert that reached a decision, and filtered out by the sweep's
-  # harvest (consts.reviewed_tag in rule_tuning.yaml must match the shared
-  # detection-watch:tuning-reviewed entry), so a later sweep cannot rediagnose the
-  # same alerts into the same proposal.
-  dismissed_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-dismissed
-  applied_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-applied
-  handoff_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-handoff
+  # Written onto every alert that reached a decision, alongside the tag naming the
+  # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
+  # the same alerts into the same proposal; consts.reviewed_tag in rule_tuning.yaml
+  # must match this value.
+  reviewed_tag: detection-watch:tuning-reviewed
+  dismissed_tag: detection-watch:tuning-dismissed
+  applied_tag: detection-watch:tuning-applied
+  handoff_tag: detection-watch:tuning-handoff
   no_items: []
 steps:
   # Fetched by saved-object id, which pins the exact rule incarnation that produced
@@ -393,7 +388,11 @@ steps:
     if: "${{ steps.review_tuning.output.response.approved == false }}"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
-      tags_to_add: "${{ consts.dismissed_tags }}"
+      # Listed item by item because security.setAlertTags takes an array here and its
+      # input schema is a union, so a whole-array template fails workflow validation.
+      tags_to_add:
+        - "{{ consts.reviewed_tag }}"
+        - "{{ consts.dismissed_tag }}"
 
   - name: mark_alerts_applied
     type: security.setAlertTags
@@ -403,7 +402,9 @@ steps:
         and steps.record_outcome.output.rule_patched == true }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
-      tags_to_add: "${{ consts.applied_tags }}"
+      tags_to_add:
+        - "{{ consts.reviewed_tag }}"
+        - "{{ consts.applied_tag }}"
 
   # Non-query proposals and query modes that cannot be previewed faithfully are
   # manual handoffs, not applied rule changes.
@@ -414,7 +415,9 @@ steps:
         and steps.record_auto_apply_support.output.manual_handoff == true }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
-      tags_to_add: "${{ consts.handoff_tags }}"
+      tags_to_add:
+        - "{{ consts.reviewed_tag }}"
+        - "{{ consts.handoff_tag }}"
 
   - name: emit_result
     type: workflow.output
