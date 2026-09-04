@@ -77,18 +77,21 @@ export const createSandboxBashTool = ({
 
     try {
       // Prepend the venv bin dir so `python` resolves without requiring a full path.
-      // BASH_ENV causes bash to source /workspace/.env on every non-interactive invocation,
-      // making seeded connector credentials available without explicit re-sourcing.
       const mergedEnv: Record<string, string> = {
         PATH: `/home/appuser/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`,
-        BASH_ENV: '/workspace/.env',
         ...env,
       };
+
+      // Source connector credentials before every command. The sandbox gRPC server does not
+      // propagate arbitrary env vars to the shell process, so BASH_ENV doesn't work; prepending
+      // the source is the reliable alternative. 2>/dev/null suppresses errors on a new sandbox
+      // where .env hasn't been written yet.
+      const prefixedCommand = `source /workspace/.env 2>/dev/null || true; ${command}`;
 
       const result = await connectionManager.runCommand(
         conversationId,
         {
-          command,
+          command: prefixedCommand,
           directory: working_directory,
           env: mergedEnv,
           timeout_seconds,
