@@ -143,6 +143,31 @@ export async function scheduleBackfill(
     rulesToSchedule = [...response.saved_objects];
   }
 
+  // if any rule being scheduled has actions that will run,
+  // the caller must hold the connector-execute privilege on their own credentials.
+  // Without this, a low-privileged user with only "Manual rule run" sub-feature could
+  // trigger another user's connectors under that owner's stored API key.
+  const paramsRunActionsMap = new Map(params.map((p) => [p.ruleId, p.runActions]));
+  const anyRuleHasActionsToRun = rulesToSchedule.some((rule) => {
+    if (!rule.attributes.actions?.length) return false;
+    const runActions = paramsRunActionsMap.get(rule.id);
+    return runActions !== false;
+  });
+
+  if (anyRuleHasActionsToRun) {
+    try {
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+    } catch (error) {
+      context.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.SCHEDULE_BACKFILL,
+          error,
+        })
+      );
+      throw error;
+    }
+  }
+
   const actionsClient = await context.getActionsClient();
   return await context.backfillClient.bulkQueue({
     actionsClient,

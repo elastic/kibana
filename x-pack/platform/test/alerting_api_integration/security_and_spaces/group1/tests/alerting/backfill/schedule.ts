@@ -1242,7 +1242,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body.error).to.eql('Forbidden');
-              expect(response.body.message).to.eql('Unauthorized to get actions');
+              expect(response.body.message).to.eql('Unauthorized to execute actions');
               break;
             // Superuser has access to everything
             case 'superuser at space1':
