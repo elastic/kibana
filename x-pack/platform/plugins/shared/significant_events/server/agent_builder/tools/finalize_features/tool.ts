@@ -67,7 +67,7 @@ export function createFinalizeFeaturesTool(): StaticToolRegistration<
     id: SIGNIFICANT_EVENTS_FINALIZE_FEATURES_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Submit the identified features. Call exactly once with the full deduplicated list after completing all searches (search_similar_features, search_knowledge_indicators). Do not call before all candidates have been checked.',
+      'Submit the identified features. Call exactly once with the full deduplicated list after memory grounding, relevant Significant Events searches, and semantic duplicate checks are complete. Do not call before all candidates have been checked.',
     annotations: {
       title: 'Finalize Features',
       readOnlyHint: true,

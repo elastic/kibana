@@ -10,6 +10,12 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../routes/types';
+import {
+  createMemoryListTool,
+  createMemoryReadTool,
+  createMemorySearchTool,
+  type MemoryToolsOptions,
+} from '../../memory_and_investigation/tools/memory';
 import { createFeatureSimilaritySearchTool } from './feature_similarity_search/tool';
 import { createFeatureKnowledgeIndicatorTool } from './create_feature_knowledge_indicator/tool';
 import { createQueryKnowledgeIndicatorTool } from './create_query_knowledge_indicator/tool';
@@ -20,6 +26,7 @@ import { createEventStatusUpdateTool } from './event_status_update/tool';
 import { createEventInvestigationAttachTool } from '../../memory_and_investigation/tools/event_investigation_attach/tool';
 import { createEventsWriteTool } from './event_write/tool';
 import { createFinalizeFeaturesTool } from './finalize_features/tool';
+import { createSignificantEventsAvailability } from './significant_events_availability';
 export {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID,
@@ -37,12 +44,14 @@ export function registerAgentBuilderTools({
   server,
   logger,
   telemetry,
+  memoryToolsOptions,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
+  memoryToolsOptions: MemoryToolsOptions;
 }): void {
   if (!agentBuilder) {
     return;
@@ -102,6 +111,21 @@ export function registerAgentBuilderTools({
       logger: logger.get('events_write_tool'),
       telemetry,
     }),
+    ...[createMemorySearchTool, createMemoryReadTool, createMemoryListTool].map((createTool) => ({
+      ...createTool(memoryToolsOptions),
+      annotations: {
+        title: 'Read Significant Events Memory',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+      tags: ['streams', 'significant-events', 'feature-identification'],
+      availability: createSignificantEventsAvailability({
+        server,
+        logger: logger.get('memory_read_tool'),
+      }),
+    })),
     createFinalizeFeaturesTool(),
   ];
 
