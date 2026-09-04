@@ -25,6 +25,7 @@ export const visualizationCreationSkill = defineSkillType({
 
 Use this skill when:
 - A user asks for one or more standalone visualizations (chart, metric, trend, breakdown, distribution).
+- A user asks for a standalone HTML-style panel that no chart type covers — a KPI scorecard, a status or health board, a panel mixing narrative text with live values.
 - You explicitly want a reusable visualization attachment ID for later use.
 - A user asks to update an existing visualization by attachment ID.
 
@@ -76,9 +77,9 @@ Do **not** use this skill when:
    - Provide:
      - \`query\` (required, specific and field-accurate)
      - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
-     - \`renderer\` (new visualizations only; \`lens\` or \`vega\`; omit to default to Lens)
+     - \`renderer\` (new visualizations only; \`lens\`, \`vega\` or \`custom_content\`; omit to default to Lens)
      - \`chartType\` (required for a new Lens visualization; optional hint for a new Vega visualization; optional on updates)
-     - \`esql\` (optional, when you have a validated ES|QL)
+     - \`esql\` (optional for Lens and Vega, when you have a validated ES|QL; see the custom content section for how it differs there)
      - \`attachment_id\` (optional, only when updating an existing visualization)
      - \`time_range\` (optional; **only** when the user explicitly named a time window, e.g. "last 7 days", "May 20–24". Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
@@ -99,7 +100,7 @@ Render a created visualization by referencing its persisted attachment, using th
 <render_attachment id="{attachment_id}" version="{version}" />
 \`\`\`
 
-- This renders both Lens and Vega visualizations. Copy \`attachment_id\` and \`version\` verbatim from the tool result; never invent them.
+- This renders Lens, Vega and custom content visualizations. Copy \`attachment_id\` and \`version\` verbatim from the tool result; never invent them.
 - Do **NOT** use the \`<visualization>\` element for ${
     platformCoreTools.createVisualization
   } output — that element is only for \`esql_results\` from \`${platformCoreTools.executeEsql}\`.
@@ -133,8 +134,23 @@ ${
 - Pass \`renderer: "vega"\` when:
   - The user explicitly asks for a Vega or Vega-Lite visualization, OR
   - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts of **different measures** (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
+- Pass \`renderer: "custom_content"\` only when **neither chart grammar** can express the request: an HTML/CSS layout such as a KPI scorecard with colored status badges, a health or status board, a panel mixing narrative text with live values, or when the user explicitly asks for a custom or HTML panel. Anything that is a standard time series, bar, pie, metric or table belongs on Lens; anything faceted, layered or scatter-shaped belongs on Vega. Reach for custom content last.
 - Otherwise pass \`renderer: "lens"\` (or omit it to use the Lens default) with the required best-fitting \`chartType\`. Legend statistics of one series stay on Lens xy — see the average/min/max distinction above.
 - When updating an existing attachment, omit \`renderer\` — edits keep the existing renderer.
+
+### Custom content
+
+\`chartType\` does not apply. Two things work differently from the chart renderers:
+
+**ES|QL is not generated for you.** For Lens and Vega the tool builds the query when you omit \`esql\`. For custom content it does not. Decide deliberately:
+- The panel shows live data → build the query with \`${
+    platformCoreTools.generateEsql
+  }\` first and pass it as \`esql\`. Omitting it does not fail — you get a panel with no data, which usually is not what was asked for.
+- The panel is genuinely static (a banner, a legend, an explanatory note, a decorative header) → omit \`esql\` on purpose.
+
+The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails the call and returns an error naming the reason. Correct the query and retry rather than proceeding.
+
+**You never write the markup.** \`query\` is a plain-English description of what to display; the HTML template is generated server-side from it and stored in the attachment. Never author HTML, and never try to pass a template. To change an existing panel, call the tool again with its \`attachment_id\` and describe the change — a style-only edit refines the existing template and preserves its layout.
 
 **Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
 
@@ -188,6 +204,28 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
   "index": "logs-nginx.access-default",
   "chartType": "xy",
   "esql": "FROM logs-nginx.access-default | STATS requests = COUNT(*) BY source.ip | SORT requests DESC | LIMIT 10"
+}
+\`\`\`
+
+## Create a custom content panel (HTML layout, live data)
+
+Build the ES|QL first with generate_esql — it is not generated for this renderer.
+
+\`\`\`json
+{
+  "query": "A status board with one card per host showing its log count and a colored badge",
+  "index": "logs-*",
+  "renderer": "custom_content",
+  "esql": "FROM logs-* | STATS logs = COUNT(*) BY host.name | SORT logs DESC | LIMIT 10"
+}
+\`\`\`
+
+## Create a static custom content panel (no data)
+
+\`\`\`json
+{
+  "query": "A header banner reading 'Production overview' with a short subtitle",
+  "renderer": "custom_content"
 }
 \`\`\`
 
