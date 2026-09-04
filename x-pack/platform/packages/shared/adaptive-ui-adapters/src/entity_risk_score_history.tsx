@@ -7,7 +7,15 @@
 
 import React from 'react';
 import type { Tone, ViewSpec } from '@kbn/adaptive-ui';
-import { DescriptionList, StatGroup, TimeSeries, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
+import {
+  DescriptionList,
+  DescriptionListItem,
+  Stat,
+  StatGroup,
+  TimeSeries,
+  View,
+  toViewSpec,
+} from '@kbn/adaptive-ui/jsx';
 
 /**
  * Mirror of the `security.entity_risk_score_history` attachment data. The
@@ -29,10 +37,18 @@ export interface EntityRiskScoreHistoryData {
 // Buckets mirror Security's risk levels (`Unknown < 20 ≤ Low < 40 ≤ Moderate <
 // 70 ≤ High < 90 ≤ Critical`).
 const riskLevel = (score: number): { label: string; tone: Tone } => {
-  if (score >= 90) return { label: 'Critical', tone: 'danger' };
-  if (score >= 70) return { label: 'High', tone: 'risk' };
-  if (score >= 40) return { label: 'Moderate', tone: 'warning' };
-  if (score >= 20) return { label: 'Low', tone: 'success' };
+  if (score >= 90) {
+    return { label: 'Critical', tone: 'danger' };
+  }
+  if (score >= 70) {
+    return { label: 'High', tone: 'risk' };
+  }
+  if (score >= 40) {
+    return { label: 'Moderate', tone: 'warning' };
+  }
+  if (score >= 20) {
+    return { label: 'Low', tone: 'success' };
+  }
   return { label: 'Unknown', tone: 'neutral' };
 };
 
@@ -50,40 +66,40 @@ export const toEntityRiskScoreHistoryViewSpec = ({
   const latest = entries.length > 0 ? entries[entries.length - 1] : undefined;
   const level = riskLevel(latest?.score ?? 0);
 
-  const details: Array<{ title: string; description: string }> = [
-    { title: 'Entity', description: entityType ? `${entityName} (${entityType})` : entityName },
-  ];
-  if (entries.length > 0) {
-    details.push({
-      title: 'Range',
-      description: `${entries[0].timestamp} → ${entries[entries.length - 1].timestamp}`,
-    });
-  }
-  if (interval) details.push({ title: 'Interval', description: interval });
-
   return toViewSpec(
     <View title={`${entityName} risk history`} subtitle="Entity risk score">
-      <StatGroup
-        label="Latest"
-        stats={[
-          { label: 'Risk score', value: String(latest?.score ?? 0), tone: level.tone },
-          { label: 'Risk level', value: level.label, tone: level.tone },
-        ]}
-      />
+      <StatGroup label="Latest">
+        <Stat label="Risk score" value={String(latest?.score ?? 0)} tone={level.tone} />
+        <Stat label="Risk level" value={level.label} tone={level.tone} />
+      </StatGroup>
       {entries.length > 0 && (
         <TimeSeries
           label="Risk score history"
           variant="area"
-          series={[{
-            label: entityName,
-            tone: level.tone,
-            values: entries.map((entry) => ({ time: entry.timestamp, value: entry.score })),
-          }]}
+          series={[
+            {
+              label: entityName,
+              tone: level.tone,
+              values: entries.map((entry) => ({ time: entry.timestamp, value: entry.score })),
+            },
+          ]}
         />
       )}
-      <DescriptionList label="History" layout="inline" items={details} />
+      <DescriptionList label="History" layout="inline">
+        <DescriptionListItem
+          title="Entity"
+          description={entityType ? `${entityName} (${entityType})` : entityName}
+        />
+        {entries.length > 0 && (
+          <DescriptionListItem
+            title="Range"
+            description={`${entries[0].timestamp} → ${entries[entries.length - 1].timestamp}`}
+          />
+        )}
+        {interval && <DescriptionListItem title="Interval" description={interval} />}
+      </DescriptionList>
     </View>
-  ) as ViewSpec;
+  );
 };
 
 export const sampleEntityRiskScoreHistory: EntityRiskScoreHistoryData = {

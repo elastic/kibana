@@ -7,7 +7,16 @@
 
 import React from 'react';
 import type { ViewSpec } from '@kbn/adaptive-ui';
-import { Badge, CodeBlock, DescriptionList, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
+import {
+  Badge,
+  BadgeGroup,
+  CodeBlock,
+  DescriptionList,
+  DescriptionListItem,
+  Text,
+  View,
+  toViewSpec,
+} from '@kbn/adaptive-ui/jsx';
 
 /**
  * Mirror of the `platform.ki_feature` attachment data (a Streams "key insight"
@@ -40,23 +49,31 @@ export const toKiFeatureViewSpec = ({
   tags,
   filter,
 }: KiFeatureData): ViewSpec => {
-  const badges = [
-    ...(type ? [{ label: type, tone: 'primary' as const, variant: 'fill' as const }] : []),
-    ...(subtype ? [{ label: subtype, tone: 'neutral' as const, variant: 'hollow' as const }] : []),
-  ];
-  const details: Array<{ title: string; description: string }> = [];
-  if (streamName) details.push({ title: 'Stream', description: streamName });
-  if (confidence != null) details.push({ title: 'Confidence', description: `${confidence}%` });
-  if (tags && tags.length > 0) details.push({ title: 'Tags', description: tags.join(', ') });
+  const hasDetails = Boolean(streamName || confidence != null || tags?.length);
 
   return toViewSpec(
     <View title={name} subtitle="Key insight feature">
-      {badges.length > 0 && <Badge items={badges} />}
+      {(type || subtype) && (
+        <BadgeGroup>
+          {type && <Badge label={type} tone="primary" variant="fill" />}
+          {subtype && <Badge label={subtype} tone="neutral" variant="hollow" />}
+        </BadgeGroup>
+      )}
       {description && <Text body={description} />}
-      {details.length > 0 && <DescriptionList label="Feature" layout="inline" items={details} />}
+      {hasDetails && (
+        <DescriptionList label="Feature" layout="inline">
+          {streamName && <DescriptionListItem title="Stream" description={streamName} />}
+          {confidence != null && (
+            <DescriptionListItem title="Confidence" description={`${confidence}%`} />
+          )}
+          {tags && tags.length > 0 && (
+            <DescriptionListItem title="Tags" description={tags.join(', ')} />
+          )}
+        </DescriptionList>
+      )}
       {filter && <CodeBlock language="kql" code={filter} title="Filter" />}
     </View>
-  ) as ViewSpec;
+  );
 };
 
 export const sampleKiFeature: KiFeatureData = {

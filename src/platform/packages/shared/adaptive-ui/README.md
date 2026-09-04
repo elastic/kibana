@@ -31,6 +31,8 @@ The script throws on an `@elastic/*` subpath it cannot resolve against the closu
 
 It also rewrites the one `import.meta` site upstream still emits — the SVG engine resolving its own location to find bundled fonts — which is a parse error once Kibana transpiles to CJS. See the comment on `rewriteImportMeta` in the script.
 
+Declaration maps (`.d.ts.map`) are vendored with absolute `sources` into the upstream checkout, so go-to-definition from Kibana code reaches adaptive-ui `src/` when that repo is open in the same workspace. JS source maps are still omitted — dangling `sourceMappingURL` comments in vendored `.js` files break SWC at Kibana startup.
+
 No upstream SHA is committed. Each run records the vendored revision in the gitignored `.vendored_upstream.json`, so which build is on disk is answered by the stamp, not by git.
 
 `vendored_surface.test.ts` is the counterpart to upstream's `smoke:exports`: it renders a spec spanning both packs, so a missed specifier rewrite fails a test rather than Kibana startup.

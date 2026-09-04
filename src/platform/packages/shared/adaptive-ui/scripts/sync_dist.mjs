@@ -28,6 +28,7 @@
 
 import {
   cpSync,
+  existsSync,
   mkdirSync,
   readFileSync,
   readdirSync,
@@ -35,7 +36,7 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -160,35 +161,62 @@ const walk = (dir) =>
     return entry.isDirectory() ? walk(full) : [full];
   });
 
+/** Absolute `sources` so the map still reaches the upstream checkout after it is copied into `vendor/`. */
+const vendorDeclarationMap = (upstreamDeclaration, targetDeclaration) => {
+  const mapPath = `${upstreamDeclaration}.map`;
+  if (!existsSync(mapPath)) {
+    return undefined;
+  }
+  const map = JSON.parse(readFileSync(mapPath, 'utf8'));
+  const mapDir = dirname(upstreamDeclaration);
+  const root = map.sourceRoot ? resolve(mapDir, map.sourceRoot) : mapDir;
+  map.sourceRoot = '';
+  map.file = basename(targetDeclaration);
+  map.sources = map.sources.map((source) => resolve(root, source));
+  writeFileSync(`${targetDeclaration}.map`, `${JSON.stringify(map)}\n`);
+  return `${basename(targetDeclaration)}.map`;
+};
+
 const syncPackage = (name, upstreamRoot, exportMaps) => {
-  const sourceDist = join(upstreamRoot, CLOSURE[name], 'dist');
+  const upstreamPackageRoot = join(upstreamRoot, CLOSURE[name]);
+  const sourceDist = join(upstreamPackageRoot, 'dist');
   const destination = join(VENDOR_ROOT, name);
   rmSync(destination, { recursive: true, force: true });
   mkdirSync(destination, { recursive: true });
 
   let copied = 0;
   let rewritten = 0;
+  let declarationMaps = 0;
   for (const file of walk(sourceDist)) {
-    // Source maps are not vendored, and a dangling `sourceMappingURL` makes
-    // SWC fail every file it transpiles at Kibana startup.
-    if (file.endsWith('.map')) {
+    // JS source maps are not vendored: a dangling `sourceMappingURL` makes SWC
+    // fail every file it transpiles at Kibana startup. Declaration maps are
+    // rewritten onto the vendored `.d.ts` so Cmd+click reaches upstream `src/`.
+    if (file.endsWith('.js.map') || file.endsWith('.d.ts.map')) {
       continue;
     }
     const target = join(destination, relative(sourceDist, file));
     mkdirSync(dirname(target), { recursive: true });
     const isDeclaration = file.endsWith('.d.ts');
     if (file.endsWith('.js') || isDeclaration) {
-      const source = rewriteImportMeta(
+      let source = rewriteImportMeta(
         readFileSync(file, 'utf8').replace(/^\/\/# sourceMappingURL=.*$\n?/gm, '')
       );
-      writeFileSync(target, rewriteFile(source, dirname(target), exportMaps, isDeclaration));
+      source = rewriteFile(source, dirname(target), exportMaps, isDeclaration);
+      if (isDeclaration) {
+        const mapUrl = vendorDeclarationMap(file, target);
+        if (mapUrl !== undefined) {
+          source = `${source.replace(/\s*$/, '')}\n//# sourceMappingURL=${mapUrl}\n`;
+          declarationMaps += 1;
+        }
+      }
+      writeFileSync(target, source);
       rewritten += 1;
     } else {
       cpSync(file, target);
     }
     copied += 1;
   }
-  return { copied, rewritten };
+  return { copied, rewritten, declarationMaps };
 };
 
 const readUpstreamSha = (upstreamRoot) => {
@@ -225,10 +253,14 @@ const main = () => {
   console.log(`Vendoring @elastic/adaptive-ui-host-kibana @ ${sha} from ${from}`);
 
   rmSync(VENDOR_ROOT, { recursive: true, force: true });
+  let declarationMaps = 0;
   for (const name of Object.keys(CLOSURE)) {
-    const { copied, rewritten } = syncPackage(name, from, exportMaps);
+    const result = syncPackage(name, from, exportMaps);
+    declarationMaps += result.declarationMaps;
     // eslint-disable-next-line no-console
-    console.log(`  ${name}: ${copied} files (${rewritten} rewritten)`);
+    console.log(
+      `  ${name}: ${result.copied} files (${result.rewritten} rewritten, ${result.declarationMaps} declaration maps)`
+    );
   }
 
   // `@kbn/adaptive-ui/styles.css` resolves to the package root through the
@@ -254,7 +286,12 @@ const main = () => {
     )}\n`
   );
   // eslint-disable-next-line no-console
-  console.log(`Done. Stamped ${relative(PACKAGE_ROOT, stamp)}.`);
+  console.log(
+    `Done. Stamped ${relative(
+      PACKAGE_ROOT,
+      stamp
+    )} (${declarationMaps} declaration maps for IDE navigation).`
+  );
 };
 
 main();

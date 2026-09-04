@@ -7,7 +7,16 @@
 
 import React from 'react';
 import type { ViewSpec } from '@kbn/adaptive-ui';
-import { Badge, CodeBlock, DescriptionList, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
+import {
+  Badge,
+  BadgeGroup,
+  CodeBlock,
+  DescriptionList,
+  DescriptionListItem,
+  Text,
+  View,
+  toViewSpec,
+} from '@kbn/adaptive-ui/jsx';
 import { getBreachEsqlQuery, type Query } from '@kbn/alerting-v2-schemas';
 
 /**
@@ -41,33 +50,40 @@ export const toAlertingRuleViewSpec = ({
   query,
   enabled,
 }: AlertingRuleData): ViewSpec => {
-  const details: Array<{ title: string; description: string }> = [];
-  if (schedule?.every) details.push({ title: 'Schedule', description: `Every ${schedule.every}` });
-  if (timeField) details.push({ title: 'Time field', description: timeField });
-  if (metadata.builder_type) details.push({ title: 'Type', description: metadata.builder_type });
+  const hasDetails = Boolean(schedule?.every || timeField || metadata.builder_type);
 
   return toViewSpec(
     <View title={metadata.name} subtitle="Alerting rule">
-      <Badge
-        items={[
-          {
-            label: enabled === false ? 'Disabled' : 'Enabled',
-            tone: enabled === false ? 'neutral' : 'success',
-            variant: 'fill',
-          },
-          ...(kind ? [{ label: kind, tone: 'primary' as const, variant: 'hollow' as const }] : []),
-        ]}
-      />
-      {details.length > 0 && (
-        <DescriptionList label="Rule" layout="inline" items={details} />
+      <BadgeGroup>
+        <Badge
+          label={enabled === false ? 'Disabled' : 'Enabled'}
+          tone={enabled === false ? 'neutral' : 'success'}
+          variant="fill"
+        />
+        {kind && <Badge label={kind} tone="primary" variant="hollow" />}
+      </BadgeGroup>
+      {hasDetails && (
+        <DescriptionList label="Rule" layout="inline">
+          {schedule?.every && (
+            <DescriptionListItem title="Schedule" description={`Every ${schedule.every}`} />
+          )}
+          {timeField && <DescriptionListItem title="Time field" description={timeField} />}
+          {metadata.builder_type && (
+            <DescriptionListItem title="Type" description={metadata.builder_type} />
+          )}
+        </DescriptionList>
       )}
       {query && <CodeBlock language="esql" code={getBreachEsqlQuery(query)} title="Query" />}
       {metadata.description && <Text body={metadata.description} />}
       {metadata.tags && metadata.tags.length > 0 && (
-        <Badge label="Tags" items={metadata.tags.map((label) => ({ label }))} />
+        <BadgeGroup label="Tags">
+          {metadata.tags.map((label) => (
+            <Badge key={label} label={label} />
+          ))}
+        </BadgeGroup>
       )}
     </View>
-  ) as ViewSpec;
+  );
 };
 
 export const sampleAlertingRule: AlertingRuleData = {

@@ -7,7 +7,16 @@
 
 import React from 'react';
 import type { ViewSpec } from '@kbn/adaptive-ui';
-import { Badge, CodeBlock, ItemList, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
+import {
+  Badge,
+  BadgeGroup,
+  CodeBlock,
+  Entity,
+  EntityList,
+  Text,
+  View,
+  toViewSpec,
+} from '@kbn/adaptive-ui/jsx';
 
 /**
  * Mirror of the `skill` attachment data (Agent Builder platform). Only the
@@ -28,8 +37,8 @@ export interface SkillData {
 
 /**
  * Alternate rendering for the `skill` attachment (body subset): the description,
- * the skill instructions as a `codeBlock`, a `badge` row of enabled tools, and an
- * `itemList` of referenced content.
+ * the skill instructions as a `codeBlock`, a `badgeGroup` row of enabled tools, and an
+ * `entityList` of referenced content.
  */
 export const toSkillViewSpec = ({
   name,
@@ -41,20 +50,23 @@ export const toSkillViewSpec = ({
   toViewSpec(
     <View title={name} subtitle="Skill">
       {description && <Text body={description} />}
-      {content && (
-        <CodeBlock language="markdown" code={content} title="Instructions" collapsible />
-      )}
+      {content && <CodeBlock language="markdown" code={content} title="Instructions" collapsible />}
       {toolIds && toolIds.length > 0 && (
-        <Badge label="Tools" items={toolIds.map((label) => ({ label, variant: 'hollow' }))} />
+        <BadgeGroup label="Tools">
+          {toolIds.map((label) => (
+            <Badge key={label} label={label} variant="hollow" />
+          ))}
+        </BadgeGroup>
       )}
       {referencedContent && referencedContent.length > 0 && (
-        <ItemList
-          label="Referenced content"
-          items={referencedContent.map((item) => ({ title: item.title, meta: item.type }))}
-        />
+        <EntityList label="Referenced content">
+          {referencedContent.map((item) => (
+            <Entity key={item.title} title={item.title} meta={item.type} />
+          ))}
+        </EntityList>
       )}
     </View>
-  ) as ViewSpec;
+  );
 
 export const sampleSkill: SkillData = {
   name: 'Summarize on-call incident',

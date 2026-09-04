@@ -11,8 +11,10 @@ import {
   Action,
   Actions,
   Badge,
+  BadgeGroup,
   Callout,
   DescriptionList,
+  DescriptionListItem,
   Table,
   Text,
   View,
@@ -88,12 +90,10 @@ export const toSignificantEventAttachmentViewSpec = (
       theme="auto"
       meta={{ source: 'attachment', ariaLabel: event.title }}
     >
-      <Badge
-        items={[
-          { label: titleCase(event.status), tone: statusTone, variant: 'fill' },
-          { label: severity, tone: severityTone, variant: 'hollow' },
-        ]}
-      />
+      <BadgeGroup>
+        <Badge label={titleCase(event.status)} tone={statusTone} variant="fill" />
+        <Badge label={severity} tone={severityTone} variant="hollow" />
+      </BadgeGroup>
       <Text body={event.summary} />
       {event.symptom_hypothesis && (
         <Callout title="Symptom hypothesis" tone="primary">
@@ -113,7 +113,7 @@ export const toSignificantEventAttachmentViewSpec = (
             rule: signal.metadata?.rule_name ?? signal.type ?? '—',
             stream: signal.stream_name ?? '—',
             verdict: {
-              type: 'badge' as const,
+              type: 'badge',
               label: signal.verdict ?? 'observed',
               tone: signal.verdict === 'confirms' ? 'warning' : 'neutral',
             },
@@ -122,21 +122,23 @@ export const toSignificantEventAttachmentViewSpec = (
         />
       )}
       {causalFeatures.length > 0 && (
-        <DescriptionList
-          label="Causal features"
-          layout="inline"
-          items={causalFeatures.map((feature) => ({
-            title: feature.name,
-            description: feature.stream_name ?? '—',
-            tone: 'warning',
-          }))}
-        />
+        <DescriptionList label="Causal features" layout="inline">
+          {causalFeatures.map((feature) => (
+            <DescriptionListItem
+              key={feature.name}
+              title={feature.name}
+              description={feature.stream_name ?? '—'}
+              tone="warning"
+            />
+          ))}
+        </DescriptionList>
       )}
       {streamNames.length > 0 && (
-        <Badge
-          label="Streams"
-          items={streamNames.map((stream) => ({ label: stream, variant: 'hollow' }))}
-        />
+        <BadgeGroup label="Streams">
+          {streamNames.map((stream) => (
+            <Badge key={stream} label={stream} variant="hollow" />
+          ))}
+        </BadgeGroup>
       )}
       {nightshiftHref && (
         <Actions>
@@ -144,5 +146,5 @@ export const toSignificantEventAttachmentViewSpec = (
         </Actions>
       )}
     </View>
-  ) as ViewSpec;
+  );
 };
