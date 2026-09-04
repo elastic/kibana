@@ -12,6 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { NightshiftInvestigationsConfig } from './config';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -29,6 +30,11 @@ import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
+import { SandboxConnectionManager } from './tools/sandbox_bash/grpc_client';
+import { createSandboxBashTool } from './tools/sandbox_bash/tool';
+import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
+import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
+import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -57,8 +63,9 @@ export class NightshiftInvestigationsPlugin
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private savedObjects?: CoreStart['savedObjects'];
+  private sandboxConnectionManager?: SandboxConnectionManager;
 
-  constructor(ctx: PluginInitializerContext) {
+  constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
   }
 
@@ -90,6 +97,28 @@ export class NightshiftInvestigationsPlugin
           logger: this.logger.get('investigation_progress_report_tool'),
         })
       );
+
+      const config = this.ctx.config.get();
+      if (config.sandbox) {
+        const connectionManager = new SandboxConnectionManager({
+          config: config.sandbox,
+          logger: this.logger.get('sandbox_bash_tool'),
+        });
+        this.sandboxConnectionManager = connectionManager;
+        const sandboxLogger = this.logger.get('sandbox_bash_tool');
+        plugins.agentBuilder.tools.register(
+          createSandboxBashTool({ connectionManager, logger: sandboxLogger })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxViewFileTool({ connectionManager, logger: sandboxLogger })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxStrReplaceTool({ connectionManager, logger: sandboxLogger })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxWriteFileTool({ connectionManager, logger: sandboxLogger })
+        );
+      }
     }
 
     if (plugins.workflowsManagement) {
@@ -219,5 +248,9 @@ export class NightshiftInvestigationsPlugin
     );
     await installInvestigationWorkflow({ client });
     await client.ready();
+  }
+
+  stop(): void {
+    this.sandboxConnectionManager?.close();
   }
 }
