@@ -345,12 +345,24 @@ export const checkFailoverRecovery = async () => {
   // kill would flag every correctly-moved monitor and report FAILED on a
   // healthy run. Check the steady-state windows either side of the transition
   // instead, where two distinct agents for one monitor really is a duplicate.
+  //
+  // Querying immediately after stamping failoverSettledAt makes the second
+  // window empty (`to` defaults to now). Wait one 1m schedule, then pass `to`.
+  // Skip the post-settle window if failover never completed — `from: killedAt`
+  // would span the transition and false-positive.
+  const STEADY_STATE_OBSERVE_MS = 70_000;
+  if (failoverSettledAt) {
+    await sleep(STEADY_STATE_OBSERVE_MS);
+  }
   const steadyStateWindows: Array<{ label: string; window: AtMostOnceCheckWindow }> = [
     { label: 'before the kill', window: { from: testStart, to: killedAt } },
-    failoverSettledAt
-      ? { label: 'after failover settled', window: { from: failoverSettledAt } }
-      : { label: 'after the kill', window: { from: killedAt } },
   ];
+  if (failoverSettledAt) {
+    steadyStateWindows.push({
+      label: 'after failover settled',
+      window: { from: failoverSettledAt, to: new Date().toISOString() },
+    });
+  }
   for (const { label, window } of steadyStateWindows) {
     const violations = await findAtMostOnceViolations(esClient, window);
     if (violations.length > 0) {

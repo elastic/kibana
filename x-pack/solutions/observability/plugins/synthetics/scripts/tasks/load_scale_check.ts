@@ -253,13 +253,21 @@ interface PackagePolicy {
 }
 
 const getPackagePolicies = async (agentPolicyId: string): Promise<PackagePolicy[]> => {
-  const res = await request(
-    'get',
-    `/api/fleet/package_policies?page=1&perPage=10000&kuery=${encodeURIComponent(
-      `ingest-package-policies.policy_ids: "${agentPolicyId}"`
-    )}`
-  );
-  return (res.body?.items ?? []) as PackagePolicy[];
+  const perPage = 10000;
+  const items: PackagePolicy[] = [];
+  for (let page = 1; ; page++) {
+    const res = await request(
+      'get',
+      `/api/fleet/package_policies?page=${page}&perPage=${perPage}&kuery=${encodeURIComponent(
+        `ingest-package-policies.policy_ids: "${agentPolicyId}"`
+      )}`
+    );
+    const batch = (res.body?.items ?? []) as PackagePolicy[];
+    items.push(...batch);
+    if (batch.length < perPage) {
+      return items;
+    }
+  }
 };
 
 const ensureAgentPolicy = async (name: string): Promise<string> => {
