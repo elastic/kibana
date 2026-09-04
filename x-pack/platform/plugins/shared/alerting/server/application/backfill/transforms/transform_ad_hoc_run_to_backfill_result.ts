@@ -11,6 +11,7 @@ import type {
   SavedObjectsBulkCreateObject,
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { AdHocRun, AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { createBackfillError } from '../../../backfill_client/lib';
 import type { ScheduleBackfillResult } from '../methods/schedule/types';
@@ -79,7 +80,9 @@ export const transformAdHocRunToBackfillResult = ({
         isSystemAction,
       }),
     },
-    spaceId: attributes.spaceId,
+    // Persisted SO attributes carry an unbranded string; brand once at the
+    // SO → domain transform boundary (AdHocRun / Backfill).
+    spaceId: brandSpaceId(attributes.spaceId),
     start: attributes.start,
     status: attributes.status,
     schedule: attributes.schedule,

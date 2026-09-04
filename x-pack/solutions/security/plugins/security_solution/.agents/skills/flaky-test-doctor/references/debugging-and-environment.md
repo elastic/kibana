@@ -45,16 +45,20 @@ cy.request('POST', '/api/security/some-endpoint', data);
 
 **Username assertions:** `system_indices_superuser` doesn't exist in MKI. Use `getDefaultUsername()` from `cypress/tasks/common/users.ts`.
 
-**Feature flags:** No easy way to enable/disable in MKI. Skip with `@skipInServerlessMKI`.
+**Feature flags (Cypress only):** Cypress cannot reliably toggle flags on MKI. Do not treat `@skipInServerlessMKI` as the fix — migrate to Scout, which can set flags via Kibana Core APIs on MKI/cloud (see `cypress-to-scout-migration`). `@skipInServerlessMKI` is only a temporary Cypress hold when the spec is `@serverlessQA` and must keep running the QA gate without that MKI path.
 
-**Infrastructure not ready:** Elements disabled, "shards not active" or "index not found" errors. Check server logs; add readiness waits or skip with `@skipInServerlessMKI`.
+**Infrastructure not ready:** Elements disabled, "shards not active" or "index not found" errors. Check server logs. For a non-`@serverlessQA` test: add readiness waits in the destination (Scout / API), or migrate or delete — do not add `@skipInServerlessMKI`. That skip is only a temporary Cypress hold when the spec is already `@serverlessQA` and must keep running the QA gate without that MKI path.
 
 ## Environment Tag Combinations
 
-| Tags | Behavior |
-|------|----------|
-| `@ess`, `@serverless` | Both ESS and Serverless PR CI |
-| `@ess`, `@serverless`, `@skipInServerless` | ESS PR CI + Serverless PR CI, skips MKI |
-| `@serverless`, `@skipInServerlessMKI` | Serverless PR CI, skips only MKI |
+`@ess`, `@serverless`, and `@serverlessQA` opt a test **into** a pipeline. `@skipIn*` opts it **out**. If both are present, the skip wins: `@serverless` + `@skipInServerless` does not run in any serverless suite.
 
-The periodic pipeline and Kibana QA quality gate are MKI environments.
+| Tags | Runs in | Does not run in |
+|------|---------|-----------------|
+| `@ess`, `@serverless` | ESS PR CI, simulated serverless PR CI, periodic (MKI) | Kibana QA gate (needs `@serverlessQA`) |
+| `@ess`, `@serverless`, `@serverlessQA` | All of the above + QA gate | — |
+| `@ess`, `@serverless`, `@skipInServerless` | ESS PR CI only | Simulated serverless PR CI, periodic, QA |
+| `@ess`, `@serverless`, `@skipInServerlessMKI` | ESS PR CI, simulated serverless PR CI | Periodic (MKI), QA (MKI) |
+| `@serverless`, `@skipInServerlessMKI` | Simulated serverless PR CI | ESS, periodic, QA |
+
+`@skipInServerless` is not a synonym for `@skipInServerlessMKI`. The first quality gate is simulated serverless, not MKI. Periodic and Kibana QA are MKI.

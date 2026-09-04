@@ -55,6 +55,7 @@ import {
 } from '../../../../constants';
 
 import { deleteTransforms } from './remove';
+import { reconcileTransforms } from './reconcile';
 import { getDestinationIndexAliases } from './transform_utils';
 import { loadMappingForTransform } from './mappings';
 import { removeRemoteClusterSourceIndicesOnServerless } from './ccs_transform_source';
@@ -125,6 +126,15 @@ const installLegacyTransformsAssets = async (
 
       return acc;
     }, []);
+
+    // Remove any transforms that leaked from a previous broken install and are no longer
+    // tracked by a saved-object ref. Best-effort — never throws.
+    await reconcileTransforms(
+      esClient,
+      logger,
+      packageInstallContext.packageInfo.name,
+      transformRefs.map((r) => r.id)
+    );
 
     // Pre-register new refs and remove old refs in one atomic call BEFORE installing.
     // Doing this before the installs means that if handleTransformInstall throws mid-batch,
@@ -297,8 +307,42 @@ const processTransformAssetsPerModule = async (
       );
 
       const currentTransformSameAsPrev = matchingTransformFromPrevInstall !== undefined;
-      if (previousInstalledTransformEsAssets.length === 0) {
-        aliasesRefs.push(...aliasNames);
+      if (force || !currentTransformSameAsPrev) {
+        // If we are reinstalling the package (i.e. force = true),
+        // force delete old transforms so we can reinstall the same transforms again
+        if (force && matchingTransformFromPrevInstall) {
+          transformsToRemoveWithDestIndex.push(matchingTransformFromPrevInstall);
+        } else {
+          // If upgrading from old json schema to new yml schema
+          // We need to make sure to delete those transforms by matching the legacy naming convention
+          const versionsFromOldJsonSchema = previousInstalledTransformEsAssets.filter((t) =>
+            t.id.startsWith(
+              getLegacyTransformNameForInstallation(
+                installablePackage,
+                `${transformModuleId}/default.json`
+              )
+            )
+          );
+
+          if (versionsFromOldJsonSchema.length > 0) {
+            transformsToRemoveWithDestIndex.push(...versionsFromOldJsonSchema);
+          }
+
+          // If upgrading from yml to newer version of yaml
+          // Match using new naming convention — use a deterministic prefix to avoid
+          // splitting on a version string that may appear in the module id.
+          const installNameWithoutVersion = getTransformAssetNameForInstallation(
+            installablePackage,
+            transformModuleId,
+            'default-'
+          );
+          const prevVersions = previousInstalledTransformEsAssets.filter((t) =>
+            t.id.startsWith(installNameWithoutVersion)
+          );
+          if (prevVersions.length > 0) {
+            transformsToRemove.push(...prevVersions);
+          }
+        }
         transforms.push({
           transformModuleId,
           installationName,
@@ -308,53 +352,11 @@ const processTransformAssetsPerModule = async (
           runAsKibanaSystem,
         });
         transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
-      } else {
-        if (force || !currentTransformSameAsPrev) {
-          // If we are reinstalling the package (i.e. force = true),
-          // force delete old transforms so we can reinstall the same transforms again
-          if (force && matchingTransformFromPrevInstall) {
-            transformsToRemoveWithDestIndex.push(matchingTransformFromPrevInstall);
-          } else {
-            // If upgrading from old json schema to new yml schema
-            // We need to make sure to delete those transforms by matching the legacy naming convention
-            const versionFromOldJsonSchema = previousInstalledTransformEsAssets.find((t) =>
-              t.id.startsWith(
-                getLegacyTransformNameForInstallation(
-                  installablePackage,
-                  `${transformModuleId}/default.json`
-                )
-              )
-            );
-
-            if (versionFromOldJsonSchema !== undefined) {
-              transformsToRemoveWithDestIndex.push(versionFromOldJsonSchema);
-            }
-
-            // If upgrading from yml to newer version of yaml
-            // Match using new naming convention
-            const installNameWithoutVersion = installationName.split(transformVersion)[0];
-            const prevVersion = previousInstalledTransformEsAssets.find((t) =>
-              t.id.startsWith(installNameWithoutVersion)
-            );
-            if (prevVersion !== undefined) {
-              transformsToRemove.push(prevVersion);
-            }
-          }
-          transforms.push({
-            transformModuleId,
-            installationName,
-            installationOrder,
-            transformVersion,
-            content,
-            runAsKibanaSystem,
-          });
-          transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
-          if (aliasNames.length > 0) {
-            aliasesRefs.push(...aliasNames);
-          }
-        } else {
-          transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', false);
+        if (aliasNames.length > 0) {
+          aliasesRefs.push(...aliasNames);
         }
+      } else {
+        transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', false);
       }
     }
 
@@ -528,6 +530,28 @@ const installTransformsAssets = async (
         secondaryAuth
       ),
     ]);
+
+    // Remove any transforms that leaked from a previous broken install and are no longer
+    // tracked by a saved-object ref. Best-effort — never throws.
+    // keepIds must include unchanged transforms (modules where fleet_transform_version did not
+    // bump and currentTransformSameAsPrev is true) — those are absent from transformRefs but still
+    // live in ES and must not be treated as orphans.
+    const removedTransformIds = new Set([
+      ...transformsToRemove.map((t) => t.id),
+      ...transformsToRemoveWithDestIndex.map((t) => t.id),
+    ]);
+    const reconcileKeepIds = [
+      ...previousInstalledTransformEsAssets
+        .filter((t) => !removedTransformIds.has(t.id))
+        .map((t) => t.id),
+      ...transformRefs.map((r) => r.id),
+    ];
+    await reconcileTransforms(
+      esClient,
+      logger,
+      packageInstallContext.packageInfo.name,
+      reconcileKeepIds
+    );
 
     // get and save refs associated with the transforms before installing
     esReferences = await updateEsAssetReferences(
