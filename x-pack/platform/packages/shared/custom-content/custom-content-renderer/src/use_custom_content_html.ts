@@ -64,8 +64,6 @@ export function useCustomContentHtml({
   const [error, setError] = useState<string | undefined>();
 
   const trimmedTemplate = savedTemplate?.trim() || undefined;
-  // Destructured rather than depending on `services` itself: a host that builds the object inline
-  // would re-run the fetch on every render, while these three are stable references.
   const { http, uiSettings, search } = services;
 
   useEffect(() => {
