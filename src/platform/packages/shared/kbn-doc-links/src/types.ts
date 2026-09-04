@@ -488,6 +488,7 @@ export interface DocLinks {
     authorization: string;
     guide: string;
     actionTypes: string;
+    actionPolicies: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;

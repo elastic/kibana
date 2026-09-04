@@ -11,7 +11,11 @@ import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/comm
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { selectTab } from './tabs';
-import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
+import {
+  selectTabRuntimeState,
+  selectTabTypeForPersistence,
+  type RuntimeStateManager,
+} from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
 import {
   fromSavedObjectTabToSavedSearch,
@@ -40,6 +44,7 @@ export const selectTabSavedSearch = async ({
       tab: tabState,
       currentDataView,
       services,
+      tabType: selectTabTypeForPersistence({ runtimeStateManager, tabState }),
     }),
     discoverSession: currentState.persistedDiscoverSession,
     services,

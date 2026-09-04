@@ -6,8 +6,11 @@
  */
 
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
+import { processNameSafeVersion } from '../../../common/endpoint/models/event';
 import type { NodeData } from '../types';
 import {
+  eventAtOrBefore,
+  firstEvent,
   setErrorNodes,
   setReloadedNodes,
   setRequestedNodes,
@@ -178,5 +181,77 @@ describe('node data model', () => {
         );
       });
     });
+  });
+});
+
+describe('eventAtOrBefore', () => {
+  const generator = new EndpointDocGenerator('resolver-exec');
+  const entityID = 'entity-1';
+  const sshd = generator.generateEvent({
+    entityID,
+    processName: 'sshd',
+    timestamp: Date.parse('2026-07-29T14:30:55.490Z'),
+    eventType: ['start'],
+  });
+  const bash = generator.generateEvent({
+    entityID,
+    processName: 'bash',
+    timestamp: Date.parse('2026-07-29T14:30:55.495Z'),
+    eventType: ['exec'],
+  });
+  const cat = generator.generateEvent({
+    entityID,
+    processName: 'cat',
+    timestamp: Date.parse('2026-07-29T14:31:51.692Z'),
+    eventType: ['exec', 'end'],
+  });
+  const data: NodeData = {
+    events: [cat, bash, sshd],
+    status: 'running',
+  };
+  const originTimestampMs = Date.parse('2026-07-29T14:31:21.160Z');
+
+  it('returns the newest event at or before the origin timestamp', () => {
+    const event = eventAtOrBefore(data, originTimestampMs);
+    if (event === undefined) {
+      throw new Error('expected an event at or before origin');
+    }
+    expect(processNameSafeVersion(event)).toEqual('bash');
+  });
+
+  it('returns the newest event when every event is after the origin timestamp', () => {
+    const event = eventAtOrBefore(data, Date.parse('2026-07-29T14:30:00.000Z'));
+    if (event === undefined) {
+      throw new Error('expected the newest event');
+    }
+    expect(processNameSafeVersion(event)).toEqual('cat');
+  });
+
+  it('returns the newest event when origin timestamp is undefined', () => {
+    const event = eventAtOrBefore(data, undefined);
+    if (event === undefined) {
+      throw new Error('expected an event when origin is undefined');
+    }
+    expect(processNameSafeVersion(event)).toEqual('cat');
+  });
+
+  it('returns undefined when node data is loading', () => {
+    expect(
+      eventAtOrBefore({ events: [cat], status: 'loading' }, originTimestampMs)
+    ).toBeUndefined();
+  });
+});
+
+describe('firstEvent', () => {
+  const generator = new EndpointDocGenerator('resolver-first');
+
+  it('returns the newest event', () => {
+    const newer = generator.generateEvent({ timestamp: 2000, processName: 'cat' });
+    const older = generator.generateEvent({ timestamp: 1000, processName: 'bash' });
+    const event = firstEvent({ events: [newer, older], status: 'running' });
+    if (event === undefined) {
+      throw new Error('expected a first event');
+    }
+    expect(processNameSafeVersion(event)).toEqual('cat');
   });
 });

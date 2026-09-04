@@ -35,4 +35,6 @@ export const EventsAsUnit = 'events';
 
 export enum ALERTS_API_URLS {
   INTERNAL_RELATED_DASHBOARDS = '/internal/observability/alerts/related_dashboards',
+  INTERNAL_INVESTIGATION_AVAILABILITY = '/internal/observability/alerts/investigation/availability',
+  INTERNAL_START_ALERT_INVESTIGATION = '/internal/observability/alerts/{alertId}/investigate',
 }

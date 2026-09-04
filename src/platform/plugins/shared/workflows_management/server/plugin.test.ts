@@ -9,24 +9,35 @@
 
 jest.mock('./api/routes', () => ({ defineRoutes: jest.fn() }));
 jest.mock('./api/workflows_management_api', () => ({
-  WorkflowsManagementApi: jest.fn().mockImplementation(() => ({})),
+  WorkflowsManagementApi: jest.fn().mockImplementation(() => ({
+    setAuditLog: jest.fn(),
+  })),
 }));
 jest.mock('./api/workflows_management_service');
+jest.mock('@kbn/workflows-execution-engine/server', () => ({
+  registerHitlLifecycleAuditor: jest.fn(() => jest.fn()),
+}));
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
 import { WorkflowsService } from './api/workflows_management_service';
 import { WorkflowsPlugin } from './plugin';
 
 const MockedWorkflowsService = WorkflowsService as jest.MockedClass<typeof WorkflowsService>;
+const mockRegisterHitlLifecycleAuditor = registerHitlLifecycleAuditor as jest.MockedFunction<
+  typeof registerHitlLifecycleAuditor
+>;
 
 describe('WorkflowsPlugin', () => {
   const setStopping = jest.fn();
   const cleanupUnregisteredOrphans = jest.fn().mockResolvedValue(undefined);
+  const unregisterHitlLifecycleAuditor = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRegisterHitlLifecycleAuditor.mockReturnValue(unregisterHitlLifecycleAuditor);
     MockedWorkflowsService.mockImplementation(
       () =>
         ({
@@ -64,6 +75,7 @@ describe('WorkflowsPlugin', () => {
 
     expect(start).toEqual({});
     expect(setStopping).toHaveBeenCalledWith(false);
+    expect(mockRegisterHitlLifecycleAuditor).toHaveBeenCalled();
   });
 
   it('marks the workflows service as stopping on stop()', () => {
@@ -92,5 +104,6 @@ describe('WorkflowsPlugin', () => {
     plugin.stop();
 
     expect(setStopping).toHaveBeenCalledWith(true);
+    expect(unregisterHitlLifecycleAuditor).toHaveBeenCalled();
   });
 });
