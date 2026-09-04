@@ -47,10 +47,7 @@ const okResponse = () =>
 
 const SOURCE_ID = 'text_indicator_list:maltrail-cobaltstrike';
 
-const makeSource = (
-  id = SOURCE_ID,
-  name = 'Maltrail — CobaltStrike C2 indicators'
-): SourceHit => ({
+const makeSource = (id = SOURCE_ID, name = 'Maltrail — CobaltStrike C2 indicators'): SourceHit => ({
   _id: id,
   _source: {
     adapter_type: 'text_indicator_list',
@@ -105,10 +102,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const reports = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     expect(reports).toHaveLength(1);
     expect(() => normalizedReportSchema.parse(reports[0])).not.toThrow();
@@ -118,10 +112,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const [report] = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const [report] = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     expect(report.lineage.extraction_method).toBe('text_indicator_list');
     expect(report.lineage.extracted_at).toBe('2024-01-15T12:00:00.000Z');
@@ -132,10 +123,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const [report] = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const [report] = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     expect(report.content.title).toBe('cobaltstrike');
     expect(report.lineage.source_doc_ref?.id).toBe('cobaltstrike');
@@ -146,10 +134,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const [report] = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const [report] = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     const iocs = report.extracted?.iocs ?? [];
 
@@ -196,10 +181,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const [report] = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const [report] = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     const values = (report.extracted?.iocs ?? []).map((i) => i.value);
     expect(values.filter((v) => v === '1.2.3.4')).toHaveLength(1);
@@ -210,10 +192,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue([]);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const reports = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     expect(reports).toHaveLength(0);
   });
@@ -229,10 +208,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue(emptyIocBlocks);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const reports = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     expect(reports).toHaveLength(0);
   });
@@ -243,10 +219,7 @@ describe('textIndicatorListAdapter', () => {
       .mockResolvedValue(new Response('', { status: 404, statusText: 'Not Found' }));
 
     await expect(
-      textIndicatorListAdapter.run(
-        makeSource(),
-        makeContext(fetchMock)
-      )
+      textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock))
     ).rejects.toThrow(/HTTP 404/);
   });
 
@@ -294,10 +267,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue(blocks);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const reports = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     // Two blocks exceed the per-document IOC limit, so at least two reports are required.
     expect(reports.length).toBeGreaterThanOrEqual(2);
@@ -326,10 +296,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue(blocks);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const reports = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     expect(reports.length).toBeGreaterThan(1);
     const fps = reports.map((r) => r.content_fingerprint);
@@ -351,10 +318,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue(blocks);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const reports = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     expect(reports.length).toBeGreaterThanOrEqual(3);
 
@@ -375,10 +339,7 @@ describe('textIndicatorListAdapter', () => {
     parseIndicatorListMock.mockReturnValue([bigBlock, ...smallBlocks]);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const reports = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     for (const report of reports) {
       expect(report.extracted?.iocs?.length ?? 0).toBeLessThanOrEqual(MAX_NESTED_PER_DOC);
@@ -414,10 +375,7 @@ describe('textIndicatorListAdapter', () => {
     ]);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
-    const reports = await textIndicatorListAdapter.run(
-      makeSource(),
-      makeContext(fetchMock)
-    );
+    const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
     const allValues = reports.flatMap((r) => (r.extracted?.iocs ?? []).map((i) => i.value));
     expect(allValues.filter((v) => v === '1.1.1.1')).toHaveLength(1);
@@ -499,8 +457,6 @@ describe('textIndicatorListAdapter — attribution and credentials', () => {
         .mockResolvedValue(new Response('nope', { status: 503, statusText: 'Service Unavailable' }))
     );
 
-    await expect(textIndicatorListAdapter.run(makeSource(), failing)).rejects.toThrow(
-      /HTTP 503/
-    );
+    await expect(textIndicatorListAdapter.run(makeSource(), failing)).rejects.toThrow(/HTTP 503/);
   });
 });
