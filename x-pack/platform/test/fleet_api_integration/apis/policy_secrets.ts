@@ -1299,9 +1299,11 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        // Secret deletion is async — retry until the orphaned secrets are gone.
+        // Secret deletion is async — the upgrade path uses asyncDeploy which schedules the
+        // compiled policy write as a task (~3s delay), then our deferred cleanup fires after
+        // that. Retry for up to 15s to cover both delays with headroom for CI variance.
         let searchRes: Awaited<ReturnType<typeof getSecrets>> | undefined;
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 15; i++) {
           searchRes = await getSecrets(oldPackageVarMultiIds);
           if (searchRes.hits.hits.length === 0) break;
           await new Promise((resolve) => setTimeout(resolve, 1000));

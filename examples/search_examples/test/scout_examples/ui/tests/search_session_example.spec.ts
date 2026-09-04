@@ -57,13 +57,6 @@ test.describe('Search session example', { tag: '@local-stateful-classic' }, () =
     await deleteAllSearchSessions(kbnClient);
   });
 
-  test.afterAll(async ({ kbnClient, isSnapshotBuild }) => {
-    if (!isSnapshotBuild) {
-      return;
-    }
-    await deleteAllSearchSessions(kbnClient);
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     // Privileged: saving/restoring sessions needs more than viewer.
     await browserAuth.loginAsPrivilegedUser();
@@ -71,6 +64,13 @@ test.describe('Search session example', { tag: '@local-stateful-classic' }, () =
   });
 
   test.afterEach(async ({ kbnClient }) => {
+    await deleteAllSearchSessions(kbnClient);
+  });
+
+  test.afterAll(async ({ kbnClient, isSnapshotBuild }) => {
+    if (!isSnapshotBuild) {
+      return;
+    }
     await deleteAllSearchSessions(kbnClient);
   });
 
