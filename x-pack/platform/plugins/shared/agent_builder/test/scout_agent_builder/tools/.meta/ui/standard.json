@@ -1,0 +1,266 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ce1b0b92a86a259-302640bd590430c",
+      "title": "Agent Builder — create tool should create an esql tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/create_tool.spec.ts",
+        "line": 42,
+        "column": 48
+      }
+    },
+    {
+      "id": "ce1b0b92a86a259-e093aa2f0cfe7b5",
+      "title": "Agent Builder — create tool should create an index search tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/create_tool.spec.ts",
+        "line": 53,
+        "column": 25
+      }
+    },
+    {
+      "id": "f6f819dfdb25f4e-0d47014c43ac2ba",
+      "title": "Agent Builder — manage tool edits a tool from the tool details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/manage_tool.spec.ts",
+        "line": 25,
+        "column": 39
+      }
+    },
+    {
+      "id": "f6f819dfdb25f4e-b0e786aeb3f6806",
+      "title": "Agent Builder — manage tool clones a tool from the tool details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/manage_tool.spec.ts",
+        "line": 42,
+        "column": 25
+      }
+    },
+    {
+      "id": "f6f819dfdb25f4e-3db321511f9acba",
+      "title": "Agent Builder — manage tool tests a tool from the tool details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/manage_tool.spec.ts",
+        "line": 66,
+        "column": 25
+      }
+    },
+    {
+      "id": "f6f819dfdb25f4e-e17b3d84160a134",
+      "title": "Agent Builder — manage tool deletes a tool from the tool details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/manage_tool.spec.ts",
+        "line": 87,
+        "column": 68
+      }
+    },
+    {
+      "id": "f6f819dfdb25f4e-c9006daa6d43368",
+      "title": "Agent Builder — manage tool views built-in tool as read-only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/manage_tool.spec.ts",
+        "line": 109,
+        "column": 25
+      }
+    },
+    {
+      "id": "f9267239a930d80-522397fe666b178",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management opens the MCP Clients page from the Manage MCP menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_clients.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "f9267239a930d80-50c5d6fe181a557",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management registers a public client and surfaces its details without a secret",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_clients.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "f9267239a930d80-49fc9bb9dca158a",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management registers a confidential client and reveals its secret in the post-create modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_clients.spec.ts",
+        "line": 63,
+        "column": 13
+      }
+    },
+    {
+      "id": "f9267239a930d80-18c9f656e2d023f",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management filters the client list by search term and status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_clients.spec.ts",
+        "line": 77,
+        "column": 11
+      }
+    },
+    {
+      "id": "f9267239a930d80-05e3fd96e1d9c5f",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management opens the details flyout from a client name link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_clients.spec.ts",
+        "line": 111,
+        "column": 9
+      }
+    },
+    {
+      "id": "f9267239a930d80-f38a4af978bc4ca",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management edits a client through the row actions menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_clients.spec.ts",
+        "line": 132,
+        "column": 25
+      }
+    },
+    {
+      "id": "f9267239a930d80-36311f4cb75a3c1",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management prefills the remote redirect type from stored HTTPS URIs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_clients.spec.ts",
+        "line": 172,
+        "column": 9
+      }
+    },
+    {
+      "id": "f9267239a930d80-58854346134b8b7",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management does not offer edit for a revoked client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_clients.spec.ts",
+        "line": 193,
+        "column": 95
+      }
+    },
+    {
+      "id": "f9267239a930d80-8035a9627ab4f43",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management revokes a client through the row actions menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_clients.spec.ts",
+        "line": 212,
+        "column": 9
+      }
+    },
+    {
+      "id": "f9267239a930d80-7ca72e847a3eb59",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management deletes a revoked client through the row actions menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_clients.spec.ts",
+        "line": 228,
+        "column": 22
+      }
+    },
+    {
+      "id": "d4bf87c8c999017-c4c6f662ad3fa16",
+      "title": "Agent Builder — MCP tools MCP tool flows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/ui/tests/mcp_tools.spec.ts",
+        "line": 46,
+        "column": 11
+      }
+    }
+  ]
+}
