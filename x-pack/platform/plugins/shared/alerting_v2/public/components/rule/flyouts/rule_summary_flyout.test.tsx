@@ -227,7 +227,7 @@ describe('RuleSummaryFlyout', () => {
 
       // View change history sits in the second group, after Clone and before Delete.
       const panel = changeHistory.closest('.euiContextMenuPanel');
-      const expectedOrder = [
+      const readGroup = [
         'viewRuleDetails-rule-1',
         'editRule-rule-1',
         'cloneRule-rule-1',
@@ -236,8 +236,8 @@ describe('RuleSummaryFlyout', () => {
       ];
       const renderedOrder = Array.from(panel?.querySelectorAll('[data-test-subj]') ?? [])
         .map((element) => element.getAttribute('data-test-subj'))
-        .filter((testId) => expectedOrder.includes(testId ?? ''));
-      expect(renderedOrder).toEqual(expectedOrder);
+        .filter((testId) => readGroup.includes(testId ?? ''));
+      expect(renderedOrder).toEqual(readGroup);
 
       fireEvent.click(changeHistory);
       expect(onViewChangeHistory).toHaveBeenCalledWith(baseRule);
