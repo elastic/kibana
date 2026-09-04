@@ -19,6 +19,7 @@ export const INBOUND_INGRESS_OUTCOMES = [
   'handle_fail',
   'validate_fail',
   'emit_partial',
+  'http_ack',
   'accepted',
 ] as const;
 
@@ -47,6 +48,7 @@ const OUTCOME_LOG_LEVEL: Record<InboundIngressOutcome, 'debug' | 'info' | 'warn'
   handle_fail: 'error',
   validate_fail: 'error',
   emit_partial: 'warn',
+  http_ack: 'info',
   accepted: 'info',
 };
 
