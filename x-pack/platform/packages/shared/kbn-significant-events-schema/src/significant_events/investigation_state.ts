@@ -281,11 +281,12 @@ export const investigationStateSchema = z.object({
    */
   blind_spots: z.array(investigationBlindSpotSchema).max(MAX_BLIND_SPOTS).optional(),
   /**
-   * Optional list of field-change proposals returned as feedback to the trigger. Each entry names
-   * the significant-event field being proposed (`severity`, `summary`, or `status`) along with the
-   * old and new values, a one-or-two-sentence reason tied to the confirmed findings, and the
-   * evidence backing the proposal. Omit the array (or omit a field's entry) when no change is
-   * warranted for that field. The workflow does not apply these proposals directly.
+   * Optional list of field assessments or change proposals returned as feedback to the trigger.
+   * Each entry names the significant-event field (`severity`, `summary`, or `status`) along with
+   * the old and new values, a one-or-two-sentence reason tied to the confirmed findings, and the
+   * evidence backing the proposal. Significant-event investigations include one severity entry
+   * even when its old and new values match; other fields remain optional. The workflow does not
+   * apply these proposals directly.
    */
   trigger_feedback: z.array(triggerFeedbackSchema).max(MAX_TRIGGER_FEEDBACK).optional(),
   /**

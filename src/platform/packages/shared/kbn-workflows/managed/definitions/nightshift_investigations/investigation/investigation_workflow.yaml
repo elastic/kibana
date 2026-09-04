@@ -151,6 +151,13 @@ steps:
         rule is too sensitive" is a legitimate conclusion supported by the data.
         {% elsif inputs.context and inputs.context.size > 0 %}
         Additional context: {{ inputs.context | json }}
+        {% if inputs.context.event_uuid %}
+
+        This investigation is attached to a significant event. Your final
+        `trigger_feedback` must contain exactly one severity entry. Set `from` to
+        `inputs.context.severity` and `to` to your severity assessment for this event,
+        including when the two values are equal. Summary and status entries remain optional.
+        {% endif %}
         {% endif %}
       # Keep this in sync with investigationStateSchema in @kbn/significant-events-schema
       # (x-pack/platform/packages/shared/kbn-significant-events-schema/src/significant_events/investigation_state.ts)
@@ -335,15 +342,16 @@ steps:
               Optional feedback for the trigger based on what the investigation established. Each
               entry proposes a change to one significant-event field (severity, summary, or status)
               with a typed from/to, a one-or-two-sentence reason tied to the confirmed findings, and
-              1–10 evidence items. Omit entries — or the whole array — for fields that do not need
-              changing. The workflow returns this feedback but does not apply it directly; only
-              propose what the listed evidence can defend. When no significant-event context was
-              provided (no event_uuid in inputs.context), omit trigger_feedback entirely.
+              1–10 evidence items. With significant-event context, include exactly one severity
+              entry even when from and to are equal; summary and status entries remain optional.
+              The workflow returns this feedback but does not apply it directly; only propose what
+              the listed evidence can defend. When no significant-event context was provided (no
+              event_uuid in inputs.context), omit trigger_feedback entirely.
             maxItems: 3
             items:
               oneOf:
                 - type: object
-                  description: Propose changing the event's severity tier.
+                  description: Record the investigation's assessment of the event's severity tier, including when it is unchanged.
                   properties:
                     field:
                       type: string
@@ -355,11 +363,11 @@ steps:
                     to:
                       type: string
                       enum: ['80-critical', '60-high', '40-medium', '20-low']
-                      description: The proposed new severity tier.
+                      description: The investigation's assessed severity tier.
                     reason:
                       type: string
                       maxLength: 10000
-                      description: Why the severity should change, referencing the confirmed findings.
+                      description: Why this severity fits, referencing the confirmed findings.
                     evidence:
                       type: array
                       minItems: 1

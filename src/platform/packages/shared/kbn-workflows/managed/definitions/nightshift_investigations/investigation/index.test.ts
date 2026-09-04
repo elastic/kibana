@@ -14,7 +14,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
-  with?: { method?: string; path?: string; body?: { status?: string } };
+  with?: { method?: string; path?: string; body?: { status?: string }; message?: string };
   'on-failure'?: unknown;
   steps?: WorkflowStep[];
   else?: WorkflowStep[];
@@ -45,7 +45,7 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
 
 describe('investigation lifecycle contracts', () => {
   it('emits lifecycle events and fails unsuccessful executions', () => {
-    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(10);
+    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(11);
     expect(investigation.steps[0].name).toBe('ensure_investigation_agent');
 
     const expectedStatuses: Record<string, string> = {
@@ -106,5 +106,11 @@ describe('investigation lifecycle contracts', () => {
 
     expect(requestSteps.length).toBeGreaterThan(0);
     expect(unscoped.map(({ name, with: params }) => `${name}: ${params?.path}`)).toEqual([]);
+  });
+
+  it('requires a severity assessment for significant-event investigations', () => {
+    expect(requireStep('investigate').with?.message).toContain(
+      'must contain exactly one severity entry'
+    );
   });
 });

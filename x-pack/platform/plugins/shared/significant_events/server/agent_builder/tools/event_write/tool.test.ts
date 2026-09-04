@@ -241,6 +241,41 @@ describe('events_write tool', () => {
     );
   });
 
+  it('maps the discovery source to a severity assessment', async () => {
+    const now = '2026-01-02T00:00:00.000Z';
+    jest.useFakeTimers().setSystemTime(new Date(now));
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      {
+        index: 0,
+        event_uuid: 'uuid-1',
+        event_id: 'event-1',
+        status: 'open',
+        severity: '60-high',
+        written: true,
+      },
+    ]);
+
+    try {
+      await invokeHandler(
+        createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+        { source: 'discovery', items: [input] },
+        createMockToolContext()
+      );
+
+      expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
+        eventClient: {},
+        inputs: [
+          {
+            ...input,
+            severity_assessments: [{ source: 'discovery', severity: '60-high', assessed_at: now }],
+          },
+        ],
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('enriches causal features from their Knowledge Indicators', async () => {
     getFeatures.mockImplementation((_streams, options) => {
       const hits =

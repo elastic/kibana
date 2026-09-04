@@ -10,17 +10,27 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type {
   Severity,
+  SeverityAssessment,
   SignificantEventInvestigation,
   SignificantEventStatus,
   TriggerFeedback,
 } from '@kbn/significant-events-schema';
 import type { EventClient } from './event_client';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import { materializeSeverity } from './severity_assessments';
 
 interface SignificantEventFieldChanges {
   status?: SignificantEventStatus;
-  severity?: Severity;
   summary?: string;
+}
+
+interface SignificantEventFieldValues extends SignificantEventFieldChanges {
+  severity?: Severity;
+}
+
+interface AcceptedTriggerFeedback {
+  fields: SignificantEventFieldChanges;
+  severity?: Severity;
 }
 
 export type SignificantEventTriggerFeedback = ReadonlyArray<TriggerFeedback>;
@@ -30,15 +40,12 @@ export type SignificantEventTriggerFeedback = ReadonlyArray<TriggerFeedback>;
  * version, so proposing the current value is a no-op and never writes a redundant version.
  */
 const pickChangedFields = (
-  current: SignificantEventFieldChanges,
+  current: SignificantEventFieldValues,
   fields: SignificantEventFieldChanges
 ): SignificantEventFieldChanges => {
   const changed: SignificantEventFieldChanges = {};
   if (fields.status !== undefined && fields.status !== current.status) {
     changed.status = fields.status;
-  }
-  if (fields.severity !== undefined && fields.severity !== current.severity) {
-    changed.severity = fields.severity;
   }
   if (fields.summary !== undefined && fields.summary !== current.summary) {
     changed.summary = fields.summary;
@@ -47,12 +54,13 @@ const pickChangedFields = (
 };
 
 const fieldsFromTriggerFeedback = (
-  current: SignificantEventFieldChanges,
+  current: SignificantEventFieldValues,
   triggerFeedback: SignificantEventTriggerFeedback | undefined,
   eventId: string,
   logger?: Logger
-): SignificantEventFieldChanges => {
+): AcceptedTriggerFeedback => {
   const fields: SignificantEventFieldChanges = {};
+  let severity: Severity | undefined;
   const counts = new Map<TriggerFeedback['field'], number>();
   for (const feedback of triggerFeedback ?? []) {
     counts.set(feedback.field, (counts.get(feedback.field) ?? 0) + 1);
@@ -80,14 +88,33 @@ const fieldsFromTriggerFeedback = (
         fields.status = feedback.to;
         break;
       case 'severity':
-        fields.severity = feedback.to;
+        severity = feedback.to;
         break;
       case 'summary':
         fields.summary = feedback.to;
         break;
     }
   }
-  return fields;
+  return { fields, severity };
+};
+
+const buildSeverityAssessments = (
+  existing: SeverityAssessment[] | undefined,
+  severity: Severity | undefined,
+  investigation: SignificantEventInvestigation
+): SeverityAssessment[] => {
+  const assessments = existing ?? [];
+  if (severity === undefined || investigation.completed_at === undefined) return assessments;
+
+  return [
+    ...assessments,
+    {
+      source: 'investigation',
+      severity,
+      assessed_at: investigation.completed_at,
+      workflow_execution_id: investigation.workflow_execution_id,
+    },
+  ];
 };
 
 export const attachInvestigationToEvent = async ({
@@ -127,13 +154,20 @@ export const attachInvestigationToEvent = async ({
     investigations = existing;
   }
 
-  const changedFields = pickChangedFields(
-    latest,
-    fieldsFromTriggerFeedback(latest, triggerFeedback, eventId, logger)
+  const acceptedFeedback = fieldsFromTriggerFeedback(latest, triggerFeedback, eventId, logger);
+  const changedFields = pickChangedFields(latest, acceptedFeedback.fields);
+  const severityAssessments = buildSeverityAssessments(
+    latest.severity_assessments,
+    acceptedFeedback.severity,
+    investigation
   );
 
-  // No-op only when neither the investigation list nor any reassessed field actually changed.
-  if (isEqual(investigations, existing) && Object.keys(changedFields).length === 0) {
+  // No-op only when neither the investigation list, assessment history, nor another field changed.
+  if (
+    isEqual(investigations, existing) &&
+    isEqual(severityAssessments, latest.severity_assessments ?? []) &&
+    Object.keys(changedFields).length === 0
+  ) {
     return { event_uuid: latest.event_uuid, updated: 0, ignored: 1 };
   }
 
@@ -145,6 +179,12 @@ export const attachInvestigationToEvent = async ({
     event_uuid: nextEventUuid,
     previous_event_uuid: latest.event_uuid,
     investigations,
+    severity_assessments: severityAssessments,
+    severity: materializeSeverity({
+      assessments: severityAssessments,
+      currentSeverity: latest.severity,
+      materializedAt: now,
+    }),
     workflow_execution_id: investigation.workflow_execution_id,
     ...changedFields,
   };

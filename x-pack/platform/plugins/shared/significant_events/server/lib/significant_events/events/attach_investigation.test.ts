@@ -80,6 +80,14 @@ const createEventClient = (hits: SignificantEvent[]) => {
 };
 
 describe('attachInvestigationToEvent', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-01-01T03:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('appends a new investigation entry and creates a new event version', async () => {
     const existing = createEvent({ event_uuid: 'event-1' });
     const { client, dataStreamClient } = createEventClient([existing]);
@@ -313,6 +321,14 @@ describe('attachInvestigationToEvent', () => {
     // Single version carries both the investigation entry and the trigger feedback field.
     expect(written.investigations).toEqual([investigation]);
     expect(written.severity).toBe('80-critical');
+    expect(written.severity_assessments).toEqual([
+      {
+        source: 'investigation',
+        severity: '80-critical',
+        assessed_at: investigation.completed_at,
+        workflow_execution_id: investigation.workflow_execution_id,
+      },
+    ]);
     expect(written.status).toBe('open');
     expect(written.workflow_execution_id).toBe(investigation.workflow_execution_id);
   });
@@ -343,7 +359,7 @@ describe('attachInvestigationToEvent', () => {
     expect(written.severity).toBe('80-critical');
   });
 
-  it('ignores when neither the investigation entry nor the trigger feedback fields changed', async () => {
+  it('records an unchanged severity assessment even when the investigation entry is unchanged', async () => {
     const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
     const existing = createEvent({
       event_uuid: 'event-1',
@@ -359,9 +375,81 @@ describe('attachInvestigationToEvent', () => {
       triggerFeedback: [severityFeedback('40-medium', '40-medium')],
     });
 
-    expect(result.updated).toBe(0);
-    expect(result.ignored).toBe(1);
-    expect(dataStreamClient.create).not.toHaveBeenCalled();
+    expect(result.updated).toBe(1);
+    expect(result.ignored).toBe(0);
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+    expect(written.severity).toBe('40-medium');
+    expect(written.severity_assessments).toEqual([
+      {
+        source: 'investigation',
+        severity: '40-medium',
+        assessed_at: investigation.completed_at,
+        workflow_execution_id: investigation.workflow_execution_id,
+      },
+    ]);
+  });
+
+  it('does not retain a stale investigation severity assessment', async () => {
+    const existing = createEvent({ event_uuid: 'event-1', severity: '60-high' });
+    const { client, dataStreamClient } = createEventClient([existing]);
+    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
+
+    await attachInvestigationToEvent({
+      eventClient: client,
+      eventId: 'agent-event-1',
+      investigation,
+      triggerFeedback: [severityFeedback('40-medium', '20-low')],
+    });
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+    expect(written.severity).toBe('60-high');
+    expect(written.severity_assessments).toEqual([]);
+  });
+
+  it('appends another assessment for the same workflow execution', async () => {
+    const completedAt = '2026-01-01T02:00:00.000Z';
+    const investigation = createInvestigation({ completed_at: completedAt });
+    const existing = createEvent({
+      event_uuid: 'event-1',
+      severity: '80-critical',
+      investigations: [investigation],
+      severity_assessments: [
+        {
+          source: 'investigation',
+          severity: '80-critical',
+          assessed_at: completedAt,
+          workflow_execution_id: investigation.workflow_execution_id,
+        },
+      ],
+    });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    const result = await attachInvestigationToEvent({
+      eventClient: client,
+      eventId: 'agent-event-1',
+      investigation,
+      triggerFeedback: [severityFeedback('80-critical', '80-critical')],
+    });
+
+    expect(result).toMatchObject({ updated: 1, ignored: 0 });
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+    expect(written.severity_assessments).toEqual([
+      {
+        source: 'investigation',
+        severity: '80-critical',
+        assessed_at: completedAt,
+        workflow_execution_id: investigation.workflow_execution_id,
+      },
+      {
+        source: 'investigation',
+        severity: '80-critical',
+        assessed_at: completedAt,
+        workflow_execution_id: investigation.workflow_execution_id,
+      },
+    ]);
   });
 
   it('resolves lineage: attach targets the latest event version for the given event_id', async () => {

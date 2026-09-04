@@ -20,7 +20,7 @@ interface WorkflowStep {
   with?: {
     path?: string;
     body?: { trigger_feedback?: string };
-    inputs?: { context?: { trigger_type?: string } };
+    inputs?: { context?: { trigger_type?: string; severity?: string } };
     written_rule_uuids?: string;
   };
   foreach?: string;
@@ -56,10 +56,9 @@ describe('significant events persistence workflow contracts', () => {
   });
 
   it('marks discovery-triggered investigations as automatic', () => {
-    const triggerStep = requireStep(discovery, 'trigger_investigation') as {
-      with?: { inputs?: { context?: { trigger_type?: string } } };
-    };
+    const triggerStep = requireStep(discovery, 'trigger_investigation');
     expect(triggerStep.with?.inputs?.context?.trigger_type).toBe('automatic');
+    expect(triggerStep.with?.inputs?.context?.severity).toContain('_source.severity');
   });
 
   it('stamps discovery detections only from confirmed write outcomes', () => {
@@ -68,6 +67,15 @@ describe('significant events persistence workflow contracts', () => {
     );
     expect(requireStep(discovery, 'maybe_stamp_processed').condition).toContain(
       'steps.count_written_rules.output.writtenCount > 0'
+    );
+  });
+
+  it('uses the materialized severity returned by events_write', () => {
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml).toContain(
+      'Effective severity returned by events_write after server-side materialization'
+    );
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml).toContain(
+      'required: [event_id, status, written]'
     );
   });
 

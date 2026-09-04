@@ -214,7 +214,7 @@ steps:
               rule_uuid of every detection that is done this cycle: (1) already-recorded
               known noise/false-positive that exited after the confirmation query without
               events_write, or (2) a detection whose events_write result was written: true
-              or skipped with reason existing_active_event or unchanged_outcome.
+              or skipped with reason existing_active_event.
               Failed (bulk_error) or unattempted writes (except the already-recorded-noise
               exit) must not be included.
               Used both as a hallucination guardrail (schema validation forces the agent
@@ -236,7 +236,7 @@ steps:
                 severity:
                   type: string
                   enum: ['80-critical', '60-high', '40-medium', '20-low']
-                  description: 'Severity of the event as decided by the discovery agent.'
+                  description: 'Effective severity returned by events_write after server-side materialization. Copy it exactly when present; it may differ from the submitted assessment. Omit it for a failed result that has no persisted severity.'
                 status:
                   type: string
                   enum: [open, dismissed, closed]
@@ -248,7 +248,7 @@ steps:
                   type: string
                   enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome]
                   description: 'Failure or skip reason when written is false.'
-              required: [event_id, severity, status, written]
+              required: [event_id, status, written]
         required: [written_rule_uuids, significant_events]
     on-failure:
       continue: false
@@ -472,6 +472,7 @@ steps:
                                       event_uuid: '{{ foreach.item.event_uuid }}'
                                       event_id: '{{ foreach.item.event_id }}'
                                       status: '{{ foreach.item.status }}'
+                                      severity: '{{ steps.resolve_open_event.output.hits.hits[0]._source.severity }}'
                                       causal_features: '${{ steps.resolve_open_event.output.hits.hits[0]._source.causal_features | default: [] }}'
                                       blast_radius: '${{ steps.resolve_open_event.output.hits.hits[0]._source.blast_radius | default: [] }}'
 

@@ -21,6 +21,7 @@ import {
   toCompactBulkError,
 } from '../bulk_write';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import { materializeSeverity } from '../../../lib/significant_events/events/severity_assessments';
 import {
   addsNewDetectionRules,
   extractRuleUuids,
@@ -48,6 +49,8 @@ export type EventsWriteInput = Pick<
 > & {
   event_id?: string;
   conversation_id?: string;
+  /** New assessments to append; the handler merges them with the stored assessment history. */
+  severity_assessments?: SignificantEvent['severity_assessments'];
 };
 
 export interface EventsWriteResult {
@@ -55,6 +58,7 @@ export interface EventsWriteResult {
   event_uuid: string;
   event_id: string;
   status: SignificantEvent['status'];
+  severity: SignificantEvent['severity'];
   written: true;
   /** Set when the stored title and symptom_hypothesis were preserved because this continuation
    *  introduced no new rule UUIDs — preventing identity hijack by an unrelated condition. */
@@ -65,6 +69,7 @@ export interface EventsWriteDuplicateResult {
   index: number;
   event_id: string;
   status: SignificantEvent['status'];
+  severity: SignificantEvent['severity'];
   written: false;
   skipped: true;
   reason: 'existing_active_event';
@@ -75,6 +80,7 @@ export interface EventsWriteNoOpResult {
   index: number;
   event_id: string;
   status: SignificantEvent['status'];
+  severity: SignificantEvent['severity'];
   written: false;
   skipped: true;
   reason: 'unchanged_outcome';
@@ -305,6 +311,7 @@ const resolveDedupSkips = (
           index: candidate.index,
           event_id: existingEventId,
           status: duplicate.status,
+          severity: duplicate.severity,
           written: false,
           skipped: true,
           reason: 'existing_active_event',
@@ -350,7 +357,11 @@ const buildPendingWrite = (
   latestByEventId: Map<string, SignificantEvent>,
   priorDocsByEventId: Map<string, SignificantEvent[]>
 ) => {
-  const { event_id: _explicitId, ...rest } = candidate.input;
+  const {
+    event_id: _explicitId,
+    severity_assessments: newSeverityAssessments = [],
+    ...rest
+  } = candidate.input;
   const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
   const latestEvent = latestByEventId.get(candidate.eventId);
   const isContinuation = candidate.input.event_id !== undefined;
@@ -369,6 +380,17 @@ const buildPendingWrite = (
 
   // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
   const status = candidate.input.status;
+
+  let severityAssessments = latestEvent?.severity_assessments;
+  let severity = candidate.input.severity;
+  if (newSeverityAssessments.length > 0) {
+    severityAssessments = [...(severityAssessments ?? []), ...newSeverityAssessments];
+    severity = materializeSeverity({
+      assessments: severityAssessments,
+      currentSeverity: latestEvent?.severity ?? candidate.input.severity,
+      materializedAt: timestamp,
+    });
+  }
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to
   // prevent identity hijack — the scenario where an unrelated condition's narrative replaces the
@@ -400,11 +422,12 @@ const buildPendingWrite = (
       event_id: candidate.eventId,
       previous_event_uuid: latestEvent?.event_uuid,
       investigations: latestEvent?.investigations,
+      severity_assessments: severityAssessments,
       signals,
       stream_names: episodeContext.streamNames,
       causal_features: episodeContext.causalFeatures,
       blast_radius: episodeContext.blastRadius,
-      severity: candidate.input.severity,
+      severity,
       status,
     },
   };
@@ -416,7 +439,7 @@ const applyBulkResults = (
   createResults: BulkResponseItem[],
   results: BulkResults
 ): void => {
-  pendingWrites.forEach(({ candidate, status, narrativePreserved }, responseIndex) => {
+  pendingWrites.forEach(({ candidate, status, narrativePreserved, document }, responseIndex) => {
     const detail = createResults[responseIndex];
     if (detail.error) {
       results[candidate.index] = {
@@ -433,6 +456,7 @@ const applyBulkResults = (
         event_uuid: candidate.eventUuid,
         event_id: candidate.eventId,
         status,
+        severity: document.severity,
         written: true,
       };
       if (narrativePreserved) {
@@ -454,8 +478,9 @@ const applyBulkResults = (
  *  - Otherwise write a new event with the caller-supplied status.
  *
  * Snapshot-mode items (`event_id` present):
- *  - Skip the write (`unchanged_outcome`) when the latest stored version has the same severity and
- *    status, avoiding pure-churn duplicates.
+ *  - Without a new severity assessment, skip the write (`unchanged_outcome`) when the latest
+ *    stored version has the same severity and status, avoiding pure-churn duplicates.
+ *  - Discovery-sourced writes always append an assessment and materialize the effective severity.
  *  - Otherwise write a new version of the identified event, persisting the caller-supplied status.
  *    Merges signals and topology with prior versions when history is found.
  *    When no new rule UUIDs are introduced, the stored `title` and `symptom_hypothesis` are
@@ -487,6 +512,7 @@ export async function eventsWriteBulkHandler({
   const remaining = toWrite.filter((candidate) => {
     if (
       candidate.mode === 'snapshot' &&
+      (candidate.input.severity_assessments?.length ?? 0) === 0 &&
       shouldSkipAsNoOp(
         latestByEventId.get(candidate.eventId),
         candidate,
@@ -497,6 +523,7 @@ export async function eventsWriteBulkHandler({
         index: candidate.index,
         event_id: candidate.eventId,
         status: candidate.input.status,
+        severity: latestByEventId.get(candidate.eventId)?.severity ?? candidate.input.severity,
         written: false,
         skipped: true,
         reason: 'unchanged_outcome',

@@ -91,6 +91,7 @@ describe('eventsWriteHandler', () => {
     expect(eventClient.bulkCreate.mock.calls[0][0][0].symptom_hypothesis).toBe(
       baseInput.symptom_hypothesis
     );
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity_assessments).toBeUndefined();
     expect(result.written).toBe(true);
     if (result.written) {
       expect(result.event_id).toBe('checkout__latency-abc12345');
@@ -878,6 +879,201 @@ describe('eventsWriteBulkHandler — continuation status', () => {
       expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
     }
   );
+});
+
+describe('eventsWriteBulkHandler — discovery severity assessments', () => {
+  const now = '2026-01-02T00:00:00.000Z';
+  const investigationAssessment = {
+    source: 'investigation' as const,
+    severity: '40-medium' as const,
+    assessed_at: '2026-01-01T12:00:00.001Z',
+    workflow_execution_id: 'investigation-1',
+  };
+  const withDiscoveryAssessment = (input: EventsWriteInput): EventsWriteInput => ({
+    ...input,
+    severity_assessments: [
+      {
+        source: 'discovery',
+        severity: input.severity,
+        assessed_at: now,
+      },
+    ],
+  });
+  const ruleSignal = (ruleUuid: string) =>
+    ({
+      type: 'detection',
+      stream_name: 'logs.checkout',
+      description: `${ruleUuid} detected an issue`,
+      verdict: 'confirms',
+      metadata: {
+        detection_id: `detection-${ruleUuid}`,
+        rule_uuid: ruleUuid,
+        change_point_type: 'spike',
+        p_value: 0.01,
+      },
+    } as SignalEntry);
+
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date(now));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('adds an assessment to a new event and returns the materialized severity', async () => {
+    const eventClient = makeEventClient();
+
+    const [result] = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [withDiscoveryAssessment({ ...baseInput, event_id: 'event-1' })],
+    });
+
+    expect(result).toMatchObject({ written: true, severity: '60-high' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity_assessments).toEqual([
+      { source: 'discovery', severity: '60-high', assessed_at: now },
+    ]);
+  });
+
+  it('appends identical discovery assessments instead of applying the no-op guard', async () => {
+    const stored = makeStoredEvent('event-1', {
+      severity_assessments: [
+        {
+          source: 'discovery',
+          severity: '60-high',
+          assessed_at: '2026-01-01T23:30:00.000Z',
+        },
+      ],
+    });
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [withDiscoveryAssessment({ ...baseInput, event_id: 'event-1' })],
+    });
+
+    expect(result).toMatchObject({ written: true, severity: '60-high' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity_assessments).toHaveLength(2);
+  });
+
+  it('preserves a fresh investigation severity while retaining the discovery assessment', async () => {
+    const stored = makeStoredEvent('event-1', {
+      severity: '40-medium',
+      severity_assessments: [investigationAssessment],
+    });
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        withDiscoveryAssessment({ ...baseInput, event_id: 'event-1', severity: '80-critical' }),
+      ],
+    });
+
+    expect(result).toMatchObject({ written: true, severity: '40-medium' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0]).toMatchObject({
+      severity: '40-medium',
+      severity_assessments: [
+        investigationAssessment,
+        { source: 'discovery', severity: '80-critical', assessed_at: now },
+      ],
+    });
+  });
+
+  it('does not invalidate investigation assessments for a new confirmed rule', async () => {
+    const stored = makeStoredEvent('event-1', {
+      severity: '40-medium',
+      signals: [ruleSignal('rule-1')],
+      severity_assessments: [investigationAssessment],
+    });
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        withDiscoveryAssessment({
+          ...baseInput,
+          event_id: 'event-1',
+          severity: '80-critical',
+          signals: [ruleSignal('rule-2')],
+        }),
+      ],
+    });
+
+    expect(result).toMatchObject({ written: true, severity: '40-medium' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity_assessments).toEqual([
+      investigationAssessment,
+      { source: 'discovery', severity: '80-critical', assessed_at: now },
+    ]);
+  });
+
+  it('does not invalidate investigation assessments when reopening', async () => {
+    const stored = makeStoredEvent('event-1', {
+      status: 'closed',
+      severity: '40-medium',
+      severity_assessments: [investigationAssessment],
+    });
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        withDiscoveryAssessment({
+          ...baseInput,
+          event_id: 'event-1',
+          severity: '60-high',
+          status: 'open',
+        }),
+      ],
+    });
+
+    expect(result).toMatchObject({ written: true, severity: '40-medium', status: 'open' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0]).toMatchObject({
+      severity_assessments: [
+        investigationAssessment,
+        { source: 'discovery', severity: '60-high', assessed_at: now },
+      ],
+    });
+  });
+
+  it('materializes severity when discovery resolves an event', async () => {
+    const stored = makeStoredEvent('event-1', {
+      severity: '60-high',
+      severity_assessments: [investigationAssessment],
+    });
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        withDiscoveryAssessment({
+          ...baseInput,
+          event_id: 'event-1',
+          severity: '20-low',
+          status: 'closed',
+        }),
+      ],
+    });
+
+    expect(result).toMatchObject({ written: true, severity: '40-medium', status: 'closed' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0]).toMatchObject({
+      severity: '40-medium',
+      severity_assessments: [
+        investigationAssessment,
+        { source: 'discovery', severity: '20-low', assessed_at: now },
+      ],
+    });
+  });
 });
 
 describe('eventsWriteItemSchema', () => {
