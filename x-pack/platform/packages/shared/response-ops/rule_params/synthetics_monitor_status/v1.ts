@@ -52,6 +52,13 @@ const StatusRuleConditionSchema = schema.object({
   ]),
   includeRetests: schema.maybe(schema.boolean()),
   alertOnNoData: schema.maybe(schema.boolean()),
+  pendingThreshold: schema.maybe(
+    schema.number({
+      defaultValue: 2,
+      min: 1,
+      max: 100,
+    })
+  ),
   recoveryStrategy: schema.maybe(
     schema.oneOf([schema.literal('firstUp'), schema.literal('conditionNotMet')])
   ),

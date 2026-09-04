@@ -290,6 +290,35 @@ describe('message_utils', () => {
         'monitor.tags': monitorTags,
       });
     });
+
+    it('uses pendingCount as evaluation.value when provided', () => {
+      const monitorSummary = {
+        monitorId,
+        monitorName,
+        monitorType: 'http',
+        monitorUrl,
+        configId: monitorId,
+        locationId,
+        locationName,
+        hostName: monitorAgentName,
+        status: 'pending',
+        reason: 'Monitor is pending',
+        monitorTags,
+      } as any;
+
+      const result = getMonitorAlertDocument(
+        monitorSummary,
+        [locationName],
+        [monitorSummary.locationId],
+        false,
+        2,
+        undefined,
+        2
+      );
+
+      expect(result['kibana.alert.evaluation.threshold']).toBe(2);
+      expect(result['kibana.alert.evaluation.value']).toBe(2);
+    });
   });
 
   describe('formatStepInformation', () => {

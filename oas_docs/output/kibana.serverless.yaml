@@ -118080,6 +118080,10 @@ components:
                   type: boolean
                 locationsThreshold:
                   type: number
+                pendingThreshold:
+                  maximum: 100
+                  minimum: 1
+                  type: number
                 recoveryStrategy:
                   enum:
                     - firstUp
