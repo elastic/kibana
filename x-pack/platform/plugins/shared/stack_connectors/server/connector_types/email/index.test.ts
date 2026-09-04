@@ -1204,6 +1204,7 @@ describe('execute()', () => {
 
     const executorOptionsWithHTTP = {
       ...executorOptions,
+      config: { ...executorOptions.config, service: 'gmail' },
       source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
     };
 
