@@ -459,17 +459,59 @@ The fixer deliberately leaves every created PR with only the `flaky-test-fixer` 
    - **`backport:version` plus the matching `vX.Y.Z` labels** — only the named release branches contain the affected code and can take the patch. Map branch names to their current version labels using `versions.json`.
    - **No backport label** — applicability is uncertain or any target would require a materially adapted fix. Never guess.
 6. Add the release-note and confident backport labels in the same `add-labels` safe output as the terminal verdict when possible.
-7. Leave exactly one short rationale for developers. If the verdict already requires a skipped or passed-after-iteration comment, fold the label rationale into that comment. Otherwise post only:
+7. Leave exactly one short rationale for developers. If the verdict already requires a skipped or passed-after-iteration comment, fold the label rationale into that comment. Otherwise post only the label-rationale comment. Keep a very short visible summary; put the reasoning in collapsed `<details>` blocks (GitHub collapses these by default — do not set `open`).
+
+   **Visible summary** (1–3 sentences total, including any verdict prose): name the labels that were applied, e.g. `Applied \`release_note:skip\` and \`backport:all-open\`.` When no backport label was safe, say so in one clause (`Applied \`release_note:skip\`; no backport label because <reason>.`). Do not list per-version bullets in the visible body. For a skipped verdict, also name the missed gate in one sentence. When citing the fixer's local Jest loops, report `<passes>/<runs>` (e.g. 25/25), not failure counts.
+
+   Then append only the sections that apply, each in its own `<details>` block, with a blank line after `</summary>` so Markdown inside renders:
+
+   - **Why the flaky test runner wasn't used** — include only on a `skipped` verdict. Omit it when the runner did run (`passed`, `failed`, `inconclusive`) and on duplicates.
+   - **How release-note and backport labels were chosen** — include only when this run actually chose those labels (`passed` or `skipped`). Omit it for `failed`, `inconclusive`, and duplicate PRs. Include it even when no backport label was applied: the bullets must then state the uncertainty per version.
+
+   First-run `passed` (runner ran; no skip section):
 
    ```markdown
    ### 🏷️ Release and backport labels
+
+   The targeted test held 30/30. Applied `release_note:skip` and `backport:all-open`.
+
+   <details>
+   <summary>How release-note and backport labels were chosen</summary>
+
    Applied `<release-note label>` because <one very short reason>.
 
    - `<version>` → <one very short sentence justifying its backport decision>.
    - `<version>` → <one very short sentence justifying its backport decision>.
+
+   </details>
    ```
 
-   Include exactly one bullet for every active version checked, using its current `vX.Y.Z` label from `versions.json`. Each bullet must start with the version, followed by `→` and one very short sentence explaining why that version is included, excluded, or uncertain. Do not add introductory prose, nested bullets, or details to the backport list. If no backport label was safe, the bullets must state the uncertainty per version. Do not add this guidance to the PR body.
+   `skipped` (both sections):
+
+   ```markdown
+   ### ⏭️ Flaky-fix verification skipped
+
+   This is a Jest-only change, so required CI is the whole verdict. Applied `release_note:skip` and `backport:all-open`.
+
+   <details>
+   <summary>Why the flaky test runner wasn't used</summary>
+
+   The `/flaky` runner accepts only FTR and Scout configs. This PR only touches `<file>`.
+
+   </details>
+
+   <details>
+   <summary>How release-note and backport labels were chosen</summary>
+
+   Applied `<release-note label>` because <one very short reason>.
+
+   - `<version>` → <one very short sentence justifying its backport decision>.
+   - `<version>` → <one very short sentence justifying its backport decision>.
+
+   </details>
+   ```
+
+   Include exactly one bullet for every active version checked, using its current `vX.Y.Z` label from `versions.json`. Each bullet must start with the version, followed by `→` and one very short sentence explaining why that version is included, excluded, or uncertain. Do not add introductory prose, nested bullets, or details to the backport list. Do not add this guidance to the PR body.
 
 This work runs after the fix exists and has been validated, so a backport-analysis failure must never change a green verdict or hold the PR in draft: still apply the release-note label, leave the PR without a backport label, explain the uncertainty in the short rationale, and continue opening it for review.
 
@@ -482,8 +524,8 @@ This work runs after the fix exists and has been validated, so a backport-analys
 An update comment is the kickoff rationale, a terminal verdict, or the required release/backport-label rationale. Post one **only when it is strictly necessary and adds real value** a reader can't already get from the `/flaky` command, the runner's result comment, the pushed commit, or the labels; otherwise post nothing. Shape:
 
 1. A `### <emoji> <heading>` first line: the status heading from the table below.
-2. One to three prose sentences: what happened and, for a verdict, the single most useful next step. A green label rationale additionally includes the required per-version backport bullets from [Release-note and backport labels](#release-note-and-backport-labels). Don't write a full analysis. For any non-green verdict (`failed` or `inconclusive`), state **why** the run wasn't green — and when the red comes from unrelated tests that merely share the config (lane pollution not caused by this PR), say so explicitly, naming the failing test(s), so a reviewer doesn't misread it as the fix failing.
-3. Add a short `<details><summary>See details</summary>` block only when a reader genuinely needs a specific you can't fit above (e.g. a concrete recommended fix, or which unrelated test failed). Keep it terse; omit it otherwise.
+2. One to three prose sentences: what happened and, for a verdict, the single most useful next step. For a green verdict, name the labels applied (or that no backport label was applied) in that summary — do not put the per-version bullets here. Don't write a full analysis. For any non-green verdict (`failed` or `inconclusive`), state **why** the run wasn't green — and when the red comes from unrelated tests that merely share the config (lane pollution not caused by this PR), say so explicitly, naming the failing test(s), so a reviewer doesn't misread it as the fix failing.
+3. After the summary, append the collapsed sections from [Release-note and backport labels](#release-note-and-backport-labels) that apply (`Why the flaky test runner wasn't used` only when skipped; `How release-note and backport labels were chosen` only when this run chose those labels). Add a further short `<details><summary>See details</summary>` block only when a reader genuinely needs a specific you can't fit above (e.g. a concrete recommended fix, or which unrelated test failed). Keep it terse; omit it otherwise.
 
 A green terminal verdict always needs the short release/backport-label rationale described above. Fold it into the skipped or passed-after-iteration verdict comment when one is already required; for a first-run `passed` verdict, post only the label-rationale comment. These are the allowed comment shapes:
 
@@ -496,7 +538,7 @@ A green terminal verdict always needs the short release/backport-label rationale
 | Passed after >1 flaky run (an earlier fix didn't hold and you pushed a revision) | `### ✅ Flaky-fix verified` |
 | Release/backport labels (routine first-run pass) | `### 🏷️ Release and backport labels` |
 
-**Passed after more than one iteration.** When the verdict is `passed` **and** `triggeredByBot` (from `flaky-run-count.json`) is greater than 1 — i.e. an earlier fix didn't hold and you pushed a revised fix that then held — post one short comment describing, in one sentence, what the final revision changed to make the test stable, then add the release-note rationale and per-version backport bullets. A first-run pass instead gets only the label-rationale comment.
+**Passed after more than one iteration.** When the verdict is `passed` **and** `triggeredByBot` (from `flaky-run-count.json`) is greater than 1 — i.e. an earlier fix didn't hold and you pushed a revised fix that then held — post one short comment describing, in one sentence, what the final revision changed to make the test stable, name the labels applied in the visible summary, then add the collapsed label-rationale section. A first-run pass instead gets only the label-rationale comment.
 
 ## Flaky test invocation comment
 
@@ -515,7 +557,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
 
 3. **Screen the patch against the Fix guardrails.** Check `pr-diff.txt` against the [Fix guardrails](#fix-guardrails) before spending any runs: a guardrail-violating fix — e.g. a retry or error-tolerance loop anywhere (test, framework, or application code), or a framework internal newly exposed to enable the fix — must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. Derive a compliant fix, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot derive a compliant fix, add `flaky-fix-check:failed`, post a failed comment naming the violated guardrail, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
 
-4. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, complete [Release-note and backport labels](#release-note-and-backport-labels), post one skipped comment (see [Update comment](#update-comment)) explaining which gate the fix missed and the label rationale, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
+4. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, complete [Release-note and backport labels](#release-note-and-backport-labels), post one skipped comment (see [Update comment](#update-comment)) whose visible summary names which gate the fix missed and the labels applied, with the skip and label reasoning in the collapsed sections, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
 
    - **Runner-supported test.** The `/flaky` runner accepts only **FTR** and **Scout** configs. If the fix touches only a **Jest** test (`*.test.ts(x)` not under a `test/scout*/` or FTR `test/` config), it can't help: the fixer already verifies Jest fixes by local repetition.
    - **A fix repeated runs can actually validate.** The required CI already catches deterministic failures; extra runs add signal only when one pass isn't a reliable verdict: when the test still has a timing/ordering/concurrency element after the fix. Trigger a run only when the fix *mitigates* a non-deterministic cause (a race, a wait/timeout, ordering, shared-state timing) whose stability is confirmed by holding across many runs.
@@ -527,7 +569,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    - **Reuse first:** if a previous `/flaky` comment on the PR already names the config(s) — e.g. an earlier iteration recorded them in `pr-issue-comments.json` — reuse those exact config paths so runs stay consistent, and skip the file-tree walk below (only add a config if your latest change touches files under a different one).
    - **FTR:** walk up from each changed test file to the nearest leaf `config*.ts` (skip `*.base.ts`); verify it actually runs the file via `testFiles` / `loadTestFile` (directly or via glob). If none is found by walking up, search for the config that includes the file.
    - **Scout:** walk up to the nearest `playwright.config.ts` or `parallel.playwright.config.ts` (prefer `parallel` when the path contains `parallel_tests/`); verify it runs the file.
-   - Deduplicate; include each config once. If you cannot resolve any config, add `flaky-fix-check:skipped`, complete [Release-note and backport labels](#release-note-and-backport-labels), post one skipped comment (see [Update comment](#update-comment)) asking a human to identify the config and giving the label rationale, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
+   - Deduplicate; include each config once. If you cannot resolve any config, add `flaky-fix-check:skipped`, complete [Release-note and backport labels](#release-note-and-backport-labels), post one skipped comment (see [Update comment](#update-comment)) asking a human to identify the config in the visible summary, with the skip and label reasoning in the collapsed sections, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
    - If the PR touches a page object in one of the Scout packages (e.g., `@kbn/scout`, `@kbn/scout-oblt`, etc.) determine if it is worthwhile to run extra configs to test the fix is stable and won't create flakiness.
 
 6. **Trigger the run.** Confirm `triggeredByBot` in `flaky-run-count.json` is below 6 (this precomputed count already ignores developer-posted `/flaky` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
@@ -596,7 +638,7 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 ## Workflow guardrails
 
 - Never exceed 6 total `/flaky` triggers of your own for this PR; use the precomputed `triggeredByBot` in `flaky-run-count.json` (kibanamachine-authored only) rather than re-tallying, so developer-triggered `/flaky` comments don't count toward this.
-- Comments are costly noise: post one only when strictly necessary and genuinely useful, keep the prose summary to 1–3 sentences plus the required per-version backport bullets (any extra depth goes in a terse `<details>` block, per [Update comment](#update-comment)), and prefer none during verification. A green terminal verdict gets exactly one label-rationale note, folded into an existing skipped or passed-after-iteration comment when possible.
+- Comments are costly noise: post one only when strictly necessary and genuinely useful, keep the prose summary to 1–3 sentences (skip reason, per-version backport bullets, and any extra depth go in the collapsed `<details>` blocks, per [Update comment](#update-comment)), and prefer none during verification. A green terminal verdict gets exactly one label-rationale note, folded into an existing skipped or passed-after-iteration comment when possible.
 - The `/flaky` command must be its own comment and start with `/flaky ` (it is consumed by `.github/workflows/trigger-flaky.yml`).
 - Never include the literal phrase `Flaky Test Runner Stats` in any comment you post — that header is how this workflow detects the runner's results comment, and reusing it would make the workflow re-trigger on its own comment.
 - Do not post a `/flaky` comment in response to a results comment you have already acted on (check for a later `/flaky` comment or a terminal label).
