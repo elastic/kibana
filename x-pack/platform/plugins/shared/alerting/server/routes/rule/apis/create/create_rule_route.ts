@@ -115,7 +115,12 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 actions,
                 systemActions,
               }),
-              options: { id: params?.id },
+              options: {
+                id: params?.id,
+                ...(createRuleData.clone_api_key !== undefined
+                  ? { cloneApiKey: createRuleData.clone_api_key }
+                  : {}),
+              },
               ...(createRuleData.template_id ? { templateId: createRuleData.template_id } : {}),
             })) as Rule<RuleParamsV1>;
 
