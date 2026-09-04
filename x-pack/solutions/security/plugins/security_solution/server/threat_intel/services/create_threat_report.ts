@@ -68,6 +68,11 @@ export const createThreatReport = async (
   // but a global-tagged seed is everyone's canonical copy.
   const existing = await esClient.search({
     index: THREAT_REPORTS_INDEX,
+    // The reports index is created lazily on first write, so on the first
+    // ingest in a fresh deployment or space this precheck would otherwise throw
+    // `index_not_found_exception` and 500 the very request that would have
+    // created it. A missing index means "no duplicate", which is this path.
+    ignore_unavailable: true,
     size: 1,
     _source: false,
     query: {

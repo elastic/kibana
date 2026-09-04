@@ -65,6 +65,20 @@ describe('createThreatReport', () => {
     expect(esClient.create).not.toHaveBeenCalled();
   });
 
+  it('ignores a missing reports index on the dedup precheck so the first ingest still writes', async () => {
+    // The reports index is created lazily on first write. Without
+    // ignore_unavailable the precheck would throw index_not_found_exception and
+    // 500 the very request that would have created the index.
+    const esClient = buildEsClient();
+    const result = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
+
+    expect(esClient.search.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ ignore_unavailable: true })
+    );
+    expect(result.status).toBe('ingested');
+    expect(esClient.create).toHaveBeenCalledTimes(1);
+  });
+
   it('reports a duplicate when it loses the create race (409)', async () => {
     // Both requests pass the precheck; only one create can win.
     const esClient = buildEsClient();
