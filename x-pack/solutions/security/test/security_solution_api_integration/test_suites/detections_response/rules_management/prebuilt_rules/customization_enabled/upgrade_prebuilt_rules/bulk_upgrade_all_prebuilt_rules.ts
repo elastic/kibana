@@ -487,6 +487,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_id: 'rule_1',
             reason: 'CONFLICT',
             conflict: 'SOLVABLE',
+            rule_type_change: { current: 'query', target: 'saved_query' },
           })
         );
         expect(response.results.updated).toContainEqual(
