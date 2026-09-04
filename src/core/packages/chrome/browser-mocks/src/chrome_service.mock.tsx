@@ -14,12 +14,14 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ReactNode } from 'react';
 import type {
+  AppHeaderTitle,
   ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
   GlobalSearchConfig,
 } from '@kbn/core-chrome-browser';
 import type {
+  InlineAppHeaderState,
   InternalChromeSetup,
   InternalChromeStart,
 } from '@kbn/core-chrome-browser-internal-types';
@@ -40,8 +42,11 @@ const createStartContractMock = () => {
   const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
   const nextProjectPickerState$ = new BehaviorSubject<ReactNode>(null);
   const nextAppHeaderState$ = new BehaviorSubject<ChromeAppHeaderConfig | undefined>(undefined);
-  const inlineAppHeaderState$ = new BehaviorSubject(false);
+  const inlineAppHeaderState$ = new BehaviorSubject<InlineAppHeaderState | undefined>(undefined);
+  const docTitleBase = 'Elastic';
+  const docTitleParts$ = new BehaviorSubject<readonly string[]>([docTitleBase]);
   let appHeaderRegistrationId = 0;
+  let inlineAppHeaderRegistrationId = 0;
 
   const sidebar = sidebarServiceMock.createStartContract();
 
@@ -69,6 +74,7 @@ const createStartContractMock = () => {
         management: {},
         catalogue: {},
       }),
+      docTitleParts$: docTitleParts$ as unknown as DeeplyMockedKeys<Observable<readonly string[]>>,
     }),
     sidebar: lazyObject(sidebar),
     navLinks: lazyObject({
@@ -83,8 +89,13 @@ const createStartContractMock = () => {
       get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     }),
     docTitle: lazyObject({
-      change: jest.fn(),
-      reset: jest.fn(),
+      change: jest.fn((title: string | string[]) => {
+        const parts = (Array.isArray(title) ? title : [title]).filter(Boolean);
+        docTitleParts$.next([...parts, docTitleBase]);
+      }),
+      reset: jest.fn(() => {
+        docTitleParts$.next([docTitleBase]);
+      }),
     }),
     navControls: lazyObject({
       registerLeft: jest.fn(),
@@ -177,7 +188,22 @@ const createStartContractMock = () => {
       }),
       inlineAppHeader: lazyObject({
         get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
-        set: jest.fn((value: boolean) => inlineAppHeaderState$.next(value)),
+        register: jest.fn((title?: AppHeaderTitle) => {
+          const registrationId = ++inlineAppHeaderRegistrationId;
+          inlineAppHeaderState$.next(title === undefined ? {} : { title });
+          return {
+            update: (nextTitle?: AppHeaderTitle) => {
+              if (registrationId === inlineAppHeaderRegistrationId) {
+                inlineAppHeaderState$.next(nextTitle === undefined ? {} : { title: nextTitle });
+              }
+            },
+            unregister: () => {
+              if (registrationId === inlineAppHeaderRegistrationId) {
+                inlineAppHeaderState$.next(undefined);
+              }
+            },
+          };
+        }),
       }),
       appHeader: lazyObject({
         get$: jest.fn().mockReturnValue(nextAppHeaderState$),

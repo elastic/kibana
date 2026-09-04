@@ -14,6 +14,7 @@ import type { ChromeDocTitle } from '@kbn/core-chrome-browser';
 
 export interface InternalChromeDocTitleSetup {
   title$: Observable<string>;
+  titleParts$: Observable<readonly string[]>;
 }
 
 interface SetupDeps {
@@ -28,14 +29,19 @@ export class DocTitleService {
   private document?: { title: string };
   private baseTitle?: string;
   private titleSubject = new ReplaySubject<string>(1);
+  private titlePartsSubject = new ReplaySubject<readonly string[]>(1);
 
   public setup({ document }: SetupDeps): InternalChromeDocTitleSetup {
     this.document = document;
     this.baseTitle = document.title;
     this.titleSubject.next(this.baseTitle);
+    this.titlePartsSubject.next([this.baseTitle]);
 
     return {
       title$: this.titleSubject.asObservable().pipe(distinctUntilChanged()),
+      titleParts$: this.titlePartsSubject
+        .asObservable()
+        .pipe(distinctUntilChanged(areTitlePartsEqual)),
     };
   }
 
@@ -55,14 +61,19 @@ export class DocTitleService {
   }
 
   private applyTitle(title: string | string[]) {
-    const rendered = this.render(title);
+    const parts = this.getTitleParts(title);
+    const rendered = parts.join(titleSeparator);
     this.document!.title = rendered;
     this.titleSubject.next(rendered);
+    this.titlePartsSubject.next(parts);
   }
 
-  private render(title: string | string[]) {
+  private getTitleParts(title: string | string[]): string[] {
     const parts = [...(isString(title) ? [title] : title), this.baseTitle];
     // ensuring compat with legacy that might be passing nested arrays
-    return compact(flattenDeep(parts)).join(titleSeparator);
+    return compact(flattenDeep(parts));
   }
 }
+
+const areTitlePartsEqual = (left: readonly string[], right: readonly string[]): boolean =>
+  left.length === right.length && left.every((part, index) => part === right[index]);

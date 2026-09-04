@@ -8,9 +8,17 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { render, fireEvent, act } from '@testing-library/react';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import type { ChromeBreadcrumb, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
-import { HeaderPageAnnouncer } from './header_page_announcer';
+import { ChromeNextPageAnnouncer, HeaderPageAnnouncer } from './header_page_announcer';
+import {
+  getDeepestActiveNavigationTitle,
+  normalizeAppHeaderTitle,
+  resolveChromeNextAnnouncement,
+} from './resolve_chrome_next_announcement';
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -158,6 +166,351 @@ describe('HeaderPageAnnouncer', () => {
     flyoutButton.focus();
 
     skipLink.focus = jest.fn();
+    fireEvent.keyDown(window, { key: 'Tab' });
+
+    expect(skipLink.focus).not.toHaveBeenCalled();
+  });
+});
+
+const createNavNode = (
+  id: string,
+  title: string,
+  extras: Partial<ChromeProjectNavigationNode> = {}
+): ChromeProjectNavigationNode => ({
+  id,
+  path: id,
+  title,
+  ...extras,
+});
+
+describe('resolveChromeNextAnnouncement', () => {
+  it('normalizes string and editable titles', () => {
+    expect(normalizeAppHeaderTitle('  Dashboards  ')).toBe('Dashboards');
+    expect(normalizeAppHeaderTitle({ text: '  Name  ', onSave: jest.fn() })).toBe('Name');
+    expect(
+      normalizeAppHeaderTitle({ text: '  ', placeholder: '  Untitled  ', onSave: jest.fn() })
+    ).toBe('Untitled');
+    expect(normalizeAppHeaderTitle('   ')).toBeUndefined();
+  });
+
+  it('selects one deepest navigation title and ignores breadcrumbStatus', () => {
+    expect(
+      getDeepestActiveNavigationTitle([
+        [
+          createNavNode('root', 'Observability'),
+          createNavNode('leaf', 'Workflows', { breadcrumbStatus: 'hidden' }),
+        ],
+      ])
+    ).toBe('Workflows');
+  });
+
+  it('does not join the full active navigation path', () => {
+    expect(
+      resolveChromeNextAnnouncement({
+        activeNodes: [[createNavNode('root', 'Observability'), createNavNode('leaf', 'Alerts')]],
+      })
+    ).toBe('Alerts');
+  });
+
+  it('uses only the first document-title segment so breadcrumb-style titles do not re-announce', () => {
+    expect(
+      resolveChromeNextAnnouncement({
+        docTitleParts: ['SLOs', 'Observability', 'Elastic'],
+        activeNodes: [[createNavNode('root', 'Observability'), createNavNode('leaf', 'SLOs')]],
+      })
+    ).toBe('SLOs');
+  });
+
+  it('keeps a document-title part that contains the display separator', () => {
+    expect(
+      resolveChromeNextAnnouncement({
+        docTitleParts: ['CPU - Memory', 'Elastic'],
+      })
+    ).toBe('CPU - Memory');
+  });
+
+  it('falls through a brand-only or empty first document-title part to the navigation title', () => {
+    expect(
+      resolveChromeNextAnnouncement({
+        docTitleParts: ['Elastic'],
+        activeNodes: [[createNavNode('leaf', 'Workflows')]],
+      })
+    ).toBe('Workflows');
+    expect(
+      resolveChromeNextAnnouncement({
+        docTitleParts: ['  ', 'Elastic'],
+        activeNodes: [[createNavNode('leaf', 'Workflows')]],
+      })
+    ).toBe('Workflows');
+  });
+});
+
+describe('ChromeNextPageAnnouncer', () => {
+  const flushAnnouncement = () => {
+    act(() => {
+      jest.runAllTimers();
+    });
+  };
+
+  const createHarness = () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const deps = createMockChromeComponentsDeps();
+    const currentLocation$ = deps.application.currentLocation$ as BehaviorSubject<string>;
+    const docTitleParts$ = chrome.componentDeps.docTitleParts$ as unknown as BehaviorSubject<
+      readonly string[]
+    >;
+    const navigation$ = new BehaviorSubject<{ activeNodes: ChromeProjectNavigationNode[][] }>({
+      activeNodes: [],
+    });
+    const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+
+    chrome.project.getNavigation$.mockReturnValue(navigation$ as never);
+    chrome.project.getBreadcrumbs$.mockReturnValue(breadcrumbs$);
+    docTitleParts$.next(['Elastic']);
+
+    const renderAnnouncer = () =>
+      render(
+        <TestChromeProviders chrome={chrome} deps={deps}>
+          <ChromeNextPageAnnouncer />
+        </TestChromeProviders>
+      );
+
+    return {
+      chrome,
+      deps,
+      currentLocation$,
+      docTitleParts$,
+      navigation$,
+      breadcrumbs$,
+      renderAnnouncer,
+    };
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('lets an inline title win over registered, document, and navigation titles', () => {
+    const { chrome, docTitleParts$, navigation$, renderAnnouncer } = createHarness();
+    chrome.next.appHeader.set({ title: 'Registered' });
+    chrome.next.inlineAppHeader.register('Inline');
+    docTitleParts$.next(['Document title', 'Elastic']);
+    navigation$.next({
+      activeNodes: [[createNavNode('root', 'Observability')]],
+    });
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+
+    expect(getByLabelText('Page change announcements').textContent).toBe('Inline');
+  });
+
+  it('does not append Elastic or a custom brand suffix', () => {
+    const { chrome, deps, renderAnnouncer } = createHarness();
+    chrome.next.inlineAppHeader.register('SLOs');
+    act(() => {
+      deps.customBranding.customBranding$.next({ pageTitle: 'Kibana' });
+    });
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+
+    expect(getByLabelText('Page change announcements').textContent).toBe('SLOs');
+  });
+
+  it('does not expose a registered or fallback title while updating an inline title', () => {
+    const { chrome, docTitleParts$, renderAnnouncer } = createHarness();
+    chrome.next.appHeader.set({ title: 'Registered' });
+    const inline = chrome.next.inlineAppHeader.register('First');
+    docTitleParts$.next(['Document title', 'Elastic']);
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+    const announcer = getByLabelText('Page change announcements');
+    expect(announcer).toHaveTextContent('First');
+
+    act(() => {
+      inline.update('Second');
+    });
+    flushAnnouncement();
+
+    expect(announcer).toHaveTextContent('Second');
+    expect(announcer).not.toHaveTextContent('Registered');
+    expect(announcer).not.toHaveTextContent('Document title');
+  });
+
+  it('uses editable inline title text, then placeholder', () => {
+    const { chrome, renderAnnouncer } = createHarness();
+    const inline = chrome.next.inlineAppHeader.register({
+      text: 'Named dashboard',
+      placeholder: 'Untitled dashboard',
+      onSave: jest.fn(),
+    });
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+    const announcer = getByLabelText('Page change announcements');
+    expect(announcer).toHaveTextContent('Named dashboard');
+
+    act(() => {
+      inline.update({ text: '  ', placeholder: 'Untitled dashboard', onSave: jest.fn() });
+    });
+    flushAnnouncement();
+
+    expect(announcer).toHaveTextContent('Untitled dashboard');
+  });
+
+  it('suppresses a registered title while an inline loading header is mounted', () => {
+    const { chrome, docTitleParts$, renderAnnouncer } = createHarness();
+    chrome.next.appHeader.set({ title: 'Registered' });
+    chrome.next.inlineAppHeader.register();
+    docTitleParts$.next(['Document page', 'Elastic']);
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+
+    expect(getByLabelText('Page change announcements')).toHaveTextContent('Document page');
+  });
+
+  it('lets a registered title win when no inline header is mounted', () => {
+    const { chrome, docTitleParts$, navigation$, renderAnnouncer } = createHarness();
+    chrome.next.appHeader.set({ title: 'Registered' });
+    docTitleParts$.next(['Document title', 'Elastic']);
+    navigation$.next({
+      activeNodes: [[createNavNode('root', 'Observability')]],
+    });
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+
+    expect(getByLabelText('Page change announcements')).toHaveTextContent('Registered');
+  });
+
+  it('lets a descriptive document title win over the navigation title', () => {
+    const { docTitleParts$, navigation$, renderAnnouncer } = createHarness();
+    docTitleParts$.next(['Saved object', 'Elastic']);
+    navigation$.next({
+      activeNodes: [[createNavNode('root', 'Observability')]],
+    });
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+
+    expect(getByLabelText('Page change announcements')).toHaveTextContent('Saved object');
+  });
+
+  it('falls through a brand-only document title to the deepest navigation title', () => {
+    const { navigation$, renderAnnouncer } = createHarness();
+    navigation$.next({
+      activeNodes: [
+        [
+          createNavNode('root', 'Observability'),
+          createNavNode('leaf', 'Workflows', { breadcrumbStatus: 'hidden' }),
+        ],
+      ],
+    });
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+
+    expect(getByLabelText('Page change announcements')).toHaveTextContent('Workflows');
+  });
+
+  it('does not change the live region when project breadcrumbs are replaced', () => {
+    const { chrome, breadcrumbs$, renderAnnouncer } = createHarness();
+    chrome.next.inlineAppHeader.register('Dashboards');
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+    const announcer = getByLabelText('Page change announcements');
+    expect(announcer).toHaveTextContent('Dashboards');
+
+    act(() => {
+      breadcrumbs$.next([{ text: 'Hidden trail' }, { text: 'Should not appear' }]);
+      chrome.project.setBreadcrumbs([{ text: 'Override' }]);
+    });
+    flushAnnouncement();
+
+    expect(announcer).toHaveTextContent('Dashboards');
+    expect(announcer).not.toHaveTextContent('Hidden trail');
+    expect(announcer).not.toHaveTextContent('Should not appear');
+  });
+
+  it('re-announces the same title when the location changes', () => {
+    const { chrome, currentLocation$, renderAnnouncer } = createHarness();
+    chrome.next.inlineAppHeader.register('Dashboards');
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+    const announcer = getByLabelText('Page change announcements');
+    expect(announcer).toHaveTextContent('Dashboards');
+
+    act(() => {
+      currentLocation$.next('/b');
+    });
+    expect(announcer).toHaveTextContent('');
+
+    flushAnnouncement();
+    expect(announcer).toHaveTextContent('Dashboards');
+  });
+
+  it('cancels a scheduled fallback when a destination title arrives first', () => {
+    const { chrome, currentLocation$, navigation$, renderAnnouncer } = createHarness();
+    navigation$.next({
+      activeNodes: [[createNavNode('root', 'Workflows')]],
+    });
+
+    const { getByLabelText } = renderAnnouncer();
+    flushAnnouncement();
+    const announcer = getByLabelText('Page change announcements');
+    expect(announcer).toHaveTextContent('Workflows');
+
+    act(() => {
+      currentLocation$.next('/details');
+    });
+    expect(announcer).toHaveTextContent('');
+
+    act(() => {
+      chrome.next.inlineAppHeader.register('Details');
+    });
+    flushAnnouncement();
+
+    expect(announcer).toHaveTextContent('Details');
+    expect(announcer).not.toHaveTextContent('Workflows');
+  });
+
+  it('arms the skip link on a location change', () => {
+    const { currentLocation$, renderAnnouncer } = createHarness();
+    const { getByTestId } = renderAnnouncer();
+    const skipLink = getByTestId('skipToMainButton');
+    skipLink.focus = jest.fn();
+
+    act(() => {
+      currentLocation$.next('/b');
+    });
+    fireEvent.keyDown(window, { key: 'Tab' });
+
+    expect(skipLink.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not arm the skip link on a title-only change', () => {
+    const { chrome, renderAnnouncer } = createHarness();
+    const inline = chrome.next.inlineAppHeader.register('First');
+    const { getByTestId } = renderAnnouncer();
+    const skipLink = getByTestId('skipToMainButton');
+    skipLink.focus = jest.fn();
+
+    fireEvent.mouseDown(window);
+    skipLink.focus = jest.fn();
+
+    act(() => {
+      inline.update('Second');
+    });
+    flushAnnouncement();
     fireEvent.keyDown(window, { key: 'Tab' });
 
     expect(skipLink.focus).not.toHaveBeenCalled();

@@ -24,6 +24,7 @@ type ChromeStorybookStart = Pick<
     basePath: Pick<InternalChromeStart['componentDeps']['basePath'], 'get' | 'prepend'>;
     legacyActionMenu$: InternalChromeStart['componentDeps']['legacyActionMenu$'];
     capabilities: Pick<InternalChromeStart['componentDeps']['capabilities'], 'navLinks'>;
+    docTitleParts$: InternalChromeStart['componentDeps']['docTitleParts$'];
   };
 };
 
@@ -47,6 +48,7 @@ export const createChromeStorybookStart = (): InternalChromeStart => {
       capabilities: {
         navLinks: { integrations: true },
       },
+      docTitleParts$: new BehaviorSubject<readonly string[]>(['Elastic']),
     },
     next: {
       getFeedbackHandler$: () => new BehaviorSubject<(() => void) | undefined>(undefined),
