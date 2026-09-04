@@ -50,7 +50,7 @@ export const useConversationListMutations = ({
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
 
       if (isCurrentConversation) {
-        navigateToAgentBuilderUrl(appPaths.root, undefined, { shouldStickToBottom: true });
+        navigateToAgentBuilderUrl(appPaths.root);
       }
     },
     [conversationsService, queryClient, navigateToAgentBuilderUrl, routeConversationId]

@@ -51,7 +51,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:6ef4f1e46fc4c5793d844e416c307a09b5cfd8854049a82110030c13a164a167';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:b0869f64e1ef85aa6e6f32f38e91058ed2c31f18c25e73a74e3648c60e457dd5';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
@@ -61,7 +61,7 @@ export async function runDockerGenerator(
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:3f48e3ea40067d584b6702b2c0bfca85ceb588c63a5a7318c29d8387d8901ae2';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:4ea382e1b31da3d38f49fc6a3e3b482256645cf3beb7892eda29dedfd6e53ddb';
   }
 
   // General docker var config

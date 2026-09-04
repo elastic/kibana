@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import moment from 'moment';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { css } from '@emotion/react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { DEFAULT_DATE_FORMAT } from '../../constants';
 import * as i18n from './translations';
 
@@ -40,11 +41,9 @@ export const AlertEpisodeMetadataTable = ({
   >
     {isStale && (
       <EuiFlexItem grow={false}>
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           size="s"
-          color="warning"
-          iconType="clock"
           data-test-subj="alertingV2EpisodeMetadataTabStaleCallout"
           title={i18n.getMetadataTableStaleDataCallout(
             dataTimestamp ? moment(dataTimestamp).format(dateFormat ?? DEFAULT_DATE_FORMAT) : ''

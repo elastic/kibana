@@ -26,7 +26,6 @@ const title = i18n.translate(
     defaultMessage: 'Observability',
   }
 );
-const icon = 'logoObservability';
 
 /**
  * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
@@ -73,9 +72,10 @@ function createNavTree({
         : []),
       {
         link: 'observability-overview',
-        title,
-        icon,
-        renderAs: 'home',
+        title: i18n.translate('xpack.observability.obltNav.overview', {
+          defaultMessage: 'Overview',
+        }),
+        icon: 'home',
       },
       {
         title: i18n.translate('xpack.observability.obltNav.discover', {
