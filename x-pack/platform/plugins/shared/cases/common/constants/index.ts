@@ -520,6 +520,14 @@ export const CASES_TEMPLATE_UPDATED_EVENT_TYPE = 'cases_template_updated' as con
 export const CASES_TEMPLATE_DELETED_EVENT_TYPE = 'cases_template_deleted' as const;
 
 /**
+ * Fired once per successful workflow execution started from within a case surface — case detail,
+ * observables table, alerts table, or the cases-list bulk action. `origin_type` identifies which
+ * surface fired the run; `case_count` is 1 for single-case surfaces and >1 for the bulk-list
+ * action. Never includes workflow IDs, names, tag values, case IDs, observable values, or inputs.
+ */
+export const CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE = 'cases_workflow_run_triggered' as const;
+
+/**
  * Cases list view toggle. Defined in `common` (rather than the redesign UI package) so that
  * non-UI consumers, such as the analytics/EBT layer, can depend on it without reaching into a
  * specific UI feature's implementation.

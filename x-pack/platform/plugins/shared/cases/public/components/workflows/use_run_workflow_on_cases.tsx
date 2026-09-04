@@ -13,6 +13,10 @@ import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useToasts, useAppUrl, useKibana, useHttp } from '../../common/lib/kibana';
 import type { CasesUI } from '../../containers/types';
+import {
+  useWorkflowRunTriggeredEBT,
+  UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE,
+} from '../../analytics/use_workflow_run_ebt';
 import { runCaseWorkflow } from './api';
 import * as i18n from './translations';
 
@@ -52,6 +56,7 @@ export const useRunWorkflowOnCases = ({ cases }: { cases: CasesUI }): RunWorkflo
   const toasts = useToasts();
   const { getAppUrl } = useAppUrl(WORKFLOWS_APP_ID);
   const { rendering } = useKibana().services;
+  const reportWorkflowRunTriggered = useWorkflowRunTriggeredEBT();
 
   return useCallback(
     async ({ workflowId, inputs }) => {
@@ -64,6 +69,12 @@ export const useRunWorkflowOnCases = ({ cases }: { cases: CasesUI }): RunWorkflo
           caseIds,
           inputs,
         },
+      });
+
+      // Report after the API resolves so only confirmed starts are counted.
+      reportWorkflowRunTriggered({
+        originType: UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE,
+        caseCount: caseIds.length,
       });
 
       const executionHref = response.workflowExecutionId
@@ -80,6 +91,6 @@ export const useRunWorkflowOnCases = ({ cases }: { cases: CasesUI }): RunWorkflo
 
       return { workflowExecutionId: response.workflowExecutionId };
     },
-    [cases, getAppUrl, http, rendering, toasts]
+    [cases, getAppUrl, http, rendering, reportWorkflowRunTriggered, toasts]
   );
 };

@@ -15,6 +15,13 @@ import * as api from './api';
 // Mock dependencies injected via useKibana hooks
 jest.mock('../../common/lib/kibana');
 
+// Mock the EBT hook — analytics behaviour is tested in its own suite
+jest.mock('../../analytics/use_workflow_run_ebt', () => ({
+  useWorkflowRunTriggeredEBT: () => jest.fn(),
+  getWorkflowRunOriginType: jest.requireActual('../../analytics/use_workflow_run_ebt')
+    .getWorkflowRunOriginType,
+}));
+
 const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 
 describe('useCasesWorkflowExecutor', () => {

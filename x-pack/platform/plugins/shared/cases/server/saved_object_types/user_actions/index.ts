@@ -74,6 +74,13 @@ export const createCaseUserActionSavedObjectType = (): SavedObjectsType => ({
               uid: { type: 'keyword' },
             },
           },
+          // Added in model version 2: allows aggregating workflow run origins in telemetry.
+          origin: {
+            properties: {
+              // origin.type — one of the CaseWorkflowRunOrigin discriminant values
+              type: { type: 'keyword' },
+            },
+          },
         },
       },
       owner: {

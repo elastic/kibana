@@ -18,7 +18,10 @@ import {
   CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE,
   CASES_LIST_PAGE_VIEW_EVENT_TYPE,
   CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
+  CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE,
 } from '../../common/constants';
+import { CASE_WORKFLOW_RUN_ORIGIN_TYPES } from '../../common/constants/workflow';
+import { UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE } from './use_workflow_run_ebt';
 import { registerTemplateAnalytics } from './templates';
 
 export const registerAnalytics = ({
@@ -267,6 +270,50 @@ export const registerAnalytics = ({
         },
         _meta: {
           description: 'The bounded set of filter dimensions actively applied at load time',
+          optional: false,
+        },
+      },
+    },
+  });
+
+  analyticsService.registerEventType({
+    eventType: CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE,
+    schema: {
+      owner: {
+        type: 'keyword',
+        _meta: {
+          description: 'The solution ID (owner) in which the workflow was triggered',
+          optional: false,
+        },
+      },
+      origin_type: {
+        type: 'keyword',
+        _meta: {
+          description:
+            `The surface from which the workflow was triggered. One of: ${[
+              ...CASE_WORKFLOW_RUN_ORIGIN_TYPES,
+              UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE,
+            ].join(', ')}. ` +
+            `"${UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE}" means the run carried no single-case origin — ` +
+            'cases-list bulk runs (which span multiple cases) or a run whose origin was absent. ' +
+            'The server-side usage collector records the same dimension with the "cases." prefix stripped from each value.',
+          optional: false,
+        },
+      },
+      case_count: {
+        type: 'integer',
+        _meta: {
+          description:
+            'Number of cases included in this workflow run (1 for single-case surfaces, >1 for list bulk).',
+          optional: false,
+        },
+      },
+      tag_filter_active: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Whether the owner has configured available workflow tags in Case Settings, ' +
+            'causing the workflow picker to be pre-filtered. Tag values are never reported.',
           optional: false,
         },
       },
