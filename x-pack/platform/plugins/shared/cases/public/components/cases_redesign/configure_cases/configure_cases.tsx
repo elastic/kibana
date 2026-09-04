@@ -33,6 +33,8 @@ import { AutomaticClosureSwitch } from './automatic_closure_switch';
 import { SettingsSection } from './settings_section';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
 import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_templates_section';
+import { WorkflowTags } from '../../configure_cases/workflow_tags';
+import { useAreWorkflowsAvailableForCases } from '../../workflows/use_run_case_workflow';
 import * as observableTypesI18n from '../../observable_types/translations';
 
 const contentWrapperCss = css`
@@ -62,6 +64,8 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
   const { docLinks } = useKibana().services;
 
+  const workflowsAvailableForCases = useAreWorkflowsAvailableForCases();
+
   const {
     hasMinimumLicensePermissions,
     hasMinimumLicensePermissionsForObservables,
@@ -74,6 +78,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     customFields,
     templates,
     observableTypes,
+    workflowTags,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isLoadingConnectors,
@@ -89,6 +94,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     onAddNewConnector,
     onChangeConnector,
     onChangeClosureType,
+    onChangeWorkflowTags,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,
@@ -200,6 +206,23 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                   </SettingsSection>
                 )}
 
+                {workflowsAvailableForCases && <EuiHorizontalRule margin="l" />}
+
+                {workflowsAvailableForCases && (
+                  <SettingsSection
+                    data-test-subj="cases-redesign-workflow-tags-section"
+                    title={configureCasesI18n.WORKFLOW_TAGS_TITLE}
+                    description={configureCasesI18n.WORKFLOW_TAGS_DESCRIPTION}
+                  >
+                    <WorkflowTags
+                      isLoading={isLoadingCaseConfiguration}
+                      disabled={isLoadingCaseConfiguration || !permissions.settings}
+                      workflowTags={workflowTags}
+                      onChange={onChangeWorkflowTags}
+                    />
+                  </SettingsSection>
+                )}
+
                 {/* Rendered for both templates-flag states: with templates v2 ON it is the
                     read-mostly "legacy" section behind a local-storage switch; with templates
                     v2 OFF it is the only custom-fields / templates management UI (the v2
@@ -213,6 +236,8 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                   connector={connector}
                   customFields={customFields}
                   templates={templates}
+                  observableTypes={observableTypes}
+                  workflowTags={workflowTags}
                   connectors={connectors ?? []}
                   isLoadingCaseConfiguration={isLoadingCaseConfiguration}
                   persistCaseConfigure={persistCaseConfigure}

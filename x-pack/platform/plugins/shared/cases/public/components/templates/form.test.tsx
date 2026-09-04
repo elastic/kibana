@@ -58,6 +58,7 @@ describe('TemplateForm', () => {
       id: '',
       owner: mockedTestProvidersOwner[0],
       observableTypes: [],
+      workflowTags: [],
     },
     onChange: jest.fn(),
     initialValue: null,

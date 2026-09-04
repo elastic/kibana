@@ -17,6 +17,8 @@ import {
   EuiPageBody,
   EuiPageSection,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,6 +45,8 @@ import { TemplateForm } from '../templates/form';
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
+import { WorkflowTags } from './workflow_tags';
+import { useAreWorkflowsAvailableForCases } from '../workflows/use_run_case_workflow';
 import { KibanaServices, useKibana } from '../../common/lib/kibana';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -112,6 +116,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   // observable-types logic.
   const { data: currentConfiguration } = useGetCaseConfiguration();
 
+  const workflowsAvailableForCases = useAreWorkflowsAvailableForCases();
+
   const {
     hasMinimumLicensePermissions,
     hasMinimumLicensePermissionsForObservables,
@@ -124,6 +130,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     customFields,
     templates,
     observableTypes,
+    workflowTags,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isLoadingConnectors,
@@ -139,6 +146,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     onAddNewConnector,
     onChangeConnector,
     onChangeClosureType,
+    onChangeWorkflowTags,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,
@@ -168,6 +176,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
         connector,
         customFields: [...remainingCustomFields],
         templates: [...templatesWithRemainingCustomFields],
+        observableTypes,
+        workflowTags,
         id: configurationId,
         version: configurationVersion,
         closureType,
@@ -179,6 +189,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
       configurationVersion,
       connector,
       customFields,
+      observableTypes,
+      workflowTags,
       templates,
       persistCaseConfigure,
     ]
@@ -215,6 +227,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
         connector,
         customFields: updatedCustomFields,
         templates: updatedTemplates,
+        observableTypes,
+        workflowTags,
         id: configurationId,
         version: configurationVersion,
         closureType,
@@ -229,6 +243,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
       configurationVersion,
       connector,
       customFields,
+      observableTypes,
+      workflowTags,
       templates,
       persistCaseConfigure,
       setFlyOutVisibility,
@@ -243,6 +259,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
         connector,
         customFields,
         templates: [...remainingTemplates],
+        observableTypes,
+        workflowTags,
         id: configurationId,
         version: configurationVersion,
         closureType,
@@ -254,6 +272,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
       configurationVersion,
       connector,
       customFields,
+      observableTypes,
+      workflowTags,
       templates,
       persistCaseConfigure,
     ]
@@ -284,6 +304,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
         connector,
         customFields,
         templates: updatedTemplates,
+        observableTypes,
+        workflowTags,
         id: configurationId,
         version: configurationVersion,
         closureType,
@@ -298,6 +320,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
       configurationVersion,
       connector,
       customFields,
+      observableTypes,
+      workflowTags,
       templates,
       persistCaseConfigure,
       setFlyOutVisibility,
@@ -467,6 +491,31 @@ export const ConfigureCases: React.FC = React.memo(() => {
                     }
                     handleDeleteObservableType={onDeleteObservableType}
                     handleEditObservableType={onEditObservableType}
+                  />
+                </EuiFlexItem>
+              </div>
+            </>
+          )}
+
+          {workflowsAvailableForCases && (
+            <>
+              <EuiSpacer size="xl" />
+
+              <div css={sectionWrapperCss} data-test-subj="cases-workflow-tags-section">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h2>{i18n.WORKFLOW_TAGS_TITLE}</h2>
+                  </EuiTitle>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="s" color="subdued">
+                    <p>{i18n.WORKFLOW_TAGS_DESCRIPTION}</p>
+                  </EuiText>
+                  <EuiSpacer size="m" />
+                  <WorkflowTags
+                    isLoading={isLoadingCaseConfiguration}
+                    disabled={isLoadingCaseConfiguration || !permissions.settings}
+                    workflowTags={workflowTags}
+                    onChange={onChangeWorkflowTags}
                   />
                 </EuiFlexItem>
               </div>
