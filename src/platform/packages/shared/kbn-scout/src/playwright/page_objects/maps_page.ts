@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Locator } from 'playwright/test';
 import type { ScoutPage } from '..';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
@@ -23,8 +24,11 @@ export class MapsPage {
   public readonly importFileButton;
   public readonly returnToOriginSwitch;
   public readonly documentsItem;
+  public readonly fullScreenModeButton;
+  public readonly exitFullScreenButton;
   private readonly mapLayerToc;
   private readonly layerTocTooltip;
+  private readonly appMenuOverflowButton;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
 
@@ -38,6 +42,9 @@ export class MapsPage {
     this.importFileButton = this.page.testSubj.locator('importFileButton');
     this.returnToOriginSwitch = this.page.testSubj.locator('returnToOriginModeSwitch');
     this.documentsItem = this.page.testSubj.locator('documents');
+    this.fullScreenModeButton = this.page.testSubj.locator('mapsFullScreenMode');
+    this.exitFullScreenButton = this.page.testSubj.locator('exitFullScreenModeButton');
+    this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
     this.mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
     this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
     this.saveModal = new SavedObjectSaveModal(this.page);
@@ -46,6 +53,34 @@ export class MapsPage {
   async gotoNewMap() {
     await this.page.gotoApp('maps/map');
     await this.waitForRenderComplete();
+  }
+
+  private async revealAppMenuItem(item: Locator) {
+    if (await item.isVisible()) {
+      return;
+    }
+    await item.or(this.appMenuOverflowButton).waitFor({ state: 'visible' });
+    if (await item.isVisible()) {
+      return;
+    }
+    await this.appMenuOverflowButton.click();
+    await item.waitFor({ state: 'visible' });
+  }
+
+  /** Opens the AppHeader overflow menu when Full screen is not inline. */
+  async revealFullScreenModeButton() {
+    await this.revealAppMenuItem(this.fullScreenModeButton);
+  }
+
+  async clickFullScreenMode() {
+    await this.revealFullScreenModeButton();
+    await this.fullScreenModeButton.click();
+  }
+
+  /** Save sits in overflow during save-and-return; primary is Save and return. */
+  async clickSaveButton() {
+    await this.revealAppMenuItem(this.saveButton);
+    await this.saveButton.click();
   }
 
   async waitForRenderComplete() {

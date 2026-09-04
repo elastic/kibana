@@ -30950,7 +30950,6 @@
     "xpack.maps.topNav.cancel": "Abbrechen",
     "xpack.maps.topNav.cancelButtonAriaLabel": "Kehren Sie zur letzten App zurück, ohne die Änderungen zu speichern",
     "xpack.maps.topNav.fullScreenButtonLabel": "Vollbild",
-    "xpack.maps.topNav.fullScreenDescription": "Vollbild",
     "xpack.maps.topNav.mustCopyOnSaveMessage": "Elastic verwaltet diese Karte. Speichern Sie alle Änderungen in einer neuen Zuordnung.",
     "xpack.maps.topNav.openInspectorButtonLabel": "inspizieren",
     "xpack.maps.topNav.openInspectorDescription": "Inspektor öffnen",

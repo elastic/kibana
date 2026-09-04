@@ -38,6 +38,7 @@ import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { css } from '@emotion/react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import {
   getData,
@@ -53,7 +54,7 @@ import { initializeProjectRoutingManager } from '../../project_routing_manager';
 import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
-import { getTopNavConfig } from '../top_nav_config';
+import { getMapsAppHeaderBack, getMapsAppHeaderMenu } from '../top_nav_config';
 import {
   getEditPath,
   getFullPath,
@@ -61,6 +62,7 @@ import {
   MAP_EMBEDDABLE_NAME,
 } from '../../../../common/constants';
 import type { SavedMap } from '../saved_map';
+import { getMapClient } from '../../../content_management';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -129,6 +131,7 @@ export interface State {
   savedQuery?: SavedQuery;
   isRefreshPaused: boolean;
   refreshInterval: number;
+  hasSavedMaps: boolean;
 }
 
 export class MapApp extends React.Component<Props, State> {
@@ -150,6 +153,7 @@ export class MapApp extends React.Component<Props, State> {
       initialized: false,
       isRefreshPaused: true,
       refreshInterval: 0,
+      hasSavedMaps: false,
     };
     this._kbnUrlStateStorage = createKbnUrlStateStorage({
       useHash: false,
@@ -486,41 +490,81 @@ export class MapApp extends React.Component<Props, State> {
 
     this._initMapAndLayerSettings(this.props.savedMap.getAttributes());
 
-    this.setState({ initialized: true });
+    const hasSavedObject = Boolean(this.props.savedMap.getSavedObjectId());
+    this.setState({ initialized: true, hasSavedMaps: hasSavedObject });
+
+    if (hasSavedObject || this.props.savedMap.hasSaveAndReturnConfig()) {
+      return;
+    }
+
+    try {
+      const results = await getMapClient().search({ limit: 1 });
+      if (this._isMounted) {
+        this.setState({ hasSavedMaps: results.hits.length > 0 });
+      }
+    } catch {
+      // Keep hasSavedMaps false so create-without-library does not render a looping back button.
+    }
   }
 
-  _renderTopNav() {
+  _getManagedBadge(): AppHeaderBadge[] | undefined {
+    if (!this.props.savedMap.isManaged()) {
+      return undefined;
+    }
+
+    const tooltip = i18n.translate('xpack.maps.mapController.managedMapDescriptionTooltip', {
+      defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
+    });
+    const managedBadge = getManagedContentBadge(tooltip);
+
+    return [
+      {
+        label: managedBadge.badgeText,
+        color: 'primary',
+        tooltip,
+        'data-test-subj': managedBadge['data-test-subj'],
+      },
+    ];
+  }
+
+  _renderAppHeader() {
     if (this.props.isFullScreen) {
       return null;
     }
 
-    const topNavConfig = getTopNavConfig({
-      savedMap: this.props.savedMap,
-      isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
-      isSaveDisabled: this.props.isSaveDisabled,
-      enableFullScreen: this.props.enableFullScreen,
-      openMapSettings: this.props.openMapSettings,
-      inspectorAdapters: this.props.inspectorAdapters,
-      history: this.props.history,
-    });
+    return (
+      <AppHeader
+        title={this.props.savedMap.getPageTitle()}
+        back={getMapsAppHeaderBack({
+          savedMap: this.props.savedMap,
+          history: this.props.history,
+          hasSavedMaps: this.state.hasSavedMaps,
+        })}
+        badges={this._getManagedBadge()}
+        menu={getMapsAppHeaderMenu({
+          savedMap: this.props.savedMap,
+          isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
+          isSaveDisabled: this.props.isSaveDisabled,
+          enableFullScreen: this.props.enableFullScreen,
+          openMapSettings: this.props.openMapSettings,
+          inspectorAdapters: this.props.inspectorAdapters,
+          history: this.props.history,
+        })}
+        spacing="compact"
+      />
+    );
+  }
+
+  _renderSearchBar() {
+    if (this.props.isFullScreen) {
+      return null;
+    }
 
     const { TopNavMenu } = getNavigation().ui;
     return (
       <TopNavMenu
-        setMenuMountPoint={this.props.setHeaderActionMenu}
         appName={APP_ID}
-        badges={
-          this.props.savedMap.isManaged()
-            ? [
-                getManagedContentBadge(
-                  i18n.translate('xpack.maps.mapController.managedMapDescriptionTooltip', {
-                    defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
-                  })
-                ),
-              ]
-            : undefined
-        }
-        config={topNavConfig}
+        config={[]}
         indexPatterns={this.state.indexPatterns}
         filters={this.props.filters}
         query={this.props.query}
@@ -606,8 +650,8 @@ export class MapApp extends React.Component<Props, State> {
         data-map-loaded={this.state.initialized && !this.props.isMapLoading}
         css={[styles.wrapper, this.props.isFullScreen && styles.fullScreen]}
       >
-        {this._renderTopNav()}
-        <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
+        {this._renderAppHeader()}
+        {this._renderSearchBar()}
         <div id="react-maps-root" css={styles.reactMapsRoot}>
           {this._renderLegacyUrlConflict()}
           <MapContainer
