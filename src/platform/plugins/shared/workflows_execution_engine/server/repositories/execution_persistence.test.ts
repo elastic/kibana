@@ -116,6 +116,49 @@ describe('InMemoryExecutionPersistence', () => {
     ]);
   });
 
+  it('applies sourceIncludes projection to step executions', async () => {
+    const persistence = new InMemoryExecutionPersistence(execution);
+    await persistence.bulkUpsert([
+      {
+        id: 'step-proj',
+        spaceId: 'space-1',
+        stepId: 'step-proj',
+        scopeStack: [],
+        workflowRunId: execution.id,
+        workflowId: execution.workflowId,
+        status: ExecutionStatus.RUNNING,
+        startedAt: '2026-07-21T00:00:00.000Z',
+        topologicalIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+      },
+    ]);
+    const [result] = await persistence.getStepExecutionsByIds(['step-proj'], ['id', 'status']);
+    expect(result).toEqual({ id: 'step-proj', status: ExecutionStatus.RUNNING });
+  });
+
+  it('applies sourceExcludes projection to step executions', async () => {
+    const persistence = new InMemoryExecutionPersistence(execution);
+    await persistence.bulkUpsert([
+      {
+        id: 'step-excl',
+        spaceId: 'space-1',
+        stepId: 'step-excl',
+        scopeStack: [],
+        workflowRunId: execution.id,
+        workflowId: execution.workflowId,
+        status: ExecutionStatus.RUNNING,
+        startedAt: '2026-07-21T00:00:00.000Z',
+        topologicalIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+      },
+    ]);
+    const [result] = await persistence.getStepExecutionsByIds(['step-excl'], undefined, ['status']);
+    expect(result).not.toHaveProperty('status');
+    expect(result).toHaveProperty('id', 'step-excl');
+  });
+
   it('merges step lifecycle and IO updates without an external repository', async () => {
     const persistence = new InMemoryExecutionPersistence(execution);
     await persistence.bulkUpsert([
