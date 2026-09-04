@@ -195,12 +195,22 @@ export class LensLayers {
    */
   async createLayer(
     layerType: 'data' | 'referenceLine' | 'annotations',
-    annotationFromLibraryTitle?: string
+    annotationFromLibraryTitle?: string,
+    options: {
+      /**
+       * ES|QL charts hide the annotation library, so the annotations menu item adds the
+       * layer directly instead of opening the "Select annotation method" submenu.
+       * The caller must state which flow to expect: auto-detecting the submenu would
+       * be a timing race (a slow render could show it after the check concluded).
+       * Defaults to the DSL submenu flow, keeping existing call sites unchanged.
+       */
+      annotationsAddDirectly?: boolean;
+    } = {}
   ) {
     const tabsBefore = await this.getLayerCount();
     await this.page.testSubj.click('lnsLayerAddButton');
     await this.page.testSubj.click(`lnsLayerAddButton-${layerType}`);
-    if (layerType === 'annotations') {
+    if (layerType === 'annotations' && !options.annotationsAddDirectly) {
       if (annotationFromLibraryTitle) {
         await this.page.testSubj.click('lnsAnnotationLayer_addFromLibrary');
         await this.page.testSubj.click(

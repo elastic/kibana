@@ -231,4 +231,29 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     );
     await expect(pageObjects.lens.workspace.convertToEsqlButton).toBeDisabled();
   });
+
+  test('should disable Convert to ES|QL button when the chart has query-based annotations', async ({
+    pageObjects,
+    page,
+  }) => {
+    const { lens } = pageObjects;
+
+    await openInlineEditorAndWaitVisible(
+      pageObjects,
+      testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
+    );
+    await expect(lens.workspace.convertToEsqlButton).toBeEnabled();
+
+    // Turn the fixture's manual annotation into a query-based one; query annotations
+    // are not yet supported on ES|QL charts, so this must gate the conversion.
+    await lens.layers.activateLayerTab(2);
+    await lens.dimensions.openDimensionEditor('lnsXY_xAnnotationsPanel > lns-dimensionTrigger', 2);
+    await page.testSubj.click('lnsXY_annotation_query');
+    await lens.style.configureQueryAnnotation({ queryString: '*', timeField: 'utc_time' });
+    await lens.closeDimensionEditor();
+
+    await expect(lens.workspace.convertToEsqlButton).toBeDisabled();
+
+    await cancelLensInlineEditorAndWaitClosed({ lens });
+  });
 });
