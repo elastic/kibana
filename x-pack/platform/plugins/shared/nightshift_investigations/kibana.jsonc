@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "nightshift_investigations"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["observabilityShared"],
     "optionalPlugins": [
       "agentBuilder",
       "searchInferenceEndpoints",
@@ -19,5 +19,6 @@
       "workflowsManagement",
     ],
     "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   },
 }
