@@ -33,13 +33,20 @@ export const CREATE_NEW_BUTTON = i18n.translate('xpack.maintenanceWindows.create
 });
 
 export const EMPTY_PROMPT_BUTTON = i18n.translate('xpack.maintenanceWindows.emptyPrompt.button', {
-  defaultMessage: 'Create a maintenance window',
+  defaultMessage: 'Create maintenance window',
 });
 
-export const EMPTY_PROMPT_DOCUMENTATION = i18n.translate(
-  'xpack.maintenanceWindows.emptyPrompt.documentation',
+export const EMPTY_PROMPT_LEARN_MORE = i18n.translate(
+  'xpack.maintenanceWindows.emptyPrompt.learnMore',
   {
-    defaultMessage: 'Documentation',
+    defaultMessage: 'Want to learn more?',
+  }
+);
+
+export const EMPTY_PROMPT_READ_THE_DOCS = i18n.translate(
+  'xpack.maintenanceWindows.emptyPrompt.readTheDocs',
+  {
+    defaultMessage: 'Read the docs',
   }
 );
 
