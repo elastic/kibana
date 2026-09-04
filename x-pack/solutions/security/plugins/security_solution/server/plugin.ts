@@ -334,16 +334,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
   }
 
-  /**
-   * Threat-intel supply pipeline setup. Gated on
-   * `threatIntelSupplyEnabled`. Managed workflow installation runs from
-   * `startThreatIntel` after bootstrap completes.
-   */
-  /**
-   * Threat-intel supply pipeline start. Captures optional spaces /
-   * inference / actions / taskManager contracts, heals an empty catalog,
-   * installs managed workflows, and schedules the promote task.
-   */
   public setup(
     core: SecuritySolutionPluginCoreSetupDependencies,
     plugins: SecuritySolutionPluginSetupDependencies
@@ -533,7 +523,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       APP_ID,
       (context, request) => requestContextFactory.create(context, request)
     );
-
 
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
