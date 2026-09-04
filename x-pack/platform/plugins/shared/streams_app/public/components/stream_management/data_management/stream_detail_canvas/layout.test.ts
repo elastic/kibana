@@ -42,6 +42,27 @@ describe('layoutGraph', () => {
     expect(positions.get('s1')!.y).not.toEqual(positions.get('s2')!.y);
   });
 
+  it('places disconnected unit nodes on rows that do not overlap classic flows', () => {
+    const positions = layoutGraph(
+      [
+        { id: 'classic-source' },
+        { id: 'classic-destination' },
+        { id: 'configured-source' },
+        { id: 'unconfigured-source' },
+      ],
+      [{ source: 'classic-source', target: 'classic-destination' }]
+    );
+
+    expect(positions.get('classic-source')!.y).toBe(positions.get('classic-destination')!.y);
+    expect(
+      new Set([
+        positions.get('classic-source')!.y,
+        positions.get('configured-source')!.y,
+        positions.get('unconfigured-source')!.y,
+      ]).size
+    ).toBe(3);
+  });
+
   it('lays a multi-node chain into one column per depth (extensible topology)', () => {
     const positions = layoutGraph(
       [{ id: 'source' }, { id: 'pipeline' }, { id: 'destination' }],

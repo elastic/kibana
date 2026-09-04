@@ -237,6 +237,7 @@ export const Prometheus: ConnectorSpec = {
   actions: {
     listAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'List current Alertmanager alerts, optionally filtered by active/silenced/inhibited/unprocessed state, label matchers, or receiver. The primary read path into Alertmanager for triage and routing decisions.',
       input: ListAlertsInputSchema,
@@ -265,6 +266,7 @@ export const Prometheus: ConnectorSpec = {
 
     listSilences: {
       isTool: true,
+      scope: 'read',
       description:
         'List Alertmanager silences (active, pending, and expired), optionally filtered by label matchers. Use this to check what is already muted before creating a new silence.',
       input: ListSilencesInputSchema,
@@ -285,6 +287,7 @@ export const Prometheus: ConnectorSpec = {
 
     getSilence: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a single Alertmanager silence by ID, returning its matchers, time window, and state (pending, active, or expired).',
       input: GetSilenceInputSchema,
@@ -302,6 +305,7 @@ export const Prometheus: ConnectorSpec = {
 
     createSilence: {
       isTool: true,
+      scope: 'write',
       description:
         'Create an Alertmanager silence to mute alerts matching label matchers for a time window. Returns the new silence ID. The core action for suppressing noise during a maintenance window or a known incident.',
       input: CreateSilenceInputSchema,
@@ -323,6 +327,7 @@ export const Prometheus: ConnectorSpec = {
 
     expireSilence: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Expire an Alertmanager silence by ID so the alerts it was muting can fire again. Closes the mute-and-restore loop once a maintenance window or incident is resolved.',
       input: ExpireSilenceInputSchema,
@@ -340,6 +345,7 @@ export const Prometheus: ConnectorSpec = {
 
     listAlertGroups: {
       isTool: true,
+      scope: 'read',
       description:
         'List Alertmanager alerts grouped by their routing labels, optionally filtered by state or label matchers. Use this instead of listAlerts to reason about correlated incidents rather than individual alerts.',
       input: ListAlertGroupsInputSchema,
@@ -365,6 +371,7 @@ export const Prometheus: ConnectorSpec = {
 
     createAlerts: {
       isTool: true,
+      scope: 'write',
       description:
         'Push one or more synthetic alerts into Alertmanager. The alerts enter normal routing and notification, so a workflow can raise its own alert (e.g. to page on a condition Prometheus itself cannot observe).',
       input: CreateAlertsInputSchema,
@@ -380,6 +387,7 @@ export const Prometheus: ConnectorSpec = {
 
     getStatus: {
       isTool: true,
+      scope: 'read',
       description:
         'Read the Alertmanager instance status: version, uptime, cluster peers, and the currently loaded configuration. Use this as a health check or a gating step before other actions.',
       input: GetStatusInputSchema,
@@ -395,6 +403,7 @@ export const Prometheus: ConnectorSpec = {
 
     queryPrometheus: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a PromQL instant query against the configured Prometheus server and return the current value(s). Use this to enrich an Alertmanager alert with live metric data before deciding how to act. Requires the optional "Prometheus server URL" connector field.',
       input: QueryPrometheusInputSchema,
@@ -414,6 +423,7 @@ export const Prometheus: ConnectorSpec = {
 
     listPrometheusAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'List firing and pending alerts as seen directly by the Prometheus server, before they reach Alertmanager. Use this to inspect the pre-Alertmanager alert state (e.g. to see a "pending" alert that has not started firing yet). Requires the optional "Prometheus server URL" connector field.',
       input: ListPrometheusAlertsInputSchema,
@@ -429,6 +439,7 @@ export const Prometheus: ConnectorSpec = {
 
     listPrometheusRules: {
       isTool: true,
+      scope: 'read',
       description:
         'List the alerting and recording rules currently loaded by the Prometheus server, including each alerting rule\'s currently active alerts. Use this to inspect what conditions produce an alert. Requires the optional "Prometheus server URL" connector field.',
       input: ListPrometheusRulesInputSchema,
@@ -456,6 +467,7 @@ export const Prometheus: ConnectorSpec = {
 
     queryRangePrometheus: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a PromQL range query against the configured Prometheus server and return a series of samples between a start and end time at a given step interval. Use this for trend checks, before-and-after comparisons, or attaching a metric window to an incident. Requires the optional "Prometheus server URL" connector field.',
       input: QueryRangePrometheusInputSchema,
@@ -473,6 +485,7 @@ export const Prometheus: ConnectorSpec = {
 
     listPrometheusTargets: {
       isTool: true,
+      scope: 'read',
       description:
         'List Prometheus scrape targets with their up/down health and last scrape error. Use this to diagnose a missing-metric or stale-data alert by checking whether the source is being scraped successfully. Requires the optional "Prometheus server URL" connector field.',
       input: ListPrometheusTargetsInputSchema,
@@ -492,6 +505,7 @@ export const Prometheus: ConnectorSpec = {
 
     getPrometheusSeries: {
       isTool: true,
+      scope: 'read',
       description:
         'Find Prometheus time series matching one or more series selector expressions, without returning their sample values. Use this to discover which series exist for an entity (e.g. a job or instance) before querying them with queryPrometheus. Requires the optional "Prometheus server URL" connector field.',
       input: GetPrometheusSeriesInputSchema,
@@ -517,6 +531,7 @@ export const Prometheus: ConnectorSpec = {
 
     listPrometheusLabelValues: {
       isTool: true,
+      scope: 'read',
       description:
         'List the known values of a Prometheus label (for example all "instance" or "job" values), optionally restricted to series matching a selector. Use this to enumerate hosts, services, or environments to drive a fan-out step, or to discover valid values before building a PromQL query. Requires the optional "Prometheus server URL" connector field.',
       input: ListPrometheusLabelValuesInputSchema,

@@ -11,6 +11,7 @@ import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
@@ -111,6 +112,30 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       getStartServices as unknown as StartServicesAccessor<StartPlugins>,
       loggerMock.create()
     );
+  });
+
+  it('requires advanced settings and rules privileges on the settings GET route', () => {
+    const routeConfig = router.versioned.get.mock.calls[0][0];
+
+    expect(routeConfig.security?.authz).toEqual({
+      requiredPrivileges: [
+        {
+          allRequired: ['manage_advanced_settings', RULES_API_ALL],
+        },
+      ],
+    });
+  });
+
+  it('requires advanced settings and rules privileges on the settings PUT route', () => {
+    const routeConfig = router.versioned.put.mock.calls[0][0];
+
+    expect(routeConfig.security?.authz).toEqual({
+      requiredPrivileges: [
+        {
+          allRequired: ['manage_advanced_settings', RULES_API_ALL],
+        },
+      ],
+    });
   });
 
   describe('GET', () => {

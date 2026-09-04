@@ -131,6 +131,15 @@ export interface PackagePolicyClient {
     }>;
   }>;
 
+  /**
+   * Persists partial package-policy attributes without running the full Fleet update pipeline.
+   * Callers are responsible for validation, revision metadata, callbacks, and agent deployment.
+   */
+  bulkUpdatePartial(
+    soClient: SavedObjectsClientContract,
+    packagePolicyUpdates: PackagePolicyPartialUpdate[]
+  ): Promise<PackagePolicyPartialUpdateResult>;
+
   bulkUpgrade(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -341,6 +350,20 @@ export type PackagePolicyClientFetchAllItemsOptions = Pick<
   WithSpaceIdsOption;
 
 export type PartialPackagePolicy = Pick<PackagePolicy, 'id'> & Partial<PackagePolicy>;
+
+export interface PackagePolicyPartialUpdate {
+  id: string;
+  version: string;
+  attributes: Partial<PackagePolicySOAttributes>;
+}
+
+export interface PackagePolicyPartialUpdateResult {
+  updatedPolicies: PartialPackagePolicy[];
+  failedPolicies: Array<{
+    update: PackagePolicyPartialUpdate;
+    error: SavedObjectError;
+  }>;
+}
 
 export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
   ignoreMissing?: boolean;

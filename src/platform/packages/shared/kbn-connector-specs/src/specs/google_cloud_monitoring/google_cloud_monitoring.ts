@@ -204,6 +204,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
   actions: {
     listAlertPolicies: {
       isTool: true,
+      scope: 'read',
       description:
         'List Cloud Monitoring alerting policies in the project, optionally filtered. This is the starting point for triaging a fired alert or for locating a policy to mute or snooze — use getAlertPolicy on a result to see its full conditions, enabled state, and notification channels.',
       input: ListAlertPoliciesInputSchema,
@@ -229,6 +230,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     getAlertPolicy: {
       isTool: true,
+      scope: 'read',
       description:
         "Get the full definition of a single alerting policy: its conditions, combiner, enabled state, notification channels, and documentation. Use the policy name/ID from listAlertPolicies. Call this before updateAlertPolicy so you can copy the existing conditions and modify only what's needed.",
       input: GetAlertPolicyInputSchema,
@@ -247,6 +249,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     setAlertPolicyEnabled: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Mute (enabled: false) or unmute (enabled: true) an alerting policy. This is the core lifecycle primitive Cloud Monitoring exposes in place of an acknowledge-incident call — muting stops the policy from opening new incidents without deleting or otherwise modifying it. Prefer createSnooze instead when you only want to suppress alerts for a bounded maintenance window, since a snooze automatically re-enables itself.',
       input: SetAlertPolicyEnabledInputSchema,
@@ -269,6 +272,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     updateAlertPolicy: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update one or more fields of an existing alerting policy — display name, documentation, notification channels, combiner, conditions, or user labels. Only the fields you provide are changed; call getAlertPolicy first to see the current values, since notificationChannels and conditions are replaced wholesale (not merged) when set. Use this to widen a flapping threshold or fix routing instead of only muting the policy with setAlertPolicyEnabled.',
       input: UpdateAlertPolicyInputSchema,
@@ -328,6 +332,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     createSnooze: {
       isTool: true,
+      scope: 'write',
       description:
         "Suppress alerts matching the given alert policies (and optional label filter) for a fixed time window, without disabling the policy itself — the safe way to quiet paging during a known maintenance window or an active incident. The snooze automatically stops applying after endTime, so there's nothing to remember to undo.",
       input: CreateSnoozeInputSchema,
@@ -364,6 +369,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     listSnoozes: {
       isTool: true,
+      scope: 'read',
       description:
         'List current and past snoozes in the project, so you can see what is currently suppressed before adjusting or creating another one. Pass a filter on interval.start_time / interval.end_time to narrow the results.',
       input: ListSnoozesInputSchema,
@@ -388,6 +394,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     updateSnooze: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Realign an existing snooze so suppression tracks the incident instead of outlasting it: extend or shorten its window (startTime/endTime) or rename it. Set endTime to a time in the past to end an active snooze immediately.',
       input: UpdateSnoozeInputSchema,
@@ -428,6 +435,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     listNotificationChannels: {
       isTool: true,
+      scope: 'read',
       description:
         'List the notification channels configured in the project, so you can see where an alerting policy pages (email, Slack, PagerDuty, etc.) before editing its notificationChannels with updateAlertPolicy.',
       input: ListNotificationChannelsInputSchema,
@@ -453,6 +461,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     listTimeSeries: {
       isTool: true,
+      scope: 'read',
       description:
         "Fetch the raw or aggregated metric values behind a firing alert, so a workflow can report the numbers that triggered it. Use the same or a similar filter as the alert condition (from getAlertPolicy's conditionThreshold.filter) and a time window that includes when the alert fired.",
       input: ListTimeSeriesInputSchema,
@@ -493,6 +502,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     listUptimeCheckConfigs: {
       isTool: true,
+      scope: 'read',
       description:
         'List Uptime check configurations in the project, so you can correlate an availability alert back to the check that detected it (its monitored resource, HTTP/TCP settings, and check regions).',
       input: ListUptimeCheckConfigsInputSchema,
@@ -517,6 +527,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     listServices: {
       isTool: true,
+      scope: 'read',
       description:
         'List the Cloud Monitoring services defined in the project (App Engine, GKE, custom, etc.). Use the ID from a returned service name (the last segment of "projects/{project}/services/{id}") with listServiceLevelObjectives to check that service\'s error-budget status.',
       input: ListServicesInputSchema,
@@ -541,6 +552,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     listServiceLevelObjectives: {
       isTool: true,
+      scope: 'read',
       description:
         'List the Service Level Objectives (SLOs) defined for a service, so a workflow can read error-budget status while triaging an incident. Use listServices first to find the serviceId.',
       input: ListServiceLevelObjectivesInputSchema,

@@ -89,24 +89,22 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             .rate(1)
             .generator((timestamp) =>
               instance
-                .transaction({ transactionName: 'GET /api' })
+                .appMetrics({
+                  'system.memory.actual.free': 1000,
+                  'system.memory.total': 2000,
+                  'system.cpu.total.norm.pct': 0.5,
+                })
                 .timestamp(timestamp)
-                .duration(100)
-                .children(
-                  instance
-                    .span({ spanName: 'db query', spanType: 'db', spanSubtype: 'mysql' })
-                    .timestamp(timestamp)
-                    .duration(50)
-                )
             )
         );
       });
 
       after(() => apmSynthtraceEsClient.clean());
 
-      it('returns 200', async () => {
-        const { status } = await getHasSystemMetrics();
+      it('returns hasSystemMetrics: true', async () => {
+        const { status, body } = await getHasSystemMetrics();
         expect(status).to.be(200);
+        expect(body.hasSystemMetrics).to.be(true);
       });
     });
   });

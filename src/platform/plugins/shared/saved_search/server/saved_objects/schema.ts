@@ -9,13 +9,15 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { DataGridDensity, DiscoverTabType, HistogramPercentileValue } from '@kbn/discover-utils';
+import { FunctionNames } from '@kbn/esql-language';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_DISCOVER_SESSION_COLUMNS,
   MAX_DISCOVER_SESSION_TABS,
+  MAX_METRICS_TAB_DIMENSIONS,
   VIEW_MODE,
 } from '../../common';
 import { extractTabsTransformFnV13 } from '../../common/service/extract_tabs';
@@ -192,7 +194,38 @@ export const SCHEMA_DISCOVER_SESSION_V15 = SCHEMA_DISCOVER_SESSION_V14.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V15, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
+// Tab type payloads, keyed by `type`.
+// Absent `tabTypeState` means DiscoverTabType.Default.
+const SCHEMA_SIMPLE_AGGREGATION = schema.oneOf([
+  schema.literal(`${FunctionNames.AVG}`),
+  schema.literal(`${FunctionNames.SUM}`),
+  schema.literal(`${FunctionNames.MIN}`),
+  schema.literal(`${FunctionNames.MAX}`),
+]);
+
+const SCHEMA_HISTOGRAM_PERCENTILE = schema.oneOf([
+  schema.literal(`${HistogramPercentileValue.P50}`),
+  schema.literal(`${HistogramPercentileValue.P75}`),
+  schema.literal(`${HistogramPercentileValue.P90}`),
+  schema.literal(`${HistogramPercentileValue.P95}`),
+  schema.literal(`${HistogramPercentileValue.P99}`),
+]);
+
+const SCHEMA_TAB_TYPE_STATE_V16 = schema.oneOf([
+  schema.object({
+    type: schema.literal(DiscoverTabType.Metrics),
+    dimensions: schema.arrayOf(schema.string({ maxLength: 1000 }), {
+      maxSize: MAX_METRICS_TAB_DIMENSIONS,
+    }),
+    searchTerm: schema.string({ maxLength: 1000 }),
+    counterAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    gaugeAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    histogramPercentile: SCHEMA_HISTOGRAM_PERCENTILE,
+  }),
+]);
+
 const SCHEMA_TAB_ATTRIBUTES_V16 = SCHEMA_TAB_ATTRIBUTES_V15.extends({
+  tabTypeState: schema.maybe(SCHEMA_TAB_TYPE_STATE_V16),
   jsonModeSettings: schema.maybe(
     schema.object({
       hideNulls: schema.maybe(schema.boolean()),
@@ -206,7 +239,7 @@ const SCHEMA_TAB_V16 = SCHEMA_TAB_V15.extends({
   attributes: SCHEMA_TAB_ATTRIBUTES_V16,
 });
 
-export const SCHEMA_DISCOVER_SESSION_V16 = SCHEMA_DISCOVER_SESSION_V15.extends({
+const SCHEMA_DISCOVER_SESSION_V16 = SCHEMA_DISCOVER_SESSION_V15.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V16, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
