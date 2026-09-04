@@ -9,7 +9,7 @@
 
 import type { ReqOptions } from '@kbn/kbn-client';
 import { type KbnClient } from '@kbn/scout';
-import type { WorkflowAggsDto, WorkflowExecutionDto } from '@kbn/workflows';
+import type { ExecutionStatus, WorkflowAggsDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { waitForConditionOrThrow } from '../utils/wait_for_condition';
 
@@ -273,6 +273,59 @@ export class WorkflowsApiService {
         `Execution with id ${workflowExecutionId} did not reach a terminal status` +
         ` (last status: ${execution?.status ?? 'undefined'})`,
     });
+  }
+
+  async waitForStatus({
+    workflowExecutionId,
+    status,
+    timeout = 20_000,
+    includeOutput = false,
+  }: {
+    workflowExecutionId: string;
+    status: ExecutionStatus | readonly ExecutionStatus[];
+    timeout?: number;
+    includeOutput?: boolean;
+  }): Promise<WorkflowExecutionDto> {
+    const expected = Array.isArray(status) ? status : [status];
+    const execution = await waitForConditionOrThrow({
+      action: () => this.getExecution(workflowExecutionId, { includeOutput }),
+      condition: (next) => next != null && expected.includes(next.status as ExecutionStatus),
+      interval: 1000,
+      timeout,
+      errorMessage: (last) =>
+        `Execution with id ${workflowExecutionId} did not reach ${expected.join('|')}` +
+        ` (last status: ${last?.status ?? 'undefined'})`,
+    });
+    if (execution == null) {
+      throw new Error(`Execution with id ${workflowExecutionId} was not found`);
+    }
+    return execution;
+  }
+
+  /** POST /api/workflows/executions/{id}/resume — resume a paused HITL execution. */
+  async rawResume(
+    workflowExecutionId: string,
+    input: Record<string, unknown>,
+    options?: Partial<ReqOptions>
+  ): Promise<{
+    data: { success: boolean; executionId: string; message: string };
+    status: number;
+  }> {
+    const { headers, retries, ...rest } = options ?? {};
+    const response = await this.kbnClient.request<{
+      success: boolean;
+      executionId: string;
+      message: string;
+    }>({
+      ...rest,
+      // Resume is not idempotent: a retried POST after a successful claim returns 409.
+      retries: retries ?? 0,
+      method: 'POST',
+      path: `/s/${this.spaceId}/api/workflows/executions/${workflowExecutionId}/resume`,
+      body: { input },
+      headers: { 'elastic-api-version': '2023-10-31', ...headers },
+    });
+    return response;
   }
 
   /** GET /api/workflows/workflow/aggs —  */

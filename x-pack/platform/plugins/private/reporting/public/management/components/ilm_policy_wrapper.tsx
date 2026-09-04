@@ -5,66 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import type { RouteComponentProps } from 'react-router-dom';
+import React, { forwardRef } from 'react';
 import type { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
 import { useKibana } from '@kbn/reporting-public';
-import type { Section } from '../../constants';
 
-import { IlmPolicyLink } from './ilm_policy_link';
 import { ReportDiagnostic } from './report_diagnostic';
-import { useIlmPolicyStatus } from '../../lib/ilm_policy_status_context';
+import type { ReportDiagnosticHandle } from './report_diagnostic';
 import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
-
-export interface MatchParams {
-  section: Section;
-}
 
 export interface ReportingTabsProps {
   config: ClientConfigType;
   apiClient: ReportingAPIClient;
 }
 
-export const IlmPolicyWrapper: React.FunctionComponent<
-  Partial<RouteComponentProps> & ReportingTabsProps
-> = (props) => {
-  const { config, apiClient } = props;
-  const {
-    services: {
-      application: { capabilities },
-      share: { url: urlService },
-      notifications,
-    },
-  } = useKibana();
+export const IlmPolicyWrapper = forwardRef<ReportDiagnosticHandle, ReportingTabsProps>(
+  ({ config, apiClient }, ref) => {
+    const {
+      services: { notifications },
+    } = useKibana();
 
-  const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
-  const ilmPolicyContextValue = useIlmPolicyStatus();
-  const hasIlmPolicy = ilmPolicyContextValue?.status !== 'policy-not-found';
-  const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
-
-  return (
-    <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-        <EuiFlexGroup justifyContent="flexEnd">
-          {capabilities?.management?.data?.index_lifecycle_management && (
-            <EuiFlexItem grow={false}>
-              {ilmPolicyContextValue?.isLoading ? (
-                <EuiLoadingSpinner />
-              ) : (
-                showIlmPolicyLink && <IlmPolicyLink locator={ilmLocator!} />
-              )}
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+    return (
+      <>
         <MigrateIlmPolicyCallOut toasts={notifications.toasts} />
-        <EuiFlexItem grow={false}>
-          <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-};
+        <ReportDiagnostic ref={ref} hideTrigger clientConfig={config} apiClient={apiClient} />
+      </>
+    );
+  }
+);
+
+IlmPolicyWrapper.displayName = 'IlmPolicyWrapper';
 
 // eslint-disable-next-line import/no-default-export
 export { IlmPolicyWrapper as default };
