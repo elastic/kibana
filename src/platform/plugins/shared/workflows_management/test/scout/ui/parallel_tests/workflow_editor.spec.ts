@@ -121,13 +121,13 @@ test.describe.skip(
     test('should show step type autocompletion suggestions', async ({ pageObjects, page }) => {
       await pageObjects.workflowEditor.gotoNewWorkflow();
       const workflowName = 'Autocomplete Test';
-      await pageObjects.workflowEditor.setYamlEditorValue(getIncompleteStepTypeYaml(workflowName));
 
       // Set incomplete YAML with empty step type
       await pageObjects.workflowEditor.setYamlEditorValue(getIncompleteStepTypeYaml(workflowName));
 
-      // Click on the "type:" line to focus the editor at that position
-      await page.getByText('type:', { exact: true }).click();
+      // Focus the step's own `type:` line — the trigger block has its own `type: manual`,
+      // so an unscoped text match can land on the wrong line and yield no step-type suggestions.
+      await pageObjects.workflowEditor.setCursorToText('    type:');
 
       // Move to end of line and trigger autocomplete
       await page.keyboard.press('End');
