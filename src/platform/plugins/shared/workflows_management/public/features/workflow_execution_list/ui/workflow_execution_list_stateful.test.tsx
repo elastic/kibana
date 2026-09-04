@@ -44,6 +44,10 @@ jest.mock('../../../hooks/use_telemetry', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/use_serial_polling', () => ({
+  useSerialPolling: jest.fn(),
+}));
+
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => ({
     selectedExecutionId: null,
@@ -187,7 +191,7 @@ describe('WorkflowExecutionList (stateful)', () => {
     await waitFor(() =>
       expect(mockWorkflowApi.cancelAllWorkflowExecutions).toHaveBeenCalledWith('wf-1')
     );
-    await waitFor(() => expect(mockRefetch).toHaveBeenCalled());
+    await waitFor(() => expect(mockRefetch).toHaveBeenCalledTimes(1));
   });
 
   it('disables bulk cancel when the user lacks cancel capability', () => {
