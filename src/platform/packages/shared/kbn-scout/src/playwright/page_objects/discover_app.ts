@@ -172,17 +172,13 @@ export class DiscoverApp {
     const title = name.endsWith('*') ? name : `${name}*`;
     const timestampCombo = this.page.components.comboBox('timestampField');
 
-    // The editor renders a skeleton in place of the form until it has loaded the
-    // index sources and the existing data view names, so a visible flyout does not
-    // mean the fields exist yet. Listing sources takes a while on a loaded CI
-    // worker, hence the allowance over the much shorter default action timeout on
-    // the `fill` calls below.
+    // The editor renders a skeleton in place of the form until it has loaded the index
+    // sources and the existing data view names, so a visible flyout does not mean the
+    // fields exist yet, and listing sources is slow on a loaded CI worker.
     //
-    // This is deliberately outside the retry below: the skeleton is one-way. The
-    // editor service only ever sets `isLoadingSourcesInternal` to false, and the
-    // `true` the flyout renders from is just `useObservable`'s initial value before
-    // the first emission, so the form cannot revert to a skeleton once shown. Paying
-    // this wait per attempt instead put a 30s floor under every retry.
+    // Outside the retry below because the skeleton is one-way: the editor service only
+    // ever sets `isLoadingSourcesInternal` to false, so the form cannot revert once
+    // shown. Waiting per attempt instead put a 30s floor under every retry.
     await titleInput.waitFor({ state: 'visible', timeout: 30_000 });
 
     // Submitting can silently no-op: the title's async validation races a separately
@@ -194,13 +190,13 @@ export class DiscoverApp {
     // The sequence succeeds once the new data view is the selected one. That outcome only
     // ever becomes true, unlike the flyout closing, which is a transition: waiting for it
     // with a deadline made a slow close indistinguishable from a rejected submit, and
-    // retrying then drove the editor that had already closed.
+    // retrying then drove the editor that had already closed (#274530).
     //
-    // `toPass` never aborts an attempt that is already running; its timeout only gates
-    // whether another one *starts*. The caller's test budget therefore has to cover this
-    // window plus one whole attempt, or a retry that starts just under the deadline is
-    // killed by the test timeout and reports a bare `Test timeout of Nms exceeded`
-    // instead of the assertion that actually failed (#274869).
+    // `toPass` never aborts an attempt already running; its timeout only gates whether
+    // another one starts. A caller's test budget therefore has to cover this window plus
+    // one whole attempt, or a retry starting just under the deadline is killed by the
+    // test timeout, which reports a bare `Test timeout of Nms exceeded` and hides the
+    // assertion that actually failed (#274869).
     await expect(async () => {
       await titleInput.fill(''); // a real value change, so a latched validation runs again
       await titleInput.fill(title);
@@ -228,7 +224,7 @@ export class DiscoverApp {
             }
             return (await timestampCombo.getSelectedOptions()).length > 0;
           },
-          { timeout: 20_000, intervals: [200] }
+          { timeout: 30_000, intervals: [200] }
         )
         .toBe(true);
 
