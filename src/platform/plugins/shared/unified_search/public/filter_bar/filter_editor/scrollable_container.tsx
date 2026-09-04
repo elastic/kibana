@@ -32,10 +32,10 @@ export function ScrollableContainer({
   resetVisibleHeight$: Subject<void>;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [visibleHeight, setVisibleHeigth] = useState(0);
+  const [visibleHeight, setVisibleHeight] = useState(0);
 
   const clearVisibleHeight = useCallback(() => {
-    setVisibleHeigth(0);
+    setVisibleHeight(0);
   }, []);
 
   useLayoutEffect(() => {
@@ -43,7 +43,7 @@ export function ScrollableContainer({
 
     const resizeObserver = new ResizeObserver(() => {
       if (!containerRef.current) return;
-      setVisibleHeigth(getVisibleHeightInViewport(containerRef.current));
+      setVisibleHeight(getVisibleHeightInViewport(containerRef.current));
     });
     resizeObserver.observe(containerRef.current);
 
