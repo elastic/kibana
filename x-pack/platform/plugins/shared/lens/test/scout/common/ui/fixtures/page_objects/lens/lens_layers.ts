@@ -40,7 +40,7 @@ export class LensLayers {
   async getSelectedLayerIndexPattern(layerIndex = 0): Promise<string> {
     const trigger = this.getLayerIndexPatternTrigger(layerIndex);
     await trigger.waitFor({ state: 'visible' });
-    return (await trigger.innerText()).trim();
+    return (await trigger.locator('[data-test-subj="fullText"]').innerText()).trim();
   }
 
   private getLayerIndexPatternTrigger(layerIndex: number) {
