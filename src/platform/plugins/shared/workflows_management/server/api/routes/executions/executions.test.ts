@@ -16,6 +16,7 @@ import {
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
+import { executionStepsQuerySchema } from './get_execution_steps';
 import type { WorkflowsManagementConfig } from '../../../config';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
@@ -867,6 +868,27 @@ describe('Execution Routes', () => {
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(mockApi.getExecutionStepExecutions).not.toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
+    });
+  });
+
+  describe('executionStepsQuerySchema', () => {
+    it('accepts integer page and size values', () => {
+      expect(executionStepsQuerySchema.validate({ page: 2, size: 50 })).toEqual({
+        page: 2,
+        size: 50,
+      });
+    });
+
+    it('rejects non-integer page values', () => {
+      expect(() => executionStepsQuerySchema.validate({ page: 1.5, size: 50 })).toThrow(
+        'page must be an integer'
+      );
+    });
+
+    it('rejects non-integer size values', () => {
+      expect(() => executionStepsQuerySchema.validate({ page: 1, size: 20.5 })).toThrow(
+        'size must be an integer'
+      );
     });
   });
 

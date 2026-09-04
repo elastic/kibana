@@ -23,6 +23,22 @@ import {
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
+export const executionStepsQuerySchema = schema.object({
+  page: schema.number({
+    min: 1,
+    defaultValue: 1,
+    meta: { description: 'Page number.' },
+    validate: (value) => (Number.isInteger(value) ? undefined : 'page must be an integer'),
+  }),
+  size: schema.number({
+    min: 1,
+    max: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
+    defaultValue: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+    meta: { description: 'Number of step executions per page.' },
+    validate: (value) => (Number.isInteger(value) ? undefined : 'size must be an integer'),
+  }),
+});
+
 export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
@@ -46,19 +62,7 @@ export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDep
         validate: {
           request: {
             params: executionIdParamSchema,
-            query: schema.object({
-              page: schema.number({
-                min: 1,
-                defaultValue: 1,
-                meta: { description: 'Page number.' },
-              }),
-              size: schema.number({
-                min: 1,
-                max: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
-                defaultValue: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-                meta: { description: 'Number of step executions per page.' },
-              }),
-            }),
+            query: executionStepsQuerySchema,
           },
         },
       },

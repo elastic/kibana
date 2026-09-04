@@ -11,7 +11,6 @@ import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { loadExecutionStepPages } from './load_execution_step_pages';
 import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
@@ -35,11 +34,6 @@ export const loadExecutionThunk = createAsyncThunk<
     const api = new WorkflowApi(http);
     try {
       const previousExecution = getState().detail.execution;
-      const cachedSteps = previousExecution?.id === id ? previousExecution.stepExecutions : [];
-      const cachedTotal =
-        previousExecution?.id === id
-          ? Math.max(getState().detail.stepExecutionsTotal, cachedSteps.length)
-          : 0;
 
       const [execution, stepsPage] = await Promise.all([
         api.getExecution(id, {
@@ -47,16 +41,11 @@ export const loadExecutionThunk = createAsyncThunk<
           includeOutput: false,
           omitStepExecutions: true,
         }),
-        loadExecutionStepPages({
-          fetchPage: (page, size) => api.getExecutionSteps(id, { page, size }),
-          cachedSteps,
-          cachedTotal,
-          maxSteps: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-        }),
+        api.getExecutionSteps(id, { page: 1, size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE }),
       ]);
       const response: WorkflowExecutionDto = {
         ...execution,
-        stepExecutions: stepsPage.steps,
+        stepExecutions: stepsPage.results.slice(0, WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE),
       };
       dispatch(setExecution(response));
       dispatch(setStepExecutionsTotal(stepsPage.total));

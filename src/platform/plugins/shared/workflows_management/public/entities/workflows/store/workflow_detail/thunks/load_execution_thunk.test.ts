@@ -10,7 +10,6 @@
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
-import { WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE } from './load_execution_step_pages';
 import { loadExecutionThunk } from './load_execution_thunk';
 import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
@@ -146,42 +145,36 @@ describe('loadExecutionThunk', () => {
     expect(store.getState().detail.stepExecutionsTotal).toBe(0);
   });
 
-  it('should skip a completed poll batch and fetch the next page', async () => {
-    const completedBatch = Array.from(
-      { length: WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE },
-      (_, i) => ({
-        id: `s${i}`,
-        stepId: `s${i}`,
-        status: ExecutionStatus.COMPLETED,
-      })
-    );
+  it('should refetch the first page of steps on later polls', async () => {
+    const previousSteps = [{ id: 's1', stepId: 's1', status: ExecutionStatus.COMPLETED }];
     store.dispatch(
       setExecution({
         ...mockExecution,
         status: ExecutionStatus.RUNNING,
-        stepExecutions: completedBatch as WorkflowExecutionDto['stepExecutions'],
+        stepExecutions: previousSteps as WorkflowExecutionDto['stepExecutions'],
       })
     );
+    const nextSteps = [
+      ...previousSteps,
+      { id: 's2', stepId: 's2', status: ExecutionStatus.RUNNING },
+    ];
     mockGetExecution.mockResolvedValue({ ...mockExecution, status: ExecutionStatus.RUNNING });
     mockGetExecutionSteps.mockResolvedValue({
-      results: [{ id: 'next', stepId: 'next', status: ExecutionStatus.RUNNING }],
-      total: WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE + 1,
-      page: 2,
-      size: WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE,
+      results: nextSteps,
+      total: 2,
+      page: 1,
+      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
     });
 
     const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
 
     expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
     expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
-      page: 2,
-      size: WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE,
+      page: 1,
+      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
     });
     expect(result.payload).toMatchObject({
-      stepExecutions: [
-        ...completedBatch,
-        { id: 'next', stepId: 'next', status: ExecutionStatus.RUNNING },
-      ],
+      stepExecutions: nextSteps,
     });
   });
 
