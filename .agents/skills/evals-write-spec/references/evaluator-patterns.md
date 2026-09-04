@@ -182,32 +182,35 @@ Dataset examples with tool call assertions:
 }
 ```
 
-## RAG Evaluators
+## IR Evaluators
 
-For retrieval quality with ground truth documents:
+For information retrieval quality with ground truth documents:
 
 ```ts
 import {
   createPrecisionAtKEvaluator,
   createRecallAtKEvaluator,
   createF1AtKEvaluator,
-  createRagEvaluators,
+  createHitRateAtKEvaluator,
+  createMrrAtKEvaluator,
+  createNdcgAtKEvaluator,
+  createMapAtKEvaluator,
+  createIrEvaluators,
 } from '@kbn/evals';
 import type { GroundTruth, RetrievedDoc } from '@kbn/evals';
 ```
 
-The `createRagEvaluators` factory creates all three at once:
+The `createIrEvaluators` factory creates all seven at once (Precision@K, Recall@K, F1@K, HitRate@K, MRR@K, NDCG@K, MAP@K). `extractRetrievedDocs` must return docs ordered best match first: MRR, NDCG, and MAP derive each doc's rank from its array position, so an unordered array makes those three scores meaningless (Precision, Recall, F1, and HitRate are unaffected):
 
 ```ts
-const ragEvals = createRagEvaluators({
+const irEvals = createIrEvaluators({
   k: 5,
-  extractRetrievedDocs: (output) =>
-    output.documents.map((d) => ({ id: d.id, content: d.content })),
+  extractRetrievedDocs: (output) => output.documents.map((d) => ({ index: d.index, id: d.id })),
   extractGroundTruth: (expected) => expected.groundTruth,
 });
 ```
 
-Ground truth in datasets uses document IDs mapped to relevance scores:
+Ground truth in datasets maps index names to document IDs with relevance scores:
 
 ```ts
 {

@@ -150,12 +150,12 @@ Available from `evaluators.traceBasedEvaluators`:
 
 These read from the tracing ES cluster and require EDOT to be running.
 
-### RAG Evaluators
+### IR Evaluators
 
-For retrieval-augmented generation with ground truth:
+For information retrieval quality with ground truth (Precision@K, Recall@K, F1@K, HitRate@K, MRR@K, NDCG@K, MAP@K):
 
 ```ts
-import { createPrecisionAtKEvaluator, createRecallAtKEvaluator, createF1AtKEvaluator } from '@kbn/evals';
+import { createIrEvaluators } from '@kbn/evals';
 ```
 
 See [evaluator-patterns.md](references/evaluator-patterns.md) for full examples.

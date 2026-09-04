@@ -158,15 +158,21 @@ export {
   createPrecisionAtKEvaluator,
   createRecallAtKEvaluator,
   createF1AtKEvaluator,
+  createHitRateAtKEvaluator,
+  createMrrAtKEvaluator,
+  createNdcgAtKEvaluator,
+  createMapAtKEvaluator,
+  createIrEvaluators,
   createRagEvaluators,
-} from './src/evaluators/rag';
+} from './src/evaluators/ir';
 export type {
   GroundTruth,
+  IrEvaluatorConfig,
   RagEvaluatorConfig,
   RetrievedDocsExtractor,
   GroundTruthExtractor,
   RetrievedDoc,
-} from './src/evaluators/rag/types';
+} from './src/evaluators/ir/types';
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';

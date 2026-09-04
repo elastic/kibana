@@ -6,25 +6,30 @@
  */
 
 import {
-  isKSpecificRagEvaluator,
+  isKSpecificIrEvaluator,
   matchesEvaluatorPattern,
   expandPatternsToEvaluators,
 } from './patterns';
 
 describe('evaluator patterns', () => {
-  describe('isKSpecificRagEvaluator', () => {
+  describe('isKSpecificIrEvaluator', () => {
     it('should return true for K-specific evaluator names', () => {
-      expect(isKSpecificRagEvaluator('Precision@5')).toBe(true);
-      expect(isKSpecificRagEvaluator('Precision@10')).toBe(true);
-      expect(isKSpecificRagEvaluator('Recall@5')).toBe(true);
-      expect(isKSpecificRagEvaluator('F1@10')).toBe(true);
+      expect(isKSpecificIrEvaluator('Precision@5')).toBe(true);
+      expect(isKSpecificIrEvaluator('Precision@10')).toBe(true);
+      expect(isKSpecificIrEvaluator('Recall@5')).toBe(true);
+      expect(isKSpecificIrEvaluator('F1@10')).toBe(true);
+      expect(isKSpecificIrEvaluator('HitRate@5')).toBe(true);
+      expect(isKSpecificIrEvaluator('MRR@10')).toBe(true);
+      expect(isKSpecificIrEvaluator('NDCG@10')).toBe(true);
+      expect(isKSpecificIrEvaluator('MAP@100')).toBe(true);
     });
 
-    it('should return false for pattern names and non-RAG evaluators', () => {
-      expect(isKSpecificRagEvaluator('Precision@K')).toBe(false);
-      expect(isKSpecificRagEvaluator('Factuality')).toBe(false);
-      expect(isKSpecificRagEvaluator('Precision@abc')).toBe(false);
-      expect(isKSpecificRagEvaluator('Precision@')).toBe(false);
+    it('should return false for pattern names and non-IR evaluators', () => {
+      expect(isKSpecificIrEvaluator('Precision@K')).toBe(false);
+      expect(isKSpecificIrEvaluator('NDCG@K')).toBe(false);
+      expect(isKSpecificIrEvaluator('Factuality')).toBe(false);
+      expect(isKSpecificIrEvaluator('Precision@abc')).toBe(false);
+      expect(isKSpecificIrEvaluator('Precision@')).toBe(false);
     });
   });
 
@@ -39,6 +44,10 @@ describe('evaluator patterns', () => {
       expect(matchesEvaluatorPattern('Precision@10', 'Precision@K')).toBe(true);
       expect(matchesEvaluatorPattern('Recall@5', 'Recall@K')).toBe(true);
       expect(matchesEvaluatorPattern('F1@10', 'F1@K')).toBe(true);
+      expect(matchesEvaluatorPattern('HitRate@5', 'HitRate@K')).toBe(true);
+      expect(matchesEvaluatorPattern('MRR@10', 'MRR@K')).toBe(true);
+      expect(matchesEvaluatorPattern('NDCG@10', 'NDCG@K')).toBe(true);
+      expect(matchesEvaluatorPattern('MAP@100', 'MAP@K')).toBe(true);
     });
 
     it('should not match different metric types or invalid patterns', () => {
