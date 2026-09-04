@@ -8,6 +8,12 @@ viewer:
     - 'read_project_routing'
   indices:
     - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
@@ -101,6 +107,22 @@ editor:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+      privileges:
+        - read
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
     - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
@@ -228,6 +250,12 @@ t1_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
@@ -325,6 +353,12 @@ t2_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
     - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
@@ -424,6 +458,18 @@ t3_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
     - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
@@ -543,6 +589,12 @@ threat_intelligence_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
@@ -645,6 +697,18 @@ rule_author:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
     - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
@@ -751,6 +815,18 @@ soc_manager:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
     - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
@@ -962,7 +1038,24 @@ platform_engineer:
     reserved: true
   cluster:
     - manage
+    - 'read_project_routing'
   indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+      privileges:
+        - read
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
     - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
@@ -1067,6 +1160,18 @@ endpoint_operations_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
     - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
@@ -1185,6 +1290,12 @@ endpoint_policy_manager:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
     - names:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
