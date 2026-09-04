@@ -12,8 +12,8 @@ export const getInboundIngestToken = (connector: ActionConnector): string | unde
   if (!('secrets' in connector) || connector.secrets == null) {
     return undefined;
   }
-  const secrets = connector.secrets as Record<string, unknown>;
-  const token = secrets.ingestToken ?? secrets.ingest_token;
+  const secrets = connector.secrets as { ingestToken?: unknown };
+  const token = secrets.ingestToken;
   return typeof token === 'string' && token.length > 0 ? token : undefined;
 };
 

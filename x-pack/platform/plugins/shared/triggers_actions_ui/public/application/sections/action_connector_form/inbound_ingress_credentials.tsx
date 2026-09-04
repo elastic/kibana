@@ -87,12 +87,14 @@ const InboundIngressCredentialsComponent: React.FC<InboundIngressCredentialsProp
   const rotateConfirmTitleId = useGeneratedHtmlId();
 
   const onConfirmRotate = useCallback(async () => {
-    const rotated = await rotateIngress(connector.id);
-    setShowRotateConfirm(false);
-    if (!rotated) {
-      return;
+    try {
+      const rotated = await rotateIngress(connector.id);
+      setIngestToken(rotated.ingestToken);
+    } catch {
+      // Danger toast is shown by the rotate hook.
+    } finally {
+      setShowRotateConfirm(false);
     }
-    setIngestToken(rotated.ingestToken);
   }, [connector.id, rotateIngress]);
 
   return (

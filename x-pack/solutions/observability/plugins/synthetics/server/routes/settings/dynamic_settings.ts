@@ -96,7 +96,10 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       await server.pluginsStart.taskManager.bulkUpdateSchedules([PRIVATE_LOCATIONS_SYNC_TASK_ID], {
         interval: `${privateLocationsSyncInterval}m`,
       });
-      void runSynPrivateLocationMonitorsTaskSoon({ server });
+      // Fire-and-forget: the new interval is already persisted, so a failure to
+      // kick the task early only means it starts on its next cycle. Swallow it
+      // here (it is already logged) rather than failing the settings write.
+      void runSynPrivateLocationMonitorsTaskSoon({ server }).catch(() => {});
     }
 
     let persistedRebalance = true;

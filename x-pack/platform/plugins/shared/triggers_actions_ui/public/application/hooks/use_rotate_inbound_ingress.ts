@@ -14,7 +14,7 @@ import { useKibana } from '../../common/lib/kibana';
 
 interface UseRotateInboundIngressReturnValue {
   isLoading: boolean;
-  rotateIngress: (id: string) => Promise<RotateInboundIngressResult | undefined>;
+  rotateIngress: (id: string) => Promise<RotateInboundIngressResult>;
 }
 
 export const useRotateInboundIngress = (): UseRotateInboundIngressReturnValue => {
@@ -50,16 +50,7 @@ export const useRotateInboundIngress = (): UseRotateInboundIngressReturnValue =>
   });
 
   const { mutateAsync, isLoading } = mutation;
-  const rotateIngress = useCallback(
-    async (id: string) => {
-      try {
-        return await mutateAsync(id);
-      } catch {
-        return undefined;
-      }
-    },
-    [mutateAsync]
-  );
+  const rotateIngress = useCallback((id: string) => mutateAsync(id), [mutateAsync]);
 
   return {
     isLoading,

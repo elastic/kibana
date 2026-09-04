@@ -87,7 +87,7 @@ describe('InboundIngressCredentials', () => {
     });
 
     expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
-      '/internal/actions/connector/sales-ingress/_rotate_ingress'
+      '/internal/actions/connector/sales-ingress/_rotate_event_token'
     );
   });
 });

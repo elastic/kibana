@@ -102,7 +102,7 @@ describe('Inbound events HTTP API', () => {
     const mintRes = await getSupertest(
       kibanaServer.root,
       'post',
-      `${INTERNAL_BASE_ACTION_API_PATH}/connector/${created.id}/_rotate_ingress`
+      `${INTERNAL_BASE_ACTION_API_PATH}/connector/${created.id}/_rotate_event_token`
     )
       .set('kbn-xsrf', 'kibana')
       .set('x-elastic-internal-origin', 'kibana')
@@ -135,7 +135,7 @@ describe('Inbound events HTTP API', () => {
     const rotateRes = await getSupertest(
       kibanaServer.root,
       'post',
-      `${INTERNAL_BASE_ACTION_API_PATH}/connector/${created.id}/_rotate_ingress`
+      `${INTERNAL_BASE_ACTION_API_PATH}/connector/${created.id}/_rotate_event_token`
     )
       .set('kbn-xsrf', 'kibana')
       .set('x-elastic-internal-origin', 'kibana')

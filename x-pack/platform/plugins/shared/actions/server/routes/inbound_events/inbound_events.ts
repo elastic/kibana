@@ -85,7 +85,7 @@ export function inboundEventsRoute({
           response: {
             200: {
               description:
-                'Connector HTTP 200 ack. No event is emitted. `.inboundWebhook` handshake is `{ challenge }`; other connector types may return a different JSON object.',
+                'Connector HTTP 200 ack. No event is emitted. `.inboundWebhook` handshake is `{ challenge }`.',
               body: () => ingestEventsAckResponseSchemaV1,
             },
             202: {

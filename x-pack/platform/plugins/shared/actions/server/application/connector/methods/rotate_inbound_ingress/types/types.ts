@@ -11,3 +11,8 @@ export interface RotateInboundIngressParams {
   context: ActionsClientContext;
   id: string;
 }
+
+/** One-time ingest token returned on rotate; never persisted. */
+export interface RotateInboundIngressResult {
+  ingestToken: string;
+}
