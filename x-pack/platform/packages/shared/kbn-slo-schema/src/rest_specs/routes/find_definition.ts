@@ -43,7 +43,9 @@ const findSloDefinitionsResponseSchema = z.object({
   results: z.array(sloDefinitionResponseSchema),
 });
 
-type FindSLODefinitionsParams = NonNullable<z.output<typeof findSloDefinitionsParamsSchema.shape.query>>;
+type FindSLODefinitionsParams = NonNullable<
+  z.output<typeof findSloDefinitionsParamsSchema.shape.query>
+>;
 type FindSLODefinitionsResponse = z.input<typeof findSloDefinitionsResponseSchema>;
 
 type SLODefinitionResponse = z.input<typeof sloDefinitionResponseSchema>;

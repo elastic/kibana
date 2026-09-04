@@ -16,11 +16,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
-import {
-  ALL_VALUE,
-  compositeSloDefinitionSchema,
-  sloDefinitionSchemaZod,
-} from '@kbn/slo-schema';
+import { ALL_VALUE, compositeSloDefinitionSchema, sloDefinitionSchemaZod } from '@kbn/slo-schema';
 import { chunk, merge } from 'lodash';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import type {
