@@ -287,16 +287,19 @@ export class WorkflowsApiService {
     includeOutput?: boolean;
   }): Promise<WorkflowExecutionDto> {
     const expected = Array.isArray(status) ? status : [status];
-    return waitForConditionOrThrow({
+    const execution = await waitForConditionOrThrow({
       action: () => this.getExecution(workflowExecutionId, { includeOutput }),
-      condition: (execution) =>
-        execution != null && expected.includes(execution.status as ExecutionStatus),
+      condition: (next) => next != null && expected.includes(next.status as ExecutionStatus),
       interval: 1000,
       timeout,
-      errorMessage: (execution) =>
+      errorMessage: (last) =>
         `Execution with id ${workflowExecutionId} did not reach ${expected.join('|')}` +
-        ` (last status: ${execution?.status ?? 'undefined'})`,
+        ` (last status: ${last?.status ?? 'undefined'})`,
     });
+    if (execution == null) {
+      throw new Error(`Execution with id ${workflowExecutionId} was not found`);
+    }
+    return execution;
   }
 
   /** POST /api/workflows/executions/{id}/resume — resume a paused HITL execution. */
