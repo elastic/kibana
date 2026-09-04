@@ -18,5 +18,6 @@ import type { ParsedMetricItem } from '../../types';
  * first `::` is always the delimiter and the encoding stays injective even if
  * `metricName` contains `::`.
  */
-export const getMetricUniqueKey = (metricItem: ParsedMetricItem): string =>
-  `${metricItem.indexName}::${metricItem.metricName}`;
+export const getMetricUniqueKey = (
+  metricItem: Pick<ParsedMetricItem, 'indexName' | 'metricName'>
+): string => `${metricItem.indexName}::${metricItem.metricName}`;

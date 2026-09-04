@@ -16,7 +16,7 @@ describe('buildMetricsInfoQuery', () => {
     expect(buildMetricsInfoQuery('   ')).toBe('');
   });
 
-  it('appends | METRICS_INFO when no dimension filter', () => {
+  it('appends | METRICS_INFO', () => {
     expect(buildMetricsInfoQuery('TS INDEX')).toBe(`TS INDEX\n | METRICS_INFO`);
   });
 
@@ -27,72 +27,37 @@ describe('buildMetricsInfoQuery', () => {
     expect(buildMetricsInfoQuery(withLimit)).toBe(withLimit);
   });
 
-  it('does not inject dimension filters when METRICS_INFO is already user-authored', () => {
+  it('does not inject a postFilter when METRICS_INFO is already user-authored', () => {
     const userQuery = 'TS INDEX | METRICS_INFO';
-    expect(buildMetricsInfoQuery(userQuery, ['environment', 'station.name'])).toBe(userQuery);
-  });
-
-  it('does not add dimension filter when dimensionFieldNames is empty', () => {
-    expect(buildMetricsInfoQuery('TS INDEX', [])).toBe(`TS INDEX\n | METRICS_INFO`);
-  });
-
-  it('adds pre-METRICS_INFO IS NOT NULL filter when multiple dimension names', () => {
-    expect(buildMetricsInfoQuery('TS INDEX', ['environment', 'station.name'])).toBe(
-      `TS INDEX\n| WHERE TO_STRING(\`environment\`) IS NOT NULL AND TO_STRING(\`station.name\`) IS NOT NULL | METRICS_INFO`
-    );
-  });
-
-  it('adds pre-METRICS_INFO IS NOT NULL filter for a single dimension', () => {
-    expect(buildMetricsInfoQuery('TS INDEX', ['environment'])).toBe(
-      `TS INDEX\n| WHERE TO_STRING(\`environment\`) IS NOT NULL | METRICS_INFO`
-    );
-  });
-
-  it('escapes dimension identifiers in the pre-METRICS_INFO IS NOT NULL filter', () => {
-    expect(buildMetricsInfoQuery('TS INDEX', ['weird"name', 'back\\slash'])).toBe(
-      `TS INDEX\n| WHERE TO_STRING(\`weird"name\`) IS NOT NULL AND TO_STRING(\`back\\slash\`) IS NOT NULL | METRICS_INFO`
-    );
-  });
-
-  it('combines with existing WHERE via AND when multiple dimensions', () => {
     expect(
-      buildMetricsInfoQuery('TS INDEX | WHERE region == eu', ['environment', 'station.name'])
-    ).toBe(
-      'TS INDEX | WHERE region == eu\n| WHERE TO_STRING(`environment`) IS NOT NULL AND TO_STRING(`station.name`) IS NOT NULL | METRICS_INFO'
-    );
+      buildMetricsInfoQuery(userQuery, {
+        postFilter: 'MV_CONTAINS(dimension_fields, "environment")',
+      })
+    ).toBe(userQuery);
   });
 
   it('appends a caller-supplied postFilter after METRICS_INFO', () => {
     expect(
-      buildMetricsInfoQuery('TS INDEX', undefined, 'MV_CONTAINS(dimension_fields, "environment")')
+      buildMetricsInfoQuery('TS INDEX', {
+        postFilter: 'MV_CONTAINS(dimension_fields, "environment")',
+      })
     ).toBe(`TS INDEX\n | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment")`);
   });
 
-  it('applies both the pre-METRICS_INFO dimension filter and the postFilter', () => {
-    expect(
-      buildMetricsInfoQuery(
-        'TS INDEX',
-        ['environment'],
-        'MV_CONTAINS(dimension_fields, "environment")'
-      )
-    ).toBe(
-      `TS INDEX\n| WHERE TO_STRING(\`environment\`) IS NOT NULL | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment")`
-    );
-  });
-
   it('ignores an empty postFilter', () => {
-    expect(buildMetricsInfoQuery('TS INDEX', [], '')).toBe(`TS INDEX\n | METRICS_INFO`);
+    expect(buildMetricsInfoQuery('TS INDEX', { postFilter: '' })).toBe(`TS INDEX\n | METRICS_INFO`);
+    expect(buildMetricsInfoQuery('TS INDEX', {})).toBe(`TS INDEX\n | METRICS_INFO`);
   });
 
-  it('places the postFilter before LIMIT', () => {
-    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10', undefined, 'foo == 1')).toBe(
-      `TS INDEX\n | METRICS_INFO | WHERE foo == 1 | LIMIT 10`
+  it('does not inherit the document LIMIT onto the catalog query', () => {
+    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10')).toBe(`TS INDEX\n | METRICS_INFO`);
+    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10', { postFilter: 'foo == 1' })).toBe(
+      `TS INDEX\n | METRICS_INFO | WHERE foo == 1`
     );
   });
 
   it('returns empty string for query with transformational command', () => {
     expect(buildMetricsInfoQuery('FROM x | STATS count()')).toBe('');
-    expect(buildMetricsInfoQuery('FROM x | STATS count()', ['a', 'b'])).toBe('');
     expect(buildMetricsInfoQuery('TS x | STATS count()')).toBe('');
   });
 
@@ -101,28 +66,24 @@ describe('buildMetricsInfoQuery', () => {
     expect(buildMetricsInfoQuery('FROM metrics-* | LIMIT 100')).toBe('');
   });
 
-  it('inserts METRICS_INFO before LIMIT when query has LIMIT', () => {
-    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10')).toBe(
-      `TS INDEX\n | METRICS_INFO | LIMIT 10`
-    );
-  });
-
   it('removes SORT from the query', () => {
     expect(buildMetricsInfoQuery('TS metrics-* | LIMIT 100 | SORT timestamp DESC')).toBe(
-      `TS metrics-*\n | METRICS_INFO | LIMIT 100`
+      `TS metrics-*\n | METRICS_INFO`
     );
 
     expect(buildMetricsInfoQuery('TS metrics-* | SORT timestamp DESC | LIMIT 100')).toBe(
-      `TS metrics-*\n | METRICS_INFO | LIMIT 100`
+      `TS metrics-*\n | METRICS_INFO`
     );
 
     expect(
       buildMetricsInfoQuery(
         'TS metrics-* | SORT timestamp DESC | LIMIT 100 | WHERE timestamp > now-1h',
-        ['environment', 'station.name']
+        {
+          postFilter: 'MV_CONTAINS(dimension_fields, "environment")',
+        }
       )
     ).toBe(
-      `TS metrics-* | WHERE timestamp > now - 1h\n| WHERE TO_STRING(\`environment\`) IS NOT NULL AND TO_STRING(\`station.name\`) IS NOT NULL | METRICS_INFO | LIMIT 100`
+      `TS metrics-* | WHERE timestamp > now - 1h\n | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment")`
     );
   });
 });
