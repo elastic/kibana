@@ -27,7 +27,9 @@ import { probeHttp } from './profiles';
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
-const SCOUT_READY_TIMEOUT_MS = 180_000;
+// Overridable via SCOUT_READY_TIMEOUT_MS env: cold-boot rspack compile (303
+// bundles) can exceed the 180s default on loaded eval VMs.
+const SCOUT_READY_TIMEOUT_MS = Number(process.env.SCOUT_READY_TIMEOUT_MS) || 180_000;
 
 const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
