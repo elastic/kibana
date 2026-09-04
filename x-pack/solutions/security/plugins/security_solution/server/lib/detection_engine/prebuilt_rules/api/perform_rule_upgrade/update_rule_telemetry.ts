@@ -13,6 +13,7 @@ import {
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
 } from '../../../../telemetry/event_based/events';
+import { hasRuleTypeChanged } from './get_rule_type_change';
 
 interface BasicDiffInfo {
   conflict: ThreeWayDiffConflict;
@@ -206,7 +207,7 @@ function calculateBulkUpdateSummary(
       numOfNonCustomizedRules++;
     }
 
-    if (hasRuleTypeChanged(fieldsDiff)) {
+    if (hasRuleTypeChanged(fieldsDiff.type)) {
       numOfRulesWithRuleTypeChange++;
     }
 
@@ -289,7 +290,7 @@ function createRuleUpdateTelemetryEvent({
     ruleId,
     ruleName,
     hasBaseVersion,
-    hasRuleTypeChange: hasRuleTypeChanged(fieldsDiff),
+    hasRuleTypeChange: hasRuleTypeChanged(fieldsDiff.type),
     updatedFieldsSummary: {
       count: updatedFieldsTotal.length,
       nonSolvableConflictsCount: updatedFieldsWithNonSolvableConflicts.length,
@@ -302,18 +303,4 @@ function createRuleUpdateTelemetryEvent({
     updatedFieldsWithNoConflicts,
     finalResult,
   };
-}
-
-// The rule's `type` was force-set to the target version's value during this upgrade attempt.
-// Only the three outcomes `determineIfValueCanUpdate` treats as a real update count - unlike
-// `isUpdatableOutcome` above, `CustomizedValueSameUpdate` is deliberately excluded here because
-// current already equals target for that outcome, so nothing changes on upgrade.
-function hasRuleTypeChanged(fieldsDiff: BasicRuleFieldsDiff): boolean {
-  const diffOutcome = fieldsDiff.type?.diff_outcome;
-
-  return (
-    diffOutcome === ThreeWayDiffOutcome.StockValueCanUpdate ||
-    diffOutcome === ThreeWayDiffOutcome.CustomizedValueCanUpdate ||
-    diffOutcome === ThreeWayDiffOutcome.MissingBaseCanUpdate
-  );
 }

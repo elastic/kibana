@@ -614,6 +614,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_id: 'rule_1',
             reason: 'CONFLICT',
             conflict: 'SOLVABLE',
+            rule_type_change: { current: 'query', target: 'saved_query' },
           })
         );
       });
@@ -682,6 +683,7 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_id: 'rule_1',
               reason: 'CONFLICT',
               conflict: 'NON_SOLVABLE',
+              rule_type_change: { current: 'query', target: 'saved_query' },
             })
           );
         });

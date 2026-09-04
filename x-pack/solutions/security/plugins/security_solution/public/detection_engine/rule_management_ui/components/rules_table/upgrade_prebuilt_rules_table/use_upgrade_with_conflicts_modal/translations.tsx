@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 export const UPGRADE_CONFLICTS_MODAL_TITLE = i18n.translate(
@@ -165,6 +166,35 @@ export const RULES_WITH_AUTO_RESOLVED_CONFLICTS_GUIDANCE = ({
     </>
   );
 };
+
+const RULE_TYPE_CHANGE_WARNING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeConflictsModal.ruleTypeChangeWarningTitle',
+  {
+    defaultMessage: 'Rule type changes',
+  }
+);
+
+export const RULES_WITH_RULE_TYPE_CHANGE_WARNING = (numOfRulesWithRuleTypeChange: number) => (
+  <>
+    <KbnWarningCallout
+      title={RULE_TYPE_CHANGE_WARNING_TITLE}
+      data-test-subj="upgradeConflictsModalRuleTypeChangeWarning"
+      text={
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithRuleTypeChangeWarning"
+            defaultMessage="Auto-resolved conflicts include a rule type change for {numOfRulesWithRuleTypeChangeStrong} unmodified {numOfRulesWithRuleTypeChange, plural, =1 {rule} other {rules}}. A rule type change can affect how the rule’s actions and exceptions are executed."
+            values={{
+              numOfRulesWithRuleTypeChange,
+              numOfRulesWithRuleTypeChangeStrong: <strong>{numOfRulesWithRuleTypeChange}</strong>,
+            }}
+          />
+        </p>
+      }
+    />
+    <br />
+  </>
+);
 
 export const RULES_WITHOUT_CONFLICTS_GUIDANCE = (numOfRulesWithoutConflicts: number) => (
   <FormattedMessage
