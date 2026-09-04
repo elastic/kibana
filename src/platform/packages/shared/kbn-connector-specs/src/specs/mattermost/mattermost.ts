@@ -220,6 +220,9 @@ const optionalResponseInteger = (
   return value;
 };
 
+const optionalChannelMemberTimestamp = (value: unknown, action: string): number | undefined =>
+  value === -1 ? -1 : optionalResponseInteger(value, action, 'ChannelMember');
+
 const optionalResponseBoolean = (
   value: unknown,
   action: string,
@@ -293,7 +296,7 @@ const trimChannelMember = (value: unknown, action: string) => {
     channelId,
     userId,
     roles: optionalResponseString(value.roles, action, 'ChannelMember'),
-    lastViewedAt: optionalResponseInteger(value.last_viewed_at, action, 'ChannelMember'),
+    lastViewedAt: optionalChannelMemberTimestamp(value.last_viewed_at, action),
     messageCount: optionalResponseInteger(value.msg_count, action, 'ChannelMember'),
     mentionCount: optionalResponseInteger(value.mention_count, action, 'ChannelMember'),
     rootMentionCount: optionalResponseInteger(value.mention_count_root, action, 'ChannelMember'),
@@ -303,7 +306,7 @@ const trimChannelMember = (value: unknown, action: string) => {
       'ChannelMember'
     ),
     rootMessageCount: optionalResponseInteger(value.msg_count_root, action, 'ChannelMember'),
-    lastUpdateAt: optionalResponseInteger(value.last_update_at, action, 'ChannelMember'),
+    lastUpdateAt: optionalChannelMemberTimestamp(value.last_update_at, action),
     schemeGuest: optionalResponseBoolean(value.scheme_guest, action, 'ChannelMember'),
     schemeUser: optionalResponseBoolean(value.scheme_user, action, 'ChannelMember'),
     schemeAdmin: optionalResponseBoolean(value.scheme_admin, action, 'ChannelMember'),
@@ -382,7 +385,7 @@ const trimValidatedPost = (value: unknown, action: string) => {
   for (const key of ['create_at', 'update_at', 'delete_at', 'edit_at', 'reply_count'] as const) {
     optionalResponseInteger(value[key], action, 'Post');
   }
-  if (value.file_ids !== undefined) {
+  if (value.file_ids !== undefined && value.file_ids !== null) {
     if (!Array.isArray(value.file_ids)) {
       return malformedResponse(action, 'Post');
     }
@@ -485,7 +488,7 @@ const trimPostList = (
     return malformedPostList(action);
   }
 
-  if (value.matches !== undefined && !isRecord(value.matches)) {
+  if (value.matches !== undefined && value.matches !== null && !isRecord(value.matches)) {
     return malformedPostList(action);
   }
   const matchesSource = isRecord(value.matches) ? value.matches : {};

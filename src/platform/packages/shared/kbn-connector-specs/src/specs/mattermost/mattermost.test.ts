@@ -657,6 +657,37 @@ describe('Mattermost connector', () => {
       });
     });
 
+    it('accepts the Mattermost -1 sentinel only for channel member view timestamps', async () => {
+      const unviewedMember = { ...rawChannelMember, last_viewed_at: -1, last_update_at: -1 };
+      mockPost.mockResolvedValue({ data: unviewedMember, status: 201 });
+
+      const added = await Mattermost.actions.addUserToChannel.handler(mockContext, {
+        channelId: CHANNEL_ID,
+        userId: OTHER_USER_ID,
+      });
+
+      expect(added.member).toEqual(expect.objectContaining({ lastViewedAt: -1, lastUpdateAt: -1 }));
+
+      mockGet.mockResolvedValue({ data: [unviewedMember], status: 200 });
+      const listed = await Mattermost.actions.listChannelMembers.handler(mockContext, {
+        channelId: CHANNEL_ID,
+      });
+      expect(listed.members).toEqual([
+        expect.objectContaining({ lastViewedAt: -1, lastUpdateAt: -1 }),
+      ]);
+
+      mockPost.mockResolvedValue({
+        data: { ...unviewedMember, msg_count: -1 },
+        status: 201,
+      });
+      await expect(
+        Mattermost.actions.addUserToChannel.handler(mockContext, {
+          channelId: CHANNEL_ID,
+          userId: OTHER_USER_ID,
+        })
+      ).rejects.toThrow('malformed ChannelMember response');
+    });
+
     it('creates only public or private channels with exact Mattermost field names', async () => {
       mockPost.mockResolvedValue({ data: rawChannel, status: 201 });
 
@@ -1221,6 +1252,20 @@ describe('Mattermost connector', () => {
       expect(result.post).not.toHaveProperty('props');
     });
 
+    it('accepts null file IDs in a successful ephemeral post response', async () => {
+      mockPost.mockResolvedValue({ data: { ...rawPost, file_ids: null }, status: 201 });
+
+      const result = await Mattermost.actions.createEphemeralPost.handler(mockContext, {
+        userId: OTHER_USER_ID,
+        channelId: CHANNEL_ID,
+        message: 'Transient notice',
+      });
+
+      expect(result.post).toEqual(
+        expect.objectContaining({ id: POST_ID, channelId: CHANNEL_ID, fileIds: undefined })
+      );
+    });
+
     it('creates a reaction only as the authenticated connector user', async () => {
       mockGet.mockResolvedValue({ data: rawUser, status: 200 });
       mockPost.mockResolvedValue({ data: rawReaction, status: 200 });
@@ -1579,6 +1624,33 @@ describe('Mattermost connector', () => {
           matches: { [POST_ID]: ['alert'] },
         })
       );
+    });
+
+    it('treats null search matches from SQL-backed Mattermost as empty', async () => {
+      mockPost.mockResolvedValue({ data: { ...rawPostList, matches: null }, status: 200 });
+
+      const result = await Mattermost.actions.searchPosts.handler(mockContext, {
+        teamId: TEAM_ID,
+        terms: 'alert',
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          posts: [expect.objectContaining({ id: POST_ID })],
+          matches: {},
+        })
+      );
+    });
+
+    it('still rejects non-null non-object search matches', async () => {
+      mockPost.mockResolvedValue({ data: { ...rawPostList, matches: [] }, status: 200 });
+
+      await expect(
+        Mattermost.actions.searchPosts.handler(mockContext, {
+          teamId: TEAM_ID,
+          terms: 'alert',
+        })
+      ).rejects.toThrow('Mattermost searchPosts failed: malformed PostList response');
     });
 
     it('rejects a malformed successful search PostList response', async () => {
