@@ -9,14 +9,21 @@ import { Subject, startWith, distinctUntilChanged, BehaviorSubject, withLatestFr
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   ADJUST_THROUGHPUT_INTERVAL,
+  INTERVAL_AFTER_BLOCK_EXCEPTION,
   calculateStartingCapacity,
   countErrors,
   createCapacityScan,
   createPollIntervalScan,
+  isBackpressureActive,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
 import type { TaskManagerConfig } from '../config';
-import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, MGET_DEFAULT_POLL_INTERVAL } from '../config';
+import {
+  CLAIM_STRATEGY_MGET,
+  DEFAULT_CAPACITY,
+  LOW_UTILIZATION_POLL_INTERVAL,
+  MGET_DEFAULT_POLL_INTERVAL,
+} from '../config';
 import { BulkUpdateError, MsearchError } from './errors';
 import { createRunningAveragedStat } from '../monitoring/task_run_calculators';
 
@@ -376,5 +383,41 @@ describe('createManagedConfiguration()', () => {
         );
       });
     });
+  });
+});
+
+describe('isBackpressureActive()', () => {
+  const startingCapacity = 10;
+  const startingPollInterval = MGET_DEFAULT_POLL_INTERVAL;
+
+  test('is inactive at baseline capacity and poll interval', () => {
+    expect(isBackpressureActive(startingCapacity, startingCapacity, startingPollInterval)).toBe(
+      false
+    );
+  });
+
+  test('is active when capacity is reduced below baseline (ES 429 / script errors)', () => {
+    // 429 reproduction: capacity 10 -> 8, poll interval 500 -> 600
+    expect(isBackpressureActive(8, startingCapacity, 600)).toBe(true);
+  });
+
+  test('is active on a cluster_block_exception (poll interval sentinel, capacity held)', () => {
+    // cluster_block reproduction: capacity held at baseline, poll interval -> 61s
+    expect(
+      isBackpressureActive(startingCapacity, startingCapacity, INTERVAL_AFTER_BLOCK_EXCEPTION)
+    ).toBe(true);
+  });
+
+  test('stays inactive on the low-utilization poll-interval change (capacity-driven, not ES)', () => {
+    expect(
+      isBackpressureActive(startingCapacity, startingCapacity, LOW_UTILIZATION_POLL_INTERVAL)
+    ).toBe(false);
+  });
+
+  test('stays inactive under pool saturation with no ES errors', () => {
+    // Pool saturation does not reduce capacity nor error-raise the poll interval.
+    expect(isBackpressureActive(startingCapacity, startingCapacity, startingPollInterval)).toBe(
+      false
+    );
   });
 });

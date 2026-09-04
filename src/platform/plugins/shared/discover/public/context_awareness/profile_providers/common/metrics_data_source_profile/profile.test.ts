@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { DiscoverTabType } from '@kbn/discover-utils';
 import { DataSourceType } from '../../../../../common/data_sources';
 import type { MetricsExperienceDataSourceProfileProvider } from './profile';
 import { METRICS_DATA_SOURCE_PROFILE_ID, createMetricsDataSourceProfileProvider } from './profile';
@@ -18,6 +19,7 @@ const RESOLUTION_MATCH = {
   isMatch: true,
   context: {
     category: DataSourceCategory.Metrics,
+    tabType: DiscoverTabType.Metrics,
     profileState: METRICS_STATE_DEF,
   },
 };
