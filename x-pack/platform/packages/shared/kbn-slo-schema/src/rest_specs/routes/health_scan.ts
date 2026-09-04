@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { dateRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import * as t from 'io-ts';
-import { transformHealthSchema } from '../../schema/health';
+import { BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod';
 
-const postHealthScanParamsSchema = t.partial({
-  body: t.partial({
-    force: toBooleanRt,
-  }),
+import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
+import { transformHealthSchema } from '../../schema/zod/health';
+
+const postHealthScanParamsSchema = z.object({
+  body: z
+    .object({
+      force: BooleanFromString.optional(),
+    })
+    .optional(),
 });
 
 interface PostHealthScanResponse {
@@ -23,26 +27,26 @@ interface PostHealthScanResponse {
   error?: string;
 }
 
-const getHealthScanParamsSchema = t.intersection([
-  t.type({
-    path: t.type({
-      scanId: t.string,
-    }),
+const getHealthScanParamsSchema = z.object({
+  path: z.object({
+    scanId: z.string().max(MAX_KEYWORD_LENGTH),
   }),
-  t.partial({
-    query: t.partial({
-      size: toNumberRt,
-      searchAfter: t.string,
-      problematic: toBooleanRt,
-      allSpaces: toBooleanRt,
-    }),
-  }),
-]);
+  query: z
+    .object({
+      size: z.coerce.number().optional(),
+      searchAfter: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      problematic: BooleanFromString.optional(),
+      allSpaces: BooleanFromString.optional(),
+    })
+    .optional(),
+});
 
-const listHealthScanParamsSchema = t.partial({
-  query: t.partial({
-    size: toNumberRt,
-  }),
+const listHealthScanParamsSchema = z.object({
+  query: z
+    .object({
+      size: z.coerce.number().optional(),
+    })
+    .optional(),
 });
 
 interface HealthScanSummary {
@@ -57,24 +61,24 @@ interface ListHealthScanResponse {
   scans: HealthScanSummary[];
 }
 
-const healthScanResultResponseSchema = t.type({
-  '@timestamp': dateRt,
-  scanId: t.string,
-  spaceId: t.string,
-  slo: t.type({
-    id: t.string,
-    name: t.string,
-    revision: t.number,
-    enabled: t.boolean,
+const healthScanResultResponseSchema = z.object({
+  '@timestamp': z.string(),
+  scanId: z.string(),
+  spaceId: z.string(),
+  slo: z.object({
+    id: z.string(),
+    name: z.string(),
+    revision: z.number(),
+    enabled: z.boolean(),
   }),
-  health: t.type({
-    isProblematic: t.boolean,
+  health: z.object({
+    isProblematic: z.boolean(),
     rollup: transformHealthSchema,
     summary: transformHealthSchema,
   }),
 });
 
-type HealthScanResultResponse = t.OutputOf<typeof healthScanResultResponseSchema>;
+type HealthScanResultResponse = z.output<typeof healthScanResultResponseSchema>;
 
 interface GetHealthScanResultsResponse {
   results: HealthScanResultResponse[];

@@ -4,37 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { durationType } from '../../schema';
-import { allOrAnyString } from '../../schema/common';
+import { z } from '@kbn/zod';
 
-const getSLOBurnRatesResponseSchema = t.type({
-  burnRates: t.array(
-    t.type({
-      name: t.string,
-      burnRate: t.number,
-      sli: t.number,
+import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
+import { durationType } from '../../schema/zod/duration';
+import { allOrAnyString } from '../../schema/zod/common';
+
+const getSLOBurnRatesResponseSchema = z.object({
+  burnRates: z.array(
+    z.object({
+      name: z.string(),
+      burnRate: z.number(),
+      sli: z.number(),
     })
   ),
 });
 
-const getSLOBurnRatesParamsSchema = t.type({
-  path: t.type({ id: t.string }),
-  body: t.intersection([
-    t.type({
-      instanceId: allOrAnyString,
-      windows: t.array(
-        t.type({
-          name: t.string,
-          duration: durationType,
-        })
-      ),
-    }),
-    t.partial({ remoteName: t.string }),
-  ]),
+const getSLOBurnRatesParamsSchema = z.object({
+  path: z.object({ id: z.string().max(MAX_KEYWORD_LENGTH) }),
+  body: z.object({
+    instanceId: allOrAnyString,
+    windows: z.array(
+      z.object({
+        name: z.string().max(MAX_KEYWORD_LENGTH),
+        duration: durationType,
+      })
+    ),
+    remoteName: z.string().optional(),
+  }),
 });
 
-type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
+type GetSLOBurnRatesResponse = z.input<typeof getSLOBurnRatesResponseSchema>;
 
 export { getSLOBurnRatesParamsSchema, getSLOBurnRatesResponseSchema };
 export type { GetSLOBurnRatesResponse };
