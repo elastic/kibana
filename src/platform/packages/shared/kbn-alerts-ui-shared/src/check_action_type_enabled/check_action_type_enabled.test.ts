@@ -78,6 +78,27 @@ describe('checkActionTypeEnabled', () => {
     `);
   });
 
+  test('uses an before Enterprise in license disabled messages', async () => {
+    const actionType: ActionType = {
+      id: '1',
+      minimumLicenseRequired: 'enterprise',
+      supportedFeatureIds: ['alerting'],
+      name: 'my action',
+      enabled: false,
+      enabledInConfig: true,
+      enabledInLicense: false,
+      isSystemActionType: false,
+      isDeprecated: false,
+    };
+    const result = checkActionTypeEnabled(actionType);
+    expect(result.isEnabled).toBe(false);
+    expect(result).toEqual(
+      expect.objectContaining({
+        message: 'This connector requires an Enterprise license.',
+      })
+    );
+  });
+
   test('returns isEnabled:false when action type is disabled by config', async () => {
     const actionType: ActionType = {
       id: '1',
