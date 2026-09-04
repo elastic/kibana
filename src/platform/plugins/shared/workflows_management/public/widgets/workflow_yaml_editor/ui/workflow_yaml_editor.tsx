@@ -770,7 +770,7 @@ export const WorkflowYAMLEditor = ({
         description: i18n.translate('workflows.yamlEditor.commands.toggleEditorModeDescription', {
           defaultMessage: 'Switch between YAML and graph view',
         }),
-        iconType: 'visGraph',
+        iconType: 'appGraph',
       });
     }
     return cmds;

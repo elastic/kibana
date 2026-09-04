@@ -182,7 +182,7 @@ export function getActionOptions(
   };
   const aiGroup: ActionOptionData = {
     iconType: 'sparkles',
-    iconColor: euiTheme.colors.textPrimary,
+    iconColor: euiTheme.colors.textAssistance,
     id: 'ai',
     label: i18n.translate('workflows.actionsMenu.ai', {
       defaultMessage: 'AI',
@@ -428,7 +428,7 @@ export function getActionOptions(
     }
   }
 
-  // Color-grouped: accent (triggers) → neutral tiles → platform blues → flow control
+  // Color-grouped: accent (triggers) → neutral tiles → AI assistance → flow control
   const topLevelOptions: ActionOptionData[] = [
     triggersGroup,
     elasticSearchGroup,
@@ -481,7 +481,7 @@ export function getIconGlyphColor(
     case 'trigger':
       return euiTheme.colors.textAccent;
     case 'platform':
-      return euiTheme.colors.textPrimary;
+      return euiTheme.colors.textAssistance;
     case 'dataTransformation':
       return euiTheme.colors.textWarning;
     case 'flowControl':

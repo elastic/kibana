@@ -48,6 +48,7 @@ describe('getActionOptions', () => {
       textInverse: '#inverse',
       textAccent: '#accent',
       textPrimary: '#primary',
+      textAssistance: '#assistance',
       textWarning: '#warning',
       textAccentSecondary: '#accentSecondary',
     },

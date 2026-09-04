@@ -228,7 +228,7 @@ describe('buildDisplayOptions', () => {
           id: 'toggleEditorMode',
           label: 'Toggle graph editor',
           description: 'Switch between YAML and graph view',
-          iconType: 'visGraph',
+          iconType: 'appGraph',
         },
       ];
       const result = buildDisplayOptions({ ...base, commands, searchTerm: 'yaml' });

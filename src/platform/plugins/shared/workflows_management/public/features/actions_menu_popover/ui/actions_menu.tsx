@@ -31,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getBaseConnectorType } from '@kbn/workflows-ui';
 import { ActionsMenuPreviewPanel } from './actions_menu_preview_panel';
+import { ActionsMenuAiIcon, aiIconTileCss } from './ai_icon_tile';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { flattenOptions, getActionOptions, getIconGlyphColor } from '../lib/get_action_options';
@@ -637,7 +638,7 @@ export function ActionsMenu({
               {isActionConnectorGroup(action) || isActionConnectorOption(action) ? (
                 // Prefer an explicit menu icon (e.g. sparkles for AI) over the connector glyph
                 'iconType' in action && action.iconType === 'sparkles' ? (
-                  <EuiIcon type="sparkles" size="m" color={glyphColor} aria-hidden={true} />
+                  <ActionsMenuAiIcon />
                 ) : (
                   <StepIcon
                     stepType={getBaseConnectorType(action.connectorType)}
@@ -645,7 +646,11 @@ export function ActionsMenu({
                   />
                 )
               ) : isActionGroup(action) || isActionOption(action) ? (
-                <EuiIcon type={action.iconType} size="m" color={glyphColor} aria-hidden={true} />
+                action.iconType === 'sparkles' ? (
+                  <ActionsMenuAiIcon />
+                ) : (
+                  <EuiIcon type={action.iconType} size="m" color={glyphColor} aria-hidden={true} />
+                )
               ) : null}
             </span>
           </EuiFlexItem>
@@ -1412,12 +1417,8 @@ const componentStyles = {
     borderRadius: '8px',
     boxSizing: 'border-box',
   }),
-  // AI — Backgrounds/Base/Primary + Borders/Base/Primary (Text/Primary on glyph)
-  iconOuterPlatform: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBasePrimary,
-      border: `1px solid ${euiTheme.colors.borderBasePrimary}`,
-    }),
+  // AI — Primary→Assistance gradients (same recipe as AiButton / AI Agent)
+  iconOuterPlatform: aiIconTileCss,
   // Triggers — Backgrounds/Base/Accent + Borders/Base/Accent (Text/Accent on glyph)
   iconOuterTrigger: ({ euiTheme }: UseEuiTheme) =>
     css({

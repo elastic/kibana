@@ -35,6 +35,7 @@ import { useWorkflowJsonSchema } from '../../validate_workflow_yaml/model/use_wo
 import { getIconGlyphColor } from '../lib/get_action_options';
 import { getFieldsFromZodSchema } from '../lib/get_step_preview_fields';
 import type { ActionOptionData, JumpToStepEntry } from '../types';
+import { ActionsMenuAiIcon, aiIconTileCss } from './ai_icon_tile';
 import {
   isActionConnectorGroup,
   isActionConnectorOption,
@@ -559,7 +560,9 @@ function PreviewStepRow({
   return (
     <button type="button" css={styles.row} onClick={onClick}>
       <span css={[styles.iconContainer, getPreviewIconContainerStyle(step, styles)]}>
-        {preferMenuIcon && iconType ? (
+        {preferMenuIcon && iconType === 'sparkles' ? (
+          <ActionsMenuAiIcon />
+        ) : preferMenuIcon && iconType ? (
           <EuiIcon type={iconType} size="m" color={glyphColor} aria-hidden />
         ) : isActionConnectorGroup(step) || isActionConnectorOption(step) ? (
           <StepIcon
@@ -567,7 +570,11 @@ function PreviewStepRow({
             executionStatus={undefined}
           />
         ) : isActionGroup(step) || isActionOption(step) ? (
-          <EuiIcon type={step.iconType} size="m" color={glyphColor} aria-hidden />
+          step.iconType === 'sparkles' ? (
+            <ActionsMenuAiIcon />
+          ) : (
+            <EuiIcon type={step.iconType} size="m" color={glyphColor} aria-hidden />
+          )
         ) : null}
       </span>
       <span css={styles.info}>
@@ -931,11 +938,8 @@ const previewStepRowStyles = {
     borderRadius: '8px',
     boxSizing: 'border-box',
   }),
-  iconContainerPlatform: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBasePrimary,
-      border: `1px solid ${euiTheme.colors.borderBasePrimary}`,
-    }),
+  // AI — Primary→Assistance gradients (same recipe as AiButton / AI Agent)
+  iconContainerPlatform: aiIconTileCss,
   iconContainerTrigger: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBaseAccent,
