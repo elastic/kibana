@@ -21,7 +21,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
-import type { VegaByValueState } from '../../server';
+import type { VegaByValueState } from '../../server/embeddable/schema';
 
 const bodyCss = css({
   '.euiFlyoutBody__overflowContent': {
@@ -49,6 +49,7 @@ export const VegaEditorFlyout = ({
   ariaLabelledBy,
   closeFlyout,
   initialSpec,
+  isByReference = false,
   isNewPanel = false,
   onPreview,
   onRevert,
@@ -58,16 +59,18 @@ export const VegaEditorFlyout = ({
   closeFlyout: () => void;
   initialSpec: VegaByValueState['spec'];
 
+  isByReference?: boolean;
   isNewPanel?: boolean;
   onPreview: (spec: VegaByValueState['spec']) => void;
   onRevert: () => void;
-  onSave: (spec: VegaByValueState['spec']) => void;
+  onSave: (spec: VegaByValueState['spec']) => Promise<void> | void;
 }) => {
   const initialEditorValue =
     initialSpec.format === 'json' ? JSON.stringify(initialSpec.value, null, 2) : initialSpec.value;
   const [spec, setSpec] = useState(initialEditorValue);
   const [previewedSpec, setPreviewedSpec] = useState(initialEditorValue);
   const [format, setFormat] = useState<VegaByValueState['spec']['format']>(initialSpec.format);
+  const [isSaving, setIsSaving] = useState(false);
   const canPreview = spec !== previewedSpec;
   const canSave = isNewPanel || spec !== initialEditorValue;
   const previewChanges = () => {
@@ -89,10 +92,15 @@ export const VegaEditorFlyout = ({
     []
   );
 
-  const handleSave = () => {
-    saved.current = true;
-    onSave(specFromEditor(spec, format));
-    closeFlyout();
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave(specFromEditor(spec, format));
+      saved.current = true;
+      closeFlyout();
+    } finally {
+      setIsSaving(false);
+    }
   };
   return (
     <>
@@ -141,12 +149,17 @@ export const VegaEditorFlyout = ({
                 <EuiButton
                   data-test-subj="vegaEditorFlyoutSaveButton"
                   fill
-                  disabled={!canSave}
+                  disabled={!canSave || isSaving}
+                  isLoading={isSaving}
                   onClick={handleSave}
                 >
-                  {i18n.translate('visTypeVega.dashboard.applyAndCloseButtonLabel', {
-                    defaultMessage: 'Apply and close',
-                  })}
+                  {isByReference
+                    ? i18n.translate('visTypeVega.dashboard.saveAndCloseButtonLabel', {
+                        defaultMessage: 'Save and close',
+                      })
+                    : i18n.translate('visTypeVega.dashboard.applyAndCloseButtonLabel', {
+                        defaultMessage: 'Apply and close',
+                      })}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

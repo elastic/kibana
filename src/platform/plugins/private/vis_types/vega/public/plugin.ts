@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { distinctUntilChanged, type Subscription } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -44,8 +43,16 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import {
+  VEGA_API_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_SAVED_OBJECT_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+} from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+import type { VegaEmbeddableState } from '../server/embeddable/schema';
+import type { StoredVegaLibraryItemState } from '../server/vega_saved_object/types';
+import { VegaIcon } from './vega_icon';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -80,7 +87,6 @@ export interface VegaPluginStartDependencies {
 /** @internal */
 export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
-  private standaloneEmbeddableFlagSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -114,13 +120,40 @@ export class VegaPlugin implements Plugin<void, void> {
       return vegaVisType;
     });
 
-    embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {
-      const [startCore, startDeps] = await core.getStartServices();
+    // TODO: Register Add from library synchronously when the feature flags are removed. This
+    // registration waits for start services so the flags can be evaluated. Applications render
+    // only after startup completes, and Add from library reads the registry each time it mounts.
+    const embeddableDefinition = core.getStartServices().then(async ([startCore, startDeps]) => {
       const { vegaEmbeddableFactory } = await import('./embeddable/vega_embeddable');
-      return vegaEmbeddableFactory(startCore, {
+      const definition = vegaEmbeddableFactory(startCore, {
         uiActions: startDeps.uiActions,
         visualizationDependencies,
       });
+      const standaloneEnabled = startCore.featureFlags.getBooleanValue(
+        VEGA_STANDALONE_EMBEDDABLE_FLAG,
+        false
+      );
+      const apiEnabled = startCore.featureFlags.getBooleanValue(VEGA_API_ENABLED_FLAG, false);
+      if (standaloneEnabled && apiEnabled) {
+        embeddable.registerAddFromLibraryType<StoredVegaLibraryItemState>({
+          onAdd: async (container, savedObject) => {
+            container.addNewPanel<VegaEmbeddableState>(
+              {
+                panelType: VEGA_EMBEDDABLE_TYPE,
+                serializedState: { ref_id: savedObject.id },
+              },
+              { displaySuccessMessage: true }
+            );
+          },
+          savedObjectType: VEGA_SAVED_OBJECT_TYPE,
+          savedObjectName: 'Vega',
+          getIconForSavedObject: () => VegaIcon,
+        });
+      }
+      return definition;
+    });
+    embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {
+      return embeddableDefinition;
     });
   }
 
@@ -148,24 +181,18 @@ export class VegaPlugin implements Plugin<void, void> {
       return getAddVegaEmbeddableAction();
     });
 
-    // The feature flag swaps both Dashboard and Canvas from legacy Visualize action to the
-    // standalone embeddable action.
-    this.standaloneEmbeddableFlagSubscription = core.featureFlags
-      .getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
-      .pipe(distinctUntilChanged())
-      .subscribe((useEmbeddableAction) => {
-        const [actionToAttach, actionToDetach] = useEmbeddableAction
-          ? [ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID]
-          : [ADD_VEGA_PANEL_ACTION_ID, ADD_VEGA_EMBEDDABLE_ACTION_ID];
+    // Feature-flag changes require a restart so public and server registrations stay consistent.
+    const useEmbeddableAction = core.featureFlags.getBooleanValue(
+      VEGA_STANDALONE_EMBEDDABLE_FLAG,
+      false
+    );
+    const [actionToAttach, actionToDetach] = useEmbeddableAction
+      ? [ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID]
+      : [ADD_VEGA_PANEL_ACTION_ID, ADD_VEGA_EMBEDDABLE_ACTION_ID];
 
-        for (const trigger of [ADD_PANEL_TRIGGER, ADD_CANVAS_ELEMENT_TRIGGER]) {
-          deps.uiActions.attachAction(trigger, actionToAttach);
-          deps.uiActions.detachAction(trigger, actionToDetach);
-        }
-      });
-  }
-
-  public stop() {
-    this.standaloneEmbeddableFlagSubscription?.unsubscribe();
+    for (const trigger of [ADD_PANEL_TRIGGER, ADD_CANVAS_ELEMENT_TRIGGER]) {
+      deps.uiActions.attachAction(trigger, actionToAttach);
+      deps.uiActions.detachAction(trigger, actionToDetach);
+    }
   }
 }

@@ -15,46 +15,64 @@ import type {
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
+  BY_REF_SCHEMA_META,
+  BY_VALUE_SCHEMA_META,
 } from '@kbn/presentation-publishing-schemas';
 import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
+import { vegaSpecSchema } from '../api/schema';
 
-export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
-  return (
-    z
-      .object({
-        ...serializedTitlesSchema.shape,
-        ...serializedTimeRangeSchema.shape,
-        ...getDrilldownsSchema(VEGA_SUPPORTED_TRIGGERS).shape,
-        spec: z
-          .discriminatedUnion('format', [
-            z.object({
-              format: z.literal('hjson'),
-              value: z.string().min(1),
-            }),
-            z.object({
-              format: z.literal('json'),
-              value: z.looseObject({}),
-            }),
-          ])
-          .meta({
-            description:
-              'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.',
-          }),
-      })
-      // Strip unknown keys for forward-compatible additive changes in this public contract.
-      .strip()
-      .meta({
-        id: 'kbn-vega-embeddable',
-        title: 'Vega',
-        description: 'Vega by-value embeddable state schema.',
-      })
-  );
+const getPanelOwnedFields = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => ({
+  ...serializedTitlesSchema.shape,
+  ...serializedTimeRangeSchema.shape,
+  ...getDrilldownsSchema(VEGA_SUPPORTED_TRIGGERS).shape,
+});
+
+const getVegaByValueSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+  z
+    .object({
+      ...getPanelOwnedFields(getDrilldownsSchema),
+      spec: vegaSpecSchema,
+    })
+    // Strip unknown keys for forward-compatible additive changes in this public contract.
+    .strip()
+    .meta(BY_VALUE_SCHEMA_META);
+
+const getVegaByReferenceSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+  z
+    .object({
+      ...getPanelOwnedFields(getDrilldownsSchema),
+      ref_id: z.string().meta({ description: 'The unique identifier of the Vega library item.' }),
+    })
+    .strip()
+    .meta(BY_REF_SCHEMA_META);
+
+export const getVegaEmbeddableSchema = (
+  getDrilldownsSchema: GetDrilldownsSchemaFnType,
+  byReferenceEnabled = false
+) => {
+  const byValueSchema = getVegaByValueSchema(getDrilldownsSchema);
+  if (!byReferenceEnabled) return byValueSchema;
+
+  return z.union([byValueSchema, getVegaByReferenceSchema(getDrilldownsSchema)]).meta({
+    id: 'kbn-vega-embeddable',
+    title: 'Vega',
+    description: 'Vega panel config.',
+  });
 };
 
 /**
- * NOTE: `vis_types/vega` compiles with `strictNullChecks: false`, which can make the Zod-inferred
- * drilldowns output type incompatible with `SerializedDrilldowns` (e.g. `trigger` becomes optional).
+ * `vis_types/vega` compiles with `strictNullChecks: false`, which makes the Zod-inferred drilldowns
+ * output type incompatible with `SerializedDrilldowns` (e.g. `trigger` becomes optional). Replace
+ * only that inferred property until strict null checks are enabled.
  * See https://github.com/elastic/kibana/issues/287451
  */
-export type VegaByValueState = z.output<ReturnType<typeof getVegaEmbeddableSchema>> &
+type WithSerializedDrilldowns<State> = Omit<State, keyof SerializedDrilldowns> &
   SerializedDrilldowns;
+
+export type VegaByValueState = WithSerializedDrilldowns<
+  z.output<ReturnType<typeof getVegaByValueSchema>>
+>;
+export type VegaByReferenceState = WithSerializedDrilldowns<
+  z.output<ReturnType<typeof getVegaByReferenceSchema>>
+>;
+export type VegaEmbeddableState = VegaByValueState | VegaByReferenceState;

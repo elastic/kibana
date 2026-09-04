@@ -15,14 +15,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export type ConfigObservable = Observable<SharedGlobalConfig>;
 
-export interface VegaSavedObjectAttributes {
-  title: string;
-  type: string;
-  params: {
-    spec: string;
-  };
-}
-
 export interface VisTypeVegaPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   usageCollection?: UsageCollectionSetup;

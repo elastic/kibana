@@ -29,7 +29,12 @@ jest.mock('../components/vega_vis_editor', () => ({
 }));
 
 describe('VegaEditorFlyout', () => {
-  const renderFlyout = ({ isNewPanel = false }: { isNewPanel?: boolean } = {}) => {
+  const renderFlyout = (
+    {
+      isByReference = false,
+      isNewPanel = false,
+    }: { isByReference?: boolean; isNewPanel?: boolean } = {}
+  ) => {
     const closeFlyout = jest.fn();
     const onRevert = jest.fn();
     const onPreview = jest.fn();
@@ -39,6 +44,7 @@ describe('VegaEditorFlyout', () => {
         ariaLabelledBy="vega-flyout-title"
         closeFlyout={closeFlyout}
         initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
+        isByReference={isByReference}
         isNewPanel={isNewPanel}
         onPreview={onPreview}
         onRevert={onRevert}
@@ -93,6 +99,11 @@ describe('VegaEditorFlyout', () => {
   it('enables Apply and close for a new panel so its default spec can be accepted', () => {
     renderFlyout({ isNewPanel: true });
     expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeEnabled();
+  });
+
+  it('labels the action Save and close for a by-reference panel', () => {
+    renderFlyout({ isByReference: true });
+    expect(screen.getByRole('button', { name: 'Save and close' })).toBeInTheDocument();
   });
 
   it('saves the current spec, closes, and does not revert on unmount', async () => {
