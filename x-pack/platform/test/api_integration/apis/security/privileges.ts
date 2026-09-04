@@ -489,6 +489,7 @@ export default function ({ getService }: FtrProviderContext) {
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
+      significantEvents: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_v2_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],

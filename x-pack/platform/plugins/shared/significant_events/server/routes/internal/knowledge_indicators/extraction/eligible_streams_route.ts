@@ -20,7 +20,7 @@ import {
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import {
-  STREAMS_API_PRIVILEGES,
+  SIGNIFICANT_EVENTS_API_PRIVILEGES,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MAX_SCHEDULED_STREAMS,
 } from '../../../../../common/constants';
@@ -76,7 +76,7 @@ const eligibleStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

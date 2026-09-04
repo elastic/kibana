@@ -18,6 +18,7 @@ api/
     ├── global.teardown.ts                      # Reverts the flag, disables Streams
     ├── memory_and_investigation/memory_crud.spec.ts
     ├── significant_events/onboarding_bulk_status.spec.ts
+    ├── significant_events/plugin_loaded.spec.ts
     └── workflows/managed_workflows.spec.ts
 ```
 
@@ -39,7 +40,7 @@ import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 
 apiTest.beforeAll(async ({ samlAuth }) => {
-  const credentials = await samlAuth.asStreamsAdmin();
+  const credentials = await samlAuth.asSignificantEventsAdmin();
   adminCookieHeader = credentials.cookieHeader;
 });
 ```

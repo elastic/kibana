@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
 import { createSignificantEventsTracedEsClient } from '../../../../lib/significant_events/create_significant_events_traced_es_client';
 import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../../common/constants';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
 import { resolveStreamNames } from '../../../utils/resolve_stream_names';
@@ -61,7 +61,7 @@ const readQueryOccurrencesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
     },
   },
   handler: async ({

@@ -30,6 +30,10 @@ export function useFetchStreams(
   const showFetchErrorToast = useFetchErrorToast();
 
   const fetchStreams = async ({ signal }: QueryFunctionContext): Promise<StreamsFetchResult> => {
+    // GET /internal/streams is authorized with Streams `read_stream`, not
+    // `read_significant_events`. A significantEvents-only role can open this
+    // app and still 403 the stream list. Streams read stays required for the
+    // Streams tab and Settings stream matching until we add an SE-owned list.
     return streamsRepositoryClient.fetch('GET /internal/streams', { signal: signal ?? null });
   };
 

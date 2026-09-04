@@ -83,6 +83,7 @@ import {
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
+import { registerSignificantEventsFeature } from './register_feature';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
@@ -130,6 +131,8 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
+
+    registerSignificantEventsFeature(plugins.features);
 
     this.ebtTelemetryService.setup(core.analytics);
 

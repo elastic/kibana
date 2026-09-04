@@ -17,8 +17,6 @@ project:
   owner: '@elastic/streams-ui'
   sourceRoot: x-pack/platform/plugins/shared/streams
 dependsOn:
-  - '@kbn/agent-builder-elastic-ai-index-ki-types'
-  - '@kbn/deeplinks-observability'
   - '@kbn/config-schema'
   - '@kbn/core-pricing-common'
   - '@kbn/core'

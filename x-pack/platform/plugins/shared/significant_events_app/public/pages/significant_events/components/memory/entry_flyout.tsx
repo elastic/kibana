@@ -102,7 +102,15 @@ function DiscardChangesModal({
   );
 }
 
-export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => void }) {
+export function EntryFlyout({
+  entryId,
+  onClose,
+  canManage,
+}: {
+  entryId: string;
+  onClose: () => void;
+  canManage: boolean;
+}) {
   const { data: entry, isLoading } = useMemoryEntry(entryId);
   const { updateEntry, deleteEntry } = useMemoryMutations();
   const [activeTab, setActiveTab] = useState<FlyoutTab>('content');
@@ -290,9 +298,9 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
           {entry && activeTab === 'history' && <HistoryPanel entryId={entryId} entry={entry} />}
         </EuiFlyoutBody>
 
-        <EuiFlyoutFooter>
-          {activeTab === 'content' &&
-            (isEditing ? (
+        {activeTab === 'content' && canManage && (
+          <EuiFlyoutFooter>
+            {isEditing ? (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiButton
@@ -343,8 +351,9 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            ))}
-        </EuiFlyoutFooter>
+            )}
+          </EuiFlyoutFooter>
+        )}
       </EuiFlyout>
 
       {showDeleteModal && entry && (

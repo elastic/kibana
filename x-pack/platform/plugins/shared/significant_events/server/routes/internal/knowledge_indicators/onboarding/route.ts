@@ -14,7 +14,7 @@ import {
   type KIsOnboardingStatusResult,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
@@ -46,7 +46,7 @@ const onboardingExecuteRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -148,7 +148,7 @@ const onboardingStatusRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -187,7 +187,7 @@ const onboardingBulkStatusRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

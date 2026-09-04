@@ -22,11 +22,11 @@ export const PUBLIC_API_HEADERS = {
 } as const;
 
 /**
- * Returns streams user roles with privileges appropriate for the deployment type.
- * Some cluster privileges (manage_ilm, manage_data_stream_global_retention) are not
- * supported in serverless mode.
+ * Returns Significant Events user roles with privileges appropriate for the
+ * deployment type. Some cluster privileges (manage_ilm,
+ * manage_data_stream_global_retention) are not supported in serverless mode.
  */
-export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaRole> {
+export function getSignificantEventsUsers(config: ScoutTestConfig): Record<string, KibanaRole> {
   const isServerless = config.serverless;
 
   // Cluster privileges that are only available in stateful deployments
@@ -35,7 +35,7 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
     : ['manage_ilm', 'manage_data_stream_global_retention'];
 
   return {
-    streamsAdmin: {
+    significantEventsAdmin: {
       kibana: [
         {
           base: ['all'],
@@ -60,7 +60,7 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
       },
     },
 
-    streamsReadOnly: {
+    significantEventsReadOnly: {
       kibana: [
         {
           base: ['read'],
@@ -79,7 +79,7 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
       },
     },
 
-    streamsUnauthorized: {
+    unauthorized: {
       kibana: [
         {
           base: [],

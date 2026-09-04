@@ -17,17 +17,17 @@ import {
   getSignificantEventsTestApiService,
   type SignificantEventsTestApiService,
 } from '../services/significant_events_api_service';
-import { getStreamsUsers } from './constants';
+import { getSignificantEventsUsers } from './constants';
 
-export interface StreamsSamlAuthFixture extends SamlAuth {
-  asStreamsAdmin: () => Promise<RoleSessionCredentials>;
-  asStreamsReadOnly: () => Promise<RoleSessionCredentials>;
-  asStreamsUnauthorized: () => Promise<RoleSessionCredentials>;
+export interface SignificantEventsSamlAuthFixture extends SamlAuth {
+  asSignificantEventsAdmin: () => Promise<RoleSessionCredentials>;
+  asSignificantEventsReadOnly: () => Promise<RoleSessionCredentials>;
+  asUnauthorized: () => Promise<RoleSessionCredentials>;
 }
 
-export interface StreamsRequestAuthFixture extends RequestAuthFixture {
-  loginAsStreamsAdmin: () => Promise<RoleApiCredentials>;
-  loginAsStreamsReadOnly: () => Promise<RoleApiCredentials>;
+export interface SignificantEventsRequestAuthFixture extends RequestAuthFixture {
+  loginAsSignificantEventsAdmin: () => Promise<RoleApiCredentials>;
+  loginAsSignificantEventsReadOnly: () => Promise<RoleApiCredentials>;
 }
 
 export interface SignificantEventsApiServicesFixture extends ApiServicesFixture {
@@ -35,42 +35,43 @@ export interface SignificantEventsApiServicesFixture extends ApiServicesFixture 
 }
 
 export const significantEventsApiTest = apiTest.extend<{
-  requestAuth: StreamsRequestAuthFixture;
-  samlAuth: StreamsSamlAuthFixture;
+  requestAuth: SignificantEventsRequestAuthFixture;
+  samlAuth: SignificantEventsSamlAuthFixture;
   apiServices: SignificantEventsApiServicesFixture;
 }>({
   requestAuth: async ({ requestAuth, config }, use) => {
-    const streamsUsers = getStreamsUsers(config);
+    const users = getSignificantEventsUsers(config);
 
-    const loginAsStreamsAdmin = async () =>
-      requestAuth.getApiKeyForCustomRole(streamsUsers.streamsAdmin);
+    const loginAsSignificantEventsAdmin = async () =>
+      requestAuth.getApiKeyForCustomRole(users.significantEventsAdmin);
 
-    const loginAsStreamsReadOnly = async () =>
-      requestAuth.getApiKeyForCustomRole(streamsUsers.streamsReadOnly);
+    const loginAsSignificantEventsReadOnly = async () =>
+      requestAuth.getApiKeyForCustomRole(users.significantEventsReadOnly);
 
-    const extendedRequestAuth: StreamsRequestAuthFixture = {
+    const extendedRequestAuth: SignificantEventsRequestAuthFixture = {
       ...requestAuth,
-      loginAsStreamsAdmin,
-      loginAsStreamsReadOnly,
+      loginAsSignificantEventsAdmin,
+      loginAsSignificantEventsReadOnly,
     };
     await use(extendedRequestAuth);
   },
 
   samlAuth: async ({ samlAuth, config }, use) => {
-    const streamsUsers = getStreamsUsers(config);
+    const users = getSignificantEventsUsers(config);
 
-    const asStreamsAdmin = async () => samlAuth.asInteractiveUser(streamsUsers.streamsAdmin);
+    const asSignificantEventsAdmin = async () =>
+      samlAuth.asInteractiveUser(users.significantEventsAdmin);
 
-    const asStreamsReadOnly = async () => samlAuth.asInteractiveUser(streamsUsers.streamsReadOnly);
+    const asSignificantEventsReadOnly = async () =>
+      samlAuth.asInteractiveUser(users.significantEventsReadOnly);
 
-    const asStreamsUnauthorized = async () =>
-      samlAuth.asInteractiveUser(streamsUsers.streamsUnauthorized);
+    const asUnauthorized = async () => samlAuth.asInteractiveUser(users.unauthorized);
 
-    const extendedSamlAuth: StreamsSamlAuthFixture = {
+    const extendedSamlAuth: SignificantEventsSamlAuthFixture = {
       ...samlAuth,
-      asStreamsAdmin,
-      asStreamsReadOnly,
-      asStreamsUnauthorized,
+      asSignificantEventsAdmin,
+      asSignificantEventsReadOnly,
+      asUnauthorized,
     };
 
     await use(extendedSamlAuth);
@@ -86,5 +87,5 @@ export const significantEventsApiTest = apiTest.extend<{
   },
 });
 
-export { getStreamsUsers } from './constants';
+export { getSignificantEventsUsers } from './constants';
 export { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from './constants';

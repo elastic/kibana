@@ -23,7 +23,7 @@ apiTest.describe(
     apiTest(
       'returns not_started for every requested stream that has never been onboarded',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const { cookieHeader } = await samlAuth.asSignificantEventsAdmin();
 
         const suffix = uuidv4().slice(0, 8);
         const streamNames = [`logs.bulk_status_a_${suffix}`, `logs.bulk_status_b_${suffix}`];
@@ -47,7 +47,7 @@ apiTest.describe(
     );
 
     apiTest('rejects an empty streamNames array', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+      const { cookieHeader } = await samlAuth.asSignificantEventsAdmin();
 
       const response = await apiClient.post(BULK_STATUS_ENDPOINT, {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
@@ -61,7 +61,7 @@ apiTest.describe(
     apiTest(
       'returns 403 when significant events is disabled',
       async ({ apiClient, samlAuth, apiServices }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const { cookieHeader } = await samlAuth.asSignificantEventsAdmin();
 
         await apiServices.significantEventsTest.disableSignificantEvents();
 

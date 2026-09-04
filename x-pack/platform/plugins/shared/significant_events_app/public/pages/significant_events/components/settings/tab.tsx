@@ -77,14 +77,14 @@ export function SettingsTab() {
   const { core } = useKibana();
   const modelSettingsUrl = useModelSettingsUrl();
 
-  // Saving these settings hits two routes with different privileges: the streams
-  // settings route (requires the streams `manage` privilege) and core's UI
-  // settings routes used by `core.settings.client`/`globalClient` (require
-  // `advancedSettings.save`). Gate the whole form on both so the user never
-  // triggers a partial save that 403s halfway through.
-  const canManageStreams = core.application.capabilities.streams?.manage === true;
+  // Saving these settings hits two routes with different privileges: the
+  // significantEvents settings route (requires the significantEvents `manage`
+  // privilege) and core's UI settings routes used by `core.settings.client`/
+  // `globalClient` (require `advancedSettings.save`). Gate the whole form on
+  // both so the user never triggers a partial save that 403s halfway through.
+  const canManage = core.application.capabilities.significantEvents?.manage === true;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
-  const canEditSettings = canManageStreams && canSaveAdvancedSettings;
+  const canEditSettings = canManage && canSaveAdvancedSettings;
 
   // Pause turns these Settings toggles off (and Resume restores only those that
   // were previously on). While paused, the toggles are not editable.
@@ -287,7 +287,7 @@ export function SettingsTab() {
                 'xpack.significantEventsApp.settings.noPermissionCalloutDescription',
                 {
                   defaultMessage:
-                    'Editing these settings requires both the Streams "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
+                    'Editing these settings requires both the Significant Events "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
                 }
               )}
             </p>
@@ -295,7 +295,7 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
-      <MaintenanceSection canManage={canManageStreams} />
+      <MaintenanceSection canManage={canManage} />
 
       <EuiSpacer />
 
@@ -838,7 +838,10 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
-      {isAppsEnabled && <AppsSection canEdit={canEditSettings} />}
+      {/* Slack connect/disconnect and channel bind only hit SE manage routes,
+          not Advanced Settings. Gate on canManage so an SE admin can reconnect
+          a stale key without advancedSettings.save. */}
+      {isAppsEnabled && <AppsSection canEdit={canManage} />}
 
       {isConfirmingZeroMatch && (
         <EuiConfirmModal

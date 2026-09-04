@@ -66,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         stackAlerts: 0,
         stackAlertsOnly: 0,
         streams: 0,
+        significantEvents: 0,
         alerting_v2_rules: 0,
         alerting_v2_alerts: 0,
         alerting_v2_action_policies: 0,

@@ -73598,7 +73598,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.
+        Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_significant_events.
       operationId: get-streams-name-queries
       parameters:
         - description: The name of the stream.
@@ -73659,7 +73659,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Bulk update queries of a stream. Can add new queries and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.
+        Bulk update queries of a stream. Can add new queries and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_significant_events.
       operationId: post-streams-name-queries-bulk
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -73775,7 +73775,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Remove a query from a stream. Noop if the query is not found on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
+        Remove a query from a stream. Noop if the query is not found on the stream.<br/><br/>[Required authorization] Route required privileges: manage_significant_events.
       operationId: delete-streams-name-queries-queryid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -73829,7 +73829,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Adds a query to a stream. Noop if the query is already present on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
+        Adds a query to a stream. Noop if the query is already present on the stream.<br/><br/>[Required authorization] Route required privileges: manage_significant_events.
       operationId: put-streams-name-queries-queryid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -73918,7 +73918,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.
+        Read the significant events<br/><br/>[Required authorization] Route required privileges: read_significant_events.
       operationId: get-streams-name-significant-events
       parameters:
         - description: The name of the stream.
