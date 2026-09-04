@@ -71111,7 +71111,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List managed entity resolution rules and their effective enabled state for this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        List managed entity resolution rules and their effective enabled state for this space. Each rule description states what it bridges, which data sources it needs, and when to disable it.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: get-security-entity-store-resolution-rules
       parameters: []
       responses:
@@ -71124,13 +71124,35 @@ paths:
                   summary: Managed resolution rules
                   value:
                     rules:
-                      - enabled: false
+                      - description: Links user entities that share the same email address, compared case-insensitively, across identity providers. Disable if shared mailboxes or role accounts produce false links.
+                        enabled: true
+                        id: email_exact_match
+                        kind: same_field
+                        managed: true
+                      - description: Links Windows and system account-management (IAM) entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem. Needs Windows/system IAM events and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.
+                        enabled: true
+                        id: windows_sid_bridge
+                        kind: same_field
+                        managed: true
+                      - description: Links Microsoft Defender (`m365_defender`) identities to Entra ID by GUID-shaped `user.id`. Needs Defender identity events and Entra entity analytics. Disable if Defender SID IAM events leak through the GUID gate.
+                        enabled: true
+                        id: entra_guid_bridge
+                        kind: same_field
+                        managed: true
+                      - description: Links CrowdStrike user entities to Active Directory by SID-prefixed `user.id` (filters out Linux UIDs). Needs CrowdStrike FDR IAM events and Active Directory entity analytics. Disable if CrowdStrike SID coverage is noisy in your tenant.
+                        enabled: true
+                        id: crowdstrike_sid_bridge
+                        kind: same_field
+                        managed: true
+                      - description: Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit user-lifecycle events and Entra entity analytics. Covers admins who perform AAD user operations; disable if that population should stay separate.
+                        enabled: true
+                        id: upn_cross_field_bridge
+                        kind: cross_field
+                        managed: true
+                      - description: Related user alias resolution across identity providers
+                        enabled: false
                         id: related_user_alias_resolution
                         kind: related_user_alias_resolution
-                        managed: true
-                      - enabled: true
-                        id: email_exact_match
-                        kind: email_exact_match
                         managed: true
           description: Entity resolution rules.
       summary: List entity resolution rules
@@ -71175,6 +71197,7 @@ paths:
                   description: The related user alias resolution rule was disabled in the current space.
                   summary: Rule disabled
                   value:
+                    description: Related user alias resolution across identity providers
                     enabled: false
                     id: related_user_alias_resolution
                     kind: related_user_alias_resolution
@@ -71234,6 +71257,7 @@ paths:
                   description: The related user alias resolution rule was enabled in the current space.
                   summary: Rule enabled
                   value:
+                    description: Related user alias resolution across identity providers
                     enabled: true
                     id: related_user_alias_resolution
                     kind: related_user_alias_resolution

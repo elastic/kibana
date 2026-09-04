@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export {
-  RESOLUTION_RULE_CONFIGS,
-  getResolutionRuleConfig,
-  type ResolutionRuleConfig,
-  type EsqlMatchSpec,
-} from './rule_registry';
-export { ResolutionRulesClient, type EffectiveResolutionRule } from './rule_client';
+export { GROUP_SIZE_CEILING, MATCHER_PAGE_SIZE } from './constants';
+export { buildMatchGroupsQuery, buildWatermarkQuery } from './query';
+export { runEsqlMatcherRule, type RunEsqlMatcherDeps } from './run';
