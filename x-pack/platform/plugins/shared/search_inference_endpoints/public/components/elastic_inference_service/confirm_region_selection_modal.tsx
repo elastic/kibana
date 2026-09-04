@@ -84,13 +84,10 @@ export const ConfirmRegionSelectionModal: React.FC<ConfirmRegionSelectionModalPr
       <EuiModalBody>
         <EuiText size="s">
           <p>
-            {i18n.translate(
-              'xpack.searchInferenceEndpoints.confirmRegionSelection.description',
-              {
-                defaultMessage:
-                  'Your region policy will be updated to the selected locations. This will apply to all spaces.',
-              }
-            )}
+            {i18n.translate('xpack.searchInferenceEndpoints.confirmRegionSelection.description', {
+              defaultMessage:
+                'Your region policy will be updated to the selected locations. This will apply to all spaces.',
+            })}
           </p>
         </EuiText>
 

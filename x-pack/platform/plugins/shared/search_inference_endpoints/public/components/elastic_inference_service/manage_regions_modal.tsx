@@ -95,23 +95,23 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   const locationSelection =
     activeTab === 'geo'
       ? {
-        options: geoOptions,
-        total: geoTab.totalGeos,
-        totalSelected: geoTab.totalGeosSelected,
-        allSelected: geoTab.allGeosSelected,
-        onSelectAll: geoTab.onSelectAll,
-        onToggle: geoTab.onToggleGeo,
-        ...GEO_LOCATION_COPY,
-      }
+          options: geoOptions,
+          total: geoTab.totalGeos,
+          totalSelected: geoTab.totalGeosSelected,
+          allSelected: geoTab.allGeosSelected,
+          onSelectAll: geoTab.onSelectAll,
+          onToggle: geoTab.onToggleGeo,
+          ...GEO_LOCATION_COPY,
+        }
       : {
-        options: regionOptions,
-        total: regionTab.totalRegions,
-        totalSelected: regionTab.totalSelected,
-        allSelected: regionTab.allSelected,
-        onSelectAll: regionTab.onSelectAll,
-        onToggle: regionTab.onToggleRegion,
-        ...REGIONS_LOCATION_COPY,
-      };
+          options: regionOptions,
+          total: regionTab.totalRegions,
+          totalSelected: regionTab.totalSelected,
+          allSelected: regionTab.allSelected,
+          onSelectAll: regionTab.onSelectAll,
+          onToggle: regionTab.onToggleRegion,
+          ...REGIONS_LOCATION_COPY,
+        };
 
   return (
     <>

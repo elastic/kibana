@@ -6,12 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiPanel,
-  EuiSelectable,
-  type EuiSelectableOption,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiSelectable, type EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getGeoDisplayName, getRegionDisplayName, regionKey } from '../../utils/eis_utils';
 import type { ZoneGroup } from '../../utils/eis_utils';
@@ -127,8 +122,8 @@ export const LocationSelectionList: React.FC<LocationSelectionListProps> = ({
   const selectableTestSubj = isLoading
     ? loadingTestSubj
     : total === 0 && !isError
-      ? emptyTestSubj
-      : listTestSubj;
+    ? emptyTestSubj
+    : listTestSubj;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

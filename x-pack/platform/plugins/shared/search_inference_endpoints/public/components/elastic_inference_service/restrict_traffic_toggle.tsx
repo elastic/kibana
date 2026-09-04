@@ -27,7 +27,6 @@ export const RestrictTrafficToggle: React.FC<RestrictTrafficToggleProps> = ({
   isDisabled,
   onChange,
 }) => {
-
   const toggleId = useGeneratedHtmlId({ prefix: 'restrictTrafficToggle' });
 
   const helpText = (
@@ -56,6 +55,5 @@ export const RestrictTrafficToggle: React.FC<RestrictTrafficToggleProps> = ({
     </EuiFormRow>
   );
 
-  return switchElement
-
+  return switchElement;
 };
