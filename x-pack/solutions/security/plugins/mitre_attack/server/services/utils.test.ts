@@ -11,48 +11,8 @@ import {
   getMockMitreSubtechnique,
 } from '../mocks/mitre_entities.mock';
 import type { MitreEntityType } from '@kbn/security-mitre-attack-common';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../saved_objects';
-import {
-  buildSoId,
-  buildKqlFilter,
-  summarizeEntityCounts,
-  getEmptyMitreEntityCollection,
-} from './utils';
-
-describe('buildSoId', () => {
-  it('builds a colon-delimited id for a tactic', () => {
-    const tactic = getMockMitreTactic();
-    expect(
-      buildSoId({
-        framework: tactic.framework,
-        frameworkVersion: tactic.framework_version,
-        id: tactic.id,
-      })
-    ).toBe('enterprise:15.1:TA0001');
-  });
-
-  it('builds a colon-delimited id for a technique', () => {
-    const technique = getMockMitreTechnique();
-    expect(
-      buildSoId({
-        framework: technique.framework,
-        frameworkVersion: technique.framework_version,
-        id: technique.id,
-      })
-    ).toBe('enterprise:15.1:T1003');
-  });
-
-  it('builds a colon-delimited id for a dotted subtechnique id', () => {
-    const subtechnique = getMockMitreSubtechnique();
-    expect(
-      buildSoId({
-        framework: subtechnique.framework,
-        frameworkVersion: subtechnique.framework_version,
-        id: subtechnique.id,
-      })
-    ).toBe('enterprise:15.1:T1003.001');
-  });
-});
+import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
+import { buildKqlFilter, summarizeEntityCounts, getEmptyMitreEntityCollection } from './utils';
 
 describe('buildKqlFilter', () => {
   it('returns only the framework clause when no other options are provided', () => {

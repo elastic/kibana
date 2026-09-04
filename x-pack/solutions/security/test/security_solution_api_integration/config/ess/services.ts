@@ -17,6 +17,7 @@ import { SecuritySolutionApiProvider as ExceptionsApiProvider } from '@kbn/secur
 import { SpacesServiceProvider } from '../services/spaces_service';
 import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
 import { RolesUsersProvider } from '../services/security_solution_edr_workflows_roles_users';
+import { MitreAttackApiProvider } from '../services/mitre_attack_api';
 
 export const services = {
   ...commonFunctionalServices,
@@ -34,4 +35,5 @@ export const services = {
   securitySolutionUtils: SecuritySolutionESSUtils,
   kibana_ebt_server: KibanaEBTServerProvider,
   rolesUsersProvider: RolesUsersProvider,
+  mitreAttackApi: MitreAttackApiProvider,
 };
