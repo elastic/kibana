@@ -84,6 +84,7 @@ export {
 } from './maintenance/state_machine';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
 
+export { DEFAULT_RUN_LIMITS } from './run_quotas';
 export type {
   RunQuotaConsumeRequest,
   RunQuotaConsumeResponse,

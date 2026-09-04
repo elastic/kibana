@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type {
-  RunQuotaGroup,
-  RunQuotaSettingsUpdate,
-  RunQuotasResponse,
+import {
+  DEFAULT_RUN_LIMITS,
+  type RunQuotaGroup,
+  type RunQuotaSettingsUpdate,
+  type RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
 
 export const RUN_QUOTA_GROUPS = [
@@ -37,22 +38,36 @@ export interface RunQuotaDraftState {
 export const parseRunLimitDraft = (value: string): RunLimitDraft =>
   value === '' ? '' : Number(value);
 
-export const isValidRunLimitDraft = (value: RunLimitDraft): value is number =>
-  value !== '' && Number.isInteger(value) && value >= MIN_RUN_LIMIT && value <= MAX_RUN_LIMIT;
+export const isValidRunLimitDraft = (value: unknown): value is number =>
+  typeof value === 'number' &&
+  Number.isInteger(value) &&
+  value >= MIN_RUN_LIMIT &&
+  value <= MAX_RUN_LIMIT;
 
 export const createRunQuotaDraftState = ({
   enabled,
   limits,
-}: Pick<RunQuotasResponse, 'enabled' | 'limits'>): RunQuotaDraftState => ({
-  saved: {
-    enabled,
-    limits: { ...limits },
-  },
-  draft: {
-    enabled,
-    limits: { ...limits },
-  },
-});
+}: Pick<RunQuotasResponse, 'enabled'> & {
+  limits?: Partial<Record<RunQuotaGroup, number>>;
+}): RunQuotaDraftState => {
+  const resolvedLimits = Object.fromEntries(
+    RUN_QUOTA_GROUPS.map((group) => {
+      const limit = limits?.[group];
+      return [group, isValidRunLimitDraft(limit) ? limit : DEFAULT_RUN_LIMITS[group]];
+    })
+  ) as Record<RunQuotaGroup, number>;
+
+  return {
+    saved: {
+      enabled,
+      limits: resolvedLimits,
+    },
+    draft: {
+      enabled,
+      limits: { ...resolvedLimits },
+    },
+  };
+};
 
 export const hasRunQuotaDraftChanges = ({ saved, draft }: RunQuotaDraftState): boolean =>
   saved.enabled !== draft.enabled ||

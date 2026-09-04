@@ -282,42 +282,46 @@ export const RunLimitsSection = () => {
                 </p>
               </EuiText>
 
-              <RunQuotaExhaustionCallout
-                enabled={draftState.draft.enabled}
-                limits={draftState.draft.limits}
-                counts={response.counts}
-              />
-
-              <EuiSpacer />
-              {RUN_QUOTA_GROUPS.map((group, index) => (
-                <React.Fragment key={group}>
-                  {index > 0 && <EuiHorizontalRule margin="l" />}
-                  <RunLimitRow
-                    group={group}
-                    count={response.counts[group]}
-                    limit={draftState.draft.limits[group]}
-                    enforcementEnabled={draftState.draft.enabled}
-                    disabled={!canManage || isSaving}
-                    onChange={(limit) => updateLimitDraft(group, limit)}
+              {draftState.draft.enabled && (
+                <>
+                  <RunQuotaExhaustionCallout
+                    enabled
+                    limits={draftState.draft.limits}
+                    counts={response.counts}
                   />
-                </React.Fragment>
-              ))}
 
-              <EuiHorizontalRule margin="l" />
-              <EuiText size="xs" color="subdued">
-                <p data-test-subj="significantEventsRunLimitsResetTime">
-                  {i18n.translate(
-                    'xpack.significantEventsApp.settings.runLimits.counterResetDescription',
-                    {
-                      defaultMessage: 'The current {timezone} day resets at {resetsAt}.',
-                      values: {
-                        timezone: response.window.timezone,
-                        resetsAt: response.window.resetsAt,
-                      },
-                    }
-                  )}
-                </p>
-              </EuiText>
+                  <EuiSpacer />
+                  {RUN_QUOTA_GROUPS.map((group, index) => (
+                    <React.Fragment key={group}>
+                      {index > 0 && <EuiHorizontalRule margin="l" />}
+                      <RunLimitRow
+                        group={group}
+                        count={response.counts[group]}
+                        limit={draftState.draft.limits[group]}
+                        enforcementEnabled
+                        disabled={!canManage || isSaving}
+                        onChange={(limit) => updateLimitDraft(group, limit)}
+                      />
+                    </React.Fragment>
+                  ))}
+
+                  <EuiHorizontalRule margin="l" />
+                  <EuiText size="xs" color="subdued">
+                    <p data-test-subj="significantEventsRunLimitsResetTime">
+                      {i18n.translate(
+                        'xpack.significantEventsApp.settings.runLimits.counterResetDescription',
+                        {
+                          defaultMessage: 'The current {timezone} day resets at {resetsAt}.',
+                          values: {
+                            timezone: response.window.timezone,
+                            resetsAt: response.window.resetsAt,
+                          },
+                        }
+                      )}
+                    </p>
+                  </EuiText>
+                </>
+              )}
 
               {!canManage && (
                 <>
@@ -338,7 +342,7 @@ export const RunLimitsSection = () => {
                         'xpack.significantEventsApp.settings.runLimits.readOnlyDescription',
                         {
                           defaultMessage:
-                            'You can view counts and limits, but changing them requires the Streams manage privilege in every space.',
+                            'Changing enforcement or daily limits requires the Streams manage privilege in every space.',
                         }
                       )}
                     </p>

@@ -73,14 +73,14 @@ describe('RunLimitsSection', () => {
     jest.clearAllMocks();
   });
 
-  it('renders exactly three categories and keeps their counts visible while enforcement is off', () => {
+  it('hides category details while enforcement is off and shows suggested limits when enabled', () => {
     setup(
       response({
         enabled: false,
         limits: {
           detection: 100,
           investigation: 30,
-          ki_extraction: 0,
+          ki_extraction: 20,
         },
         counts: {
           detection: 14,
@@ -89,6 +89,12 @@ describe('RunLimitsSection', () => {
         },
       })
     );
+
+    expect(screen.queryByTestId(/^significantEventsRunLimitRow-/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('significantEventsRunLimitsResetTime')).not.toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsRunLimitsEnforcementSwitch')).not.toBeChecked();
+
+    fireEvent.click(screen.getByTestId('significantEventsRunLimitsEnforcementSwitch'));
 
     expect(screen.getAllByTestId(/^significantEventsRunLimitRow-/)).toHaveLength(3);
     expect(screen.getByText('Discovery')).toBeInTheDocument();
@@ -104,8 +110,10 @@ describe('RunLimitsSection', () => {
     expect(screen.getByTestId('significantEventsRunLimitCount-ki_extraction')).toHaveTextContent(
       '25 counted scheduled admissions today'
     );
-    expect(screen.getByTestId('significantEventsRunLimitInput-ki_extraction')).toHaveValue(0);
-    expect(screen.getByTestId('significantEventsRunLimitsEnforcementSwitch')).not.toBeChecked();
+    expect(screen.getByTestId('significantEventsRunLimitInput-detection')).toHaveValue(100);
+    expect(screen.getByTestId('significantEventsRunLimitInput-investigation')).toHaveValue(30);
+    expect(screen.getByTestId('significantEventsRunLimitInput-ki_extraction')).toHaveValue(20);
+    expect(screen.getByTestId('significantEventsRunLimitsEnforcementSwitch')).toBeChecked();
   });
 
   it('prevents read-only users from editing the switch or limits', () => {

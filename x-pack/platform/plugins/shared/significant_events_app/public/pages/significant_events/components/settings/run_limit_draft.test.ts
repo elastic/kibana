@@ -22,6 +22,13 @@ const response = {
 };
 
 describe('run quota drafts', () => {
+  it('uses the suggested limits when the response omits them', () => {
+    expect(createRunQuotaDraftState({ enabled: false })).toEqual({
+      saved: response,
+      draft: response,
+    });
+  });
+
   it('treats zero as a valid unlimited value and rejects invalid limits', () => {
     expect(parseRunLimitDraft('0')).toBe(0);
     expect(isValidRunLimitDraft(0)).toBe(true);
