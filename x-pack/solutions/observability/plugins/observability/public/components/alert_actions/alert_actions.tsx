@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiFlexItem,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
-import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
+import { ALERT_UUID, getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
 import { useKibana } from '../../utils/kibana_react';
+import { useInvestigateAlert } from '../../hooks/use_investigate_alert';
 import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
 import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
@@ -23,6 +31,33 @@ import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
+
+function InvestigateAlertActionItem({
+  alertId,
+  onActionExecuted,
+}: {
+  alertId?: string;
+  onActionExecuted: () => void;
+}) {
+  const { showInvestigateAction, handleInvestigate, isInvestigating, investigateActionLabel } =
+    useInvestigateAlert({
+      alertId,
+      onInvestigate: onActionExecuted,
+      queryContext: AlertsQueryContext,
+    });
+
+  if (!showInvestigateAction) return null;
+
+  return (
+    <EuiContextMenuItem
+      data-test-subj="investigateAlert"
+      disabled={isInvestigating}
+      onClick={handleInvestigate}
+    >
+      {investigateActionLabel}
+    </EuiContextMenuItem>
+  );
+}
 
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
@@ -110,6 +145,12 @@ export function AlertActions(
 
   const actionsMenuItems = [
     ...caseAlertActionItems,
+
+    <InvestigateAlertActionItem
+      key="investigateAlert"
+      alertId={observabilityAlert.fields[ALERT_UUID]}
+      onActionExecuted={closeActionsPopover}
+    />,
 
     useMemo(
       () => (

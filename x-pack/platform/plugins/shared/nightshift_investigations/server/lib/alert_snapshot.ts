@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  alertSnapshotSchema,
-  type AlertSnapshot,
-} from '@kbn/nightshift-investigations-plugin/server';
+import Boom from '@hapi/boom';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -28,8 +26,16 @@ import {
   ALERT_STATUS,
   ALERT_URL,
   ALERT_UUID,
+  OBSERVABILITY_RULE_TYPE_IDS,
+  STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { alertSnapshotSchema, type AlertSnapshot } from '../../common';
+
+const INVESTIGABLE_RULE_TYPE_IDS = [
+  ...OBSERVABILITY_RULE_TYPE_IDS,
+  ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
+];
 
 export const parseAlertSnapshot = (alert: Record<string, unknown>): AlertSnapshot | undefined => {
   const value = alert[ALERT_EVALUATION_VALUES] ?? alert[ALERT_EVALUATION_VALUE];
@@ -61,4 +67,27 @@ export const parseAlertSnapshot = (alert: Record<string, unknown>): AlertSnapsho
   });
 
   return result.success ? result.data : undefined;
+};
+
+export const fetchAlertSnapshot = async (
+  alertsClient: AlertsClient,
+  alertId: string
+): Promise<AlertSnapshot> => {
+  const indices = (await alertsClient.getAuthorizedAlertsIndices(INVESTIGABLE_RULE_TYPE_IDS)) ?? [];
+  if (!indices.length) {
+    throw Boom.notFound(`Alert with id ${alertId} not found`);
+  }
+
+  const alert = await alertsClient.get({ id: alertId, index: indices.join(',') }).catch((error) => {
+    if (Boom.isBoom(error) && error.output.statusCode === 404) {
+      throw Boom.notFound(`Alert with id ${alertId} not found`);
+    }
+    throw error;
+  });
+
+  const snapshot = parseAlertSnapshot(alert);
+  if (!snapshot) {
+    throw Boom.badRequest('Alert does not contain the fields required for an investigation');
+  }
+  return snapshot;
 };

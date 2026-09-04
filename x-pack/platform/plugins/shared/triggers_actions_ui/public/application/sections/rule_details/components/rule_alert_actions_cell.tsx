@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui
 import React, { useCallback, useState, type ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
+import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
 import { useViewInAppUrl } from '@kbn/response-ops-alerts-table/hooks/use_view_in_app_url';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
@@ -37,25 +37,8 @@ const VIEW_IN_APP = i18n.translate(
  * Actions cell for the rule details alerts table.
  * Contains up to three buttons: expand row, view in app (when available), and a kebab menu with common actions.
  */
-interface RuleAlertContext {
-  ruleId: string;
-  ruleTypeId: string;
-}
-
-type RuleAlertActionsCellProps = React.ComponentProps<
-  NonNullable<AlertsTableProps<RuleAlertContext>['renderActionsCell']>
->;
-
-export const RuleAlertActionsCell = (props: RuleAlertActionsCellProps) => {
-  const {
-    rowIndex,
-    alert,
-    getAlertFormatter,
-    openLinksInNewTab,
-    alertDetailsNavigation,
-    ruleId,
-    ruleTypeId,
-  } = props;
+export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (props) => {
+  const { rowIndex, alert, getAlertFormatter, openLinksInNewTab, alertDetailsNavigation } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const viewInAppUrl = useViewInAppUrl(alert, getAlertFormatter);
   const canModifyAlerts = useCanModifyAlerts();
@@ -96,7 +79,6 @@ export const RuleAlertActionsCell = (props: RuleAlertActionsCellProps) => {
     ...caseActionItems,
     <DefaultAlertActions
       key="defaultRowActions"
-      investigationContext={{ ruleId, ruleTypeId }}
       onActionExecuted={closeActionsPopover}
       onExpandedAlertIndexChange={onExpandedAlertIndexChange}
       alertDetailsNavigation={alertDetailsNavigation}

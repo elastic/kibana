@@ -208,7 +208,6 @@ export function RuleComponent({
           showAlertStatusWithFlapping
           columns={alertsTableColumns}
           renderActionsCell={RuleAlertActionsCell}
-          additionalContext={{ ruleId: rule.id, ruleTypeId: ruleType.id }}
           actionsColumnWidth={120}
           lastReloadRequestTime={lastReloadRequestTime}
           getAlertFormatter={getAlertFormatter}
@@ -246,7 +245,6 @@ export function RuleComponent({
     licensing,
     notifications,
     rendering,
-    rule.id,
     ruleType.hasAlertsMappings,
     ruleType.id,
     settings,

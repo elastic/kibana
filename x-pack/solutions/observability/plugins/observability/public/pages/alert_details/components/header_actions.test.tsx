@@ -25,12 +25,12 @@ import type { AlertStatus } from '@kbn/rule-data-utils';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { useAlertSnooze } from '@kbn/response-ops-alert-snooze';
 import { paths } from '../../../../common/locators/paths';
-import { useInvestigateAlert } from '@kbn/response-ops-alerts-table/hooks/use_investigate_alert';
+import { useInvestigateAlert } from '../../../hooks/use_investigate_alert';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../hooks/use_fetch_rule');
 jest.mock('../hooks/use_alert_snooze_state');
-jest.mock('@kbn/response-ops-alerts-table/hooks/use_investigate_alert', () => ({
+jest.mock('../../../hooks/use_investigate_alert', () => ({
   useInvestigateAlert: jest.fn(),
 }));
 

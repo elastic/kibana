@@ -14,7 +14,7 @@ export const getInvestigationAvailabilityRoute = createNightshiftInvestigationsS
     access: 'internal',
     summary: 'Get investigation availability',
   },
-  security: { authz: { requiredPrivileges: ['agentBuilder:read'] } },
+  security: { authz: { requiredPrivileges: ['agentBuilder:write'] } },
   params: z.object({}),
   handler: async ({ request, getInvestigationsClient }) => ({
     available: await getInvestigationsClient(request).isAvailable(),

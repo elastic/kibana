@@ -8,52 +8,38 @@
 import type { Context } from 'react';
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { QueryClient } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-
-interface InvestigationListResponse {
-  results: Array<{ status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' }>;
-}
+import { useKibana } from '../utils/kibana_react';
 
 const getStatusQuery = (alertId: string) => ({
   concurrency_key: alertId,
-  sort_field: 'created_at',
-  sort_order: 'desc',
+  sort_field: 'created_at' as const,
+  sort_order: 'desc' as const,
   size: 1,
 });
 
 export const useInvestigateAlert = ({
   alertId,
-  application,
-  http,
-  notifications,
-  startInvestigation,
   enabled = true,
   onInvestigate,
   queryContext,
 }: {
   alertId?: string;
-  application: ApplicationStart;
-  http: HttpStart;
-  notifications: NotificationsStart;
-  startInvestigation: () => Promise<unknown>;
   enabled?: boolean;
   onInvestigate?: () => void;
   queryContext?: Context<QueryClient | undefined>;
 }) => {
+  const { http, notifications, nightshiftInvestigations } = useKibana().services;
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
   const statusQueryKey = ['alertInvestigations', http.basePath.get?.() ?? '', alertId] as const;
   const queryClient = useQueryClient({ context: queryContext });
-  const canInvestigate = Boolean(
-    enabled && alertId && application.capabilities?.agentBuilder?.write === true
-  );
+  const canInvestigate = Boolean(enabled && alertId && investigationsClient);
   const { data: availability } = useQuery({
     queryKey: ['investigationAvailability', http.basePath.get?.() ?? ''],
     queryFn: ({ signal }) =>
-      http.get<{ available: boolean }>('/internal/nightshift/investigations/availability', {
-        signal,
+      investigationsClient!.fetch('GET /internal/nightshift/investigations/availability', {
+        signal: signal ?? null,
       }),
     context: queryContext,
     enabled: canInvestigate,
@@ -63,9 +49,9 @@ export const useInvestigateAlert = ({
   const { data: investigations } = useQuery({
     queryKey: statusQueryKey,
     queryFn: ({ signal }) =>
-      http.get<InvestigationListResponse>('/internal/nightshift/investigations', {
-        query: getStatusQuery(alertId ?? ''),
-        signal,
+      investigationsClient!.fetch('GET /internal/nightshift/investigations', {
+        signal: signal ?? null,
+        params: { query: getStatusQuery(alertId ?? '') },
       }),
     context: queryContext,
     enabled: canInvestigate && availability?.available === true,
@@ -79,39 +65,40 @@ export const useInvestigateAlert = ({
   const latestStatus = investigations?.results[0]?.status;
   const hasOngoingInvestigation = latestStatus === 'pending' || latestStatus === 'running';
   const isInvestigating = isStarting || hasOngoingInvestigation;
-  const showInvestigateAction = Boolean(
-    canInvestigate && availability?.available === true && investigations
-  );
+  const showInvestigateAction = availability?.available === true;
   const investigateActionLabel = isInvestigating
-    ? i18n.translate('xpack.responseOpsAlertsTable.investigating', {
+    ? i18n.translate('xpack.observability.alerts.investigating', {
         defaultMessage: 'Investigating',
       })
     : latestStatus === 'completed'
-    ? i18n.translate('xpack.responseOpsAlertsTable.reinvestigate', {
+    ? i18n.translate('xpack.observability.alerts.reinvestigate', {
         defaultMessage: 'Re-investigate',
       })
-    : i18n.translate('xpack.responseOpsAlertsTable.investigate', {
+    : i18n.translate('xpack.observability.alerts.investigate', {
         defaultMessage: 'Investigate',
       });
 
   const handleInvestigate = async () => {
-    if (!alertId || isInvestigating) return;
+    if (!alertId || !investigationsClient || isInvestigating) return;
 
     setIsStarting(true);
     onInvestigate?.();
     try {
-      await startInvestigation();
+      await investigationsClient.fetch('POST /internal/nightshift/investigations', {
+        signal: null,
+        params: {
+          body: { subject: { type: 'alert', id: alertId }, concurrency_key: alertId },
+        },
+      });
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.responseOpsAlertsTable.investigationStarted', {
+        title: i18n.translate('xpack.observability.alerts.investigationStarted', {
           defaultMessage: 'Investigation started',
         }),
       });
-      queryClient.setQueryData<InvestigationListResponse>(statusQueryKey, {
-        results: [{ status: 'pending' }],
-      });
+      await queryClient.invalidateQueries(statusQueryKey);
     } catch (error) {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.responseOpsAlertsTable.investigationFailed', {
+        title: i18n.translate('xpack.observability.alerts.investigationFailed', {
           defaultMessage: 'Failed to start investigation',
         }),
         text: error instanceof Error ? error.message : String(error),

@@ -26,7 +26,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowsMock } from '@kbn/response-ops-alerts-table/mocks/maintenance_windows.mock';
 import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
-import { RuleAlertActionsCell } from './rule_alert_actions_cell';
 
 jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 jest.mocked(getRuleTypes).mockResolvedValue([]);
@@ -242,8 +241,6 @@ describe('rules', () => {
         ruleTypeIds: [ruleType.id],
         showAlertStatusWithFlapping: true,
         query: expect.any(Object),
-        renderActionsCell: RuleAlertActionsCell,
-        additionalContext: { ruleId: rule.id, ruleTypeId: ruleType.id },
       }),
       expect.anything()
     );

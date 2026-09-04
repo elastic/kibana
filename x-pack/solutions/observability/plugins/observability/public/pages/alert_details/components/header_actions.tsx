@@ -34,8 +34,8 @@ import { AlertSnoozePanelInline, useAlertSnooze } from '@kbn/response-ops-alert-
 import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
 import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names';
 
-import { useInvestigateAlert } from '@kbn/response-ops-alerts-table/hooks/use_investigate_alert';
 import { useKibana } from '../../../utils/kibana_react';
+import { useInvestigateAlert } from '../../../hooks/use_investigate_alert';
 import type { TopAlert } from '../../../typings/alerts';
 import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
 import { observabilityFeatureId } from '../../../../common';
@@ -175,14 +175,7 @@ export function HeaderActions({
   const { showInvestigateAction, handleInvestigate, isInvestigating, investigateActionLabel } =
     useInvestigateAlert({
       alertId,
-      application: services.application,
-      http,
-      notifications,
       onInvestigate: () => setIsPopoverOpen(false),
-      startInvestigation: () =>
-        http.post(
-          `/internal/observability/alerts/${encodeURIComponent(alertId ?? '')}/investigate`
-        ),
     });
 
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);

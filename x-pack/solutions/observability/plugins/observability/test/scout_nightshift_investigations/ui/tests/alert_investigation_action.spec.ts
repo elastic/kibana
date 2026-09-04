@@ -101,13 +101,13 @@ test.describe(
       const requestPromise = page.waitForRequest(
         (request) =>
           request.method() === 'POST' &&
-          request.url().endsWith(`/internal/observability/alerts/${alertId}/investigate`)
+          request.url().endsWith('/internal/nightshift/investigations')
       );
       await pageObjects.alertPage.clickInvestigate();
 
-      expect((await requestPromise).url()).toContain(
-        `/internal/observability/alerts/${alertId}/investigate`
-      );
+      expect((await requestPromise).postDataJSON()).toMatchObject({
+        subject: { type: 'alert', id: alertId },
+      });
     });
   }
 );

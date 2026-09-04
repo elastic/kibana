@@ -17,7 +17,6 @@ import { AcknowledgeAlertAction } from './acknowledge_alert_action';
 import { MarkAsUntrackedAlertAction } from './mark_as_untracked_alert_action';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { EditTagsAction } from './edit_tags_action';
-import { InvestigateAlertAction } from './investigate_alert_action';
 
 /**
  * Common alerts table row actions
@@ -47,7 +46,6 @@ export const DefaultAlertActions = <AC extends AdditionalContext = AdditionalCon
 
   return (
     <>
-      <InvestigateAlertAction {...props} />
       <ViewRuleDetailsAlertAction {...props} />
       <ViewAlertDetailsAlertAction {...props} />
       {showModifyOption && <AcknowledgeAlertAction {...props} />}

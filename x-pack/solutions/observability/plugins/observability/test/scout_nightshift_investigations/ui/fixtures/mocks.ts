@@ -17,7 +17,4 @@ export const mockInvestigationApi = async (page: ScoutPage) => {
   await page.route('**/internal/nightshift/investigations', async (route) => {
     await route.fulfill({ status: 200, json: { investigation_id: 'investigation-1' } });
   });
-  await page.route('**/internal/observability/alerts/*/investigate', async (route) => {
-    await route.fulfill({ status: 200, json: { investigation_id: 'investigation-1' } });
-  });
 };

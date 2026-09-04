@@ -33,7 +33,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
-import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
 import { getLogsFeature } from './features/logs_feature';
 import { getObservabilityAlertsFeature } from './features/alerts_feature';
 import type { ObservabilityConfig } from '.';
@@ -78,7 +77,6 @@ interface PluginStart {
   dataViews: DataViewsServerPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dashboard: DashboardPluginStart;
-  nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
@@ -160,7 +158,6 @@ export class ObservabilityPlugin
             alertDetailsContextualInsightsService,
           },
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
-          nightshiftInvestigations: pluginStart.nightshiftInvestigations,
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
