@@ -9,6 +9,7 @@ import { EuiSkeletonText, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { OsqueryEmptyPrompt, OsqueryNotAvailablePrompt } from '../prompts';
 import { AGENT_STATUS_ERROR, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
 import { useKibana } from '../../common/lib/kibana';
@@ -19,7 +20,14 @@ import type { AddToTimelineHandler } from '../../types';
 
 export interface OsqueryActionProps {
   agentId?: string;
-  defaultValues?: {};
+  defaultValues?: {
+    alertIds?: string[];
+    query?: string;
+    savedQueryId?: string;
+    packId?: string;
+    ecs_mapping?: ECSMapping;
+    timeout?: number;
+  };
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
   onSuccess?: (actionId: string) => void;

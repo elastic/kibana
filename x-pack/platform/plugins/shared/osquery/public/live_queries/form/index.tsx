@@ -13,10 +13,8 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, find, pickBy, isNumber } from 'lodash';
 
 import { QUERY_TIMEOUT } from '../../../common/constants';
-import {
-  containsDynamicQuery,
-  replaceParamsQuery,
-} from '../../../common/utils/replace_params_query';
+import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
+import { AlertAttachmentContext } from '../../common/contexts';
 import { QueryPackSelectable } from './query_pack_selectable';
 import { useKibana } from '../../common/lib/kibana';
 import { usePacks } from '../../packs/use_packs';
@@ -27,12 +25,13 @@ import type { AddToTimelineHandler } from '../../types';
 import LiveQueryQueryField from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
-import { AlertAttachmentContext } from '../../common/contexts';
 import { PackQueriesStatusTable } from './pack_queries_status_table';
 
 export interface LiveQueryFormFields {
   alertIds?: string[];
   query?: string;
+  /** Original template behind a `query` that was substituted for display only. */
+  submittedQuery?: string;
   agentSelection: AgentSelection;
   savedQueryId?: string | null;
   ecs_mapping: ECSMapping;
@@ -43,6 +42,7 @@ export interface LiveQueryFormFields {
 
 interface DefaultLiveQueryFormFields {
   query?: string;
+  submittedQuery?: string;
   agentSelection?: AgentSelection;
   alertIds?: string[];
   savedQueryId?: string | null;
@@ -75,8 +75,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   hideAgentsField = false,
   addToTimeline,
 }) => {
-  const alertAttachmentContext = useContext(AlertAttachmentContext);
-
   const { application } = useKibana().services;
   const permissions = application.capabilities.osquery;
   const canRunPacks = useMemo(
@@ -97,6 +95,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [permissions]
   );
 
+  const alertAttachmentContext = useContext(AlertAttachmentContext);
   const [isLive, setIsLive] = useState(false);
 
   const watchedValues = watch();
@@ -117,15 +116,15 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   useEffect(() => {
     register('savedQueryId');
     register('alertIds');
+    register('submittedQuery');
   }, [register]);
 
   const onSubmit = useCallback(
     async (values: LiveQueryFormFields) => {
-      // Temporary, frontend solution for params substitution. To be removed once alert_ids refactored in create_live_query_route
-      const query =
-        values.query && containsDynamicQuery(values.query) && alertAttachmentContext
-          ? replaceParamsQuery(values.query, alertAttachmentContext).result
-          : values.query;
+      const substitutedDefault =
+        values.submittedQuery && alertAttachmentContext
+          ? replaceParamsQuery(values.submittedQuery, alertAttachmentContext).result
+          : undefined;
 
       const serializedData = {
         ...pickBy(
@@ -135,7 +134,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             // the reset effect below, so a saved query picked before switching to Pack would
             // otherwise still be posted and get compared against the pack's queries server-side.
             saved_query_id: queryType === 'query' ? values.savedQueryId : undefined,
-            query: queryType === 'query' ? query : undefined,
+            // Send the template when the displayed value is just its substitution and the user
+            // has not edited it; the server substitutes authoritatively from the alert doc.
+            query:
+              queryType === 'query'
+                ? values.submittedQuery && values.query === substitutedDefault
+                  ? values.submittedQuery
+                  : values.query
+                : undefined,
             alert_ids: values.alertIds,
             pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
             ecs_mapping: queryType === 'query' ? values.ecs_mapping : undefined,
@@ -200,6 +206,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
       if (defaultValue.query && canRunSingleQuery) {
         setValue('query', defaultValue.query);
+        setValue('submittedQuery', defaultValue.submittedQuery);
         setValue('savedQueryId', defaultValue.savedQueryId);
         setValue('ecs_mapping', defaultValue.ecs_mapping ?? {});
         setValue('timeout', defaultValue.timeout ?? QUERY_TIMEOUT.DEFAULT);
@@ -226,6 +233,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     if (!defaultValue) {
       resetField('packId');
       resetField('query');
+      resetField('submittedQuery');
       resetField('ecs_mapping');
       resetField('savedQueryId');
       resetField('alertIds');
