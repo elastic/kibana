@@ -7,6 +7,12 @@
 
 export { dispatchConnectorEvents } from './dispatch_connector_events';
 export { computeIngestTokenHash } from './compute_ingest_token_hash';
+export {
+  applyInboundIngressCredentialsIfNeeded,
+  ensureConnectorIngressCredentials,
+  preserveInboundIngressHashIfNeeded,
+  resolveInboundEventsSpaceId,
+} from './ensure_connector_ingress_credentials';
 export type { InboundEventsClient, InboundEventsClientArgs } from './factory';
 export { createInboundEventsClient } from './factory';
 export type {
