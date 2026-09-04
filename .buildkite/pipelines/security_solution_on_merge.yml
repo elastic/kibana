@@ -491,3 +491,24 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+
+  # Build-bot Slack posts one build-level message to SLACK_NOTIFICATIONS_CHANNEL
+  # and ignores step env. Fan out to owning team channels after the suites finish.
+  - wait: ~
+    continue_on_failure: true
+
+  - command: ts-node .buildkite/scripts/pipelines/security_solution_on_merge/notify_failed_suites.ts
+    label: ':slack: Notify owning teams of Security on-merge failures'
+    key: notify_owning_teams
+    timeout_in_minutes: 10
+    soft_fail: true
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
