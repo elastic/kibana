@@ -27,6 +27,7 @@ import type {
   LensSerializedState,
   LensByRefSerializedState,
   LensByValueSerializedState,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
@@ -102,7 +103,10 @@ export const updatingMiddleware =
         datasourceStates[activeDatasourceId].state,
         visualization.state,
         visualization.activeId,
-        undefined,
+        // pass the store's active datasource id explicitly: during a datasource
+        // conversion (e.g. formBased -> textBased) the serialized attributes can
+        // lag behind the store, so re-deriving the id from them may pick a stale key
+        (activeDatasourceId as LensDatasourceId | null) ?? undefined,
         datasourceStates
       );
     }

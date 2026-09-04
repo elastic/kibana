@@ -39,7 +39,7 @@ describe('Lens flyout', () => {
           newDatasourceState: 'newDatasourceState',
         })
       );
-      expect(updaterFn).toHaveBeenCalledWith('newDatasourceState', null, 'testVis', undefined, {
+      expect(updaterFn).toHaveBeenCalledWith('newDatasourceState', null, 'testVis', 'textBased', {
         formBased: { isLoading: true, state: null },
         textBased: { isLoading: false, state: 'newDatasourceState' },
       });
@@ -50,7 +50,7 @@ describe('Lens flyout', () => {
         'newDatasourceState',
         'newVisState',
         'testVis',
-        undefined,
+        'textBased',
         {
           formBased: { isLoading: true, state: null },
           textBased: { isLoading: false, state: 'newDatasourceState' },
