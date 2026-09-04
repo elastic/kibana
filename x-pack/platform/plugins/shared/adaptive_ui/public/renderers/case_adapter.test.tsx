@@ -22,6 +22,15 @@ describe('case attachment adapter (record)', () => {
     expect(rendered).toContain('#101 Suspicious PowerShell on finance hosts');
     expect(rendered).toContain('24');
     expect(rendered).toContain('Assignees');
+    expect(rendered).not.toContain('[object Object]');
     expect(rendered).toContain('Go to case');
+    const details = spec.body.find((node) => node.type === 'descriptionList');
+    expect(details).toEqual(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({ title: 'Assignees', description: '2' }),
+        ]),
+      })
+    );
   });
 });
