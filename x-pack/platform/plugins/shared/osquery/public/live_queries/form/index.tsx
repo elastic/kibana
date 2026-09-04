@@ -13,7 +13,10 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, find, pickBy, isNumber } from 'lodash';
 
 import { QUERY_TIMEOUT } from '../../../common/constants';
-import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
+import {
+  containsDynamicQuery,
+  replaceParamsQuery,
+} from '../../../common/utils/replace_params_query';
 import { QueryPackSelectable } from './query_pack_selectable';
 import { useKibana } from '../../common/lib/kibana';
 import { usePacks } from '../../packs/use_packs';
@@ -30,8 +33,6 @@ import { PackQueriesStatusTable } from './pack_queries_status_table';
 export interface LiveQueryFormFields {
   alertIds?: string[];
   query?: string;
-  /** Unsubstituted template for `query`, when the caller pre-substituted it for display. */
-  submittedQuery?: string;
   agentSelection: AgentSelection;
   savedQueryId?: string | null;
   ecs_mapping: ECSMapping;
@@ -42,7 +43,6 @@ export interface LiveQueryFormFields {
 
 interface DefaultLiveQueryFormFields {
   query?: string;
-  submittedQuery?: string;
   agentSelection?: AgentSelection;
   alertIds?: string[];
   savedQueryId?: string | null;
@@ -117,22 +117,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   useEffect(() => {
     register('savedQueryId');
     register('alertIds');
-    register('submittedQuery');
   }, [register]);
 
   const onSubmit = useCallback(
     async (values: LiveQueryFormFields) => {
-      // Send the original template when the caller pre-substituted `query` only for display, and
-      // when the user has not edited it since. The server substitutes from the alert document it
-      // authorizes against; doing it on both sides diverges (unresolved `{{field}}` is left in
-      // place, arrays take the first value) and a byte mismatch would be denied.
-      const substitutedDefault =
-        values.submittedQuery && alertAttachmentContext
-          ? replaceParamsQuery(values.submittedQuery, alertAttachmentContext).result
-          : undefined;
+      // Temporary, frontend solution for params substitution. To be removed once alert_ids refactored in create_live_query_route
       const query =
-        values.submittedQuery && values.query === substitutedDefault
-          ? values.submittedQuery
+        values.query && containsDynamicQuery(values.query) && alertAttachmentContext
+          ? replaceParamsQuery(values.query, alertAttachmentContext).result
           : values.query;
 
       const serializedData = {
@@ -208,7 +200,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
       if (defaultValue.query && canRunSingleQuery) {
         setValue('query', defaultValue.query);
-        setValue('submittedQuery', defaultValue.submittedQuery);
         setValue('savedQueryId', defaultValue.savedQueryId);
         setValue('ecs_mapping', defaultValue.ecs_mapping ?? {});
         setValue('timeout', defaultValue.timeout ?? QUERY_TIMEOUT.DEFAULT);
@@ -235,7 +226,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     if (!defaultValue) {
       resetField('packId');
       resetField('query');
-      resetField('submittedQuery');
       resetField('ecs_mapping');
       resetField('savedQueryId');
       resetField('alertIds');
