@@ -15,7 +15,7 @@ import type {
   SlackSendMessageInput,
 } from './types';
 
-const RELAY_SUPPORTED_ACTIONS = new Set(['sendMessage', 'listChannels', 'resolveChannelId']);
+const getRelaySupportedActions = () => Object.keys(slackRelay.actions);
 
 /** The Relay's own max page size; the Slack schemas allow far larger limits. */
 const RELAY_MAX_BINDINGS_PAGE = 200;
@@ -247,14 +247,27 @@ export async function relayTest(
   return {};
 }
 
+export const slackRelay = {
+  getConnection: getRelayConnection,
+  withGuards: withRelayGuards,
+  test: relayTest,
+  actions: {
+    sendMessage: relaySendMessage,
+    listChannels: relayListChannels,
+    resolveChannelId: relayResolveChannelId,
+  },
+};
+
 /**
  * Fails the actions the Relay has no route for, so they report what is supported instead of reaching
  * Slack unauthenticated. The direct-token path is untouched.
  */
 export function withRelayGuards(actions: ConnectorSpec['actions']): ConnectorSpec['actions'] {
+  const supported = getRelaySupportedActions();
+
   return Object.fromEntries(
     Object.entries(actions).map(([name, action]) => {
-      if (RELAY_SUPPORTED_ACTIONS.has(name)) {
+      if (supported.includes(name)) {
         return [name, action];
       }
 
@@ -265,9 +278,7 @@ export function withRelayGuards(actions: ConnectorSpec['actions']): ConnectorSpe
           handler: async (ctx: ActionContext, input: unknown) => {
             if (isRelayAuth(ctx)) {
               throw new Error(
-                `${name} is not available through the Elastic Slack app. Supported actions: ${[
-                  ...RELAY_SUPPORTED_ACTIONS,
-                ].join(', ')}.`
+                `${name} is not available through the Elastic Slack app. Supported actions: ${supported.join(', ')}.`
               );
             }
             return action.handler(ctx, input);

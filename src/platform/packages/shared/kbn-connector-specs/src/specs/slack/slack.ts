@@ -11,14 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
-import {
-  getRelayConnection,
-  relayListChannels,
-  relayResolveChannelId,
-  relaySendMessage,
-  relayTest,
-  withRelayGuards,
-} from './relay';
+import { slackRelay } from './relay';
 import {
   SlackCreateConversationInputSchema,
   SlackGetConversationHistoryInputSchema,
@@ -281,7 +274,7 @@ export const Slack: ConnectorSpec = {
   // No additional configuration needed beyond OAuth credentials
   schema: lazySchema(() => z.object({})),
 
-  actions: withRelayGuards({
+  actions: slackRelay.withGuards({
     // https://api.slack.com/methods/assistant.search.context
     searchMessages: {
       isTool: true,
@@ -388,9 +381,9 @@ export const Slack: ConnectorSpec = {
         'List Slack channels/conversations the token can see (one page per call). Use this to answer which channels exist or to browse IDs before sendMessage. Pass nextCursor from the previous response to fetch the next page. Prefer this over many resolveChannelId calls for discovery.',
       input: SlackListChannelsInputSchema,
       handler: async (ctx, input: SlackListChannelsInput) => {
-        const relayConnection = getRelayConnection(ctx);
+        const relayConnection = slackRelay.getConnection(ctx);
         if (relayConnection) {
-          return relayListChannels(relayConnection, ctx, input);
+          return slackRelay.actions.listChannels(relayConnection, ctx, input);
         }
 
         const params: SlackConversationsListParams = {
@@ -451,9 +444,9 @@ export const Slack: ConnectorSpec = {
         'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use before sendMessage when you already know the target name but need its ID. To list or explore channels, use listChannels instead of many resolveChannelId calls.',
       input: SlackResolveChannelIdInputSchema,
       handler: async (ctx, input: SlackResolveChannelIdInput) => {
-        const relayConnection = getRelayConnection(ctx);
+        const relayConnection = slackRelay.getConnection(ctx);
         if (relayConnection) {
-          return relayResolveChannelId(relayConnection, ctx, input);
+          return slackRelay.actions.resolveChannelId(relayConnection, ctx, input);
         }
 
         const nameNorm = input.name.trim().replace(/^#/, '').toLowerCase();
@@ -1089,9 +1082,9 @@ export const Slack: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
 
-        const relayConnection = getRelayConnection(ctx);
+        const relayConnection = slackRelay.getConnection(ctx);
         if (relayConnection) {
-          return relaySendMessage(relayConnection, ctx, typedInput);
+          return slackRelay.actions.sendMessage(relayConnection, ctx, typedInput);
         }
 
         const payload: Record<string, unknown> = {
@@ -1154,11 +1147,9 @@ export const Slack: ConnectorSpec = {
     handler: async (ctx) => {
       ctx.log.debug('Slack test handler');
 
-      // withRelayGuards cannot reach this: it is registered under the reserved `_test` key, outside
-      // spec.actions.
-      const relayConnection = getRelayConnection(ctx);
+      const relayConnection = slackRelay.getConnection(ctx);
       if (relayConnection) {
-        return relayTest(relayConnection, ctx);
+        return slackRelay.test(relayConnection, ctx);
       }
 
       // Test connection by calling auth.test which validates the token
