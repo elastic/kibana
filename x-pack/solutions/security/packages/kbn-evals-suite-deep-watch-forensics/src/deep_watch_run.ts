@@ -122,10 +122,15 @@ export const runDeepWatch = async ({
       version: WORKFLOWS_API_VERSION,
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
       query: { includeOutput: true },
-    })) as { status?: string; output?: DeepWatchOutput };
-
+    })) as {
+      status?: string;
+      output?: DeepWatchOutput;
+      context?: { output?: DeepWatchOutput };
+    };
     status = execution.status;
-    output = execution.output ?? {};
+    // The workflow.output step materializes onto context.output; the top-level
+    // execution.output field is null on this engine. Read the real gate result.
+    output = execution.context?.output ?? execution.output ?? {};
 
     if (isTerminal(status)) {
       break;
