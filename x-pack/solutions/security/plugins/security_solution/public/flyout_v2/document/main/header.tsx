@@ -68,10 +68,11 @@ export interface HeaderProps {
    */
   onShowNotes: () => void;
   /**
-   * `true` while pagination is fetching the next document and the previously
-   * rendered hit is kept around only to preserve non-mutating header context.
+   * `true` when the rendered hit is no longer the document the flyout is showing — pagination is
+   * still fetching the next one, or the requested one could not be resolved. The hit is kept around
+   * only to preserve non-mutating header context, so alert actions that would mutate it are hidden.
    */
-  isPaginationLoading?: boolean;
+  isDocumentStale?: boolean;
 }
 
 /**
@@ -85,7 +86,7 @@ export const Header: FC<HeaderProps> = memo(
     renderCellActions = noopCellActionRenderer,
     onAlertUpdated,
     onShowNotes,
-    isPaginationLoading = false,
+    isDocumentStale = false,
   }) => {
     const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
     const isAlert = useMemo(
@@ -141,7 +142,7 @@ export const Header: FC<HeaderProps> = memo(
           <EuiSpacer size="xs" />
         </Timestamp>
         <Title hit={hit} hideLink={!canReadRules || isRulePreview} />
-        {isAlert && !isPaginationLoading && (
+        {isAlert && !isDocumentStale && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup

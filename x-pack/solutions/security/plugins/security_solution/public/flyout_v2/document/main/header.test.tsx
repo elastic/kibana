@@ -235,7 +235,7 @@ describe('<DocumentHeader />', () => {
       store.setState({ flyoutDocumentIndex: 1, totalDocumentCount: 5 });
     });
     const { getByTestId, queryByTestId } = renderHeaderWithStore(
-      { hit: alertHit, isPaginationLoading: true },
+      { hit: alertHit, isDocumentStale: true },
       store
     );
 

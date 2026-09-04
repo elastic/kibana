@@ -187,8 +187,8 @@ export const DocumentFlyoutWrapper = memo(
       );
     }
 
-    if (requestState === ElasticRequestState.NotFound) {
-      return (
+    const unavailableDocumentCallout =
+      requestState === ElasticRequestState.NotFound ? (
         <EuiCallOut
           announceOnMount
           color="danger"
@@ -196,17 +196,33 @@ export const DocumentFlyoutWrapper = memo(
           title={DOCUMENT_NOT_FOUND}
           data-test-subj="document-overview-wrapper-not-found"
         />
-      );
-    }
-
-    if (requestState === ElasticRequestState.Error) {
-      return (
+      ) : requestState === ElasticRequestState.Error ? (
         <EuiCallOut
           announceOnMount
           color="danger"
           iconType="warning"
           title={FETCH_ERROR}
           data-test-subj="document-overview-fetch-error"
+        />
+      ) : null;
+
+    if (unavailableDocumentCallout) {
+      // Paginating onto a document that no longer resolves (deleted, or moved out of its index)
+      // must not take the whole panel down with it: keep the last document that did resolve
+      // mounted so the header's pagination controls survive, and surface the failure in the body
+      // instead. Without a previous document there is nothing to keep mounted, so the callout
+      // stands alone.
+      if (!lastResolvedHit.current) {
+        return unavailableDocumentCallout;
+      }
+
+      return (
+        <DocumentFlyout
+          hit={lastResolvedHit.current}
+          renderCellActions={renderCellActions}
+          onAlertUpdated={handleAlertUpdated}
+          dataTestSubj={dataTestSubj}
+          unavailableDocumentCallout={unavailableDocumentCallout}
         />
       );
     }
