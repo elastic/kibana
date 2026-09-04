@@ -9,6 +9,25 @@ import { schema } from '@kbn/config-schema';
 
 // --- Shared primitives ---
 
+const EcfFamilySchema = schema.oneOf(
+  [schema.literal('unified'), schema.literal('otel'), schema.literal('crowdstrike')],
+  { meta: { description: 'ECF template family.' } }
+);
+
+const EcfStackSchema = schema.object({
+  family: EcfFamilySchema,
+  stackName: schema.string({
+    minLength: 1,
+    maxLength: 128,
+    meta: { description: 'CloudFormation stack name (128-char AWS limit).' },
+  }),
+  templateVersion: schema.string({
+    minLength: 1,
+    maxLength: 32,
+    meta: { description: 'ECF semantic version resolved at launch time, e.g. "1.10.0".' },
+  }),
+});
+
 const CloudOnboardingDeploymentProviderSchema = schema.oneOf(
   [schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')],
   { meta: { description: 'Cloud provider.' } }
@@ -116,6 +135,15 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
+  ecfStacks: schema.maybe(
+    schema.arrayOf(EcfStackSchema, {
+      maxSize: 10,
+      meta: {
+        description:
+          'ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.',
+      },
+    })
+  ),
 });
 
 const SingleItemResponseSchema = schema.object({ item: CloudOnboardingDeploymentItemSchema });
@@ -186,6 +214,12 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     agentPolicyId: schema.maybe(schema.string()),
     packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
     apiKeyId: schema.maybe(schema.string()),
+    ecfStacks: schema.maybe(
+      schema.arrayOf(EcfStackSchema, {
+        maxSize: 10,
+        meta: { description: 'ECF CloudFormation stacks to record for this deployment.' },
+      })
+    ),
   }),
 };
 
