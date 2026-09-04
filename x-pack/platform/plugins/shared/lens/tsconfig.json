@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_search_sessions/**/*"
   ],
   "kbn_references": [
     "@kbn/spaces-plugin",
@@ -130,6 +131,7 @@
     "@kbn/css-utils",
     "@kbn/lens-common",
     "@kbn/lens-common-2",
+    "@kbn/lens-test-helpers",
     "@kbn/react-kibana-context-common",
     "@kbn/control-group-renderer",
     "@kbn/unified-tabs",

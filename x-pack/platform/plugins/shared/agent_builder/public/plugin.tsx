@@ -62,6 +62,7 @@ import type {
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
   ConversationSidebarRef,
+  OpenConversationDetailsOptions,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type {
@@ -242,6 +243,22 @@ export class AgentBuilderPlugin
       return { chatRef: sidebarRef };
     };
 
+    const openConversationDetails = async ({
+      conversationId,
+      onClose,
+    }: OpenConversationDetailsOptions): Promise<() => void> => {
+      const { openConversationDetailsFlyout } = await import(
+        './flyout/open_conversation_details_flyout'
+      );
+      return openConversationDetailsFlyout({
+        core,
+        conversationsService,
+        conversationTemplatesService,
+        conversationId,
+        onClose,
+      });
+    };
+
     const internalServices: AgentBuilderInternalService = {
       filesClient,
       agentService,
@@ -391,6 +408,7 @@ export class AgentBuilderPlugin
       },
       EmbeddableConversation: PublicEmbeddableConversation,
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
+      openConversationDetails,
     };
 
     if (hasAgentBuilder) {

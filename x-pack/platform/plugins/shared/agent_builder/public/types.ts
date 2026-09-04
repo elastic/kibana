@@ -44,6 +44,7 @@ export type {
   ConversationTemplateUIDefinition,
   ConversationTemplateServiceStartContract,
   OpenConversationSidebarReturn,
+  OpenConversationDetailsOptions,
   PublicEmbeddableConversationProps,
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,

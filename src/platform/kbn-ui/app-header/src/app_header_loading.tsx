@@ -44,7 +44,14 @@ export const AppHeaderLoadingView = React.memo<AppHeaderLoadingViewProps>(
 
     return (
       <AppHeaderShell
-        title={<TitleArea back={back} size={titleSize} placeholder={<AppHeaderSkeletonTitle />} />}
+        title={
+          <TitleArea
+            back={back}
+            size={titleSize}
+            compact={spacing === 'compact'}
+            placeholder={<AppHeaderSkeletonTitle />}
+          />
+        }
         trailing={<AppMenuLoading buttonCount={menu?.buttonCount} hasPrimary={menu?.hasPrimary} />}
         sticky={sticky}
         spacing={spacing}

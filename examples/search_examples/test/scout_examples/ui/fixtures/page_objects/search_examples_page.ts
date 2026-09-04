@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
-import { APP_ID, DATA_VIEW, LOGSTASH_TIME_RANGE } from '../constants';
+import type { EuiComboBoxObject, Locator, PageObjects, ScoutPage } from '@kbn/scout';
+import {
+  APP_ID,
+  DATA_VIEW,
+  LOGSTASH_TIME_RANGE,
+  SAMPLE_01_DATA_VIEW_NAME,
+  SAMPLE_01_TIME_RANGE,
+} from '../constants';
 
 /**
  * Page object for the search_examples demo apps.
- *
- * Combo selection uses a temporary replace-without-clear path: shared
- * `setSelectedOptions` clears pills via × first and times out on these
- * `singleSelection` demos. Keep until Apps DX adds that behavior to
- * `@elastic/eui-test-helpers`.
  */
 export class SearchExamplesPage {
   readonly searchSourceWithOther: Locator;
@@ -32,6 +33,12 @@ export class SearchExamplesPage {
   readonly saveBackgroundSearchButton: Locator;
   readonly sqlQueryInput: Locator;
   readonly querySubmitButton: Locator;
+  readonly warningsTab: Locator;
+  readonly warningsCodeBlock: Locator;
+  readonly viewWarningBtn: Locator;
+  readonly dataViewSelector: EuiComboBoxObject;
+  readonly searchBucketField: EuiComboBoxObject;
+  readonly searchMetricField: EuiComboBoxObject;
 
   constructor(
     private readonly page: ScoutPage,
@@ -52,6 +59,12 @@ export class SearchExamplesPage {
     );
     this.sqlQueryInput = this.page.testSubj.locator('sqlQueryInput');
     this.querySubmitButton = this.page.testSubj.locator('querySubmitButton');
+    this.warningsTab = this.page.testSubj.locator('warningsTab');
+    this.warningsCodeBlock = this.page.testSubj.locator('warningsCodeBlock');
+    this.viewWarningBtn = this.page.testSubj.locator('viewWarningBtn');
+    this.dataViewSelector = this.page.components.comboBox('dataViewSelector');
+    this.searchBucketField = this.page.components.comboBox('searchBucketField');
+    this.searchMetricField = this.page.components.comboBox('searchMetricField');
   }
 
   searchResults(count: number): Locator {
@@ -77,43 +90,70 @@ export class SearchExamplesPage {
    * Configures the Search demo: data view, bucket/metric fields, and time range.
    */
   async configureSearchDemo(): Promise<void> {
-    await this.selectSingleComboOption('dataViewSelector', DATA_VIEW);
+    await this.dataViewSelector.setSelectedOptions([DATA_VIEW]);
     // Field options load after the data view resolves.
     await this.page.testSubj.locator('searchBucketField').waitFor({ state: 'visible' });
-    await this.selectSingleComboOption('searchBucketField', 'geo.src');
-    await this.selectSingleComboOption('searchMetricField', 'memory');
+    await this.replaceSingleComboSelection('searchBucketField', 'geo.src');
+    await this.replaceSingleComboSelection('searchMetricField', 'memory');
     await this.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
   }
 
   /**
-   * Configures the Search Sessions demo: data view and metric field.
+   * Configures the Search demo for shard-failure warnings: downsampled
+   * data view, rollup metric field, and the range covering sample-01.
    */
-  async configureSearchSessionDemo(): Promise<void> {
-    await this.selectSingleComboOption('dataViewSelector', DATA_VIEW);
-    await this.selectSingleComboOption('searchMetricField', 'bytes');
+  async configureWarningsDemo(dataViewName: string = SAMPLE_01_DATA_VIEW_NAME): Promise<void> {
+    await this.dataViewSelector.setSelectedOptions([dataViewName]);
+    await this.page.testSubj.locator('searchMetricField').waitFor({ state: 'visible' });
+    await this.replaceSingleComboSelection(
+      'searchMetricField',
+      'kubernetes.container.memory.usage.bytes'
+    );
+    await this.datePicker.setAbsoluteRange(SAMPLE_01_TIME_RANGE);
   }
 
   /**
-   * Temporary until Apps DX supports replace-without-clear on comboBox.
-   * Select by typing + exact option click (no clear). Always runs the select
-   * path so unexpected state surfaces as a failure.
+   * Configures the Search Sessions demo: data view, metric, and time range.
+   * Finishes after startSearch is actionable so date-picker query resets
+   * cannot clear the session after the spec starts it.
    */
-  private async selectSingleComboOption(
-    testSubj: string,
-    label: string,
-    { timeout = 10_000 }: { timeout?: number } = {}
-  ): Promise<void> {
-    const normalizedLabel = label.trim();
-    const root = this.page.testSubj.locator(testSubj);
-    await root.locator('[data-test-subj="comboBoxInput"]').click();
-    const searchInput = root.locator('[data-test-subj="comboBoxSearchInput"]');
-    await searchInput.fill(label);
+  async configureSearchSessionDemo(): Promise<void> {
+    await this.dataViewSelector.setSelectedOptions([DATA_VIEW]);
+    await this.replaceSingleComboSelection('searchMetricField', 'bytes');
+    await this.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
+    await this.page.testSubj
+      .locator('dateRangePickerCustomRangePanel')
+      .waitFor({ state: 'hidden' });
+    await this.startSearch.click({ trial: true });
+  }
 
-    const listbox = this.page.getByRole('listbox');
-    const exactLabel = new RegExp(`^${normalizedLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
-    const option = listbox.getByRole('option').filter({ hasText: exactLabel });
-    await option.waitFor({ state: 'visible', timeout });
-    await option.click();
-    await listbox.waitFor({ state: 'hidden', timeout });
+  /**
+   * Picks `label` on a single-select combo. `setSelectedOptions` tries to
+   * clear existing pills first; these demo combos render pills without a
+   * close button, so that helper hangs. Typing the full label focuses the
+   * exact option (`geo.src` ahead of `geo.srcdest`); Enter commits it.
+   */
+  private async replaceSingleComboSelection(testSubj: string, label: string): Promise<void> {
+    const combo = this.page.components.comboBox(testSubj);
+    if ((await combo.getSelectedOptions()).includes(label)) {
+      return;
+    }
+
+    const root = this.page.testSubj.locator(testSubj);
+    const searchInput = root.getByTestId('comboBoxSearchInput');
+    await root.getByTestId('comboBoxInput').click();
+    await searchInput.fill(label);
+    await this.page.getByRole('listbox').waitFor({ state: 'visible' });
+    await searchInput.press('Enter');
+  }
+
+  /**
+   * Saves via the query-bar split button while the search is in-flight.
+   * The secondary control is disabled for 500ms after Loading and unmounts
+   * when the search completes.
+   */
+  async saveBackgroundSearch(): Promise<void> {
+    await this.page.testSubj.locator('queryCancelButton').waitFor({ state: 'visible' });
+    await this.saveBackgroundSearchButton.click();
   }
 }
