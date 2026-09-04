@@ -961,7 +961,8 @@ Issue flow:
       isTool: false,
       scope: 'write',
       input: CreateIssueInputSchema,
-      description: 'Create a Linear issue. Requires a team id and non-empty title.',
+      description:
+        'Create a Linear issue. Requires a team id and non-empty title. Returns selected issue fields, including cycle and parent references.',
       handler: async (ctx, input: CreateIssueInput) => {
         const data = await graphqlRequest<{ issueCreate?: Record<string, unknown> | null }>(
           ctx,
@@ -978,7 +979,7 @@ Issue flow:
       scope: 'destroy',
       input: UpdateIssueInputSchema,
       description:
-        'Update only the supplied fields on one Linear issue, preserving omitted fields.',
+        'Update only the supplied fields on one Linear issue, preserving omitted fields. Returns selected issue fields, including cycle and parent references.',
       handler: async (ctx, input: UpdateIssueInput) => {
         const data = await graphqlRequest<{ issueUpdate?: Record<string, unknown> | null }>(
           ctx,
@@ -994,7 +995,8 @@ Issue flow:
       isTool: false,
       scope: 'write',
       input: CreateCommentInputSchema,
-      description: 'Add a required Markdown comment body to one Linear issue.',
+      description:
+        'Add a required Markdown comment body to one Linear issue. Returns selected comment fields.',
       handler: async (ctx, input: CreateCommentInput) => {
         const data = await graphqlRequest<{ commentCreate?: Record<string, unknown> | null }>(
           ctx,
@@ -1011,7 +1013,7 @@ Issue flow:
       scope: 'destroy',
       input: CreateAttachmentInputSchema,
       description:
-        'Create or update a Linear issue attachment that links to an existing HTTPS URL.',
+        'Create or update a Linear issue attachment that links to an existing HTTPS URL. Returns selected attachment fields.',
       handler: async (ctx, input: CreateAttachmentInput) => {
         const attachmentInput = {
           issueId: input.issueId,

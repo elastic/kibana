@@ -505,6 +505,12 @@ describe('Linear', () => {
       expect(Linear.metadata.description).toBe(
         'Search and inspect Linear teams, projects, users, and issues.'
       );
+      expect(Linear.actions.createIssue.description).toContain('Returns selected issue fields');
+      expect(Linear.actions.updateIssue.description).toContain('Returns selected issue fields');
+      expect(Linear.actions.createComment.description).toContain('Returns selected comment fields');
+      expect(Linear.actions.createAttachment.description).toContain(
+        'Returns selected attachment fields'
+      );
       expect(Linear.skill).toContain('listTeams');
       expect(Linear.skill).toContain('listCycles');
       expect(Linear.skill).toContain('labelIds');
