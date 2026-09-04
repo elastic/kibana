@@ -186,6 +186,7 @@ describe('scheduled Significant Events managed workflows', () => {
         flakyRuleDetectionThreshold: 12,
         flakyRuleProbeAfterMinutes: 180,
         flakyRuleExemptSeverityScore: 85,
+        rootTriggeredBy: '${{ execution.triggeredBy }}',
       },
     });
   });

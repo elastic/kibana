@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { inject, injectable, multiInject } from 'inversify';
 import type {
   RuleExecutionInput,
@@ -36,7 +37,7 @@ import {
  */
 export interface RuleExecutionPipelineInput {
   readonly ruleId: string;
-  readonly spaceId: string;
+  readonly spaceId: SpaceId;
   readonly scheduledAt: string;
   readonly executionUuid: string;
   readonly abortSignal: AbortSignal;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
@@ -54,9 +55,9 @@ describe('managed_workflow_targets registry', () => {
 
   it('tracks cleanup as a per-space scheduled workflow', () => {
     expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).toContain(SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID);
-    expect(buildDisableTargets(['space-a'])).toContainEqual({
+    expect(buildDisableTargets([asSpaceId('space-a')])).toContainEqual({
       id: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
-      spaceId: 'space-a',
+      spaceId: asSpaceId('space-a'),
     });
   });
 });

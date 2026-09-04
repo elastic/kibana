@@ -12,6 +12,40 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 
+let lastMounted: React.ReactNode;
+
+jest.mock('@kbn/react-kibana-mount', () => ({
+  toMountPoint: (node: React.ReactElement) => {
+    lastMounted = node;
+    return () => () => undefined;
+  },
+}));
+
+const findGetAppDetails = (
+  node: React.ReactNode
+):
+  | (() => {
+      title: string;
+      id: string;
+      url: string;
+      context?: Record<string, string | boolean | number>;
+    })
+  | undefined => {
+  if (!React.isValidElement(node)) {
+    return undefined;
+  }
+  if (typeof node.props.getAppDetails === 'function') {
+    return node.props.getAppDetails;
+  }
+  for (const child of React.Children.toArray(node.props.children)) {
+    const found = findGetAppDetails(child);
+    if (found) {
+      return found;
+    }
+  }
+  return undefined;
+};
+
 describe('Feedback Plugin', () => {
   let coreStartMock: ReturnType<typeof coreMock.createStart>;
   let cloudStartMock: ReturnType<typeof cloudMock.createStart>;
@@ -25,7 +59,19 @@ describe('Feedback Plugin', () => {
 
   const enableFeedback = () => coreStartMock.notifications.feedback.isEnabled.mockReturnValue(true);
 
+  const getAppDetailsFromModal = () => {
+    isOptedIn$.next(true);
+    const [handler] = coreStartMock.chrome.next.registerFeedbackHandler.mock.calls[0];
+    handler();
+    const getAppDetails = findGetAppDetails(lastMounted);
+    if (!getAppDetails) {
+      throw new Error('getAppDetails was not found on the feedback modal');
+    }
+    return getAppDetails;
+  };
+
   beforeEach(() => {
+    lastMounted = undefined;
     coreStartMock = coreMock.createStart();
     cloudStartMock = cloudMock.createStart();
     isOptedIn$ = new Subject<boolean>();
@@ -38,69 +84,42 @@ describe('Feedback Plugin', () => {
     plugin = new FeedbackPlugin();
   });
 
-  it('registers the feedback button when feedback is enabled', () => {
-    enableFeedback();
-
-    startPlugin();
-
-    expect(coreStartMock.chrome.navControls.registerRight).toHaveBeenCalledWith({
-      order: 1001,
-      content: expect.anything(),
-    });
-    const [[{ content }]] = coreStartMock.chrome.navControls.registerRight.mock.calls;
-    expect(React.isValidElement(content)).toBe(true);
-  });
-
-  it('does not register the feedback button when feedback is disabled', () => {
+  it('does not register the feedback handler when feedback is disabled', () => {
     coreStartMock.notifications.feedback.isEnabled.mockReturnValue(false);
 
     startPlugin();
 
-    expect(coreStartMock.chrome.navControls.registerRight).not.toHaveBeenCalled();
+    expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
   });
 
-  describe('Chrome Next', () => {
-    beforeEach(() => {
-      enableFeedback();
-    });
+  it('registers the feedback handler only once opt-in resolves to true', () => {
+    enableFeedback();
+    startPlugin();
 
-    it('registers the feedback handler only once opt-in resolves to true', () => {
-      startPlugin();
+    expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
 
-      expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
+    isOptedIn$.next(true);
 
-      isOptedIn$.next(true);
+    expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledWith(
+      expect.any(Function)
+    );
+  });
 
-      expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledWith(
-        expect.any(Function)
-      );
-    });
+  it('unregisters the feedback handler when opt-in becomes false', () => {
+    enableFeedback();
+    const unregister = jest.fn();
+    coreStartMock.chrome.next.registerFeedbackHandler.mockReturnValue(unregister);
 
-    it('unregisters the feedback handler when opt-in becomes false', () => {
-      const unregister = jest.fn();
-      coreStartMock.chrome.next.registerFeedbackHandler.mockReturnValue(unregister);
+    startPlugin();
 
-      startPlugin();
+    isOptedIn$.next(true);
+    expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledTimes(1);
 
-      isOptedIn$.next(true);
-      expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledTimes(1);
-
-      isOptedIn$.next(false);
-      expect(unregister).toHaveBeenCalled();
-    });
+    isOptedIn$.next(false);
+    expect(unregister).toHaveBeenCalled();
   });
 
   describe('setContext', () => {
-    const getAppDetailsFromTrigger = () => {
-      const [[{ content }]] = coreStartMock.chrome.navControls.registerRight.mock.calls;
-      return (content as React.ReactElement).props.children.props.getAppDetails as () => {
-        title: string;
-        id: string;
-        url: string;
-        context?: Record<string, string | boolean | number>;
-      };
-    };
-
     it('no-ops when appId does not match the current app', () => {
       enableFeedback();
       const { setContext } = startPlugin();
@@ -108,7 +127,7 @@ describe('Feedback Plugin', () => {
 
       setContext('discover', { isEsql: true });
 
-      expect(getAppDetailsFromTrigger()().context).toBeUndefined();
+      expect(getAppDetailsFromModal()().context).toBeUndefined();
     });
 
     it('stores context only while appId is the current app', () => {
@@ -118,7 +137,7 @@ describe('Feedback Plugin', () => {
 
       setContext('discover', { isEsql: true });
 
-      expect(getAppDetailsFromTrigger()().context).toEqual({ isEsql: true });
+      expect(getAppDetailsFromModal()().context).toEqual({ isEsql: true });
     });
 
     it('clears context when the current app changes', () => {
@@ -129,7 +148,7 @@ describe('Feedback Plugin', () => {
 
       currentAppId$.next('dashboard');
 
-      expect(getAppDetailsFromTrigger()().context).toBeUndefined();
+      expect(getAppDetailsFromModal()().context).toBeUndefined();
     });
 
     it('clears context on unregister', () => {
@@ -140,7 +159,7 @@ describe('Feedback Plugin', () => {
 
       unregister();
 
-      expect(getAppDetailsFromTrigger()().context).toBeUndefined();
+      expect(getAppDetailsFromModal()().context).toBeUndefined();
     });
 
     it('uses options.title as a full app title override', () => {
@@ -150,7 +169,7 @@ describe('Feedback Plugin', () => {
 
       setContext('discover', { isEsql: true }, { title: 'Analytics - Discover ES|QL' });
 
-      expect(getAppDetailsFromTrigger()()).toEqual(
+      expect(getAppDetailsFromModal()()).toEqual(
         expect.objectContaining({
           title: 'Analytics - Discover ES|QL',
           context: { isEsql: true },

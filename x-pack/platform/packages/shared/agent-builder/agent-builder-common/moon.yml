@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/visualization-utils'
   - '@kbn/zod'
   - '@kbn/core'
+  - '@kbn/utility-types'
 tags:
   - shared-common
   - package
