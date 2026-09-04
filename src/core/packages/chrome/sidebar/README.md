@@ -28,5 +28,5 @@ This enables lazy initialization - stores are only created when first accessed. 
 
 ## Documentation
 
-- Public usage guide: `src/core/packages/chrome/sidebar/docs/sidebar.mdx`
+- Public usage guide: `docs-dev/chrome/sidebar.md`
 - Package-specific notes: each package has its own `README.md`

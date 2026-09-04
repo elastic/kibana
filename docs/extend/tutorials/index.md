@@ -23,8 +23,6 @@ Hands-on, task-focused guides for working with the {{kib}} platform from inside 
 ## Building UIs
 
 - [Register an application](./registering-an-application.md) — register a top-level application in {{kib}}
-- [Page template](./kibana-page-template.md) — create consistent page layouts with `KibanaPageTemplate`
-- [Recently viewed](./chrome-recently-viewed.md) — register items in the side navigation's "Recently Viewed" list via `chrome.recentlyAccessed`
 - [Expressions service](./kibana-expressions-service.md) — build and execute expression pipelines
 - [Lens Config Builder API](./lens-config-builder-api-examples.md) — embed Lens visualizations using the config builder API
 - [Add data tutorials](./home-tutorials.md) — register data ingestion tutorials in the {{kib}} home screen
@@ -32,12 +30,13 @@ Hands-on, task-focused guides for working with the {{kib}} platform from inside 
 ## Configuration
 
 - [Configure your plugin](./configuring-your-plugin.md) — define a config schema and read values at runtime
-- [UI settings](./ui-settings.md) — register a new UI setting (aka advanced setting / uiSetting) and read it at runtime
+- [UI settings](./ui-settings.md) — register and read Advanced Settings (`uiSettings`)
 
 ## Platform services
 
 - [Logging](./logging-service.md) — structured logging from the server
 - [Reporting integration](./reporting-integration.md) — integrate your plugin with the Reporting plugin
+- [Files](./files.md) — store and download blobs through the files plugin
 - [Screenshotting service](./screenshotting/kibana-screenshotting-service.md) — generate screenshots programmatically
 - [Development telemetry](./development-telemetry.md) — register telemetry events for usage analytics
 - [Internationalization (i18n)](./i18n.md) — add translatable strings and use the i18n tooling

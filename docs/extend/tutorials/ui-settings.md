@@ -17,7 +17,7 @@ There are four ways a user or administrator can configure a UI setting:
 
 - [Through the Advanced Settings UI](#advanced-settings-ui)
 - [Locked via `kibana.yml`'s `uiSettings.overrides`](#uisettings-overrides)
-- [Through the client-side `uiSettings` service](#client-side-usage)
+- [Through the client-side settings service](#client-side-usage)
 - [Through the server-side `uiSettings` service](#server-side-usage)
 
 `uiSettings` are registered synchronously during `core`'s `setup` lifecycle phase. Once you add a new setting you cannot change or remove it without [registering a migration](#uisettings-migrations).
@@ -162,14 +162,16 @@ export class MyPlugin implements Plugin {
 
 ## Client-side usage [client-side-usage]
 
-On the client, the `uiSettings` service is exposed directly from `core`. The [client](https://github.com/elastic/kibana/blob/main/src/core/packages/ui-settings/server/src/ui_settings_client.ts) provides plugins access to the `config` entries stored in {{es}}.
+On the browser, read settings through `core.settings.client`. `core.uiSettings` is the same client and is deprecated.
+
+The [browser contract](https://github.com/elastic/kibana/blob/main/src/core/packages/ui-settings/browser) provides plugins access to the `config` entries stored in {{es}}.
 
 ```ts
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 export class MyPlugin implements Plugin<MyPluginSetup, MyPluginStart> {
   public setup(core: CoreSetup): MyPluginSetup {
-    core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
+    core.settings.client.getUpdate$().subscribe(({ key, newValue }) => {
       if (key === 'custom') {
         // react to updates...
       }
@@ -179,7 +181,7 @@ export class MyPlugin implements Plugin<MyPluginSetup, MyPluginStart> {
   public start(core: CoreStart): MyPluginStart {
     return {
       settings: {
-        getCustomValue: () => core.uiSettings.get('custom'),
+        getCustomValue: () => core.settings.client.get('custom'),
       },
     };
   }
@@ -193,7 +195,7 @@ export class MyPlugin implements Plugin<MyPluginSetup, MyPluginStart> {
 Migrations for 3rd-party plugin advanced settings are not currently supported. If a 3rd-party plugin registers an advanced setting, the setting is essentially permanent and cannot be fixed without manual intervention.
 ::::
 
-To change or remove a `uiSetting`, you must migrate the whole `config` saved object. `uiSettings` migrations are declared directly in the service — as of 8.17, they live in `src/core/packages/ui-settings/server-internal/src/saved_objects/migrations.ts`.
+To change or remove a `uiSetting`, you must migrate the whole `config` saved object. `uiSettings` migrations are declared in `src/core/packages/ui-settings/server-internal/src/saved_objects/migrations.ts`.
 
 For example, removing a `custom` setting in 8.1.0 and renaming `my_setting:fourtyTwo` to `my_other_setting:fourtyTwo` in 8.2.0:
 
@@ -233,4 +235,4 @@ export const migrations = {
 
 If you need to make a change that isn't possible in a saved object migration function (for example, you need to look up other saved objects), you can register a transform function instead. Transforms run when a `config` saved object is first created, or when it is first upgraded.
 
-Add an extra attribute to mark that the transform has already been applied so it doesn't run again. For example, the `defaultIndex` transform uses an `isDefaultIndexMigrated` flag. See `src/core/packages/ui-settings/server-internal/src/saved_objects/transforms.ts` and [#133339](https://github.com/elastic/kibana/pull/133339) for an example.
+Add an extra attribute to mark that the transform has already been applied so it doesn't run again. For example, the `defaultIndex` transform uses an `isDefaultIndexMigrated` flag. See `src/core/packages/ui-settings/server-internal/src/saved_objects/transforms.ts` and [#133339](https://github.com/elastic/kibana/pull/133339).

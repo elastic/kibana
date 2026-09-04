@@ -10,3 +10,4 @@ Internal developer documentation for the Kibana repository. Content here is publ
 ## Subjects
 
 - [Kibana UI (`@kbn/ui`)](kbn-ui/index.md) — reusable, opinionated UI components built on EUI.
+- [Chrome](chrome/index.md) — sidebar apps and recently viewed items.
