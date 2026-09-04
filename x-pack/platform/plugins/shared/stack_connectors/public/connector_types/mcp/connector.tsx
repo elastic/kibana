@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiSpacer,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiPanel, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionConnectorFieldsProps } from '@kbn/alerts-ui-shared';
 import { HiddenField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
