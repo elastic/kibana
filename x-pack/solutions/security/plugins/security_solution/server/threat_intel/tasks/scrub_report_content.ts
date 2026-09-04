@@ -47,8 +47,10 @@ const MAX_DOCS_PER_RUN = 5_000;
 const UNENRICHED_EXTRACTION_METHODS = ['pending'] as const;
 
 /**
- * Fields holding fetched third-party content. `body_text` and `title` are
- * `semantic_text`, so clearing them also drops their generated embeddings.
+ * Fields holding fetched third-party content. `body_text` is `semantic_text`, so
+ * clearing it also drops its generated embedding. `content.title` is deliberately
+ * retained: it is also `semantic_text`, but a scrubbed report still has to be
+ * identifiable in report lists and hunt results.
  */
 const SCRUBBED_FIELDS = ['content.body_text', 'content.body_text_bm25'] as const;
 
