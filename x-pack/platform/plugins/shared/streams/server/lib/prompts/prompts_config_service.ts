@@ -11,8 +11,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
 } from '@kbn/core/server';
-import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import { featuresPrompt, significantEventsPrompt } from '@kbn/nightshift-ai';
 import { streamsPromptsSOType } from './prompts_config';
 import type { PromptsConfigAttributes } from './prompts_config';
 

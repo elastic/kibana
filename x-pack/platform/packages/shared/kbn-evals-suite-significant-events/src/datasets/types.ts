@@ -8,7 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
-import type { ExistingQuerySummary } from '@kbn/streams-ai';
+import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ChronicSeedConfig as ChronicSeedInput } from '../data_generators/seed_chronic_background';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';

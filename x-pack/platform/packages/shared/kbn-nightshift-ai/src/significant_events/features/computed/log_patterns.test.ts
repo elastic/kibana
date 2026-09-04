@@ -7,8 +7,8 @@
 
 import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Streams } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
+import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { logPatternsGenerator, selectLogPatternsForLlm } from './log_patterns';
 
 jest.mock('@kbn/ai-tools', () => ({
@@ -22,7 +22,12 @@ jest.mock('@kbn/traced-es-client', () => ({
 const getSigEventsLogPatternsEsqlMock = jest.mocked(getSigEventsLogPatternsEsql);
 const createTracedEsClientMock = jest.mocked(createTracedEsClient);
 
-const stream = { name: 'logs.test-default' } as Streams.all.Definition;
+const target: AnalysisTarget = {
+  id: 'logs.test-default',
+  name: 'logs.test-default',
+  sources: ['logs.test-default', 'logs.test-default.*'],
+  samplingSource: 'logs.test-default',
+};
 const esClient = {} as ElasticsearchClient;
 const logger = {} as Logger;
 const signal = new AbortController().signal;
@@ -40,7 +45,7 @@ describe('logPatternsGenerator', () => {
     ]);
 
     const result = await logPatternsGenerator.generate({
-      stream,
+      target,
       start: 100,
       end: 200,
       esClient,
@@ -56,7 +61,7 @@ describe('logPatternsGenerator', () => {
     });
     expect(getSigEventsLogPatternsEsqlMock).toHaveBeenCalledWith({
       esClient: tracedClient,
-      samplingSource: stream.name,
+      samplingSource: target.samplingSource,
       start: 100,
       end: 200,
       fields: ['message', 'body.text'],

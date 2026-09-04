@@ -7946,6 +7946,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/nightshift-ai@link:x-pack/platform/packages/shared/kbn-nightshift-ai":
+  version "0.0.0"
+  uid ""
+
 "@kbn/nightshift-investigations-plugin@link:x-pack/platform/plugins/shared/nightshift_investigations":
   version "0.0.0"
   uid ""

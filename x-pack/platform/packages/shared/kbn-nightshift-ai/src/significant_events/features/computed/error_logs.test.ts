@@ -6,9 +6,9 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Streams } from '@kbn/streams-schema';
 import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { esql } from '@elastic/esql';
+import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { errorLogsGenerator } from './error_logs';
 
 jest.mock('@kbn/ai-tools', () => ({
@@ -17,7 +17,12 @@ jest.mock('@kbn/ai-tools', () => ({
 
 const getSampleDocumentsEsqlMock = jest.mocked(getSampleDocumentsEsql);
 
-const stream = { name: 'logs.test-default' } as Streams.all.Definition;
+const target: AnalysisTarget = {
+  id: 'logs.test-default',
+  name: 'logs.test-default',
+  sources: ['logs.test-default', 'logs.test-default.*'],
+  samplingSource: 'logs.test-default',
+};
 const esClient = {} as ElasticsearchClient;
 const logger = {} as Logger;
 const signal = new AbortController().signal;
@@ -43,7 +48,7 @@ describe('errorLogsGenerator', () => {
     });
 
     const result = await errorLogsGenerator.generate({
-      stream,
+      target,
       start: 100,
       end: 200,
       esClient,
@@ -54,7 +59,7 @@ describe('errorLogsGenerator', () => {
     expect(getSampleDocumentsEsqlMock).toHaveBeenCalledWith(
       expect.objectContaining({
         esClient,
-        index: stream.name,
+        index: target.samplingSource,
         start: 100,
         end: 200,
         sampleSize: 5,
@@ -70,7 +75,7 @@ describe('errorLogsGenerator', () => {
   it('filters with a single QSTR predicate so union-typed log.level stays pushable', async () => {
     getSampleDocumentsEsqlMock.mockResolvedValueOnce({ hits: [], total: 0 });
 
-    await errorLogsGenerator.generate({ stream, start: 100, end: 200, esClient, logger, signal });
+    await errorLogsGenerator.generate({ target, start: 100, end: 200, esClient, logger, signal });
 
     const { whereCondition } = getSampleDocumentsEsqlMock.mock.calls[0][0];
     if (!whereCondition) throw new Error('expected whereCondition to be defined');
@@ -103,7 +108,7 @@ describe('errorLogsGenerator', () => {
     });
 
     const result = await errorLogsGenerator.generate({
-      stream,
+      target,
       start: 100,
       end: 200,
       esClient,
@@ -156,7 +161,7 @@ describe('errorLogsGenerator', () => {
     });
 
     const result = await errorLogsGenerator.generate({
-      stream,
+      target,
       start: 100,
       end: 200,
       esClient,

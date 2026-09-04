@@ -8,7 +8,7 @@
 import { deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { ExistingQuerySummary } from '@kbn/streams-ai';
+import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
 import type { KIQueryGenerationEvaluationExample, KIQueryGenerationOutput, Query } from '../types';
 import { getQueriesFromOutput } from '../types';

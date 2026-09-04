@@ -7,14 +7,21 @@
 
 import { CODE_ANALYSIS_FEATURE_TYPE, COMPUTED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Streams } from '@kbn/streams-schema';
+import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { codeAnalysisGenerator, CODE_ANALYSIS_PROVIDER_KEY } from './code_analysis';
 import type { ComputedFeatureGeneratorOptions } from './types';
+
+const target: AnalysisTarget = {
+  id: 'logs.acme',
+  name: 'logs.acme',
+  sources: ['logs.acme', 'logs.acme.*'],
+  samplingSource: 'logs.acme',
+};
 
 const baseOptions = (
   overrides: Partial<ComputedFeatureGeneratorOptions> = {}
 ): ComputedFeatureGeneratorOptions => ({
-  stream: { name: 'logs.acme' } as Streams.all.Definition,
+  target,
   start: 0,
   end: 1,
   esClient: {} as ElasticsearchClient,

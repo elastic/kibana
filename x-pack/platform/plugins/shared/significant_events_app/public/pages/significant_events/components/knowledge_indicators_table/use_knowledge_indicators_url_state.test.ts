@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { Feature } from '@kbn/significant-events-schema';
 import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 

@@ -7,7 +7,6 @@
 
 import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { esql } from '@elastic/esql';
-import { getStreamSamplingSource } from '@kbn/streams-schema';
 import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { compact } from 'lodash';
 import type { ComputedFeatureGenerator } from './types';
@@ -63,10 +62,10 @@ export const errorLogsGenerator: ComputedFeatureGenerator = {
 Use the \`properties.samples\` array to see actual error log entries.
 This is useful for understanding error patterns, identifying recurring issues, and diagnosing problems in the system.`,
 
-  generate: async ({ stream, start, end, esClient, signal }) => {
+  generate: async ({ target, start, end, esClient, signal }) => {
     const { hits } = await getSampleDocumentsEsql({
       esClient,
-      index: getStreamSamplingSource(stream),
+      index: target.samplingSource,
       start,
       end,
       sampleSize: SAMPLE_SIZE,

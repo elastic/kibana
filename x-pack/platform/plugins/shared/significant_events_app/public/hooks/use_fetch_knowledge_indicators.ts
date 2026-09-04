@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { useCallback, useMemo } from 'react';
 import { useFetchFeatures } from './use_fetch_features';
 import { useFetchDiscoveryQueries } from './use_fetch_discovery_queries';

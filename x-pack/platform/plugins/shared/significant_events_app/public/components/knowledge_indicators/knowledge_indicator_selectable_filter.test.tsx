@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
 import { KnowledgeIndicatorSelectableFilter } from './knowledge_indicator_selectable_filter';
 import type { KnowledgeIndicatorFilterCriteria } from './utils/matches_knowledge_indicator_filters';

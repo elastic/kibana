@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { isExpirable } from '@kbn/significant-events-schema';
 import { MAKE_DURABLE_LABEL, MAKE_EXPIRING_LABEL } from './hooks/use_knowledge_indicator_actions';
 

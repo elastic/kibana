@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ToolsStart } from '@kbn/agent-builder-server';
-import type { Streams } from '@kbn/streams-schema';
+import type { AnalysisTarget } from '@kbn/nightshift-ai';
 import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools';
 import { createCodeAnalysisProvider, type CodeAnalysisOutcome } from './compute_code_analysis';
 import {
@@ -68,11 +68,16 @@ describe('createCodeAnalysisProvider', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;
   let onOutcome: jest.Mock;
   const request = {} as KibanaRequest;
-  const stream = { name: 'logs.acme.checkout' } as Streams.all.Definition;
+  const target: AnalysisTarget = {
+    id: 'logs.acme.checkout',
+    name: 'logs.acme.checkout',
+    sources: ['logs.acme.checkout', 'logs.acme.checkout.*'],
+    samplingSource: 'logs.acme.checkout',
+  };
 
   const run = () =>
     createCodeAnalysisProvider({ agentBuilderTools, request, onOutcome })({
-      stream,
+      target,
       start: 0,
       end: 1,
       esClient,

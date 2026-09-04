@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
-import type { InferenceDocument } from '@kbn/streams-ai';
+import type { InferenceDocument } from '@kbn/nightshift-ai';
 import {
   MAX_ID_LENGTH,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
@@ -271,6 +271,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         signal: getRequestAbortSignal(request),
         streamName,
         streamType,
+        definition: stream,
         runId,
         documents,
         totalFilters,

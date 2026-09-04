@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Streams } from '@kbn/streams-schema';
+import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { generateAllComputedFeatures } from '.';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 import { logSamplesGenerator } from './log_samples';
@@ -17,7 +17,12 @@ import { codeAnalysisGenerator } from './code_analysis';
 describe('generateAllComputedFeatures', () => {
   const logger = { warn: jest.fn() } as unknown as Logger;
   const options = {
-    stream: { name: 'logs.test-default' } as Streams.all.Definition,
+    target: {
+      id: 'logs.test-default',
+      name: 'logs.test-default',
+      sources: ['logs.test-default', 'logs.test-default.*'],
+      samplingSource: 'logs.test-default',
+    } satisfies AnalysisTarget,
     start: 0,
     end: 1,
     esClient: {} as ElasticsearchClient,

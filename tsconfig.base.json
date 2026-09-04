@@ -1895,6 +1895,8 @@
       "@kbn/newsfeed-plugin/*": ["./src/platform/plugins/shared/newsfeed/*"],
       "@kbn/newsfeed-test-plugin": ["./src/platform/test/common/plugins/newsfeed"],
       "@kbn/newsfeed-test-plugin/*": ["./src/platform/test/common/plugins/newsfeed/*"],
+      "@kbn/nightshift-ai": ["./x-pack/platform/packages/shared/kbn-nightshift-ai"],
+      "@kbn/nightshift-ai/*": ["./x-pack/platform/packages/shared/kbn-nightshift-ai/*"],
       "@kbn/nightshift-investigations-plugin": ["./x-pack/platform/plugins/shared/nightshift_investigations"],
       "@kbn/nightshift-investigations-plugin/*": ["./x-pack/platform/plugins/shared/nightshift_investigations/*"],
       "@kbn/nightshift-plugin": ["./x-pack/solutions/observability/plugins/nightshift"],
