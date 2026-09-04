@@ -16,6 +16,7 @@ import { RulesClient, type CreateRulesClientOptions } from '../lib/rules_client'
 import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import { BuilderTypeRegistry } from '../lib/builder_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
@@ -34,10 +35,14 @@ import type {
 /** Builds the plugin's setup contract from its injected registries. */
 const createSetupContract = (
   registry: ArtifactTypeRegistry,
+  builderTypes: BuilderTypeRegistry,
   alertStatusChangedOptIns: AlertStatusChangedOptIns
 ): AlertingServerSetup => ({
   registerArtifactType: (definition) => {
     registry.register(definition);
+  },
+  registerBuilderType: (definition) => {
+    builderTypes.register(definition);
   },
   enableAlertStatusChanged: (optIn) => {
     alertStatusChangedOptIns.register(optIn);
@@ -109,6 +114,7 @@ const createStartContract = (
 export function bindContract({ bind }: ContainerModuleLoadOptions) {
   bind(Setup).toResolvedValue(createSetupContract, [
     ArtifactTypeRegistry,
+    BuilderTypeRegistry,
     AlertStatusChangedOptIns,
   ]);
 

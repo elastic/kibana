@@ -203,6 +203,16 @@ export const THRESHOLD_CREATE_FLYOUT_TITLE = i18n.translate(
   { defaultMessage: 'Create Threshold rule' }
 );
 
+export const THRESHOLD_CREATE_OPTION_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleTitle',
+  { defaultMessage: 'Threshold rule' }
+);
+
+export const THRESHOLD_CREATE_OPTION_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
+  { defaultMessage: 'Use the query builder to monitor metrics against threshold conditions.' }
+);
+
 export const STAT_LABEL_REQUIRED_ERROR = i18n.translate(
   'xpack.alertingV2.ruleBuilder.stats.labelRequiredError',
   { defaultMessage: 'Label is required.' }

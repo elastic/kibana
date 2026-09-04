@@ -35,6 +35,7 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RulesClient, CreateRulesClientOptions } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
+import type { RegisteredBuilderType } from './lib/builder_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
 import type { AlertActionsClient } from './lib/alert_actions_client';
 import type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
@@ -67,6 +68,7 @@ export interface AlertingServerSetup {
    * Unregistered types pass through unchanged.
    */
   registerArtifactType(definition: ArtifactTypeDefinition): void;
+  registerBuilderType(definition: RegisteredBuilderType): void;
 
   /**
    * Opts in to the `alerting.alertStatusChanged` workflow trigger. Until a plugin opts in,
