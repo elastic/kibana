@@ -10,6 +10,7 @@
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec, isKibanaManagedAuthTypeId } from '../../..';
 import { Slack } from './slack';
+import { slackRelay } from './relay';
 import {
   SlackGetConversationHistoryInputSchema,
   SlackGetFileInfoInputSchema,
@@ -1600,6 +1601,16 @@ describe('Slack', () => {
 
       expect(mockClient.get).toHaveBeenCalled();
       expect(relayListBindings).not.toHaveBeenCalled();
+    });
+
+    it('every action either routes through the relay or refuses it', async () => {
+      for (const [name, action] of Object.entries(Slack.actions)) {
+        if (name in slackRelay.actions) continue;
+
+        await expect(action.handler(relayContext, {})).rejects.toThrow(
+          `${name} is not available through the Elastic Slack app`
+        );
+      }
     });
   });
 

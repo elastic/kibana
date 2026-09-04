@@ -15,7 +15,7 @@ import {
   relayResolveChannelId,
   relaySendMessage,
   relayTest,
-  withRelayGuards,
+  slackRelay,
 } from './relay';
 
 const createLogger = () =>
@@ -350,80 +350,22 @@ describe('relayTest', () => {
   });
 });
 
-describe('withRelayGuards', () => {
-  const createActions = () => ({
-    sendMessage: {
-      input: {} as never,
-      handler: jest.fn().mockResolvedValue({ ok: true }),
-      scope: 'write' as const,
-    },
-    listChannels: {
-      input: {} as never,
-      handler: jest.fn().mockResolvedValue({ channels: [] }),
-      scope: 'read' as const,
-    },
-    resolveChannelId: {
-      input: {} as never,
-      handler: jest.fn().mockResolvedValue({ found: false }),
-      scope: 'read' as const,
-    },
-    searchMessages: {
-      input: {} as never,
-      handler: jest.fn().mockResolvedValue({ messages: [] }),
-      scope: 'read' as const,
-    },
+describe('slackRelay.assertNotSupported', () => {
+  it('returns without throwing for a connector holding its own Slack token', () => {
+    expect(() =>
+      slackRelay.assertNotSupported(createContext({ authType: 'bearer' }), 'searchMessages')
+    ).not.toThrow();
+    expect(() => slackRelay.assertNotSupported(createContext({}), 'searchMessages')).not.toThrow();
   });
 
-  it('fails an unsupported action under relay auth', async () => {
-    const actions = createActions();
-    const guarded = withRelayGuards(actions);
-
-    await expect(
-      guarded.searchMessages.handler(createContext(relaySecrets, { trigger: jest.fn() }), {})
-    ).rejects.toThrow('searchMessages is not available through the Elastic Slack app');
-    expect(actions.searchMessages.handler).not.toHaveBeenCalled();
-  });
-
-  it('names the supported actions in the failure', async () => {
-    const guarded = withRelayGuards(createActions());
-
-    await expect(
-      guarded.searchMessages.handler(createContext(relaySecrets, { trigger: jest.fn() }), {})
-    ).rejects.toThrow(/sendMessage, listChannels, resolveChannelId/);
-  });
-
-  it('leaves the same action working on the direct-token path', async () => {
-    const actions = createActions();
-    const guarded = withRelayGuards(actions);
-
-    await guarded.searchMessages.handler(createContext({ authType: 'bearer' }), { query: 'x' });
-
-    expect(actions.searchMessages.handler).toHaveBeenCalledWith(expect.anything(), { query: 'x' });
-  });
-
-  it('passes every relay-supported action through unwrapped', () => {
-    const actions = createActions();
-    const guarded = withRelayGuards(actions);
-
-    expect(guarded.sendMessage).toBe(actions.sendMessage);
-    expect(guarded.listChannels).toBe(actions.listChannels);
-    expect(guarded.resolveChannelId).toBe(actions.resolveChannelId);
-  });
-
-  it('preserves the rest of an action definition', () => {
-    const actions = {
-      searchMessages: {
-        isTool: true,
-        input: {} as never,
-        description: 'x',
-        handler: jest.fn(),
-        scope: 'read' as const,
-      },
-    };
-
-    expect(withRelayGuards(actions).searchMessages).toMatchObject({
-      isTool: true,
-      description: 'x',
-    });
+  it('throws naming the action and the supported list under relay auth', () => {
+    expect(() =>
+      slackRelay.assertNotSupported(
+        createContext(relaySecrets, { trigger: jest.fn() }),
+        'searchMessages'
+      )
+    ).toThrow(
+      'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, listChannels, resolveChannelId.'
+    );
   });
 });

@@ -274,7 +274,7 @@ export const Slack: ConnectorSpec = {
   // No additional configuration needed beyond OAuth credentials
   schema: lazySchema(() => z.object({})),
 
-  actions: slackRelay.withGuards({
+  actions: {
     // https://api.slack.com/methods/assistant.search.context
     searchMessages: {
       isTool: true,
@@ -283,6 +283,8 @@ export const Slack: ConnectorSpec = {
         'Search Slack messages by keyword. Returns matching messages with channel, sender, timestamp, and permalink. Use the dedicated fromUser, inChannel, after, and before parameters for filtering — do not embed Slack search operators in the query string.',
       input: SlackSearchMessagesInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'searchMessages');
+
         if (ctx.secrets?.authType === 'bearer') {
           throw new Error(
             i18n.translate('core.kibanaConnectorSpecs.slack.searchMessages.botTokenError', {
@@ -528,6 +530,8 @@ export const Slack: ConnectorSpec = {
         'Fetch a page of recent messages from a Slack channel or DM. Returns messages newest-first. Pass nextCursor from the response to fetch older pages.',
       input: SlackGetConversationHistoryInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'getConversationHistory');
+
         const typedInput: SlackGetConversationHistoryInput =
           SlackGetConversationHistoryInputSchema.parse(input);
 
@@ -605,6 +609,8 @@ export const Slack: ConnectorSpec = {
         'Look up metadata for a single Slack channel or DM by ID. Returns the channel object (name, privacy, membership, topic, purpose).',
       input: SlackGetConversationInfoInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'getConversationInfo');
+
         const typedInput: SlackGetConversationInfoInput =
           SlackGetConversationInfoInputSchema.parse(input);
 
@@ -647,6 +653,8 @@ export const Slack: ConnectorSpec = {
         'Find a Slack user by email address. Returns the matching user object including id, name, and profile. Throws if no user has that email.',
       input: SlackLookupUserByEmailInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'lookupUserByEmail');
+
         const typedInput: SlackLookupUserByEmailInput =
           SlackLookupUserByEmailInputSchema.parse(input);
 
@@ -682,6 +690,8 @@ export const Slack: ConnectorSpec = {
         'List Slack workspace users (one page per call). Pass nextCursor from the previous response to fetch the next page.',
       input: SlackListUsersInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'listUsers');
+
         const typedInput: SlackListUsersInput = SlackListUsersInputSchema.parse(input);
 
         const params: Record<string, string | number | boolean> = {
@@ -760,6 +770,8 @@ export const Slack: ConnectorSpec = {
         'List the channels/conversations a Slack user is a member of (one page per call). Omit user to list for the authenticated user. Pass nextCursor to fetch the next page.',
       input: SlackListUserConversationsInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'listUserConversations');
+
         const typedInput: SlackListUserConversationsInput =
           SlackListUserConversationsInputSchema.parse(input);
 
@@ -820,6 +832,8 @@ export const Slack: ConnectorSpec = {
         'Return the identity the Slack connector is authenticated as. Useful before sendMessage to confirm the workspace, or to resolve "me" to a user ID for other actions.',
       input: SlackWhoAmIInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'whoAmI');
+
         const typedInput: SlackWhoAmIInput = SlackWhoAmIInputSchema.parse(input);
 
         const response = await slackRequestWithRateLimitRetry<SlackAuthTestResponse>({
@@ -865,6 +879,8 @@ export const Slack: ConnectorSpec = {
         'Look up a single Slack file by ID. Returns the file metadata (name, mimetype, size, urls, sharing channels).',
       input: SlackGetFileInfoInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'getFileInfo');
+
         const typedInput: SlackGetFileInfoInput = SlackGetFileInfoInputSchema.parse(input);
 
         const response = await slackRequestWithRateLimitRetry<SlackFilesInfoResponse>({
@@ -900,6 +916,8 @@ export const Slack: ConnectorSpec = {
         'List Slack files (one page per call). Filter by channel, user, time range, or types. Pass nextPage from the previous response to fetch the next page.',
       input: SlackListFilesInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'listFiles');
+
         const typedInput: SlackListFilesInput = SlackListFilesInputSchema.parse(input);
 
         const params: Record<string, string | number | boolean> = {
@@ -975,6 +993,8 @@ export const Slack: ConnectorSpec = {
         'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
       input: SlackCreateConversationInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'createConversation');
+
         const typedInput: SlackCreateConversationInput =
           SlackCreateConversationInputSchema.parse(input);
 
@@ -1027,6 +1047,8 @@ export const Slack: ConnectorSpec = {
       description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'inviteToConversation');
+
         const typedInput: SlackInviteToConversationInput =
           SlackInviteToConversationInputSchema.parse(input);
 
@@ -1138,7 +1160,7 @@ export const Slack: ConnectorSpec = {
         }
       },
     },
-  }),
+  },
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.slack.test.description', {
