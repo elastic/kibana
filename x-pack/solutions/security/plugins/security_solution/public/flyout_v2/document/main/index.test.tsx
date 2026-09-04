@@ -9,7 +9,6 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import {
@@ -23,17 +22,12 @@ import {
   TABLE_TAB_SOURCE_EVENT_LINK_TEST_ID,
   TABLE_TAB_TEST_ID,
 } from '.';
-import { ANCESTOR_INDEX } from './constants/field_names';
-import { getTimelineEventsDetailsFromRecord } from './utils/get_timeline_events_details_from_record';
 import type { OpenFlyoutLinkRenderer } from '../../shared/components/open_flyout_link';
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../common/hooks/is_in_security_app');
-jest.mock('./utils/get_timeline_events_details_from_record', () => ({
-  getTimelineEventsDetailsFromRecord: jest.fn(() => []),
-}));
 // The Table tab is mocked, but it captures the `renderFlyoutLink` prop so the source event link
 // behavior (built in DocumentFlyout) can be exercised in isolation.
 const mockTableTab = jest.fn(
@@ -71,10 +65,14 @@ jest.mock('../../shared/tools/notes', () => ({
   NotesDetails: () => <div data-test-subj="mock-notes-details" />,
 }));
 
-const createAlertHit = (extra: DataTableRecord['flattened'] = {}): DataTableRecord =>
+const createAlertHit = (
+  extra: DataTableRecord['flattened'] = {},
+  source?: Record<string, unknown>
+): DataTableRecord =>
   ({
     id: '1',
-    raw: {},
+    // `_source` carries the nested `ancestors` objects the Source-event link resolves against.
+    raw: source ? { _source: source } : {},
     flattened: { 'event.kind': 'signal', ...extra },
     isAnchor: false,
   } as DataTableRecord);
@@ -324,16 +322,17 @@ describe('<DocumentFlyout />', () => {
   });
 
   describe('Table tab source event link', () => {
-    const buildDetails = (items: Array<[string, string[]]>): TimelineEventsDetailsItem[] =>
-      items.map(([field, values]) => ({ field, values, isObjectArray: false }));
-
-    // Renders the flyout, switches to the (mocked) Table tab, and returns the `renderFlyoutLink`
-    // it was given so the source event link behavior can be exercised directly.
-    const renderAndGetRenderFlyoutLink = (): OpenFlyoutLinkRenderer => {
+    // Renders the flyout with a hit whose `_source` carries the given nested ancestors, switches to
+    // the (mocked) Table tab, and returns the `renderFlyoutLink` it was given so the source event
+    // link behavior can be exercised directly.
+    const renderAndGetRenderFlyoutLink = (
+      source?: Record<string, unknown>,
+      extraFlattened?: DataTableRecord['flattened']
+    ): OpenFlyoutLinkRenderer => {
       const { getByTestId } = render(
         <TestProviders startServices={startServices}>
           <DocumentFlyout
-            hit={createAlertHit()}
+            hit={createAlertHit(extraFlattened, source)}
             renderCellActions={jest.fn()}
             onAlertUpdated={jest.fn()}
           />
@@ -346,20 +345,14 @@ describe('<DocumentFlyout />', () => {
 
     beforeEach(() => {
       (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
-      jest.mocked(getTimelineEventsDetailsFromRecord).mockReturnValue([]);
     });
 
     it('opens the ancestor document in a new flyout when a source event value is clicked', () => {
       const openSystemFlyout = jest.fn(() => ({ onClose: Promise.resolve(), close: jest.fn() }));
       startServices.overlays = { ...startServices.overlays, openSystemFlyout };
-      jest.mocked(getTimelineEventsDetailsFromRecord).mockReturnValue(
-        buildDetails([
-          [EVENT_SOURCE_FIELD_NAME, ['ancestor-1']],
-          [ANCESTOR_INDEX, ['.ds-logs-source-1']],
-        ])
-      );
-
-      const renderFlyoutLink = renderAndGetRenderFlyoutLink();
+      const renderFlyoutLink = renderAndGetRenderFlyoutLink({
+        'kibana.alert.ancestors': [{ id: 'ancestor-1', index: '.ds-logs-source-1' }],
+      });
 
       const { getByTestId } = render(
         <TestProviders startServices={startServices}>
@@ -382,14 +375,9 @@ describe('<DocumentFlyout />', () => {
     it('opens the ancestor document for the legacy signal.ancestors.id field', () => {
       const openSystemFlyout = jest.fn(() => ({ onClose: Promise.resolve(), close: jest.fn() }));
       startServices.overlays = { ...startServices.overlays, openSystemFlyout };
-      jest.mocked(getTimelineEventsDetailsFromRecord).mockReturnValue(
-        buildDetails([
-          [LEGACY_EVENT_SOURCE_FIELD_NAME, ['ancestor-1']],
-          ['signal.ancestors.index', ['.ds-logs-source-1']],
-        ])
-      );
-
-      const renderFlyoutLink = renderAndGetRenderFlyoutLink();
+      const renderFlyoutLink = renderAndGetRenderFlyoutLink({
+        'signal.ancestors': [{ id: 'ancestor-1', index: '.ds-logs-source-1' }],
+      });
 
       const { getByTestId } = render(
         <TestProviders startServices={startServices}>
@@ -412,14 +400,12 @@ describe('<DocumentFlyout />', () => {
     it('aligns each ancestor value with its own index', () => {
       const openSystemFlyout = jest.fn(() => ({ onClose: Promise.resolve(), close: jest.fn() }));
       startServices.overlays = { ...startServices.overlays, openSystemFlyout };
-      jest.mocked(getTimelineEventsDetailsFromRecord).mockReturnValue(
-        buildDetails([
-          [EVENT_SOURCE_FIELD_NAME, ['ancestor-1', 'ancestor-2']],
-          [ANCESTOR_INDEX, ['.ds-logs-source-1', '.internal.alerts-security.alerts-default']],
-        ])
-      );
-
-      const renderFlyoutLink = renderAndGetRenderFlyoutLink();
+      const renderFlyoutLink = renderAndGetRenderFlyoutLink({
+        'kibana.alert.ancestors': [
+          { id: 'ancestor-1', index: '.ds-logs-source-1' },
+          { id: 'ancestor-2', index: '.internal.alerts-security.alerts-default' },
+        ],
+      });
 
       const { getByTestId } = render(
         <TestProviders startServices={startServices}>
@@ -437,11 +423,9 @@ describe('<DocumentFlyout />', () => {
     });
 
     it('renders a source event value as plain text when its index cannot be resolved', () => {
-      jest
-        .mocked(getTimelineEventsDetailsFromRecord)
-        .mockReturnValue(buildDetails([[EVENT_SOURCE_FIELD_NAME, ['ancestor-1']]]));
-
-      const renderFlyoutLink = renderAndGetRenderFlyoutLink();
+      const renderFlyoutLink = renderAndGetRenderFlyoutLink({
+        'kibana.alert.ancestors': [{ id: 'ancestor-1' }],
+      });
 
       const { queryByTestId, getByText } = render(
         <TestProviders>
@@ -458,15 +442,10 @@ describe('<DocumentFlyout />', () => {
     });
 
     it('does not link source event values for threshold rules', () => {
-      jest.mocked(getTimelineEventsDetailsFromRecord).mockReturnValue(
-        buildDetails([
-          [ALERT_RULE_TYPE, ['threshold']],
-          [EVENT_SOURCE_FIELD_NAME, ['fake-ancestor']],
-          [ANCESTOR_INDEX, ['.ds-logs-source-1']],
-        ])
+      const renderFlyoutLink = renderAndGetRenderFlyoutLink(
+        { 'kibana.alert.ancestors': [{ id: 'fake-ancestor', index: '.ds-logs-source-1' }] },
+        { [ALERT_RULE_TYPE]: ['threshold'] }
       );
-
-      const renderFlyoutLink = renderAndGetRenderFlyoutLink();
 
       const { queryByTestId } = render(
         <TestProviders>

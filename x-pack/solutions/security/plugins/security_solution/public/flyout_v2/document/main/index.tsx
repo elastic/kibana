@@ -43,7 +43,6 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
-import { getTimelineEventsDetailsFromRecord } from './utils/get_timeline_events_details_from_record';
 import { getAncestorsIndexById } from './utils/get_ancestors_index_by_id';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE } from '../../../common/lib/telemetry';
 import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
@@ -107,7 +106,7 @@ export interface DocumentFlyoutProps {
  */
 export const DocumentFlyout = memo(
   ({ hit, onAlertUpdated, renderCellActions, dataTestSubj }: DocumentFlyoutProps) => {
-    const { openNotes, openDocumentFlyoutFromIndex } = useFlyoutApi();
+    const { openNotes, openDocumentFlyoutFromPattern } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -140,7 +139,7 @@ export const DocumentFlyout = memo(
     const ancestorsIndexById = useMemo(
       () =>
         getAncestorsIndexById(
-          getTimelineEventsDetailsFromRecord(hit),
+          hit,
           hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''
         ),
       [hit]
@@ -152,9 +151,14 @@ export const DocumentFlyout = memo(
       (props: OpenFlyoutLinkProps) => {
         // Source event: the raw `kibana.alert.ancestors.id` field (or its legacy `signal.ancestors.id`
         // equivalent) can list several ancestor documents, so each value is matched to its own index
-        // and opened in a new flyout (the same open method used by the sibling host/user/rule links).
-        // Values without a resolved index (e.g. a threshold rule's synthetic ancestor) render as
-        // plain text.
+        // and opened in a new flyout. Values without a resolved index (e.g. a threshold rule's
+        // synthetic ancestor) render as plain text.
+        //
+        // We resolve by *pattern* (routing the search at the ancestor index) rather than by concrete
+        // `_index`: the from-index path pins the lookup with a `term` filter on `_index`, which never
+        // matches a cross-cluster document (on the remote the stored `_index` is bare, while the
+        // resolved index carries the `cluster:` alias). Routing at the index reaches the document,
+        // like the legacy flyout. See SDH https://github.com/elastic/sdh-security-team/issues/1666.
         if (
           props.field === EVENT_SOURCE_FIELD_NAME ||
           props.field === LEGACY_EVENT_SOURCE_FIELD_NAME
@@ -166,7 +170,7 @@ export const DocumentFlyout = memo(
           return (
             <EuiLink
               onClick={() =>
-                openDocumentFlyoutFromIndex({
+                openDocumentFlyoutFromPattern({
                   documentId: props.value,
                   indexName,
                   origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
@@ -192,7 +196,7 @@ export const DocumentFlyout = memo(
         }
         return <OpenFlyoutLink {...props} />;
       },
-      [ruleId, isRulePreview, ancestorsIndexById, openDocumentFlyoutFromIndex]
+      [ruleId, isRulePreview, ancestorsIndexById, openDocumentFlyoutFromPattern]
     );
 
     const onShowNotesFromHeader = useCallback(() => {
