@@ -10,6 +10,8 @@
 import type { ReactNode } from 'react';
 
 export interface MetaBlock {
+  /** Stable identity used as the React key. Falls back to array position when omitted. */
+  id?: string;
   title: ReactNode;
   value: ReactNode;
   'data-test-subj'?: string;

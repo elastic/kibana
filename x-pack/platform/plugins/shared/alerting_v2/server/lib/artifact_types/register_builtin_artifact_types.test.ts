@@ -26,7 +26,9 @@ describe('registerBuiltinArtifactTypes', () => {
 
   it('registers runbook and dashboard', () => {
     expect(registry.get(RUNBOOK_ARTIFACT_TYPE)).toBeDefined();
-    expect(registry.get(DASHBOARD_ARTIFACT_TYPE)).toBeDefined();
+    expect(registry.get(DASHBOARD_ARTIFACT_TYPE)?.references).toEqual([
+      { field: 'dashboardId', savedObjectType: 'dashboard' },
+    ]);
   });
 
   it('accepts valid data', () => {

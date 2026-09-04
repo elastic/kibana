@@ -13,8 +13,7 @@ import { expect } from '@kbn/scout/api';
 import { APPROVED_TRIGGER_DEFINITIONS } from '../fixtures/approved_trigger_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
-// Failing: See https://github.com/elastic/kibana/issues/275431
-apiTest.describe.skip(
+apiTest.describe(
   'Workflows Extensions - Event-Driven Trigger Definitions Approval',
   {
     tag: [...tags.stateful.classic],
