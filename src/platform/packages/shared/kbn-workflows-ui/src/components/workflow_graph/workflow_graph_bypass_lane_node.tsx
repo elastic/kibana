@@ -43,7 +43,7 @@ function WorkflowGraphBypassLaneNodeInner(props: NodeProps) {
           height: 12,
           width: 1,
           transform: 'translateX(-50%)',
-          background: traversed ? euiTheme.colors.success : euiTheme.colors.borderBasePlain,
+          background: traversed ? euiTheme.colors.success : euiTheme.colors.borderBaseProminent,
           pointerEvents: 'none',
         }}
       />

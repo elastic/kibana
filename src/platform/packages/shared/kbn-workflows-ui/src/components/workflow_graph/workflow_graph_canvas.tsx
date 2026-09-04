@@ -254,13 +254,6 @@ export interface WorkflowGraphCanvasProps {
    */
   readonly showBackground?: boolean;
   /**
-   * Override the z-index applied to every edge. The default (-1) keeps edges
-   * below nodes in the live editor, but breaks DOM-to-image capture because
-   * negative-z children are clipped by the stacking context. Pass 0 for
-   * off-screen export canvases.
-   */
-  readonly edgeZIndex?: number;
-  /**
    * Called once after ReactFlow has initialised and positioned the viewport
    * (including any fitView). Useful for off-screen export canvases that need
    * to know when the graph is ready to capture.
@@ -279,6 +272,12 @@ export interface WorkflowGraphCanvasProps {
    */
   readonly onViewportChange?: (viewport: Viewport) => void;
 }
+
+// `zIndex` is deliberately unset: getElevatedEdgeZIndex (in @xyflow/system) defaults it to 0,
+// which keeps edges under nodes (they tie at 0 and nodes win on DOM order) while still adding
+// +1 for edges whose endpoints have a parentId — i.e. edges inside a container — so those paint
+// above the container body instead of under its 50%-opaque veil.
+const DEFAULT_EDGE_OPTIONS = { type: 'workflowEdge' } as const;
 
 function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   const {
@@ -302,16 +301,11 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     showMinimap = true,
     showZoomControls = false,
     showBackground = true,
-    edgeZIndex = -1,
     onReady,
     defaultViewport,
     onViewportChange,
   } = props;
 
-  const defaultEdgeOptions = useMemo(
-    () => ({ type: 'workflowEdge', zIndex: edgeZIndex }),
-    [edgeZIndex]
-  );
   const actions = useMemo(
     () => ({
       onStepRun,
@@ -640,7 +634,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               edges={edges}
               nodeTypes={NODE_TYPES}
               edgeTypes={EDGE_TYPES}
-              defaultEdgeOptions={defaultEdgeOptions}
+              defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
               colorMode={colorMode}
               onInit={handleInit}
               fitView={fitViewProp}
