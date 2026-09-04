@@ -88406,7 +88406,7 @@ components:
           type: string
         matcher:
           additionalProperties: false
-          description: Structured matcher, or null to match all.
+          description: 'Structured matcher: `tags` values are OR-ed into a rule-tag clause, `expression` is a KQL string evaluated against alert data, and both clauses are AND-ed together. `null` means the policy matches all alerts (catch-all).'
           nullable: true
           type: object
           properties:
@@ -89830,7 +89830,7 @@ components:
           nullable: true
         matcher:
           additionalProperties: false
-          description: Structured matcher; null clears the matcher (catch-all).
+          description: Structured matcher, replaced as a whole on update. To preserve an existing `expression` while changing `tags`, send both fields. `null` clears the matcher (catch-all).
           nullable: true
           type: object
           properties:
