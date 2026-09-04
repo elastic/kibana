@@ -39,7 +39,7 @@ import { FeatureNotEnabledError } from '../../errors/feature_not_enabled_error';
 
 export { findSimilarFeatures } from './feature_similarity_search';
 
-const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 2;
+const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 
 export const selectPreviouslyIdentifiedFeatures = (
   features: ReadonlyArray<Feature>,
