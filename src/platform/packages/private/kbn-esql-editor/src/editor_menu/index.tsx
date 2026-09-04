@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { Suspense, useRef, useState } from 'react';
-import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { isMac } from '@kbn/shared-ux-utility';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
-import { searchPlaceholder } from '../editor_visor';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
+import { searchPlaceholder } from '../editor_visor/visor_i18n';
+import { KeyboardShortcuts } from '../editor_footer/keyboard_shortcuts';
+import { QueryWrapComponent } from '../editor_footer/query_wrap_component';
 import { MagnifySparklesIcon } from './magnify_sparkles_icon';
 import {
   addStarredQueryLabel,
   helpLabel,
   hideHistoryLabel,
+  removeStarredQueryLabel,
   searchTooltipLabel,
   searchWithNlTooltipLabel,
-  removeStarredQueryLabel,
   showHistoryLabel,
 } from './menu_i18n';
 
@@ -33,17 +33,16 @@ const LazyHelpPopover = React.lazy(async () => {
 export function ESQLMenu({
   hideHistory,
   onESQLDocsFlyoutVisibilityChanged,
+  onPrettifyQuery,
 }: {
   hideHistory?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  onPrettifyQuery?: () => void;
 } = {}) {
   const editorActions = useEsqlEditorActions();
-  const { euiTheme } = useEuiTheme();
   const isNlToEsqlEnabled = useNlToEsqlCheck();
-  const commandKey = isMac ? '⌘' : 'Ctrl';
-  const visorTooltip = isNlToEsqlEnabled
-    ? searchWithNlTooltipLabel(commandKey)
-    : searchTooltipLabel(commandKey);
+  const visorTooltip = isNlToEsqlEnabled ? searchWithNlTooltipLabel : searchTooltipLabel;
+  const isInline = editorActions?.editorIsInline;
   const onToggleVisor = editorActions?.toggleVisor;
   const onToggleHistory = editorActions?.toggleHistory;
   const onToggleStarredQuery = editorActions?.toggleStarredQuery;
@@ -61,31 +60,9 @@ export function ESQLMenu({
   wasStarredRef.current = isStarred;
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      justifyContent="center"
-      responsive={false}
-      css={css`
-        border-radius: ${euiTheme.border.radius.small};
-        border: ${euiTheme.border.thin};
-        background: ${euiTheme.colors.emptyShade};
-        padding: ${euiTheme.size.xs};
-      `}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
-            size="xs"
-            aria-label={searchPlaceholder}
-            onClick={onToggleVisor}
-            isDisabled={!onToggleVisor}
-            data-test-subj="esql-menu-button"
-            color="text"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+    <>
+      {onPrettifyQuery && <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />}
+      <KeyboardShortcuts />
       {!hideHistory && (
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
@@ -140,6 +117,21 @@ export function ESQLMenu({
           <LazyHelpPopover onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged} />
         </Suspense>
       </EuiFlexItem>
-    </EuiFlexGroup>
+      {isInline && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
+              size="xs"
+              aria-label={searchPlaceholder}
+              onClick={onToggleVisor}
+              isDisabled={!onToggleVisor}
+              data-test-subj="esql-menu-button"
+              color="text"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+    </>
   );
 }

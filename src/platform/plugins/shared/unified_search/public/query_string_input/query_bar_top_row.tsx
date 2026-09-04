@@ -25,12 +25,7 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import {
-  ESQLLangEditor,
-  ESQLMenu,
-  EsqlEditorActionsProvider,
-  type ESQLEditorProps,
-} from '@kbn/esql/public';
+import { ESQLLangEditor, QuickSearchVisor, type ESQLEditorProps } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -664,6 +659,14 @@ export const QueryBarTopRow = React.memo(
     // stays in sync with real query cadence. The timefilter drives data fetches in consumers like
     // Discover and Dashboard; without this the two independent timers drift apart over time.
     const [autoRefreshEpoch, setAutoRefreshEpoch] = useState<number | undefined>(undefined);
+    const visorNlResultHandlerRef = useRef<((generatedQuery: string) => void) | undefined>(
+      undefined
+    );
+    const [visorNlResultHandlerReady, setVisorNlResultHandlerReady] = useState(false);
+    const onVisorNlResultReady = useCallback((fn: (generatedQuery: string) => void) => {
+      visorNlResultHandlerRef.current = fn;
+      setVisorNlResultHandlerReady(true);
+    }, []);
     useEffect(() => {
       if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;
 
@@ -740,6 +743,19 @@ export const QueryBarTopRow = React.memo(
         );
       },
       [onSubmit]
+    );
+
+    const propsOnTextLangQueryChange = props.onTextLangQueryChange;
+    const onVisorUpdateAndSubmit = useCallback(
+      (newEsqlQuery: string) => {
+        const aggregateQuery = { esql: newEsqlQuery } as AggregateQuery;
+        propsOnTextLangQueryChange(aggregateQuery);
+        onSubmit({
+          query: aggregateQuery as unknown as Query | QT,
+          dateRange: dateRangeRef.current,
+        });
+      },
+      [propsOnTextLangQueryChange, onSubmit]
     );
 
     const {
@@ -1207,22 +1223,6 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
-    function renderEsqlMenuPopover() {
-      return (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            margin-left: auto;
-            @media (min-width: ${euiTheme.breakpoint.xl}px) {
-              order: 1;
-            }
-          `}
-        >
-          <ESQLMenu onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged} />
-        </EuiFlexItem>
-      );
-    }
-
     function renderQueryInput() {
       const filterButtonGroup = !renderFilterMenuOnly() && renderFilterButtonGroup();
       const queryInput = shouldRenderQueryInput() && (
@@ -1316,6 +1316,8 @@ export const QueryBarTopRow = React.memo(
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             queryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
+            onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+            onVisorNlResultReady={onVisorNlResultReady}
           />
         )
       );
@@ -1350,30 +1352,39 @@ export const QueryBarTopRow = React.memo(
         />
         {!isScreenshotMode &&
           (shouldRenderESQLUi ? (
-            <EsqlEditorActionsProvider>
+            <>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
+                <EuiFlexItem>
+                  <QuickSearchVisor
+                    query={
+                      props.query && isOfAggregateQueryType(props.query) ? props.query.esql : ''
+                    }
+                    onNlResult={
+                      visorNlResultHandlerReady ? visorNlResultHandlerRef.current : undefined
+                    }
+                    onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
+                  />
+                </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}
-                {/* Optional wrapper for the ES|QL controls elements */}
-                {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
-                  <EuiFlexItem
-                    grow={true}
-                    css={css`
-                      min-width: 0;
-                      @media (max-width: ${euiTheme.breakpoint.xl}px) {
-                        order: 1;
-                        flex-basis: 100%;
-                      }
-                    `}
-                  >
-                    {props.esqlVariablesConfig?.controlsWrapper}
-                  </EuiFlexItem>
-                )}
-                {renderEsqlMenuPopover()}
               </EuiFlexGroup>
+              {/* Optional wrapper for the ES|QL controls elements rendered on its own row */}
+              {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
+                <EuiFlexGroup
+                  responsive={false}
+                  gutterSize="s"
+                  wrap
+                  css={css`
+                    padding: ${!props.disableExternalPadding ? euiTheme.size.s : 0};
+                    padding-top: 0;
+                  `}
+                >
+                  <EuiFlexItem>{props.esqlVariablesConfig?.controlsWrapper}</EuiFlexItem>
+                </EuiFlexGroup>
+              )}
               {!shouldShowDatePickerAsBadge() && props.filterBar}
               {renderESQLEditor()}
-            </EsqlEditorActionsProvider>
+            </>
           ) : (
             <>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
@@ -1392,7 +1403,6 @@ export const QueryBarTopRow = React.memo(
                 {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}
-              {renderESQLEditor()}
             </>
           ))}
       </FilterBarContextProvider>

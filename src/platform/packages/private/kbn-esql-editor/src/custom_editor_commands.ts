@@ -318,7 +318,6 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
 export const addEditorKeyBindings = (
   editor: monaco.editor.IStandaloneCodeEditor,
   onQuerySubmit: (source: QuerySource) => void,
-  toggleVisor: () => void,
   onPrettifyQuery: () => void,
   onGenerateFromComment?: () => void
 ): monaco.IDisposable[] => {
@@ -342,15 +341,6 @@ export const addEditorKeyBindings = (
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
       run: (currentEditor) => currentEditor.trigger('keyboard', 'type', { text: '\n' }),
-    }),
-    editor.addAction({
-      id: 'esql.toggleVisor',
-      label: i18n.translate('esqlEditor.query.toggleVisorLabel', {
-        defaultMessage: 'Toggle quick search',
-      }),
-      // eslint-disable-next-line no-bitwise
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
-      run: () => toggleVisor(),
     }),
     editor.addAction({
       id: 'esql.prettifyQuery',
