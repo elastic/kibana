@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FINAL_SUMMARY_KQL } from './single_metric_config';
+import { ERROR_STATES_KQL, FINAL_SUMMARY_KQL } from './single_metric_config';
 import type { ColumnFilter, ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -103,14 +103,30 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         },
       },
       {
-        label: 'Monitor Errors',
+        label: i18n.translate('xpack.exploratoryView.expView.kpi.errorStatesLabel', {
+          defaultMessage: 'Error states',
+        }),
         id: 'monitor_errors',
         columnType: OPERATION_COLUMN,
         field: 'state.id',
         columnFilters: [
           {
             language: 'kuery',
-            query: `summary.down > 0`,
+            query: ERROR_STATES_KQL,
+          },
+        ],
+      },
+      {
+        label: i18n.translate('xpack.exploratoryView.expView.kpi.failedTestsLabel', {
+          defaultMessage: 'Failed tests',
+        }),
+        id: 'monitor_failed_tests',
+        field: RECORDS_FIELD,
+        columnType: OPERATION_COLUMN,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: 'summary.status: down',
           },
         ],
       },
