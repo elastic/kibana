@@ -53,7 +53,17 @@ export function generateYamlSchemaFromConnectors(
    */
   loose: boolean = false
 ): z.ZodType {
-  const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
+  // Zod v4's `z.toJSONSchema({ reused: 'ref' })` names shared definitions
+  // `__schema0…__schemaN` in traversal (encounter) order. Any reordering of
+  // the connector or trigger arrays therefore renumbers every downstream
+  // definition and the 8 000+ `$ref`s that point to them, producing a ~2 MB
+  // whole-file diff on a schema that has not semantically changed.
+  // Sort both arrays by their type discriminator to make traversal order stable
+  // and independent of async loader resolution order or Map insertion order.
+  const sortedConnectors = [...connectors].sort((a, b) => a.type.localeCompare(b.type));
+  const sortedTriggers = [...triggers].sort((a, b) => a.localeCompare(b));
+
+  const recursiveStepSchema = createRecursiveStepSchema(sortedConnectors, loose);
 
   if (loose) {
     // For loose mode, use WorkflowSchemaForAutocompleteBase which already handles partial fields
@@ -67,7 +77,7 @@ export function generateYamlSchemaFromConnectors(
     }));
   }
 
-  const triggerSchema = getTriggerSchema(triggers);
+  const triggerSchema = getTriggerSchema(sortedTriggers);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
     triggers: z.array(triggerSchema).min(1),
   });

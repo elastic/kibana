@@ -115,15 +115,86 @@ determinable `type` literal, or two branches would map to the same tag, the
 
 Each `schema.json` is written minified with sorted keys — exactly the bytes a CDN
 serves. `index.json` is the pretty, sorted entry point: `kibanaVersion`,
-`buildHash`, `profile: "superset"`, `channel`, `connectorTypes[]`, `stepTypes[]`,
+`buildHash`, `profile: "superset"`, `connectorTypes[]`, `stepTypes[]`,
 `triggerTypes[]`, and per variant `{ path, sha256 }`, where `sha256` is over the
 **exact served bytes** of that variant's `schema.json`. There is no timestamp, so
-an identical schema yields a byte-identical `index.json` across runs.
+an identical schema yields a byte-identical `index.json` across runs. The
+`channel` field is absent from the committed copy and stamped at CDN publish time.
 
 ## Loading
 
 Consumers read `index.json`, then fetch each variant's `schema.json` and verify
 its bytes against the manifest `sha256`.
+
+## CI generation and CDN publishing
+
+The artifact is generated in CI and committed to the repo, then published to the
+CDN from the release/serverless build pipelines.
+
+### Generation (committed to the repo)
+
+The generation is a Jest integration test
+(`integration_tests/generate_schema.test.ts`), following the same convention as
+the encrypted-saved-objects `ci_checks` integration test. It boots a real,
+all-solutions Kibana (`createRootWithCorePlugins({}, { oss: false })` over a
+trial-license ES), generates the artifact in-process using this package's own
+modules (the same steps the CLI runs), and writes the committed artifact directly
+to a single channel-agnostic bundle:
+
+```
+generated/{index.json,strict/schema.json,template/schema.json}
+```
+
+The `kibanaVersion`, `buildHash`, and `channel` fields are omitted from the
+committed `index.json` and stamped at CDN publish time by `publish_schema.sh`.
+The output is otherwise deterministic and timestamp-free, so re-generation is a
+no-op unless the schema actually changed. Determinism is achieved through two
+layers:
+
+1. **Pre-composition ordering.** Connector and trigger arrays are sorted by their
+   `type` discriminator before `z.toJSONSchema()` runs, pinning the
+   `__schemaN` reference-definition numbering that Zod v4 assigns in traversal
+   order. This ensures re-ordering of async step-loader resolution never
+   produces a whole-file diff.
+2. **Post-serialization canonicalization.** The writer sorts members of
+   `anyOf`, `oneOf`, and `required` arrays by stable-stringified content before
+   hashing, as a belt-and-braces guard. `enum` and `allOf` are intentionally
+   excluded: `enum` order is curated (e.g. severity levels), and `allOf` has no
+   ordering benefit here.
+
+The config runs exclusively via
+`.buildkite/scripts/steps/code_generation/workflow_step_schema_codegen.sh`,
+wired into the `Checks` pipeline step (`checks.sh`). It is excluded from the
+regular Jest integration lane via `.buildkite/disabled_jest_configs.json` to
+avoid a redundant double boot. Any drift is auto-committed back to the PR inline
+by `check_for_changed_files`. Set `WORKFLOW_SCHEMA_OUTPUT_DIR` to write
+elsewhere (e.g. under the gitignored `target/`) when experimenting locally.
+
+### CDN layout
+
+Published to the workflows CDN bucket (`elastic-workflows-library-prod`, served
+at `https://workflows.elastic.co`) under a `/schema/v1` prefix, a sibling of the
+Workflow Template Library's `/library` prefix:
+
+```
+schema/v1/<version>/release/{index.json,strict/schema.json,template/schema.json}
+schema/v1/serverless/{index.json,strict/schema.json,template/schema.json}
+```
+
+- **Release** (`.buildkite/scripts/steps/artifacts/upload_dra_pipeline.sh`, gated on
+  `RELEASE_BUILD=true`, `depends_on: dra-prep`): version cut, every RC, and GA
+  overwrite `schema/v1/<version>/release`. Nightly snapshots are not published.
+- **Serverless** (`.buildkite/scripts/steps/artifacts/docker_image.sh`, on the
+  main-branch image promotion): rolling overwrite of `schema/v1/serverless`.
+
+Both call the shared `.buildkite/scripts/steps/workflow_step_schema/publish_schema.sh`,
+which reads the GCS service-account key from `GCS_SA_CDN_KEY` (exported by
+`setup_job_env.sh`), stamps the real `kibanaVersion`, `buildHash`, and `channel` onto the
+published `index.json` (the committed copy omits all three), and `gcloud storage rsync`s
+the bytes with `cache-control: public, max-age=300`.
+
+The CDN publish is `soft_fail` on both paths; a Buildkite warning annotation is emitted
+on failure so the CDN staleness is visible without trawling job logs.
 
 ## Limitations (accepted)
 
