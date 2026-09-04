@@ -14,6 +14,13 @@ viewer:
         - read
       allow_restricted_indices: false
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - '.siem-signals*'
         - '.lists-*'
         - '.items-*'
@@ -115,6 +122,13 @@ editor:
         - metrics-endpoint.policy-*
       privileges:
         - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
         - '.siem-signals*'
@@ -242,6 +256,13 @@ t1_analyst:
         - read
       allow_restricted_indices: false
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - '.alerts-security*'
         - '.siem-signals-*'
       privileges:
@@ -337,6 +358,13 @@ t2_analyst:
         - metrics-endpoint.policy-*
       privileges:
         - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
         - .alerts-security*
@@ -441,6 +469,13 @@ t3_analyst:
         - metrics-endpoint.policy-*
       privileges:
         - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
         - apm-*-transaction*
@@ -560,6 +595,13 @@ threat_intelligence_analyst:
         - read
       allow_restricted_indices: false
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
@@ -666,6 +708,13 @@ rule_author:
         - metrics-endpoint.policy-*
       privileges:
         - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
         - apm-*-transaction*
@@ -777,6 +826,13 @@ soc_manager:
         - metrics-endpoint.policy-*
       privileges:
         - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
         - apm-*-transaction*
@@ -891,6 +947,13 @@ detections_admin:
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
@@ -992,6 +1055,13 @@ platform_engineer:
         - metrics-endpoint.policy-*
       privileges:
         - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
         - apm-*-transaction*
@@ -1101,6 +1171,13 @@ endpoint_operations_analyst:
         - metrics-endpoint.policy-*
       privileges:
         - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
@@ -1218,6 +1295,13 @@ endpoint_policy_manager:
         - metrics-endpoint.policy-*
       privileges:
         - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
