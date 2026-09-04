@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   Logger,
   LogMeta,
   RequestHandlerContext,
@@ -225,8 +226,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   private securityEventBus?: SecuritySolutionEventBus;
 
   /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
-  private defendCpsEnabled = false;
   private platformCpsEnabled = false;
+  /** The `defendCrossProjectSearch` experimental flag; AND-ed with `cps.isCpsActive` per request */
+  private defendCpsFeatureFlagEnabled = false;
 
   /**
    * Threat intel routes are registered in `setup()` but depend on start-time
@@ -356,8 +358,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = config.experimentalFeatures;
 
     this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
-    this.defendCpsEnabled =
-      this.platformCpsEnabled && experimentalFeatures.defendCrossProjectSearch;
+    this.defendCpsFeatureFlagEnabled = experimentalFeatures.defendCrossProjectSearch;
 
     initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
@@ -1049,7 +1050,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       esClient: core.elasticsearch.client.asInternalUser,
       clusterClient: core.elasticsearch.client,
       dataStart: plugins.data,
-      cpsEnabled: this.defendCpsEnabled,
+      // `cps.isCpsActive` is tri-state: `undefined` means the linked projects could not be
+      // resolved, which is not the same as there being none. Defend collapses that to "do not fan
+      // out" deliberately. An unresolved scope is one whose index grants we cannot inspect --
+      // almost always a custom role missing `read_project_routing` -- and fanning those out would
+      // put exactly the principals we know least about on `asCurrentUser`. The cost is that such a
+      // role reads origin-only until the predefined roles carry the privilege.
+      isCpsActive: async (request: KibanaRequest): Promise<boolean> =>
+        this.defendCpsFeatureFlagEnabled && (await plugins.cps?.isCpsActive(request)) === true,
       productFeaturesService,
       savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,
