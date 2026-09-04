@@ -283,4 +283,31 @@ describe('action_type_model_utils', () => {
       expect(deserializer?.(noAuthInConfig)).toEqual(noAuthInConfig);
     });
   });
+
+  describe('hideSettingsTitle', () => {
+    it('hides the generic settings heading for inbound-only connectors', () => {
+      const model = transformSpecToActionTypeModel(
+        {
+          metadata: {
+            id: '.inboundWebhook',
+            displayName: 'Inbound Webhook',
+            description: 'Test',
+            minimumLicense: 'gold',
+            supportedFeatureIds: ['workflows'],
+          },
+          schema: { type: 'object', properties: {} },
+          isTestable: false,
+        },
+        docLinks
+      );
+      expect(model.connectorForm?.hideSettingsTitle).toBe(true);
+    });
+
+    it('keeps the settings heading for outbound and dual spec connectors', () => {
+      expect(
+        transformSpecToActionTypeModel(minimalConnectorSpecForForm(), docLinks).connectorForm
+          ?.hideSettingsTitle
+      ).toBe(false);
+    });
+  });
 });
