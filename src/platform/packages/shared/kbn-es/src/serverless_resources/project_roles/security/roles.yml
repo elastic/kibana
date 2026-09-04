@@ -8,6 +8,13 @@ viewer:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - '.siem-signals*'
         - '.lists-*'
         - '.items-*'
@@ -94,6 +101,13 @@ editor:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.siem-signals*'
         - '.lists-*'
@@ -214,6 +228,13 @@ t1_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - '.alerts-security*'
         - '.siem-signals-*'
       privileges:
@@ -304,6 +325,13 @@ t2_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -396,6 +424,13 @@ t3_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -508,6 +543,13 @@ threat_intelligence_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
@@ -603,6 +645,13 @@ rule_author:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -702,6 +751,13 @@ soc_manager:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -815,6 +871,13 @@ detections_admin:
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
@@ -900,6 +963,13 @@ platform_engineer:
   cluster:
     - manage
   indices:
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -997,6 +1067,13 @@ endpoint_operations_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -1108,6 +1185,13 @@ endpoint_policy_manager:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*

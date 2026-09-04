@@ -8,6 +8,7 @@
  */
 
 export {
+  HistogramPercentileValue,
   METRICS_GRID_SETTINGS_DEFAULTS,
   type HistogramPercentile,
   type MetricsGridSettings,

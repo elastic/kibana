@@ -922,6 +922,7 @@ describe('groupCandidatesByInterval', () => {
     taskId: `task:${id}`,
     attrs: createRuleSoAttributes({ schedule: { every, lookback: '1m' } }),
     version: 'v1',
+    references: [],
   });
 
   it('groups candidates by their schedule interval, preserving order', () => {
