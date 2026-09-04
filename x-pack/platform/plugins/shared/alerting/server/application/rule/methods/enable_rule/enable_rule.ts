@@ -161,7 +161,6 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
       attributes.tags,
       existingApiKey ? attributes.uiamApiKey : apiKeyAttributes.uiamApiKey,
-      existingApiKey ? attributes.apiKeyCreatedByUser : apiKeyAttributes.apiKeyCreatedByUser,
       context.isServerless,
       context.featureFlags
     );

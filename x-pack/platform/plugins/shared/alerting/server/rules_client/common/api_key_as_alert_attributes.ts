@@ -112,13 +112,11 @@ export function apiKeyAsRuleDomainProperties(
  * - The environment is serverless
  * - The feature flag for provisioning UIAM API keys is enabled
  * - uiamApiKey is not set (null/undefined)
- * - AND apiKeyCreatedByUser is false (system-created API key)
  *
  * This indicates that the UIAM key rollout attempted to create a UIAM key but failed.
  */
 export async function shouldAddMissingUiamKeyTag(
   uiamApiKey: string | null | undefined,
-  apiKeyCreatedByUser: boolean | null | undefined,
   isServerless: boolean,
   featureFlags: FeatureFlagsStart
 ): Promise<boolean> {
@@ -126,7 +124,7 @@ export async function shouldAddMissingUiamKeyTag(
     PROVISION_UIAM_API_KEYS_FEATURE_FLAG,
     false
   );
-  return isServerless && isFeatureFlagEnabled && !uiamApiKey && apiKeyCreatedByUser === false;
+  return isServerless && isFeatureFlagEnabled && !uiamApiKey;
 }
 
 /**
@@ -136,13 +134,10 @@ export async function shouldAddMissingUiamKeyTag(
 export async function addMissingUiamKeyTagIfNeeded(
   tags: string[],
   uiamApiKey: string | null | undefined,
-  apiKeyCreatedByUser: boolean | null | undefined,
   isServerless: boolean,
   featureFlags: FeatureFlagsStart
 ): Promise<string[]> {
-  if (
-    await shouldAddMissingUiamKeyTag(uiamApiKey, apiKeyCreatedByUser, isServerless, featureFlags)
-  ) {
+  if (await shouldAddMissingUiamKeyTag(uiamApiKey, isServerless, featureFlags)) {
     // Avoid duplicates
     if (!tags.includes(MISSING_UIAM_API_KEY_TAG)) {
       return [...tags, MISSING_UIAM_API_KEY_TAG];

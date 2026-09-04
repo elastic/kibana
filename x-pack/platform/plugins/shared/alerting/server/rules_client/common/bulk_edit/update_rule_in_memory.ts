@@ -269,7 +269,6 @@ async function updateAttributes({
   const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
     attributes.tags,
     apiKeyAttributes?.uiamApiKey,
-    apiKeyAttributes?.apiKeyCreatedByUser,
     context.isServerless,
     context.featureFlags
   );

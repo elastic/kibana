@@ -5005,6 +5005,14 @@ describe('update()', () => {
         version: '123',
       });
 
+      // The rule is enabled, so the API key is rotated: the tag decision is made on the
+      // freshly created key set, which does contain a UIAM key here.
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '456', name: '456', api_key: 'abc' },
+        uiamResult: { id: '789', name: '789', api_key: 'def' },
+      });
+
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
         type: 'alert',

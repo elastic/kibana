@@ -229,7 +229,6 @@ export async function createRule<Params extends RuleParams = never>(
   const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
     data.tags,
     apiKeyProps.uiamApiKey,
-    apiKeyProps.apiKeyCreatedByUser,
     context.isServerless,
     context.featureFlags
   );
