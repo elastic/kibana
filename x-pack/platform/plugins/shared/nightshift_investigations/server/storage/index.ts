@@ -6,13 +6,19 @@
  */
 
 export type {
+  FindInvestigationsAcrossSpacesResult,
   FindInvestigationsQuery,
   FindInvestigationsResult,
   InvestigationAttributes,
   InvestigationPatch,
   InvestigationRecord,
   InvestigationRepository,
+  InvestigationSweepRepository,
   ProjectedInvestigationRecord,
 } from './types';
 export { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
 export { SavedObjectInvestigationRepository } from './saved_object_investigation_repository';
+export {
+  createInvestigationSweepRepository,
+  SavedObjectInvestigationSweepRepository,
+} from './saved_object_investigation_sweep_repository';
