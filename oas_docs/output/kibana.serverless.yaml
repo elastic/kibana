@@ -101423,13 +101423,15 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-truncate'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-url'
         - additionalProperties: false
-          type: object
+          description: Fallback for custom formatter IDs only. Known formatter IDs must match their dedicated schema and are validated at runtime.
           properties:
             params: {}
             type:
               type: string
           required:
             - type
+          title: Extensible format
+          type: object
       description: Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.
       title: Format
     Kibana_HTTP_APIs_kbn-field-format-boolean:
@@ -101454,7 +101456,6 @@ components:
           properties:
             pattern:
               description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
-              nullable: true
               title: Numeral pattern
               type: string
         type:
@@ -101598,7 +101599,6 @@ components:
             pattern:
               default: MMM D, YYYY @ HH:mm:ss.SSS
               description: Moment.js format pattern. See https://momentjs.com/ to learn more.
-              nullable: true
               title: Moment.js pattern
               type: string
         type:
@@ -101620,7 +101620,6 @@ components:
             pattern:
               default: MMM D, YYYY @ HH:mm:ss.SSSSSSSSS
               description: Moment.js format pattern. See https://momentjs.com/ to learn more.
-              nullable: true
               title: Moment.js pattern
               type: string
         type:
@@ -101642,7 +101641,6 @@ components:
             include_space_with_suffix:
               default: true
               description: When true or not provided, the formatted duration includes a space between the value and suffix. When false, no space is included.
-              nullable: true
               title: Include space with suffix
               type: boolean
             input_format:
@@ -101742,18 +101740,15 @@ components:
             output_precision:
               default: 2
               description: The number of decimal places to display in the duration value.
-              nullable: true
               title: Output precision
               type: number
             show_suffix:
               description: When true, the formatted duration includes a suffix (such as "seconds", "milliseconds", or "years"). When false or not provided, no suffix is shown.
-              nullable: true
               title: Show suffix
               type: boolean
             use_short_suffix:
               default: false
               description: When true, the formatted duration uses short suffixes (such as "s", "ms", or "h"). When false or not provided, full suffixes are used.
-              nullable: true
               title: Use short suffix
               type: boolean
           required:
@@ -101836,7 +101831,6 @@ components:
                   type: string
             pattern:
               description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
-              nullable: true
               title: Numeral pattern
               type: string
           required:
@@ -101872,7 +101866,6 @@ components:
           properties:
             pattern:
               description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
-              nullable: true
               title: Numeral pattern
               type: string
         type:
@@ -101893,7 +101886,6 @@ components:
           properties:
             pattern:
               description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
-              nullable: true
               title: Numeral pattern
               type: string
         type:
@@ -101940,7 +101932,6 @@ components:
               type: array
             unknown_key_value:
               description: The value to display for unknown key values. If not provided, the field value will be displayed.
-              nullable: true
               title: Unknown key value
               type: string
           required:
@@ -101994,7 +101985,6 @@ components:
                     - urlparam
                   title: URL parameter decode
                   type: string
-              nullable: true
         type:
           enum:
             - string
@@ -102012,7 +102002,6 @@ components:
           type: object
           properties:
             field_length:
-              nullable: true
               type: number
         type:
           enum:
@@ -102035,12 +102024,10 @@ components:
               properties:
                 label_template:
                   description: 'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".'
-                  nullable: true
                   title: Label template
                   type: string
                 open_link_in_current_tab:
                   description: When true, the URL opens in the current tab. When false or not provided, the URL opens in a new tab.
-                  nullable: true
                   title: Open link in current tab
                   type: boolean
                 type:
@@ -102051,7 +102038,6 @@ components:
                   type: string
                 url_template:
                   description: 'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:''{{risonValue}}''). For example: "https://example.com/{{value}}".'
-                  nullable: true
                   title: URL template
                   type: string
               required:
@@ -102061,12 +102047,10 @@ components:
               properties:
                 height:
                   description: The height of the image. If not provided, the image will be displayed at the original height.
-                  nullable: true
                   title: Height
                   type: number
                 label_template:
                   description: 'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".'
-                  nullable: true
                   title: Label template
                   type: string
                 type:
@@ -102077,12 +102061,10 @@ components:
                   type: string
                 url_template:
                   description: 'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:''{{risonValue}}''). For example: "https://example.com/{{value}}".'
-                  nullable: true
                   title: URL template
                   type: string
                 width:
                   description: The width of the image. If not provided, the image will be displayed at the original width.
-                  nullable: true
                   title: Width
                   type: number
               required:
@@ -102092,7 +102074,6 @@ components:
               properties:
                 label_template:
                   description: 'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".'
-                  nullable: true
                   title: Label template
                   type: string
                 type:
@@ -102103,7 +102084,6 @@ components:
                   type: string
                 url_template:
                   description: 'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:''{{risonValue}}''). For example: "https://example.com/{{value}}".'
-                  nullable: true
                   title: URL template
                   type: string
               required:
