@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render log.level row indicators on Surrounding documents page', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await dataViews.switchTo('my-example-logs,logstash*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await dataGrid.clickRowToggle({ rowIndex: 0 });

@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
     });
     after(async () => {
       await esArchiver.unload(
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     async function prepareTest(time: TimeStrings, interval?: string) {
       await PageObjects.common.setTime(time);
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       if (interval) {
         await PageObjects.discover.setChartInterval(interval);
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     it('should modify the time range when the histogram is brushed', async function () {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await elasticChart.waitForRenderComplete();
       let prevRowData = '';
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should update correctly when switching data views and brushing the histogram', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
       });
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.header.awaitKibanaChrome();
       const initialTimeString = await PageObjects.discover.getChartTimespan();
       await queryBar.clickQuerySubmitButton();
@@ -263,7 +263,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // go to discover
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
@@ -277,7 +277,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should recover from broken query search when clearing the query bar', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // Make sure the chart is visible
       await PageObjects.discover.toggleChartVisibility();
@@ -297,7 +297,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset all histogram state when resetting the saved search', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.timePicker.setDefaultAbsoluteRange();

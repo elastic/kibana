@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   describe('Session management', function describeSessionManagementTests() {
     describe('Discover', () => {
       before(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('All logs');
         await discover.waitUntilTabIsLoaded();

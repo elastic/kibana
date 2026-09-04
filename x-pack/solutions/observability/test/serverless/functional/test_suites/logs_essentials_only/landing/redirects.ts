@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+      await PageObjects.discover.setQueryMode('classic', 'esql');
       await PageObjects.common.navigateToApp('landingPage');
 
       await retry.tryForTime(60 * 1000, async () => {

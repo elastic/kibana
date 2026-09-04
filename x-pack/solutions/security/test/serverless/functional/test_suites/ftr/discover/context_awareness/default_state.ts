@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('DataView mode', () => {
       it('should have correct list of columns', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await PageObjects.discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
 

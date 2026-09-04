@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
-  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
+  const { discover, timePicker } = getPageObjects(['discover', 'timePicker']);
   const defaultIndexPatternString = config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -44,8 +44,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(kbnDirectory);
       await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await discover.setQueryMode('classic', 'esql');
-      await common.navigateToApp('discover');
+      // A non-empty `_a` bypasses the persisted-query-mode check (which requires
+      // localStorage, unavailable on a brand new session's `data:` origin) and
+      // lands on the classic default query, same as `navigateToApp('classic')`.
+      await discover.navigateToActualUrl(undefined, '_a=(columns:!())');
     });
 
     after(async () => {

@@ -11,7 +11,7 @@ import { openDiscoverSearchThresholdRuleFlyout } from '../open_search_threshold_
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover rule creation', function () {
-    const { common } = getPageObjects(['common', 'settings', 'shareSavedObjectsToSpace']);
+    const { discover } = getPageObjects(['discover', 'settings', 'shareSavedObjectsToSpace']);
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
     const esArchiver = getService('esArchiver');
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('navigate to Discover', () => {
-      return common.navigateToApp('discover');
+      return discover.navigateToApp('classic');
     });
 
     it('begin creating rule', async () => {

@@ -19,12 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
-  const { common, discover, header, timePicker } = getPageObjects([
-    'common',
-    'discover',
-    'header',
-    'timePicker',
-  ]);
+  const { discover, header, timePicker } = getPageObjects(['discover', 'header', 'timePicker']);
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -110,14 +105,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async function () {
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await discover.setQueryMode('classic', 'esql');
-      await common.navigateToApp('discover');
+      // A non-empty `_a` bypasses the persisted-query-mode check (which requires
+      // localStorage, unavailable on a brand new session's `data:` origin) and
+      // lands on the classic default query, same as `navigateToApp('classic')`.
+      await discover.navigateToActualUrl(undefined, '_a=(columns:!())');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-    });
-
-    afterEach(async function () {
-      await discover.resetQueryMode();
     });
 
     it('should show histogram by default', async () => {

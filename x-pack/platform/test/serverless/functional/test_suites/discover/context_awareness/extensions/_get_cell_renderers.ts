@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       describe('root profile', () => {
         it('should not render custom @timestamp', async () => {
-          await common.navigateToActualUrl('discover', undefined, {
+          await discover.navigateToActualUrl('classic', undefined, {
             ensureCurrentUrl: false,
           });
           await dataViews.switchTo('my-example-*');
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('data source profile', () => {
         it('should not render custom @timestamp or log.level', async () => {
-          await common.navigateToActualUrl('discover', undefined, {
+          await discover.navigateToActualUrl('classic', undefined, {
             ensureCurrentUrl: false,
           });
           await dataViews.switchTo('my-example-*');
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should not render custom @timestamp but should render custom log.level', async () => {
-          await common.navigateToActualUrl('discover', undefined, {
+          await discover.navigateToActualUrl('classic', undefined, {
             ensureCurrentUrl: false,
           });
           await dataViews.switchTo('my-example-logs');

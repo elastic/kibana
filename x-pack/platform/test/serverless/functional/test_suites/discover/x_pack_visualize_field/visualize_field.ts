@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
-    'common',
     'svlCommonPage',
     'discover',
     'timePicker',
@@ -50,8 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await PageObjects.discover.setQueryMode('classic', 'esql');
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await setDiscoverTimeRange();

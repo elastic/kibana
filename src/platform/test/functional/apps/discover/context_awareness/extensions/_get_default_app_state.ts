@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render default state', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await header.waitUntilLoadingHasFinished();
@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render default state when switching data views', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await header.waitUntilLoadingHasFinished();
@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should reset default state when clicking "New"', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await header.waitUntilLoadingHasFinished();
@@ -211,7 +211,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.update({
           defaultColumns: ['bad_column', 'data_stream.type', 'message'],
         });
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await header.waitUntilLoadingHasFinished();

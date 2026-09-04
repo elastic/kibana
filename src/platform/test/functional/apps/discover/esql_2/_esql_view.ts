@@ -97,8 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render esql view correctly', async function () {
-        await discover.setQueryMode('classic', 'esql');
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 

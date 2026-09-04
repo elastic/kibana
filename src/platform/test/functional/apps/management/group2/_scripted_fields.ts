@@ -51,7 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await kibanaServer.uiSettings.replace({});
-      await PageObjects.discover.setQueryMode('classic', 'esql');
       // Navigate once to capture the actual data view ID (importExport may assign a new UUID).
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
@@ -143,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should see scripted field value in Discover', async function () {
-          await PageObjects.common.navigateToApp('discover');
+          await PageObjects.discover.navigateToApp('classic');
 
           await retry.try(async function () {
             await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName);
@@ -245,7 +244,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
 
         await retry.try(async function () {
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);
@@ -346,7 +345,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
 
         await retry.try(async function () {
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);
@@ -440,7 +439,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
 
         await retry.try(async function () {
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);

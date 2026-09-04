@@ -11,8 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedFieldList, svlCommonPage } = getPageObjects([
-    'common',
+  const { discover, unifiedFieldList, svlCommonPage } = getPageObjects([
     'discover',
     'unifiedFieldList',
     'svlCommonPage',
@@ -35,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the profile data view', async () => {
-      await common.navigateToActualUrl('discover', undefined, {
+      await discover.navigateToActualUrl('classic', undefined, {
         ensureCurrentUrl: false,
       });
       expect(await dataViews.getSelectedName()).not.to.be('Example profile data view');
@@ -102,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.importExport.unload(
           'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
         );
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         expect(await dataViews.getSelectedName()).to.be('Example profile data view');
@@ -121,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload(
           'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
         );
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         expect(await testSubjects.exists('kbnNoDataPage')).to.be(true);

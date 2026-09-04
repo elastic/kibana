@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should show recommended fields section for matching profile', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await header.waitUntilLoadingHasFinished();
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not show recommended fields for non-matching profile', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await header.waitUntilLoadingHasFinished();

@@ -18,16 +18,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
-  const { reporting, common, discover, timePicker, header, dashboard, unifiedFieldList } =
-    getPageObjects([
-      'reporting',
-      'common',
-      'discover',
-      'timePicker',
-      'header',
-      'dashboard',
-      'unifiedFieldList',
-    ]);
+  const { reporting, discover, timePicker, header, dashboard, unifiedFieldList } = getPageObjects([
+    'reporting',
+    'discover',
+    'timePicker',
+    'header',
+    'dashboard',
+    'unifiedFieldList',
+  ]);
   const monacoEditor = getService('monacoEditor');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
@@ -113,8 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await discover.setQueryMode('classic', 'esql');
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await discover.selectIndexPattern('logstash-*');

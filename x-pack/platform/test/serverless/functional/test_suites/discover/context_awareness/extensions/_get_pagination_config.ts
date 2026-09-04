@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render single page pagination without page numbers', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs,logstash*');
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render default pagination with page numbers', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
 

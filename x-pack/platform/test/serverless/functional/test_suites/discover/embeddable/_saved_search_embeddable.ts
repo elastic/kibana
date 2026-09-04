@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const createNonLogsSavedSearch = async () => {
-      await common.navigateToActualUrl('discover', undefined, {
+      await discover.navigateToActualUrl('classic', undefined, {
         ensureCurrentUrl: false,
       });
       await dataViews.createFromSearchBar({

@@ -14,7 +14,7 @@ import { SECURITY_ES_ARCHIVES_DIR } from '../../../constants';
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['timePicker', 'svlCommonPage', 'discover']);
+  const PageObjects = getPageObjects(['timePicker', 'svlCommonPage']);
   const detectionsApi = getService('detectionsApi');
   const retry = getService('retry');
   const es = getService('es');
@@ -83,10 +83,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
 
       await esArchiver.unload(path.join(SECURITY_ES_ARCHIVES_DIR, 'auditbeat_single'));
-    });
-
-    beforeEach(async () => {
-      await PageObjects.discover.setQueryMode('classic', 'esql');
     });
 
     loadTestFile(require.resolve('./default_state'));

@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
     after(async () => {
@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('time zone switch', () => {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -253,7 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('managing fields', function () {
       it('should add a field, sort by it, remove it and also sorting by it', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('_score');
         await PageObjects.discover.waitUntilTabIsLoaded();
@@ -268,7 +268,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       it('should add a field with customLabel, sort by it, display it correctly', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('referer');
         await PageObjects.discover.waitUntilTabIsLoaded();

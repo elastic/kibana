@@ -226,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     {
       name: 'classic',
       loadDefaultProfile: async () => {
-        await common.navigateToActualUrl('discover', undefined, {
+        await discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await discover.waitUntilTabIsLoaded();

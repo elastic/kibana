@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it(`should unselect saved search when navigating to a 'new'`, async function () {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.selectIndexPattern('ecommerce');
       await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
       await queryBar.setQuery('customer_gender:MALE');

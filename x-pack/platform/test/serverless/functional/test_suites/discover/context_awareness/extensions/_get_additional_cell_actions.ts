@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render additional cell actions for logs data source', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await PageObjects.discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs');
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not render incompatible cell action for message column', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await PageObjects.discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs');
@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not render cell actions for incompatible data source', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await PageObjects.discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-metrics');

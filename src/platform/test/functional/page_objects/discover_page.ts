@@ -41,8 +41,30 @@ export class DiscoverPageObject extends FtrService {
 
   public readonly APP_ID = 'discover';
 
-  public async navigateToApp() {
+  /**
+   * Navigates to Discover, optionally pinning the query mode (classic vs ES|QL)
+   * for this load.
+   */
+  public async navigateToApp(queryMode?: string) {
+    if (queryMode) {
+      await this.setQueryMode(queryMode, 'esql');
+    }
     await this.common.navigateToApp(this.APP_ID);
+  }
+
+  /**
+   * Navigates to Discover via an explicit rison-encoded app-state URL (e.g. to seed
+   * ES|QL query state directly), optionally pinning the query mode for this load.
+   */
+  public async navigateToActualUrl(
+    queryMode: string | undefined,
+    hash?: string,
+    options?: { basePath?: string; ensureCurrentUrl?: boolean; shouldLoginIfPrompted?: boolean }
+  ) {
+    if (queryMode) {
+      await this.setQueryMode(queryMode, 'esql');
+    }
+    await this.common.navigateToActualUrl(this.APP_ID, hash, options);
   }
 
   /** Ensures that navigation to discover has completed */

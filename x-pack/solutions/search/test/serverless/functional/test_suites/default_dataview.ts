@@ -13,6 +13,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
+  const discover = getPageObject('discover');
   const dataViewApi = getService('dataViewApi');
   const samlAuth = getService('samlAuth');
   let roleAuthc: RoleCredentials;
@@ -33,6 +34,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('should show discover but with no data', async () => {
+      await discover.setQueryMode('classic', 'esql');
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
       await testSubjects.existOrFail('discover-dataView-switch-link');
       await testSubjects.click('discover-dataView-switch-link');

@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should set EBT context for telemetry events with default profile', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.selectTextBaseLang();
         await discover.waitUntilSearchingHasFinished();
         await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should set EBT context for telemetry events when example profile and reset', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.selectTextBaseLang();
         await discover.waitUntilSearchingHasFinished();
         await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should send EBT events when a different data source profile gets resolved', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.selectTextBaseLang();
         await discover.waitUntilSearchingHasFinished();
         await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
@@ -196,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should send EBT events when a different document profile gets resolved', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.selectTextBaseLang();
         await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
         await testSubjects.click('querySubmitButton');
@@ -225,7 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('field usage events', () => {
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
       });
@@ -509,7 +509,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('trackTabs telemetry', () => {
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await ebtUIHelper.setOptIn(true);
       });

@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['timePicker', 'svlCommonPage', 'discover']);
+  const PageObjects = getPageObjects(['timePicker', 'svlCommonPage']);
   const from = '2024-06-10T14:00:00.000Z';
   const to = '2024-06-10T16:30:00.000Z';
 
@@ -37,10 +37,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
       );
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-    });
-
-    beforeEach(async () => {
-      await PageObjects.discover.setQueryMode('classic', 'esql');
     });
 
     loadTestFile(require.resolve('./_framework'));

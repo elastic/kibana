@@ -11,8 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
-  const { common, discover, header, unifiedFieldList, security } = getPageObjects([
-    'common',
+  const { discover, header, unifiedFieldList, security } = getPageObjects([
     'discover',
     'header',
     'unifiedFieldList',
@@ -73,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should star a query from the editor query history', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.selectTextBaseLang();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
@@ -104,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should select a query from the starred and submit it', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.selectTextBaseLang();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
@@ -121,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should delete a query from the starred queries tab', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.selectTextBaseLang();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();

@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render logs overview tab for logs data source', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await PageObjects.discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilTabIsLoaded();
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not render logs overview tab for non-logs data source', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await PageObjects.discover.navigateToActualUrl('classic', undefined, {
           ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilTabIsLoaded();

@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to discover and verify no of hits for alias1', async function () {
       const expectedHitCount = '4';
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should be able to discover and verify no of hits for alias2', async function () {
         const expectedHitCount = '5';
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
         await PageObjects.discover.selectIndexPattern('alias2*');
 
         await retry.waitForWithTimeout('expected hit count to be 5', 30000, async () => {

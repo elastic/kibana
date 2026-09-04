@@ -25,9 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
-  const { reporting, common, discover, timePicker, exports } = getPageObjects([
+  const { reporting, discover, timePicker, exports } = getPageObjects([
     'reporting',
-    'common',
     'discover',
     'timePicker',
     'share',
@@ -151,8 +150,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
         await reportingAPI.initEcommerce();
-        await discover.setQueryMode('classic', 'esql');
-        await common.navigateToApp('discover');
+        // A non-empty `_a` bypasses the persisted-query-mode check (which requires
+        // localStorage, unavailable on a brand new session's `data:` origin) and
+        // lands on the classic default query, same as `navigateToApp('classic')`.
+        // This is the first Discover navigation in the config, so no other page
+        // has been loaded yet to establish a real origin.
+        await discover.navigateToActualUrl(undefined, '_a=(columns:!())');
         await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
         await discover.waitUntilTabIsLoaded();
@@ -201,8 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await discover.setQueryMode('classic', 'esql');
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
         await discover.waitUntilTabIsLoaded();
@@ -390,8 +392,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dateSubstractUnit: 'days',
         });
         await reportingAPI.initLogs();
-        await discover.setQueryMode('classic', 'esql');
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await discover.loadSavedSearch('Sparse Columns');
         await discover.waitUntilTabIsLoaded();
@@ -437,8 +438,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await reportingAPI.initEcommerce();
-        await discover.setQueryMode('classic', 'esql');
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
         await discover.waitUntilTabIsLoaded();

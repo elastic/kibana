@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       describe('custom context', () => {
         it('should render formatted record in doc viewer using formatter from custom context', async () => {
-          await common.navigateToActualUrl('discover', undefined, {
+          await discover.navigateToActualUrl('classic', undefined, {
             ensureCurrentUrl: false,
           });
           await discover.waitUntilSearchingHasFinished();
