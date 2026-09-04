@@ -8,6 +8,7 @@
 export { buildLensConfig } from './lens/build_lens_config';
 export {
   editLensPresentation,
+  editVegaPresentation,
   getLensPresentationEditGuidance,
   lensPresentationEditSchema,
 } from './lens/presentation';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, get, has, isEqual, unset } from 'lodash';
+import { cloneDeep, get, has, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
@@ -16,8 +16,6 @@ const valueSchema = z.union([
   z.number().finite(),
   z.array(z.string().max(64)).max(20),
 ]);
-/** Panel-level fields that every visualization panel, including Vega, may change. */
-const chromePaths = ['title', 'description', 'hide_title'] as const;
 const pathSchema = z
   .string()
   .min(1)
@@ -48,68 +46,95 @@ export const lensPresentationEditSchema = z.strictObject({
     ),
 });
 
-type PresentationEdit = z.infer<typeof lensPresentationEditSchema>;
+type PresentationChange = z.infer<typeof lensPresentationEditSchema>['changes'][number];
 
-/** Applies edits atomically without changing unmentioned settings. */
-export const editLensPresentation = <T extends object>(
-  config: T,
-  edit: PresentationEdit,
-  chromeOnly = false
-): T => {
-  const parsedEdit = lensPresentationEditSchema.parse(edit);
+/** Dashboard panel fields that live next to the chart config and are not part of the Lens schema. */
+const PANEL_FIELD_TYPES = {
+  title: 'string',
+  description: 'string',
+  hide_title: 'boolean',
+} as const;
+const PANEL_FIELDS = Object.keys(PANEL_FIELD_TYPES);
+const isPanelField = (path: string): boolean => PANEL_FIELDS.includes(path);
+
+/** `set` may create missing objects, but must never create, extend, or reshape an array. */
+const assertNoArrayGrowth = (target: object, segments: string[], path: string): void => {
+  for (let index = 1; index < segments.length; index++) {
+    const parent = get(target, segments.slice(0, index));
+    const segment = segments[index];
+    const isIndex = /^\d+$/.test(segment);
+    const allowed = Array.isArray(parent) ? isIndex && Number(segment) < parent.length : !isIndex;
+    if (!allowed) {
+      throw new Error(`Path "${path}" must use an existing array index.`);
+    }
+  }
+};
+
+const applyChanges = <T extends object>(config: T, changes: PresentationChange[]): T => {
   const result = cloneDeep(config);
-  for (const change of parsedEdit.changes) {
-    if (chromeOnly && !chromePaths.some((path) => path === change.path)) {
-      throw new Error(
-        `Unsupported presentation path "${change.path}". Data and chart-family edits require source: "request".`
-      );
-    }
-    const path = change.path.split('.');
-    // Do not allocate sparse arrays or let a path change an array's length.
-    for (let index = 1; index < path.length; index++) {
-      const parent = get(result, path.slice(0, index));
-      const part = path[index];
-      const isIndex = /^(0|[1-9]\d*)$/.test(part);
-      if (
-        (isIndex || Array.isArray(parent)) &&
-        !(isIndex && Array.isArray(parent) && Object.hasOwn(parent, part))
-      ) {
-        throw new Error(`Path "${change.path}" must use an existing array index.`);
-      }
-    }
-    if (change.operation === 'remove') {
-      if (has(result, path)) unset(result, path);
-    } else {
-      set(result, path, change.value);
+  for (const change of changes) {
+    const segments = change.path.split('.');
+    assertNoArrayGrowth(result, segments, change.path);
+    if (change.operation === 'set') {
+      set(result, segments, change.value);
+    } else if (has(result, segments)) {
+      unset(result, segments);
     }
   }
+  return result;
+};
 
-  for (const path of chromePaths) {
-    const value = get(result, path);
-    if (value !== undefined && typeof value !== (path === 'hide_title' ? 'boolean' : 'string')) {
-      throw new Error(`Invalid panel ${path}.`);
+const assertPanelFieldTypes = (config: object): void => {
+  for (const [field, type] of Object.entries(PANEL_FIELD_TYPES)) {
+    const value = get(config, field);
+    if (value !== undefined && typeof value !== type) {
+      throw new Error(`Invalid panel ${field}.`);
     }
   }
-  if (!chromeOnly) {
-    // Validate, but do not persist the parsed object: parsing drops wrapper fields and adds defaults.
-    const validation = lensApiConfigSchema.safeParse(result);
-    if (!validation.success) {
+};
+
+/**
+ * Validates with the Lens schema without persisting its output, which drops panel fields and fills
+ * defaults. Because the schema strips unknown fields instead of rejecting them, every set field
+ * must also still be present after parsing.
+ */
+const assertLensAccepts = (config: object, changes: PresentationChange[]): void => {
+  const validation = lensApiConfigSchema.safeParse(config);
+  if (!validation.success) {
+    throw new Error(
+      'Presentation edit would produce an invalid Lens API configuration. Check the supported settings and the existing chart; this panel was left unchanged.'
+    );
+  }
+  for (const { operation, path } of changes) {
+    if (operation === 'set' && !isPanelField(path) && !has(validation.data, path)) {
+      throw new Error(`Lens ignores "${path}"; it is not a setting of this chart.`);
+    }
+  }
+};
+
+/** Applies presentation edits to a Lens API config atomically; unmentioned settings stay unchanged. */
+export const editLensPresentation = <T extends object>(config: T, edit: unknown): T => {
+  const { changes } = lensPresentationEditSchema.parse(edit);
+  const result = applyChanges(config, changes);
+  assertPanelFieldTypes(result);
+  assertLensAccepts(result, changes);
+  return result;
+};
+
+/** Vega panels only expose their panel fields; the spec itself is edited through `source: "request"`. */
+export const editVegaPresentation = <T extends object>(config: T, edit: unknown): T => {
+  const { changes } = lensPresentationEditSchema.parse(edit);
+  for (const { path } of changes) {
+    if (!isPanelField(path)) {
       throw new Error(
-        'Presentation edit would produce an invalid Lens API configuration. Check the supported settings and the existing chart; this panel was left unchanged.'
+        `Unsupported presentation path "${path}". Vega panels accept only ${PANEL_FIELDS.join(
+          ', '
+        )}; spec changes require source: "request".`
       );
     }
-    const validated = validation.data;
-    for (const change of parsedEdit.changes) {
-      const path = change.path.split('.');
-      if (
-        change.operation === 'set' &&
-        change.path !== 'hide_title' &&
-        !isEqual(get(result, path), get(validated, path))
-      ) {
-        throw new Error(`Lens does not support the value at "${change.path}".`);
-      }
-    }
   }
+  const result = applyChanges(config, changes);
+  assertPanelFieldTypes(result);
   return result;
 };
 
@@ -121,6 +146,6 @@ export const getLensPresentationEditGuidance = (): string =>
     '- Values are scalars or a list of legend statistics. Edit objects field by field, e.g. layers.0.y.0.format.type and layers.0.y.0.format.decimals.',
     '- Unmentioned settings stay unchanged. Remove a setting to restore the Lens default; to drop chart coloring, remove both color and apply_color_to.',
     '- Presentation only: queries, data sources, filters, aggregations, column bindings, chart families, and layer membership stay as they are. The only exceptions are those the chart style rules call for: removing optional gauge metric.min, metric.max, and an unrequested metric.goal, and setting a time-series layers.<index>.type to "area".',
-    `- Vega panels accept only ${chromePaths.join(', ')}.`,
+    `- Vega panels accept only ${PANEL_FIELDS.join(', ')}.`,
     '- Each panel is validated against the Lens schema and applied atomically; a failed panel is left unchanged. Report failures instead of claiming they were fixed.',
   ].join('\n');

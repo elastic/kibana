@@ -7,7 +7,11 @@
 
 import { cloneDeep } from 'lodash';
 import { LensConfigBuilder, lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
-import { editLensPresentation, lensPresentationEditSchema } from './presentation';
+import {
+  editLensPresentation,
+  editVegaPresentation,
+  lensPresentationEditSchema,
+} from './presentation';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const xy = {
@@ -342,18 +346,14 @@ describe('Lens presentation', () => {
   it('limits Vega edits to panel chrome and preserves its spec', () => {
     const vega = { spec: '{"mark":"line"}', title: 'Before', hide_border: true };
     expect(
-      editLensPresentation(
-        vega,
-        { changes: [{ operation: 'set', path: 'hide_title', value: true }] },
-        true
-      )
+      editVegaPresentation(vega, {
+        changes: [{ operation: 'set', path: 'hide_title', value: true }],
+      })
     ).toEqual({ ...vega, hide_title: true });
     expect(() =>
-      editLensPresentation(
-        vega,
-        { changes: [{ operation: 'set', path: 'spec', value: 'not JSON' }] },
-        true
-      )
+      editVegaPresentation(vega, {
+        changes: [{ operation: 'set', path: 'spec', value: 'not JSON' }],
+      })
     ).toThrow(/Unsupported presentation path/);
   });
 

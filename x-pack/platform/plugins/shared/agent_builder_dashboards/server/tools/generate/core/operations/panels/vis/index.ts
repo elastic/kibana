@@ -16,6 +16,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import {
   editLensPresentation,
+  editVegaPresentation,
   lensPresentationEditSchema,
 } from '@kbn/agent-builder-visualizations-server';
 import { definePanelType } from '../panel_type';
@@ -224,9 +225,7 @@ export const visPanelDefinition = definePanelType({
     return { ok: true };
   },
   applyConfigEdit: (existingPanel, edit) =>
-    editLensPresentation(
-      existingPanel.config,
-      lensPresentationEditSchema.parse(edit),
-      existingPanel.type === VEGA_VIS_TYPE
-    ),
+    existingPanel.type === VEGA_VIS_TYPE
+      ? editVegaPresentation(existingPanel.config, edit)
+      : editLensPresentation(existingPanel.config, edit),
 });
