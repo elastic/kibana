@@ -137,7 +137,8 @@ describe('Significant Events run quota workflow contracts', () => {
   });
 
   it('places discovery and KI gates before their expensive work', () => {
-    expect(definitions.discovery.steps.slice(0, 2).map(({ name }) => name)).toEqual([
+    expect(definitions.discovery.steps.slice(0, 3).map(({ name }) => name)).toEqual([
+      'bootstrap_cleanup_workflow',
       'check_budget',
       'exit_if_budget_denied',
     ]);
