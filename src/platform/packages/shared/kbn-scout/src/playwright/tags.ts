@@ -30,18 +30,6 @@ export const getPlaywrightTagsFor = (
 };
 
 export const tags = {
-  /**
-   * Local-only test targets.
-   *
-   * Use these instead of the deployment-target groups below when a suite fundamentally cannot run
-   * on Elastic Cloud — not merely "hasn't been verified there yet". The motivating case is Kibana's
-   * first-boot / interactive setup flows, which require Kibana to start *unconfigured* so it stays
-   * in the `preboot` stage; on ECH/MKI the Elasticsearch connection is provisioned by the control
-   * plane before Kibana ever starts, so the scenario cannot exist.
-   *
-   * `tags.stateful.classic` would also expand to `@cloud-stateful-classic` and schedule such a
-   * suite on ECH, where it can only fail.
-   */
   local: {
     stateful: {
       classic: getPlaywrightTagsFor('stateful', 'classic', 'local'),
