@@ -18,6 +18,7 @@
 
 import { Position } from '@elastic/charts';
 import { getAccessorByDimension, getFormatByAccessor } from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
   getDurationUnitFromOutputFormat,
@@ -113,6 +114,16 @@ const setDurationInputUnit = (
 const getColumnFormat = (columns: DatatableColumn[], accessor: string): SerializedFieldFormat =>
   getFormatByAccessor(accessor, columns, DEFAULT_FORMAT) ?? DEFAULT_FORMAT;
 
+const getDimensionFormat = (
+  dimension: string | ExpressionValueVisDimension,
+  columns: DatatableColumn[]
+): SerializedFieldFormat => {
+  if (typeof dimension !== 'string' && dimension.format?.id) {
+    return dimension.format;
+  }
+  return getColumnFormat(columns, getAccessorByDimension(dimension, columns));
+};
+
 const isDefaultNumberFormat = (format: SerializedFieldFormat): boolean =>
   format.id === 'number' && !format.params?.formatOverride;
 
@@ -145,7 +156,7 @@ const getDataDescriptors = (
   layers.flatMap((layer) =>
     layer.accessors.map((dimension) => {
       const accessor = getAccessorByDimension(dimension, layer.table.columns);
-      const sourceFormat = getColumnFormat(layer.table.columns, accessor);
+      const sourceFormat = getDimensionFormat(dimension, layer.table.columns);
       const groupingFormat =
         hasDurationFormat(sourceFormat) && !getDurationSemantics(sourceFormat)
           ? DEFAULT_FORMAT

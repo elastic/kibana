@@ -17,6 +17,7 @@
  */
 
 import { Position } from '@elastic/charts';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { EXTENDED_REFERENCE_LINE_DECORATION_CONFIG, LayerTypes, REFERENCE_LINE } from './constants';
@@ -61,7 +62,7 @@ const dataLayer = ({
   layerId: string;
   columns: DatatableColumn[];
   row: Record<string, number>;
-  accessors: string[];
+  accessors: Array<string | ExpressionValueVisDimension>;
   isPercentage?: boolean;
   decorations?: Array<{ forAccessor: string; axisId?: string }>;
 }): CommonXYDataLayerConfig =>
@@ -391,6 +392,25 @@ describe('axis format policy', () => {
       expect.objectContaining({ accessor: 'threshold', factor: 0.001, kind: 'reference' })
     );
     expect((normalized[1] as ReferenceLineConfig).decorations[0].value).toBe(1);
+  });
+
+  it('honors vis-dimension percent overrides from Visualize percentage mode', () => {
+    const countColumn = column('count', { id: 'number' });
+    const percentDimension: ExpressionValueVisDimension = {
+      type: 'vis_dimension',
+      accessor: countColumn,
+      format: { id: 'percent' },
+    };
+    const [policy] = resolveAxisFormatPolicies([
+      dataLayer({
+        layerId: 'visualize',
+        columns: [countColumn],
+        row: { count: 10 },
+        accessors: [percentDimension],
+      }),
+    ]);
+
+    expect(policy.formatter).toEqual({ id: 'percent' });
   });
 
   it('normalizes duration values before retaining percentage presentation', () => {
