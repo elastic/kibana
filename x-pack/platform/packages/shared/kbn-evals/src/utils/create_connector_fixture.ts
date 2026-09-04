@@ -76,8 +76,8 @@ export async function deleteConnectorById({
 }
 
 /**
- * Returns the inference endpoint id for EIS connectors (`.inference` connectors
- * whose config points at an existing inference endpoint), or undefined otherwise.
+ * Returns the inference endpoint id for `.inference` connectors whose config
+ * names the backing inference endpoint, or undefined otherwise.
  */
 function getInferenceEndpointId(connector: AvailableConnectorWithId): string | undefined {
   if (connector.actionTypeId !== '.inference') {
@@ -157,6 +157,27 @@ export async function createConnectorFixture({
     });
   }
 
+  async function createInferenceEndpointIfMissing(inferenceId: string, body: unknown) {
+    if (await inferenceEndpointExists(inferenceId)) {
+      return;
+    }
+    log.info(`Creating inference endpoint ${inferenceId} for connector ${predefinedConnector.id}`);
+    try {
+      await fetch({
+        path: '/internal/_inference/_add',
+        method: 'POST',
+        headers: { 'elastic-api-version': '1' },
+        body: JSON.stringify(body),
+      });
+    } catch (error) {
+      if (isAlreadyExistsConnectorError(error)) {
+        log.info(`Inference endpoint already exists, reusing: ${inferenceId}`);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   if (process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP) {
     log.info(
       `Skipping connector setup/teardown for: ${predefinedConnector.id} (KBN_EVALS_SKIP_CONNECTOR_SETUP is set)`
@@ -165,22 +186,38 @@ export async function createConnectorFixture({
     return;
   }
 
-  // EIS connectors reference an ES inference endpoint (created by EIS/CCM setup). We bind directly
-  // to that endpoint instead of creating a `.inference` stack connector wrapper around it — the
-  // inference plugin resolves inference endpoint ids passed as connector ids.
+  // `.inference` connectors reference an ES inference endpoint. We bind directly to that endpoint
+  // instead of creating a `.inference` stack connector wrapper around it — the inference plugin
+  // resolves inference endpoint ids passed as connector ids.
   const inferenceEndpointId = getInferenceEndpointId(predefinedConnector);
   if (inferenceEndpointId) {
-    await waitForInferenceEndpoint(inferenceEndpointId);
+    if (predefinedConnector.config.provider === 'elastic') {
+      // EIS endpoints are pre-provisioned by EIS/CCM setup and are never created here.
+      await waitForInferenceEndpoint(inferenceEndpointId);
+      log.info(
+        `Binding EIS connector ${predefinedConnector.id} to inference endpoint ${inferenceEndpointId}`
+      );
+      await use({ ...predefinedConnector, id: inferenceEndpointId });
+      return;
+    }
+
+    // Endpoint-shaped definitions (e.g. OpenRouter from the CI generator) carry the exact
+    // `POST /internal/_inference/_add` body in config/secrets, so create the endpoint when missing.
+    await createInferenceEndpointIfMissing(inferenceEndpointId, {
+      config: predefinedConnector.config,
+      secrets: predefinedConnector.secrets ?? {},
+    });
+
     log.info(
-      `Binding EIS connector ${predefinedConnector.id} to inference endpoint ${inferenceEndpointId}`
+      `Binding connector ${predefinedConnector.id} to inference endpoint ${inferenceEndpointId}`
     );
     await use({ ...predefinedConnector, id: inferenceEndpointId });
     return;
   }
 
-  // OpenRouter (and any other `.gen-ai`) eval LLMs are provisioned as ES inference endpoints
-  // instead of `.gen-ai` stack connectors: new `.gen-ai` connectors can no longer be created,
-  // and the inference plugin resolves inference endpoint ids passed as connector ids.
+  // Old-shape OpenRouter (and any other `.gen-ai`) eval LLMs are provisioned as ES inference
+  // endpoints instead of `.gen-ai` stack connectors: new `.gen-ai` connectors can no longer be
+  // created, and the inference plugin resolves inference endpoint ids passed as connector ids.
   if (predefinedConnector.actionTypeId === '.gen-ai') {
     const inferenceId = predefinedConnector.id;
     const { apiUrl, defaultModel } = predefinedConnector.config;
@@ -192,41 +229,22 @@ export async function createConnectorFixture({
       );
     }
 
-    if (!(await inferenceEndpointExists(inferenceId))) {
-      log.info(
-        `Creating inference endpoint ${inferenceId} for connector ${predefinedConnector.id}`
-      );
-      try {
-        await fetch({
-          path: '/internal/_inference/_add',
-          method: 'POST',
-          // versioned internal route: requests without this header are rejected
-          headers: { 'elastic-api-version': '1' },
-          body: JSON.stringify({
-            config: {
-              inferenceId,
-              provider: 'openai',
-              taskType: 'chat_completion',
-              providerConfig: {
-                model_id: defaultModel,
-                url: apiUrl,
-              },
-            },
-            secrets: {
-              providerSecrets: {
-                api_key: predefinedConnector.secrets?.apiKey,
-              },
-            },
-          }),
-        });
-      } catch (error) {
-        if (isAlreadyExistsConnectorError(error)) {
-          log.info(`Inference endpoint already exists, reusing: ${inferenceId}`);
-        } else {
-          throw error;
-        }
-      }
-    }
+    await createInferenceEndpointIfMissing(inferenceId, {
+      config: {
+        inferenceId,
+        provider: 'openai',
+        taskType: 'chat_completion',
+        providerConfig: {
+          model_id: defaultModel,
+          url: apiUrl,
+        },
+      },
+      secrets: {
+        providerSecrets: {
+          api_key: predefinedConnector.secrets?.apiKey,
+        },
+      },
+    });
 
     log.info(`Binding connector ${predefinedConnector.id} to inference endpoint ${inferenceId}`);
     await use({ ...predefinedConnector, id: inferenceId });

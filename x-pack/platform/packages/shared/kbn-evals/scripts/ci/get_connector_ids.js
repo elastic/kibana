@@ -28,8 +28,11 @@ const connectorIds =
     ? connectorEntries.map(([id]) => id)
     : connectorEntries
         .filter(([id, connector]) => {
+          // Old-shape `.gen-ai` defs (still accepted from locally-provided payloads).
           const defaultModel = connector?.config?.defaultModel;
-          const eisModelId = connector?.config?.providerConfig?.model_id;
+          // Endpoint-shaped defs (EIS and OpenRouter) carry the model in providerConfig.
+          const modelId = connector?.config?.providerConfig?.model_id;
+          const isEis = connector?.config?.provider === 'elastic';
 
           const matchesRequested = (requestedValue) => {
             if (requestedValue === id) return true;
@@ -37,11 +40,12 @@ const connectorIds =
             if (requestedValue.startsWith('openrouter/') && slugifyId(requestedValue) === id) {
               return true;
             }
-            if (typeof eisModelId === 'string') {
-              if (requestedValue === eisModelId) return true;
+            if (typeof modelId === 'string') {
+              if (requestedValue === modelId) return true;
               if (
+                isEis &&
                 requestedValue.startsWith('eis/') &&
-                requestedValue.slice('eis/'.length) === eisModelId
+                requestedValue.slice('eis/'.length) === modelId
               ) {
                 return true;
               }
@@ -58,8 +62,10 @@ if (requested.length > 0 && !requested.includes('all') && connectorIds.length ==
     const out = [];
     const defaultModel = connector?.config?.defaultModel;
     if (typeof defaultModel === 'string') out.push(defaultModel);
-    const eisModelId = connector?.config?.providerConfig?.model_id;
-    if (typeof eisModelId === 'string') out.push(`eis/${eisModelId}`);
+    const modelId = connector?.config?.providerConfig?.model_id;
+    if (typeof modelId === 'string') {
+      out.push(connector?.config?.provider === 'elastic' ? `eis/${modelId}` : modelId);
+    }
     return out;
   });
   console.error(
