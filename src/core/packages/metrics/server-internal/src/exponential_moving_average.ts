@@ -7,36 +7,56 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type OperatorFunction, map } from 'rxjs';
+import { map, type OperatorFunction, type TimestampProvider } from 'rxjs';
+
+const wallClock: TimestampProvider = {
+  now: () => Date.now(),
+};
 
 /**
  * An RxJS operator implementing the exponential moving average function.
  *
  * @see https://en.wikipedia.org/wiki/Exponential_smoothing
  * @param period The period of time.
- * @param interval The interval between values.
+ * @param expectedInterval The nominal interval between values; used for the first sample and when samples arrive back-to-back.
+ * @param timestampProvider Optional clock for elapsed-time weighting (defaults to wall clock).
  * @returns An operator emitting smoothed values.
  * @remarks
- * Uses **accumulating mean value** until the observation window is full (i.e., until enough samples have been received to cover the specified period),
- * then switches to exponential smoothing for subsequent values. The switch happens when the number of values emitted reaches `period / interval`.
- * This ensures the initial output isn't biased by insufficient data, and provides a smooth transition to exponential smoothing.
+ * Uses **accumulating mean value** until the observation window is full (i.e., until enough elapsed time has been covered),
+ * then switches to exponential smoothing for subsequent values. The switch happens when accumulated elapsed time reaches `period`.
+ * Smoothing uses `alpha = 1 - exp(-dt / period)` where `dt` is the actual time since the previous sample.
  */
 export function exponentialMovingAverage(
   period: number,
-  interval: number
+  expectedInterval: number,
+  timestampProvider: TimestampProvider = wallClock
 ): OperatorFunction<number, number> {
-  const alpha = 1 - Math.exp(-interval / period);
-
   return (inner) => {
     let previous: number | undefined;
     let mean = 0;
+    let elapsed = 0;
+    let lastTimestamp: number | undefined;
 
     return inner.pipe(
-      map((current, index) => {
-        if (index < period / interval) {
-          return (mean += (current * interval) / period); // accumulating mean value
+      map((current) => {
+        const timestamp = timestampProvider.now();
+        const dt =
+          lastTimestamp == null ? expectedInterval : Math.max(timestamp - lastTimestamp, 0);
+        lastTimestamp = timestamp;
+
+        if (elapsed < period) {
+          elapsed += dt;
+          mean += (current * dt) / period;
+
+          if (elapsed >= period) {
+            previous = mean;
+          }
+
+          return mean;
         }
-        return (previous = previous == null ? current : alpha * current + (1 - alpha) * previous); // smoothing
+
+        const alpha = 1 - Math.exp(-dt / period);
+        return (previous = alpha * current + (1 - alpha) * (previous ?? current));
       })
     );
   };
