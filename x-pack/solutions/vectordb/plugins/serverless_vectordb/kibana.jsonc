@@ -18,6 +18,7 @@
     ],
     "requiredPlugins": [
       "dataViews",
+      "features",
       "navigation",
       "serverless",
       "share",

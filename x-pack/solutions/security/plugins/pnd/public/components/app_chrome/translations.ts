@@ -40,25 +40,6 @@ export const NAV_WATCHES = i18n.translate('xpack.pnd.chrome.nav.watches', {
   defaultMessage: 'Watches',
 });
 
-/**
- * Labels for the two global Watches sections, shared by the Watches subnav and the deep links
- * registered in `deep_links.ts`.
- *
- * They live here, next to the other deep-link titles, rather than in `pages/watches/translations.ts`
- * where the rest of the section's copy sits: `deep_links.ts` is reachable synchronously from
- * `plugin.ts`, so anything it imports lands in the page-load bundle. Importing two constants from the
- * section's translations module drags all of that module's messages in with them — `i18n.translate`
- * is a call, so no bundler can drop the unused ones — which cost ~2.9kB of page-load budget. Keep
- * the ids as-is; only the definition site moved.
- */
-export const SUBNAV_WORKERS = i18n.translate('xpack.pnd.watches.subnav.workers', {
-  defaultMessage: 'Workers',
-});
-
-export const SUBNAV_SKILLS = i18n.translate('xpack.pnd.watches.subnav.skills', {
-  defaultMessage: 'Skills',
-});
-
 export const ASK_PND_LABEL = i18n.translate('xpack.pnd.chrome.askPnd', {
   defaultMessage: 'Ask PND',
 });

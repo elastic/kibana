@@ -45,12 +45,20 @@ viewer:
         - '.entities.v2.latest.*'
         - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - '.entity_analytics.entity-leads*'
         - '.entity_analytics.watchlists.*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -133,6 +141,9 @@ editor:
         - '.entities.v2.latest.*'
         - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -149,6 +160,13 @@ editor:
         - 'view_index_metadata'
         - 'write'
         - 'manage'
+      allow_restricted_indices: false
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -232,14 +250,28 @@ t1_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.latest.security_*'
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.*'
-        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
       privileges:
         - read
+    - names:
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
+      privileges:
+        - read
+        - view_index_metadata
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -308,6 +340,7 @@ t2_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
@@ -317,10 +350,20 @@ t2_analyst:
         - .asset-criticality.asset-criticality-*
         - '.entities.v2.latest.*'
         - '.entities.v2.metadata.*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
+        - 'entities-latest-*'
       privileges:
         - read
         - view_index_metadata
         - write
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -368,6 +411,9 @@ t3_analyst:
         - .asset-criticality.asset-criticality-*
         - '.entities.v2.latest.*'
         - '.entities.v2.metadata.*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
+        - 'entities-latest-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -404,10 +450,18 @@ t3_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -511,6 +565,13 @@ threat_intelligence_analyst:
         - '.ml-anomalies-*'
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -597,6 +658,13 @@ rule_author:
         - .entity_analytics.monitoring*
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -656,6 +724,9 @@ soc_manager:
         - '.entities.v2.latest.*'
         - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -680,14 +751,25 @@ soc_manager:
         - write
         - view_index_metadata
     - names:
+        - risk-score.risk-score-*
+      privileges:
+        - read
+        - write
+    - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
-        - risk-score.risk-score-*
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -785,6 +867,13 @@ detections_admin:
       privileges:
         - read
         - write
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -851,6 +940,9 @@ platform_engineer:
         - '.entities.v2.latest.*'
         - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
       privileges:
         - read
         - view_index_metadata
@@ -860,6 +952,13 @@ platform_engineer:
         - .entity_analytics.monitoring*
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -959,6 +1058,13 @@ endpoint_operations_analyst:
         - read
         - view_index_metadata
         - write
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -1063,6 +1169,13 @@ endpoint_policy_manager:
         - read
         - write
         - manage
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:

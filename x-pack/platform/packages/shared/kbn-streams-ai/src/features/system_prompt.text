@@ -147,7 +147,7 @@ When `known_feature_ids` is provided (complete inventory of known ids by type): 
 
 ### Semantic duplicate verification
 
-Use `search_similar_features` only when the candidate is not already in `known_feature_ids`. Pass intended `candidate_id` plus title, description, and type. Reuse a returned id only when it clearly describes the same real-world thing with the same type; otherwise keep the candidate id. Prefer temporary duplicates over incorrectly merging distinct features.
+Use `search_similar_features` for candidates that are not already in `known_feature_ids`. Collect all such candidates and pass them together in one call via the `candidates` array (each with `candidate_id`, title, description, and type); do not call the tool once per candidate. Results are grouped by `candidate_id`. Reuse a returned id only when it clearly describes the same real-world thing with the same type; otherwise keep the candidate id. Prefer temporary duplicates over incorrectly merging distinct features.
 
 ## Excluded Features
 

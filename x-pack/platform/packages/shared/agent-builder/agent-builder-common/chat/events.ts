@@ -11,6 +11,9 @@ import type { ToolResult } from '../tools/tool_result';
 import type {
   ConversationInternalState,
   ConversationRound,
+  ConversationRoundAuthor,
+  ConversationRoundOrigin,
+  RoundInput,
   BackgroundExecutionState,
   SubagentRosterEntry,
   TodoItem,
@@ -36,6 +39,7 @@ export enum ChatEventType {
   messageComplete = 'message_complete',
   thinkingComplete = 'thinking_complete',
   promptRequest = 'prompt_request',
+  roundStarted = 'round_started',
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
@@ -288,6 +292,31 @@ export const isThinkingCompleteEvent = (
   return event.type === ChatEventType.thinkingComplete;
 };
 
+// Round started
+
+export interface RoundStartedEventData {
+  /** id of the round that started; matches the eventual `round_complete` round id */
+  round_id: string;
+  /** the processed input driving the round (what the round's `input` will be) */
+  input: RoundInput;
+  /** ISO timestamp the round started at (the round's `started_at`) */
+  started_at: string;
+  /** author of the round, when known */
+  author?: ConversationRoundAuthor;
+  /** origin of the round, for externally-originated rounds */
+  origin?: ConversationRoundOrigin;
+  /** true when this round resumed a paused (HITL) round */
+  resumed?: boolean;
+}
+
+export type RoundStartedEvent = ChatEventBase<ChatEventType.roundStarted, RoundStartedEventData>;
+
+export const isRoundStartedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is RoundStartedEvent => {
+  return event.type === ChatEventType.roundStarted;
+};
+
 // Round complete
 
 export interface RoundCompleteEventData {
@@ -474,6 +503,7 @@ export type ChatAgentEvent =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ThinkingCompleteEvent
+  | RoundStartedEvent
   | RoundCompleteEvent
   | CompactionStartedEvent
   | CompactionCompletedEvent
