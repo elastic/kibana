@@ -76,7 +76,6 @@ spaceTest.describe('Discover session panel interactions', { tag: tags.deployment
       await dashboard.openNewDashboard();
       await dashboard.addSavedSearch(savedSearchName);
       await dashboard.waitForRenderComplete();
-      await dataGrid.waitForLoad();
 
       expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
       expect(await dataGrid.getCurrentRowsPerPage()).toBe(testData.DEFAULT_ROWS_PER_PAGE);
@@ -84,7 +83,6 @@ spaceTest.describe('Discover session panel interactions', { tag: tags.deployment
       await dashboard.saveDashboard(dashboardName);
       await page.reload();
       await dashboard.waitForRenderComplete();
-      await dataGrid.waitForLoad();
 
       expect(await dataGrid.getCurrentRowsPerPage()).toBe(testData.DEFAULT_ROWS_PER_PAGE);
 
@@ -96,7 +94,6 @@ spaceTest.describe('Discover session panel interactions', { tag: tags.deployment
 
       await page.reload();
       await dashboard.waitForRenderComplete();
-      await dataGrid.waitForLoad();
 
       expect(await dataGrid.getCurrentRowsPerPage()).toBe(CUSTOM_ROWS_PER_PAGE);
     }
