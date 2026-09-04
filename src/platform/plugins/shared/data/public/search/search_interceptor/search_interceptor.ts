@@ -125,6 +125,8 @@ export class SearchInterceptor {
   );
   private protocolSupportsMultiplexing: boolean = false;
   private performanceObserver?: PerformanceObserver;
+  private readonly activeAsyncSearches = new Map<string, string>(); // id -> strategy
+  private boundPageHideHandler: ((event: PageTransitionEvent) => void) | null = null;
 
   /**
    * Observable that emits when the number of pending requests changes.
@@ -171,6 +173,9 @@ export class SearchInterceptor {
       })
     );
 
+    this.boundPageHideHandler = this.handlePageHide.bind(this);
+    window.addEventListener('pagehide', this.boundPageHideHandler);
+
     // Set up PerformanceObserver to capture search requests as they happen
     try {
       this.performanceObserver = new PerformanceObserver((list) => {
@@ -188,11 +193,35 @@ export class SearchInterceptor {
   }
 
   public stop() {
+    this.cancelAllActiveSearches();
+    if (this.boundPageHideHandler) {
+      window.removeEventListener('pagehide', this.boundPageHideHandler);
+      this.boundPageHideHandler = null;
+    }
+
     this.responseCache.clear();
     this.uiSettingsSubs.forEach((s) => s.unsubscribe());
     if (this.performanceObserver) {
       this.performanceObserver.disconnect();
     }
+  }
+
+  private sendCancelRequest(searchId: string, strategy: string) {
+    return this.deps.http.delete(
+      buildPath('/internal/search/{strategy}/{id}', { strategy, id: searchId }),
+      { version: '1', keepalive: true }
+    );
+  }
+
+  private cancelAllActiveSearches(): void {
+    for (const [searchId, strategy] of this.activeAsyncSearches) {
+      this.sendCancelRequest(searchId, strategy).catch(() => {}); // Fire-and-forget
+    }
+    this.activeAsyncSearches.clear();
+  }
+
+  private handlePageHide(event: PageTransitionEvent): void {
+    this.cancelAllActiveSearches();
   }
 
   /*
@@ -400,18 +429,13 @@ export class SearchInterceptor {
         .subscribe(() => {
           searchAbortController.cleanup();
           isSavedToBackground = true;
+          if (id) {
+            this.activeAsyncSearches.delete(id);
+          }
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(
-        buildPath('/internal/search/{strategy}/{id}', {
-          strategy: strategyToString(strategy),
-          id: id as string,
-        }),
-        {
-          version: '1',
-        }
-      )
+      this.sendCancelRequest(id as string, strategyToString(strategy))
     );
 
     const cancel = async () => {
@@ -460,8 +484,15 @@ export class SearchInterceptor {
 
         id = response.id;
 
+        if (response.id && isRunningResponse(response) && !isSavedToBackground) {
+          this.activeAsyncSearches.set(response.id, strategyToString(strategy));
+        }
+
         if (!isRunningResponse(response)) {
           searchTracker?.complete(response);
+          if (response.id) {
+            this.activeAsyncSearches.delete(response.id);
+          }
         }
       }),
       map((response) => {
@@ -518,6 +549,9 @@ export class SearchInterceptor {
         searchAbortController.cleanup();
         if (savedToBackgroundSub) {
           savedToBackgroundSub.unsubscribe();
+        }
+        if (id) {
+          this.activeAsyncSearches.delete(id);
         }
       }),
       // This observable is cached in the responseCache.

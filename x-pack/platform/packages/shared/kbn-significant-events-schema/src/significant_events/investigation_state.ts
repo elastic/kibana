@@ -125,7 +125,7 @@ export const MAX_HYPOTHESIS_EVIDENCE = 3;
 
 const investigationHypothesisStatusSchema = z.enum(['investigating', 'dismissed', 'confirmed']);
 
-const investigationHypothesisSchema = z.object({
+export const investigationHypothesisSchema = z.object({
   /** The candidate cause under consideration. */
   candidate: z.string().max(MAX_TEXT_LENGTH),
   /** Current confidence in this specific hypothesis. */
@@ -148,7 +148,7 @@ export const MAX_RECOMMENDATIONS = 5;
  * code fix, rather than general advice like "investigate further". Structured so consumers can
  * render a "Try next" list without parsing prose for headings and bullets.
  */
-const investigationRecommendationSchema = z.object({
+export const investigationRecommendationSchema = z.object({
   /** The action itself, stated concretely (e.g. "Revert the pool-size config change"). */
   title: z.string().max(MAX_MEDIUM_STRING_LENGTH),
   /** Why this step helps, or detail needed to carry it out, when the title alone isn't enough. */
@@ -167,7 +167,7 @@ export const MAX_BLIND_SPOTS = 10;
  * knowledge gap, not an incident-specific fact. Structured so consumers don't have to split a
  * "title · description" sentence themselves.
  */
-const investigationBlindSpotSchema = z.object({
+export const investigationBlindSpotSchema = z.object({
   /** The missing data source or access, named concisely (e.g. "No traces for the cart service"). */
   title: z.string().max(MAX_MEDIUM_STRING_LENGTH),
   /** Why this gap mattered to the investigation. */

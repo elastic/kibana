@@ -1349,7 +1349,7 @@ describe('WorkflowExecutionQueryService', () => {
         expect.arrayContaining([
           { term: { workflowRunId: 'run-1' } },
           { term: { spaceId: 'default' } },
-          { term: { stepType: 'waitForInput' } },
+          { terms: { stepType: ['waitForInput', 'waitForApproval'] } },
           { term: { status: 'waiting_for_input' } },
         ])
       );
@@ -1405,7 +1405,9 @@ describe('WorkflowExecutionQueryService', () => {
       expect(args.script).toContain('ctx._source.hitl.respondedAt != null');
       expect(args.script).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
       expect(args.script).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
-      expect(args.script).toContain('ctx._source.hitl.channel = params.channel');
+      expect(args.script).toContain(
+        'if (params.channel != null) { ctx._source.hitl.channel = params.channel; }'
+      );
       expect(args.script).toContain('ctx._source.input.remove(params.tokenHashField)');
       expect(args.script).toContain('ctx._source.input.remove(params.tokenExpiresAtField)');
       expect(args.params).toEqual({

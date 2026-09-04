@@ -20,7 +20,7 @@ import { cloneDeep, isObject } from 'lodash';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
-import { selectTabRuntimeState } from '../runtime_state';
+import { selectTabRuntimeState, selectTabTypeForPersistence } from '../runtime_state';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
 import { resetDiscoverSession } from './reset_discover_session';
@@ -74,6 +74,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             overridenTimeRestore: newTimeRestore,
             currentDataView,
             services,
+            tabType: selectTabTypeForPersistence({ runtimeStateManager, tabState: tab }),
           })
         );
 

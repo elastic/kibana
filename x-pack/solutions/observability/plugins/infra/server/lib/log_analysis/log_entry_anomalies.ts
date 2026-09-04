@@ -30,10 +30,14 @@ import type {
   InfraRequestHandlerContext,
   MlAnomalyDetectors,
   MlSystem,
-  ServerlessInfo,
 } from '../../types';
 import type { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
-import { fetchMlJob, getLogEntryDatasets, resolveJobProjectRouting } from './common';
+import {
+  fetchIsInfraMlCpsEnabled,
+  fetchMlJob,
+  getLogEntryDatasets,
+  resolveJobProjectRouting,
+} from './common';
 import {
   InsufficientAnomalyMlJobsConfigured,
   InsufficientLogAnalysisMlJobConfigurationError,
@@ -359,7 +363,7 @@ export async function getLogEntryExamples(
   exampleCount: number,
   resolvedLogView: ResolvedLogView,
   callWithRequest: KibanaFramework['callWithRequest'],
-  serverless: ServerlessInfo,
+  isCpsPlatformGateEnabled: () => Promise<boolean>,
   categoryId?: string
 ) {
   const finalizeLogEntryExamplesSpan = startTracingSpan('get log entry rate example log entries');
@@ -372,15 +376,21 @@ export async function getLogEntryExamples(
     categoryId != null ? logEntryCategoriesJobTypes[0] : logEntryRateJobTypes[0]
   );
 
-  const {
-    mlJob,
-    timing: { spans: fetchMlJobSpans },
-  } = await fetchMlJob(infraContext.mlAnomalyDetectors, jobId);
+  const [
+    {
+      mlJob,
+      timing: { spans: fetchMlJobSpans },
+    },
+    isMlCpsEnabled,
+  ] = await Promise.all([
+    fetchMlJob(infraContext.mlAnomalyDetectors, jobId),
+    fetchIsInfraMlCpsEnabled(isCpsPlatformGateEnabled, infraContext.mlSystem),
+  ]);
 
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
-  const projectRouting = resolveJobProjectRouting(mlJob, serverless);
+  const projectRouting = resolveJobProjectRouting(mlJob, isMlCpsEnabled);
   const { tiebreakerField, runtimeMappings } = resolvedLogView;
 
   if (indices == null || timestampField == null) {
