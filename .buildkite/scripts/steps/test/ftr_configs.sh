@@ -115,14 +115,22 @@ while read -r config; do
   set -e;
 
   # Only sound when the whole config ran (no --bail): every failure must be inspected.
-  if [[ $lastCode -ne 0 && -z "$BAIL_ARG" ]] && skipped_on_main_applicable; then
-    junitArgs=()
-    while IFS= read -r junitFile; do
-      junitArgs+=(--junit-file "$junitFile")
-    done < <(find "target/junit/$JOB" -name '*.xml' -newer "$junitMarker" 2>/dev/null)
+  if [[ $lastCode -ne 0 ]]; then
+    if [[ -n "$BAIL_ARG" ]]; then
+      skipped_on_main_skipped "$config" "--bail is on, config did not run to completion"
+    elif skipped_on_main_applicable; then
+      junitArgs=()
+      while IFS= read -r junitFile; do
+        junitArgs+=(--junit-file "$junitFile")
+      done < <(find "target/junit/$JOB" -name '*.xml' -newer "$junitMarker" 2>/dev/null)
 
-    if [[ ${#junitArgs[@]} -gt 0 ]] && forgive_skipped_on_main "$config" "${junitArgs[@]}"; then
-      lastCode=0
+      if [[ ${#junitArgs[@]} -eq 0 ]]; then
+        skipped_on_main_skipped "$config" "no JUnit report was written (failure happened before tests ran)"
+      elif forgive_skipped_on_main "$config" "${junitArgs[@]}"; then
+        lastCode=0
+      fi
+    else
+      skipped_on_main_skipped "$config" "not a PR build or flaky test runner"
     fi
   fi
   rm -f "$junitMarker"

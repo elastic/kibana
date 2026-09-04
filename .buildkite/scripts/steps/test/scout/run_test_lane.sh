@@ -258,15 +258,21 @@ run_scout_tests() {
   local exit_code=$?
   set -e
 
-  if [[ $exit_code -ne 0 ]] && skipped_on_main_applicable; then
-    local failure_args=()
-    local failures_file
-    while IFS= read -r failures_file; do
-      failure_args+=(--scout-failures "$failures_file")
-    done < <(find .scout/reports -path '*scout-playwright-test-failures-*' -name 'scout-failures-*.ndjson' -newer "$failures_marker" 2>/dev/null)
+  if [[ $exit_code -ne 0 ]]; then
+    if skipped_on_main_applicable; then
+      local failure_args=()
+      local failures_file
+      while IFS= read -r failures_file; do
+        failure_args+=(--scout-failures "$failures_file")
+      done < <(find .scout/reports -path '*scout-playwright-test-failures-*' -name 'scout-failures-*.ndjson' -newer "$failures_marker" 2>/dev/null)
 
-    if [[ ${#failure_args[@]} -gt 0 ]] && forgive_skipped_on_main "$config_path" "${failure_args[@]}"; then
-      exit_code=0
+      if [[ ${#failure_args[@]} -eq 0 ]]; then
+        skipped_on_main_skipped "$config_path" "no failure report was written (failure happened before tests ran)"
+      elif forgive_skipped_on_main "$config_path" "${failure_args[@]}"; then
+        exit_code=0
+      fi
+    else
+      skipped_on_main_skipped "$config_path" "not a PR build or flaky test runner"
     fi
   fi
   rm -f "$failures_marker"

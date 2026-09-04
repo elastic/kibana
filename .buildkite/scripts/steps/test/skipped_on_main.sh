@@ -13,6 +13,15 @@ skipped_on_main_applicable() {
     && [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]]
 }
 
+# Usage: skipped_on_main_skipped <context> <reason>
+# Logs why a failure was not evaluated so the log distinguishes "did not run" from "ran and kept".
+skipped_on_main_skipped() {
+  if [[ ! "${IGNORE_SKIPPED_ON_MAIN:-}" =~ ^(1|true)$ ]]; then
+    return
+  fi
+  echo "[skipped-on-main] not evaluating $1: $2 (target=${GITHUB_PR_TARGET_BRANCH:-unset} merge-base=${GITHUB_PR_MERGE_BASE:-unset})"
+}
+
 # Resolves the target branch tip once per step. Returns non-zero when it cannot be fetched,
 # in which case failures are left untouched.
 resolve_skipped_on_main_target() {
