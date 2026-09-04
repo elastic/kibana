@@ -23,12 +23,12 @@ import type { StartPlugins } from '../../types';
 import { createActionHandler } from '../../handlers';
 import { parser as OsqueryParser } from './osquery_parser';
 import { getUserInfo } from '../../lib/get_user_info';
+import type { AuthorizeOsqueryResponseActionResult } from '../../lib/check_response_action_authz';
 import {
   getOsqueryCapabilities,
   authorizeOsqueryResponseAction,
 } from '../../lib/check_response_action_authz';
 import { createLiveQueryResponseSchema } from './response_schemas';
-import type { ResolvedQueryReference } from '../../lib/resolve_query_reference';
 import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -64,6 +64,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       async (context, request, response) => {
         const [coreStartServices, startPlugins] = await osqueryContext.getStartServices();
 
+        const logger = osqueryContext.logFactory.get('liveQuery');
         const space = await osqueryContext.service.getActiveSpace(request);
         const { writeLiveQueries, runSavedQueries } = await getOsqueryCapabilities(
           coreStartServices,
@@ -89,10 +90,9 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
         // Resolving the reference reads saved objects, so a transient ES/SO failure must not
         // escape as an unhandled rejection on a request that only asked for an authz decision.
-        let authorized: boolean;
-        let resolved: ResolvedQueryReference | undefined;
+        let authorization: AuthorizeOsqueryResponseActionResult;
         try {
-          ({ authorized, resolved } = await authorizeOsqueryResponseAction(
+          authorization = await authorizeOsqueryResponseAction(
             coreStartServices,
             request,
             {
@@ -104,11 +104,11 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             },
             space?.id,
             alertData
-          ));
+          );
         } catch (error) {
-          osqueryContext.logFactory
-            .get('liveQuery')
-            .error(`Failed to authorize osquery live query request: ${error.message}`, { error });
+          logger.error(`Failed to authorize osquery live query request: ${error.message}`, {
+            error,
+          });
 
           return response.customError({
             statusCode: 500,
@@ -116,7 +116,8 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           });
         }
 
-        const isInvalid = !authorized;
+        const { resolved } = authorization;
+        const isInvalid = !authorization.authorized;
 
         if (isInvalid) {
           // Investigation-guide match requires runSavedQueries; it is not a grant of its own.
@@ -180,7 +181,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           const currentUser = await getUserInfo({
             request,
             security: securityStart,
-            logger: osqueryContext.logFactory.get('liveQuery'),
+            logger,
           });
           const username = currentUser?.username ?? undefined;
           const userProfileUid = currentUser?.profile_uid ?? undefined;

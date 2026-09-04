@@ -332,8 +332,8 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should authorize an empty ecs_mapping against a saved query that has none', async () => {
-      // The rule response-action form always emits `ecsMapping`, defaulting to `{}`. An empty
-      // mapping is equivalent to omitting the field and must not be a denial on its own.
+      // `toEcsMappingRecord` collapses `{}` to undefined on both sides, so an explicit empty
+      // mapping is equivalent to omitting the field when the saved query has none either.
       const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
 
       await expect(
@@ -343,6 +343,28 @@ describe('isOsqueryResponseActionAuthorized', () => {
           ecs_mapping: {},
         })
       ).resolves.toBe(true);
+    });
+
+    it('should reject an empty ecs_mapping for a saved query that has one', async () => {
+      // Guards the pack carve-out below from loosening saved queries: sending `{}` must not
+      // become a way to strip the saved query's stored mapping from the dispatched action.
+      const coreStart = createMockCoreStart(
+        { writeLiveQueries: false, runSavedQueries: true },
+        {
+          [SAVED_QUERY_ID]: {
+            query: STORED_QUERY,
+            ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+          },
+        }
+      );
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, {
+          saved_query_id: SAVED_QUERY_ID,
+          query: STORED_QUERY,
+          ecs_mapping: {},
+        })
+      ).resolves.toBe(false);
     });
 
     it('should authorize an ecs_mapping that matches one of the pack queries', async () => {
@@ -389,7 +411,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
       ).resolves.toBe(false);
     });
 
-    it('should authorize an empty ecs_mapping against a pack', async () => {
+    it('should authorize an empty ecs_mapping against a pack whose queries have none', async () => {
       const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
 
       await expect(
@@ -399,6 +421,27 @@ describe('isOsqueryResponseActionAuthorized', () => {
           ecs_mapping: {},
         })
       ).resolves.toBe(true);
+    });
+
+    it('should reject an empty ecs_mapping for a pack whose query has one', async () => {
+      const coreStart = createMockCoreStart(
+        { writeLiveQueries: false, runSavedQueries: true },
+        {
+          [PACK_ID]: {
+            queries: [
+              { query: STORED_PACK_QUERY, ecs_mapping: { 'host.name': { field: 'name' } } },
+            ],
+          },
+        }
+      );
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, {
+          pack_id: PACK_ID,
+          query: STORED_PACK_QUERY,
+          ecs_mapping: {},
+        })
+      ).resolves.toBe(false);
     });
 
     it('should authorize a client-substituted query when it matches server-side substitution', async () => {

@@ -46,6 +46,9 @@ type RuleResponseActions = Pick<RuleResponse, 'response_actions'>;
  * throughout. Without normalizing the params too, `isEqual` never matches an osquery
  * action, so every write re-validates it and a user who loses access to the referenced
  * saved query can no longer edit the rule at all — not even to remove the action.
+ *
+ * The casts are deliberate: this works structurally over the union of the persisted and
+ * payload shapes, which no single member of `ResponseAction | RuleResponseAction` describes.
  */
 const normalizeResponseActionForComparison = (
   responseAction: ResponseAction | RuleResponseAction
