@@ -161,6 +161,7 @@ import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/
 import { registerRoutes as registerThreatIntelRoutes } from './threat_intel/routes';
 import { registerThreatIntelInferenceFeatures } from './threat_intel/inference_features';
 import { ensureThreatIntelBootstrap } from './threat_intel/setup/bootstrap_threat_intel';
+import { createDeferred } from './threat_intel/lib/deferred';
 import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
@@ -189,22 +190,6 @@ import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
 const SECURITY_INFERENCE_PARENT_FEATURE_ID = 'security_search_inference_parent';
-
-interface Deferred {
-  promise: Promise<void>;
-  resolve: () => void;
-  reject: (err: unknown) => void;
-}
-
-const createDeferred = (): Deferred => {
-  let resolve!: () => void;
-  let reject!: (err: unknown) => void;
-  const promise = new Promise<void>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-};
 
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
@@ -245,11 +230,15 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   /**
    * Threat intel routes are registered in `setup()` but depend on start-time
-   * services (inference, spaces, task manager) and a one-time bootstrap. We
-   * capture the start plugins here and expose them to route handlers via lazy
-   * getters so a request cannot resolve them before `start()` runs.
+   * services and a one-time bootstrap. We capture only the start plugins the
+   * route getters actually read and expose them via lazy getters so a request
+   * cannot resolve them before `start()` runs. Narrowed to those four so the
+   * full 20+ plugin start bundle is not held alive for the plugin's lifetime.
    */
-  private threatIntelStartPlugins?: SecuritySolutionPluginStartDependencies;
+  private threatIntelStartPlugins?: Pick<
+    SecuritySolutionPluginStartDependencies,
+    'spaces' | 'inference' | 'searchInferenceEndpoints' | 'taskManager'
+  >;
   private readonly threatIntelBootstrapReady = createDeferred();
 
   constructor(context: PluginInitializerContext) {
