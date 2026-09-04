@@ -38,8 +38,8 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/core-saved-objects-server'
   - '@kbn/es-query'
-  - '@kbn/task-manager-plugin'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod
