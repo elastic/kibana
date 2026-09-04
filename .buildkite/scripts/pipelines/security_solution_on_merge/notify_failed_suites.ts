@@ -16,7 +16,13 @@ import type { Job } from '#pipeline-utils';
 import { FALLBACK_SLACK_CHANNEL, getChannelForStepLabel } from './failed_suite_channels';
 
 const NOTIFY_STEP_KEY = 'notify_owning_teams';
+/** Set after a successful pipeline upload so a retried notify step cannot double-post. */
+export const SLACK_NOTIFY_UPLOADED_META_KEY = 'security_solution_on_merge:slack_notify_uploaded';
 const DRY_RUN = !!process.env.DRY_RUN?.match(/(1|true)/i);
+
+export function slackNotifyStepKey(channel: string): string {
+  return `notify-owning-team-${channel.replace(/^#/, '').replace(/[^a-zA-Z0-9_-]+/g, '-')}`;
+}
 
 export interface FailedJob {
   id: string;
@@ -95,17 +101,49 @@ export function composeChannelMessage(
   ].join('\n');
 }
 
-export function buildNotifyPipelineYaml(channelToMessage: Map<string, string>): string {
+export function composeFanOutFailureMessage(
+  error: unknown,
+  buildUrl = process.env.BUILDKITE_BUILD_URL,
+  buildNumber: string | number | undefined = process.env.BUILDKITE_BUILD_NUMBER
+): string {
+  const detail = error instanceof Error ? error.message : String(error);
+  const lines = [
+    ':warning: *kibana-security-solution-on-merge* owning-team Slack fan-out failed',
+    '',
+    'Cypress may be red, but team channels were not notified. Please check the build and page owning teams manually.',
+    '',
+    `\`notify_owning_teams\` error: ${detail}`,
+  ];
+
+  if (buildUrl) {
+    const label =
+      buildNumber !== undefined && buildNumber !== ''
+        ? `View build #${buildNumber}`
+        : 'View build';
+    lines.push('', `<${buildUrl}|${label}>`);
+  }
+
+  return lines.join('\n');
+}
+
+export function buildNotifyPipelineYaml(
+  channelToMessage: Map<string, string>,
+  options: { stepKey?: (channel: string) => string } = {}
+): string {
+  const stepKeyFor = options.stepKey ?? slackNotifyStepKey;
   const notifySteps = [...channelToMessage.entries()].map(([channel, message]) => ({
     label: `:slack: Notify ${channel}`,
+    key: stepKeyFor(channel),
     command: 'true',
     timeout_in_minutes: 10,
+    // Non-preemptible: these steps only run `true` + notify.slack, and Slack is
+    // gated on step.outcome == passed. Preemption would drop the message.
     agents: {
       image: 'family/kibana-ubuntu-2404',
       imageProject: 'elastic-images-prod',
       provider: 'gcp',
       machineType: 'n2-standard-2',
-      preemptible: true,
+      preemptible: false,
     },
     notify: [
       {
@@ -122,7 +160,7 @@ export function buildNotifyPipelineYaml(channelToMessage: Map<string, string>): 
   // continue_on_failure boundary Buildkite skips them and nothing reaches Slack.
   const steps: unknown[] = [{ wait: null, continue_on_failure: true }, ...notifySteps];
 
-  return stringify({ steps });
+  return stringify({ steps }, { lineWidth: 0 });
 }
 
 function uploadNotifyPipeline(yaml: string): void {
@@ -137,9 +175,44 @@ function uploadNotifyPipeline(yaml: string): void {
   });
 }
 
-export async function notifyFailedSuites(
-  buildkite: BuildkiteClient = new BuildkiteClient()
+function notifyFanOutFailure(
+  error: unknown,
+  buildkite: BuildkiteClient,
+  upload: (yaml: string) => void
+): void {
+  const message = composeFanOutFailureMessage(error);
+  const yaml = buildNotifyPipelineYaml(new Map([[FALLBACK_SLACK_CHANNEL, message]]), {
+    // Distinct from a successful unmatched-step notify to the same channel.
+    stepKey: () => 'notify-owning-team-fanout-failure',
+  });
+
+  console.error(
+    `Fan-out failed; uploading fallback Slack notify to ${FALLBACK_SLACK_CHANNEL}`
+  );
+  upload(yaml);
+
+  try {
+    buildkite.setAnnotation(
+      'security-solution-on-merge-slack-fanout',
+      'error',
+      `Owning-team Slack fan-out failed; alerted ${FALLBACK_SLACK_CHANNEL}. ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  } catch (annotationError) {
+    console.error('Failed to annotate fan-out failure', annotationError);
+  }
+}
+
+async function runNotifyFailedSuites(
+  buildkite: BuildkiteClient,
+  upload: (yaml: string) => void
 ): Promise<void> {
+  if (process.env.BUILDKITE && buildkite.getMetadata(SLACK_NOTIFY_UPLOADED_META_KEY)) {
+    console.log('Slack notify pipeline already uploaded for this build; skipping');
+    return;
+  }
+
   const build = await buildkite.getCurrentBuild();
   const failedJobs = collectFailedScriptJobs(build.jobs, (job) => {
     return buildkite.getJobStatus(build, job).success;
@@ -160,7 +233,34 @@ export async function notifyFailedSuites(
   console.log(
     `Uploading Slack notify steps for: ${[...channelToMessage.keys()].join(', ') || FALLBACK_SLACK_CHANNEL}`
   );
-  uploadNotifyPipeline(yaml);
+  upload(yaml);
+
+  // Mark after a successful upload so a retried notify step cannot double-post.
+  if (!DRY_RUN && process.env.BUILDKITE) {
+    buildkite.setMetadata(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
+  }
+}
+
+export async function notifyFailedSuites(
+  buildkite: BuildkiteClient = new BuildkiteClient(),
+  options: { upload?: (yaml: string) => void } = {}
+): Promise<void> {
+  const upload = options.upload ?? uploadNotifyPipeline;
+
+  try {
+    await runNotifyFailedSuites(buildkite, upload);
+  } catch (error) {
+    console.error('Failed to fan out Security on-merge Slack alerts', error);
+    try {
+      notifyFanOutFailure(error, buildkite, upload);
+    } catch (fallbackError) {
+      console.error(
+        `Also failed to notify ${FALLBACK_SLACK_CHANNEL} about the fan-out failure`,
+        fallbackError
+      );
+    }
+    throw error;
+  }
 }
 
 if (require.main === module) {

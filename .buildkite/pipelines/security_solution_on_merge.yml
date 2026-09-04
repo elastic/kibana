@@ -497,6 +497,9 @@ steps:
   - wait: ~
     continue_on_failure: true
 
+  # No automatic retry: a retry after a successful pipeline upload would fan out
+  # duplicate Slack messages. Idempotency is also enforced via buildkite meta-data.
+  # Non-preemptible so the upload step is less likely to die mid-flight.
   - command: ts-node .buildkite/scripts/pipelines/security_solution_on_merge/notify_failed_suites.ts
     label: ':slack: Notify owning teams of Security on-merge failures'
     key: notify_owning_teams
@@ -507,8 +510,4 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      preemptible: true
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+      preemptible: false
