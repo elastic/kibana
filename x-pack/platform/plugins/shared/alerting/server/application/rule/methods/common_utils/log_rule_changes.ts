@@ -6,7 +6,7 @@
  */
 
 import { every, isUndefined } from 'lodash';
-import type { LogChangeHistoryOptions } from '@kbn/change-history';
+import type { ChangeHistoryActionId, LogChangeHistoryOptions } from '@kbn/change-history';
 import type { RuleChangeTrackingMetadata } from '@kbn/alerting-types';
 import type { Logger, SavedObjectBulkResult } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
@@ -52,7 +52,7 @@ interface LogRuleChanges {
     /**
      * Action performed on rule, e.g. rule_create or rule_update
      */
-    action: string;
+    action: ChangeHistoryActionId;
     /**
      * Original timestamp of the change. Uses `ruleSO.updated_at` when omitted.
      */

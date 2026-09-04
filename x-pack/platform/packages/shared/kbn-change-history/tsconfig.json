@@ -16,5 +16,6 @@
     "@kbn/test",
     "@kbn/object-utils",
     "@kbn/apm-utils",
+    "@kbn/core-user-activity-server",
   ]
 }
