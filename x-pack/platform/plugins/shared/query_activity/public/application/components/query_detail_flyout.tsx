@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-
-function prettyPrint(value: string): string {
-  try {
-    return JSON.stringify(JSON.parse(value), null, 2);
-  } catch {
-    return value;
-  }
-}
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -47,6 +39,14 @@ import { useQueryActivityAppContext } from '../app_context';
 import { notAvailableLabel } from './query_activity_table';
 import type { RunningQuery, RunningQuerySummary } from '../../../common/types';
 
+function prettyPrint(value: string): string {
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2);
+  } catch {
+    return value;
+  }
+}
+
 interface QueryDetailFlyoutProps {
   summary: RunningQuerySummary;
   isStopRequested: boolean;
@@ -68,6 +68,8 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   const [loadState, setLoadState] = useState<'loading' | 'loaded' | 'notFound' | 'error'>(
     'loading'
   );
+  const onQueryNoLongerRunningRef = useRef(onQueryNoLongerRunning);
+  onQueryNoLongerRunningRef.current = onQueryNoLongerRunning;
   const displayedQuery = query ?? summary;
   const source = displayedQuery.source.trim();
 
@@ -89,7 +91,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
 
         if (error?.attributes?.code === 'QUERY_NOT_FOUND') {
           setLoadState('notFound');
-          onQueryNoLongerRunning?.();
+          onQueryNoLongerRunningRef.current?.();
           return;
         }
 
@@ -104,7 +106,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
     return () => {
       isActive = false;
     };
-  }, [apiService, onQueryNoLongerRunning, summary.taskId]);
+  }, [apiService, summary.taskId]);
 
   const { rangeFrom, rangeTo } = useMemo(() => {
     const from = new Date(query?.startTime ?? summary.startTime);
@@ -209,9 +211,14 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             })}
           >
             <p>
-              {i18n.translate('xpack.queryActivity.flyout.loadErrorBody', {
-                defaultMessage: 'Close the flyout and try again.',
-              })}
+              {canCancelTasks && displayedQuery.cancellable
+                ? i18n.translate('xpack.queryActivity.flyout.loadErrorWithCancelBody', {
+                    defaultMessage:
+                      'You can still cancel this query below, or close the flyout and try again.',
+                  })
+                : i18n.translate('xpack.queryActivity.flyout.loadErrorBody', {
+                    defaultMessage: 'Close the flyout and try again.',
+                  })}
             </p>
           </EuiCallOut>
         )}

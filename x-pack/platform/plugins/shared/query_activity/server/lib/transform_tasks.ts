@@ -17,7 +17,6 @@ const ASYNC_SEARCH_ACTION_PREFIX = 'indices:data/read/async_search';
 
 export const QUERY_TASK_ACTIONS = [
   SEARCH_ACTION_PREFIX,
-  `${SEARCH_ACTION_PREFIX}/template`,
   ESQL_ACTION_PREFIX,
   `${ESQL_ACTION_PREFIX}[a]`,
   EQL_ACTION_PREFIX,
@@ -25,7 +24,6 @@ export const QUERY_TASK_ACTIONS = [
   SQL_ACTION_PREFIX,
   `${SQL_ACTION_PREFIX}[a]`,
   MSEARCH_ACTION_PREFIX,
-  `${MSEARCH_ACTION_PREFIX}/template`,
   `${ASYNC_SEARCH_ACTION_PREFIX}/submit`,
 ] as const;
 
@@ -128,7 +126,7 @@ export function parseEsqlDescription(description: string): { indices: number; qu
 }
 
 /**
- * Returns true for lightweight root query tasks that need detailed enrichment.
+ * Returns true when a root query task should be shown in Query Activity.
  */
 export function isQueryTaskCandidate(task: TasksTaskInfo, thresholdNanos: number): boolean {
   if (task.parent_task_id !== undefined && task.parent_task_id !== null) {
@@ -141,31 +139,6 @@ export function isQueryTaskCandidate(task: TasksTaskInfo, thresholdNanos: number
   }
 
   if ((task.running_time_in_nanos ?? 0) < thresholdNanos) {
-    return false;
-  }
-
-  // Once an async QL request has detached from its HTTP request, Elasticsearch keeps a
-  // non-cancellable [a] task without useful query details. Do not show it in the table.
-  if (action.endsWith('[a]') && !task.cancellable) {
-    return false;
-  }
-
-  return true;
-}
-
-/**
- * Returns true for detailed query tasks that can be displayed in the UI.
- */
-export function isIncludedTask(task: TasksTaskInfo, thresholdNanos: number): boolean {
-  if (!isQueryTaskCandidate(task, thresholdNanos)) {
-    return false;
-  }
-
-  // Background async tasks (e.g. ES|QL submitted via POST /_esql/async) surface in the task
-  // list with cancellable:false and an empty description once the initial HTTP handler task
-  // has completed. They cannot be cancelled via the tasks API and have no query to display,
-  // so there is nothing useful to show the user.
-  if (!task.cancellable && !task.description) {
     return false;
   }
 
@@ -223,7 +196,7 @@ export function transformTasks(tasks: TasksTaskInfo[], thresholdNanos: number): 
   const results: RunningQuery[] = [];
 
   for (const task of tasks) {
-    if (!isIncludedTask(task, thresholdNanos)) {
+    if (!isQueryTaskCandidate(task, thresholdNanos)) {
       continue;
     }
 

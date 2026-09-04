@@ -13,7 +13,10 @@ import {
 } from '../../common/constants';
 import type { RouteOptions } from '.';
 import { QUERY_TASK_ACTIONS, transformTaskSummaries } from '../lib/transform_tasks';
+import { getErrorStatusCode, hasQueryActivityMonitorPrivilege } from '../lib/route_helpers';
 
+// Elasticsearch includes task headers independently of `detailed`; that flag only gates the
+// description and status fields.
 const LIST_FILTER_PATH = [
   'tasks.node',
   'tasks.id',
@@ -25,11 +28,6 @@ const LIST_FILTER_PATH = [
   'tasks.cancelled',
   'tasks.headers',
 ];
-
-const getErrorStatusCode = (error: unknown): number | undefined => {
-  const typedError = error as { statusCode?: number; meta?: { statusCode?: number } };
-  return typedError?.statusCode ?? typedError?.meta?.statusCode;
-};
 
 export const registerSearchRoute = ({ router, logger }: RouteOptions) => {
   router.get(
@@ -53,11 +51,10 @@ export const registerSearchRoute = ({ router, logger }: RouteOptions) => {
         // In Serverless, security?.hasPrivileges is absent so the check is silently skipped —
         // GET /_tasks is an internal-only API that requires operator-level access there,
         // and Kibana RBAC (requiredPrivileges above) is the authorization gate.
-        const esPrivileges =
-          await coreContext.elasticsearch.client.asCurrentUser.security?.hasPrivileges?.({
-            cluster: ['monitor'],
-          });
-        if (esPrivileges && !esPrivileges.cluster?.monitor) {
+        const hasMonitorPrivilege = await hasQueryActivityMonitorPrivilege(
+          coreContext.elasticsearch.client.asCurrentUser
+        );
+        if (!hasMonitorPrivilege) {
           return response.forbidden({
             body: { message: 'Insufficient privileges to view queries' },
           });

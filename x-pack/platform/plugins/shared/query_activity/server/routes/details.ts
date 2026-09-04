@@ -7,10 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { API_BASE_PATH, QUERY_ACTIVITY_READ_PRIVILEGE } from '../../common/constants';
+import { getErrorStatusCode, hasQueryActivityMonitorPrivilege } from '../lib/route_helpers';
 import { transformTasks } from '../lib/transform_tasks';
 import type { RouteOptions } from '.';
 
-const GET_FILTER_PATH = [
+const TASK_GET_FIELD_PROJECTION = [
   'completed',
   'task.node',
   'task.id',
@@ -23,11 +24,6 @@ const GET_FILTER_PATH = [
   'task.headers',
   'task.parent_task_id',
 ];
-
-const getErrorStatusCode = (error: unknown): number | undefined => {
-  const typedError = error as { statusCode?: number; meta?: { statusCode?: number } };
-  return typedError?.statusCode ?? typedError?.meta?.statusCode;
-};
 
 export const registerDetailsRoute = ({ router, logger }: RouteOptions) => {
   router.get(
@@ -60,11 +56,10 @@ export const registerDetailsRoute = ({ router, logger }: RouteOptions) => {
 
       try {
         const coreContext = await context.core;
-        const esPrivileges =
-          await coreContext.elasticsearch.client.asCurrentUser.security?.hasPrivileges?.({
-            cluster: ['monitor'],
-          });
-        if (esPrivileges && !esPrivileges.cluster?.monitor) {
+        const hasMonitorPrivilege = await hasQueryActivityMonitorPrivilege(
+          coreContext.elasticsearch.client.asCurrentUser
+        );
+        if (!hasMonitorPrivilege) {
           return response.forbidden({
             body: { message: 'Insufficient privileges to view queries' },
           });
@@ -74,13 +69,15 @@ export const registerDetailsRoute = ({ router, logger }: RouteOptions) => {
         const result = await esClient.tasks.get({
           task_id: request.params.taskId,
           wait_for_completion: false,
-          filter_path: GET_FILTER_PATH,
+          filter_path: TASK_GET_FIELD_PROJECTION,
         });
 
         if (result.completed) {
           return notFound();
         }
 
+        // The task was selected from the threshold-filtered list, so do not reapply a potentially
+        // changed minimum runtime while loading its details.
         const [query] = transformTasks(result.task ? [result.task] : [], 0);
         if (!query) {
           return notFound();

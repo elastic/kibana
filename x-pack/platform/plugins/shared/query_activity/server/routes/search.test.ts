@@ -71,7 +71,6 @@ describe(`GET ${API_BASE_PATH}/search`, () => {
       group_by: 'none',
       actions: [
         'indices:data/read/search',
-        'indices:data/read/search/template',
         'indices:data/read/esql',
         'indices:data/read/esql[a]',
         'indices:data/read/eql',
@@ -79,7 +78,6 @@ describe(`GET ${API_BASE_PATH}/search`, () => {
         'indices:data/read/sql',
         'indices:data/read/sql[a]',
         'indices:data/read/msearch',
-        'indices:data/read/msearch/template',
         'indices:data/read/async_search/submit',
       ],
       filter_path: [
@@ -109,6 +107,38 @@ describe(`GET ${API_BASE_PATH}/search`, () => {
         },
       ],
     });
+  });
+
+  it('omits non-cancellable template wrapper tasks hidden by the original detailed list', async () => {
+    const { handler, context, esClient } = setup();
+    const runningTime = QUERY_ACTIVITY_MIN_RUNNING_TIME_DEFAULT_MS * 1_000_000 + 1;
+    esClient.tasks.list.mockResolvedValueOnce({
+      tasks: [
+        {
+          node: 'node1',
+          id: 1,
+          action: 'indices:data/read/search/template',
+          start_time_in_millis: 1_000_000,
+          running_time_in_nanos: runningTime,
+          cancellable: false,
+          headers: {},
+        },
+        {
+          node: 'node1',
+          id: 2,
+          action: 'indices:data/read/msearch/template',
+          start_time_in_millis: 1_000_000,
+          running_time_in_nanos: runningTime,
+          cancellable: false,
+          headers: {},
+        },
+      ],
+    } as any);
+
+    const response = await handler(context, createRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({ queries: [] });
   });
 
   it('returns an error response when ES tasks.list throws', async () => {
