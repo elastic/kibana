@@ -113,7 +113,6 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        version: 2,
       });
 
       expect(result.metadata.tags).toBeUndefined();
@@ -130,7 +129,6 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        version: 2,
       });
 
       expect(result.metadata.tags).toEqual(['prod', 'infra']);
@@ -147,7 +145,6 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
-        version: 2,
       });
 
       expect(result.metadata.tags).toEqual(['prod', 'infra']);
