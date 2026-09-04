@@ -331,5 +331,26 @@ export default function ({ getService }: FtrProviderContext) {
         expect(Array.isArray(metrics?.task_overdue?.value.overall.overdue_by.values)).to.be(true);
       });
     });
+
+    describe('task backpressure', () => {
+      it('should be exposed and inactive against a healthy Elasticsearch', async () => {
+        const metrics = (
+          await getMetrics(false, (m) => m?.metrics?.task_backpressure?.value != null)
+        ).metrics;
+        expect(metrics?.task_backpressure).not.to.be(null);
+        expect(metrics?.task_backpressure?.value).not.to.be(null);
+        expect(metrics?.task_backpressure?.value.active).to.be(0);
+        expect(metrics?.task_backpressure?.value.reason).to.be(null);
+      });
+
+      it('should preserve the point-in-time snapshot across a metrics reset', async () => {
+        // Backpressure is a gauge: a reset scrape must still report current state.
+        const metrics = (
+          await getMetrics(true, (m) => m?.metrics?.task_backpressure?.value != null)
+        ).metrics;
+        expect(metrics?.task_backpressure?.value.active).to.be(0);
+        expect(metrics?.task_backpressure?.value.reason).to.be(null);
+      });
+    });
   });
 }

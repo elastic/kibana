@@ -9,7 +9,7 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-
+import { JOIN_INDICES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
 
 export const registerGetJoinIndicesRoute = (
@@ -18,11 +18,12 @@ export const registerGetJoinIndicesRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/esql/autocomplete/join/indices',
+      path: JOIN_INDICES_AUTOCOMPLETE_ROUTE,
       validate: {
         query: schema.object({
           // remoteClusters may hold a comma-separated list of cluster names.
-          remoteClusters: schema.maybe(schema.string({ maxLength: 1000 })),
+          remoteClusters: schema.maybe(schema.string({ maxLength: 1024 })),
+          projectRouting: schema.maybe(schema.string({ maxLength: 1024 })),
         }),
       },
       security: {
@@ -35,9 +36,13 @@ export const registerGetJoinIndicesRoute = (
     async (requestHandlerContext, request, response) => {
       try {
         const core = await requestHandlerContext.core;
-        const { remoteClusters } = request.query;
+        const { remoteClusters, projectRouting } = request.query;
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
-        const result = await service.getIndicesByIndexMode('lookup', remoteClusters);
+        const result = await service.getIndicesByIndexMode(
+          'lookup',
+          remoteClusters,
+          projectRouting
+        );
 
         return response.ok({
           body: result,

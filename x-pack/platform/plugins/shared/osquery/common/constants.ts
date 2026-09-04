@@ -61,3 +61,12 @@ export const ACTION_EXPIRATION_WEEKS = 2;
 
 export const MAX_TAGS_PER_ACTION = 20;
 export const MAX_TAG_LENGTH = 256;
+
+/**
+ * `precision_threshold` for `cardinality(agent_id)` on the scheduled execution
+ * DETAILS endpoint (single-bucket agg — sketch memory negligible). Exact up to
+ * 40k agents, close approximation beyond, never a rejected request. NOT used on
+ * the History list agg: it fans out over thousands of buckets where per-bucket
+ * sketch memory at max precision could trip the circuit breaker.
+ */
+export const AGENT_CARDINALITY_PRECISION = 40000;

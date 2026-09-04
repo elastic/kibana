@@ -21,14 +21,13 @@ export type MetricsState = MetricsGridSettings & MetricsGridSort;
 export const METRICS_STATE_DEF: ProfileStateDefinition<MetricsState> = {
   key: 'metricsState',
   descriptor: {
-    counterAggregation: { type: ProfileStateType.Persistent },
-    gaugeAggregation: { type: ProfileStateType.Persistent },
-    histogramPercentile: { type: ProfileStateType.Persistent },
-    // Sort is typed as `Url` so it can be bookmarked and shared. This does not cost reload
-    // persistence: `LOCALLY_PERSISTED_PROFILE_STATE_TYPES` in `profile_state.ts` covers
-    // both `Persistent` and `Url`, so sort still survives a reload with no `_p` in the URL.
+    counterAggregation: { type: ProfileStateType.Url },
+    gaugeAggregation: { type: ProfileStateType.Url },
+    histogramPercentile: { type: ProfileStateType.Url },
     sortField: { type: ProfileStateType.Url },
     sortDirection: { type: ProfileStateType.Url },
+    dimensions: { type: ProfileStateType.Url },
+    searchTerm: { type: ProfileStateType.Url },
   },
   defaultState: { ...METRICS_GRID_SETTINGS_DEFAULTS, ...METRICS_GRID_SORT_DEFAULTS },
 };
