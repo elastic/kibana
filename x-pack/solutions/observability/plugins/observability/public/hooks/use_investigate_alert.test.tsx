@@ -9,8 +9,10 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { NightshiftInvestigationsRepositoryClient } from '@kbn/nightshift-investigations-plugin/public';
 import { useInvestigateAlert } from './use_investigate_alert';
 import { useKibana } from '../utils/kibana_react';
+import { setInvestigationsClient } from '../services/investigations_client';
 
 jest.mock('../utils/kibana_react');
 
@@ -61,9 +63,11 @@ describe('useInvestigateAlert', () => {
       services: {
         http: { basePath: { get: () => '' } },
         notifications: { toasts: { addSuccess, addDanger } },
-        nightshiftInvestigations: { investigationsClient: { fetch: fetchMock } },
       },
     });
+    setInvestigationsClient({
+      fetch: fetchMock,
+    } as unknown as NightshiftInvestigationsRepositoryClient);
     mockInvestigationsApi();
   });
 
@@ -153,12 +157,7 @@ describe('useInvestigateAlert', () => {
   });
 
   it('hides the action when the nightshift plugin is unavailable', async () => {
-    useKibanaMock.mockReturnValue({
-      services: {
-        http: { basePath: { get: () => '' } },
-        notifications: { toasts: { addSuccess, addDanger } },
-      },
-    });
+    setInvestigationsClient(undefined);
     const { result } = renderInvestigateAlert();
 
     expect(result.current.showInvestigateAction).toBe(false);

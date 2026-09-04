@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../utils/kibana_react';
+import { getInvestigationsClient } from '../services/investigations_client';
 
 const getStatusQuery = (alertId: string) => ({
   concurrency_key: alertId,
@@ -24,8 +25,8 @@ export const useInvestigateAlert = ({
   alertId?: string;
   onInvestigate?: () => void;
 }) => {
-  const { http, notifications, nightshiftInvestigations } = useKibana().services;
-  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+  const { http, notifications } = useKibana().services;
+  const investigationsClient = getInvestigationsClient();
   const statusQueryKey = ['alertInvestigations', http.basePath.get?.() ?? '', alertId] as const;
   const queryClient = useQueryClient();
   const canInvestigate = Boolean(alertId && investigationsClient);
