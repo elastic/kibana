@@ -84,6 +84,13 @@ export const platformSignificantEventsTools = {
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
 } as const;
 
+/** Memory tools follow the standard verb-based D3 shape: remember / recall / forget. */
+export const platformMemoryTools = {
+  remember: `${internalNamespaces.platformMemory}.remember`,
+  recall: `${internalNamespaces.platformMemory}.recall`,
+  forget: `${internalNamespaces.platformMemory}.forget`,
+} as const;
+
 export const attachmentTools = {
   read: `${internalNamespaces.attachments}.read`,
   update: `${internalNamespaces.attachments}.update`,

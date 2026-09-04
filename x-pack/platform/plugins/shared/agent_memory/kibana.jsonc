@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/agent-memory-plugin",
+  "owner": "@elastic/context-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "agentMemory",
+    "server": true,
+    "browser": false,
+    "configPath": ["xpack", "agentMemory"],
+    "requiredPlugins": ["agentBuilder", "workflowsExtensions"]
+  }
+}

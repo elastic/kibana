@@ -164,6 +164,44 @@ describe('runDefaultAgentMode', () => {
     );
   });
 
+  it('passes the effective agent configuration and space ID to the beforeAgent hook', async () => {
+    const context = createAgentHandlerContextMock();
+    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      connector: { name: 'test-connector' },
+      chatModel: {},
+    } as any);
+    context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+    context.toolManager.getDynamicToolIds.mockReturnValue([]);
+    getPendingRoundMock.mockReturnValue(undefined);
+    selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+    prepareConversationMock.mockResolvedValue({
+      previousRounds: [],
+      nextInput: { message: 'hello', attachments: [] },
+      attachments: [],
+      attachmentTypes: [],
+      attachmentStateManager: context.attachmentStateManager,
+    } as any);
+    extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+    createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    const agentConfiguration = {
+      tools: [{ tool_ids: ['platform.memory.recall'] }],
+      enable_elastic_capabilities: false,
+    };
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'hello' },
+        agentConfiguration,
+      },
+      context
+    );
+
+    expect(context.hooks.run).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ agentConfiguration, spaceId: context.spaceId })
+    );
+  });
+
   it('configures the tool-result length guardrail budget on the toolManager', async () => {
     const context = createAgentHandlerContextMock();
 

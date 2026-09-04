@@ -13,4 +13,5 @@ export {
   WORKFLOW_KI_TYPE,
   RULE_KI_TYPE,
   ACTION_POLICY_KI_TYPE,
+  AGENT_MEMORY_KI_TYPE,
 } from './constants';

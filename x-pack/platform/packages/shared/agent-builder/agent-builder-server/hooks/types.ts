@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
@@ -21,7 +22,9 @@ interface AgentHookContextBase {
 }
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {
+  spaceId: string;
   nextInput: ProcessedRoundInput;
+  agentConfiguration: AgentConfiguration;
 }
 
 interface ToolCallHookContextBase extends AgentHookContextBase {

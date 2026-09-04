@@ -9,6 +9,7 @@ import {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  platformMemoryTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -98,6 +99,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
   `${internalNamespaces.security}.alert-triage`,
 
+  // Platform – Agent Memory
+  ...Object.values(platformMemoryTools),
+
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
   `${internalNamespaces.streams}.diagnose_stream`,
@@ -168,6 +172,9 @@ export const isAllowedAgentType = (typeId: string): typeId is AgentBuilderAgentT
  * The intention is to force a code review from the Agent Builder team when any team adds a new skill.
  */
 export const AGENT_BUILDER_BUILTIN_SKILLS = [
+  // Platform – Agent Memory
+  'agent-memory',
+
   // Platform
   'data-exploration',
   'visualization-creation',
