@@ -2416,8 +2416,6 @@ module.exports = {
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
-        'src/platform/test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
-        'src/platform/test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/private/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
@@ -2479,8 +2477,6 @@ module.exports = {
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{ts,tsx}',
-        'src/platform/test/interactive_setup_api_integration/**/*.{ts,tsx}',
-        'src/platform/test/interactive_setup_functional/**/*.{ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{ts,tsx}',
         'src/platform/packages/private/kbn-mock-idp-utils/**/*.{ts,tsx}',

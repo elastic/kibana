@@ -154,8 +154,10 @@ async function runLocalServersAndTests(
     // wait for 5 seconds
     await silence(log, 5000);
 
-    // Pre-create Elasticsearch Security indexes after server startup
-    await preCreateSecurityIndexesViaSamlAuth(config, log);
+    // Pre-create Elasticsearch Security indexes after server startup. Skipped for `prebootOnly`
+    if (!config.get('prebootOnly')) {
+      await preCreateSecurityIndexesViaSamlAuth(config, log);
+    }
 
     await runPlaywrightTest(procs, cmd, cmdArgs, env);
   } finally {
