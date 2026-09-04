@@ -7,49 +7,75 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
+import type { ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
-import { spaceTest, testData } from '../../../common/ui/fixtures';
+import { VIEW_MODE } from '../../../../../common/constants';
+import type { DiscoverSessionTab } from '../../../../../server';
+import { spaceTest, testData, type DiscoverScoutSpace } from '../../../common/ui/fixtures';
 
 const ESQL_SESSION_TITLE = 'Reporting ES|QL session';
 
-const createDashboardWithSavedSession = async (
-  pageObjects: PageObjects,
+const createDashboardWithSessionPanel = async (
+  apiServices: ApiServicesFixture,
+  spaceId: string,
   sessionTitle: string,
-  dashboardTitle: string
-) => {
-  await pageObjects.dashboard.openNewDashboard();
-  await pageObjects.datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE_DISPLAY);
-  await pageObjects.dashboard.addSavedSearch(sessionTitle);
-  await pageObjects.dashboard.waitForRenderComplete();
-  await pageObjects.dashboard.saveDashboard(dashboardTitle);
-  await pageObjects.dashboard.ensureViewMode();
+  dashboardTitle: string,
+  tab: DiscoverSessionTab
+): Promise<string> =>
+  apiServices.dashboard.create(
+    {
+      title: dashboardTitle,
+      time_range: {
+        ...testData.DEFAULT_TIME_RANGE,
+        mode: 'absolute',
+      },
+      panels: [
+        {
+          type: 'discover_session',
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+          config: {
+            title: sessionTitle,
+            tabs: [tab],
+          },
+        },
+      ],
+    },
+    spaceId
+  );
+
+const getSessionTab = (
+  mode: 'classic' | 'ES|QL',
+  discoverScoutSpace: DiscoverScoutSpace
+): DiscoverSessionTab => {
+  if (mode === 'ES|QL') {
+    return {
+      data_source: {
+        type: 'esql',
+        query:
+          'FROM logstash-* | STATS average_bytes = AVG(bytes) BY extension | SORT average_bytes DESC',
+      },
+      sort: [],
+    };
+  }
+
+  return {
+    data_source: {
+      type: 'data_view_reference',
+      ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+    },
+    query: { language: 'kql', expression: '' },
+    filters: [],
+    sort: [{ name: '@timestamp', direction: 'desc' }],
+    view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+  };
 };
 
 spaceTest.describe('Discover session panel CSV export', { tag: '@local-stateful-classic' }, () => {
   // Each scenario generates two reports, which can exceed Scout's default timeout under CI load.
   spaceTest.setTimeout(5 * 60_000);
 
-  spaceTest.beforeAll(async ({ apiServices, discoverScoutSpace }) => {
+  spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
-    await apiServices.discover.create(
-      {
-        title: ESQL_SESSION_TITLE,
-        tabs: [
-          {
-            id: 'esql',
-            label: 'Untitled',
-            data_source: {
-              type: 'esql',
-              query:
-                'FROM logstash-* | STATS average_bytes = AVG(bytes) BY extension | SORT average_bytes DESC',
-            },
-          },
-        ],
-      } satisfies DiscoverSessionApiDataInput,
-      discoverScoutSpace.id
-    );
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -66,12 +92,15 @@ spaceTest.describe('Discover session panel CSV export', { tag: '@local-stateful-
   ] as const) {
     spaceTest(
       `exports a ${mode} Discover session panel with global and custom time ranges`,
-      async ({ page, pageObjects, scoutSpace }) => {
-        await createDashboardWithSavedSession(
-          pageObjects,
+      async ({ apiServices, discoverScoutSpace, page, pageObjects, scoutSpace }) => {
+        const dashboardId = await createDashboardWithSessionPanel(
+          apiServices,
+          scoutSpace.id,
           sessionTitle,
-          `Reporting ${mode} dashboard ${scoutSpace.id}`
+          `Reporting ${mode} dashboard ${scoutSpace.id}`,
+          getSessionTab(mode, discoverScoutSpace)
         );
+        await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
         await spaceTest.step('exports with the dashboard global time range', async () => {
           await expect
