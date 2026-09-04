@@ -31,6 +31,8 @@ import {
   MAX_ARTIFACT_DATA_LENGTH,
   FIND_DEFAULT_PER_PAGE,
   FIND_MAX_RESULT_WINDOW,
+  MAX_BUILDER_FIELDS_KEYS,
+  MAX_BUILDER_TYPE_LENGTH,
 } from './constants';
 import { bulkErrorSchema } from './bulk_operation_schema';
 
@@ -69,6 +71,29 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 
 /** Metadata (required) */
 
+const builderFieldsSchema = z
+  .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
+  .check((ctx) => {
+    if (Object.keys(ctx.value).length > MAX_BUILDER_FIELDS_KEYS) {
+      ctx.issues.push({
+        code: 'custom',
+        message: `builder_fields must have at most ${MAX_BUILDER_FIELDS_KEYS} top-level fields.`,
+        input: ctx.value,
+      });
+    }
+  })
+  .describe(
+    'Structured parameters for the rule builder identified by `builder_type`. The server generates the rule query from these fields.'
+  );
+
+const builderTypeSchema = z
+  .string()
+  .min(1)
+  .max(MAX_BUILDER_TYPE_LENGTH)
+  .describe(
+    'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
+  );
+
 export const metadataSchema = z
   .object({
     name: z
@@ -86,13 +111,8 @@ export const metadataSchema = z
       .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
-    builder_type: z
-      .string()
-      .max(64)
-      .optional()
-      .describe(
-        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
-      ),
+    builder_type: builderTypeSchema.optional(),
+    builder_fields: builderFieldsSchema.optional(),
   })
   .strict()
   .describe('Rule metadata.')
@@ -617,6 +637,52 @@ const rejectEmitNoDataStrategy = {
   path: ['no_data_strategy'],
 };
 
+/** Builder invariants — shared between the create and update schemas. */
+
+interface BuilderMetadataLike {
+  metadata?: { builder_type?: string | null; builder_fields?: unknown };
+  query?: unknown;
+}
+
+/**
+ * The server generates the query from `metadata.builder_fields`, so a request
+ * cannot carry both. Sending `builder_fields: null` releases the query for
+ * direct edits in the same request.
+ */
+const isQueryAbsentForBuilderFields = (data: BuilderMetadataLike): boolean =>
+  data.metadata?.builder_fields == null || data.query == null;
+
+/** `builder_type` names the schema that validates `builder_fields`, so it is required with them. */
+const isBuilderTypeProvidedForBuilderFields = (data: BuilderMetadataLike): boolean =>
+  data.metadata?.builder_fields == null || Boolean(data.metadata?.builder_type);
+
+const rejectQueryWithBuilderFields = {
+  message:
+    'query cannot be set together with metadata.builder_fields — the server generates the query from those fields. Send metadata.builder_fields: null in the same request to stop using the builder and set query directly.',
+  path: ['query'],
+};
+
+const rejectBuilderFieldsWithoutBuilderType = {
+  message: 'metadata.builder_fields requires metadata.builder_type.',
+  path: ['metadata', 'builder_fields'],
+};
+
+/** A rule that is not builder-generated has to carry its own query. */
+const isQueryProvidedWithoutBuilderFields = (data: BuilderMetadataLike): boolean =>
+  data.metadata?.builder_fields != null || data.query != null;
+
+/**
+ * A builder-authored rule has no query of its own yet, so the two query-shape
+ * invariants that would read one are waived for it.
+ */
+const isSignalUsingStandaloneFormatUnlessBuilder = (
+  data: BuilderMetadataLike & Parameters<typeof isSignalUsingStandaloneFormat>[0]
+): boolean => data.metadata?.builder_fields != null || isSignalUsingStandaloneFormat(data);
+
+const isRecoveryQueryProvidedForStrategyUnlessBuilder = (
+  data: BuilderMetadataLike & Parameters<typeof isRecoveryQueryProvidedForStrategy>[0]
+): boolean => data.metadata?.builder_fields != null || isRecoveryQueryProvidedForStrategy(data);
+
 /**
  * Shared create-rule cross-field refinements. Applied to both the single-create
  * body and each bulk-create item so the two write paths cannot drift.
@@ -627,7 +693,7 @@ const applyCreateRuleRefinements = <T extends z.ZodObject<z.ZodRawShape>>(schema
       message: 'state_transition is only allowed when kind is "alert".',
       path: ['state_transition'],
     })
-    .refine(isSignalUsingStandaloneFormat, {
+    .refine(isSignalUsingStandaloneFormatUnlessBuilder, {
       message: 'kind "signal" requires query.format "standalone".',
       path: ['query', 'format'],
     })
@@ -639,7 +705,7 @@ const applyCreateRuleRefinements = <T extends z.ZodObject<z.ZodRawShape>>(schema
       message: 'query.recovery is only allowed when recovery_strategy is "query".',
       path: ['query', 'recovery'],
     })
-    .refine(isRecoveryQueryProvidedForStrategy, {
+    .refine(isRecoveryQueryProvidedForStrategyUnlessBuilder, {
       message: 'query.recovery is required when recovery_strategy is "query".',
       path: ['query', 'recovery'],
     })
@@ -657,9 +723,20 @@ const applyCreateRuleRefinements = <T extends z.ZodObject<z.ZodRawShape>>(schema
       message:
         'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
       path: ['state_transition', 'recovering_count'],
+    })
+    .refine(isQueryAbsentForBuilderFields, rejectQueryWithBuilderFields)
+    .refine(isBuilderTypeProvidedForBuilderFields, rejectBuilderFieldsWithoutBuilderType)
+    .refine(isQueryProvidedWithoutBuilderFields, {
+      message: 'query is required unless metadata.builder_fields is set.',
+      path: ['query'],
     });
 
-export const createRuleDataSchema = applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
+// Builder-authored rules omit `query`: the server generates it from
+// `metadata.builder_fields`. The refinements above keep exactly one of the two
+// sources present.
+export const createRuleDataSchema = applyCreateRuleRefinements(
+  createRuleDataBaseSchema.extend({ query: querySchema.optional() })
+).meta({
   id: 'alerting_new_rule',
 });
 
@@ -693,7 +770,10 @@ export const updateRuleDataSchema = z
     metadata: metadataSchema
       .partial()
       .extend({
-        builder_type: z.string().max(64).optional().nullable(),
+        // `null` opts the rule out of builder mode, clearing both builder fields
+        // and releasing `query` for direct edits in the same request.
+        builder_type: builderTypeSchema.optional().nullable(),
+        builder_fields: builderFieldsSchema.optional().nullable(),
         // `null` clears all tags (an empty array is rejected by `.min(1)`, and
         // omitting `tags` preserves the existing ones on a partial update).
         tags: tagsSchema.min(1).nullable().optional(),
@@ -722,6 +802,25 @@ export const updateRuleDataSchema = z
         path: ['no_data_strategy'],
         message: rejectEmitNoDataStrategy.message,
         input: ctx.value.no_data_strategy,
+      });
+    }
+
+    if (!isQueryAbsentForBuilderFields(ctx.value)) {
+      ctx.issues.push({
+        code: 'custom',
+        path: rejectQueryWithBuilderFields.path,
+        message: rejectQueryWithBuilderFields.message,
+        input: ctx.value.query,
+      });
+    }
+
+    if (ctx.value.metadata?.builder_type === null && ctx.value.metadata?.builder_fields != null) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['metadata', 'builder_fields'],
+        message:
+          'metadata.builder_fields cannot be set while metadata.builder_type is being cleared with null.',
+        input: ctx.value.metadata.builder_fields,
       });
     }
   });
