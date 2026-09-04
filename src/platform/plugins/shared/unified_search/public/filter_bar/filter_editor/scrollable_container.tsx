@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Subject } from 'rxjs';
 
 function getVisibleHeightInViewport(element: HTMLDivElement) {
@@ -34,33 +34,35 @@ export function ScrollableContainer({
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleHeight, setVisibleHeigth] = useState(0);
 
+  const clearVisibleHeight = useCallback(() => {
+    setVisibleHeigth(0);
+  }, []);
+
   useLayoutEffect(() => {
     if (!containerRef.current) return;
 
-    function updateVisibleHeight() {
+    const resizeObserver = new ResizeObserver(() => {
       if (!containerRef.current) return;
       setVisibleHeigth(getVisibleHeightInViewport(containerRef.current));
-    }
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateVisibleHeight();
     });
     resizeObserver.observe(containerRef.current);
 
-    window.addEventListener('resize', updateVisibleHeight);
+    // Clear visible height on window resize to allow children to grow to new window size
+    window.addEventListener('resize', clearVisibleHeight);
 
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener('resize', updateVisibleHeight);
+      window.removeEventListener('resize', clearVisibleHeight);
     };
-  }, []);
+  }, [clearVisibleHeight]);
 
   useEffect(() => {
-    const subscription = resetVisibleHeight$.subscribe(() => setVisibleHeigth(0));
+    // Clear visible height on content size change to allow children to grow to new content size
+    const subscription = resetVisibleHeight$.subscribe(clearVisibleHeight);
     return () => {
       subscription.unsubscribe();
     };
-  }, [resetVisibleHeight$]);
+  }, [resetVisibleHeight$, clearVisibleHeight]);
 
   return (
     <div
