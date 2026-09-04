@@ -1,5 +1,5 @@
 {
-  "sha1": "42842aef6148e18b68aa7a3832c1f4b15bc710a0",
+  "sha1": "c70a8c021d0e4e1a9091a2ea2ac7ff180294a6fd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -274,7 +274,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
         "line": 53,
-        "column": 52
+        "column": 27
       }
     },
     {
@@ -286,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 94,
-        "column": 72
+        "line": 93,
+        "column": 57
       }
     },
     {
@@ -299,8 +299,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 158,
-        "column": 16
+        "line": 152,
+        "column": 25
       }
     },
     {
@@ -312,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 209,
-        "column": 59
+        "line": 203,
+        "column": 27
       }
     },
     {
