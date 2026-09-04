@@ -89,7 +89,7 @@ export function startDashboardSearchSessionIntegration(
       if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
         setSearchSessionId(updatedSearchSessionId);
 
-        // Update cache so future reopens use this session and frozen time
+        // Update cache so future reopens can reuse this session
         const dashboardId = dashboardApi.savedObjectId$.getValue();
         if (dashboardId) {
           const currentTimeRange = dashboardApi.timeRange$.getValue();

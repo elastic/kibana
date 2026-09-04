@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, type Observable, type Subscription } from 'rxjs';
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
@@ -21,13 +21,15 @@ export function initializeSearchSessionManager(
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   dashboardApi: Omit<DashboardApi, 'searchSessionId$'>,
-  dashboardInternalApi: DashboardInternalApi
+  dashboardInternalApi: DashboardInternalApi,
+  waitForPanelsToLoad$?: Observable<void>
 ) {
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
   const searchSessionGenerationInProgress$ = new BehaviorSubject<boolean>(false);
 
   let stopSearchSessionIntegration: (() => void) | undefined;
   let requestSearchSessionId: (() => Promise<string | undefined>) | undefined;
+  let revalidationSubscription: Subscription | undefined;
   if (searchSessionSettings) {
     stopSearchSessionIntegration = startDashboardSearchSessionIntegration(
       {
@@ -65,7 +67,7 @@ export function initializeSearchSessionManager(
         : dataService.search.session.start());
     searchSessionId$.next(initialSearchSessionId);
 
-    // Store fresh sessions in the cache so subsequent reopens can reuse the session and frozen time.
+    // Store fresh sessions in the cache so subsequent reopens can reuse the session.
     // Skip when restoring from URL or continuing from cache (those already have the right state).
     if (!sessionIdToRestore && !cachedSessionId && initialSearchSessionId) {
       const dashboardId = dashboardApi.savedObjectId$.getValue();
@@ -92,6 +94,20 @@ export function initializeSearchSessionManager(
         });
       });
     };
+
+    // After a cache hit renders, trigger a new session so panels fetch fresh data.
+    if (cachedSessionId && waitForPanelsToLoad$) {
+      revalidationSubscription = waitForPanelsToLoad$.subscribe(() => {
+        const scheduleRevalidation: (cb: () => void) => void =
+          typeof window.requestIdleCallback === 'function'
+            ? (cb) => window.requestIdleCallback(cb)
+            : (cb) => setTimeout(cb, 50);
+
+        scheduleRevalidation(() => {
+          dashboardApi.forceRefresh();
+        });
+      });
+    }
   }
   return {
     api: {
@@ -100,6 +116,7 @@ export function initializeSearchSessionManager(
     },
     cleanup: () => {
       stopSearchSessionIntegration?.();
+      revalidationSubscription?.unsubscribe();
     },
   };
 }
