@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { compact, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   AgentExecutionMode,
@@ -27,7 +26,7 @@ import {
 import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
 import {
   EMPTY_TOKENS,
-  formatRawDocument,
+  type InferenceDocument,
   type ExcludedFeatureSummary,
   type PreviouslyIdentifiedFeature,
 } from '@kbn/streams-ai';
@@ -42,7 +41,7 @@ export interface ExecuteFeatureIdentificationAgentOptions {
   request: KibanaRequest;
   connectorId: string;
   streamName: string;
-  sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
+  sampleDocuments: InferenceDocument[];
   excludedFeatures?: ExcludedFeatureSummary[];
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
   knownFeatureIds?: string;
@@ -94,18 +93,9 @@ export async function executeFeatureIdentificationAgent({
   ignoredFeatures: IgnoredFeature[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  const formattedDocuments = compact(
-    sampleDocuments.map((hit) =>
-      formatRawDocument({
-        hit,
-        shouldNotTruncate: (key) => key.includes('tags'),
-      })
-    )
-  );
-
   const userMessage = buildFeatureIdentificationUserMessage({
     streamName,
-    sampleDocuments: JSON.stringify(formattedDocuments),
+    sampleDocuments: JSON.stringify(sampleDocuments),
     previouslyIdentifiedFeatures:
       previouslyIdentifiedFeatures.length > 0
         ? JSON.stringify(previouslyIdentifiedFeatures)
