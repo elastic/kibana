@@ -33,10 +33,6 @@ describe('Annotate', () => {
     };
   });
 
-  afterEach(() => {
-    delete process.env.SLACK_NOTIFICATIONS_NEEDS_TEAM;
-  });
-
   describe('getAnnotation', () => {
     it('should create an annotation without logs link if artifact is missing', () => {
       const annotation = getAnnotation([mockFailure], {});
@@ -101,19 +97,6 @@ describe('Annotate', () => {
       expect(annotation).toEqual(
         '*Test Failures*\n<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> <https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id|[logs]> <https://github.com/some/failure/link/1234|[2 failures]> OSS CI Group #1 / test should fail'
       );
-    });
-
-    it('should append a needs-team note when SLACK_NOTIFICATIONS_NEEDS_TEAM is set', () => {
-      process.env.SLACK_NOTIFICATIONS_NEEDS_TEAM = 'true';
-      const annotation = getSlackMessage([mockFailure], {});
-
-      expect(annotation).toContain('⚠️ _This step has no team channel configured.');
-    });
-
-    it('should not append a needs-team note when SLACK_NOTIFICATIONS_NEEDS_TEAM is unset', () => {
-      const annotation = getSlackMessage([mockFailure], {});
-
-      expect(annotation).not.toContain('⚠️');
     });
   });
 

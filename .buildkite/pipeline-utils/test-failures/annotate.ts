@@ -108,10 +108,6 @@ export const getSlackMessage = (
   failures: TestFailure[],
   failureHtmlArtifacts: Record<string, Artifact>
 ): string => {
-  const needsTeamNote =
-    process.env.SLACK_NOTIFICATIONS_NEEDS_TEAM === 'true'
-      ? `\n⚠️ _This step has no team channel configured. Set \`SLACK_NOTIFICATIONS_CHANNEL\` on this step to route these alerts to the right team._\n`
-      : '';
   return (
     `*Test Failures*\n` +
     failures
@@ -137,8 +133,7 @@ export const getSlackMessage = (
 
         return `<${jobUrl}|[job]>${logsLink}${failuresCount} ${failure.jobName} / ${failure.name}`;
       })
-      .join('\n') +
-    needsTeamNote
+      .join('\n')
   );
 };
 
