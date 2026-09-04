@@ -9,6 +9,7 @@
 
 export {
   checkForTripleQuotesAndEsqlQuery,
+  createInsideConsoleStringChecker,
   endsWithConsoleBodyContinuation,
   getLineRemainderWithoutConsoleComments,
   isInsideConsoleComment,

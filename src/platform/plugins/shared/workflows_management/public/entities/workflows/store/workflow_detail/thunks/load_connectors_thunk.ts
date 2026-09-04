@@ -47,7 +47,7 @@ export const loadConnectorsThunk = createAsyncThunk<
 
         const schema = getWorkflowZodSchema(
           currentConnectorTypes,
-          triggerSchemas.getRegisteredIds()
+          triggerSchemas.getRegisteredTriggersForSchema()
         );
         dispatch(_setGeneratedSchemaInternal(schema));
       }

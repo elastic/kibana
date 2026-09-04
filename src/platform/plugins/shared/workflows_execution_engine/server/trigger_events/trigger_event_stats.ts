@@ -11,6 +11,7 @@
 export interface TriggerResolutionStats {
   subscribedCount: number;
   disabledCount: number;
+  connectorIdMismatchCount: number;
   kqlFalseCount: number;
   kqlErrorCount: number;
   matchedCount: number;
@@ -31,6 +32,7 @@ export interface TriggerEventScheduleStats {
 export const createEmptyTriggerResolutionStats = (): TriggerResolutionStats => ({
   subscribedCount: 0,
   disabledCount: 0,
+  connectorIdMismatchCount: 0,
   kqlFalseCount: 0,
   kqlErrorCount: 0,
   matchedCount: 0,

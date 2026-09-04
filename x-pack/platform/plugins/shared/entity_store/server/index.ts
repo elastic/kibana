@@ -39,7 +39,17 @@ export type {
 } from './types';
 export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 export { EntityMaintainerTaskStatus } from './tasks/entity_maintainers/types';
-export type { EntityUpdateClient, BulkObject, BulkObjectResponse } from './domain/crud';
+export type {
+  EntityUpdateClient,
+  BulkObject,
+  BulkObjectResponse,
+  CreateEntityFromSourceRequest,
+  CreateEntitiesFromSourceResult,
+  CreateEntityFromSourceOutcome,
+  EntityCreationRejectionReason,
+  CreateEntityFromSourceRejectionReason,
+} from './domain/crud';
+export { isEntityTypeCreatableFromSingleDocument } from '../common/domain/definitions/creatable_from_single_document';
 export type { EntityMetadataClient } from './domain/entity_metadata';
 export type { RelationshipsClient } from './domain/relationships';
 export type { ResolutionClient } from './domain/resolution';

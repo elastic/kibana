@@ -15,8 +15,8 @@ import {
   EuiText,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import type { WatchWorker, WorkerRunState } from '@kbn/pnd-common';
-import { useToggleWorker, useWorkers } from '../../../hooks/use_workers_api';
+import type { Worker, WorkerRunState } from '@kbn/pnd-common';
+import { useUpdateWorker, useWorkers } from '../../../hooks/use_workers_api';
 import { formatRelativeTime } from '../components/format_relative_time';
 import { WatchBadges } from '../components/watch_badges';
 import * as sectionI18n from '../translations';
@@ -51,7 +51,6 @@ const LastRunCell: React.FC<{ lastRun: string | null; state: WorkerRunState }> =
     );
   }
 
-  // A degraded worker is still running, so it keeps its timestamp but flags for attention.
   return (
     <EuiText size="s" color={state === 'degraded' ? 'warning' : undefined}>
       {formatRelativeTime(lastRun)}
@@ -61,14 +60,14 @@ const LastRunCell: React.FC<{ lastRun: string | null; state: WorkerRunState }> =
 
 export const WorkersTable: React.FC = () => {
   const { data, isLoading, error } = useWorkers();
-  const { mutate: toggleWorker } = useToggleWorker();
+  const { mutate: updateWorker } = useUpdateWorker();
 
-  const columns = useMemo<Array<EuiBasicTableColumn<WatchWorker>>>(
+  const columns = useMemo<Array<EuiBasicTableColumn<Worker>>>(
     () => [
       {
         field: 'id',
         name: i18n.COL_WORKER,
-        render: (_id: string, worker: WatchWorker) => {
+        render: (_id: string, worker: Worker) => {
           const description = i18n.workerDescription(worker.id);
           return (
             <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -76,7 +75,7 @@ export const WorkersTable: React.FC = () => {
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
-                      <strong>{i18n.workerName(worker.id)}</strong>
+                      <strong>{i18n.workerName(worker.id, worker.name)}</strong>
                     </EuiText>
                   </EuiFlexItem>
                   {worker.lifecycle && worker.lifecycle !== 'ga' ? (
@@ -111,7 +110,7 @@ export const WorkersTable: React.FC = () => {
         field: 'lastRun',
         name: i18n.COL_LAST_RUN,
         width: '140px',
-        render: (lastRun: string | null, worker: WatchWorker) => (
+        render: (lastRun: string | null, worker: Worker) => (
           <LastRunCell lastRun={lastRun} state={worker.state} />
         ),
       },
@@ -120,20 +119,21 @@ export const WorkersTable: React.FC = () => {
         name: i18n.COL_ENABLED,
         width: '100px',
         align: 'right',
-        render: (enabled: boolean, worker: WatchWorker) => (
+        render: (enabled: boolean, worker: Worker) => (
           <EuiSwitch
             checked={enabled}
             showLabel={false}
-            label={i18n.enableWorkerAriaLabel(i18n.workerName(worker.id))}
+            label={i18n.enableWorkerAriaLabel(i18n.workerName(worker.id, worker.name))}
+            disabled={worker.state === 'unavailable'}
             data-test-subj={`pndWorkerToggle-${worker.id}`}
             onChange={(event) =>
-              toggleWorker({ workerId: worker.id, enabled: event.target.checked })
+              updateWorker({ workerId: worker.id, patch: { enabled: event.target.checked } })
             }
           />
         ),
       },
     ],
-    [toggleWorker]
+    [updateWorker]
   );
 
   return (

@@ -2188,7 +2188,7 @@ describe('Action Scheduler', () => {
     const actionScheduler = new ActionScheduler(
       getSchedulerContext({
         ...defaultSchedulerContext,
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
         rule: {
           ...defaultSchedulerContext.rule,
           actions: [

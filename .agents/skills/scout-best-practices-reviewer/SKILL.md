@@ -36,6 +36,8 @@ Important: Do not post GitHub comments unless explicitly stated.
 
 Work through these numbered checks **in order, one at a time**, before the general checklist — don't batch or skip. They're the highest-priority findings: a genuine hit almost always means the PR must change before merge. Each row links to the canonical public guidance — **read the linked section before flagging**, and cite it in the comment.
 
+The **Fires when the PR…** column only determines when to perform a check; it does not establish that the PR has a problem. Post a finding only after the condition in **Flag / ask** is positively verified. A failed or incomplete repository lookup is not evidence that an implementation, configuration, or reusable abstraction is absent.
+
 | # | Critical check | Fires when the PR… | Flag / ask → see |
 |---|---|---|---|
 | 1 | **Custom server config earns its keep** | adds or updates a config set (files under `.../kbn-scout/.../config_sets/<name>/**`, a new `test/scout_<name>/` dir, or new `--serverConfigSet`) | Setting is runtime-toggleable → move it to `apiServices.core.settings(...)`. Duplicates an existing set's purpose/args → reuse that set, or ask its owners to extend it. → `docs/extend/testing/feature-flags.md`, `docs/extend/testing/scout-best-practices.md#prefer-runtime-feature-flags` |
@@ -63,7 +65,8 @@ Open only the docs relevant to the test type(s) under review.
 
 - **[general]** **Reuse-first**: prefer existing `pageObjects`, fixtures, and `apiServices`; if adding helpers/page objects, place them in the right scope (plugin vs solution vs `@kbn/scout`) and register via fixtures.
 - **[general]** **No unused constants**: flag constants that are unused or used in only one place — prefer inlining them.
-- **[general]** **Don't circumvent the linter**: flag attempts to silence a lint rule instead of fixing the root cause (`eslint-disable`, or swapping a flagged pattern for a hack that hides it). Sanctioned escape hatches (e.g. `dispatchEvent('click')` for a documented app bug) are fine only with an explicit documented justification. Don't re-flag plain lint violations — CI already gates those.
+- **[general]** **Don't circumvent the linter**: CI gates lint *violations*, so don't re-flag those — but it can't see a **suppressed** rule, so read every `eslint-disable` the diff adds. A file-level `/* eslint-disable <rule> */` is a `blocker`; it silences code added later too. An undescribed `// eslint-disable-next-line` is a `major`. With a stated reason (`-- <why>`) it is acceptable only when the rule genuinely can't express the case; if a supported alternative exists, name it. Same bar for hiding a flagged pattern behind a hack, or a sanctioned escape hatch like `dispatchEvent('click')`: both need a documented justification.
+  - Most common offender: `playwright/no-nth-methods`. A suppressed `.first()` almost always means the locator matched more than one element — the selector is the bug; name the replacement from **Avoid selecting elements by index or position** in `docs/extend/testing/ui-best-practices.md`. Only a genuinely ordered collection, or elements that are truly indistinguishable in a component the author doesn't own, justify a described `.nth()` / `.last()`, and both need a preceding `toHaveCount` to bound the index.
 - **[api]** **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
 - **[api]** **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
 - **[ui]** **UI scope**: keep UI specs focused on user interactions and rendering; for data-correctness assertions and choosing the right layer, see **Critical check 3 (right test type)**.
@@ -99,6 +102,8 @@ Flag **only major** changes or drops — coverage that genuinely weakens. Skip b
 
 - **Detect migration** when the PR removes/changes FTR tests (for example `test/functional/**`, `loadTestFile()`, FTR configs) alongside new/changed Scout specs.
 - **If migration is detected**:
+  - **Establish the baseline before asserting any delta.** A parity finding needs the old suite as evidence, not the list of deleted paths. For every removed file you cite: read its body; read the `index.ts` / `loadTestFile()` and FTR config(s) that referenced it, to establish which deployments actually ran it; then quote the old `describe` / `it` titles you claim were lost. If you cannot quote them, you have no parity finding.
+  - **Never infer coverage from a path.** A file under `test/serverless/**` proves only that some serverless suite existed, not that it covered the flow you're flagging. A `// Serverless test (remove during Scout migration): <path>` marker names the counterpart of the one file it sits in — it says nothing about sibling files in the same directory.
   - Treat parity gaps as `blocker` unless explicitly de-scoped.
   - Confirm the suite is the right **test type** (UI vs API): if the old FTR suite is primarily “data correctness”, prefer migrating it to a Scout API test (or unit/integration) rather than a Scout UI test.
   - Build a parity map from old scenarios → new Scout coverage (roles, setup/teardown, assertions, cleanup).

@@ -70,6 +70,9 @@ export const inputControlTexts = {
   hintTextPrefix: i18n.translate('sharedUXPackages.dateRangePicker.inputControl.hintTextPrefix', {
     defaultMessage: 'Type',
   }),
+  roundedSuffix: i18n.translate('sharedUXPackages.dateRangePicker.inputControl.roundedSuffix', {
+    defaultMessage: '(rounded)',
+  }),
 };
 
 export const dialogTexts = {
