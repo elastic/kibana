@@ -33,7 +33,7 @@ describe('buildFlyoutParticipants', () => {
 
   it('names the watch that ran the steps', () => {
     expect(buildFlyoutParticipants([step('step-1-1', SYSTEM_SECURITY_WATCH_DEEP_ID)])).toEqual([
-      { label: 'Deep Watch', tone: 'accent', workflowId: SYSTEM_SECURITY_WATCH_DEEP_ID },
+      { label: 'Forensic Watch', tone: 'accent', workflowId: SYSTEM_SECURITY_WATCH_DEEP_ID },
     ]);
   });
 

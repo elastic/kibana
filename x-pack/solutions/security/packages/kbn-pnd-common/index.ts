@@ -330,3 +330,20 @@ export type {
   DetectionChangeSignalEvent,
   DetectionChangeSignalEvidenceRef,
 } from './impl/workflow_triggers/detection_change_signal';
+
+export {
+  MANUAL_RESPONSE_ACTION_TYPES,
+  RESPONSE_ACTION_CAPABILITIES,
+  RESPONSE_ACTION_PRIORITIES,
+} from './recommended_actions';
+export type {
+  KibanaRecommendedResponseAction,
+  KibanaResponseActionType,
+  ManualRecommendedResponseAction,
+  ManualResponseActionType,
+  RecommendedResponseAction,
+  RecommendedResponseActionPriority,
+  RecommendedResponseActionTargets,
+  ResponseActionCapabilityRef,
+  ResponseActionType,
+} from './recommended_actions';

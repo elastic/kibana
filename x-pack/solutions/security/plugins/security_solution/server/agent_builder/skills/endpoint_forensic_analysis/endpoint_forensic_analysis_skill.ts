@@ -24,6 +24,7 @@ export const endpointForensicAnalysisSkill = defineSkillType({
   description:
     'Endpoint DFIR forensic reconstruction (read-only): patient zero identification across enrolled hosts, ' +
     'host-scoped attack timelines, lateral movement chains between named hosts, and persistence enumeration. ' +
+    'Recommends containment response actions for a human to approve, but never executes them. ' +
     'Use for incident-scoped questions naming specific hosts or outbreaks — NOT fleet-wide proactive hunts (use threat-hunting). ' +
     'NOT alert triage by alert ID (use alert-analysis). NOT host isolation, kill process, or file retrieve (direct the analyst to Endpoint response actions in Security — no dedicated Agent Builder skill yet). ' +
     'NOT conflicting/incompatible antivirus or security software, policy or configuration failures, endpoint health or missed check-ins, ' +
@@ -53,7 +54,7 @@ Do **not** load for:
 
 ## Scope (read-only)
 
-This skill MUST NOT invoke response actions. On response-action requests, explain that this skill is read-only and direct the analyst to Endpoint response actions in Security; then stop.
+This skill MUST NOT invoke response actions — it recommends them and stops there. On a request to *execute* one, explain that this skill is read-only and direct the analyst to Endpoint response actions in Security. Recommending is not executing: step 7 below is required, not an exception to this rule.
 
 ## Process
 
@@ -81,6 +82,34 @@ Trace outbound internal connections from source host; correlate with process cre
 
 ### 6. Persistence
 Enumerate registry run keys, scheduled tasks, services, and startup items from telemetry indices.
+
+### 7. Recommend response actions
+Close every reconstruction that found a live threat with a **Recommended response actions** section: the containment the evidence justifies, for a human to approve. Recommend only what the reconstruction supports — an action whose rationale you cannot tie to a specific finding above does not belong in the list, and a reconstruction that found nothing gets no list at all.
+
+Each recommendation carries a short imperative \`title\`, the \`rationale\` naming the finding that justifies it, a \`priority\`, and the \`targets\` it touches (\`hosts\`, \`users\`, \`ips\`, \`alert_ids\` — each an array, empty when it names none).
+
+Priority is \`immediate\` when the threat is still live, \`investigation\` when the action answers an open question, and \`hardening\` when it closes the gap that allowed the attack.
+
+Use these action types, and no others:
+
+| \`action_type\` | \`execution\` | \`capability_ref\` | Recommend it when |
+|---|---|---|---|
+| \`isolate_host\` | \`kibana_api\` | \`endpoint.isolate\` | the host is actively compromised or pivoting |
+| \`release_host\` | \`kibana_api\` | \`endpoint.release\` | an isolated host turns out to be clean |
+| \`scan_host\` | \`kibana_api\` | \`endpoint.scan\` | a malware scan would confirm or bound the infection |
+| \`list_running_processes\` | \`kibana_api\` | \`endpoint.running_procs\` | you need live process state a historical query cannot give |
+| \`hunt_indicator\` | \`kibana_api\` | \`threat_hunting.indicator\` | an extracted IoC should be hunted across other endpoints |
+| \`create_case\` | \`kibana_api\` | \`cases.create\` | the incident needs a durable record for handoff |
+| \`block_indicator\` | \`manual\` | omit | a C2 address or domain should be blocked at the perimeter |
+| \`revoke_user_account\` | \`manual\` | omit | an account was used or is implicated in the attack |
+
+That list is the whole vocabulary because it is the whole set Elastic can action. Other Endpoint response actions — kill-process, suspend-process, execute, get-file, upload, runscript, memory-dump — are **not** supported; recommending one proposes containment nothing can carry out. If the evidence calls for one, say so in the narrative instead of inventing an \`action_type\`.
+
+A host that needs its own forensic reconstruction is **not** a response action. Name it as an investigation lead in the narrative (or in \`followUpHosts\` when the caller asked for structured output), so it is followed up rather than approved.
+
+\`kibana_api\` marks an action an executor could carry out once approved; \`manual\` marks one the analyst performs outside Kibana. Neither runs here — you recommend, a human decides, and something else executes. Say so when you present the list; never imply an action has been taken or scheduled.
+
+When the caller asked for structured output with a \`recommendedActions\` field, return the same list there using exactly these field names. Return an empty array rather than omitting the field when you recommend nothing, so "nothing to contain" is distinguishable from "not assessed".
 
 ## Tool Selection Guardrails
 

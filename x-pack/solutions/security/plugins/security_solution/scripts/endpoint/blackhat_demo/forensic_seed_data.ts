@@ -13,14 +13,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
  * (`@kbn/evals-suite-endpoint`'s `forensic_data.ts`), duplicated here rather
  * than imported. `@kbn/evals-suite-endpoint` depends on
  * `@kbn/security-solution-plugin`, so importing it FROM this plugin's
- * `scripts/` tree creates an unbreakable `tsc -b` project-reference cycle
- * (TS6202). This script only needs the seed function, not the eval harness,
- * so a local copy is the smallest fix — see `ponytail.mdc` (deletion over a
- * cross-package abstraction that only one caller needs).
+ * `scripts/` tree creates an unbreakable `tsc -b` project-reference cycle.
  *
- * Keep in sync with forensic_data.ts's KILL_CHAIN by hand if that narrative
- * changes; this is a live-demo seeder, not a test fixture, so drift here is
- * low-risk and caught immediately by running the demo.
+ * Keep in sync with forensic_data.ts's KILL_CHAIN if that narrative changes.
  */
 
 const FORENSIC_AGENT_PREFIX = 'eval-agent-forensic-';
@@ -58,12 +53,16 @@ const FILE_INDEX = 'logs-endpoint.events.file-default';
 const NETWORK_INDEX = 'logs-endpoint.events.network-default';
 const REGISTRY_INDEX = 'logs-endpoint.events.registry-default';
 
+const PATIENT_ZERO_USER = 'r.martinez';
+
 interface ForensicEvent {
   offsetMinutes: number;
   host: keyof typeof AGENT_IDS;
   index: string;
   document: Record<string, unknown>;
 }
+
+export type ForensicAgentIdOverrides = Partial<Record<keyof typeof AGENT_IDS, string>>;
 
 const os = (host: keyof typeof AGENT_IDS) =>
   host === FORENSIC_HOSTS.domainController ? DC_OS : WORKSTATION_OS;
@@ -86,6 +85,7 @@ const KILL_CHAIN: ForensicEvent[] = [
           executable: 'C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE',
         },
       },
+      user: { name: PATIENT_ZERO_USER },
       message: 'OUTLOOK.EXE spawned an encoded PowerShell command (phishing attachment macro).',
     },
   },
@@ -105,6 +105,7 @@ const KILL_CHAIN: ForensicEvent[] = [
         name: 'powershell.exe',
         executable: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
       },
+      user: { name: PATIENT_ZERO_USER },
       message: 'PowerShell dropped second-stage payload update.dll to a world-writable path.',
     },
   },
@@ -117,6 +118,7 @@ const KILL_CHAIN: ForensicEvent[] = [
       network: { direction: 'outbound', transport: 'tcp', protocol: 'tls' },
       destination: { address: '185.220.101.42', ip: '185.220.101.42', port: 443 },
       process: { name: 'powershell.exe' },
+      user: { name: PATIENT_ZERO_USER },
       message: 'Outbound TLS beacon to known C2 185.220.101.42:443.',
     },
   },
@@ -133,6 +135,7 @@ const KILL_CHAIN: ForensicEvent[] = [
         command_line: 'rundll32.exe C:\\Users\\Public\\update.dll,DllMain',
         parent: { name: 'powershell.exe', pid: 4821 },
       },
+      user: { name: PATIENT_ZERO_USER },
       message: 'rundll32 loaded update.dll; process accessed lsass.exe memory (credential theft).',
     },
   },
@@ -145,6 +148,7 @@ const KILL_CHAIN: ForensicEvent[] = [
       network: { direction: 'outbound', transport: 'tcp', protocol: 'smb' },
       destination: { domain: FORENSIC_HOSTS.domainController, ip: '10.0.0.10', port: 445 },
       process: { name: 'rundll32.exe', pid: 5102 },
+      user: { name: PATIENT_ZERO_USER },
       message: 'SMB (445) connection from WKSTN-RECV01 to SRV-DC01 using stolen credentials.',
     },
   },
@@ -196,7 +200,6 @@ const KILL_CHAIN: ForensicEvent[] = [
         value: 'C:\\ProgramData\\svc.exe',
       },
       process: { name: 'cmd.exe', pid: 8004 },
-      message: 'Run-key persistence added on SRV-DC01 pointing at C:\\ProgramData\\svc.exe.',
     },
   },
   {
@@ -251,7 +254,7 @@ export async function seedForensicTimeline(
   { esClient }: { esClient: Client },
   log: ToolingLog,
   baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000),
-  agentIdOverrides: Partial<Record<keyof typeof AGENT_IDS, string>> = {}
+  agentIdOverrides: ForensicAgentIdOverrides = {}
 ): Promise<void> {
   const operations = KILL_CHAIN.flatMap((event) => {
     const agentId = agentIdOverrides[event.host] ?? AGENT_IDS[event.host];

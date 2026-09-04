@@ -16,8 +16,8 @@ import {
 import { watchLabel } from '.';
 
 describe('watchLabel', () => {
-  it('labels the Deep Watch', () => {
-    expect(watchLabel(SYSTEM_SECURITY_WATCH_DEEP_ID)).toBe('Deep Watch');
+  it('labels the Forensic Watch', () => {
+    expect(watchLabel(SYSTEM_SECURITY_WATCH_DEEP_ID)).toBe('Forensic Watch');
   });
 
   it('labels the Post-Incident Watch', () => {

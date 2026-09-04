@@ -11,8 +11,9 @@ paths:
       description: >
         Prepare the whole conversation context for an Attack Discovery 2.0 alert in one
         call: the three deterministic UUIDv5 conversation ids (investigation, incident and
-        tuning), the alert's rendered markdown and title, the per-phase Agent Builder agent
-        ids, and whether demo mode is forcing the incident verdict.
+        tuning), the alert's rendered markdown and title, the per-phase Agent Builder
+        agent ids, and whether demo mode is forcing the incident verdict. Forensic Watch
+        extracts host.name from the attack or alert in YAML, not here.
       summary: Derive conversation ids
       tags:
         - PND API

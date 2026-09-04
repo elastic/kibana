@@ -138,7 +138,7 @@ describe('ConversationCard', () => {
   it('renders no watch badge', () => {
     renderWithPndProviders(<ConversationCard {...defaultProps} />);
 
-    expect(screen.queryByText('Deep Watch')).toBeNull();
+    expect(screen.queryByText('Forensic Watch')).toBeNull();
   });
 
   /** Annotation 11a: reversibility survives on the contract, for the modal's tone, not as a badge. */

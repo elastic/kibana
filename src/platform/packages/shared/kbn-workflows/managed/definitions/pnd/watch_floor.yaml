@@ -386,6 +386,15 @@ steps:
       # concluded the opposite — and in demo mode the branch is forced, so a fixed verdict
       # claim would be flatly wrong. Sourcing it from the agent's own closing statement is
       # what keeps card and conversation from drifting.
+      # The trailing label + `| json` array is a machine-readable contract with
+      # `parse_recommended_actions` in the PND plugin, which reads the containment the
+      # forensics recommended out of this summary and renders it on the card, then strips
+      # the array from the prose. It has to ride in `summary`: `extract_reasoning_summary`
+      # drops `sections` before the row reaches the API (security finding D3), so a
+      # section is invisible to the UI. The literal is pinned on both sides — `@kbn/workflows`
+      # is `group: platform` and cannot import the plugin — so changing it here alone
+      # silently drops every card back to prose-only. Recommendations only: nothing in this
+      # repo executes them, and the summary says so.
       - name: reason_promote_incident
         type: data.set
         with:
@@ -397,6 +406,9 @@ steps:
               second gate that is always human. Declining ends the run and records your
               rationale in the thread. The investigation's own closing statement follows.
               {{ steps.investigate.output.proposal }}
+              The forensics recommend the containment below for your review; approving
+              escalates the incident and executes none of it.
+              Recommended response actions JSON: {{ steps.investigate.output.recommendedActions | json }}.
             sections:
               - title: Investigation assessment
                 body: "{{ steps.investigate.output.rationale }}"
@@ -502,17 +514,6 @@ steps:
 
             The investigation's assessment:
             {{ steps.investigate.output.rationale }}
-
-
-            The investigation's forensic reconstruction follows. Both fields are
-            empty when reconstruction did not run or did not complete, in which
-            case rely on the assessment above rather than inferring a sequence.
-
-
-            Patient zero: {{ steps.investigate.output.patientZero }}
-
-
-            Attack timeline: {{ steps.investigate.output.attackTimeline }}
 
 
             Recommend and stage containment and response actions, and explain the reasoning

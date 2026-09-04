@@ -175,4 +175,59 @@ describe('ApprovalModal', () => {
     const titleEl = document.getElementById(labelId ?? '');
     expect(titleEl).toHaveTextContent('Open investigation');
   });
+
+  // The Forensic Watch's recommended containment rides in `reasoning` as a label-anchored
+  // JSON array. @see parseRecommendedActions
+  describe('when the reasoning carries recommended actions', () => {
+    const isolateHost = {
+      action_type: 'isolate_host',
+      capability_ref: 'endpoint.isolate',
+      execution: 'kibana_api',
+      priority: 'immediate',
+      rationale: 'The host is beaconing to a known C2 address.',
+      targets: { alert_ids: [], hosts: ['WKSTN-RECV01'], ips: [], users: [] },
+      title: 'Isolate WKSTN-RECV01',
+    };
+
+    const prose = 'The investigation assessed this as a real incident.';
+
+    const withRecommendations = (actions: unknown[]): PndProposalRow => ({
+      ...mockProposal,
+      reasoning: `${prose} Recommended response actions JSON: ${JSON.stringify(actions)}.`,
+    });
+
+    it('renders each recommendation', () => {
+      renderModal({ proposal: withRecommendations([isolateHost]) });
+
+      expect(screen.getByTestId('pndRecommendedActionTitle-0')).toHaveTextContent(
+        'Isolate WKSTN-RECV01'
+      );
+    });
+
+    it('keeps the prose the array was anchored into', () => {
+      renderModal({ proposal: withRecommendations([isolateHost]) });
+
+      expect(screen.getByTestId('hitlActionCardReasoning')).toHaveTextContent(prose);
+    });
+
+    it('does not render the raw JSON array to the analyst', () => {
+      renderModal({ proposal: withRecommendations([isolateHost]) });
+
+      expect(screen.getByTestId('hitlActionCardReasoning')).not.toHaveTextContent(
+        'Recommended response actions JSON'
+      );
+    });
+
+    it('renders no recommendations section when the forensics recommended nothing', () => {
+      renderModal({ proposal: withRecommendations([]) });
+
+      expect(screen.queryByTestId('pndRecommendedActions')).not.toBeInTheDocument();
+    });
+  });
+
+  it('renders no recommendations section on a gate whose reasoning carries none', () => {
+    renderModal();
+
+    expect(screen.queryByTestId('pndRecommendedActions')).not.toBeInTheDocument();
+  });
 });

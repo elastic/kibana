@@ -28,6 +28,11 @@ import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { getActionButtonIconProps } from '../../helpers';
 import { primaryActionLabel } from '../../conversation_card/helpers/primary_action_label';
 import { CONVERSATION_CARD_ACTIONS } from '../../conversation_card/translations';
+import { RecommendedActions } from '../../recommended_actions';
+import {
+  parseRecommendedActions,
+  stripRecommendedActionsJson,
+} from '../../../pages/conversations/helpers/parse_recommended_actions';
 
 const TITLE_ID = 'approvalModalTitle';
 
@@ -92,8 +97,22 @@ export const ApprovalModal = memo<ApprovalModalProps>(
       text: <span data-test-subj="hitlActionCardEntity">{value}</span>,
     }));
 
+    // The containment the forensics recommended rides in `reasoning` as a label-anchored JSON
+    // array, so the prose above the list has to drop it: rendering the raw array is the one
+    // thing on the card no analyst can read. `undefined` on any parse failure leaves the
+    // summary exactly as it arrived.
+    const recommendedActions = useMemo(
+      () => parseRecommendedActions(proposal.reasoning),
+      [proposal.reasoning]
+    );
+
+    const reasoningProse = useMemo(
+      () => (proposal.reasoning != null ? stripRecommendedActionsJson(proposal.reasoning) : ''),
+      [proposal.reasoning]
+    );
+
     const blastRadiusDescription =
-      blastRadiusItems.length === 0 ? proposal.message ?? proposal.reasoning : undefined;
+      blastRadiusItems.length === 0 ? proposal.message ?? reasoningProse : undefined;
 
     const onSubmit = useCallback(() => {
       if (rationale.trim().length === 0) {
@@ -128,15 +147,16 @@ export const ApprovalModal = memo<ApprovalModalProps>(
               title={errorMessage}
             />
           ) : null}
-          {proposal.reasoning != null && proposal.reasoning.length > 0 ? (
+          {reasoningProse.length > 0 ? (
             <EuiText
               css={css({ padding: `0 ${euiTheme.size.m} ${euiTheme.size.m}` })}
               data-test-subj="hitlActionCardReasoning"
               size="s"
             >
-              <p>{proposal.reasoning}</p>
+              <p>{reasoningProse}</p>
             </EuiText>
           ) : null}
+          {recommendedActions != null ? <RecommendedActions actions={recommendedActions} /> : null}
           <BlastRadiusSection
             content={
               blastRadiusItems.length > 0

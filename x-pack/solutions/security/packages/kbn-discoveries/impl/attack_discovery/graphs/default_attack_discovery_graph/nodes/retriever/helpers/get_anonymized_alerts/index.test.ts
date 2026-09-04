@@ -200,12 +200,57 @@ describe('getAnonymizedAlerts', () => {
     const searchArg = (mockEsClient.search as unknown as jest.Mock).mock.calls[0][0];
 
     expect(searchArg.query).toEqual({ ids: { values: alertIds } });
-    // the non-query scaffolding (index/size/fields) is preserved so anonymization still works
-    expect(searchArg.size).toBe(size);
+    // the re-fetch is sized by the curated id list, not by the caller's size
+    expect(getOpenAndAcknowledgedAlertsQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ size: alertIds.length })
+    );
+    // the non-query scaffolding (index/fields) is preserved so anonymization still works
     expect(searchArg.fields).toEqual([{ field: '*', include_unmapped: true }]);
     // the time and status constraints are gone
     expect(JSON.stringify(searchArg)).not.toContain('@timestamp');
     expect(JSON.stringify(searchArg)).not.toContain('workflow_status');
+  });
+
+  describe('when an ids filter curates fewer alerts than MIN_SIZE', () => {
+    // MIN_SIZE/MAX_SIZE bound the user-configurable "alerts to analyze" setting. An
+    // exact-id re-fetch is bounded by its id list instead, so a curated set below
+    // MIN_SIZE must still resolve rather than silently returning zero alerts.
+    const alertIds = ['alert-id-1', 'alert-id-2', 'alert-id-3', 'alert-id-4'];
+    const belowMinSize = alertIds.length;
+
+    beforeEach(() => {
+      (getOpenAndAcknowledgedAlertsQuery as jest.Mock).mockReturnValue({
+        index: [alertsIndexPattern],
+        size: belowMinSize,
+        fields: [{ field: '*', include_unmapped: true }],
+        query: { bool: { filter: [] } },
+      });
+    });
+
+    it('searches instead of short-circuiting on the size range', async () => {
+      await getAnonymizedAlerts({
+        alertsIndexPattern,
+        esClient: mockEsClient,
+        filter: { ids: { values: alertIds } },
+        size: belowMinSize,
+      });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ query: { ids: { values: alertIds } } })
+      );
+    });
+
+    it('returns the anonymized alerts', async () => {
+      const result = await getAnonymizedAlerts({
+        alertsIndexPattern,
+        anonymizationFields: mockAnonymizationFields,
+        esClient: mockEsClient,
+        filter: { ids: { values: alertIds } },
+        size: belowMinSize,
+      });
+
+      expect(result.length).toEqual(mockOpenAndAcknowledgedAlertsQueryResults.hits.hits.length);
+    });
   });
 
   it('returns the expected transformed (anonymized) raw data', async () => {

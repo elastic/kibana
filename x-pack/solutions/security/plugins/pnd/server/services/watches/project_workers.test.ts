@@ -124,7 +124,7 @@ describe('projectWorkers', () => {
   });
 
   /**
-   * The Deep Watch's `triage_alerts` is the live example: it is a real `ai.agent` step, but it names
+   * The Forensic Watch's `forensic_analysis` is the live example: it is a real `ai.agent` step, but it names
    * no `agent-id`, so at run time it falls through to the platform default agent. PND neither
    * installs nor configures that agent, so a row for it could state neither an agent nor its skills
    * truthfully — which is the whole class of row this bead removes.

@@ -39,28 +39,8 @@ export const getAnonymizedAlerts = async ({
   size?: number;
   start?: DateMath | null;
 }): Promise<string[]> => {
-  if (alertsIndexPattern == null || size == null || sizeIsOutOfRange(size)) {
-    return [];
-  }
-
-  const query = getOpenAndAcknowledgedAlertsQuery({
-    alertsIndexPattern,
-    anonymizationFields: anonymizationFields ?? [],
-    end,
-    filter,
-    size,
-    start,
-  });
-
   // Exact-id re-fetch (skill mode): when the caller passes an `ids` filter it has
-  // already selected the precise documents to fetch (the gate-curated alerts). The
-  // shared builder unconditionally ANDs an open/acknowledged status clause and a
-  // `@timestamp` range (defaulting to now-24h) onto every query, which would drop
-  // curated alerts that are older than that window or not open/acknowledged. Override
-  // just the query clause with a plain `ids` query so those documents resolve exactly,
-  // regardless of age or status. The rest of the request (index/size/fields/_source/
-  // sort) is preserved so anonymization is unchanged. Only the id re-fetch passes an
-  // `ids` filter, so no other retrieval path is affected.
+  // already selected the precise documents to fetch (the gate-curated alerts).
   const rawIds =
     filter != null && typeof filter === 'object' && 'ids' in filter
       ? (filter as Record<string, unknown>).ids
@@ -73,6 +53,36 @@ export const getAnonymizedAlerts = async ({
       ? (rawIds as { values: string[] }).values
       : undefined;
 
+  // An exact-id re-fetch is bounded by its id list, so it is sized by that list and
+  // exempt from the `MIN_SIZE`/`MAX_SIZE` range, which bounds the user-configurable
+  // "alerts to analyze" setting. A curated set smaller than `MIN_SIZE` is legitimate
+  // and must still resolve, rather than silently returning zero alerts.
+  const requestSize = idsValues != null ? idsValues.length : size;
+
+  if (
+    alertsIndexPattern == null ||
+    requestSize == null ||
+    (idsValues == null && sizeIsOutOfRange(requestSize))
+  ) {
+    return [];
+  }
+
+  const query = getOpenAndAcknowledgedAlertsQuery({
+    alertsIndexPattern,
+    anonymizationFields: anonymizationFields ?? [],
+    end,
+    filter,
+    size: requestSize,
+    start,
+  });
+
+  // The shared builder unconditionally ANDs an open/acknowledged status clause and a
+  // `@timestamp` range (defaulting to now-24h) onto every query, which would drop
+  // curated alerts that are older than that window or not open/acknowledged. Override
+  // just the query clause with a plain `ids` query so those documents resolve exactly,
+  // regardless of age or status. The rest of the request (index/size/fields/_source/
+  // sort) is preserved so anonymization is unchanged. Only the id re-fetch passes an
+  // `ids` filter, so no other retrieval path is affected.
   const searchRequest =
     idsValues != null ? { ...query, query: { ids: { values: idsValues } } } : query;
 

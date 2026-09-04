@@ -62,7 +62,7 @@ describe('LifecycleParticipants', () => {
 
     expect(
       screen.getByTestId(`pndLifecycleParticipant-${SYSTEM_SECURITY_WATCH_DEEP_ID}`)
-    ).toHaveTextContent('Deep Watch');
+    ).toHaveTextContent('Forensic Watch');
   });
 
   it('renders one badge per watch', () => {

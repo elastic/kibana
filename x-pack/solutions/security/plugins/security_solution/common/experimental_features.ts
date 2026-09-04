@@ -267,9 +267,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
-   * Shipped dark by default; enable per environment via config.
+   * Forensic Watch on this POC branch requires it, so the default is on.
    */
-  endpointForensicAnalysisSkill: false,
+  endpointForensicAnalysisSkill: true,
 
   /**
    * Enables the investigate-rule Agent Builder skill.

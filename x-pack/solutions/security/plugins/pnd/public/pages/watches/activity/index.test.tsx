@@ -138,7 +138,7 @@ describe('WatchesActivityPage', () => {
   it('names the watch each run belongs to', async () => {
     renderActivity({ body: bothRuns });
 
-    expect((await screen.findAllByTestId('pndRunWatch'))[0]).toHaveTextContent('Deep Watch');
+    expect((await screen.findAllByTestId('pndRunWatch'))[0]).toHaveTextContent('Forensic Watch');
   });
 
   it('badges the run status', async () => {
@@ -258,7 +258,7 @@ describe('WatchesActivityPage', () => {
       route: `/watches/activity?watchId=${SYSTEM_SECURITY_WATCH_DEEP_ID}`,
     });
 
-    expect(await screen.findByTestId('pndRunsWatchFilter')).toHaveTextContent('Deep Watch');
+    expect(await screen.findByTestId('pndRunsWatchFilter')).toHaveTextContent('Forensic Watch');
   });
 
   it('clears the watch filter back to every watch', async () => {

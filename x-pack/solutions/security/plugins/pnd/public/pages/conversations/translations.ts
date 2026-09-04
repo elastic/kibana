@@ -28,7 +28,7 @@ export const WATCH_DARK = i18n.translate('xpack.pnd.brief.watch.dark', {
 });
 
 export const WATCH_DEEP = i18n.translate('xpack.pnd.brief.watch.deep', {
-  defaultMessage: 'Deep Watch',
+  defaultMessage: 'Forensic Watch',
 });
 
 /**

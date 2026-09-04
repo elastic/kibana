@@ -38,7 +38,7 @@ describe('WatchFilters', () => {
 
     expect(
       screen.getByTestId(`pndBriefWatchFilter-${SYSTEM_SECURITY_WATCH_DEEP_ID}`)
-    ).toHaveTextContent('Deep Watch');
+    ).toHaveTextContent('Forensic Watch');
   });
 
   it('labels the row, which is what makes it read in the right tense', () => {

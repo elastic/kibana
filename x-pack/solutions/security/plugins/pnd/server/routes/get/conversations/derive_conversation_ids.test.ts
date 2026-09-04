@@ -179,6 +179,30 @@ describe('registerDeriveConversationIdsRoute', () => {
     expect(okBody(response).demoForceIncident).toBe(false);
   });
 
+  // Host extraction moved into watch_deep.yaml, which resolves it from the attack or its
+  // constituent alerts so the watch can skip forensics when no host is extractable. This
+  // route no longer carries a host name at all.
+  it('never returns a host name, because the YAML resolves the host itself', async () => {
+    const deps = createDeps();
+    registerDeriveConversationIdsRoute(deps);
+
+    const response = await invoke(getHandler(deps.router), AD_ALERT_ID);
+
+    expect(okBody(response)).not.toHaveProperty('hostName');
+  });
+
+  it('still returns conversation ids when host extraction finds nothing', async () => {
+    const deps = createDeps();
+    registerDeriveConversationIdsRoute(deps);
+
+    const response = await invoke(getHandler(deps.router), AD_ALERT_ID);
+
+    expect(response.ok).toHaveBeenCalledTimes(1);
+    expect(okBody(response).investigationConversationId).toBe(
+      deriveConversationIds(AD_ALERT_ID).investigationConversationId
+    );
+  });
+
   it('resolves the discovery as the calling user (S3)', async () => {
     const deps = createDeps();
     registerDeriveConversationIdsRoute(deps);

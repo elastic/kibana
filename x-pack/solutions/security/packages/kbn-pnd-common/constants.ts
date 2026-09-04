@@ -533,7 +533,7 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
   {
     id: SYSTEM_SECURITY_WATCH_DEEP_ID,
     deepLinkId: SecurityPageName.pndWatchDeep,
-    name: 'Deep Watch',
+    name: 'Forensic Watch',
     color: '#8b5cf6',
     isBeta: true,
   },

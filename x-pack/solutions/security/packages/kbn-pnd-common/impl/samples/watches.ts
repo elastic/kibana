@@ -218,9 +218,9 @@ const deepWatchBase: Watch = {
   draft: false,
   managed: true,
   sortOrder: 40,
-  mandate: 'Deep investigation & hunts',
+  mandate: 'Endpoint forensics',
   description:
-    'Deep Watch skeleton. Specialist, on-demand depth — forensics, hunts, and draft-only conclusions under human review.',
+    'Forensic Watch. Given an Attack Discovery, extracts the affected host and runs endpoint-forensic-analysis; returns isIncident, rationale, and a proposal.',
   schedule: {
     set: true,
     mode: 'window',
