@@ -108,6 +108,7 @@ export const navigateToEndpointList = (
   /** If defined, we'll wait until that host name appears on the list (assumes its on page 1) */
   endpointHostName?: string
 ): void => {
+  cy.getByTestSubj('chromeNextGlobalHeaderSearchButton').click();
   cy.getByTestSubj('nav-search-input').type('endpoints');
   cy.getByTestSubj('nav-search-option', { timeout: 20000 })
     .parent()

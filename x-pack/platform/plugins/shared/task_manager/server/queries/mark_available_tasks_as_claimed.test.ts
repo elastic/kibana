@@ -309,20 +309,25 @@ if (doc['task.runAt'].size()!=0) {
   describe('claimSort', () => {
     const definitions = new TaskTypeDictionary(mockLogger());
     definitions.registerTaskDefinitions({
-      normalPriorityTask: {
-        title: 'normal priority',
+      standardPriorityTask: {
+        title: 'standard priority',
         createTaskRunner: () => ({ run: () => Promise.resolve() }),
-        priority: TaskPriority.Normal, // 50
+        priority: TaskPriority.Standard, // 50
       },
       noPriorityTask: {
         title: 'no priority',
         createTaskRunner: () => ({ run: () => Promise.resolve() }),
         priority: undefined, // 50
       },
-      lowPriorityTask: {
-        title: 'low priority',
+      maintenancePriorityTask: {
+        title: 'maintenance priority',
         createTaskRunner: () => ({ run: () => Promise.resolve() }),
-        priority: TaskPriority.Low, // 1
+        priority: TaskPriority.Maintenance, // 1
+      },
+      userInteractivePriorityTask: {
+        title: 'user interactive priority',
+        createTaskRunner: () => ({ run: () => Promise.resolve() }),
+        priority: TaskPriority.UserInteractive, // 100
       },
     });
 
@@ -341,14 +346,14 @@ if (doc['task.runAt'].size()!=0) {
       const baseTasks: ConcreteTaskInstance[] = [];
 
       // push in reverse order
-      baseTasks.push(buildTaskInstance({ taskType: 'lowPriorityTask', runAt: date }));
+      baseTasks.push(buildTaskInstance({ taskType: 'maintenancePriorityTask', runAt: date }));
       baseTasks.push(buildTaskInstance({ taskType: 'noPriorityTask', runAt: date }));
-      baseTasks.push(buildTaskInstance({ taskType: 'normalPriorityTask', runAt: date }));
+      baseTasks.push(buildTaskInstance({ taskType: 'standardPriorityTask', runAt: date }));
 
       for (const perm of permutations) {
         const tasks = [baseTasks[perm[0]], baseTasks[perm[1]], baseTasks[perm[2]]];
         const sorted = claimSort(definitions, tasks);
-        // all we know is low should be last
+        // all we know is maintenance should be last
         expect(sorted[2]).toBe(baseTasks[0]);
       }
     });
@@ -406,14 +411,14 @@ if (doc['task.runAt'].size()!=0) {
     test('task instance priority takes precedence over task definition priority', () => {
       const date = new Date();
       const overridden = buildTaskInstance({
-        taskType: 'normalPriorityTask',
+        taskType: 'standardPriorityTask',
         runAt: date,
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
       });
       const promoted = buildTaskInstance({
-        taskType: 'lowPriorityTask',
+        taskType: 'maintenancePriorityTask',
         runAt: date,
-        priority: TaskPriority.Normal,
+        priority: TaskPriority.Standard,
       });
 
       const sorted = claimSort(definitions, [overridden, promoted]);
@@ -423,23 +428,56 @@ if (doc['task.runAt'].size()!=0) {
 
     test('uses task definition priority when there is no task instance priority set', () => {
       const date = new Date();
-      const normal = buildTaskInstance({ taskType: 'normalPriorityTask', runAt: date });
-      const low = buildTaskInstance({ taskType: 'lowPriorityTask', runAt: date });
+      const standard = buildTaskInstance({ taskType: 'standardPriorityTask', runAt: date });
+      const maintenance = buildTaskInstance({ taskType: 'maintenancePriorityTask', runAt: date });
 
-      const sorted = claimSort(definitions, [low, normal]);
-      expect(sorted[0]).toBe(normal);
-      expect(sorted[1]).toBe(low);
+      const sorted = claimSort(definitions, [maintenance, standard]);
+      expect(sorted[0]).toBe(standard);
+      expect(sorted[1]).toBe(maintenance);
     });
 
-    test('uses "normal" priority when there is no task instance or definition priority set', () => {
+    test('uses "standard" priority when there is no task instance or definition priority set', () => {
       const date = new Date();
-      // noPriorityTask defaults to Normal,
+      // noPriorityTask defaults to Standard,
       const noPriority = buildTaskInstance({ taskType: 'noPriorityTask', runAt: date });
-      const low = buildTaskInstance({ taskType: 'lowPriorityTask', runAt: date });
+      const maintenance = buildTaskInstance({ taskType: 'maintenancePriorityTask', runAt: date });
 
-      const sorted = claimSort(definitions, [low, noPriority]);
+      const sorted = claimSort(definitions, [maintenance, noPriority]);
       expect(sorted[0]).toBe(noPriority);
-      expect(sorted[1]).toBe(low);
+      expect(sorted[1]).toBe(maintenance);
+    });
+
+    test('claims user interactive tasks ahead of every other priority', () => {
+      const date = new Date();
+      const maintenance = buildTaskInstance({ taskType: 'maintenancePriorityTask', runAt: date });
+      const deferrable = buildTaskInstance({
+        taskType: 'standardPriorityTask',
+        runAt: date,
+        priority: TaskPriority.Deferrable,
+      });
+      const standard = buildTaskInstance({ taskType: 'standardPriorityTask', runAt: date });
+      const userInteractive = buildTaskInstance({
+        taskType: 'userInteractivePriorityTask',
+        runAt: date,
+      });
+
+      const sorted = claimSort(definitions, [maintenance, standard, deferrable, userInteractive]);
+      expect(sorted).toEqual([userInteractive, standard, deferrable, maintenance]);
+    });
+
+    test('claims a user interactive task ahead of an older standard priority task', () => {
+      const baseDate = new Date('2024-07-29T00:00:00Z').valueOf();
+      const olderStandard = buildTaskInstance({
+        taskType: 'standardPriorityTask',
+        runAt: new Date(baseDate - 60_000),
+      });
+      const userInteractive = buildTaskInstance({
+        taskType: 'userInteractivePriorityTask',
+        runAt: new Date(baseDate),
+      });
+
+      const sorted = claimSort(definitions, [olderStandard, userInteractive]);
+      expect(sorted).toEqual([userInteractive, olderStandard]);
     });
   });
 });

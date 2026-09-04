@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 
 export const HEADER_BUTTON_HEIGHT_PX = 32;
 export const HEADER_BUTTON_SQUARE_WIDTH_PX = 32;
@@ -60,6 +60,7 @@ export interface HeaderActionButtonProps
   onClick: () => void;
   'aria-label': string;
   'data-test-subj'?: string;
+  notification?: boolean;
 }
 
 export const HeaderActionButton = React.forwardRef<HTMLButtonElement, HeaderActionButtonProps>(
@@ -72,9 +73,11 @@ export const HeaderActionButton = React.forwardRef<HTMLButtonElement, HeaderActi
       'aria-expanded': ariaExpanded,
       'aria-haspopup': ariaHaspopup,
       'data-test-subj': dataTestSubj,
+      notification,
     },
     ref
   ) => {
+    const { euiTheme } = useEuiTheme();
     const styleVars = useHeaderButtonStyleVars();
 
     return (
@@ -93,7 +96,34 @@ export const HeaderActionButton = React.forwardRef<HTMLButtonElement, HeaderActi
         style={styleVars}
         onClick={onClick}
       >
-        {children}
+        {notification ? (
+          <span
+            css={css`
+              position: relative;
+              display: inline-flex;
+            `}
+          >
+            {children}
+            <EuiIcon
+              type="dot"
+              size="s"
+              color="primary"
+              aria-hidden
+              data-test-subj="headerActionButtonNotification"
+              css={css`
+                position: absolute;
+                top: -${euiTheme.size.xs};
+                right: -${euiTheme.size.xs};
+                pointer-events: none;
+                stroke: ${euiTheme.colors.emptyShade};
+                stroke-width: 2px;
+                paint-order: stroke;
+              `}
+            />
+          </span>
+        ) : (
+          children
+        )}
       </button>
     );
   }

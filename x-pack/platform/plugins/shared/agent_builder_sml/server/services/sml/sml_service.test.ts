@@ -101,11 +101,26 @@ const expectedVisibilityFilter = ({
                 ...(actions
                   ? [
                       {
-                        terms_set: {
-                          [PERM_NAME_FIELD]: {
-                            terms: actions,
-                            minimum_should_match_field: PERM_COUNT_FIELD,
-                          },
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            {
+                              bool: {
+                                filter: [
+                                  { term: { [PERM_COUNT_FIELD]: 0 } },
+                                  { bool: { must_not: [{ exists: { field: PERM_NAME_FIELD } }] } },
+                                ],
+                              },
+                            },
+                            {
+                              terms_set: {
+                                [PERM_NAME_FIELD]: {
+                                  terms: actions,
+                                  minimum_should_match_field: PERM_COUNT_FIELD,
+                                },
+                              },
+                            },
+                          ],
                         },
                       },
                     ]
@@ -118,6 +133,28 @@ const expectedVisibilityFilter = ({
     ],
   },
 });
+
+/** The slice of Query DSL the visibility-filter assertions have to walk. */
+interface QueryClause {
+  nested?: { query: { bool: { filter: QueryClause[] } } };
+  bool?: { should?: QueryClause[] };
+  terms_set?: Record<string, unknown>;
+}
+
+/**
+ * Dig the zero-action `should` branch out of an emitted visibility filter: the nested privilege
+ * clause -> the privilege `bool` -> the branch that is not the `terms_set`.
+ */
+const findZeroActionBranch = (visibilityFilter: unknown): QueryClause | undefined => {
+  const { should } = (visibilityFilter as { bool: { should: QueryClause[] } }).bool;
+  const nested = should.find((clause) => clause.nested != null)?.nested;
+  // The space-scope clause is also a `bool.should`; the privilege clause is the one holding the
+  // `terms_set`.
+  const privilegeClause = nested?.query.bool.filter.find((clause) =>
+    clause.bool?.should?.some((branch) => branch.terms_set != null)
+  );
+  return privilegeClause?.bool?.should?.find((clause) => clause.terms_set == null);
+};
 
 /** The authorization filter emitted when the security plugin is present. */
 const expectedAuthzFilter = (actions: string[], spaceId = 'default') =>
@@ -1353,6 +1390,45 @@ describe('SmlService', () => {
       expect(filterClauses[0]).toEqual(expectedAuthzFilter(['saved_object:dashboard/get']));
     });
 
+    it('gates the zero-action branch on the element carrying no action names', async () => {
+      // The indexer derives `count` from the action list, so `count: 0` always means "no names".
+      // An element with `count: 0` AND names is malformed, and `terms_set` would match it for
+      // free (minimum_should_match_field resolves to 0). The branch therefore pairs the count
+      // term with `must_not exists` on the name leaf so such an element fails CLOSED instead of
+      // reading as public. Asserted independently of `expectedAuthzFilter` — loosening the shared
+      // helper must not silently loosen this rule.
+      const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
+      aggResponse = universeAgg(['saved_object:dashboard/get']);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      hitsResponse = { hits: { total: 0, hits: [] } };
+
+      await smlService.autocomplete({
+        query: 'git',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = docSearchCall(esClient);
+      const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
+      const privilegeClause = findZeroActionBranch(filterClauses[0]);
+
+      // Separates "the branch changed" from "the walk no longer finds the privilege clause".
+      expect(privilegeClause).toBeDefined();
+      expect(privilegeClause).toEqual({
+        bool: {
+          filter: [
+            { term: { [PERM_COUNT_FIELD]: 0 } },
+            { bool: { must_not: [{ exists: { field: PERM_NAME_FIELD } }] } },
+          ],
+        },
+      });
+    });
+
     it('emits a space-only visibility filter (no terms_set) when securityAuthz is absent', async () => {
       // Open access applies to PRIVILEGES only — space isolation must hold without the security
       // plugin, because Spaces are available on Basic with security disabled.
@@ -1682,6 +1758,45 @@ describe('SmlService', () => {
       });
 
       expect(result.get('item-zero-actions')).toBe(true);
+    });
+
+    it('denies access for a malformed element whose count is 0 but still names actions', async () => {
+      // Parity with the ES-side filter, which pairs `count: 0` with `must_not exists` on the name
+      // leaf for exactly this case. The in-memory mirror reads the names directly, so an unheld
+      // action denies regardless of what `count` claims. Both paths fail CLOSED.
+      const securityAuthz = createMockSecurityAuthz([]);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      hitsResponse = {
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'item-malformed',
+                permissions: {
+                  kibana: {
+                    privileges: [
+                      { space: 'default', name: ['saved_object:dashboard/get'], count: 0 },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+
+      const result = await smlService.checkItemsAccess({
+        ids: ['item-malformed'],
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.get('item-malformed')).toBe(false);
     });
 
     it('handles 404 error by returning false for all items', async () => {

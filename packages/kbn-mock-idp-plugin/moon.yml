@@ -33,14 +33,19 @@ dependsOn:
   - '@kbn/core-http-server-utils'
   - '@kbn/i18n'
   - '@kbn/core'
+  - '@kbn/developer-toolbar-plugin'
+  - '@kbn/test-jest-helpers'
 tags:
   - plugin
   - dev
   - group-platform
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

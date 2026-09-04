@@ -17,7 +17,8 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
-import { createToolErrorResult } from '../common/tool_results';
+import { hasRuleMigrationPrivileges } from '../common/privileges';
+import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
@@ -90,6 +91,11 @@ Use this to decide whether translated rules are ready to install, and to surface
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {
+      const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
+      if (!hasPrivilege) {
+        return createMissingPrivilegeError('view rule migration translation stats');
+      }
+
       const response = await callSelfClient<GetRuleMigrationTranslationStatsResponse>(
         request,
         buildPath(migrationId),

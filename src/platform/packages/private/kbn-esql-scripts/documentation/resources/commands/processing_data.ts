@@ -166,7 +166,7 @@ Refer to the [dissect processor documentation](https://www.elastic.co/guide/en/e
 
 \`\`\` esql
 ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
-| DISSECT a "%'\\{Y\\}-%\\{M\\}-%\\{D\\}T%\\{h\\}:%\\{m\\}:%\\{s\\}Z - %\\{msg\\} - %\\{ip\\}'"
+| DISSECT a "%'{Y}'-%'{M}'-%'{D}'T%'{h}':%'{m}':%'{s}'Z - %'{msg}' - %'{ip}'"
 \`\`\`            `,
     descriptionOptions: {
       ignoreTag: true,
@@ -439,7 +439,7 @@ Refer to the [grok processor documentation](https://www.elastic.co/guide/en/elas
 
 \`\`\` esql
 ROW a = "12 15.5 15.6 true"
-| GROK a "%'\\{NUMBER:b:int\\} %\\{NUMBER:c:float\\} %\\{NUMBER:d:double\\} %\\{WORD:e:boolean\\}'"
+| GROK a "%'{NUMBER:b:int}' %'{NUMBER:c:float}' %'{NUMBER:d:double}' %'{WORD:e:boolean}'"
 \`\`\`
             `,
     descriptionOptions: {

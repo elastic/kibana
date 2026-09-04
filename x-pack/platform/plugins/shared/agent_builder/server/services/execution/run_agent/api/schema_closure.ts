@@ -6,8 +6,8 @@
  */
 
 import { memoize } from 'lodash';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { isRecord } from './types';
-import type { ApiTarget } from './types';
 
 const jsonDirByTarget: Record<ApiTarget, string> = {
   elasticsearch: 'es',

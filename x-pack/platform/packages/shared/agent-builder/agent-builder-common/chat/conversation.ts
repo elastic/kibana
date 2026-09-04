@@ -496,6 +496,20 @@ export interface ConversationRoundAuthor {
   full_name?: string;
 }
 
+export const getConversationRoundAuthorDisplayName = (
+  author?: ConversationRoundAuthor
+): string | undefined => {
+  if (!author) {
+    return undefined;
+  }
+
+  if (author.full_name) {
+    return author.full_name;
+  }
+
+  return author.username;
+};
+
 /** External system the message comes from, for example Slack or GitHub. */
 export enum ConversationOriginType {
   Slack = 'slack',
@@ -698,6 +712,11 @@ export type ConversationWithPermissions = Conversation & {
 export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
   permissions: ConversationPermissions;
 };
+
+export interface ConversationListResult {
+  results: ConversationWithoutRoundsWithPermissions[];
+  total: number;
+}
 
 export type ConversationAction = 'regenerate';
 

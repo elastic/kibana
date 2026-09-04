@@ -987,7 +987,7 @@ describe('execute()', () => {
       logger: mockedLogger,
       connectorUsageCollector,
     });
-    expect(mockedLogger.error).toBeCalledWith(
+    expect(mockedLogger.error).toHaveBeenCalledWith(
       'error on some-id http event: maxContentLength size of 1000000 exceeded'
     );
   });

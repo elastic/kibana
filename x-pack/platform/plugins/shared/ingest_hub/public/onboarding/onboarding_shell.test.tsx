@@ -63,7 +63,7 @@ jest.mock('./step_components', () => ({
       Continue
     </button>
   ),
-  DeployAndDetectStep: () => <div data-test-subj="deployAndDetectStep" />,
+  DetectAndReviewStep: () => <div data-test-subj="detectAndReviewStep" />,
 }));
 
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';

@@ -14,7 +14,10 @@ describe('TelemetrySavedObjectsClient', () => {
     const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsRepository);
 
     await telemetrySavedObjectsClient.find({ type: 'my-test-type' });
-    expect(savedObjectsRepository.find).toBeCalledWith({ type: 'my-test-type', namespaces: ['*'] });
+    expect(savedObjectsRepository.find).toHaveBeenCalledWith({
+      type: 'my-test-type',
+      namespaces: ['*'],
+    });
   });
 
   it("allow callers to overwrite the `namespaces:['*']`", async () => {
@@ -22,7 +25,7 @@ describe('TelemetrySavedObjectsClient', () => {
     const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsRepository);
 
     await telemetrySavedObjectsClient.find({ type: 'my-test-type', namespaces: ['some_space'] });
-    expect(savedObjectsRepository.find).toBeCalledWith({
+    expect(savedObjectsRepository.find).toHaveBeenCalledWith({
       type: 'my-test-type',
       namespaces: ['some_space'],
     });

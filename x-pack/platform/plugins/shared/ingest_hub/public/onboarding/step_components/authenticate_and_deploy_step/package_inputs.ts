@@ -16,7 +16,6 @@ import type {
 
 interface PackageInputEntry {
   enabled: boolean;
-  vars?: Record<string, string | boolean | string[]>;
   streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean | string[]> }>;
 }
 
@@ -116,13 +115,23 @@ export function buildPackageInputs(
         ? service.defaultEnabledInputs.slice(0, 1)
         : (service.inputs ?? []).slice(0, 1);
 
-      // Fleet stream key: <packageName>.<dataStreamPath>
-      const streamKey = `${service.packageName}.${dsId}`;
-      // Fleet input key: <policyTemplateName>-<inputType>  (service.id is now the PT name)
+      // Fleet input key: <policyTemplateName>-<inputType>
+      // Use policyTemplate when present (e.g. aws_cloudwatch_input_otel entries where id !== PT name).
+      const ptName = service.policyTemplate ?? service.id;
       const dsView = makeDsView(service, dsId);
+      // Fleet stream key for input packages: <packageName>.<policyTemplateName>
+      // Fleet synthesizes one data stream per PT with dataset = packageName.ptName
+      // (see getNormalizedDataStreams in Fleet's policy_template.ts). Regular packages use the
+      // actual data stream path instead.
+      // isInputPackage: buildAwsServiceMatrix sets entry.id = pt.name for input-package PTs, so
+      // dsId === service.id iff the service was built from a PT (not a standalone data stream).
+      const isInputPackage = dsId === service.id && !!service.policyTemplate;
+      const streamKey = isInputPackage
+        ? `${service.packageName}.${ptName}`
+        : `${service.packageName}.${dsId}`;
 
       for (const inputType of activeInputs) {
-        const inputKey = `${service.id}-${inputType}`;
+        const inputKey = `${ptName}-${inputType}`;
         const streamVars = buildStreamVars(dsView, dsVars, globalRegion, inputType);
 
         if (!inputs[inputKey]) {
@@ -143,6 +152,10 @@ export function buildPackageVars(
 ): Record<string, string> | undefined {
   const vars: Record<string, string> = {};
   if (globalRegion && pkgVarNames.has('default_region')) vars.default_region = globalRegion;
+  // 'region' (distinct from 'default_region') is a package-level var on aws_cloudwatch_input_otel
+  // today; ECS packages use 'default_region'. The pkgVarNames guard ensures it only fires when
+  // the deployed package actually declares it.
+  if (globalRegion && pkgVarNames.has('region')) vars.region = globalRegion;
   if (staticKeys?.access_key_id && staticKeys?.secret_access_key) {
     if (pkgVarNames.has('access_key_id')) vars.access_key_id = staticKeys.access_key_id;
     if (pkgVarNames.has('secret_access_key')) vars.secret_access_key = staticKeys.secret_access_key;

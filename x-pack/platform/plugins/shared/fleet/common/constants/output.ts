@@ -134,6 +134,10 @@ export const OTLP_GRPC_ONLY_COMPRESSION_TYPES: ReadonlyArray<string> = [
   otlpCompressionType.Zstd,
 ];
 
+// Fleet Server gained OTLP output support in this version. Placeholder until the
+// supporting Fleet Server release is confirmed.
+export const OTLP_MINIMUM_FLEET_SERVER_VERSION = '9.6.0';
+
 export const kafkaSupportedVersions = [
   '0.8.2.0',
   '0.8.2.1',

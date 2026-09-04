@@ -1,0 +1,47 @@
+{
+  "sha1": "0a4dd6256d63fcd6e81b5f042e0d4a624789e768",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "d96d98f2ba7a715-6b1093d7d0c4ec0",
+      "title": "Ingest ES data for Background Search UI tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout_search_sessions/ui/parallel_tests/global.setup.ts",
+        "line": 12,
+        "column": 1
+      }
+    },
+    {
+      "id": "1bd25d63c50c952-2a24fc74cc44ea8",
+      "title": "Lens other-bucket background search adds the Lens other-bucket search to the session when restoring",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout_search_sessions/ui/parallel_tests/dashboard_lens_other_bucket.spec.ts",
+        "line": 54,
+        "column": 15
+      }
+    },
+    {
+      "id": "92e9af7fe70402e-9aaaf536b262eec",
+      "title": "Dashboard search session sharing with Lens shares the search session with a by-value Lens panel but not with a by-reference one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout_search_sessions/ui/parallel_tests/dashboard_lens_session_sharing.spec.ts",
+        "line": 42,
+        "column": 24
+      }
+    }
+  ]
+}

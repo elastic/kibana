@@ -138,7 +138,7 @@ describe('<NodeEventsListItem />', () => {
     );
     expect(getByTestId('resolver:panel:node-events-in-category:event-link')).toBeInTheDocument();
     getByTestId('resolver:panel:node-events-in-category:event-link').click();
-    expect(nodeEventOnClick).toBeCalledWith({
+    expect(nodeEventOnClick).toHaveBeenCalledWith({
       documentId: 'test _id',
       indexName: '_index',
       scopeId: 'test',

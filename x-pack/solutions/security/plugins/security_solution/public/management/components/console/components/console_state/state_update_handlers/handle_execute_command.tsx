@@ -442,10 +442,29 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             )
           );
         }
+      } else if (
+        argDefinition.mustHaveValue === false &&
+        argInput.some((value) => value !== true)
+      ) {
+        // Args defined as `mustHaveValue: false` do not support providing argument value
+        return updateStateWithNewCommandHistoryItem(
+          state,
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+            createCommandExecutionState({
+              errorMessage: (
+                <ConsoleCodeBlock>
+                  {executionTranslations.argDoesNotAcceptAnyValue(argName)}
+                </ConsoleCodeBlock>
+              ),
+            }),
+            false
+          )
+        );
       }
 
-      // Call validation callback if one was defined for the argument
       if (argDefinition.validate) {
+        // Call validation callback if one was defined for the argument
         const validationResult = argDefinition.validate(argInput);
 
         if (validationResult !== true) {

@@ -8,13 +8,21 @@
  */
 
 import { parse } from 'yaml';
-import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW } from '.';
+import {
+  SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
+  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
+} from '.';
 
 interface WorkflowStep {
   name: string;
   condition?: string;
   steps?: WorkflowStep[];
-  with?: Record<string, string>;
+  with?: {
+    path?: string;
+    body?: { trigger_feedback?: string };
+    inputs?: { context?: { trigger_type?: string } };
+    written_rule_uuids?: string;
+  };
   foreach?: string;
 }
 
@@ -37,10 +45,14 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
 };
 
 const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
+const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
+  | ParsedWorkflow & {
+      triggers: Array<{ type: string; on?: { condition?: string } }>;
+    };
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(18);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(19);
   });
 
   it('marks discovery-triggered investigations as automatic', () => {
@@ -63,5 +75,19 @@ describe('significant events persistence workflow contracts', () => {
     expect(requireStep(discovery, 'guard_resolved_event').condition).toContain(
       'steps.resolve_open_event.output.hits.hits[0] != null'
     );
+  });
+
+  it('applies completed investigation feedback only to Significant Events', () => {
+    expect(investigationCompleted.triggers).toEqual([
+      {
+        type: 'nightshift-investigations.completed',
+        on: { condition: 'event.subject.type: "significant_event"' },
+      },
+    ]);
+    const getInvestigation = requireStep(investigationCompleted, 'get_investigation');
+    const attach = requireStep(investigationCompleted, 'attach_completed_investigation');
+    expect(getInvestigation.with?.path).toContain('/internal/nightshift/investigations/');
+    expect(attach.with?.path).toContain('/internal/significant_events/events/');
+    expect(attach.with?.body?.trigger_feedback).toContain('output.trigger_feedback');
   });
 });

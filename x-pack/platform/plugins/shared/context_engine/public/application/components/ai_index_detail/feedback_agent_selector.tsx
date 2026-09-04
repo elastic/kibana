@@ -56,7 +56,7 @@ export const FeedbackAgentSelector = ({ aiIndex }: FeedbackAgentSelectorProps) =
         isLoading={isLoading || updateFeedbackAgent.isLoading}
         isInvalid={Boolean(errorMessage)}
         options={options}
-        value={aiIndex.feedback_agent_id ?? UNSET_VALUE}
+        value={aiIndex.feedback_analysis?.agent_id ?? UNSET_VALUE}
         onChange={(event) => {
           const value = event.target.value;
           updateFeedbackAgent.mutate(value === UNSET_VALUE ? undefined : value);

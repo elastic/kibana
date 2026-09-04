@@ -387,6 +387,45 @@ describe('EsAndUiamApiKeyStrategy', () => {
       );
     });
 
+    test('reports UIAM keys created before a later cloned grant fails', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_uiam-credential' },
+      });
+      const onApiKeyCreated = jest.fn();
+
+      shouldCloneApiKeyFromRequestMock.mockReturnValue(true);
+      hasApiKeyMock.mockReturnValue(true);
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+        username: 'testuser',
+      });
+      mockUiam.grant
+        .mockResolvedValueOnce({
+          id: 'first-uiam-id',
+          name: 'test',
+          api_key: 'essu_first-secret',
+        })
+        .mockRejectedValueOnce(new Error('second grant failed'));
+
+      await expect(
+        strategy.grantApiKeys(
+          [
+            { id: 'task-1', taskType: 'report', params: {}, state: {} },
+            { id: 'task-2', taskType: 'second-report', params: {}, state: {} },
+          ],
+          request,
+          coreStart.security,
+          { cloneApiKey: true, onApiKeyCreated }
+        )
+      ).rejects.toThrow('Failed to grant UIAM API key for cloned task "task-2"');
+
+      expect(onApiKeyCreated).toHaveBeenCalledTimes(1);
+      expect(onApiKeyCreated).toHaveBeenCalledWith({
+        apiKeyId: 'first-uiam-id',
+        uiamApiKey: 'essu_first-secret',
+      });
+    });
+
     test('persists a raw user-created UIAM API key as-is (UIAM-only, no id) without minting any keys', async () => {
       const { strategy, coreStart, mockUiam } = createStrategy();
       // User-created Cloud API keys are presented as the raw `essu_` secret, not `base64(id:key)`
