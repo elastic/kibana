@@ -217,6 +217,7 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiTimeOptions.monthToDate\\": \\"Month to date\\",
     \\"euiTimeOptions.yearToDate\\": \\"Year to date\\",
     \\"euiQuickSelect.applyButton\\": \\"Apply\\",
+    \\"euiTimeWindowButtons.label\\": \\"Time window controls\\",
     \\"euiTimeWindowButtons.invalidShiftLabel\\": \\"Cannot shift invalid time window\\",
     \\"euiTimeWindowButtons.invalidZoomOutLabel\\": \\"Cannot zoom out invalid time window\\",
     \\"euiTimeWindowButtons.previousLabel\\": \\"Previous\\",

@@ -1310,6 +1310,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiQuickSelect.applyButton': i18n.translate('core.euiQuickSelect.applyButton', {
       defaultMessage: 'Apply',
     }),
+    'euiTimeWindowButtons.label': i18n.translate('core.euiTimeWindowButtons.label', {
+      defaultMessage: 'Time window controls',
+    }),
     'euiTimeWindowButtons.invalidShiftLabel': i18n.translate(
       'core.euiTimeWindowButtons.invalidShiftLabel',
       { defaultMessage: 'Cannot shift invalid time window' }
