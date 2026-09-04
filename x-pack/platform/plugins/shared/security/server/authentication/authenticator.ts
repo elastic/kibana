@@ -805,12 +805,13 @@ export class Authenticator {
       );
     }
 
-    // Don't extend the session if request is "minimally" authenticated, but still persist state
-    // updates explicitly returned by the authentication provider (e.g. refreshed access tokens).
-    if (
-      request.route.options.security?.authc?.enabled === 'minimal' &&
-      !authenticationResult.shouldUpdateState()
-    ) {
+    const ownsSession =
+      existingSessionValue?.provider.name === provider.name &&
+      existingSessionValue?.provider.type === provider.type;
+    const isMinimalAuthentication = request.route.options.security?.authc?.enabled === 'minimal';
+
+    // Minimal authentication can persist provider state only for a session that provider already owns.
+    if (isMinimalAuthentication && !(ownsSession && authenticationResult.shouldUpdateState())) {
       this.logger.debug(
         'Session should not be changed for requests that require minimal authentication, skipping session update.'
       );
@@ -831,10 +832,6 @@ export class Authenticator {
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       return null;
     }
-
-    const ownsSession =
-      existingSessionValue?.provider.name === provider.name &&
-      existingSessionValue?.provider.type === provider.type;
 
     // If provider owned the session, but failed to authenticate anyway, that likely means that
     // session is not valid and we should clear it. Unexpected errors should not cause session
@@ -1005,13 +1002,11 @@ export class Authenticator {
         });
       }
     } else if (authenticationResult.shouldUpdateState()) {
-      newSessionValue = await this.session.update(request, {
-        ...existingSessionValue,
-        userProfileId,
-        state: authenticationResult.shouldUpdateState()
-          ? authenticationResult.state
-          : existingSessionValue.state,
-      });
+      newSessionValue = await this.session.update(
+        request,
+        { ...existingSessionValue, userProfileId, state: authenticationResult.state },
+        { extend: !isMinimalAuthentication }
+      );
     } else {
       newSessionValue = await this.session.extend(request, existingSessionValue);
     }
