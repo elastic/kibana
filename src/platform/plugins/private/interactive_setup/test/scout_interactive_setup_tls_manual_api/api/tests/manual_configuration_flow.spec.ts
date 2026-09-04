@@ -20,18 +20,6 @@ import {
 import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup_state';
 import { getElasticsearchCaCertificate } from '../../../helpers/tls_tools';
 
-/**
- * Manual configuration against a TLS-enabled, security-enabled cluster, so the payload carries both
- * credentials and the cluster's CA certificate.
- *
- * These tests are not independent, and cannot be made so: they share one Kibana held in the
- * `preboot` stage, and the last one configures it, which reboots Kibana and closes the endpoint for
- * good. Ordering is therefore load-bearing — Playwright runs tests in declaration order within a
- * file, and Scout's defaults (`workers: 1`, `fullyParallel: false`) keep it that way.
- *
- * The routes are unauthenticated by design (`authc.enabled: false`): in `preboot` there is no
- * security and nobody to authenticate as, so `apiClient` is used without any auth fixture.
- */
 apiTest.describe(
   'Interactive setup - manual configuration flow',
   { tag: ["@local-stateful-classic"] },

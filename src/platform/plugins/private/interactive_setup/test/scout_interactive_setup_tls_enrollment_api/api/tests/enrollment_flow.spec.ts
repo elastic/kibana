@@ -24,20 +24,6 @@ const ENROLL_ROUTE = '/internal/interactive_setup/enroll';
 /** A CA fingerprint that is well-formed but belongs to no cluster we talk to. */
 const UNRELATED_CA_FINGERPRINT = '3FDAEE71A3604070E6AE6B01412D19772DE5AE129F69C413F0453B293D9BE65D';
 
-/**
- * Enrollment against a TLS-enabled cluster with `xpack.security.enrollment.enabled`. Enrolling
- * proves possession of three things at once: the verification code Kibana printed, an Elasticsearch
- * API key, and the cluster's CA fingerprint.
- *
- * These tests are not independent, and cannot be made so: they share one Kibana held in the
- * `preboot` stage, and the last one enrolls it, which reboots Kibana and closes the endpoint for
- * good. Ordering is therefore load-bearing — Playwright runs tests in declaration order within a
- * file, and Scout's defaults (`workers: 1`, `fullyParallel: false`) keep it that way.
- *
- * The routes are unauthenticated by design (`authc.enabled: false`): in `preboot` there is no
- * security and nobody to authenticate as, so `apiClient` is used without any auth fixture. The
- * `elastic` credentials behind `esClient` are only used to mint the API key the payload carries.
- */
 apiTest.describe(
   'Interactive setup - enrollment flow',
   { tag: ["@local-stateful-classic"] },

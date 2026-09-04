@@ -119,9 +119,21 @@ export const schema = Joi.object()
         serverArgs: Joi.array(),
         installDir: Joi.string(),
         useDedicatedTaskRunner: Joi.boolean().default(false),
+        /** Options for how FTR should execute and interact with Kibana */
         runOptions: Joi.object()
           .keys({
-            wait: Joi.object().regex().default(/Kibana is now available/),
+            /**
+             * Log message to wait for before initiating tests, defaults to waiting for Kibana status to be `available`.
+             * Note that this log message must not be filtered out by the current logging config, for example by the
+             * log level. If needed, you can adjust the logging level via `kbnTestServer.serverArgs`.
+             */
+            wait: Joi.object()
+              .regex()
+              .default(/Kibana is now available/),
+
+            /**
+             * Does this test config only work when run against source?
+             */
             alwaysUseSource: Joi.boolean().default(false),
           })
           .default(),

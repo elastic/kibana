@@ -10,10 +10,4 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { createTlsServers } from '../../interactive_setup.preboot_base';
 
-/**
- * Serves `test/scout_interactive_setup_tls_manual_ui/ui` — the manual-configuration wizard flow over TLS.
- *
- * Deliberately a dedicated config set for a single Playwright config: see "Why there is one config
- * set per Playwright config" in `interactive_setup.preboot_base.ts`.
- */
 export const servers: ScoutServerConfig = createTlsServers();

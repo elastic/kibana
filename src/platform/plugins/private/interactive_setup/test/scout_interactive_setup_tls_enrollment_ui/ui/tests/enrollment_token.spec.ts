@@ -20,16 +20,6 @@ import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup
 import { getElasticsearchCaCertificate } from '../../../helpers/tls_tools';
 import { test } from '../fixtures';
 
-/**
- * The enrollment-token flow: the landing screen of the wizard takes a single base64 token that
- * bundles the Kibana version, the cluster's address, its CA fingerprint, and an Elasticsearch API
- * key — the same token `elasticsearch-create-enrollment-token` prints.
- *
- * There is deliberately no `browserAuth` call. Kibana is held in the `preboot` stage with no
- * security, so there is nobody to log in as; Scout's `page` fixture is independent of `browserAuth`
- * and gives an unauthenticated page by default. The `elastic` credentials behind `esClient` are
- * only used to mint the API key the token carries.
- */
 test.describe('Interactive setup - enrollment token', { tag: ["@local-stateful-classic"] }, () => {
   let enrollmentApiKey: string;
 

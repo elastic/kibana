@@ -18,14 +18,6 @@ import {
 import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup_state';
 import { test } from '../fixtures';
 
-/**
- * The manual-configuration wizard against a security-enabled cluster served over plain HTTP: it
- * asks for credentials, but there is no certificate to trust.
- *
- * There is deliberately no `browserAuth` call. Kibana is held in the `preboot` stage with no
- * security, so there is nobody to log in as; Scout's `page` fixture is independent of `browserAuth`
- * and gives an unauthenticated page by default.
- */
 test.describe(
   'Interactive setup - manual configuration without TLS',
   { tag: ["@local-stateful-classic"] },

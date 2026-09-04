@@ -19,18 +19,6 @@ import {
 } from '../../../helpers/constants';
 import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup_state';
 
-/**
- * Manual configuration against a security-enabled cluster served over plain HTTP, so the payload
- * carries credentials but no `caCert`.
- *
- * These tests are not independent, and cannot be made so: they share one Kibana held in the
- * `preboot` stage, and the last one configures it, which reboots Kibana and closes the endpoint for
- * good. Ordering is therefore load-bearing — Playwright runs tests in declaration order within a
- * file, and Scout's defaults (`workers: 1`, `fullyParallel: false`) keep it that way.
- *
- * The routes are unauthenticated by design (`authc.enabled: false`): in `preboot` there is no
- * security and nobody to authenticate as, so `apiClient` is used without any auth fixture.
- */
 apiTest.describe(
   'Interactive setup - manual configuration flow without TLS',
   { tag: ["@local-stateful-classic"] },
