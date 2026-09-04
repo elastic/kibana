@@ -462,7 +462,7 @@
     {
       "id": "deep-watch-forensics",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-deep-watch-forensics/playwright.config.ts",
-      "serverConfigSet": "evals_attack_discovery_agent_builder",
+      "serverConfigSet": "evals_detection_watch_rule_creation",
       "name": "Deep Watch Forensic Gate",
       "slackChannel": "#security-generative-ai-evals",
       "tags": [
