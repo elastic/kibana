@@ -130,7 +130,7 @@ const promotionOutputSchema = z.object({
           ),
       })
     )
-    .max(MAX_PROMOTED_LEADS)
+    .max(POOL_SIZE)
     .describe(
       `Up to ${MAX_PROMOTED_LEADS} entities that would change what a hunter investigates today. Empty if none clear the bar.`
     ),
@@ -194,12 +194,13 @@ export const buildExploratoryLeads = async (
       }
     }
 
+    const promoted = selected.slice(0, MAX_PROMOTED_LEADS);
     logger.info(
       `[LeadGeneration][Telemetry] LLM exploratory lead selection: ${
         Date.now() - llmSelectionStart
-      }ms (${selected.length} of ${selections.length} selected from ${pool.length} pool candidates)`
+      }ms (${promoted.length} of ${selections.length} selected from ${pool.length} pool candidates)`
     );
-    return selected;
+    return promoted;
   } catch (error) {
     logger.warn(`[LeadGeneration] LLM exploratory lead selection failed: ${errorMessage(error)}`);
     return [];

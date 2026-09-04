@@ -29,7 +29,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
     <EuiCard
       title={
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+          <EuiFlexItem grow={1} css={{ minWidth: 0 }}>
             <EuiToolTip content={lead.title} anchorClassName="eui-textTruncate" display="block">
               <span tabIndex={0}>{lead.title}</span>
             </EuiToolTip>

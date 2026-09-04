@@ -151,6 +151,22 @@ describe('searchEntitiesV2Batch', () => {
     expect((result[1] as { total: number }).total).toBe(0);
   });
 
+  it('surfaces a missing msearch response as a per-item error without throwing', async () => {
+    const msearch = jest.fn().mockResolvedValue({
+      responses: [{ hits: { total: 0, hits: [] } }],
+    });
+    const esClient = { msearch } as unknown as ElasticsearchClient;
+
+    const result = await searchEntitiesV2Batch({
+      esClient,
+      namespace: 'default',
+      queries: [baseParams, baseParams],
+    });
+
+    expect((result[0] as { total: number }).total).toBe(0);
+    expect(result[1]).toEqual({ error: 'Missing msearch response for query' });
+  });
+
   it('surfaces a per-item filterQuery parse error without issuing a request for it', async () => {
     const msearch = jest.fn().mockResolvedValue({
       responses: [{ hits: { total: 0, hits: [] } }],

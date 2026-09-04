@@ -202,6 +202,9 @@ export async function searchEntitiesV2Batch(options: {
     if (!b.ok) return { error: b.error };
 
     const response = responses[responseIndex++];
+    if (response == null) {
+      return { error: 'Missing msearch response for query' };
+    }
     if ('error' in response) {
       return { error: response.error.reason ?? response.error.type };
     }
