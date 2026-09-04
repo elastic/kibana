@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
-  const { common, timePicker } = getPageObjects(['common', 'timePicker']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const defaultIndexPatternString = config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -44,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(kbnDirectory);
       await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await discover.setQueryMode('classic', 'esql');
       await common.navigateToApp('discover');
     });
 

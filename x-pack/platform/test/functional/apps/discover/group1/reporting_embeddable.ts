@@ -113,6 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await discover.setQueryMode('classic', 'esql');
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();

@@ -77,7 +77,6 @@ import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
   DATA_TABLE_JSON_VIEW_FEATURE_FLAG_KEY,
-  IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
@@ -220,8 +219,7 @@ export const buildServices = ({
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
         core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
-      getIsEsqlDefault: () =>
-        core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
+      getIsEsqlDefault: () => true,
       getDataTableJsonViewEnabled: () =>
         core.featureFlags.getBooleanValue(DATA_TABLE_JSON_VIEW_FEATURE_FLAG_KEY, false),
     },

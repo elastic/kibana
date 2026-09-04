@@ -79,6 +79,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render esql view correctly', async function () {
+        await PageObjects.discover.setQueryMode('classic', 'esql');
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await testSubjects.existOrFail('showQueryBarMenu');
@@ -330,6 +333,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('inspector', () => {
       beforeEach(async () => {
+        await PageObjects.discover.setQueryMode('classic', 'esql');
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -359,6 +363,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('query history', () => {
       beforeEach(async () => {
+        await PageObjects.discover.setQueryMode('classic', 'esql');
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.timePicker.setDefaultAbsoluteRange();

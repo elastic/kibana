@@ -355,6 +355,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
+      await PageObjects.discover.setQueryMode('classic', 'esql');
 
       log.debug('create source indices');
       await createSourceIndex();

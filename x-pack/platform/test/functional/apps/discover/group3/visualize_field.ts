@@ -61,6 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
+      await discover.setQueryMode('classic', 'esql');
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
