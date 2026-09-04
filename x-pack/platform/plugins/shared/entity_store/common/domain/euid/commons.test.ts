@@ -425,14 +425,14 @@ describe('user containsId filter condition (documentsFilter AND postAggFilter)',
     expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(true);
   });
 
-  it('matches IDP doc: event.category=iam, event.type=user, user.id present', () => {
+  it('excludes IAM lifecycle doc: event.category=iam, event.type=user, user.id present, no host.id', () => {
     const doc = applyFieldEvaluationsToDoc({
       'event.outcome': 'success',
       'event.category': 'iam',
       'event.type': 'user',
       'user.id': 'user-123',
     });
-    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(true);
+    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(false);
   });
 
   it('matches non-IDP doc: user.name + host.id, user.name not in excluded list', () => {

@@ -104,7 +104,9 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
     const eventsMapByEuid: Record<string, Array<EventsForEnrichment<T>>> = {};
     const eventsMapById: EventsMapByEnrichments = {};
     for (const event of events) {
-      const computedEuid = euid.getEuidFromObject(entityType, event._source);
+      const computedEuid = euid.getEuidFromObject(entityType, event._source, {
+        applyPostAggFilter: false,
+      });
       if (computedEuid) {
         (eventsMapByEuid[computedEuid] ??= []).push(event);
         eventsMapById[event._id] = [buildEuidStampEnrichment(computedEuid)];

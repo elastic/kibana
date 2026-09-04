@@ -490,7 +490,8 @@ export const buildRiskScoreBucket =
 export const buildEuidRuntimeMappingWithStoredFieldFastPath = (
   entityType: EntityType
 ): { type: 'keyword'; script: { source: string } } => {
-  const evalScript = euid.painless.getEuidEvaluation(entityType);
+  // Store membership is enforced separately, by `inStoreScores` in the maintainer's score_base_entities step.
+  const evalScript = euid.painless.getEuidEvaluation(entityType, { applyPostAggFilter: false });
   const typePrefix = `${entityType}:`;
 
   const source = [

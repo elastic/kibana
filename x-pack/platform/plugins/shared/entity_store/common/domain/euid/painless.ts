@@ -15,7 +15,8 @@ import type {
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { isEuidField } from './commons';
+import type { EuidGateOptions } from './commons';
+import { isEuidField, waiveForAlerts } from './commons';
 
 /**
  * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
@@ -74,11 +75,14 @@ function buildPreAggEvaluatedVarOverridesPreamble(
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @returns A runtime keyword field mapping (type + script) for use in runtime_mappings.
  */
-export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
+export function getEuidPainlessRuntimeMapping(
+  entityType: EntityType,
+  options?: EuidGateOptions
+): {
   type: 'keyword';
   script: { source: string };
 } {
-  const returnScript = getEuidPainlessEvaluation(entityType);
+  const returnScript = getEuidPainlessEvaluation(entityType, options);
   const emitScript = wrapEvaluationScriptForKeywordRuntimeField(returnScript);
   return {
     type: 'keyword',
@@ -101,7 +105,11 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @returns A Painless evaluation string that computes the entity id.
  */
-export function getEuidPainlessEvaluation(entityType: EntityType): string {
+export function getEuidPainlessEvaluation(
+  entityType: EntityType,
+  options?: EuidGateOptions
+): string {
+  const { applyPostAggFilter = true } = options ?? {};
   const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
   const prefixExpr = identityField.skipTypePrepend ? '' : `"${entityType}:" + `;
@@ -138,9 +146,10 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   /** Same order as getEuidFromObject: field evals (and pre/post stats overrides) run before the pipeline gate. */
   const filterOpts: StreamlangToPainlessDocOptions = { evaluatedVars };
   const filterChecks: string[] = [];
-  for (const filterCond of [identityField.documentsFilter, entityDefinition.postAggFilter].filter(
-    (c): c is Condition => Boolean(c)
-  )) {
+  const gateConditions = applyPostAggFilter
+    ? [identityField.documentsFilter, waiveForAlerts(entityDefinition.postAggFilter)]
+    : [identityField.documentsFilter];
+  for (const filterCond of gateConditions.filter((c): c is Condition => Boolean(c))) {
     filterChecks.push(
       `if (!(${streamlangConditionToPainlessDoc(filterCond, filterOpts)})) { return null; }`
     );

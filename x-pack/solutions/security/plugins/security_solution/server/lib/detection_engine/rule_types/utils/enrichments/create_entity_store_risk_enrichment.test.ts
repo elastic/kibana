@@ -359,5 +359,14 @@ describe('createEntityStoreEnrichment', () => {
       const enriched = applyAll(event, result['2']);
       expect(enriched._source[ALERT_ENTITY_ID]).toEqual(['host:not-in-store']);
     });
+
+    it('resolves the EUID without the postAggFilter creation gate', async () => {
+      // Gating here would leave IdP-namespace entities with no stamp and no enrichment.
+      await runHostEnrichment([createAlert('1', { host: { name: 'server1' } })]);
+
+      expect(mockGetEuidFromObject).toHaveBeenCalledWith('host', expect.any(Object), {
+        applyPostAggFilter: false,
+      });
+    });
   });
 });
