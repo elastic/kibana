@@ -302,8 +302,12 @@ export class AgentStatusChangeTask {
     policyNamespaceMap: Map<string, string> | undefined
   ) => {
     const bulkBody = agentsToUpdate.flatMap((agent) => {
-      const policyNamespace =
-        (agent.policy_id && policyNamespaceMap?.get(agent.policy_id)) || 'default';
+      // Use policy_base_id (always the plain UUID) for map lookups so that agents whose
+      // policy_id carries a version suffix (e.g. "<uuid>#9.6") are still matched against
+      // the maps that are keyed by base id. Falls back to policy_id for agents enrolled by
+      // an older fleet-server that did not yet write policy_base_id.
+      const basePolicyId = agent.policy_base_id ?? agent.policy_id;
+      const policyNamespace = (basePolicyId && policyNamespaceMap?.get(basePolicyId)) || 'default';
       const body = {
         '@timestamp': new Date().toISOString(),
         data_stream: AGENT_STATUS_CHANGE_DATA_STREAM,
@@ -315,7 +319,7 @@ export class AgentStatusChangeTask {
         policy_namespace: policyNamespace,
         space_id: agent.namespaces,
         hostname: agent.local_metadata?.host?.hostname,
-        agentless: (agent.policy_id && agentlessPolicies?.includes(agent.policy_id)) ?? false,
+        agentless: (basePolicyId && agentlessPolicies?.includes(basePolicyId)) ?? false,
       };
 
       return [

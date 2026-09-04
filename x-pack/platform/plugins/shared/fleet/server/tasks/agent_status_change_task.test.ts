@@ -385,6 +385,39 @@ describe('AgentStatusChangeTask', () => {
       expect(operations[3].data_stream.namespace).toBe('default');
     });
 
+    it('should correctly resolve agentless flag and policy_namespace for agents with versioned policy_id', async () => {
+      // Agents enrolled via version-specific policies have policy_id: "<uuid>#<version>" but
+      // policy_base_id: "<uuid>". The maps (agentlessPolicies / policyNamespaceMap) are keyed
+      // by the base id, so lookups must use policy_base_id, not policy_id.
+      const agents = [
+        {
+          id: 'agent-versioned',
+          policy_id: 'agentless-policy-1#9.6', // versioned — mismatches the map key
+          policy_base_id: 'agentless-policy-1', // base id — matches the map key
+          status: 'online',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: 'host-versioned' } },
+        },
+      ] as unknown as Agent[];
+
+      mockedFetchAllAgentsByKuery
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
+        .mockResolvedValue(getMockFetchAllAgentsByKuery([]));
+
+      await runTask();
+
+      const bulkCall = esClient.bulk.mock.calls[0][0];
+      const operations = bulkCall.operations as any[];
+      const doc = operations[1];
+
+      // The fix: policy_base_id is used for the agentlessPolicies lookup.
+      expect(doc.agentless).toBe(true);
+      // The fix: policy_base_id is used for the policyNamespaceMap lookup.
+      expect(doc.policy_namespace).toBe('default');
+      // policy_id in the emitted doc still carries the full versioned id (as stored on the agent).
+      expect(doc.policy_id).toBe('agentless-policy-1#9.6');
+    });
+
     it('should do nothing when no agents changed status', async () => {
       const agents = [] as unknown as Agent[];
       mockedFetchAllAgentsByKuery
