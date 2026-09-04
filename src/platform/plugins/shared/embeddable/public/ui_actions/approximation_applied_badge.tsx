@@ -29,7 +29,8 @@ export const approximationAppliedBadge: ActionDefinition<EmbeddableApiContext> =
   },
   getDisplayNameTooltip: ({ embeddable }: EmbeddableApiContext) => {
     return i18n.translate('embeddableApi.badge.approximationApplied.displayNameTooltip', {
-      defaultMessage: 'This panel shows approximate results',
+      defaultMessage:
+        'This panel shows approximate results because fast mode is enabled on the page or the ES|QL query that powers the panel enables approximation.',
     });
   },
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
