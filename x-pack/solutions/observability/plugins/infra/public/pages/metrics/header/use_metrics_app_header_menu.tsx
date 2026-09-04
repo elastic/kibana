@@ -19,6 +19,7 @@ import {
   type MetricsAlertFlyoutType,
 } from '../../../alerting/common/components/metrics_alert_dropdown';
 import { AnomalyDetectionFlyout } from '../../../components/ml/anomaly_detection/anomaly_detection_flyout';
+import { INFRA_EBT_ACTIONS, INFRA_EBT_DETAILS } from '../../../common/ebt_constants';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -136,6 +137,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
         iconType: 'machineLearningApp',
         testId: 'openAnomalyFlyoutButton',
         order: order++,
+        ebt: { action: INFRA_EBT_ACTIONS.VIEW_ANOMALY_DETECTION },
         run: () => {
           setIsAnomalyFlyoutOpen(true);
         },
@@ -148,11 +150,13 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
           id: 'infrastructureRules',
           label: INFRASTRUCTURE_RULES_LABEL,
           testId: 'inventory-alerts-menu-option',
+          ebt: { action: INFRA_EBT_ACTIONS.OPEN_INFRASTRUCTURE_RULES_MENU },
           items: [
             {
               id: 'createInventoryRule',
               label: CREATE_INVENTORY_RULE_LABEL,
               testId: 'inventory-alerts-create-rule',
+              ebt: { action: INFRA_EBT_ACTIONS.CREATE_INVENTORY_RULE },
               run: () => {
                 setVisibleFlyoutType('inventory');
               },
@@ -166,11 +170,13 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
           id: 'metricsRules',
           label: METRICS_RULES_LABEL,
           testId: 'metrics-threshold-alerts-menu-option',
+          ebt: { action: INFRA_EBT_ACTIONS.OPEN_METRICS_RULES_MENU },
           items: [
             {
               id: 'createThresholdRule',
               label: CREATE_THRESHOLD_RULE_LABEL,
               testId: 'metrics-threshold-alerts-create-rule',
+              ebt: { action: INFRA_EBT_ACTIONS.CREATE_METRIC_THRESHOLD_RULE },
               run: () => {
                 setVisibleFlyoutType('metricThreshold');
               },
@@ -184,6 +190,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
           id: 'createCustomThresholdRule',
           label: CREATE_CUSTOM_THRESHOLD_RULE_LABEL,
           testId: 'custom-threshold-alerts-menu-option',
+          ebt: { action: INFRA_EBT_ACTIONS.CREATE_CUSTOM_THRESHOLD_RULE },
           run: () => {
             setVisibleFlyoutType('customThreshold');
           },
@@ -196,6 +203,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
           label: MANAGE_RULES_LABEL,
           iconType: 'tableOfContents',
           href: manageRulesLinkProps.href,
+          ebt: { action: INFRA_EBT_ACTIONS.MANAGE_RULES },
         });
       }
 
@@ -206,6 +214,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
           iconType: 'bell',
           testId: 'infrastructure-alerts-and-rules',
           order: order++,
+          ebt: { action: INFRA_EBT_ACTIONS.OPEN_ALERTS_MENU },
           items: alertItems,
         });
       }
@@ -219,6 +228,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
         href: settingsLinkProps.href,
         order: order++,
         overflow: true,
+        ebt: { action: INFRA_EBT_ACTIONS.VIEW_SETTINGS },
       });
     }
 
@@ -230,6 +240,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
         testId: 'infraInspectHeaderLink',
         order: order++,
         overflow: true,
+        ebt: { action: INFRA_EBT_ACTIONS.OPEN_INSPECTOR },
         run: () => {
           inspector.open(inspectorAdapters);
         },
@@ -244,6 +255,12 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
             label: ADD_DATA_LABEL,
             iconType: 'plusCircle',
             href: addDataHref,
+            ebt: {
+              action: INFRA_EBT_ACTIONS.ADD_DATA,
+              detail: visibility.showHostsOnboarding
+                ? INFRA_EBT_DETAILS.ADD_DATA_HOST
+                : INFRA_EBT_DETAILS.ADD_DATA_INFRA,
+            },
           }
         : undefined,
     };
