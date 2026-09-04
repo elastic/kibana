@@ -568,8 +568,7 @@ describe('buildWorkflowContext', () => {
 
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
-      // For manual triggers with no persisted event, event is aliased with inputs at render time
-      expect(context.event).toEqual({ spaceId: 'default', inputs: undefined });
+      expect(context.event).toBeUndefined();
     });
 
     it('should handle when workflowInputs parameter is undefined (uses default)', () => {
@@ -677,6 +676,18 @@ describe('buildWorkflowContext', () => {
       const result = buildWorkflowContext(execution, undefined, dependencies);
 
       expect((result.event as Record<string, unknown>).inputs).toEqual({ severity: 'medium' });
+    });
+
+    it('does not mint an event when context is empty and there are no inputs', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {},
+      };
+
+      const result = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(result.event).toBeUndefined();
+      expect(result.inputs).toBeUndefined();
     });
 
     it('does not alias event.inputs for non-manual triggers that have a real event', () => {

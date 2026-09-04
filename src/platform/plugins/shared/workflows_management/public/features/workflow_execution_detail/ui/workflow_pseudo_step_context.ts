@@ -55,8 +55,8 @@ export function buildTriggerContextFromExecution(
     }
   }
 
-  // For manual triggers (including the synthesized-event path), always surface
-  // context.inputs rather than the full synthesized event object.
+  // Manual runs store the payload on context.inputs. Older rows may still have
+  // event.type === 'manual'; keep classifying those as manual and show inputs.
   const inputData =
     triggerType === 'manual'
       ? (executionContext as { inputs?: JsonValue }).inputs
