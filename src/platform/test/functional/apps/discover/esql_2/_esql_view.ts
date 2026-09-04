@@ -10,18 +10,10 @@
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/esql/_esql_view.ts
 
 /**
- * Migration recommendation: MIXED. One 1,000-line file with 28 tests across 10 `describe` blocks.
- * The ES|QL-specific integration (histogram behavior, sorting persistence, chart-state preservation
- * across cell filtering) is worth a browser; the query-string construction, history bookkeeping and
- * error-message parsing it also asserts are already unit tested.
+ * Migration recommendation: MIXED. Migrate to src/platform/plugins/shared/discover/test/scout/esql.
  *
- * Migration target is src/platform/plugins/shared/discover/test/scout/esql, split into several
- * specs rather than one — see the per-block notes for the proposed grouping.
- *
- * Config note: ../config.ts pins `--feature_flags.overrides.discover.cascadeLayoutEnabled=false`.
- * The Scout port must either reproduce that override or be re-validated against the cascade layout,
- * which the specs under test/scout/core/ui/parallel_tests/cascade_layout_*.spec.ts already exercise.
- * Do not carry the flag over without checking whether these assertions still hold with it enabled.
+ * Config: ../config.ts pins `--feature_flags.overrides.discover.cascadeLayoutEnabled=false`. Confirm
+ * assertions hold with the feature enabled before pinning the flag in Scout.
  */
 
 import expect from '@kbn/expect';
@@ -104,10 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
-    /**
-     * Migration recommendation: MIGRATE TO SCOUT, as one spec covering the ES|QL rendering
-     * contract. Several tests below are near-duplicates that should collapse during the move.
-     */
+    /** Migration recommendation: MIGRATE TO SCOUT. Near-duplicate pairs below collapse during migration. */
     describe('ES|QL in Discover', () => {
       beforeEach(async () => {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -115,14 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT, trimmed to the ES|QL half. This is 25 presence
-       * assertions covering both classic and ES|QL chrome; the classic-mode half duplicates
-       * test/scout/core2/ui/parallel_tests/view_mode_toggle.spec.ts and panels_toggle_esql.spec.ts.
-       * Keep only the deltas that are actually ES|QL-specific — no query bar menu, no `addFilter`,
-       * no view mode toggle, no column sorting button, no field edit action — and assert them as a
-       * group rather than re-asserting the shared chrome.
-       */
+      /** Migration recommendation: MIGRATE, trimmed to ES|QL-specific assertions only (classic chrome covered by view_mode_toggle.spec.ts). */
       it('should render esql view correctly', async function () {
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -170,11 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverFieldListPanelEditItem')).to.be(false);
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT, merged with the `?_tstart`/`?_tend` test below.
-       * The two are a matched pair — histogram absent without a time field, present once the query
-       * declares the time params — and reading them together is what makes either meaningful.
-       */
+      /** Migration recommendation: MIGRATE, merged with the ?_tstart/?_tend test below as a matched pair. */
       it('should not render the histogram for indices with no @timestamp field', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -211,11 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT. Core ES|QL smoke test: a stats query renders an
-       * XY chart plus the right first cell. Merge in 'should query an index pattern that doesnt
-       * translate to a dataview correctly' below as a second step — same query, different glob.
-       */
+      /** Migration recommendation: MIGRATE, merged with the logstash* variant below. */
       it('should perform test query correctly', async function () {
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -233,10 +207,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT. A real regression guard — the grid has to
-       * recover after an empty time range, which no unit test covers.
-       */
       it('should render when switching to a time range with no data, then back to a time range with data', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -259,10 +229,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT, merged into 'should perform test query
-       * correctly' as a step. It differs only in `logstash*` vs `logstash-*`.
-       */
+      /** Migration recommendation: MIGRATE, merged into 'should perform test query correctly'. */
       it('should query an index pattern that doesnt translate to a dataview correctly', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -276,11 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT. The `drop_null_columns` round trip is
-       * integration, but note the NULL_LABEL cell rendering itself is component behavior owned by
-       * kbn-unified-data-table — assert the column order here, not the placeholder styling.
-       */
+      /** Migration recommendation: MIGRATE; assert column order, not NULL_LABEL placeholder styling (component-owned). */
       it('should render correctly if there are empty fields', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -297,10 +260,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT. A `ROW` query needs no index or archive, so
-       * this is one of the cheapest tests in the file to run.
-       */
       it('should work without a FROM statement', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -315,12 +274,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT. Brushing the histogram to drive the time picker
-       * without creating a filter pill is genuinely browser-only. Replace the
-       * `getVisualizationRenderingCount` / `waitForRenderingCount` dance with a Playwright
-       * assertion on the resulting time range — the render counter is a Selenium-era workaround.
-       */
+      /** Migration recommendation: MIGRATE; replace render-count workaround with a Playwright time-range assertion. */
       it('should allow brushing time series', async () => {
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -351,14 +305,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: Cover with a unit test. Returning focus to the editor textarea when
-     * the data source picker closes on Escape is focus management inside kbn-esql-editor, and the
-     * test already reaches for `browser.execute` and a `document.activeElement` comparison to check
-     * it. RTL asserts focus directly and without a browser; add it next to
-     * src/platform/packages/private/kbn-esql-editor/src/esql_editor.test.tsx.
-     *
-     * Also note the `.esqlSourcesBadge` CSS class selector — if any part of this does stay in a
-     * browser, it needs a test subject first.
+     * Migration recommendation: UNIT. Focus management after Escape — cover next to esql_editor.test.tsx.
+     * Note: .esqlSourcesBadge CSS class selector needs a test subject before any browser version is kept.
      */
     describe('resource browser', () => {
       it('returns focus to the editor when the data source picker is closed via Escape', async () => {
@@ -388,13 +336,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: Cover with unit tests, then DELETE. The loop asserts message content
-     * ("Couldn't parse Elasticsearch ES|QL query…", no 'undefined' in the string) and the Monaco
-     * marker count for four malformed queries — that is parsing and formatting logic, best covered
-     * against kbn-esql-editor's helpers with all four inputs as table-driven cases. That an invalid
-     * query surfaces the callout at all is already asserted in Scout by
-     * test/scout/core2/ui/parallel_tests/view_mode_toggle.spec.ts
-     * ('should show an error callout on invalid query').
+     * Migration recommendation: UNIT then DELETE. Four malformed queries → table-driven unit test in
+     * kbn-esql-editor; callout presence already covered by view_mode_toggle.spec.ts.
      */
     describe('errors', () => {
       it('should show error messages for syntax errors in query', async function () {
@@ -487,11 +430,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIGRATE TO SCOUT. That ES|QL issues exactly two labelled requests
-     * (Table and Visualization) is a real contract, and partially overlaps
-     * test/scout/tabs/ui/parallel_tests/inspector.spec.ts — reconcile with it rather than adding a
-     * third inspector spec. The `retry.try` loop that closes and re-opens the inspector is a flake
-     * workaround; Playwright's auto-waiting should make it unnecessary.
+     * Migration recommendation: MIGRATE. Reconcile with test/scout/tabs inspector.spec.ts rather than
+     * adding a third inspector spec.
      */
     describe('inspector', () => {
       beforeEach(async () => {
@@ -521,13 +461,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT, but stop paying for the delay. This sets
-       * `window.ELASTIC_ESQL_DELAY_SECONDS = 5` and then waits out a chart query that the comment
-       * itself says takes three times that. In Playwright, intercept the `_query/async` route and
-       * stall the response instead — the point is that a slow query still produces one Table and one
-       * Visualization entry, not that the suite actually sleeps for fifteen seconds.
-       */
+      /** Migration recommendation: MIGRATE; stub _query/async route instead of sleeping 15 s. */
       describe('with slow queries', () => {
         it('should show only one entry in inspector for table/visualization', async function () {
           const state = kbnRison.encode({
@@ -566,17 +500,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIXED, mostly cover with unit tests. History bookkeeping is already
-     * covered by
-     * src/platform/packages/private/kbn-esql-editor/src/history_local_storage.test.ts (add, update,
-     * dedupe, size limits) and the panel rendering by
-     * src/platform/packages/private/kbn-esql-editor/src/editor_footer/history_starred_queries.test.tsx.
-     * 'should see my current query in the history', 'updating the query should add this to the
-     * history' and 'should add a failed query to the history' are all reachable there.
-     *
-     * These four tests are also order-dependent: 'should select a query from the history and submit
-     * it' clicks history item 1 expecting the query the previous test added. Whatever survives the
-     * migration must set up its own history rather than inherit it.
+     * Migration recommendation: MIXED. Three of four tests covered by history_local_storage.test.ts —
+     * convert to unit tests. Note: tests are order-dependent; the Scout port must set up its own history.
      */
     describe('query history', () => {
       beforeEach(async () => {
@@ -586,6 +511,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
+      /** Migration recommendation: UNIT (history_local_storage.test.ts). */
       it('should see my current query in the history', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -596,6 +522,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esql.isQueryPresentInTable('FROM logstash-* | SORT @timestamp DESC', historyItems);
       });
 
+      /** Migration recommendation: UNIT (history_local_storage.test.ts). */
       it('updating the query should add this to the history', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -634,6 +561,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      /** Migration recommendation: UNIT (history_local_storage.test.ts). */
       it('should add a failed query to the history', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -651,11 +579,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIGRATE TO SCOUT, but SPLIT. 'should sort correctly' is ~160 lines
-     * with ten `retry.waitFor` blocks and covers three separable contracts in a single `it`: that
-     * sorting applies and the column badge counts it, that it survives save/reload/reopen, and that
-     * it carries into a dashboard panel. When it fails today you cannot tell which one broke.
-     * Migrate as three specs and parametrize over the plain field and the custom var.
+     * Migration recommendation: MIGRATE, split. 'should sort correctly' covers three contracts
+     * (apply, save/reload/reopen, dashboard) — migrate as three specs; parametrize over bytes and var0.
      */
     describe('sorting', () => {
       beforeEach(async () => {
@@ -918,13 +843,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIXED. The generated ES|QL strings these tests assert are already
-     * covered exhaustively by
-     * src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.test.ts
-     * (append, negate, append-to-existing-WHERE) and the Discover-side wiring by
-     * src/platform/plugins/shared/discover/public/application/main/state_management/redux/actions/tab_state_filters.test.ts.
-     * What is left for a browser is that the data grid's filter buttons reach that code and that the
-     * visualization survives it.
+     * Migration recommendation: MIXED. Query strings covered by append_where.test.ts and
+     * tab_state_filters.test.ts; keep one browser wiring test and one visualization-state test.
      */
     describe('filtering by clicking on the table in Discover', () => {
       beforeEach(async () => {
@@ -934,12 +854,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT as a single wiring test, merged with 'should
-       * append an end in existing where clause by clicking the table' below. Both assert exact query
-       * strings that append_where.test.ts already pins down; one browser test proving the grid
-       * button reaches the action is enough.
-       */
+      /** Migration recommendation: MIGRATE, merged with 'should append an end in existing where clause' below. */
       it('should append a where clause by clicking the table', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -1029,12 +944,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(type).to.be('Line');
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT. That cell filtering does not silently reset a
-       * customized visualization is the highest-value assertion in this block. Drop the
-       * `common.sleep(1000)` debounce wait — Playwright should assert on the committed color value
-       * instead.
-       */
+      /** Migration recommendation: MIGRATE; drop common.sleep(1000) debounce, assert committed color value instead. */
       it('should append a where clause by clicking the table without changing the chart type nor the visualization state', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -1088,12 +998,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIGRATE TO SCOUT. Filtering an ES|QL saved search from inside a
-     * dashboard panel is a cross-app contract with no coverage below the browser, and the negative
-     * half (clicking an aggregated value offers no filter button) is the interesting part.
-     *
-     * The raw `[role="gridcell"]:nth-child(4)` selectors must become test-subject based during the
-     * migration — they silently target the wrong column whenever the grid's control columns change.
+     * Migration recommendation: MIGRATE. Replace [role="gridcell"]:nth-child() selectors with test subjects.
      */
     describe('filtering by clicking on the table in Dashboards', () => {
       beforeEach(async () => {
@@ -1151,10 +1056,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIGRATE TO SCOUT as one spec with steps. These four tests share a
-     * single `before` and run as a chain — 'should add filter using histogram legend values' acts on
-     * the breakdown the previous test selected, and the one after it starts by reverting that
-     * filter. That is a sequence, not four independent tests, and it should be written as one.
+     * Migration recommendation: MIGRATE as one stepped spec; the four tests share a before and run
+     * as a chain.
      */
     describe('histogram breakdown', () => {
       before(async () => {

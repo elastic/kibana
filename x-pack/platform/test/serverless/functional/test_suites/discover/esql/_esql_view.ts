@@ -7,28 +7,7 @@
 
 // Original test (remove during Scout migration): src/platform/test/functional/apps/discover/esql_2/_esql_view.ts
 
-/**
- * Migration recommendation: DELETE (whole file), folded into the stateful migration. This is a
- * subset of the original — 18 of its 28 tests, with brushing, the resource browser, the slow-query
- * inspector case, both cell-filtering blocks, histogram breakdown and the custom-var sort all
- * absent — so it adds no scenario the original does not already have, only a second deployment.
- * Scout expresses that with `tags.deploymentAgnostic` on the migrated specs instead of a duplicated
- * file, and the audit decisions recorded on the original apply here one for one:
- *
- * - ES|QL in Discover (8 tests) — MIGRATE, collapsing the near-duplicate pairs.
- * - errors — cover with unit tests, then delete.
- * - switching to a data view (3) — MIGRATE as 2 specs.
- * - inspector ('shows Discover and Lens requests') — MIGRATE, reconciled with the existing
- *   test/scout/tabs inspector spec.
- * - query history (4) — mostly covered by history_local_storage.test.ts and
- *   history_starred_queries.test.tsx; keep one browser test for selecting a history item.
- * - sorting ('should sort correctly') — MIGRATE, split into separate apply / persistence /
- *   dashboard specs.
- *
- * Worth checking during the migration: this mirror omits `enableESQL: true` from its ui settings and
- * has no `cascadeLayoutEnabled` override, so the two suites are not running against identical
- * configuration today.
- */
+/** Migration recommendation: DELETE. Subset of the stateful original; folds in via `tags.deploymentAgnostic`. */
 
 import expect from '@kbn/expect';
 import { NULL_LABEL } from '@kbn/field-formats-common';
