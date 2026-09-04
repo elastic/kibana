@@ -133,8 +133,10 @@ function describeAlert(alert: AlertSnapshot): string {
     `Rule "${sanitize(alert.rule_name)}" (${sanitize(alert.rule_category)}, type ${sanitize(
       alert.rule_type_id
     )}) is ${sanitize(alert.status)}, first active at ${sanitize(alert.start)}.`,
-    `Reason: ${sanitize(alert.reason)}`,
   ];
+
+  if (alert.reason) lines.push(`Reason: ${sanitize(alert.reason)}`);
+  if (alert.timestamp) lines.push(`Last evaluated at ${sanitize(alert.timestamp)}.`);
 
   const entity = describeEntity(alert);
   if (entity) lines.push(`Affected entity: ${entity}`);

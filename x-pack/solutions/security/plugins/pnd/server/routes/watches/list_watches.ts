@@ -36,10 +36,7 @@ export const registerListWatchesRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const body: ListWatchesResponse = await getWatchesService().list(
-            request,
-            getSpaceId(request)
-          );
+          const body: ListWatchesResponse = await getWatchesService().list(getSpaceId(request));
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list watches: ${error}`);

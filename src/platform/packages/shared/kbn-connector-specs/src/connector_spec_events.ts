@@ -9,6 +9,13 @@
 
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
+import type { HandleEventsResult } from './handle_events_result';
+
+export type {
+  EventPayload,
+  HandleEventsHttpResponse,
+  HandleEventsResult,
+} from './handle_events_result';
 
 /**
  * Context passed to ConnectorSpecEvents.handleEvents after hub verification.
@@ -23,24 +30,6 @@ export interface ConnectorIngressContext {
   readonly connectorTypeId: string;
   readonly config: Record<string, unknown>;
   readonly rawBody: unknown;
-}
-
-export interface EventPayload {
-  readonly eventId: string;
-  readonly correlationKey: string;
-  readonly payload: Record<string, unknown>;
-}
-
-/**
- * Result of handleEvents: publish each payload.
- *
- * Before publish, the actions hub must run `validateEmittedEvents` so every
- * emitted `eventId` exists in `definitions` and each `payload` matches the
- * corresponding `eventSchema`.
- */
-export interface HandleEventsResult {
-  type: 'emit';
-  events: EventPayload[];
 }
 
 /**
@@ -59,6 +48,12 @@ export interface EventDefinition {
   readonly eventSchema: z.ZodObject;
 }
 
+/**
+ * Spoke events contract.
+ *
+ * `handleEvents` returns emit or HTTP ack. The hub must run
+ * `parseHandleEventsResult` (and `validateEmittedEvents` on emit).
+ */
 export interface ConnectorSpecEvents {
   readonly definitions: Record<string, EventDefinition>;
   handleEvents(ctx: ConnectorIngressContext): Promise<HandleEventsResult>;

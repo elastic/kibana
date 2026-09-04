@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/es-query'
   - '@kbn/task-manager-plugin'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod
