@@ -36,6 +36,7 @@ import { EditorSettingsPopover } from './editor_settings_popover';
 import type { ExtraAction } from './extra_actions_bar';
 import { ExtraActionsBar } from './extra_actions_bar';
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
+import { useFixWithAi } from './hooks/use_fix_with_ai';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
 import { StepActions } from './step_actions';
@@ -139,6 +140,11 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   formatOnType: true,
   suggestLineHeight: 25, // default 21 + 4px for padding
 };
+
+const getWorkflowName = (
+  workflow: { name?: string } | null | undefined,
+  workflowDefinition: { name?: string } | null | undefined
+) => workflow?.name ?? workflowDefinition?.name;
 
 export interface WorkflowYAMLEditorProps {
   highlightDiff?: boolean;
@@ -340,11 +346,11 @@ export const WorkflowYAMLEditor = ({
   }, [validationErrors, dispatch]);
 
   // Agent Builder integration for AI-assisted editing
-  const { isAgentBuilderAvailable } = useAgentBuilderIntegration({
+  const { isAgentBuilderAvailable, openAgentChat } = useAgentBuilderIntegration({
     editorRef,
     isEditorMounted,
     workflowId: workflow?.id,
-    workflowName: workflow?.name ?? workflowDefinition?.name,
+    workflowName: getWorkflowName(workflow, workflowDefinition),
     validationErrors,
   });
 
@@ -354,6 +360,13 @@ export const WorkflowYAMLEditor = ({
     }
     navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
   }, []);
+
+  const { onFixWithAi } = useFixWithAi({
+    editorRef,
+    isAgentBuilderAvailable,
+    isReadOnlyYaml,
+    openAgentChat,
+  });
 
   useEffect(() => {
     if (!isEditorMounted) {
@@ -908,6 +921,7 @@ export const WorkflowYAMLEditor = ({
             error={errorValidating}
             validationErrors={validationErrors}
             onErrorClick={handleErrorClick}
+            onFixWithAi={onFixWithAi}
             extraAction={hideEditorTools ? undefined : extraActionElement}
           />
         </div>
