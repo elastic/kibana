@@ -115,7 +115,47 @@ export const setupWatchCell = async ({
     ops.push(attackDiscoveryDoc(row));
   }
   log.info(`Seeding ${KILL_CHAIN_EVENTS.length} kill-chain events + ${rows.length} AD alerts`);
-  await esClient.bulk({ body: ops, refresh: 'wait_for' });
+  const bulkResp = (await esClient.bulk({ body: ops, refresh: 'wait_for' })) as {
+    errors?: boolean;
+    items?: Array<{ [op: string]: { error?: unknown } }>;
+  };
+  if (bulkResp.errors) {
+    const failed = (bulkResp.items ?? [])
+      .map((i) => Object.values(i)[0])
+      .filter((r) => r && 'error' in (r as Record<string, unknown>));
+    throw new Error(`Seed bulk had ${failed.length} item errors: ${JSON.stringify(failed.slice(0, 3))}`);
+  }
+  // `refresh: 'wait_for'` should make the docs searchable, but on a fast
+  // single-model path we have seen count 0 at watch-run time (2026-09-04,
+  // run dwv17c: derive_ids -> null, all rows "no data"). Poll counts until
+  // the seeds are actually queryable so the watch never races the seed.
+  const expectedEvents = KILL_CHAIN_EVENTS.length;
+  const deadline = Date.now() + 30_000;
+  for (;;) {
+    const [events, ads] = await Promise.all([
+      esClient.count({
+        index: EVENT_INDEX,
+        query: { term: { 'event.dataset': 'endpoint forensics watch eval seed' } },
+      }) as Promise<{ count: number }>,
+      esClient.count({
+        index: ATTACK_DISCOVERY_INDEX,
+        query: { ids: { values: rows.map((r) => r.id) } },
+      }) as Promise<{ count: number }>,
+    ]);
+    if (events.count >= expectedEvents && ads.count >= rows.length) {
+      log.info(
+        `Seed queryable: ${events.count} events, ${ads.count} AD alerts (verified via _count before returning)`
+      );
+      return;
+    }
+    if (Date.now() > deadline) {
+      throw new Error(
+        `Seed not queryable after 30s: ${events.count}/${expectedEvents} events, ` +
+          `${ads.count}/${rows.length} AD alerts -- aborting rather than running the watch against missing data`
+      );
+    }
+    await new Promise((r) => setTimeout(r, 1_000));
+  }
 };
 
 /** Remove everything this module indexed (idempotent). */
@@ -126,9 +166,15 @@ export const teardownWatchCell = async ({
   esClient: EsClient;
   rows: DeepWatchGoldenRow[];
 }): Promise<void> => {
-  for (const [off] of KILL_CHAIN_EVENTS) {
-    await esClient.deleteByQuery({ index: EVENT_INDEX, refresh: true, query: { term: { 'event.dataset': 'endpoint forensics watch eval seed' } } }).catch(() => undefined);
-  }
+  // One deleteByQuery covers all seeded events (tagged via event.dataset).
+  // The previous per-event loop repeated the identical query 11 times.
+  await esClient
+    .deleteByQuery({
+      index: EVENT_INDEX,
+      refresh: true,
+      query: { term: { 'event.dataset': 'endpoint forensics watch eval seed' } },
+    })
+    .catch(() => undefined);
   for (const row of rows) {
     await esClient.delete({ index: ATTACK_DISCOVERY_INDEX, id: row.id }).catch(() => undefined);
   }
