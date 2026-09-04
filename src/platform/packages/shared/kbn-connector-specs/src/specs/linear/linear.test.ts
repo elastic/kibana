@@ -499,15 +499,16 @@ describe('Linear', () => {
   });
 
   describe('metadata and auth', () => {
-    it('supports Workflows and Agent Builder with a useful connector skill', () => {
-      expect(Linear.metadata.supportedFeatureIds).toEqual(['workflows', 'agentBuilder']);
+    it('stages the new connector for Agent Builder before Workflows activation', () => {
+      expect(Linear.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
       expect(Linear.metadata.minimumLicense).toBe('enterprise');
       expect(Linear.metadata.description).toBe(
-        'Find, create, and update issues, add comments, and link URL attachments.'
+        'Search and inspect Linear teams, projects, users, and issues.'
       );
       expect(Linear.skill).toContain('listTeams');
       expect(Linear.skill).toContain('listCycles');
       expect(Linear.skill).toContain('labelIds');
+      expect(Linear.skill).toContain('planned Workflows activation');
     });
 
     it('fixes and hides the raw Authorization header name', () => {
@@ -1086,6 +1087,19 @@ describe('Linear', () => {
         'Linear listTeams GraphQL error Malformed GraphQL error; Malformed GraphQL error; Malformed GraphQL error; Unknown GraphQL error'
       );
       await expect(result).rejects.not.toThrow('do-not-surface-this-value');
+    });
+
+    it('truncates GraphQL error messages without splitting a Unicode code point', async () => {
+      const boundedPrefix = 'a'.repeat(499);
+      mockClient.post.mockResolvedValue({
+        data: {
+          errors: [{ message: `${boundedPrefix}\u{1F642}tail` }],
+        },
+      });
+
+      await expect(getAction('listTeams').handler(mockContext, {})).rejects.toThrow(
+        `Linear listTeams GraphQL error ${boundedPrefix}\u{1F642}`
+      );
     });
 
     it('surfaces HTTP response details', async () => {

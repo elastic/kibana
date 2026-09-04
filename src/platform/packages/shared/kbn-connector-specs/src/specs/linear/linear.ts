@@ -500,7 +500,7 @@ const boundedMessage = (value: unknown): string | undefined => {
     return undefined;
   }
   const trimmed = value.trim();
-  return trimmed ? trimmed.slice(0, MAX_ERROR_MESSAGE_LENGTH) : undefined;
+  return trimmed ? Array.from(trimmed).slice(0, MAX_ERROR_MESSAGE_LENGTH).join('') : undefined;
 };
 
 const graphQLErrorDetail = (errors: unknown[]): string =>
@@ -733,11 +733,11 @@ export const Linear: ConnectorSpec = {
     id: '.linear',
     displayName: 'Linear',
     description: i18n.translate('core.kibanaConnectorSpecs.linear.metadata.description', {
-      defaultMessage: 'Find, create, and update issues, add comments, and link URL attachments.',
+      defaultMessage: 'Search and inspect Linear teams, projects, users, and issues.',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -769,6 +769,10 @@ export const Linear: ConnectorSpec = {
   schema: lazySchema(() => z.object({})),
 
   skill: `Linear organizes product work into teams, projects, workflow states, labels, users, issues, comments, and attachments.
+
+Availability:
+- This initial connector rollout is available to Agent Builder only.
+- Read actions marked as tools are available now. Mutation actions are reserved for a planned Workflows activation after the connector reaches all Production-NonCanary versions.
 
 Discovery flow:
 1. Call listTeams first and retain the team id.

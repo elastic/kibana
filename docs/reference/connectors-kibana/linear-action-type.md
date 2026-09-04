@@ -1,7 +1,7 @@
 ---
 navigation_title: "Linear"
 type: reference
-description: "Use the Linear connector to find, create, and update issues, add comments, and link URL attachments."
+description: "Use the Linear connector to search and inspect teams, projects, users, and issues."
 applies_to:
   stack: preview 9.6
   serverless: preview
@@ -9,7 +9,9 @@ applies_to:
 
 # Linear connector [linear-action-type]
 
-The Linear connector uses the fixed Linear GraphQL API endpoint to find teams, projects, cycles, workflow states, labels, users, and issues, and to create or update issue records. It uses a personal Linear API key.
+The Linear connector uses the fixed Linear GraphQL API endpoint to find teams, projects, cycles, workflow states, labels, users, and issues. It uses a personal Linear API key.
+
+The initial connector rollout is available to Agent Builder. Create and update actions are defined for a planned Workflows activation after the connector reaches all Production-NonCanary versions, but they are not available during this first rollout.
 
 ## Create connectors in {{kib}} [define-linear-ui]
 
@@ -81,7 +83,7 @@ Create comment (`createComment`)
 Create attachment (`createAttachment`)
 :   Link an existing HTTPS URL to an issue. `issueId`, `title`, and `url` are required. Optional `subtitle`, `iconUrl`, and metadata are supported. An `iconUrl` should point to a PNG or JPG no larger than 1 MB; Linear recommends 20x20 pixels. The connector validates that the URL uses HTTPS but does not fetch the icon or verify its format, size, or dimensions. Metadata values must be strings or numbers. This action links a URL; it does not upload file bytes. Linear updates the existing attachment when the same issue and URL are used again.
 
-The create and update actions are available to workflows but are not exposed as autonomous Agent Builder tools.
+The list and get actions are exposed as Agent Builder tools. The create and update actions are not exposed as autonomous tools and remain unavailable until the planned Workflows activation.
 
 ## Connector networking configuration [linear-connector-networking-configuration]
 
