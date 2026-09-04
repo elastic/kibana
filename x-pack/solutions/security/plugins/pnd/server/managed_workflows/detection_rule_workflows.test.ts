@@ -248,6 +248,82 @@ describe('detection rule workflows', () => {
         );
       });
 
+      // `kibana.alert.rule.enabled` on an alert is a creation-time snapshot, so a rule
+      // disabled after alerting keeps harvesting until its FPs age out of the window.
+      // The sweep checks live enabled status for the harvested candidates only and
+      // drops disabled rules from the fan-out source (a parallel branch body cannot
+      // carry a step-level `if`), failing open into a full fan-out when the lookup
+      // gave no verdict.
+      it('skips proposals for rules that are no longer enabled', () => {
+        const collect = tuningSteps.find(({ name }) => name === 'collect_candidates')!;
+        const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_candidates')!;
+        const resolve = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
+        const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
+        const fanOut = tuningSteps.find(({ name }) => name === 'run_proposals')!;
+
+        const filterKql = String(collect.with?.filter_kql);
+        expect(filterKql).toContain('alert.attributes.enabled: true');
+        expect(filterKql).toContain('alert.id: ("alert:{{ row[0] }}")');
+
+        const path = String(lookup.with?.path);
+        expect(path).toContain('/api/detection_engine/rules/_find?');
+        expect(path).toContain('per_page={{ consts.max_candidate_rules }}');
+        expect(path).toContain('{{ steps.collect_candidates.output.filter_kql | url_encode }}');
+        expect(String(lookup.if)).toContain('steps.collect_candidates.output.count > 0');
+        expect(lookup['on-failure']).toEqual({ continue: true });
+
+        // The prefixed joined string keeps the verdict non-empty when zero
+        // candidates are enabled, so all-disabled never reads as no-verdict.
+        expect(String(resolve.if)).toContain('steps.list_enabled_candidates.output.data != null');
+        expect(String(resolve.with?.verdict)).toContain("| join: ',' | prepend: 'enabled:'");
+
+        const rowsExpr = String(rows.with?.rows);
+        expect(rowsExpr).toContain(
+          "where_exp: 'row', 'steps.resolve_enabled_rules.output.verdict == null or steps.resolve_enabled_rules.output.verdict contains row[0]'"
+        );
+        // No `default` after where_exp: an empty filtered array is legitimate and a
+        // default would resurrect every disabled candidate.
+        expect(rowsExpr).not.toMatch(/where_exp:.*\| default:/);
+        // The engine's rehydration planner cannot see step paths inside the quoted
+        // where_exp argument; this direct reference keeps the verdict resident. If
+        // it is removed, an evicted verdict renders null and the filter fails open.
+        expect(String(rows.with?.verdict)).toContain(
+          '${{ steps.resolve_enabled_rules.output.verdict }}'
+        );
+        // Slice after the enabled filter: the pool overscans the launch cap so
+        // disabled candidates cannot starve enabled rules ranked below them.
+        expect(rowsExpr).toContain('| slice: 0, steps.collect_candidates.output.fanout_limit');
+        expect(String(collect.with?.fanout_limit)).toContain(
+          'inputs.max_rules_per_sweep | default: consts.max_rules_per_sweep'
+        );
+
+        expect(String((fanOut as NestedStep & { foreach?: string }).foreach)).toContain(
+          'steps.resolve_fanout_rows.output.rows'
+        );
+      });
+
+      // The pool is cut in ES|QL before the enabled check runs, so it must exceed
+      // the launch cap for the enabled filter to have anything to backfill from.
+      it('overscans the harvest pool beyond the launch cap', () => {
+        const consts = (tuning as unknown as { consts: Record<string, number> }).consts;
+        expect(consts.max_candidate_rules).toBe(20);
+        expect(consts.max_rules_per_sweep).toBe(10);
+        expect(consts.max_candidate_rules).toBeGreaterThan(consts.max_rules_per_sweep);
+        expect(harvestQuery).toContain('LIMIT {{ consts.max_candidate_rules }}');
+
+        const trigger = (
+          tuning.triggers as unknown as Array<{
+            type: string;
+            inputs: { properties: Record<string, Record<string, unknown>> };
+          }>
+        ).find(({ type }) => type === 'manual')!;
+        // The input can only lower the launch cap; the fan-out's parallel slots
+        // are sized for the default.
+        expect(trigger.inputs.properties.max_rules_per_sweep).toEqual(
+          expect.objectContaining({ minimum: 1, maximum: consts.max_rules_per_sweep })
+        );
+      });
+
       it('does not split one rule history when its name changes', () => {
         const groupClause = harvestQuery
           .split('\n')
@@ -529,7 +605,8 @@ describe('detection rule workflows', () => {
         expect(fanOut.type).toBe('parallel');
         // Settled: one failed proposal must not skip the other rules' gates.
         expect(fanOut.mode).toBe('settled');
-        // A slot per harvested rule (max_rules_per_sweep) so every gate opens at once.
+        // A slot per launched rule (max_rules_per_sweep; the input can only lower
+        // the cap) so every gate opens at once.
         expect(fanOut.concurrency).toEqual({ max: 10, 'count-waiting': false });
         // A timeout here would abort branches and cancel children mid-approval;
         // the child gate's own timeout is the only clock.

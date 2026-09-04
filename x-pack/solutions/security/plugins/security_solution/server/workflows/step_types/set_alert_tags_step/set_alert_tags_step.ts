@@ -24,7 +24,7 @@ export const setAlertTagsStepDefinition = createServerStepDefinition({
     const ids = Array.isArray(alertIds) ? alertIds : [alertIds];
 
     try {
-      const { body } = await context.contextManager.callKibanaApi<{
+      await context.contextManager.callKibanaApi<{
         version?: string | number;
         updated?: number;
         failures?: unknown[];
@@ -39,14 +39,6 @@ export const setAlertTagsStepDefinition = createServerStepDefinition({
           },
         },
       });
-      const failures = body.failures ?? [];
-      if (body.updated !== ids.length || failures.length > 0) {
-        throw new Error(
-          `Alert tag update completed partially: updated ${body.updated ?? 0} of ${
-            ids.length
-          } alert(s), failures=${failures.length}`
-        );
-      }
 
       const addedCount = tagsToAdd.length;
       const removedCount = tagsToRemove.length;

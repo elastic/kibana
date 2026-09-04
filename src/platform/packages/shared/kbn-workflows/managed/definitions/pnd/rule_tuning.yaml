@@ -31,7 +31,7 @@ triggers:
           # Floor of 2: a single-FP group makes ES|QL return alert_ids as a scalar,
           # which would fail the proposal's array input schema.
           minimum: 2
-          maximum: 1000000
+          maximum: 100
           description: Overrides the minimum unreviewed false-positive alerts a rule needs before it is diagnosed.
         min_fp_rate_pct:
           type: number
@@ -48,6 +48,13 @@ triggers:
           minimum: 1
           maximum: 10
           description: Overrides the rule executions each backtest preview simulates.
+        max_rules_per_sweep:
+          type: integer
+          minimum: 1
+          # Can only lower the cap: the fan-out's parallel slots are sized for the
+          # default, so a larger value could not open every gate at once.
+          maximum: 10
+          description: Overrides how many tuning proposals one sweep may launch, up to the default of 10.
       additionalProperties: false
 outputs:
   - name: proposals_requested
@@ -67,6 +74,8 @@ consts:
   min_fp_count: 10
   min_fp_rate_pct: 50
   max_rules_per_sweep: 10
+  # The max number of rules to consider for tuning.
+  max_candidate_rules: 20
   # Ids handed to the diagnosing agent and tagged once the gate resolves; must
   # match ALERTS_BY_IDS_MAX in the investigate-rule skill (investigate_rule_skill.ts).
   max_diagnosis_ids: 100
@@ -74,10 +83,6 @@ consts:
   # Liquid has no array literal, so `| default: []` yields undefined rather than an
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
-  # Written onto every alert that reached a decision (by the proposal workflow).
-  # The harvest treats the newest tagged alert as a per-rule watermark: any false
-  # positive at or before it counts as addressed, tagged or not, so the false
-  # positives older than a decided batch cannot be rediagnosed.
   reviewed_tag: detection-watch:tuning-reviewed
 steps:
   # A proposal can outlive its sweep (sweep cancelled or failed while the child sits
@@ -171,7 +176,7 @@ steps:
         | WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
           AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
         | SORT fp_count DESC
-        | LIMIT {{ consts.max_rules_per_sweep }}
+        | LIMIT {{ consts.max_candidate_rules }}
         | MV_EXPAND recent_keys
         | EVAL alert_id = SUBSTRING(recent_keys, 19)
         | STATS fp_count = MAX(fp_count),
@@ -183,6 +188,38 @@ steps:
     on-failure:
       continue: true
 
+  # Get the candidates from the harvest and the enabled rules.
+  - name: collect_candidates
+    type: data.set
+    with:
+      count: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | size }}"
+      fanout_limit: "${{ inputs.max_rules_per_sweep | default: consts.max_rules_per_sweep }}"
+      filter_kql: '(alert.attributes.enabled: true) AND ({% for row in steps.harvest_fp_alerts_by_rule.output.values %}alert.id: ("alert:{{ row[0] }}"){% unless forloop.last %} OR {% endunless %}{% endfor %})'
+
+  - name: list_enabled_candidates
+    type: kibana.request
+    if: "${{ steps.collect_candidates.output.count > 0 }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/_find?page=1&per_page={{ consts.max_candidate_rules }}&filter={{ steps.collect_candidates.output.filter_kql | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+    on-failure:
+      continue: true
+
+  - name: resolve_enabled_rules
+    type: data.set
+    if: "${{ steps.list_enabled_candidates.output.data != null }}"
+    with:
+      verdict: "${{ steps.list_enabled_candidates.output.data | map: 'id' | join: ',' | prepend: 'enabled:' }}"
+
+  # Only enabled rules are included in the fan-out.
+  - name: resolve_fanout_rows
+    type: data.set
+    with:
+      verdict: "${{ steps.resolve_enabled_rules.output.verdict }}"
+      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.verdict == null or steps.resolve_enabled_rules.output.verdict contains row[0]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
+
   # One proposal execution per rule, launched synchronously inside a parallel
   # branch so this sweep joins once every gate has settled. The gate itself cannot
   # live in this run: waitForApproval is rejected inside a parallel branch, and one
@@ -193,12 +230,13 @@ steps:
   # the only clock.
   - name: run_proposals
     type: parallel
-    foreach: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows }}"
+    foreach: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows }}"
     # Settled: one dropped or failed proposal must not skip the other rules'
     # gates. Failures stay visible in the aggregate results and counts.
     mode: settled
     concurrency:
-      # Must cover consts.max_rules_per_sweep so every gate opens at once.
+      # Must cover consts.max_rules_per_sweep (the input can only lower the cap)
+      # so every gate opens at once.
       max: 10
       # A branch parked in WAITING_FOR_CHILD frees its slot.
       count-waiting: false
@@ -225,7 +263,7 @@ steps:
   - name: summarize_decisions
     type: data.set
     with:
-      proposals_requested: "${{ steps.harvest_fp_alerts_by_rule.output.values | size | default: 0 }}"
+      proposals_requested: "${{ steps.resolve_fanout_rows.output.rows | size | default: 0 }}"
       proposals_failed: "${{ steps.run_proposals.output.failed | default: 0 }}"
       proposals_approved: "${{ steps.run_proposals.output.results | map: 'output' | where: 'approved' | size | default: 0 }}"
       rules_applied: "${{ steps.run_proposals.output.results | map: 'output' | where: 'applied' | size | default: 0 }}"

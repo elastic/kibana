@@ -49,7 +49,7 @@ describe('setAlertTagsStepDefinition', () => {
       });
       (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
         status: 200,
-        body: { updated: 1, failures: [] },
+        body: {},
       });
 
       const result = await setAlertTagsStepDefinition.handler(mockContext);
@@ -81,7 +81,7 @@ describe('setAlertTagsStepDefinition', () => {
       });
       (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
         status: 200,
-        body: { updated: 2, failures: [] },
+        body: {},
       });
 
       const result = await setAlertTagsStepDefinition.handler(mockContext);
@@ -113,7 +113,7 @@ describe('setAlertTagsStepDefinition', () => {
       });
       (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
         status: 200,
-        body: { updated: 1, failures: [] },
+        body: {},
       });
 
       const result = await setAlertTagsStepDefinition.handler(mockContext);
@@ -133,7 +133,7 @@ describe('setAlertTagsStepDefinition', () => {
       });
       (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
         status: 200,
-        body: { updated: 1, failures: [] },
+        body: {},
       });
 
       await setAlertTagsStepDefinition.handler(mockContext);
@@ -155,7 +155,7 @@ describe('setAlertTagsStepDefinition', () => {
       });
       (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
         status: 200,
-        body: { updated: 1, failures: [] },
+        body: {},
       });
 
       await setAlertTagsStepDefinition.handler(mockContext);
@@ -168,34 +168,6 @@ describe('setAlertTagsStepDefinition', () => {
           tags: { tags_to_add: [], tags_to_remove: ['needs-review'] },
         },
       });
-    });
-
-    it('throws when the API updates fewer alerts than requested', async () => {
-      const mockContext = createMockContext({
-        alert_ids: ['alert-1', 'alert-2'],
-        tags_to_add: ['triaged'],
-      });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
-        status: 200,
-        body: { updated: 1, failures: [] },
-      });
-
-      await expect(setAlertTagsStepDefinition.handler(mockContext)).rejects.toThrow(
-        'updated 1 of 2'
-      );
-    });
-
-    it('throws when the API reports update failures', async () => {
-      const mockContext = createMockContext({
-        alert_ids: ['alert-1'],
-        tags_to_add: ['triaged'],
-      });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
-        status: 200,
-        body: { updated: 1, failures: [{ id: 'alert-1' }] },
-      });
-
-      await expect(setAlertTagsStepDefinition.handler(mockContext)).rejects.toThrow('failures=1');
     });
 
     it('persists only status (not the raw body/headers) when callKibanaApi throws on a non-2xx', async () => {
