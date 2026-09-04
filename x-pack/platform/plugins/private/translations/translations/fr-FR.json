@@ -30888,7 +30888,6 @@
     "xpack.maps.topNav.cancel": "Annuler",
     "xpack.maps.topNav.cancelButtonAriaLabel": "Revenir à la dernière application sans enregistrer les modifications",
     "xpack.maps.topNav.fullScreenButtonLabel": "plein écran",
-    "xpack.maps.topNav.fullScreenDescription": "plein écran",
     "xpack.maps.topNav.mustCopyOnSaveMessage": "Elastic gère cette carte. Enregistrez les modifications dans une nouvelle carte.",
     "xpack.maps.topNav.openInspectorButtonLabel": "inspecter",
     "xpack.maps.topNav.openInspectorDescription": "Ouvrir l'Inspecteur",

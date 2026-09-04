@@ -31062,7 +31062,6 @@
     "xpack.maps.topNav.cancel": "取消",
     "xpack.maps.topNav.cancelButtonAriaLabel": "返回到上一个应用而不保存更改",
     "xpack.maps.topNav.fullScreenButtonLabel": "全屏",
-    "xpack.maps.topNav.fullScreenDescription": "全屏",
     "xpack.maps.topNav.mustCopyOnSaveMessage": "Elastic 将管理此地图。将任何更改保存到新地图。",
     "xpack.maps.topNav.openInspectorButtonLabel": "检查",
     "xpack.maps.topNav.openInspectorDescription": "打开检查器",

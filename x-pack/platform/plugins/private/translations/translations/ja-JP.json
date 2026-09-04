@@ -31055,7 +31055,6 @@
     "xpack.maps.topNav.cancel": "キャンセル",
     "xpack.maps.topNav.cancelButtonAriaLabel": "変更を保存せずに最後に使用していたアプリに戻る",
     "xpack.maps.topNav.fullScreenButtonLabel": "全画面",
-    "xpack.maps.topNav.fullScreenDescription": "全画面",
     "xpack.maps.topNav.mustCopyOnSaveMessage": "Elasticはこのマップを管理します。変更は新しいマップに保存されます。",
     "xpack.maps.topNav.openInspectorButtonLabel": "検査",
     "xpack.maps.topNav.openInspectorDescription": "インスペクターを開きます",
