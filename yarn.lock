@@ -1902,10 +1902,10 @@
     semver "7.7.4"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.16.0":
-  version "2.16.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.16.0.tgz#b04061d2f598511bed61a86f02a5ad8e48012a5b"
-  integrity sha512-G59/ubflm7Z+9XoFpub9JdV7tYWdmH0cEu2/yAcQjY+RO5Y+IMR9hDMz9zN3YBUsTvD2w21cPLWkzVXL2OgNbQ==
+"@elastic/eslint-plugin-eui@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-3.0.0.tgz#50fb8e568c842a50ea13c092190ce038af1644cc"
+  integrity sha512-YkgrARxBGEBymo44aOS0md8cybSBgLfpaerJvSRUa6oNOyQ5GyxyziQYsMhOqlp0k1coy2eABhB+mTbe9N7ZTw==
   dependencies:
     "@typescript-eslint/typescript-estree" "^8.64.0"
     "@typescript-eslint/utils" "^8.64.0"
@@ -1989,10 +1989,10 @@
     tree-dump "1.1.0"
     tslib "2.8.1"
 
-"@elastic/eui-illustrations@1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-illustrations/-/eui-illustrations-1.0.1.tgz#a4bd17393daaa708cadafc1e9fa325f99c869b4a"
-  integrity sha512-kEKd1o9mtAPFeJRz/H9Loa7tF9X4HFlKtyA2dC5YVyqoESPHz7d3h4P8RxYioe/RUhZpkvHY8pIAkIeSbJJ42Q==
+"@elastic/eui-illustrations@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-illustrations/-/eui-illustrations-1.0.2.tgz#ea3386f8ff415603f0f49f18bd80acd1fa820df5"
+  integrity sha512-gYK9mHdGm/P7wbf6yhYo17qoP61IlUcwVwIDyOSHqx89TymSn9AyVZzbgjwmGdaLFNfgM+RKvg+hfTB7Unm+Gw==
 
 "@elastic/eui-test-helpers@1.5.0":
   version "1.5.0"
@@ -2016,10 +2016,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@119.1.0":
-  version "119.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-119.1.0.tgz#fe950711b75ad95a3b733fff43e97b9ef8659d51"
-  integrity sha512-655h0HmMSqcWcdF1BYaFgx35/OmHgRTdlHAYwlt4MEYfRo4PJgxwXM8xfQ7crNl/9jXYF6cbt2RM/azkpEChRg==
+"@elastic/eui@120.0.0":
+  version "120.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-120.0.0.tgz#30ee329210b3cd608fb55e31690edfe01711cd0f"
+  integrity sha512-iUutRU4JIG4eolU3LCE4CWe/H7juRCKYQaT+UeXQyegHRGttYFlunPEisS7+BLV1qrJRWiIq2lwykf0HwT7osw==
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^4.13.0"
@@ -2030,6 +2030,7 @@
     "@types/refractor" "^3.4.0"
     chroma-js "^2.4.2"
     classnames "^2.5.1"
+    diff-match-patch "^1.0.5"
     lodash "^4.17.21"
     mdast-util-to-hast "^10.2.0"
     numeral "^2.0.6"
@@ -2050,7 +2051,6 @@
     remark-parse-no-trim "^8.0.4"
     remark-rehype "^8.1.0"
     tabbable "^5.3.3"
-    text-diff "^1.0.1"
     unified "^9.2.2"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
@@ -32580,11 +32580,6 @@ text-decoder@^1.1.0:
   integrity sha512-3/o9z3X0X0fTupwsYvR03pJ/DjWuqqrfwBgTQzdWDiQSm9KitAyz/9WqsT2JQW7KV2m+bC2ol/zqpW37NHxLaA==
   dependencies:
     b4a "^1.6.4"
-
-text-diff@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/text-diff/-/text-diff-1.0.1.tgz#6c105905435e337857375c9d2f6ca63e453ff565"
-  integrity sha1-bBBZBUNeM3hXN1ydL2ymPkU/9WU=
 
 text-hex@1.0.x:
   version "1.0.0"
