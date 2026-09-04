@@ -215,21 +215,11 @@ export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): Base
   const existingVersion = existing.properties.version;
   const incomingVersion = incoming.properties.version;
   const versionHistory = getStringArray(existing.meta?.version_history);
-  // Unioning incoming aliases is safe: model-written meta.aliases is stripped at the identify
-  // boundary, so whatever arrives here was assigned by code after a verified reuse.
-  const aliases =
-    boundedUnion(getStringArray(existing.meta?.aliases), getStringArray(incoming.meta?.aliases)) ??
-    [];
 
   if (versionHistory.length > 0) {
     mergedMeta.version_history = versionHistory;
   } else {
     delete mergedMeta.version_history;
-  }
-  if (aliases.length > 0) {
-    mergedMeta.aliases = aliases;
-  } else {
-    delete mergedMeta.aliases;
   }
 
   if (

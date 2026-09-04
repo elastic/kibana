@@ -21,7 +21,7 @@ settings:
     strategy: drop
     max: 5
 triggers:
-  # Detection Watch owns the per-space 2h schedule. This global worker stays
+  # The per-space Rule Tuning worker owns the 2h schedule. This global sweep stays
   # manual-only so there is one scheduler authority and no cross-space task collision.
   - type: manual
     inputs:

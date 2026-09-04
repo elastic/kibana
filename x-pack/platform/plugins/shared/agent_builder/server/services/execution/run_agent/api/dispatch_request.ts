@@ -7,9 +7,10 @@
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { toSelfFetchQuery } from './query_params';
 import { isRecord } from './types';
-import type { ApiRequest, ApiTarget } from './types';
+import type { ApiRequest } from './types';
 
 export interface DispatchApiRequestParams {
   target: ApiTarget;
