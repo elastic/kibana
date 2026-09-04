@@ -159,6 +159,10 @@ import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../common/siem_migrations/c
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
+import { registerRoutes as registerThreatIntelRoutes } from './threat_intel/routes';
+import { registerThreatIntelInferenceFeatures } from './threat_intel/inference_features';
+import { ensureThreatIntelBootstrap } from './threat_intel/setup/bootstrap_threat_intel';
+import { createDeferred } from './threat_intel/lib/deferred';
 import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
@@ -225,6 +229,19 @@ export class Plugin implements ISecuritySolutionPlugin {
   private platformCpsEnabled = false;
   /** The `defendCrossProjectSearch` experimental flag; AND-ed with `cps.isCpsActive` per request */
   private defendCpsFeatureFlagEnabled = false;
+
+  /**
+   * Threat intel routes are registered in `setup()` but depend on start-time
+   * services and a one-time bootstrap. We capture only the start plugins the
+   * route getters actually read and expose them via lazy getters so a request
+   * cannot resolve them before `start()` runs. Narrowed to those four so the
+   * full 20+ plugin start bundle is not held alive for the plugin's lifetime.
+   */
+  private threatIntelStartPlugins?: Pick<
+    SecuritySolutionPluginStartDependencies,
+    'spaces' | 'inference' | 'searchInferenceEndpoints' | 'taskManager'
+  >;
+  private readonly threatIntelBootstrapReady = createDeferred();
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -515,6 +532,24 @@ export class Plugin implements ISecuritySolutionPlugin {
       APP_ID,
       (context, request) => requestContextFactory.create(context, request)
     );
+
+    if (experimentalFeatures.threatIntelSupplyEnabled) {
+      // Inference features let operators pick a model per enrichment stage in
+      // Stack Management; no-op when `searchInferenceEndpoints` is unavailable.
+      registerThreatIntelInferenceFeatures(plugins.searchInferenceEndpoints, logger);
+
+      // Routes are registered now, but their start-time services and the
+      // one-time bootstrap are resolved lazily in `start()`.
+      registerThreatIntelRoutes({
+        router,
+        logger,
+        getSpacesService: () => this.threatIntelStartPlugins?.spaces?.spacesService,
+        getInference: () => this.threatIntelStartPlugins?.inference,
+        getSearchInferenceEndpoints: () => this.threatIntelStartPlugins?.searchInferenceEndpoints,
+        getTaskManager: () => this.threatIntelStartPlugins?.taskManager,
+        getBootstrapReady: () => this.threatIntelBootstrapReady.promise,
+      });
+    }
 
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
@@ -888,6 +923,34 @@ export class Plugin implements ISecuritySolutionPlugin {
     ).catch(() => {});
 
     this.ruleMonitoringService.start(core, plugins);
+
+    if (config.experimentalFeatures.threatIntelSupplyEnabled) {
+      // Publish start services to the route getters registered in `setup()`.
+      this.threatIntelStartPlugins = plugins;
+
+      // A bootstrap failure must not crash Kibana. Routes that touch plugin-owned
+      // indices observe the rejection via `getBootstrapReady()` and return 503;
+      // the LLM enrichment routes do not gate on it at all. This no-op handler
+      // marks the shared promise handled so a failure does not surface as an
+      // unhandled rejection at startup (before any request has awaited it).
+      this.threatIntelBootstrapReady.promise.catch(() => {});
+
+      // Fire-and-forget: startup must not block on the bootstrap. Route handlers
+      // await `getBootstrapReady()` so requests cannot touch plugin-owned indices
+      // before their templates apply.
+      ensureThreatIntelBootstrap({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger,
+      }).then(
+        () => this.threatIntelBootstrapReady.resolve(),
+        (err) => {
+          logger.error(
+            `Threat intelligence bootstrap failed: ${err instanceof Error ? err.message : err}`
+          );
+          this.threatIntelBootstrapReady.reject(err);
+        }
+      );
+    }
 
     if (plugins.workflowsExtensions) {
       // Install once in the global space, then mark ready (install is awaited before ready inside
