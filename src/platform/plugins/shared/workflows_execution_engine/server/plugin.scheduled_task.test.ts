@@ -537,7 +537,7 @@ describe('workflow:scheduled task runner', () => {
 
   it('persists a failed execution and does not run when no identity is resolved', async () => {
     setupPlugin();
-    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(UNKNOWN_EXECUTION_IDENTITY);
+    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
     mockGetWorkflow.mockResolvedValue({
       id: workflowId,
       enabled: true,

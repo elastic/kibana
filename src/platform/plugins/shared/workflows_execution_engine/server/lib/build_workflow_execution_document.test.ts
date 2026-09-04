@@ -83,7 +83,7 @@ describe('buildWorkflowExecutionDocument', () => {
   it('fails the execution immediately when no identity is attached', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,
-      authenticatedUser: UNKNOWN_EXECUTION_IDENTITY,
+      authenticatedUser: undefined,
     });
 
     expect(workflowExecution).toMatchObject({
@@ -95,6 +95,20 @@ describe('buildWorkflowExecutionDocument', () => {
         message: MISSING_EXECUTION_IDENTITY_MESSAGE,
       },
     });
+  });
+
+  it('does not treat a real principal named unknown as a missing identity', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      authenticatedUser: 'unknown',
+    });
+
+    expect(workflowExecution).toMatchObject({
+      status: ExecutionStatus.PENDING,
+      executedBy: 'unknown',
+    });
+    expect(workflowExecution.error).toBeUndefined();
+    expect(workflowExecution.finishedAt).toBeUndefined();
   });
 
   it('copies managed workflow billable metadata', () => {

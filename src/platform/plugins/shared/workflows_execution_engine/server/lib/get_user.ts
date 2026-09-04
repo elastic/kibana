@@ -8,7 +8,6 @@
  */
 
 import type { IClusterClient, KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
-import { UNKNOWN_EXECUTION_IDENTITY } from './execution_identity';
 
 /**
  * Gets the authenticated user information from the request.
@@ -17,15 +16,17 @@ import { UNKNOWN_EXECUTION_IDENTITY } from './execution_identity';
  * @param request - The Kibana request object
  * @param security - Core's security service instance
  * @param clusterClient - Elasticsearch cluster client for fallback authentication with API keys
- * @returns User profile UID when available, username when resolvable, otherwise `'unknown'`.
- * @remarks Always **resolves** with a string — does not throw or reject. Failures in auth lookup are
+ * @returns User profile UID when available, username when resolvable, otherwise `undefined`.
+ * @remarks Always **resolves** — does not throw or reject. Failures in auth lookup are
  *   swallowed so callers (e.g. audit metadata) cannot block core workflow actions.
+ *   `undefined` means no identity was resolved; it is distinct from a real principal
+ *   whose username is the string `'unknown'`.
  */
 export async function getAuthenticatedUser(
   request: KibanaRequest,
   security: SecurityServiceStart,
   clusterClient: IClusterClient
-): Promise<string> {
+): Promise<string | undefined> {
   // Try getCurrentUser first (works for regular authenticated requests)
   try {
     const user = security.authc.getCurrentUser(request);
@@ -50,6 +51,5 @@ export async function getAuthenticatedUser(
     }
   }
 
-  // For the time being, this is WTF - should never happen since we don't have "system" execution
-  return UNKNOWN_EXECUTION_IDENTITY;
+  return undefined;
 }

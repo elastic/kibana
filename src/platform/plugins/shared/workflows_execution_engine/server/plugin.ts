@@ -45,7 +45,10 @@ import { handlePostExecutionLoop } from './execution_functions/handle_post_execu
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
-import { MISSING_EXECUTION_IDENTITY_MESSAGE } from './lib/execution_identity';
+import {
+  MISSING_EXECUTION_IDENTITY_MESSAGE,
+  UNKNOWN_EXECUTION_IDENTITY,
+} from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
   failExecutionMissingIdentity,
@@ -1106,7 +1109,7 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
-      authenticatedUser: string;
+      authenticatedUser: string | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
       return buildWorkflowExecutionDocument({
@@ -1718,8 +1721,12 @@ export class WorkflowsExecutionEnginePlugin
       const resumedBy =
         options?.resumedBy ??
         (request
-          ? await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client)
-          : 'unknown');
+          ? (await getAuthenticatedUser(
+              request,
+              coreStart.security,
+              coreStart.elasticsearch.client
+            )) ?? UNKNOWN_EXECUTION_IDENTITY
+          : UNKNOWN_EXECUTION_IDENTITY);
       const resumedAt = new Date().toISOString();
 
       const resumeContext = {

@@ -45,9 +45,19 @@ describe('getAuthenticatedUser', () => {
     ).resolves.toBe('elastic');
   });
 
-  it('returns unknown when no user or API key identity can be resolved', async () => {
+  it('returns the username even when it is the string unknown', async () => {
+    await expect(
+      getAuthenticatedUser(
+        createRequest(),
+        createSecurity({ username: 'unknown' }),
+        createClusterClient()
+      )
+    ).resolves.toBe('unknown');
+  });
+
+  it('returns undefined when no user or API key identity can be resolved', async () => {
     await expect(
       getAuthenticatedUser(createRequest(), createSecurity(null), createClusterClient())
-    ).resolves.toBe('unknown');
+    ).resolves.toBeUndefined();
   });
 });

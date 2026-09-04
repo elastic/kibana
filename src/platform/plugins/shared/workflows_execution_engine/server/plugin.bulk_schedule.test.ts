@@ -566,7 +566,7 @@ describe('bulkScheduleWorkflow', () => {
   });
 
   it('fails a single execution without scheduling when no identity is attached', async () => {
-    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(UNKNOWN_EXECUTION_IDENTITY);
+    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
 
     const result = await pluginStart.executeWorkflow(
       createWorkflow('wf-no-identity'),
@@ -591,7 +591,7 @@ describe('bulkScheduleWorkflow', () => {
   });
 
   it('persists bulk executions as failed and does not schedule when no identity is attached', async () => {
-    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(UNKNOWN_EXECUTION_IDENTITY);
+    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
     mockAreWorkflowsEnabled.mockResolvedValue(new Map([['default:wf-a', true]]));
     mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
       executions.map(({ id }) => ({ id }))

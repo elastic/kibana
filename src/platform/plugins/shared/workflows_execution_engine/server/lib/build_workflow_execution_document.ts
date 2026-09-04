@@ -26,7 +26,7 @@ export interface BuildWorkflowExecutionDocumentParams {
   workflow: WorkflowExecutionEngineModel;
   context: Record<string, unknown>;
   defaultTriggeredBy: string;
-  authenticatedUser: string;
+  authenticatedUser: string | undefined;
   now: Date;
   maxEventChainDepth: number;
   getConcurrencyGroupKey: (workflowExecution: WorkflowExecutionForInputRendering) => string | null;
@@ -76,7 +76,7 @@ export const buildWorkflowExecutionDocument = (
   );
   const dispatchEventId =
     typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
-  const missingIdentity = authenticatedUser === UNKNOWN_EXECUTION_IDENTITY;
+  const missingIdentity = authenticatedUser == null;
   const workflowExecution: WorkflowExecutionForInputRendering = {
     id: generateUuid(),
     spaceId,
@@ -88,7 +88,7 @@ export const buildWorkflowExecutionDocument = (
     context,
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
-    executedBy: authenticatedUser,
+    executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,
     triggeredBy,
     ...(missingIdentity
       ? {
