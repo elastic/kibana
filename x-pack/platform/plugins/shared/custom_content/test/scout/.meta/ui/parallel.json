@@ -1,0 +1,78 @@
+{
+  "sha1": "ee3f151a574cf20568f50f03377a12174e304676",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e5cb1f570a249de-67248641c7e308a",
+      "title": "Custom content panel create flow saves template and ES|QL query and renders HTML in the panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/custom_content/test/scout/ui/parallel_tests/custom_content_create_flow.spec.ts",
+        "line": 52,
+        "column": 26
+      }
+    },
+    {
+      "id": "e5cb1f570a249de-35b9744fc63800e",
+      "title": "Custom content panel create flow previews rendered content before saving, and re-previews after an edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/custom_content/test/scout/ui/parallel_tests/custom_content_create_flow.spec.ts",
+        "line": 70,
+        "column": 5
+      }
+    },
+    {
+      "id": "e5cb1f570a249de-cea7f7b679f3b0b",
+      "title": "Custom content panel create flow cancelling the flyout on a new panel removes it from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/custom_content/test/scout/ui/parallel_tests/custom_content_create_flow.spec.ts",
+        "line": 88,
+        "column": 20
+      }
+    },
+    {
+      "id": "e5cb1f570a249de-d73e0ea290604ee",
+      "title": "Custom content panel create flow editing an existing panel updates its rendered content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/custom_content/test/scout/ui/parallel_tests/custom_content_create_flow.spec.ts",
+        "line": 101,
+        "column": 13
+      }
+    },
+    {
+      "id": "e5cb1f570a249de-91371d86719f8e1",
+      "title": "Custom content panel create flow cancelling the flyout on an existing panel does not remove it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/custom_content/test/scout/ui/parallel_tests/custom_content_create_flow.spec.ts",
+        "line": 115,
+        "column": 24
+      }
+    }
+  ]
+}

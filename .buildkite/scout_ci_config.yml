@@ -18,6 +18,7 @@ plugins:
     - context_engine
     - cross_cluster_replication
     - custom_branding
+    - custom_content
     - dashboard
     - dashboard_markdown
     - data

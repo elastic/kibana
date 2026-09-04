@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/embeddable-plugin",
@@ -31,6 +31,7 @@
     "@kbn/data-views-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-util",
+    "@kbn/scout",
     "@kbn/esql-types"
   ],
   "exclude": ["target/**/*"]

@@ -101,7 +101,7 @@ export const CustomContentComponent = ({
   );
 
   return (
-    <div css={wrapperCss} data-shared-item>
+    <div css={wrapperCss} data-shared-item data-test-subj="customContentPanel">
       {error && (
         <KbnDangerCallout
           title={i18n.translate('xpack.customContent.error.title', {

@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-util'
+  - '@kbn/scout'
   - '@kbn/esql-types'
 tags:
   - plugin
@@ -56,6 +57,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
