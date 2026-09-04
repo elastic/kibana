@@ -18,6 +18,7 @@ jest.mock('@kbn/workflows-execution-engine/server', () => ({
   registerHitlLifecycleAuditor: jest.fn(() => jest.fn()),
 }));
 
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
@@ -105,5 +106,63 @@ describe('WorkflowsPlugin', () => {
 
     expect(setStopping).toHaveBeenCalledWith(true);
     expect(unregisterHitlLifecycleAuditor).toHaveBeenCalled();
+  });
+
+  it('does not register connector-event triggers when inbound events are disabled', () => {
+    const actions = actionsMock.createSetup();
+    (
+      actions.getActionsConfigurationUtilities().isInboundEventsEnabled as jest.Mock
+    ).mockReturnValue(false);
+    const workflowsExtensions = workflowsExtensionsMock.createSetup();
+    const plugin = new WorkflowsPlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        logging: { console: false },
+        available: true,
+        library: { ttlMs: 600_000 },
+      })
+    );
+
+    plugin.setup(coreMock.createSetup(), {
+      actions,
+      spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+      workflowsExtensions,
+    });
+
+    const connectorEventRegistrations =
+      workflowsExtensions.registerTriggerDefinition.mock.calls.filter(
+        ([definition]) => definition.id === 'inboundWebhook.received'
+      );
+    expect(connectorEventRegistrations).toHaveLength(0);
+  });
+
+  it('registers inboundWebhook.received when inbound events are enabled', () => {
+    const actions = actionsMock.createSetup();
+    (
+      actions.getActionsConfigurationUtilities().isInboundEventsEnabled as jest.Mock
+    ).mockReturnValue(true);
+    const workflowsExtensions = workflowsExtensionsMock.createSetup();
+    const plugin = new WorkflowsPlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        logging: { console: false },
+        available: true,
+        library: { ttlMs: 600_000 },
+      })
+    );
+
+    plugin.setup(coreMock.createSetup(), {
+      actions,
+      spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+      workflowsExtensions,
+    });
+
+    expect(workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'inboundWebhook.received',
+        stability: 'tech_preview',
+        requiresConnectorId: true,
+      })
+    );
   });
 });
