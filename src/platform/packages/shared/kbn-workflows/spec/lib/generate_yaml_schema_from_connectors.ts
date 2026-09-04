@@ -180,18 +180,25 @@ function withTemplateStringSupport(paramsSchema: z.ZodType): z.ZodType {
   if (!(paramsSchema instanceof z.ZodObject)) {
     return paramsSchema;
   }
-  const newShape: Record<string, z.ZodType> = {};
-  for (const [key, value] of Object.entries(paramsSchema.shape as Record<string, z.ZodType>)) {
-    const inner = value instanceof z.ZodOptional ? value.unwrap() : null;
-    if (inner instanceof z.ZodArray) {
-      newShape[key] = z.optional(z.union([z.string(), inner]));
-    } else if (value instanceof z.ZodArray) {
-      newShape[key] = z.union([z.string(), value]);
-    } else {
-      newShape[key] = value;
+  const modifications: Record<string, z.ZodType> = {};
+  for (const [key, rawValue] of Object.entries(paramsSchema.shape as Record<string, z.ZodType>)) {
+    let value = rawValue;
+    let isOptional = false;
+
+    if (value instanceof z.ZodOptional) {
+      isOptional = true;
+      value = value.unwrap();
+    }
+    if (value instanceof z.ZodDefault) {
+      value = value.removeDefault();
+    }
+
+    if (value instanceof z.ZodArray) {
+      const widened: z.ZodType = z.union([z.string(), value]);
+      modifications[key] = isOptional ? widened.optional() : widened;
     }
   }
-  return z.object(newShape);
+  return paramsSchema.extend(modifications);
 }
 
 function generateStepSchemaForConnector(
