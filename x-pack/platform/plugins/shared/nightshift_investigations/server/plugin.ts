@@ -17,6 +17,8 @@ import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
+import type { NightshiftInvestigationsConfig } from './config';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
@@ -29,6 +31,13 @@ import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
+import { SandboxConnectionManager } from './tools/sandbox_bash/grpc_client';
+import { createSandboxBashTool } from './tools/sandbox_bash/tool';
+import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
+import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
+import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
+import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
+import { getConversationId } from './tools/sandbox_bash/tool_utils';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -57,8 +66,9 @@ export class NightshiftInvestigationsPlugin
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private savedObjects?: CoreStart['savedObjects'];
+  private sandboxConnectionManager?: SandboxConnectionManager;
 
-  constructor(ctx: PluginInitializerContext) {
+  constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
   }
 
@@ -90,6 +100,64 @@ export class NightshiftInvestigationsPlugin
           logger: this.logger.get('investigation_progress_report_tool'),
         })
       );
+
+      const config = this.ctx.config.get();
+      if (config.sandbox) {
+        const connectionManager = new SandboxConnectionManager({
+          config: config.sandbox,
+          logger: this.logger.get('sandbox_bash_tool'),
+        });
+        this.sandboxConnectionManager = connectionManager;
+        const sandboxLogger = this.logger.get('sandbox_bash_tool');
+
+        const workspaceManager = new WorkspaceManager({
+          config: config.sandbox,
+          connectionManager,
+          logger: sandboxLogger.get('workspace'),
+        });
+
+        connectionManager.setRestoreCallback((conversationId) =>
+          workspaceManager.restoreWorkspace(conversationId)
+        );
+
+        plugins.agentBuilder.tools.register(
+          createSandboxBashTool({ connectionManager, logger: sandboxLogger })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxViewFileTool({ connectionManager, logger: sandboxLogger })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxStrReplaceTool({ connectionManager, logger: sandboxLogger })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxWriteFileTool({ connectionManager, logger: sandboxLogger })
+        );
+
+        const writeToolIds = new Set([
+          'nightshift_sandbox_bash',
+          'nightshift_sandbox_str_replace',
+          'nightshift_sandbox_write_file',
+        ]);
+
+        plugins.agentBuilder.hooks.register({
+          id: 'nightshift-sandbox-workspace-backup',
+          hooks: {
+            [HookLifecycle.afterToolCall]: {
+              mode: HookExecutionMode.nonBlocking,
+              handler: (context) => {
+                if (!writeToolIds.has(context.toolId)) return;
+                const conversationId = getConversationId(context.toolHandlerContext);
+                if (!conversationId) return;
+                workspaceManager.backupWorkspace(conversationId).catch((err) => {
+                  sandboxLogger
+                    .get('workspace')
+                    .warn(`Workspace backup failed for conversation ${conversationId}: ${err}`);
+                });
+              },
+            },
+          },
+        });
+      }
     }
 
     if (plugins.workflowsManagement) {
@@ -219,5 +287,9 @@ export class NightshiftInvestigationsPlugin
     );
     await installInvestigationWorkflow({ client });
     await client.ready();
+  }
+
+  stop(): void {
+    this.sandboxConnectionManager?.close();
   }
 }
