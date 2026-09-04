@@ -22,6 +22,14 @@ type ValidVersion = (typeof VALID_VERSIONS)[number];
 
 const filterlistSchema = z.record(z.string(), z.nativeEnum(Action));
 const queryTypeSchema = z.nativeEnum(QueryType);
+// Accepts YYYY-MM-DD strings, ISO datetime strings (truncated to date), and YAML Date objects.
+const expiresAtSchema = z
+  .preprocess((val) => {
+    if (val instanceof Date) return val.toISOString().slice(0, 10);
+    if (typeof val === 'string') return val.slice(0, 10);
+    return val;
+  }, z.string().date())
+  .optional();
 
 // ---------------------------------------------------------------------------
 // Shared index-query logic (used by v2 and v3 index schemas)
@@ -227,6 +235,7 @@ const v3ApiSchema = z
     responsePathKey: z.string().optional(),
     integrations: v3IntegrationsSchema,
     encryptionKeyId: z.string().min(1).optional(),
+    expiresAt: expiresAtSchema,
   })
   .strict()
   .superRefine((data, ctx) => {
@@ -257,21 +266,27 @@ const v3ApiSchema = z
     if (data.responsePathKey !== undefined) q.responsePathKey = data.responsePathKey;
     if (data.integrations !== undefined) q.integrations = data.integrations;
     if (data.encryptionKeyId !== undefined) q.encryptionKeyId = data.encryptionKeyId;
+    if (data.expiresAt !== undefined) q.expiresAt = data.expiresAt;
     return q;
   });
 
-// V4 index: same as v3 but filterlist is optional (defaults to {}) and adds encryptDocument.
+// V4 index: same as v3 but filterlist is optional (defaults to {}) and adds encryptDocument/expiresAt.
 const v4IndexSchema = z
   .object({
     version: z.literal(4),
     ...indexQueryFields,
     filterlist: filterlistSchema.optional().default({}),
     encryptDocument: z.literal(true).optional(),
+    expiresAt: expiresAtSchema,
   })
   .strict()
   .superRefine(validateIndexQuery)
   .superRefine(validateEncryptDocument)
-  .transform(transformIndexQuery);
+  .transform((data): IndexQuery => {
+    const q = transformIndexQuery(data);
+    if (data.expiresAt !== undefined) q.expiresAt = data.expiresAt;
+    return q;
+  });
 
 // V4 API: same as v3 but filterlist is optional (defaults to {}) and adds encryptDocument.
 const v4ApiSchema = z
@@ -291,6 +306,7 @@ const v4ApiSchema = z
     integrations: v3IntegrationsSchema,
     encryptionKeyId: z.string().min(1).optional(),
     encryptDocument: z.literal(true).optional(),
+    expiresAt: expiresAtSchema,
   })
   .strict()
   .superRefine((data, ctx) => {
@@ -322,6 +338,7 @@ const v4ApiSchema = z
     if (data.integrations !== undefined) q.integrations = data.integrations;
     if (data.encryptionKeyId !== undefined) q.encryptionKeyId = data.encryptionKeyId;
     if (data.encryptDocument !== undefined) q.encryptDocument = data.encryptDocument;
+    if (data.expiresAt !== undefined) q.expiresAt = data.expiresAt;
     return q;
   });
 

@@ -783,3 +783,54 @@ describe('v4 encryptDocument', () => {
     expect(result).toMatchObject({ kind: 'index' });
   });
 });
+
+describe('expiresAt', () => {
+  const v4BaseYaml = [
+    'version: 4',
+    'id: q',
+    'name: Q',
+    'type: DSL',
+    'query: \'{"match_all":{}}\'',
+    "scheduleCron: '0 */1 * * *'",
+    'enabled: true',
+    'index: logs-*',
+  ].join('\n');
+
+  const v3BaseYaml = `${v4BaseYaml.replace('version: 4', 'version: 3')}\nfilterlist: {}`;
+
+  it('parses a valid expiresAt date string on v4', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31' });
+  });
+
+  it('leaves expiresAt undefined when absent on v4', () => {
+    const [result] = parseHealthDiagnosticQueries(v4BaseYaml);
+    expect(result).toMatchObject({ kind: 'index' });
+    expect((result as { expiresAt?: string }).expiresAt).toBeUndefined();
+  });
+
+  it('produces invalid_descriptor for a non-date expiresAt value', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: 'not-a-date'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('accepts an ISO datetime string by truncating to the date part', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31T23:59:59Z'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31' });
+  });
+
+  it('accepts an unquoted YAML date (parsed as Date object by the YAML library)', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: 2099-12-31`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31' });
+  });
+
+  it('produces invalid_descriptor when expiresAt is used on a v3 descriptor', () => {
+    const yaml = `${v3BaseYaml}\nexpiresAt: '2099-12-31'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+});

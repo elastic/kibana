@@ -105,6 +105,7 @@ export interface IndexQuery {
   datastreamTypes?: string[];
   encryptionKeyId?: string;
   encryptDocument?: true;
+  expiresAt?: string;
 }
 
 /**
@@ -125,6 +126,7 @@ export interface ApiQuery {
   integrations?: string[];
   encryptionKeyId?: string;
   encryptDocument?: true;
+  expiresAt?: string;
 }
 
 /**
@@ -169,7 +171,8 @@ export type SkipReason =
   | 'integration_not_installed'
   | 'parse_failure'
   | 'fleet_unavailable'
-  | 'unsupported_query';
+  | 'unsupported_query'
+  | 'expired';
 
 export interface SkippedQuery {
   kind: 'skipped';

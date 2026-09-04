@@ -181,6 +181,40 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(mockQueryExecutor.search).not.toHaveBeenCalled();
       });
 
+      test('should skip queries whose expiresAt is in the past', async () => {
+        setupDefaultArtifact({ version: 4, expiresAt: '2000-01-01' });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should run queries whose expiresAt is today', async () => {
+        const today = new Date().toISOString().slice(0, 10);
+        setupDefaultArtifact({ version: 4, expiresAt: today });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
+      test('should run queries whose expiresAt is in the future', async () => {
+        setupDefaultArtifact({ version: 4, expiresAt: '2099-12-31' });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
+      test('should run queries with no expiresAt set', async () => {
+        setupDefaultArtifact();
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
       describe('query attribute filtering', () => {
         test('should silently skip queries with unrecognised versions — no stat doc, debug log only', async () => {
           (artifactService.getArtifact as jest.Mock).mockResolvedValue({
