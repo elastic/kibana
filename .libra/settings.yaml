@@ -9,5 +9,4 @@ paths:
     - "**/__snapshots__/**"
     - "**/.meta/**"
     - "**/moon.yml"
-    - "**/version_dependencies.txt"
     - "oas_docs/output/**"

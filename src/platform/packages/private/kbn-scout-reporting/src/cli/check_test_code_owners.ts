@@ -14,7 +14,7 @@ import { getCodeOwnersEntries } from '@kbn/code-owners';
 import ignore from 'ignore';
 
 // Non-test artifacts that live under FTR trees (generated package.json, moon inputs, …)
-const IGNORED_FILENAMES = ['moon.yml', 'version_dependencies.txt', 'package.json'];
+const IGNORED_FILENAMES = ['moon.yml', 'package.json'];
 
 const isIgnoredFile = (repoRel: string): boolean =>
   IGNORED_FILENAMES.some((fileName) => repoRel.endsWith(`/${fileName}`));
