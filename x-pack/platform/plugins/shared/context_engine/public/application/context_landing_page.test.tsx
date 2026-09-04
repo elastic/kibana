@@ -50,6 +50,26 @@ const createCore = () => {
   return core;
 };
 
+const mockContextEngineHttpGet = (
+  core: ReturnType<typeof coreMock.createStart>,
+  aiIndices: AiIndexHttpItem[],
+  kiTotal = 9
+) => {
+  core.http.get.mockImplementation((pathOrOptions) => {
+    const path = typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
+
+    if (path.includes('/kis')) {
+      return Promise.resolve({
+        kis: [],
+        total: kiTotal,
+        summary: { total: kiTotal, counts_by_type: [] },
+      });
+    }
+
+    return Promise.resolve({ ai_indices: aiIndices });
+  });
+};
+
 const renderWithProviders = (core: CoreStart) =>
   render(
     <I18nProvider>
@@ -78,20 +98,20 @@ describe('ContextLandingPage', () => {
     contentListQueryClient.clear();
   });
 
-  it('renders the header and a create button in the empty prompt when there are no indexes', async () => {
+  it('renders the onboarding panel when there are no indexes', async () => {
     const core = createCore();
     core.http.get.mockResolvedValue({ ai_indices: [] });
 
     renderWithProviders(core);
 
     expect(screen.getByTestId('contextLandingPage')).toBeInTheDocument();
-    expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
+    await waitFor(() => expect(core.http.get).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId('content-list-emptyState')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('contextAiIndexOnboarding')).toBeInTheDocument());
 
     const createButtons = screen.getAllByTestId('contextCreateAiIndexButton');
     expect(createButtons).toHaveLength(1);
     expect(createButtons[0]).toHaveTextContent('Create AI Index');
-
-    await waitFor(() => expect(core.http.get).toHaveBeenCalled());
   });
 
   it('renders exactly one create button in the page header when indexes exist', async () => {
@@ -107,7 +127,7 @@ describe('ContextLandingPage', () => {
     await waitFor(() => {
       expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
     });
-    expect(screen.queryByTestId('contextAiIndexCardsEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexOnboarding')).not.toBeInTheDocument();
   });
 
   it('renders skeleton cards while the list API is loading', () => {
@@ -158,17 +178,29 @@ describe('ContextLandingPage', () => {
     expect(screen.getAllByTestId('contextAiIndexCardUpdated')[0]).toHaveTextContent('Updated');
   });
 
-  it('renders an empty prompt when there are no AI indexes', async () => {
+  it('renders the onboarding panel when there are no AI indexes', async () => {
     const core = createCore();
     core.http.get.mockResolvedValue({ ai_indices: [] });
 
     renderWithProviders(core);
 
-    expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
+    await waitFor(() => expect(core.http.get).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId('contextAiIndexOnboarding')).toBeInTheDocument());
     expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
-    await waitFor(() =>
-      expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1)
-    );
+    expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
+  });
+
+  it('renders the onboarding panel above managed indexes when no custom indexes exist', async () => {
+    const core = createCore();
+    mockContextEngineHttpGet(core, [buildAiIndex({ id: 'elastic', managed: true })]);
+
+    renderWithProviders(core);
+
+    expect(await screen.findByTestId('contextAiIndexOnboarding')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexManagedRow')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexList-searchBox')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
   });
 
   it('renders an error prompt when the list API fails', async () => {
@@ -184,13 +216,16 @@ describe('ContextLandingPage', () => {
 
   it('marks managed AI indexes as owned by Elastic instead of showing a modified date', async () => {
     const core = createCore();
-    core.http.get.mockResolvedValue({
-      ai_indices: [buildAiIndex({ id: 'elastic', managed: true })],
-    });
+    mockContextEngineHttpGet(core, [buildAiIndex({ id: 'elastic', managed: true })]);
 
     renderWithProviders(core);
 
-    expect(await screen.findByTestId('contextAiIndexCardManaged')).toHaveTextContent('Managed');
+    expect(await screen.findByTestId('contextAiIndexManagedRowManaged')).toHaveTextContent(
+      'Managed'
+    );
+    expect(screen.getByTestId('contextAiIndexManagedRowIntegratedVia')).toHaveTextContent(
+      'Elastic (built-in)'
+    );
     expect(screen.queryByTestId('contextAiIndexCardUpdated')).not.toBeInTheDocument();
   });
 
@@ -200,7 +235,8 @@ describe('ContextLandingPage', () => {
 
     renderWithProviders(core);
 
-    await screen.findByTestId('contextAiIndexCardsEmpty');
+    await waitFor(() => expect(core.http.get).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId('contextAiIndexOnboarding')).toBeInTheDocument());
     expect(screen.queryByTestId('contextAiIndexList-searchBox')).not.toBeInTheDocument();
   });
 
