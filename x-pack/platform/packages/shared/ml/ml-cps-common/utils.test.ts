@@ -7,7 +7,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import { getProjectRoutingFromDatafeed, getProjectRoutingFromJob } from './utils';
+import {
+  getProjectRoutingFromDatafeed,
+  getProjectRoutingFromJob,
+  getProjectRoutingFromJobSummary,
+} from './utils';
 
 type DatafeedOverrides = Omit<Partial<Datafeed>, 'authorization'> & {
   authorization?: Datafeed['authorization'] & {
@@ -92,5 +96,29 @@ describe('getProjectRoutingFromJob', () => {
     } as estypes.MlJob;
 
     expect(getProjectRoutingFromJob(job)).toBe('_alias:*');
+  });
+});
+
+describe('getProjectRoutingFromJobSummary', () => {
+  it('returns the stored project routing when it is set', () => {
+    expect(
+      getProjectRoutingFromJobSummary({ projectRouting: '_id:blah', isUiamEnabled: true })
+    ).toBe('_id:blah');
+  });
+
+  it('returns all-projects routing for unscoped jobs with a cloud API key', () => {
+    expect(getProjectRoutingFromJobSummary({ projectRouting: null, isUiamEnabled: true })).toBe(
+      '_alias:*'
+    );
+  });
+
+  it('returns origin routing for unscoped jobs without a cloud API key', () => {
+    expect(getProjectRoutingFromJobSummary({ projectRouting: null, isUiamEnabled: false })).toBe(
+      '_alias:_origin'
+    );
+  });
+
+  it('returns null when both fields are absent (CPS disabled)', () => {
+    expect(getProjectRoutingFromJobSummary({})).toBeNull();
   });
 });

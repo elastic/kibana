@@ -212,6 +212,7 @@ export const Zabbix: ConnectorSpec = {
   actions: {
     getProblems: {
       isTool: true,
+      scope: 'read',
       description:
         "List current Zabbix problems (unresolved trigger-generated events), optionally filtered by host, host group, severity, tags, acknowledgement, or suppression state. This is the primary read path for triage. Pass recent: true to also include problems resolved within the server's configured display window — for problems resolved further in the past, use getEvent with known event IDs instead.",
       input: GetProblemsInputSchema,
@@ -240,6 +241,7 @@ export const Zabbix: ConnectorSpec = {
 
     getEvent: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch full details for one or more Zabbix events by ID, including already-resolved ones (unlike getProblems, which only returns unresolved or recently-resolved problems). Returns the problem name, host, tags, and full acknowledgement/update history — use this to enrich a decision with complete context.',
       input: GetEventInputSchema,
@@ -258,6 +260,7 @@ export const Zabbix: ConnectorSpec = {
 
     acknowledgeProblem: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Acknowledge one or more Zabbix problems, marking them as being handled. This is the primary triage write into Zabbix. Already-acknowledged problems are left unchanged. Use addProblemMessage separately to attach investigation notes.',
       input: AcknowledgeProblemInputSchema,
@@ -267,6 +270,7 @@ export const Zabbix: ConnectorSpec = {
 
     unacknowledgeProblem: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Remove the acknowledgement from one or more Zabbix problems, returning them to the open/unacknowledged queue — for when a problem was acknowledged or closed out too early.',
       input: UnacknowledgeProblemInputSchema,
@@ -276,6 +280,7 @@ export const Zabbix: ConnectorSpec = {
 
     addProblemMessage: {
       isTool: true,
+      scope: 'write',
       description:
         "Attach a note to one or more Zabbix problems' acknowledgement/update trail, without changing their acknowledged/closed state. Use this so automated triage context and investigation findings land where operators already look.",
       input: AddProblemMessageInputSchema,
@@ -285,6 +290,7 @@ export const Zabbix: ConnectorSpec = {
 
     closeProblem: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Manually close one or more Zabbix problems that have been remediated. The underlying trigger must have manual close enabled, or Zabbix rejects the request — already-resolved problems are left unchanged.',
       input: CloseProblemInputSchema,
@@ -293,6 +299,7 @@ export const Zabbix: ConnectorSpec = {
 
     changeProblemSeverity: {
       isTool: true,
+      scope: 'destroy',
       description:
         "Re-rank one or more Zabbix problems' severity (e.g. raise a warning to high) so a workflow can escalate a problem it judges more urgent than the trigger's configured severity.",
       input: ChangeProblemSeverityInputSchema,
@@ -302,6 +309,7 @@ export const Zabbix: ConnectorSpec = {
 
     suppressProblem: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Suppress (mute) one or more Zabbix problems so they stop triggering notifications for a time window, e.g. during known, unplanned work. Pair with unsuppressProblem to resume alerting early, or let suppressUntil expire naturally.',
       input: SuppressProblemInputSchema,
@@ -311,6 +319,7 @@ export const Zabbix: ConnectorSpec = {
 
     unsuppressProblem: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resume normal alerting on one or more previously-suppressed Zabbix problems, ending the mute early instead of waiting for it to expire.',
       input: UnsuppressProblemInputSchema,
@@ -320,6 +329,7 @@ export const Zabbix: ConnectorSpec = {
 
     createMaintenance: {
       isTool: true,
+      scope: 'write',
       description:
         'Open a one-time Zabbix maintenance window over the given hosts or host groups for a time range, so planned work does not page anyone. Returns the new maintenance ID. By default this only suppresses problem notifications (data collection continues); set withDataCollection: false to stop data collection entirely.',
       input: CreateMaintenanceInputSchema,
@@ -349,6 +359,7 @@ export const Zabbix: ConnectorSpec = {
 
     updateMaintenance: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Adjust an existing Zabbix maintenance window — rename it, change its target hosts/groups, or extend/shorten its time range — so a workflow can stretch a window when planned work runs long. Only the fields provided are changed; provide activeSince and activeTill together to change the time range.',
       input: UpdateMaintenanceInputSchema,
@@ -373,6 +384,7 @@ export const Zabbix: ConnectorSpec = {
 
     deleteMaintenance: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Delete one or more Zabbix maintenance windows, ending them immediately so normal alerting resumes right away rather than waiting for activeTill — use this to close out a window once planned work finishes early.',
       input: DeleteMaintenanceInputSchema,
@@ -382,6 +394,7 @@ export const Zabbix: ConnectorSpec = {
 
     getMaintenances: {
       isTool: true,
+      scope: 'read',
       description:
         'List Zabbix maintenance windows, optionally filtered by host or host group, so a workflow can check what is already scheduled before opening or closing one.',
       input: GetMaintenancesInputSchema,
@@ -401,6 +414,7 @@ export const Zabbix: ConnectorSpec = {
 
     getHosts: {
       isTool: true,
+      scope: 'read',
       description:
         'Resolve Zabbix hosts by ID, host group, name, or monitoring status. Returns host IDs and status, for use as input to getProblems, createMaintenance, disableHost/enableHost, or similar actions that need a host ID.',
       input: GetHostsInputSchema,
@@ -423,6 +437,7 @@ export const Zabbix: ConnectorSpec = {
 
     disableHost: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Stop monitoring one or more Zabbix hosts (equivalent to unchecking "Enabled" on the host). Use this to quiet a decommissioning or noisy host without deleting its configuration. Use enableHost to resume.',
       input: DisableHostInputSchema,
@@ -436,6 +451,7 @@ export const Zabbix: ConnectorSpec = {
 
     enableHost: {
       isTool: true,
+      scope: 'destroy',
       description: 'Resume monitoring on one or more previously-disabled Zabbix hosts.',
       input: EnableHostInputSchema,
       handler: async (ctx, input: EnableHostInput) =>
@@ -448,6 +464,7 @@ export const Zabbix: ConnectorSpec = {
 
     disableTrigger: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Disable one or more Zabbix triggers, silencing just that specific condition without stopping monitoring of the whole host — a finer-grained alternative to disableHost for a single noisy trigger.',
       input: DisableTriggerInputSchema,
@@ -461,6 +478,7 @@ export const Zabbix: ConnectorSpec = {
 
     enableTrigger: {
       isTool: true,
+      scope: 'destroy',
       description: 'Re-enable one or more previously-disabled Zabbix triggers.',
       input: EnableTriggerInputSchema,
       handler: async (ctx, input: EnableTriggerInput) =>
@@ -473,6 +491,7 @@ export const Zabbix: ConnectorSpec = {
 
     getItemHistory: {
       isTool: true,
+      scope: 'read',
       description:
         "Fetch recent metric values recorded for a Zabbix item, so an alert workflow can enrich a decision with the underlying trend. Automatically detects the item's value type — Zabbix's history.get otherwise requires the caller to know and pass it explicitly.",
       input: GetItemHistoryInputSchema,

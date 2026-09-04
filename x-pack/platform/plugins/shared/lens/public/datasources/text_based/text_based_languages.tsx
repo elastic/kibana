@@ -753,6 +753,7 @@ export function getTextBasedDatasource({
               inMetricDimension: column.inMetricDimension,
               hasTimeShift: false,
               hasReducedTimeRange: false,
+              ...(column.customLabel ? { customLabel: true } : {}),
               scale,
             };
           }
