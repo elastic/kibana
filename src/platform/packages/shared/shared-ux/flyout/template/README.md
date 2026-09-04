@@ -29,7 +29,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 
 The root forwards a fixed subset of `EuiFlyoutProps` — `id`, `hasChildBackground`, `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `outsideClickCloses`, `focusTrapProps`, `closeButtonProps`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
 
-Tab props also live on the root: `tabs` (array of `FlyoutTabProps`), `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [Tabs](#tabs) below.
+Tab selection props also live on the root: `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [`src/header/tab/README.md`](src/header/tab/README.md).
 
 ## Zones
 
@@ -115,3 +115,24 @@ Zone subjects derive from the root `data-test-subj` prop with a zone suffix, and
 | Footer | `${root}Footer` | `FlyoutTemplate.Footer` `data-test-subj` |
 
 Footer action buttons are not derived; their `data-test-subj` passes through to the button as given.
+
+## Opening a flyout imperatively
+
+`FlyoutTemplate` discovers its zones by parsing its *direct* JSX children, so every part has to be a literal child of the zone that parses it. `core.overlays.openFlyoutTemplate` takes the template's props and a function returning its zones, and calls that function inside its own render, so the zones land as literal children and every rule documented above still applies.
+
+```tsx
+core.overlays.openFlyoutTemplate({ size: 'm', session: 'start' }, (T) => (
+  <>
+    <T.Header title="Alert details" />
+    <T.Body>
+      <T.Body.Section title="Summary">
+        <AlertSummary alert={alert} />
+      </T.Body.Section>
+    </T.Body>
+  </>
+));
+```
+
+The callback's first argument is the `FlyoutTemplate` namespace, so declaring zones needs no import from this package. Its second argument is the flyout's `OverlayRef`, so content can close the flyout it lives in. See `@kbn/core-overlays-browser` for the full signature.
+
+**A part written inside another component does not render.** Parts are identified by parsing direct JSX children, so one returned from inside a component sits behind a boundary the parser cannot see through and silently renders nothing. Keep parts in the JSX of the zone that parses them, and put your own components inside those parts.
