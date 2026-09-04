@@ -7,7 +7,15 @@
 
 import React from 'react';
 import type { ViewSpec } from '@kbn/adaptive-ui';
-import { Actions, Badge, DescriptionList, StatGroup, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
+import {
+  Actions,
+  Badge,
+  DescriptionList,
+  StatGroup,
+  Text,
+  View,
+  toViewSpec,
+} from '@kbn/adaptive-ui/jsx';
 import { severityTone, titleCase } from './shared';
 
 /**
@@ -83,9 +91,7 @@ export const toCaseViewSpec = (data: CaseData): ViewSpec => {
         ]}
       />
       {data.description && <Text body={data.description} />}
-      {metadata.length > 0 && (
-        <DescriptionList label="Details" layout="inline" items={metadata} />
-      )}
+      {metadata.length > 0 && <DescriptionList label="Details" layout="inline" items={metadata} />}
       <Actions items={[{ label: 'Go to case', href: caseHref(data), tone: 'primary' }]} />
     </View>
   ) as ViewSpec;

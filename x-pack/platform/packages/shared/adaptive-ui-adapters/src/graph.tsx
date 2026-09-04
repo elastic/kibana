@@ -61,7 +61,7 @@ export const toGraphViewSpec = ({ title, nodes, edges }: GraphData): ViewSpec =>
         </>
       )}
     </View>
-  ) as ViewSpec;
+  );
 };
 
 export const sampleGraph: GraphData = {

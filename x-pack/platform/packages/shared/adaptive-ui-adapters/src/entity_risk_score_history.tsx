@@ -29,10 +29,18 @@ export interface EntityRiskScoreHistoryData {
 // Buckets mirror Security's risk levels (`Unknown < 20 ≤ Low < 40 ≤ Moderate <
 // 70 ≤ High < 90 ≤ Critical`).
 const riskLevel = (score: number): { label: string; tone: Tone } => {
-  if (score >= 90) return { label: 'Critical', tone: 'danger' };
-  if (score >= 70) return { label: 'High', tone: 'risk' };
-  if (score >= 40) return { label: 'Moderate', tone: 'warning' };
-  if (score >= 20) return { label: 'Low', tone: 'success' };
+  if (score >= 90) {
+    return { label: 'Critical', tone: 'danger' };
+  }
+  if (score >= 70) {
+    return { label: 'High', tone: 'risk' };
+  }
+  if (score >= 40) {
+    return { label: 'Moderate', tone: 'warning' };
+  }
+  if (score >= 20) {
+    return { label: 'Low', tone: 'success' };
+  }
   return { label: 'Unknown', tone: 'neutral' };
 };
 
@@ -59,7 +67,9 @@ export const toEntityRiskScoreHistoryViewSpec = ({
       description: `${entries[0].timestamp} → ${entries[entries.length - 1].timestamp}`,
     });
   }
-  if (interval) details.push({ title: 'Interval', description: interval });
+  if (interval) {
+    details.push({ title: 'Interval', description: interval });
+  }
 
   return toViewSpec(
     <View title={`${entityName} risk history`} subtitle="Entity risk score">
@@ -74,11 +84,13 @@ export const toEntityRiskScoreHistoryViewSpec = ({
         <TimeSeries
           label="Risk score history"
           variant="area"
-          series={[{
-            label: entityName,
-            tone: level.tone,
-            values: entries.map((entry) => ({ time: entry.timestamp, value: entry.score })),
-          }]}
+          series={[
+            {
+              label: entityName,
+              tone: level.tone,
+              values: entries.map((entry) => ({ time: entry.timestamp, value: entry.score })),
+            },
+          ]}
         />
       )}
       <DescriptionList label="History" layout="inline" items={details} />

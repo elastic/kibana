@@ -114,7 +114,7 @@ export const toEntityAnalyticsDashboardViewSpec = ({
             type: entity.type ?? '—',
             score: String(entity.risk_score),
             level: {
-              type: 'badge' as const,
+              type: 'badge',
               label: titleCase(entity.risk_level ?? 'unknown'),
               tone: severityTone(entity.risk_level),
             },

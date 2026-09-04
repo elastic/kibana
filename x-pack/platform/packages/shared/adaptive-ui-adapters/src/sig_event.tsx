@@ -98,9 +98,15 @@ export const significantEventFixture: SignificantEventInput = {
 // Thresholds mirror Kibana's `SeverityBadge` (`<40 low, <60 medium, <80 high,
 // else critical`) so the bucket matches what Streams shows.
 const severityFor = (criticality: number): { label: string; tone: Tone } => {
-  if (criticality < 40) return { label: 'Low', tone: 'success' };
-  if (criticality < 60) return { label: 'Medium', tone: 'warning' };
-  if (criticality < 80) return { label: 'High', tone: 'risk' };
+  if (criticality < 40) {
+    return { label: 'Low', tone: 'success' };
+  }
+  if (criticality < 60) {
+    return { label: 'Medium', tone: 'warning' };
+  }
+  if (criticality < 80) {
+    return { label: 'High', tone: 'risk' };
+  }
   return { label: 'Critical', tone: 'danger' };
 };
 
@@ -131,11 +137,7 @@ export const buildSignificantEventSpec = (event: SignificantEventInput): ViewSpe
   });
 
   return toViewSpec(
-    <View
-      title={event.title}
-      theme="auto"
-      meta={{ source: 'registry', ariaLabel: event.title }}
-    >
+    <View title={event.title} theme="auto" meta={{ source: 'registry', ariaLabel: event.title }}>
       <Text title="Assessment" body={event.summary} />
       <StatGroup>
         <Stat label="Criticality" value={String(event.criticality)} />
@@ -143,7 +145,9 @@ export const buildSignificantEventSpec = (event: SignificantEventInput): ViewSpe
         <Stat label="Severity" value={severity.label} tone={severity.tone} />
         <Stat label="Status" value={titleCase(event.status)} tone={STATUS_TONE[event.status]} />
       </StatGroup>
-      <Callout title="Root cause" tone="neutral">{event.root_cause}</Callout>
+      <Callout title="Root cause" tone="neutral">
+        {event.root_cause}
+      </Callout>
       {event.recommendations.length > 0 && (
         <List
           label="Recommended remediations"
@@ -164,7 +168,7 @@ export const buildSignificantEventSpec = (event: SignificantEventInput): ViewSpe
             signal: evidence.rule_name,
             stream: evidence.stream_name ?? '—',
             result: {
-              type: 'badge' as const,
+              type: 'badge',
               label: evidence.result ?? 'observed',
               tone: EVIDENCE_RESULT_TONE[evidence.result ?? ''] ?? 'neutral',
             },
