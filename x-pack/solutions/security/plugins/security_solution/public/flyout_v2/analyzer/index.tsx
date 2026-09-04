@@ -50,6 +50,11 @@ export const AnalyzerGraph = memo(
   ({ hit, renderCellActions, onAlertUpdated }: AnalyzerGraphProps) => {
     const { euiTheme } = useEuiTheme();
     const eventId = hit.raw._id ?? '';
+    const databaseDocumentTimestamp = useMemo(() => {
+      const value = hit.flattened?.['@timestamp'];
+      const ms = value ? Date.parse(String(value)) : NaN;
+      return Number.isFinite(ms) ? ms : undefined;
+    }, [hit]);
 
     const { from, to, shouldUpdate } = useTimelineDataFilters(false);
     const filters = useMemo(() => ({ from, to }), [from, to]);
@@ -84,6 +89,7 @@ export const AnalyzerGraph = memo(
           <div data-test-subj={ANALYZER_GRAPH_TEST_ID}>
             <Resolver
               databaseDocumentID={eventId}
+              databaseDocumentTimestamp={databaseDocumentTimestamp}
               resolverComponentInstanceID={RESOLVER_COMPONENT_INSTANCE_ID}
               indices={selectedPatterns}
               shouldUpdate={shouldUpdate}

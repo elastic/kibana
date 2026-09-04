@@ -40,7 +40,6 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/migrator-test-kit',
   '@kbn/evals',
   '@kbn/evals-extensions',
-  '@kbn/evals-phoenix-executor',
   '@kbn/performance-testing-dataset-extractor',
 
   // Lint
@@ -69,6 +68,8 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   'yarn.lock',
   '.node-version',
   '.nvmrc',
+  'config/**/*.yml',
+  'config/node.options',
 ];
 
 /** Skip FTR when every changed file matches, regardless of owning module. */

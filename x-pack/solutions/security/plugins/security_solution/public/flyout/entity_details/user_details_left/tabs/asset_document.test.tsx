@@ -43,6 +43,7 @@ describe('AssetDocumentTab', () => {
   });
 
   it('should select json tab when clicked', async () => {
+    const user = userEvent.setup({ delay: null });
     const { getByTestId, getByTitle } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={mockContextValue}>
@@ -51,12 +52,13 @@ describe('AssetDocumentTab', () => {
       </TestProviders>
     );
 
-    await userEvent.click(getByTitle('JSON'));
+    await user.click(getByTitle('JSON'));
 
     expect(getByTestId(PREFIX + JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should select table tab when path tab is table', async () => {
+    const user = userEvent.setup({ delay: null });
     const { getByTestId, getByTitle } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={mockContextValue}>
@@ -65,8 +67,8 @@ describe('AssetDocumentTab', () => {
       </TestProviders>
     );
 
-    await userEvent.click(getByTitle('JSON')); // make sure Table isn't selected
-    await userEvent.click(getByTitle('Table'));
+    await user.click(getByTitle('JSON')); // make sure Table isn't selected
+    await user.click(getByTitle('Table'));
 
     expect(getByTestId(TABLE_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });

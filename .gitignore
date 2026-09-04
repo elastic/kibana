@@ -113,9 +113,6 @@ npm-debug.log*
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 /apm-diagnostics*.json
-/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
-/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
-
 # transpiled cypress config
 x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.js
@@ -148,12 +145,9 @@ report.asciidoc
 # Yarn local mirror content
 .yarn-local-mirror
 
-# Bazel | TODO: Remove later
-.ijwb
-/bazel
-/bazel-*
-.bazelrc.user
-.bazelrc.cache
+# PNPM
+.pnpm-store
+.pnpm
 
 elastic-agent-*
 fleet-server-*

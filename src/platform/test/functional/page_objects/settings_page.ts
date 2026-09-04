@@ -772,6 +772,9 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
       alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
+      // getVisibleText returns '' while the flyout is still animating in, and the retry accepts
+      // that empty read; wait for the static title to actually paint before returning it.
+      if (!alertText) throw new Error('delete data view flyout title has not rendered yet');
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
@@ -1112,8 +1115,27 @@ export class SettingsPageObject extends FtrService {
     }
 
     if (activeTab) {
+      // The flyout slides in with an entrance animation; a tab click issued before it settles can
+      // miss the moving target and leave the default Syntax tab selected, so wait for it to stop.
+      await this.waitForScriptedFieldHelpFlyoutToSettle();
       await this.testSubjects.click(activeTab);
+      await this.testSubjects.existOrFail('runScriptButton');
     }
+  }
+
+  private async waitForScriptedFieldHelpFlyoutToSettle() {
+    let previousPosition = await (
+      await this.testSubjects.find('scriptedFieldsHelpFlyout')
+    ).getPosition();
+    await this.retry.waitFor('scripted fields help flyout to stop animating', async () => {
+      const currentPosition = await (
+        await this.testSubjects.find('scriptedFieldsHelpFlyout')
+      ).getPosition();
+      const settled =
+        currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y;
+      previousPosition = currentPosition;
+      return settled;
+    });
   }
 
   async closeScriptedFieldHelp() {

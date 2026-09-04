@@ -86,7 +86,7 @@ export const PER_PACKAGE_ALLOWED_LICENSES = {
   '@img/sharp-libvips-darwin-arm64@1.3.1': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linuxmusl-x64@1.3.1': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linux-x64@1.3.1': ['LGPL-3.0-or-later'],
-  'dompurify@3.4.11': ['(MPL-2.0 OR Apache-2.0)'],
+  'dompurify@3.4.14': ['(MPL-2.0 OR Apache-2.0)'],
 };
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
@@ -99,5 +99,4 @@ export const LICENSE_OVERRIDES = {
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
   'buffers@0.1.1': ['MIT'], // license in importing module https://www.npmjs.com/package/binary
   '@bufbuild/protobuf@2.5.2': ['Apache-2.0'], // license (Apache-2.0 AND BSD-3-Clause)
-  '@arizeai/phoenix-client@4.2.0': ['Elastic License 2.0'], // see https://github.com/Arize-ai/phoenix/blob/main/LICENSE
 };

@@ -33,6 +33,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
@@ -853,5 +854,133 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
     expect(createdSignalsCount).toEqual(3);
+  });
+
+  describe('oversized responses exceeding elasticsearch.maxResponseSize', () => {
+    const maxResponseSizeError = () =>
+      new esErrors.RequestAbortedError(
+        'The content length (209715200) is bigger than the maximum allowed string (104857600)'
+      );
+
+    test('should halve the page size and retry the same cursor when the response exceeds the limit', async () => {
+      const firstPageSortIds = ['1234567891111', '2233447556677'];
+
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
+      );
+      ruleServices.alertWithPersistence.mockResolvedValueOnce({
+        createdAlerts: [
+          {
+            _id: '1',
+            _index: '.internal.alerts-security.alerts-default-000001',
+            ...mockCommonFields,
+          },
+        ],
+        errors: {},
+        alertsWereTruncated: false,
+      });
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockRejectedValueOnce(
+        maxResponseSizeError()
+      );
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        sampleEmptyDocSearchResults()
+      );
+
+      const {
+        success,
+        warningMessages,
+        errors: searchErrors,
+      } = await searchAfterAndBulkCreate({
+        sharedParams: {
+          ...sharedParams,
+          searchAfterSize: 100,
+        },
+        services: ruleServices,
+        eventsTelemetry: undefined,
+        filter: defaultFilter,
+        buildReasonMessage,
+      });
+
+      expect(success).toEqual(true);
+      expect(searchErrors).toEqual([]);
+      expect(warningMessages).toEqual([
+        expect.stringContaining(
+          'reducing the number of events fetched per page from 30 to 15 and retrying'
+        ),
+      ]);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(3);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ size: 30 })
+      );
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ size: 30, search_after: firstPageSortIds })
+      );
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({ size: 15, search_after: firstPageSortIds })
+      );
+      expect(sharedParams.ruleExecutionLogger.error).not.toHaveBeenCalled();
+    });
+
+    test('should return an error when a single event still exceeds the limit', async () => {
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockRejectedValue(
+        maxResponseSizeError()
+      );
+
+      const {
+        success,
+        warningMessages,
+        errors: searchErrors,
+      } = await searchAfterAndBulkCreate({
+        sharedParams: {
+          ...sharedParams,
+          searchAfterSize: 4,
+        },
+        services: ruleServices,
+        eventsTelemetry: undefined,
+        filter: defaultFilter,
+        buildReasonMessage,
+      });
+
+      expect(success).toEqual(false);
+      expect(searchErrors).toEqual([
+        expect.stringContaining(
+          'A single event exceeded the "elasticsearch.maxResponseSize" limit'
+        ),
+      ]);
+      expect(warningMessages).toEqual([
+        expect.stringContaining('from 4 to 2 and retrying'),
+        expect.stringContaining('from 2 to 1 and retrying'),
+      ]);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(3);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({ size: 1 })
+      );
+      expect(sharedParams.ruleExecutionLogger.error).toHaveBeenCalled();
+    });
+
+    test('should not retry non size limit related errors', async () => {
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockRejectedValue(
+        new esErrors.RequestAbortedError('Request aborted')
+      );
+
+      const { success, warningMessages } = await searchAfterAndBulkCreate({
+        sharedParams: {
+          ...sharedParams,
+          searchAfterSize: 100,
+        },
+        services: ruleServices,
+        eventsTelemetry: undefined,
+        filter: defaultFilter,
+        buildReasonMessage,
+      });
+
+      expect(success).toEqual(false);
+      expect(warningMessages).toEqual([]);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
+    });
   });
 });
