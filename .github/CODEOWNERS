@@ -802,6 +802,7 @@ src/platform/packages/shared/shared-ux/flyout/info-blocks @elastic/appex-sharedu
 src/platform/packages/shared/shared-ux/flyout/meta-blocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/flyout/sections @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/flyout/template @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/flyout/template-overlay @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/label_formatter @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/link/redirect_app/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
