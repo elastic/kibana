@@ -23,8 +23,11 @@ export class MapsPage {
   public readonly importFileButton;
   public readonly returnToOriginSwitch;
   public readonly documentsItem;
+  public readonly fullScreenModeButton;
+  public readonly exitFullScreenButton;
   private readonly mapLayerToc;
   private readonly layerTocTooltip;
+  private readonly appMenuOverflowButton;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
 
@@ -38,6 +41,9 @@ export class MapsPage {
     this.importFileButton = this.page.testSubj.locator('importFileButton');
     this.returnToOriginSwitch = this.page.testSubj.locator('returnToOriginModeSwitch');
     this.documentsItem = this.page.testSubj.locator('documents');
+    this.fullScreenModeButton = this.page.testSubj.locator('mapsFullScreenMode');
+    this.exitFullScreenButton = this.page.testSubj.locator('exitFullScreenModeButton');
+    this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
     this.mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
     this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
     this.saveModal = new SavedObjectSaveModal(this.page);
@@ -46,6 +52,24 @@ export class MapsPage {
   async gotoNewMap() {
     await this.page.gotoApp('maps/map');
     await this.waitForRenderComplete();
+  }
+
+  /** Opens the AppHeader overflow menu when Full screen is not inline. */
+  async revealFullScreenModeButton() {
+    if (await this.fullScreenModeButton.isVisible()) {
+      return;
+    }
+    await this.fullScreenModeButton.or(this.appMenuOverflowButton).waitFor({ state: 'visible' });
+    if (await this.fullScreenModeButton.isVisible()) {
+      return;
+    }
+    await this.appMenuOverflowButton.click();
+    await this.fullScreenModeButton.waitFor({ state: 'visible' });
+  }
+
+  async clickFullScreenMode() {
+    await this.revealFullScreenModeButton();
+    await this.fullScreenModeButton.click();
   }
 
   async waitForRenderComplete() {
