@@ -34,7 +34,7 @@ const App = () => {
         <ChromeLayout
           header={
             <EuiHeader>
-              <EuiHeaderLogo iconType="logoElastic">Elastic</EuiHeaderLogo>
+              <EuiHeaderLogo logoType="horizontal" />
             </EuiHeader>
           }
           navigation={

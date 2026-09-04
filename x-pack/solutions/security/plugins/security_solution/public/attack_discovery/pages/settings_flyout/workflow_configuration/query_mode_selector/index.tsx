@@ -62,7 +62,6 @@ const QueryModeSelectorComponent: React.FC<QueryModeSelectorProps> = ({ mode, on
     >
       <EuiButtonGroup
         buttonSize="compressed"
-        color="primary"
         idSelected={mode}
         isFullWidth
         legend={i18n.QUERY_MODE_LABEL}

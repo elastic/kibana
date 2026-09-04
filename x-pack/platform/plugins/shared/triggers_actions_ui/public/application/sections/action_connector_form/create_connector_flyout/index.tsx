@@ -369,7 +369,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                 <EuiButtonGroup
                   isFullWidth
                   buttonSize="m"
-                  color="primary"
                   legend=""
                   options={groupActionButtons}
                   idSelected={actionType.id}
