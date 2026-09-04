@@ -67,6 +67,7 @@ import { BasePath } from './base_path_service';
 import { getEcsResponseLog, getSlimInfoResponseLog } from './logging';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
 import { createSelfCallPreHandler, createSelfCallPreResponseHandler } from './self_client_observer';
+import { createRequestMetricsRecorder } from './request_metrics_recorder';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -834,6 +835,12 @@ export class HttpServer {
       };
     }
 
+    const requestMetrics = createRequestMetricsRecorder({
+      activeRequests: activeRequestsCounter,
+      requestDuration,
+      requestAborted: requestTotalDisconnects,
+    });
+
     // Using onPreAuth instead of onRequest because we want the request.route.path
     this.server!.ext('onPreAuth', (request, responseToolkit) => {
       const attributes = getBaseAttributes(request);
@@ -841,17 +848,13 @@ export class HttpServer {
       requestTotalServed.add(1, attributes);
       activeRequestsCounter.add(1, attributes);
 
-      // We need to handle 'disconnect' and 'onPostResponse' events separately because onPostResponse is not called when disconnect happens.
-      // And we cannot use request.events.once('finish') here because it doesn't have the request.response info.
+      // onPostResponse can still fire after disconnect when the handler later
+      // completes. The recorder finishes accounting once so active and duration
+      // are not double-counted. request.events.once('finish') is not used here
+      // because it does not include request.response.
       request.events.once('disconnect', () => {
         const startTime = (request.app as KibanaRequestState).startTime;
-        const stopTime = performance.now();
-        requestTotalDisconnects.add(1, attributes);
-        activeRequestsCounter.add(-1, attributes);
-        requestDuration.record(stopTime - startTime, {
-          ...attributes,
-          'error.type': 'aborted',
-        });
+        requestMetrics.onDisconnect(request, attributes, performance.now() - startTime);
       });
 
       return responseToolkit.continue;
@@ -859,20 +862,12 @@ export class HttpServer {
 
     this.server!.ext('onPostResponse', (request, responseToolkit) => {
       const startTime = (request.app as KibanaRequestState).startTime;
-      const stopTime = performance.now();
-
       const attributes = getBaseAttributes(request);
-
-      activeRequestsCounter.add(-1, attributes);
-
       const statusCode: number = isBoom(request.response)
         ? request.response.output.statusCode
         : request.response.statusCode;
 
-      requestDuration.record(stopTime - startTime, {
-        ...attributes,
-        'http.response.status_code': statusCode,
-      });
+      requestMetrics.onPostResponse(request, attributes, performance.now() - startTime, statusCode);
       return responseToolkit.continue;
     });
   }
