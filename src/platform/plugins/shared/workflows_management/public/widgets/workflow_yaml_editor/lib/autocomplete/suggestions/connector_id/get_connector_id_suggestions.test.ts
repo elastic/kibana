@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parseDocument } from 'yaml';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { parseLineForCompletion } from '@kbn/workflows-yaml';
 import { getConnectorIdSuggestions } from './get_connector_id_suggestions';
@@ -89,5 +90,40 @@ describe('getConnectorIdSuggestions', () => {
 
     expect(result).toHaveLength(3);
     expect(result[0].insertText).toBe('public-slack');
+  });
+
+  it('should suggest inbound webhook instances for a trigger connector-id', () => {
+    const line = '    connector-id: ';
+    const yamlDocument = parseDocument(`triggers:
+  - type: inboundWebhook.received
+    connector-id: 
+`);
+    const result = getConnectorIdSuggestions({
+      line,
+      lineParseResult: parseLineForCompletion(line),
+      range: { startLineNumber: 3, endLineNumber: 3, startColumn: 19, endColumn: line.length + 1 },
+      focusedStepInfo: null,
+      focusedYamlPair: null,
+      path: ['triggers', 0, 'connector-id'],
+      yamlDocument,
+      dynamicConnectorTypes: {
+        ...fakeConnectorTypes,
+        '.inboundWebhook': {
+          actionTypeId: '.inboundWebhook',
+          displayName: 'Inbound Webhook',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'gold',
+          subActions: [],
+          instances: [
+            { id: 'testyng', name: 'testyng', isPreconfigured: false, isDeprecated: false },
+          ],
+        },
+      },
+    } as unknown as AutocompleteContext);
+
+    expect(result.map((item) => item.insertText)).toContain('testyng');
+    expect(result[0].label).toContain('testyng');
   });
 });

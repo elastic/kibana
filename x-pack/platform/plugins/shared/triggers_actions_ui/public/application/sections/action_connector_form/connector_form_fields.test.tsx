@@ -68,4 +68,45 @@ describe('ConnectorFormFields', () => {
       expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
     });
   });
+
+  it('renders settingsContent under Connector settings', async () => {
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      actionConnectorFields: null,
+    });
+
+    const result = appMockRenderer.render(
+      <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+        <ConnectorFormFields
+          actionTypeModel={actionTypeModel}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+          settingsContent={<div data-test-subj="custom-settings-content">Webhook URL</div>}
+        />
+      </FormTestProvider>
+    );
+
+    expect(result.getByTestId('connector-settings-label')).toBeInTheDocument();
+    expect(result.getByTestId('custom-settings-content')).toBeInTheDocument();
+  });
+
+  it('shows the settings heading when hideSettingsTitle is set if settingsContent is present', () => {
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      actionConnectorFields: lazy(() => import('./connector_mock')),
+      connectorForm: { hideSettingsTitle: true },
+    });
+
+    const result = appMockRenderer.render(
+      <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+        <ConnectorFormFields
+          actionTypeModel={actionTypeModel}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+          settingsContent={<div data-test-subj="custom-settings-content">Webhook URL</div>}
+        />
+      </FormTestProvider>
+    );
+
+    expect(result.getByTestId('connector-settings-label')).toBeInTheDocument();
+    expect(result.getByTestId('custom-settings-content')).toBeInTheDocument();
+  });
 });

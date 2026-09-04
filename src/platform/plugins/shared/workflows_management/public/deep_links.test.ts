@@ -27,6 +27,26 @@ describe('getDeepLinks', () => {
     );
   });
 
+  it('includes projectSideNav on the executions deep link so solution nav does not strip it', () => {
+    const deepLinks = getDeepLinks({ executionsViewEnabled: true });
+
+    expect(deepLinks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'executions',
+          path: '/executions',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        }),
+      ])
+    );
+  });
+
+  it('orders Executions before Template Library when both are enabled', () => {
+    const deepLinks = getDeepLinks({ executionsViewEnabled: true, libraryEnabled: true });
+
+    expect(deepLinks.map((link) => link.id)).toEqual(['list', 'executions', 'library']);
+  });
+
   it('does not set visibleIn on the workflows deep link when the library is disabled', () => {
     const [workflowsDeepLink] = getDeepLinks({ libraryEnabled: false });
 
