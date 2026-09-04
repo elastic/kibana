@@ -12,11 +12,14 @@ import type { OverviewStatus } from '../../../../../common/runtime_types';
 import { selectOverviewPageState } from '../overview/selectors';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
+  appendOverviewStatusAction,
   fetchOverviewStatusAction,
   fetchStaleStatusAction,
   quietFetchOverviewStatusAction,
 } from './actions';
 import { fetchOverviewStatus, fetchStaleStatus } from './api';
+import { selectOverviewStatusReducer } from './selectors';
+import { getNextWindowRefreshPage } from './window_refresh';
 
 export function* fetchOverviewStatusEffect() {
   yield takeLatest(
@@ -25,6 +28,22 @@ export function* fetchOverviewStatusEffect() {
       fetchOverviewStatus,
       fetchOverviewStatusAction.success,
       fetchOverviewStatusAction.fail
+    ) as ReturnType<typeof fetchEffectFactory>
+  );
+}
+
+/**
+ * Runs on its own effect (not the shared `takeLatest` above) so an append page
+ * request and a full replace/refresh never cancel each other — both land and
+ * are reconciled by the reducer (append merges, replace overwrites).
+ */
+export function* appendOverviewStatusEffect() {
+  yield takeLatest(
+    appendOverviewStatusAction.get,
+    fetchEffectFactory(
+      fetchOverviewStatus,
+      appendOverviewStatusAction.success,
+      appendOverviewStatusAction.fail
     ) as ReturnType<typeof fetchEffectFactory>
   );
 }
@@ -74,4 +93,45 @@ export function* augmentStaleStatusWorker(
  */
 export function* augmentStaleStatusEffect() {
   yield takeLatest(fetchOverviewStatusAction.success, augmentStaleStatusWorker);
+}
+
+/**
+ * After a clamped card-window refresh or a grouped full-set fill, fetch the
+ * remaining pages one at a time (the route `perPage` max cannot cover the
+ * whole result in one request).
+ */
+export function* refreshRemainingCardWindowWorker(
+  action:
+    | ReturnType<typeof fetchOverviewStatusAction.success>
+    | ReturnType<typeof appendOverviewStatusAction.success>
+) {
+  const overviewStatus: ReturnType<typeof selectOverviewStatusReducer> = yield select(
+    selectOverviewStatusReducer
+  );
+  const target = overviewStatus.refreshThrough ?? overviewStatus.fillThrough;
+  if (target == null || overviewStatus.fillAllInFlight) {
+    return;
+  }
+  const incoming = action.payload;
+  const next = getNextWindowRefreshPage(incoming.page, incoming.perPage, target);
+  if (!next) {
+    return;
+  }
+  const pageState: MonitorOverviewPageState = yield select(selectOverviewPageState);
+  yield put(
+    appendOverviewStatusAction.get({
+      pageState: { ...pageState, page: next.page, perPage: next.perPage },
+      scopeStatusByLocation: overviewStatus.lastRequest?.scopeStatusByLocation,
+      statusFilter: overviewStatus.lastRequest?.statusFilter,
+      silent: true,
+      ...(overviewStatus.fillThrough != null ? { fillAll: true } : {}),
+    })
+  );
+}
+
+export function* refreshRemainingCardWindowEffect() {
+  yield takeLatest(
+    [fetchOverviewStatusAction.success, appendOverviewStatusAction.success],
+    refreshRemainingCardWindowWorker
+  );
 }

@@ -12,7 +12,14 @@ import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { useLogicalAndFields } from '../../common/constants';
 import type { RouteContext } from './types';
-import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
+import {
+  MonitorSortFieldSchema,
+  OverviewStatusSortFieldSchema,
+} from '../../common/runtime_types/monitor_management/sort_field';
+import {
+  MONITOR_STATUS_ENUM,
+  OVERVIEW_STATUS_MAX_PER_PAGE,
+} from '../../common/constants/monitor_management';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import type { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
@@ -85,6 +92,19 @@ export const OverviewStatusSchema = schema.object({
   // monitors (no saved object, `origin: 'heartbeat'`) are excluded from the
   // overview. Defaults to showing them; remote (CCS) monitors are unaffected.
   includeHeartbeatMonitors: schema.maybe(schema.boolean()),
+  page: schema.maybe(schema.number({ min: 1 })),
+  perPage: schema.maybe(schema.number({ min: 1, max: OVERVIEW_STATUS_MAX_PER_PAGE })),
+  sortField: OverviewStatusSortFieldSchema,
+  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+  statusFilter: schema.maybe(
+    schema.oneOf([
+      schema.literal(MONITOR_STATUS_ENUM.UP),
+      schema.literal(MONITOR_STATUS_ENUM.DOWN),
+      schema.literal(MONITOR_STATUS_ENUM.PENDING),
+      schema.literal(MONITOR_STATUS_ENUM.STALE),
+      schema.literal(MONITOR_STATUS_ENUM.DISABLED),
+    ])
+  ),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;

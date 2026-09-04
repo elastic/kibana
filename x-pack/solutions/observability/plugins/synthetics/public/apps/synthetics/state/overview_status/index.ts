@@ -11,22 +11,86 @@ import type {
   OverviewStalePriorRun,
   OverviewStatusMetaData,
   OverviewStatusState,
+  PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
 import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_management';
-import { isRunStale } from '../../../../../common/lib';
+import { getOverviewConfigKey, isRunStale } from '../../../../../common/lib';
 import type { IHttpSerializedFetchError } from '..';
 import {
+  appendOverviewStatusAction,
   clearOverviewStatusErrorAction,
   fetchOverviewStatusAction,
   fetchStaleStatusAction,
   quietFetchOverviewStatusAction,
   initialLoadReported,
 } from './actions';
+import { getNextWindowRefreshPage, restrictOverviewPageToExistingKeys } from './window_refresh';
+import type { MonitorOverviewPageState } from '../overview/models';
+
+export interface OverviewStatusRequestContext {
+  scopeStatusByLocation?: boolean;
+  statusFilter?: string;
+  query?: string;
+  sortField?: MonitorOverviewPageState['sortField'];
+  sortOrder?: MonitorOverviewPageState['sortOrder'];
+  tags?: string[];
+  locations?: string[];
+  monitorTypes?: string[];
+  projects?: string[];
+  schedules?: string[];
+  remoteNames?: string[];
+  monitorQueryIds?: string[];
+  showFromAllSpaces?: boolean;
+  includeHeartbeatMonitors?: boolean;
+  useLogicalAndFor?: MonitorOverviewPageState['useLogicalAndFor'];
+  dateRangeStart?: string;
+  dateRangeEnd?: string;
+}
+
+const emptyToUndefined = <T>(value: T | undefined): T | undefined => {
+  if (value == null) {
+    return undefined;
+  }
+  if (typeof value === 'string' && value.length === 0) {
+    return undefined;
+  }
+  if (Array.isArray(value) && value.length === 0) {
+    return undefined;
+  }
+  return value;
+};
+
+const toRequestContext = (payload: {
+  pageState: MonitorOverviewPageState;
+  scopeStatusByLocation?: boolean;
+  statusFilter?: string;
+}): OverviewStatusRequestContext => {
+  const { pageState } = payload;
+  return {
+    scopeStatusByLocation: payload.scopeStatusByLocation,
+    statusFilter: emptyToUndefined(payload.statusFilter),
+    query: emptyToUndefined(pageState.query),
+    sortField: pageState.sortField,
+    sortOrder: pageState.sortOrder,
+    tags: emptyToUndefined(pageState.tags),
+    locations: emptyToUndefined(pageState.locations),
+    monitorTypes: emptyToUndefined(pageState.monitorTypes),
+    projects: emptyToUndefined(pageState.projects),
+    schedules: emptyToUndefined(pageState.schedules),
+    remoteNames: emptyToUndefined(pageState.remoteNames),
+    monitorQueryIds: emptyToUndefined(pageState.monitorQueryIds),
+    showFromAllSpaces: pageState.showFromAllSpaces,
+    includeHeartbeatMonitors: pageState.includeHeartbeatMonitors,
+    useLogicalAndFor: emptyToUndefined(pageState.useLogicalAndFor),
+    dateRangeStart: pageState.dateRangeStart,
+    dateRangeEnd: pageState.dateRangeEnd,
+  };
+};
 
 export interface OverviewStatusStateReducer {
   loading: boolean;
   loaded: boolean;
-  status: OverviewStatusState | null;
+  status: PaginatedOverviewStatus | null;
   allConfigs?: OverviewStatusMetaData[];
   disabledConfigs?: OverviewStatusMetaData[];
   // Raw "latest run before the window" facts from the supplementary stale lookup,
@@ -45,6 +109,26 @@ export interface OverviewStatusStateReducer {
   // empty overview.
   settled: boolean;
   isInitialLoad: boolean;
+  total?: number;
+  // Result-set identity the current status was fetched with, so the card view's
+  // infinite scroll can request the next page with the exact same parameters
+  // and a late append from a previous query/sort/filter is dropped.
+  lastRequest?: OverviewStatusRequestContext;
+  // Result-set identity of an in-flight append. Compared on success so a page
+  // requested under a previous query/sort/filter is not merged into a newer result.
+  pendingAppendRequest?: OverviewStatusRequestContext;
+  // Set while a silent (timer) replace is in flight. A late page-1 response
+  // must merge into the card view's accumulated window instead of shrinking it;
+  // table paging is non-silent and must always replace.
+  silentReplaceInFlight?: boolean;
+  // Target loaded-window size for a clamped card-view refresh. Set while
+  // remainder pages are still in flight so the timer and infinite scroll wait.
+  refreshThrough?: number;
+  // Target size for a grouped full-set fill (`incoming.total`). Remainder
+  // pages are appended (not clipped) until this is covered.
+  fillThrough?: number;
+  fillAllInFlight?: boolean;
+  pendingFillAppend?: boolean;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -138,8 +222,154 @@ const applyStaleBeforeWindow = (state: OverviewStatusStateReducer) => {
   }
 
   if (changed) {
-    state.allConfigs = buildAllConfigs(status);
+    const rebuilt = buildAllConfigs(status);
+    if (status.configs) {
+      const byKey = new Map(rebuilt.map((config) => [getOverviewConfigKey(config), config]));
+      status.configs = status.configs.map(
+        (config) => byKey.get(getOverviewConfigKey(config)) ?? config
+      );
+      state.allConfigs = status.configs;
+    } else {
+      state.allConfigs = rebuilt;
+    }
   }
+};
+
+const requestContextEquals = (a?: OverviewStatusRequestContext, b?: OverviewStatusRequestContext) =>
+  JSON.stringify(a) === JSON.stringify(b);
+
+const CONFIG_BUCKETS = [
+  'upConfigs',
+  'downConfigs',
+  'pendingConfigs',
+  'staleConfigs',
+  'disabledConfigs',
+] as const;
+
+const collectConfigKeys = (status: PaginatedOverviewStatus): Set<string> => {
+  const keys = new Set<string>();
+  for (const config of status.configs ?? []) {
+    keys.add(getOverviewConfigKey(config));
+  }
+  for (const bucket of CONFIG_BUCKETS) {
+    for (const config of Object.values(status[bucket] ?? {})) {
+      keys.add(getOverviewConfigKey(config));
+    }
+  }
+  return keys;
+};
+
+const mergeBucketRecords = (
+  existing: Record<string, OverviewStatusMetaData> | undefined,
+  incoming: Record<string, OverviewStatusMetaData> | undefined,
+  incomingKeys: Set<string>
+): Record<string, OverviewStatusMetaData> => {
+  const merged: Record<string, OverviewStatusMetaData> = {};
+  for (const config of Object.values(existing ?? {})) {
+    const key = getOverviewConfigKey(config);
+    if (!incomingKeys.has(key)) {
+      merged[key] = config;
+    }
+  }
+  for (const config of Object.values(incoming ?? {})) {
+    merged[getOverviewConfigKey(config)] = config;
+  }
+  return merged;
+};
+
+const mergePaginatedStatus = (
+  existing: PaginatedOverviewStatus,
+  incoming: PaginatedOverviewStatus
+): PaginatedOverviewStatus => {
+  const byKey = new Map(existing.configs!.map((config) => [getOverviewConfigKey(config), config]));
+  for (const config of incoming.configs!) {
+    byKey.set(getOverviewConfigKey(config), config);
+  }
+  const incomingKeys = collectConfigKeys(incoming);
+  return {
+    ...incoming,
+    upConfigs: mergeBucketRecords(existing.upConfigs, incoming.upConfigs, incomingKeys),
+    downConfigs: mergeBucketRecords(existing.downConfigs, incoming.downConfigs, incomingKeys),
+    pendingConfigs: mergeBucketRecords(
+      existing.pendingConfigs,
+      incoming.pendingConfigs,
+      incomingKeys
+    ),
+    staleConfigs: mergeBucketRecords(existing.staleConfigs, incoming.staleConfigs, incomingKeys),
+    disabledConfigs: mergeBucketRecords(
+      existing.disabledConfigs,
+      incoming.disabledConfigs,
+      incomingKeys
+    ),
+    configs: Array.from(byKey.values()),
+  };
+};
+
+const completeWindowRefreshIfCovered = (
+  state: OverviewStatusStateReducer,
+  incoming: PaginatedOverviewStatus
+) => {
+  if (state.refreshThrough == null) {
+    return;
+  }
+  if (incoming.total != null && incoming.total < state.refreshThrough) {
+    state.refreshThrough = incoming.total;
+  }
+  if (!getNextWindowRefreshPage(incoming.page, incoming.perPage, state.refreshThrough)) {
+    state.refreshThrough = undefined;
+  }
+};
+
+const completeFillIfCovered = (
+  state: OverviewStatusStateReducer,
+  incoming: PaginatedOverviewStatus
+) => {
+  if (state.fillThrough == null) {
+    return;
+  }
+  if (incoming.total != null && incoming.total < state.fillThrough) {
+    state.fillThrough = incoming.total;
+  }
+  if (!getNextWindowRefreshPage(incoming.page, incoming.perPage, state.fillThrough)) {
+    state.fillThrough = undefined;
+  }
+};
+
+const armFillFromIncoming = (
+  state: OverviewStatusStateReducer,
+  incoming: PaginatedOverviewStatus
+) => {
+  if (!state.fillAllInFlight) {
+    return;
+  }
+  state.fillAllInFlight = false;
+  if (incoming.total != null) {
+    state.fillThrough = incoming.total;
+  }
+};
+
+const applyMergedPaginated = (
+  state: OverviewStatusStateReducer,
+  incoming: PaginatedOverviewStatus
+) => {
+  const existing = state.status;
+  let allConfigs: OverviewStatusMetaData[];
+  if (!existing?.configs || !incoming.configs) {
+    state.status = incoming;
+    allConfigs = incoming.configs ?? buildAllConfigs(incoming);
+    state.total = incoming.total ?? allConfigs.length;
+  } else {
+    const merged = mergePaginatedStatus(existing, incoming);
+    state.status = merged;
+    allConfigs = merged.configs ?? [];
+    state.total = incoming.total;
+  }
+  state.allConfigs = allConfigs;
+  state.disabledConfigs = allConfigs.filter((monitor) => !monitor.isEnabled);
+  state.loaded = true;
+  state.loading = false;
+  state.settled = true;
+  applyStaleBeforeWindow(state);
 };
 
 export const overviewStatusReducer = createReducer(initialState, (builder) => {
@@ -147,15 +377,61 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     .addCase(fetchOverviewStatusAction.get, (state, action) => {
       state.status = null;
       state.loading = true;
+      state.silentReplaceInFlight = false;
+      state.refreshThrough = undefined;
+      state.fillThrough = undefined;
+      state.fillAllInFlight = Boolean(action.payload.fillAll);
+      state.lastRequest = toRequestContext(action.payload);
     })
-    .addCase(quietFetchOverviewStatusAction.get, (_state) => {
-      // intentionally no loading state for quiet/background refreshes
+    .addCase(quietFetchOverviewStatusAction.get, (state, action) => {
+      // Timer refreshes pass `silent` so the compact table / progress bar
+      // does not flash on every auto-refresh interval.
+      if (!action.payload.silent) {
+        state.loading = true;
+      }
+      state.silentReplaceInFlight = Boolean(action.payload.silent);
+      const fillAll = Boolean(action.payload.fillAll);
+      state.fillAllInFlight = fillAll;
+      if (fillAll) {
+        state.refreshThrough = undefined;
+      } else {
+        state.refreshThrough = action.payload.refreshThrough;
+        state.fillThrough = undefined;
+      }
+      state.lastRequest = toRequestContext(action.payload);
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
-      state.status = action.payload;
+      const incoming = action.payload;
+      const existing = state.status;
+      const silentReplaceInFlight = state.silentReplaceInFlight;
+      state.silentReplaceInFlight = false;
+      // A silent page-1 refresh can complete after the card view has already
+      // appended later pages. Merge that prefix into the accumulated window.
+      // Compact table paging is non-silent and must replace: a shorter last
+      // page or a reduced `perPage` would otherwise keep stale rows.
+      const isPageOne = incoming.page == null || incoming.page === 1;
+      const preserveAccumulatedWindow =
+        silentReplaceInFlight &&
+        isPageOne &&
+        Boolean(existing?.configs) &&
+        Boolean(incoming.configs) &&
+        existing!.configs!.length > incoming.configs!.length &&
+        incoming.total === existing!.total;
 
-      state.allConfigs = buildAllConfigs(state.status);
-      state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
+      if (preserveAccumulatedWindow) {
+        applyMergedPaginated(state, incoming);
+        armFillFromIncoming(state, incoming);
+        completeWindowRefreshIfCovered(state, incoming);
+        completeFillIfCovered(state, incoming);
+        return;
+      }
+
+      state.status = incoming;
+
+      const allConfigs = incoming.configs ?? buildAllConfigs(state.status);
+      state.allConfigs = allConfigs;
+      state.total = incoming.configs ? incoming.total : allConfigs.length;
+      state.disabledConfigs = allConfigs.filter((monitor) => !monitor.isEnabled);
       state.loaded = true;
       state.loading = false;
       state.settled = true;
@@ -163,11 +439,62 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       // refresh (which just replaced `status`) doesn't flicker them back to
       // `pending` until the supplementary lookup re-resolves.
       applyStaleBeforeWindow(state);
+      armFillFromIncoming(state, incoming);
+      completeWindowRefreshIfCovered(state, incoming);
+      completeFillIfCovered(state, incoming);
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
       state.settled = true;
+      state.refreshThrough = undefined;
+      state.fillThrough = undefined;
+      state.fillAllInFlight = false;
+    })
+    .addCase(appendOverviewStatusAction.get, (state, action) => {
+      if (!action.payload.silent) {
+        // Keep the current page visible while the next one loads.
+        state.loading = true;
+        // User-driven infinite scroll cancels an in-flight window remainder.
+        state.refreshThrough = undefined;
+        state.fillThrough = undefined;
+        state.fillAllInFlight = false;
+      }
+      state.pendingFillAppend = Boolean(action.payload.fillAll);
+      state.pendingAppendRequest = toRequestContext(action.payload);
+    })
+    .addCase(appendOverviewStatusAction.success, (state, action) => {
+      const pending = state.pendingAppendRequest;
+      const wasFill = state.pendingFillAppend;
+      state.pendingAppendRequest = undefined;
+      state.pendingFillAppend = undefined;
+      // Drop a page that was requested under a previous query/sort/filter so it
+      // cannot land on top of a newer replace.
+      if (pending && !requestContextEquals(pending, state.lastRequest)) {
+        return;
+      }
+      // Drop a grouped fill page if grouping was cancelled before page 1 landed.
+      if (wasFill && (state.fillAllInFlight || state.fillThrough == null)) {
+        return;
+      }
+      const existingConfigs = state.status?.configs;
+      const incoming =
+        state.refreshThrough && existingConfigs && action.payload.configs
+          ? restrictOverviewPageToExistingKeys(existingConfigs, action.payload)
+          : action.payload;
+      applyMergedPaginated(state, incoming);
+      completeWindowRefreshIfCovered(state, action.payload);
+      completeFillIfCovered(state, action.payload);
+    })
+    .addCase(appendOverviewStatusAction.fail, (state, action) => {
+      state.pendingAppendRequest = undefined;
+      state.pendingFillAppend = undefined;
+      state.error = action.payload;
+      state.loading = false;
+      state.settled = true;
+      state.refreshThrough = undefined;
+      state.fillThrough = undefined;
+      state.fillAllInFlight = false;
     })
     .addCase(fetchStaleStatusAction.success, (state, action) => {
       // Store the latest prior-run facts and promote the genuinely stale

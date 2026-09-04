@@ -135,3 +135,24 @@ export const MONITOR_STATUS_ENUM = {
   SUCCESS: 'succeeded',
   DISABLED: 'disabled',
 };
+
+export const OVERVIEW_STATUS_FILTER_VALUES = [
+  MONITOR_STATUS_ENUM.UP,
+  MONITOR_STATUS_ENUM.DOWN,
+  MONITOR_STATUS_ENUM.PENDING,
+  MONITOR_STATUS_ENUM.STALE,
+  MONITOR_STATUS_ENUM.DISABLED,
+] as const;
+
+export type OverviewStatusFilter = (typeof OVERVIEW_STATUS_FILTER_VALUES)[number];
+
+export const OVERVIEW_PAGINATION_DEFAULTS = {
+  page: 1,
+  perPage: 20,
+  sortField: 'status',
+  sortOrder: 'asc',
+} as const;
+
+// Route max for `perPage`. Card-view window refresh must clamp to this and
+// request later pages separately — sending `loadedCount` unbounded 400s.
+export const OVERVIEW_STATUS_MAX_PER_PAGE = 500;

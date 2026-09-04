@@ -6,7 +6,7 @@
  */
 
 import { monitorOverviewReducer } from '.';
-import { setOverviewPageStateAction } from './actions';
+import { setOverviewPageStateAction, setOverviewViewAction } from './actions';
 
 describe('monitorOverviewReducer', () => {
   describe('setOverviewPageStateAction (no-op suppression)', () => {
@@ -152,6 +152,28 @@ describe('monitorOverviewReducer', () => {
 
       expect(next.pageState).not.toBe(initial.pageState);
       expect(next.pageState.useLogicalAndFor).toEqual(['tags']);
+    });
+  });
+
+  describe('setOverviewViewAction', () => {
+    it('produces a new pageState reference on a real view switch even when pagination is already at defaults', () => {
+      const initial = monitorOverviewReducer(undefined, { type: '@@INIT' });
+      expect(initial.view).toBe('cardView');
+      expect(initial.pageState.page).toBe(1);
+
+      const next = monitorOverviewReducer(initial, setOverviewViewAction('compactView'));
+
+      expect(next.view).toBe('compactView');
+      expect(next.pageState).not.toBe(initial.pageState);
+      expect(next.pageState.page).toBe(1);
+      expect(next.pageState.perPage).toBe(initial.pageState.perPage);
+    });
+
+    it('preserves pageState identity when the view is unchanged', () => {
+      const initial = monitorOverviewReducer(undefined, { type: '@@INIT' });
+      const next = monitorOverviewReducer(initial, setOverviewViewAction(initial.view));
+
+      expect(next.pageState).toBe(initial.pageState);
     });
   });
 });

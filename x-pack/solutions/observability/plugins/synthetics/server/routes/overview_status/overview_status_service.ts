@@ -15,7 +15,11 @@ import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { OverviewStatusQuery, OverviewStatusStaleBody } from '../common';
 import { getMonitorFilters, MONITOR_STATUS_PING_SEARCH_FIELDS } from '../common';
-import { ConfigKey, MONITOR_STATUS_ENUM } from '../../../common/constants/monitor_management';
+import {
+  ConfigKey,
+  MONITOR_STATUS_ENUM,
+  OVERVIEW_PAGINATION_DEFAULTS,
+} from '../../../common/constants/monitor_management';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import type { RouteContext } from '../types';
 import type {
@@ -28,7 +32,7 @@ import {
   HEARTBEAT_UNMAPPED_LOCATION_ID,
   HEARTBEAT_UNMAPPED_LOCATION_LABEL,
 } from '../../../common/runtime_types';
-import { isRunStale } from '../../../common/lib';
+import { getOverviewConfigKey, isRunStale } from '../../../common/lib';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   FINAL_SUMMARY_FILTER,
@@ -151,6 +155,10 @@ export class OverviewStatusService {
     >,
     statusResult: Map<string, LocationStatus>
   ) {
+    const params = this.routeContext.request.query || {};
+    const { page, perPage } = params;
+    const isPaginated = page != null && perPage != null;
+
     const {
       up,
       down,
@@ -172,6 +180,43 @@ export class OverviewStatusService {
       projectMonitorsCount,
     } = processMonitors(allConfigs, this.filterData?.locationIds);
 
+    if (!isPaginated) {
+      return {
+        allIds,
+        allMonitorsCount: allConfigs.length,
+        disabledMonitorsCount,
+        projectMonitorsCount,
+        enabledMonitorQueryIds,
+        disabledMonitorQueryIds,
+        disabledCount,
+        up,
+        down,
+        pending,
+        stale,
+        upConfigs,
+        downConfigs,
+        pendingConfigs,
+        staleConfigs,
+        disabledConfigs,
+      };
+    }
+
+    const {
+      configs,
+      total,
+      pageUpConfigs,
+      pageDownConfigs,
+      pagePendingConfigs,
+      pageStaleConfigs,
+      pageDisabledConfigs,
+    } = this.paginateConfigs({
+      upConfigs,
+      downConfigs,
+      pendingConfigs,
+      staleConfigs,
+      disabledConfigs,
+    });
+
     return {
       allIds,
       allMonitorsCount: allConfigs.length,
@@ -184,11 +229,15 @@ export class OverviewStatusService {
       down,
       pending,
       stale,
-      upConfigs,
-      downConfigs,
-      pendingConfigs,
-      staleConfigs,
-      disabledConfigs,
+      upConfigs: pageUpConfigs,
+      downConfigs: pageDownConfigs,
+      pendingConfigs: pagePendingConfigs,
+      staleConfigs: pageStaleConfigs,
+      disabledConfigs: pageDisabledConfigs,
+      configs,
+      total,
+      page,
+      perPage,
     };
   }
 
@@ -264,6 +313,125 @@ export class OverviewStatusService {
     });
 
     return { priorRuns };
+  }
+
+  paginateConfigs({
+    upConfigs,
+    downConfigs,
+    pendingConfigs,
+    staleConfigs = {},
+    disabledConfigs,
+  }: {
+    upConfigs: Record<string, OverviewStatusMetaData>;
+    downConfigs: Record<string, OverviewStatusMetaData>;
+    pendingConfigs: Record<string, OverviewStatusMetaData>;
+    staleConfigs?: Record<string, OverviewStatusMetaData>;
+    disabledConfigs: Record<string, OverviewStatusMetaData>;
+  }) {
+    const queryParams = this.routeContext.request.query || {};
+    const {
+      page = OVERVIEW_PAGINATION_DEFAULTS.page,
+      perPage = OVERVIEW_PAGINATION_DEFAULTS.perPage,
+      sortField = OVERVIEW_PAGINATION_DEFAULTS.sortField,
+      sortOrder = OVERVIEW_PAGINATION_DEFAULTS.sortOrder,
+      statusFilter,
+    } = queryParams;
+
+    const buckets = {
+      [MONITOR_STATUS_ENUM.UP]: upConfigs,
+      [MONITOR_STATUS_ENUM.DOWN]: downConfigs,
+      [MONITOR_STATUS_ENUM.PENDING]: pendingConfigs,
+      [MONITOR_STATUS_ENUM.STALE]: staleConfigs,
+      [MONITOR_STATUS_ENUM.DISABLED]: disabledConfigs,
+    };
+
+    // `sortField: 'status'` is expressed as this concatenation order — `sortConfigs` is a no-op for it.
+    const pageSource = statusFilter
+      ? Object.values(buckets[statusFilter] ?? {})
+      : [
+          ...Object.values(sortOrder === 'asc' ? downConfigs : upConfigs),
+          ...Object.values(sortOrder === 'asc' ? upConfigs : downConfigs),
+          ...Object.values(disabledConfigs),
+          ...Object.values(pendingConfigs),
+          ...Object.values(staleConfigs),
+        ];
+
+    this.sortConfigs(pageSource, sortField, sortOrder);
+
+    const total = pageSource.length;
+    const start = (page - 1) * perPage;
+    const pageConfigs = pageSource.slice(start, start + perPage);
+
+    const pageUpConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pageDownConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pagePendingConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pageStaleConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pageDisabledConfigs: Record<string, OverviewStatusMetaData> = {};
+
+    for (const config of pageConfigs) {
+      const key = getOverviewConfigKey(config);
+      switch (config.overallStatus) {
+        case MONITOR_STATUS_ENUM.DOWN:
+          pageDownConfigs[key] = config;
+          break;
+        case MONITOR_STATUS_ENUM.UP:
+          pageUpConfigs[key] = config;
+          break;
+        case MONITOR_STATUS_ENUM.DISABLED:
+          pageDisabledConfigs[key] = config;
+          break;
+        case MONITOR_STATUS_ENUM.STALE:
+          pageStaleConfigs[key] = config;
+          break;
+        default:
+          pagePendingConfigs[key] = config;
+      }
+    }
+
+    return {
+      configs: pageConfigs,
+      total,
+      pageUpConfigs,
+      pageDownConfigs,
+      pagePendingConfigs,
+      pageStaleConfigs,
+      pageDisabledConfigs,
+    };
+  }
+
+  private sortConfigs(
+    configs: OverviewStatusMetaData[],
+    sortField: string | undefined,
+    sortOrder: string | undefined
+  ) {
+    const dir = sortOrder === 'desc' ? -1 : 1;
+
+    switch (sortField) {
+      case 'name.keyword':
+        configs.sort((a, b) => dir * a.name.localeCompare(b.name));
+        break;
+      case 'updated_at':
+        configs.sort((a, b) => {
+          const aTime = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+          const bTime = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+          return dir * (aTime - bTime);
+        });
+        break;
+      case 'urls': {
+        const withUrl = configs.filter((m) => m.urls);
+        const withoutUrl = configs.filter((m) => !m.urls);
+        withUrl.sort((a, b) => dir * (a.urls ?? '').localeCompare(b.urls ?? ''));
+        configs.length = 0;
+        configs.push(...withUrl, ...withoutUrl);
+        break;
+      }
+      case 'type.keyword':
+        configs.sort((a, b) => dir * (a.type ?? '').localeCompare(b.type ?? ''));
+        break;
+      case 'status':
+      default:
+        break;
+    }
   }
 
   async getEsDataFilters() {
@@ -1043,11 +1211,8 @@ export class OverviewStatusService {
           // remote clusters that host the same monitor configId in the same
           // locationId (e.g. an imported project monitor synced to both)
           // don't collide and silently overwrite each other.
-          placeExternalConfig(
-            `${remote.remoteName}-${configId}-${locData.locationId}`,
-            { ...baseMeta, remote },
-            status
-          );
+          const remoteMeta = { ...baseMeta, remote };
+          placeExternalConfig(getOverviewConfigKey(remoteMeta), remoteMeta, status);
           return;
         }
 
@@ -1072,11 +1237,8 @@ export class OverviewStatusService {
           }
           heartbeatMonitorIds.add(monitorId);
         }
-        placeExternalConfig(
-          `heartbeat-${configId}-${locData.locationId}`,
-          { ...baseMeta, origin: 'heartbeat' as const },
-          status
-        );
+        const heartbeatMeta = { ...baseMeta, origin: 'heartbeat' as const };
+        placeExternalConfig(getOverviewConfigKey(heartbeatMeta), heartbeatMeta, status);
       });
     });
 
