@@ -372,6 +372,55 @@ steps:
     });
   });
 
+  describe('connector-id on requiresConnectorId triggers', () => {
+    const connectorEventTriggerId = 'example.connector_event';
+    const schemaRequiringConnectorId = getWorkflowZodSchema({}, [
+      { id: connectorEventTriggerId, requiresConnectorId: true },
+    ]);
+
+    const workflowYaml = (triggerBlock: string) => `
+version: '1'
+name: Connector Event Trigger
+triggers:
+  - ${triggerBlock}
+steps:
+  - name: step1
+    type: console
+    with:
+      message: hello
+`;
+
+    it('should pass when connector-id is present', () => {
+      const result = validateWorkflowYaml(
+        workflowYaml(`type: ${connectorEventTriggerId}\n    connector-id: webhook-1`),
+        schemaRequiringConnectorId
+      );
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('should fail when connector-id is missing', () => {
+      const result = validateWorkflowYaml(
+        workflowYaml(`type: ${connectorEventTriggerId}`),
+        schemaRequiringConnectorId
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
+      expect(result.diagnostics.some((d) => d.message.includes('connector-id'))).toBe(true);
+    });
+
+    it('should fail when connector-id is empty', () => {
+      const result = validateWorkflowYaml(
+        workflowYaml(`type: ${connectorEventTriggerId}\n    connector-id: ""`),
+        schemaRequiringConnectorId
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
+    });
+  });
+
   describe('graph build validation', () => {
     it('rejects nested flow-control inside a parallel branch (nested parallel)', () => {
       // The schema accepts this, but compiling to an execution graph fails because

@@ -29,7 +29,8 @@ describe('Navigation Tree', () => {
     expect(body.length).toBeGreaterThan(0);
     const homeNode = body[0];
     expect(homeNode).toMatchObject({
-      title: 'Elasticsearch',
+      title: 'Home',
+      icon: 'home',
       link: 'searchHomepage',
     });
   });

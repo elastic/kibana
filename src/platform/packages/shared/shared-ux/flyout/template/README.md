@@ -27,20 +27,22 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 
 ## Root props
 
-The root forwards a fixed subset of `EuiFlyoutProps` — `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
+The root forwards a fixed subset of `EuiFlyoutProps` — `id`, `hasChildBackground`, `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `outsideClickCloses`, `focusTrapProps`, `closeButtonProps`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
+
+Tab props also live on the root: `tabs` (array of `FlyoutTabProps`), `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [Tabs](#tabs) below.
 
 ## Zones
 
-**`FlyoutTemplate.Header`** renders three stacked regions: an always-visible title row, a collapsible region holding the description, and an always-visible trailing region with the full-bleed bottom divider.
+**`FlyoutTemplate.Header`** renders three stacked regions: an always-visible title row, a collapsible region holding the description, and an always-visible trailing region with the full-bleed bottom divider. See [`src/header/README.md`](src/header/README.md) for header blocks (MetaBlock, Badge, InfoBlock) and collapse behavior.
 
 - `title` — required `ReactNode`. Rendered as an `<h3>` carrying a generated id.
 - `titleIcon` — EUI icon type rendered after the title. Without `titleTooltip` it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip` using `titleIcon` as its type, defaulting to `info`.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
-- `collapsed` — renders the compact layout permanently, regardless of scroll position. See "Header collapse".
-- `children` — reserved for future header parts. No header parts exist yet, so any child is dropped.
+- `collapsed` — renders the compact layout permanently, regardless of scroll position.
+- `children` — `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts. Free-form content (arbitrary elements, components, bare text) is not rendered, and the assembly library warns in development about unrecognized children.
 
-**`FlyoutTemplate.Body`** renders arbitrary children inside `EuiFlyoutBody` in source order, with no sectioning, titling, or dividers added by the template. Each child manages its own layout.
+**`FlyoutTemplate.Body`** renders `Body.TabPanel` parts plus arbitrary passthrough content inside `EuiFlyoutBody` in source order. Passthrough children manage their own layout; the template adds no sectioning, titling, or dividers around them. See [Tabs](#tabs) below.
 
 **`FlyoutTemplate.Footer`** renders `PrimaryAction` and `SecondaryAction` right-aligned inside `EuiFlyoutFooter`, secondary first. If neither action is present, the footer is omitted entirely — no default Cancel button is added. Only the first instance of each action is rendered.
 
@@ -58,19 +60,49 @@ Both actions take `label`, `onClick`, and optional `id`, `iconType`, `isLoading`
 - Duplicate zones (e.g. two `FlyoutTemplate.Header` children) log a dev warning and render only the first.
 - The zone components (`Header`, `Body`, `Footer`) and the footer action parts render nothing when used outside a `FlyoutTemplate` root.
 
-## Header collapse
+## Tabs
 
-Scrolling the body collapses the header to a compact layout: the title drops to an `xs` heading on a single ellipsized line, and the collapsible region animates to zero height and becomes `aria-hidden`. The title row and the divider stay visible in both states.
+Pass `tabs` to the root to render a tab bar at the bottom of the header. Each entry takes `id`, `label`, and optional `disabled`, `prepend`, `append`, and `data-test-subj`. Declare a `Body.TabPanel` for each tab id; the template wires the `tab`/`tabpanel` accessibility relationship and mounts only the selected panel.
 
-Collapse is driven by the body's scroll container, so it is template-owned rather than a header prop, and it obeys three rules:
+```tsx
+<FlyoutTemplate
+  onClose={onClose}
+  tabs={[
+    { id: 'overview', label: 'Overview' },
+    { id: 'metadata', label: 'Metadata' },
+  ]}
+  selectedTabId={tabId}
+  onTabChange={setTabId}
+>
+  <FlyoutTemplate.Header title="Alert details" />
+  <FlyoutTemplate.Body>
+    <FlyoutTemplate.Body.TabPanel tabId="overview">…</FlyoutTemplate.Body.TabPanel>
+    <FlyoutTemplate.Body.TabPanel tabId="metadata">…</FlyoutTemplate.Body.TabPanel>
+  </FlyoutTemplate.Body>
+</FlyoutTemplate>
+```
 
-- **Hysteresis.** Collapse needs `scrollTop >= 16`; expansion needs `scrollTop <= 4`. The gap keeps the header from flickering when a scroll settles on the boundary.
-- **Overflow guard.** The header only collapses when the body overflows by more than the height the expanded header would hand back — the collapsible region, the taller title row, and the larger spacer combined. Without that gate, collapsing a barely-overflowing body clamps `scrollTop` below the expansion threshold and the header immediately expands again. The guard gates entry only; leaving the collapsed state is decided by scroll position alone, because re-testing it against post-collapse geometry oscillates.
-- **Wheel forwarding.** The header itself does not scroll, so a wheel event over it is forwarded to the body scroll container and the default action is prevented, rather than scrolling the page behind the flyout. Firefox's line-mode and page-mode deltas are normalized to pixels.
+Selection is uncontrolled by default, starting on the first tab; pass `defaultSelectedTabId` to start elsewhere. For controlled selection pass `selectedTabId` and `onTabChange` — `onTabChange` fires on every tab click either way.
 
-Transitions are wrapped in `prefers-reduced-motion: no-preference`, so the state change is instant for users who ask for reduced motion.
+For conditional or dynamically-loaded content, supply only the panel for the currently selected tab:
 
-`collapsed` pins the header to the compact layout: the scroll listener is never attached and the collapsible region is hidden from first render, but wheel forwarding still works.
+```tsx
+<FlyoutTemplate tabs={tabs} selectedTabId={tabId} onTabChange={setTabId} …>
+  <FlyoutTemplate.Header title="Alert details" />
+  <FlyoutTemplate.Body>
+    <FlyoutTemplate.Body.TabPanel tabId={tabId}>{panelFor(tabId)}</FlyoutTemplate.Body.TabPanel>
+  </FlyoutTemplate.Body>
+</FlyoutTemplate>
+```
+
+**Behaviors:**
+
+- Non-empty `tabs` activates tabbed mode: the bar renders, only the selected panel mounts, and top-level `Body` passthrough content is ignored.
+- A tab whose panel is absent still renders and stays selectable; the body renders empty. This is the on-demand mounting path and is never warned about.
+- A `Body.TabPanel` declared when `tabs` is empty or omitted is silently ignored — tabbed mode is off and only passthrough children render.
+- Only the selected panel mounts; panel state is discarded on every tab switch. There is no keep-mounted escape hatch.
+- Duplicate ids in `tabs` are silently deduplicated; the first entry with each id wins.
+- Setting `tabs` without a `<FlyoutTemplate.Header>` logs a dev warning: the tab bar cannot render without a header zone.
 
 ## Test subjects
 
