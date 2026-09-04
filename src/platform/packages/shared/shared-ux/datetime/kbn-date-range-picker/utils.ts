@@ -191,13 +191,40 @@ export function isRelativeToNow(range: TimeRange): boolean {
   );
 }
 
+/** Matches `now/d` and `now-1d/d`, capturing the offset unit (if any) and the rounding unit. */
+const ROUNDED_BOUND_RE = /^now(?:[+-]\d+(ms|[smhdwMy]))?\/(ms|[smhdwMy])$/;
+
+/**
+ * Returns `true` when the range covers exactly one calendar bucket, i.e. both
+ * bounds are the same expression and that expression rounds to its own offset
+ * unit (`now/d`, `now-1d/d`, `now-1w/w`).
+ *
+ * Such a range is a whole day, week, month or year: `start` resolves to the
+ * first instant of the bucket and `end` — parsed with `roundUp` — to its last,
+ * so nothing the user asked for is truncated. The `roundRelativeTime` setting
+ * never produces this shape, because it rounds to a finer unit than the offset
+ * (see `ROUND_UNIT_MAP`: a `d` offset rounds to `/h`).
+ */
+function isWholeCalendarBucket({ start, end }: TimeRangeBounds): boolean {
+  if (start !== end) return false;
+
+  const match = start.match(ROUNDED_BOUND_RE);
+  if (!match) return false;
+
+  const [, offsetUnit, roundUnit] = match;
+  return !offsetUnit || offsetUnit === roundUnit;
+}
+
 /**
  * Returns `true` when a relative offset bound carries a rounding suffix
  * (e.g. `now-1y/y`), whether typed by the user or added by the
  * `roundRelativeTime` setting. Rounding-only bounds such as the `now/d` of
- * "Today" are not offsets and don't count.
+ * "Today" are not offsets and don't count, and neither does a whole calendar
+ * bucket such as the `now-1d/d to now-1d/d` of "Yesterday" — its label already
+ * says it spans the full day (see {@link isWholeCalendarBucket}).
  */
 export function hasRoundedOffset(range: TimeRangeBounds): boolean {
+  if (isWholeCalendarBucket(range)) return false;
   return [range.start, range.end].some((bound) => Boolean(dateMathToRelativeParts(bound)?.round));
 }
 

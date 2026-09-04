@@ -176,11 +176,41 @@ describe('hasRoundedOffset', () => {
     expect(hasRoundedOffset(textToTimeRange('-7d', { roundRelativeTime: true }))).toBe(true);
   });
 
+  it('is true when a rounded range spans more than one calendar bucket', () => {
+    expect(hasRoundedOffset(textToTimeRange('-7d/d to -1d/d'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('-1M/M to -1d/d'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('-7d to -1d', { roundRelativeTime: true }))).toBe(true);
+  });
+
   it('is false without rounding, for named ranges, and for absolute bounds', () => {
     expect(hasRoundedOffset(textToTimeRange('-1y'))).toBe(false);
-    expect(hasRoundedOffset(textToTimeRange('today'))).toBe(false);
     expect(hasRoundedOffset(textToTimeRange('now/w to now'))).toBe(false);
     expect(hasRoundedOffset(textToTimeRange('2024-01-01 to 2024-02-01'))).toBe(false);
+  });
+
+  it('is false for whole calendar buckets, however they are expressed', () => {
+    for (const named of [
+      'today',
+      'yesterday',
+      'tomorrow',
+      'this week',
+      'this month',
+      'this year',
+      'last week',
+      'last month',
+      'last year',
+      'next week',
+    ]) {
+      expect(hasRoundedOffset(textToTimeRange(named))).toBe(false);
+    }
+
+    expect(hasRoundedOffset({ start: 'now-1d/d', end: 'now-1d/d' })).toBe(false);
+    expect(hasRoundedOffset({ start: 'now-3M/M', end: 'now-3M/M' })).toBe(false);
+  });
+
+  it('is true for a bucket rounded to a unit other than its own offset', () => {
+    expect(hasRoundedOffset({ start: 'now-1y/d', end: 'now-1y/d' })).toBe(true);
+    expect(hasRoundedOffset({ start: 'now-1d/h', end: 'now-1d/h' })).toBe(true);
   });
 });
 

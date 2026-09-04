@@ -477,6 +477,8 @@ describe('DateRangePickerControl', () => {
             { start: 'now-7d/d', end: 'now', label: 'Last 7 days' },
             { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
             { start: 'now/d', end: 'now/d', label: 'Today' },
+            { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
+            { start: 'now-1w/w', end: 'now-1w/w', label: 'Last week' },
           ]}
         />
       );
@@ -486,14 +488,18 @@ describe('DateRangePickerControl', () => {
 
       const rounded = screen.getByTestId('dateRangePickerPresetItem-Last_7_days');
       const plain = screen.getByTestId('dateRangePickerPresetItem-Last_15_minutes');
-      const named = screen.getByTestId('dateRangePickerPresetItem-Today');
       expect(within(rounded).getByTestId('dateRangePickerPresetRoundedSuffix')).toBeInTheDocument();
       expect(
         within(plain).queryByTestId('dateRangePickerPresetRoundedSuffix')
       ).not.toBeInTheDocument();
-      expect(
-        within(named).queryByTestId('dateRangePickerPresetRoundedSuffix')
-      ).not.toBeInTheDocument();
+
+      for (const bucket of ['Today', 'Yesterday', 'Last_week']) {
+        expect(
+          within(screen.getByTestId(`dateRangePickerPresetItem-${bucket}`)).queryByTestId(
+            'dateRangePickerPresetRoundedSuffix'
+          )
+        ).not.toBeInTheDocument();
+      }
 
       fireEvent.keyDown(input, { key: 'Escape' });
       await waitForPopoverClose();
@@ -518,8 +524,13 @@ describe('DateRangePickerControl', () => {
       expect(screen.queryByTestId('dateRangePickerRoundedSuffix')).not.toBeInTheDocument();
       unmount();
 
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="today" />);
-      expect(screen.queryByTestId('dateRangePickerRoundedSuffix')).not.toBeInTheDocument();
+      for (const named of ['today', 'yesterday', 'last week', 'last year']) {
+        const rendered = renderWithEuiTheme(
+          <DateRangePicker {...defaultProps} defaultValue={named} />
+        );
+        expect(screen.queryByTestId('dateRangePickerRoundedSuffix')).not.toBeInTheDocument();
+        rendered.unmount();
+      }
     });
 
     it('keeps "(rounded)" out of the input and the saved preset label', async () => {
