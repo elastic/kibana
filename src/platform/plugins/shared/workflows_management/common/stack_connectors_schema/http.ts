@@ -16,6 +16,7 @@ import {
   HttpFormDataFieldSchema,
   HttpMethodSchema,
   HttpRequestBodySchema,
+  QueryParamValueSchema,
 } from '@kbn/connector-schemas/http/schemas/v1';
 import { z } from '@kbn/zod/v4';
 
@@ -35,7 +36,7 @@ export const HttpParamsSchema = z.object({
   form_data: HttpFormDataFieldSchema.optional().describe(
     'The form data to send in the request. Can be a JSON object with the field name as the key and the field value as the value. Supports utf8 (default) and base64 encoding.'
   ),
-  query: z.record(z.string(), z.string()).optional(),
+  query: z.record(z.string(), QueryParamValueSchema).optional(),
   headers: z.record(z.string(), z.string()).optional(),
   fetcher: z
     .object({
