@@ -11,12 +11,15 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CustomContentRendererServices } from '@kbn/custom-content-renderer';
 
 /**
  * Services required to render Agent Builder visualizations. Passed explicitly by
  * consumers so the package stays decoupled from any single plugin's Kibana
  * context shape. `embeddable` powers the Vega renderer (a by-value visualize
  * embeddable with "save to dashboard"); the Lens renderers ignore it.
+ * `customContent` is read only by the custom content renderer, which fetches its
+ * own ES|QL rows instead of going through Lens.
  */
 export interface VisualizationServices {
   application: ApplicationStart;
@@ -25,4 +28,5 @@ export interface VisualizationServices {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   embeddable: EmbeddableStart;
+  customContent: CustomContentRendererServices;
 }

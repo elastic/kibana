@@ -13,10 +13,16 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   VISUALIZATION_ATTACHMENT_TYPE,
+  isCustomContentVisualization,
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
-import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
+import {
+  ToolResultType,
+  SupportedChartType,
+  type VisualizationResultData,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import {
   buildLensConfig,
   buildVegaConfig,
@@ -26,12 +32,15 @@ import {
 
 /**
  * Pull the prior Lens config out of an existing attachment, when it is a Lens
- * visualization. Returns null for Vega attachments or unparseable data.
+ * visualization. Returns null for every other renderer or unparseable data.
+ *
+ * Checked positively rather than as "not Vega": a custom content payload read as
+ * a Lens config would be handed to the Lens builder as an existing chart.
  */
 const getExistingLensConfig = (
   data: VisualizationAttachmentData | undefined
 ): VisualizationConfig | null => {
-  if (!data || data.renderer === 'vega') {
+  if (!data || (data.renderer ?? 'lens') !== 'lens') {
     return null;
   }
   const candidate = data.visualization;
@@ -44,6 +53,13 @@ const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): str
   }
   const candidate = data.visualization?.spec;
   return typeof candidate === 'string' ? candidate : undefined;
+};
+
+const getExistingTemplate = (data: VisualizationAttachmentData | undefined): string | undefined => {
+  if (!data || !isCustomContentVisualization(data)) {
+    return undefined;
+  }
+  return data.visualization.template || undefined;
 };
 
 const createVisualizationSchema = z
@@ -64,10 +80,10 @@ const createVisualizationSchema = z
         '(optional) ID of an existing visualization attachment to update. The attachment must exist. Omit renderer when updating because the existing visualization determines it.'
       ),
     renderer: z
-      .enum(['lens', 'vega'])
+      .enum(['lens', 'vega', 'custom_content'])
       .optional()
       .describe(
-        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Omit this field when updating an existing attachment; edits keep the existing renderer.'
+        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Use "custom_content" only when neither chart grammar fits — HTML/CSS layouts such as KPI scorecards with status badges, health boards, or panels mixing narrative text with live values. Omit this field when updating an existing attachment; edits keep the existing renderer.'
       ),
     chartType: z
       .nativeEnum(SupportedChartType)
@@ -80,7 +96,7 @@ const createVisualizationSchema = z
       .max(4096)
       .optional()
       .describe(
-        '(optional) An ES|QL query. If not provided, the tool will automatically generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
+        '(optional) An ES|QL query. For "lens" and "vega", the tool generates the query when this is omitted. For "custom_content" it is NOT generated for you: pass a query built with the generate_esql tool when the panel needs live data, or omit it for static content. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
       ),
     time_range: z
       .object({
@@ -122,7 +138,9 @@ const createVisualizationSchema = z
       });
     }
 
-    const isNewLensVisualization = !ctx.value.attachment_id && ctx.value.renderer !== 'vega';
+    // Checked positively: "not Vega" would demand a chartType for custom content too.
+    const isNewLensVisualization =
+      !ctx.value.attachment_id && (ctx.value.renderer ?? 'lens') === 'lens';
 
     if (isNewLensVisualization && !ctx.value.chartType) {
       ctx.issues.push({
@@ -202,19 +220,53 @@ Ground first: make sure the target index exists and every field you reference is
         // Step 2: Resolve the renderer from the caller's choice. Edits keep the
         // existing attachment's renderer; otherwise honor the explicit `renderer`
         // param and default to Lens (the common case) when it is omitted.
+        // An attachment with no discriminator predates the renderer field and is
+        // implicitly Lens, so the fallback stays Lens — but each renderer is matched
+        // explicitly rather than inferred from "not Vega".
         let renderer: VisualizationRenderer;
         if (existingData) {
-          renderer = existingData.renderer === 'vega' ? 'vega' : 'lens';
+          renderer = existingData.renderer ?? 'lens';
         } else {
           renderer = requestedRenderer ?? 'lens';
         }
 
         // Step 3: Generate the spec/config for the chosen renderer and assemble
-        // the unified attachment data. `chart_type` is narrowed to
-        // SupportedChartType so the same object also satisfies the tool result.
-        let visualizationData: VisualizationAttachmentData & { chart_type?: SupportedChartType };
+        // the unified attachment data. The chart type is kept alongside rather than
+        // read back off the payload, so the tool result gets it already narrowed to
+        // SupportedChartType.
+        let visualizationData: VisualizationAttachmentData;
+        let selectedChartTypeForResult: SupportedChartType | undefined;
 
-        if (renderer === 'vega') {
+        if (renderer === 'custom_content') {
+          // The template is generated here rather than written by the model: the model
+          // supplies plain-English intent and an optional ES|QL query, and never sees or
+          // authors the markup. Same resolver the dashboard path uses.
+          const resolveTemplate = createCustomContentTemplateResolver({
+            modelProvider,
+            esClient,
+            logger,
+          });
+          const existingTemplate = getExistingTemplate(existingData);
+          const existingEsql = existingData?.esql;
+          // Sampling the schema is only worth a round trip when the query is actually
+          // changing; a style-only edit refines the existing template in place.
+          const isQueryChanging = esql !== undefined && esql !== existingEsql;
+          const mergedEsql = esql ?? existingEsql;
+
+          const template = await resolveTemplate({
+            prompt: nlQuery,
+            esqlQuery: isQueryChanging ? mergedEsql : undefined,
+            existingTemplate,
+            hasExistingQuery: !isQueryChanging && Boolean(mergedEsql),
+          });
+
+          visualizationData = {
+            renderer: 'custom_content',
+            query: nlQuery,
+            visualization: { template },
+            ...(mergedEsql ? { esql: mergedEsql } : {}),
+          };
+        } else if (renderer === 'vega') {
           const existingSpec = getExistingVegaSpec(existingData);
           const { spec, title, esqlQuery } = await buildVegaConfig({
             nlQuery,
@@ -257,6 +309,7 @@ Ground first: make sure the target index exists and every field you reference is
             chart_type: selectedChartType,
             esql: esqlQuery,
           };
+          selectedChartTypeForResult = selectedChartType;
         }
 
         if (requestedTimeRange) {
@@ -325,18 +378,36 @@ Ground first: make sure the target index exists and every field you reference is
         // Build the tool result from the attachment data, minus the echoed
         // natural-language `query` (the model already has it; the result type
         // does not carry it).
-        const { query: _query, ...visualizationResult } = visualizationData;
+        const attachmentRef = {
+          attachment_id: resultAttachmentId,
+          ...(resultVersion !== undefined && { version: resultVersion }),
+        };
+
+        // Custom content returns no template: it can run to several KB of markup, and
+        // the agent only ever needs the attachment id to render or update it.
+        const resultData: VisualizationResultData = isCustomContentVisualization(visualizationData)
+          ? {
+              renderer: 'custom_content',
+              visualization: { prompt: nlQuery },
+              ...(visualizationData.esql ? { esql: visualizationData.esql } : {}),
+              ...(visualizationData.time_range && { time_range: visualizationData.time_range }),
+              ...attachmentRef,
+            }
+          : {
+              renderer: visualizationData.renderer,
+              visualization: visualizationData.visualization,
+              esql: visualizationData.esql,
+              ...(selectedChartTypeForResult && { chart_type: selectedChartTypeForResult }),
+              ...(visualizationData.time_range && { time_range: visualizationData.time_range }),
+              ...attachmentRef,
+            };
 
         return {
           results: [
             {
               type: ToolResultType.visualization,
               tool_result_id: getToolResultId(),
-              data: {
-                ...visualizationResult,
-                attachment_id: resultAttachmentId,
-                ...(resultVersion !== undefined && { version: resultVersion }),
-              },
+              data: resultData,
             },
           ],
         };

@@ -7,7 +7,13 @@
 
 export { VISUALIZATION_ATTACHMENT_TYPE, MAX_VEGA_SPEC_LENGTH } from './constants';
 
-export type { VisualizationAttachmentData, VisualizationRenderer } from './visualization_types';
+export type {
+  VisualizationAttachmentData,
+  ChartVisualizationAttachmentData,
+  CustomContentVisualizationAttachmentData,
+  VisualizationRenderer,
+} from './visualization_types';
+export { isCustomContentVisualization } from './visualization_types';
 
 export {
   buildVegaSavedVis,

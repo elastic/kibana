@@ -13,6 +13,7 @@ import {
   buildVegaConfig,
   selectDefaultTimeRange,
 } from '@kbn/agent-builder-visualizations-server';
+import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { createVisualizationTool } from './create_visualization';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
@@ -21,9 +22,15 @@ jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   selectDefaultTimeRange: jest.fn(),
 }));
 
+jest.mock('@kbn/custom-content-server', () => ({
+  createCustomContentTemplateResolver: jest.fn(),
+}));
+
 const mockBuildLens = buildLensConfig as jest.Mock;
 const mockBuildVega = buildVegaConfig as jest.Mock;
 const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
+const mockCreateTemplateResolver = createCustomContentTemplateResolver as jest.Mock;
+const mockResolveTemplate = jest.fn();
 
 const createLogger = (): Logger =>
   ({
@@ -77,6 +84,12 @@ describe('createVisualizationTool schema', () => {
     ).toBe(true);
 
     expect(schema.safeParse({ query: 'errors over time' }).success).toBe(false);
+  });
+
+  it('allows a new custom content visualization without chartType', () => {
+    expect(
+      schema.safeParse({ query: 'a status board per host', renderer: 'custom_content' }).success
+    ).toBe(true);
   });
 
   it('allows a new Vega visualization without chartType', () => {
@@ -171,6 +184,8 @@ describe('createVisualizationTool handler', () => {
       to: 'now',
       mode: 'relative',
     });
+    mockResolveTemplate.mockResolvedValue('<div>{{ row["host"].value }}</div>');
+    mockCreateTemplateResolver.mockReturnValue(mockResolveTemplate);
   });
 
   it('builds a Lens visualization by default and persists it', async () => {
@@ -445,5 +460,123 @@ describe('createVisualizationTool handler', () => {
     const [{ data }] = result.results;
     expect(data.message).toContain('Failed to create visualization:');
     expect(data.message).not.toContain('Could not find an index matching');
+  });
+  describe('custom content', () => {
+    it('generates the template server-side and persists it under visualization.template', async () => {
+      const { result, attachments } = await runHandler({
+        query: 'a status board per host',
+        renderer: 'custom_content',
+        esql: 'FROM logs | STATS count() BY host',
+      });
+
+      expect(mockBuildLens).not.toHaveBeenCalled();
+      expect(mockBuildVega).not.toHaveBeenCalled();
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt: 'a status board per host',
+          esqlQuery: 'FROM logs | STATS count() BY host',
+        })
+      );
+
+      expect(attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: VISUALIZATION_ATTACHMENT_TYPE,
+          data: expect.objectContaining({
+            renderer: 'custom_content',
+            visualization: { template: '<div>{{ row["host"].value }}</div>' },
+            esql: 'FROM logs | STATS count() BY host',
+          }),
+        })
+      );
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.visualization);
+      expect(data.renderer).toBe('custom_content');
+      expect(data.attachment_id).toBe('att-new');
+    });
+
+    // The whole point of the custom content result shape: several KB of generated
+    // markup must not be echoed back into the model's context.
+    it('does not return the template in the tool result', async () => {
+      const { result } = await runHandler({
+        query: 'a status board per host',
+        renderer: 'custom_content',
+        esql: 'FROM logs | STATS count() BY host',
+      });
+
+      const [{ data }] = result.results;
+      expect(data.visualization).toEqual({ prompt: 'a status board per host' });
+      expect(JSON.stringify(data)).not.toContain('row["host"]');
+    });
+
+    it('persists a static panel with no esql', async () => {
+      const { result, attachments } = await runHandler({
+        query: 'a welcome banner',
+        renderer: 'custom_content',
+      });
+
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ prompt: 'a welcome banner', esqlQuery: undefined })
+      );
+      expect(attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.not.objectContaining({ esql: expect.anything() }),
+        })
+      );
+
+      const [{ data }] = result.results;
+      expect(data.esql).toBeUndefined();
+    });
+
+    it('keeps the custom content renderer when updating an existing attachment', async () => {
+      const attachments = createAttachments();
+      attachments.getAttachmentRecord.mockReturnValue({
+        id: 'att-1',
+        current_version: 1,
+        versions: [
+          {
+            version: 1,
+            data: {
+              renderer: 'custom_content',
+              query: 'a status board per host',
+              visualization: { template: '<div>old</div>' },
+              esql: 'FROM logs | STATS count() BY host',
+            },
+          },
+        ],
+      });
+
+      const { result } = await runHandler(
+        { query: 'use a darker background', attachment_id: 'att-1' },
+        { attachments }
+      );
+
+      expect(mockBuildLens).not.toHaveBeenCalled();
+      // A style-only edit refines the existing template rather than re-sampling the query.
+      expect(mockResolveTemplate).toHaveBeenCalledWith({
+        prompt: 'use a darker background',
+        esqlQuery: undefined,
+        existingTemplate: '<div>old</div>',
+        hasExistingQuery: true,
+      });
+
+      const [{ data }] = result.results;
+      expect(data.renderer).toBe('custom_content');
+      expect(data.attachment_id).toBe('att-1');
+    });
+
+    it('reports a template generation failure as an error result', async () => {
+      mockResolveTemplate.mockRejectedValue(new Error('ES|QL query is invalid'));
+
+      const { result } = await runHandler({
+        query: 'a status board per host',
+        renderer: 'custom_content',
+        esql: 'FROM nope',
+      });
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.error);
+      expect(data.message).toContain('ES|QL query is invalid');
+    });
   });
 });
