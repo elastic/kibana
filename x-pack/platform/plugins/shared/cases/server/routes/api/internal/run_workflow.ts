@@ -15,7 +15,9 @@ import {
   INTERNAL_CASE_WORKFLOW_RUN_URL,
   MAX_CASES_PER_WORKFLOW_RUN,
   MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
+  MAX_OBSERVABLES_PER_CASE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../../common/constants';
 import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
 import { createCasesRoute } from '../create_cases_route';
@@ -51,6 +53,14 @@ export const runCaseWorkflowBodySchema = schema.object({
         type: schema.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
         caseId: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
         observableId: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+      }),
+      schema.object({
+        type: schema.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
+        caseId: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+        observableIds: schema.arrayOf(
+          schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+          { minSize: 1, maxSize: MAX_OBSERVABLES_PER_CASE }
+        ),
       }),
       schema.object({
         type: schema.literal(ALERT_WORKFLOW_ORIGIN_TYPE),

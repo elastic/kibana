@@ -45,6 +45,7 @@ import {
   NO_COLLAPSIBLE_ATTACHMENTS,
 } from './translations';
 import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
+import { CaseAttachmentWorkflowProvider } from '../../workflows/case_attachment_workflow_context';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
@@ -331,31 +332,33 @@ export const CaseViewAttachments = ({
             body={<p>{NO_SEARCH_RESULTS_BODY}</p>}
           />
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="m">
-            {attachmentSections.map(({ id, label, count, Children }) => (
-              <AttachmentAccordion
-                key={id}
-                id={id}
-                title={label}
-                count={count}
-                isOpen={!collapsedAttachmentIds.has(id)}
-                onToggle={(isOpen) => onAttachmentToggle(id, isOpen)}
-              >
-                <Children caseData={authorFilteredCaseData} searchTerm={searchTerm} />
-              </AttachmentAccordion>
-            ))}
-            {hasVisibleObservables && (
-              <CaseViewObservables
-                caseData={caseData}
-                observables={filteredObservables}
-                isLoading={isLoadingObservables}
-                searchTerm={searchTerm}
-                onUpdateField={onUpdateField}
-                isOpen={!collapsedAttachmentIds.has(OBSERVABLES_FILTER_ID)}
-                onToggle={(isOpen) => onAttachmentToggle(OBSERVABLES_FILTER_ID, isOpen)}
-              />
-            )}
-          </EuiFlexGroup>
+          <CaseAttachmentWorkflowProvider caseId={caseData.id}>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              {attachmentSections.map(({ id, label, count, Children }) => (
+                <AttachmentAccordion
+                  key={id}
+                  id={id}
+                  title={label}
+                  count={count}
+                  isOpen={!collapsedAttachmentIds.has(id)}
+                  onToggle={(isOpen) => onAttachmentToggle(id, isOpen)}
+                >
+                  <Children caseData={authorFilteredCaseData} searchTerm={searchTerm} />
+                </AttachmentAccordion>
+              ))}
+              {hasVisibleObservables && (
+                <CaseViewObservables
+                  caseData={caseData}
+                  observables={filteredObservables}
+                  isLoading={isLoadingObservables}
+                  searchTerm={searchTerm}
+                  onUpdateField={onUpdateField}
+                  isOpen={!collapsedAttachmentIds.has(OBSERVABLES_FILTER_ID)}
+                  onToggle={(isOpen) => onAttachmentToggle(OBSERVABLES_FILTER_ID, isOpen)}
+                />
+              )}
+            </EuiFlexGroup>
+          </CaseAttachmentWorkflowProvider>
         )}
       </EuiFlexItem>
     </>

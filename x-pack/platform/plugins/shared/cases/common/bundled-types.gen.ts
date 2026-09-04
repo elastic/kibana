@@ -1958,7 +1958,13 @@ export const PayloadWorkflow = lazySchema(() =>
         /**
          * The origin type.
          */
-        type: z.enum(['cases.case', 'cases.observable', 'cases.alert', 'cases.alerts']),
+        type: z.enum([
+          'cases.case',
+          'cases.observable',
+          'cases.observables',
+          'cases.alert',
+          'cases.alerts',
+        ]),
         /**
          * The primary identifier of the case, observable, or alert from which the workflow was triggered (`caseId`, `observableId`, or `alertId`).
          */

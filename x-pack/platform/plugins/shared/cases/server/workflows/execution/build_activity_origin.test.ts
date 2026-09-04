@@ -9,6 +9,7 @@ import { buildActivityOrigin } from './build_activity_origin';
 import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
@@ -204,6 +205,34 @@ describe('buildActivityOrigin', () => {
       expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual({
         type: ALERT_WORKFLOW_ORIGIN_TYPE,
         id: 'missing',
+      });
+    });
+  });
+
+  describe('cases.observables origin', () => {
+    it('maps the API origin to the persisted activity shape with count', () => {
+      const origin = {
+        type: OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'case-1',
+        observableIds: ['obs-1', 'obs-2'],
+      };
+      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual({
+        type: OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
+        id: 'case-1',
+        count: 2,
+      });
+    });
+
+    it('records count for a single observable in the bulk selection', () => {
+      const origin = {
+        type: OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'case-1',
+        observableIds: ['obs-1'],
+      };
+      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual({
+        type: OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
+        id: 'case-1',
+        count: 1,
       });
     });
   });

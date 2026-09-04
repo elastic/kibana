@@ -12,6 +12,7 @@ import {
   ALERTS_WORKFLOW_ORIGIN_TYPE,
   MAX_ALERTS_PER_CASE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants';
 import type { Case } from '../../../common/types/domain';
 import { getRecord } from './alert_attachment_utils';
@@ -102,6 +103,21 @@ export const validateOrigin = ({
     throw Boom.badRequest(
       `Observable "${origin.observableId}" does not belong to case "${caseId}".`
     );
+  }
+  if (origin.type === OBSERVABLES_WORKFLOW_ORIGIN_TYPE) {
+    const observableIdSet = new Set(theCase.observables.map(({ id }) => id));
+    const seen = new Set<string>();
+    for (const observableId of origin.observableIds) {
+      if (seen.has(observableId)) {
+        throw Boom.badRequest(
+          `observableIds must not contain duplicates (found "${observableId}").`
+        );
+      }
+      seen.add(observableId);
+      if (!observableIdSet.has(observableId)) {
+        throw Boom.badRequest(`Observable "${observableId}" does not belong to case "${caseId}".`);
+      }
+    }
   }
 
   // Step 2 — alert-membership check: applied whenever alertIds appear in inputs,

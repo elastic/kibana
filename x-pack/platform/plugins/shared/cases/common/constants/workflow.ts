@@ -14,12 +14,14 @@ export const MAX_WORKFLOW_INPUTS_BYTES = 1_000_000 as const;
 
 export const CASE_WORKFLOW_ORIGIN_TYPE = 'cases.case' as const;
 export const OBSERVABLE_WORKFLOW_ORIGIN_TYPE = 'cases.observable' as const;
+export const OBSERVABLES_WORKFLOW_ORIGIN_TYPE = 'cases.observables' as const;
 export const ALERT_WORKFLOW_ORIGIN_TYPE = 'cases.alert' as const;
 export const ALERTS_WORKFLOW_ORIGIN_TYPE = 'cases.alerts' as const;
 
 export const CASE_WORKFLOW_RUN_ORIGIN_TYPES = [
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
 ] as const;
