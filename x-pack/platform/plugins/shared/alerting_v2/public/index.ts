@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Container, ContainerModule } from 'inversify';
-import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
+import { OnSetup, PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
@@ -30,9 +30,13 @@ import { RuleTemplatesApi } from './services/rule_templates_api';
 import { UserCapabilities } from './services/user_capabilities';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
+import {
+  applyRuleBuilderRegistrations,
+  queueRuleBuilderRegistration,
+} from './lib/rule_builder_registrations';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
-import type { AlertingV2PublicStart } from './types';
+import type { AlertingV2PublicSetup, AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
 import {
@@ -69,7 +73,9 @@ const lazyPageWithContainer = (
   }>,
   container: Container
 ): React.ComponentType<AlertingV2PageProps> => {
-  const LazyComponent = React.lazy(loader);
+  // Builders contributed by other plugins must be in the registry before the create and edit
+  // flows read it.
+  const LazyComponent = React.lazy(() => applyRuleBuilderRegistrations().then(loader));
   return (props: AlertingV2PageProps) =>
     React.createElement(
       React.Suspense,
@@ -82,6 +88,7 @@ const lazyPageWithContainer = (
 };
 
 export type {
+  AlertingV2PublicSetup,
   AlertingV2PublicStart,
   CreateRuleOptionsFlyoutLegacyItem,
   AlertingV2PageProps,
@@ -107,6 +114,9 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
+  bind(Setup).toConstantValue({
+    registerRuleBuilder: queueRuleBuilderRegistration,
+  } satisfies AlertingV2PublicSetup);
   bind(Start)
     .toDynamicValue(({ get }) => {
       const container = get(Container);
