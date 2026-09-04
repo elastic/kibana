@@ -65,6 +65,7 @@ export class NightshiftInvestigationsPlugin
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
+  private actionsStart?: NightshiftInvestigationsStartDeps['actions'];
   private savedObjects?: CoreStart['savedObjects'];
   private sandboxConnectionManager?: SandboxConnectionManager;
 
@@ -106,6 +107,12 @@ export class NightshiftInvestigationsPlugin
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
           logger: this.logger.get('sandbox_bash_tool'),
+          // this.actionsStart is set in start(); the factory is called at request time so
+          // the reference will be populated before any tool handler fires.
+          getActionsClient: (req) =>
+            this.actionsStart
+              ? this.actionsStart.getActionsClientWithRequest(req)
+              : Promise.reject(new Error('Actions plugin not available for sandbox seeding')),
         });
         this.sandboxConnectionManager = connectionManager;
         const sandboxLogger = this.logger.get('sandbox_bash_tool');
@@ -196,6 +203,7 @@ export class NightshiftInvestigationsPlugin
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+    this.actionsStart = plugins.actions;
     this.savedObjects = coreStart.savedObjects;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the

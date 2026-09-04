@@ -65,13 +65,15 @@ export const createSandboxWriteFileTool = ({
     try {
       const parentDir = path.posix.dirname(resolvedPath);
       if (parentDir && parentDir !== '.' && parentDir !== '/') {
-        await connectionManager.mkdirs(conversationId, [parentDir]);
+        await connectionManager.mkdirs(conversationId, [parentDir], context.request);
       }
 
       const contentBuf = Buffer.from(params.content, 'utf8');
-      const writeResult = await connectionManager.writeFiles(conversationId, [
-        { path: resolvedPath, content: contentBuf },
-      ]);
+      const writeResult = await connectionManager.writeFiles(
+        conversationId,
+        [{ path: resolvedPath, content: contentBuf }],
+        context.request
+      );
 
       if (!writeResult[0]?.success) {
         return {

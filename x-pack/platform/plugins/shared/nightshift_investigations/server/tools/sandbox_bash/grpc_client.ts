@@ -7,9 +7,11 @@
 
 import { promisify } from 'util';
 import * as grpc from '@grpc/grpc-js';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { NightshiftInvestigationsConfig } from '../../config';
 import { ContainerManagerClient } from './container_manager_client';
+import { seedSandbox } from './seed_sandbox';
 
 // ---------------------------------------------------------------------------
 // Protobuf encode/decode for SandboxService RPCs
@@ -512,7 +514,7 @@ const sandboxServiceDef: grpc.ServiceDefinition<any> = {
 
 const SandboxServiceConstructor = grpc.makeClientConstructor(sandboxServiceDef, 'SandboxService');
 
-class SandboxGrpcClient {
+export class SandboxGrpcClient {
   private readonly client: grpc.Client;
 
   constructor({
@@ -629,14 +631,24 @@ export class SandboxConnectionManager {
   private readonly containerManager: ContainerManagerClient;
   private readonly clientCertPem: Buffer;
   private readonly clientKeyPem: Buffer;
+  private readonly getActionsClient?: (request: KibanaRequest) => Promise<ActionsClient>;
   /** Pending or resolved per-conversation sandbox clients. */
   private readonly pool = new Map<string, Promise<SandboxGrpcClient>>();
   /** Called after a new sandbox is allocated so workspace can be restored. */
   private restoreCallback?: (conversationId: string) => Promise<void>;
 
-  constructor({ config, logger }: { config: SandboxConfig; logger: Logger }) {
+  constructor({
+    config,
+    logger,
+    getActionsClient,
+  }: {
+    config: SandboxConfig;
+    logger: Logger;
+    getActionsClient?: (request: KibanaRequest) => Promise<ActionsClient>;
+  }) {
     this.config = config;
     this.logger = logger;
+    this.getActionsClient = getActionsClient;
     this.clientCertPem = Buffer.from(config.client_cert);
     this.clientKeyPem = Buffer.from(config.client_key);
     this.containerManager = new ContainerManagerClient({
@@ -648,34 +660,48 @@ export class SandboxConnectionManager {
     });
   }
 
-  async runCommand(conversationId: string, params: RunCommandParams): Promise<RunCommandResult> {
-    const client = await this.getOrCreateClient(conversationId);
+  async runCommand(
+    conversationId: string,
+    params: RunCommandParams,
+    request: KibanaRequest
+  ): Promise<RunCommandResult> {
+    const client = await this.getOrCreateClient(conversationId, request);
     return client.runCommand(params);
   }
 
-  async statFiles(conversationId: string, paths: string[]): Promise<FileMetadata[]> {
-    const client = await this.getOrCreateClient(conversationId);
+  async statFiles(
+    conversationId: string,
+    paths: string[],
+    request: KibanaRequest
+  ): Promise<FileMetadata[]> {
+    const client = await this.getOrCreateClient(conversationId, request);
     return client.statFiles(paths);
   }
 
   async readFiles(
     conversationId: string,
-    requests: Array<{ path: string; maxReadBytes?: number }>
+    requests: Array<{ path: string; maxReadBytes?: number }>,
+    request: KibanaRequest
   ): Promise<ReadFileResult[]> {
-    const client = await this.getOrCreateClient(conversationId);
+    const client = await this.getOrCreateClient(conversationId, request);
     return client.readFiles(requests);
   }
 
   async writeFiles(
     conversationId: string,
-    requests: Array<{ path: string; content: Buffer }>
+    requests: Array<{ path: string; content: Buffer }>,
+    request: KibanaRequest
   ): Promise<WriteFileResult[]> {
-    const client = await this.getOrCreateClient(conversationId);
+    const client = await this.getOrCreateClient(conversationId, request);
     return client.writeFiles(requests);
   }
 
-  async mkdirs(conversationId: string, paths: string[]): Promise<boolean[]> {
-    const client = await this.getOrCreateClient(conversationId);
+  async mkdirs(
+    conversationId: string,
+    paths: string[],
+    request: KibanaRequest
+  ): Promise<boolean[]> {
+    const client = await this.getOrCreateClient(conversationId, request);
     return client.mkdirs(paths);
   }
 
@@ -684,7 +710,9 @@ export class SandboxConnectionManager {
     destinationUrl: string,
     targetPath: string
   ): Promise<StateOperationResult> {
-    const client = await this.getOrCreateClient(conversationId);
+    // backupState and restoreState are called internally (from workspace manager / restore callback)
+    // and don't need a request — the client is already in the pool by the time they run.
+    const client = await this.getOrCreateClientFromPool(conversationId);
     return client.backupState(destinationUrl, targetPath);
   }
 
@@ -693,7 +721,7 @@ export class SandboxConnectionManager {
     sourceUrl: string,
     targetPath: string
   ): Promise<StateOperationResult> {
-    const client = await this.getOrCreateClient(conversationId);
+    const client = await this.getOrCreateClientFromPool(conversationId);
     return client.restoreState(sourceUrl, targetPath);
   }
 
@@ -701,11 +729,21 @@ export class SandboxConnectionManager {
     this.restoreCallback = cb;
   }
 
-  private getOrCreateClient(conversationId: string): Promise<SandboxGrpcClient> {
+  /** Returns the pooled client (must already exist). Used by internal callers that run after allocation. */
+  private async getOrCreateClientFromPool(conversationId: string): Promise<SandboxGrpcClient> {
+    const existing = this.pool.get(conversationId);
+    if (existing) return existing;
+    throw new Error(`No connection established for conversation ${conversationId}`);
+  }
+
+  private getOrCreateClient(
+    conversationId: string,
+    request: KibanaRequest
+  ): Promise<SandboxGrpcClient> {
     const existing = this.pool.get(conversationId);
     if (existing) return existing;
 
-    const promise = this.allocateSandbox(conversationId).catch((err) => {
+    const promise = this.allocateSandbox(conversationId, request).catch((err) => {
       // Remove failed promise so the next call retries.
       this.pool.delete(conversationId);
       throw err;
@@ -715,7 +753,10 @@ export class SandboxConnectionManager {
     return promise;
   }
 
-  private async allocateSandbox(conversationId: string): Promise<SandboxGrpcClient> {
+  private async allocateSandbox(
+    conversationId: string,
+    request: KibanaRequest
+  ): Promise<SandboxGrpcClient> {
     this.logger.debug(`Allocating sandbox for conversation ${conversationId}`);
 
     const response = await this.containerManager.getContainer({
@@ -736,9 +777,25 @@ export class SandboxConnectionManager {
       sandboxCertPem: response.sandbox_public_cert,
     });
 
+    // Register the client in the pool before invoking the restore callback.
+    // The callback calls restoreState → getOrCreateClientFromPool, which would otherwise
+    // await the still-pending allocateSandbox promise and deadlock.
+    this.pool.set(conversationId, Promise.resolve(client));
+
     if (this.restoreCallback) {
       await this.restoreCallback(conversationId).catch((err) => {
         this.logger.warn(`Workspace restore failed for conversation ${conversationId}: ${err}`);
+      });
+    }
+
+    if (this.getActionsClient) {
+      await seedSandbox({
+        client,
+        request,
+        getActionsClient: this.getActionsClient,
+        logger: this.logger,
+      }).catch((err) => {
+        this.logger.warn(`Sandbox seeding failed: ${err.message}`);
       });
     }
 

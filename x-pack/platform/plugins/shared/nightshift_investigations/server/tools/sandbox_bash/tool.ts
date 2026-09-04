@@ -77,17 +77,24 @@ export const createSandboxBashTool = ({
 
     try {
       // Prepend the venv bin dir so `python` resolves without requiring a full path.
+      // BASH_ENV causes bash to source /workspace/.env on every non-interactive invocation,
+      // making seeded connector credentials available without explicit re-sourcing.
       const mergedEnv: Record<string, string> = {
         PATH: `/home/appuser/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`,
+        BASH_ENV: '/workspace/.env',
         ...env,
       };
 
-      const result = await connectionManager.runCommand(conversationId, {
-        command,
-        directory: working_directory,
-        env: mergedEnv,
-        timeout_seconds,
-      });
+      const result = await connectionManager.runCommand(
+        conversationId,
+        {
+          command,
+          directory: working_directory,
+          env: mergedEnv,
+          timeout_seconds,
+        },
+        context.request
+      );
 
       const { stdout, stderr, exit_code, timed_out } = result;
 

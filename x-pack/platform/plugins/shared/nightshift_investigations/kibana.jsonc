@@ -12,6 +12,7 @@
     "configPath": ["xpack", "nightshift_investigations"],
     "requiredPlugins": [],
     "optionalPlugins": [
+      "actions",
       "agentBuilder",
       "searchInferenceEndpoints",
       "spaces",

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { Connector, ConnectorWithExtraFindData, ConnectorWithSecrets } from './connector';
-export type { ConnectorType } from './connector_type';
+export type { GetWithSecretsParams } from './params';

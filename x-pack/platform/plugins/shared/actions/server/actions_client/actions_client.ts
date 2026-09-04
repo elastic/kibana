@@ -25,9 +25,10 @@ import type { AxiosInstance } from 'axios';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AuthMode } from '@kbn/connector-specs';
-import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
+import type { Connector, ConnectorWithExtraFindData, ConnectorWithSecrets } from '../application/connector/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
+import { getWithSecrets } from '../application/connector/methods/get_with_secrets';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
 import { getAuthStatus } from '../application/connector/methods/get_auth_status';
 import { getConnectorSpecAsJsonSchema } from '../application/connector/methods/get_connector_spec';
@@ -244,6 +245,13 @@ export class ActionsClient {
     throwIfSystemAction?: boolean;
   }): Promise<ActionResult> {
     return get({ context: this.context, id, throwIfSystemAction });
+  }
+
+  /**
+   * Get a connector including its decrypted secrets.
+   */
+  public async getWithSecrets({ id }: { id: string }): Promise<ConnectorWithSecrets> {
+    return getWithSecrets({ context: this.context, id });
   }
 
   /**
