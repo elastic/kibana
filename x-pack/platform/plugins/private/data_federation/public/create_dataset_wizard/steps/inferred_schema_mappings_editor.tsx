@@ -22,14 +22,19 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { FieldSourceNameChange, MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
+import type {
+  FieldSourceNameChange,
+  MappedFieldsEditorProps,
+} from '@kbn/index-management-shared-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { debounce } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { DatasetSettingsSectionAccordion } from '../../create_dataset_flyout/dataset_settings_section_accordion';
 import type { DataFederationKibanaServices } from '../../types';
 import {
   automaticFieldTypesToMappings,
@@ -140,10 +145,13 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     [isFlow396]
   );
   const { euiTheme } = useEuiTheme();
-  /** Holds the row still while the button gives way to the inline add form. */
+  /** Holds the header row still while the button gives way to the inline add form. */
   const mappedFieldsHeaderCss = css`
     min-block-size: ${euiTheme.size.xl};
   `;
+  const mappedFieldsAccordionId = useGeneratedHtmlId({
+    prefix: 'datasetWizardMappedFieldsAccordion',
+  });
   const containerRef = useRef<HTMLDivElement>(null);
   const addFieldButtonRef = useRef<HTMLElement | null>(null);
   const {
@@ -165,6 +173,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
 
   const [schemaEditorKey, setSchemaEditorKey] = useState(0);
   const [isAddFieldFormOpen, setIsAddFieldFormOpen] = useState(false);
+  const [isMappedFieldsOpen, setIsMappedFieldsOpen] = useState(true);
   const [inferredSnapshot, setInferredSnapshot] = useState<TestConfigurationPreviewField[]>([]);
   const [mappedFieldTypes, setMappedFieldTypes] = useState<Record<string, string>>(
     () => field.value ?? {}
@@ -294,6 +303,8 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   );
 
   const handleAddField = useCallback(() => {
+    // The inline form opens inside the section, so a collapsed one would swallow it.
+    setIsMappedFieldsOpen(true);
     addFieldButtonRef.current?.click();
   }, []);
 
@@ -361,19 +372,14 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
         }
       `}
     >
-      <div data-test-subj="datasetWizardMappedFields">
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          gutterSize="s"
-          css={mappedFieldsHeaderCss}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h4>{datasetWizardStrings.mappedFieldsTitle()}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+      <DatasetSettingsSectionAccordion
+        id={mappedFieldsAccordionId}
+        title={datasetWizardStrings.mappedFieldsTitle()}
+        contentLayout="plain"
+        forceState={isMappedFieldsOpen ? 'open' : 'closed'}
+        onToggle={setIsMappedFieldsOpen}
+        extraAction={
+          <div css={mappedFieldsHeaderCss}>
             {!isAddFieldFormOpen ? (
               <EuiButton
                 iconType="plusCircle"
@@ -385,9 +391,11 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
                 {datasetWizardStrings.addFieldButton()}
               </EuiButton>
             ) : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
+          </div>
+        }
+        dataTestSubj="datasetWizardMappedFieldsAccordion"
+        fieldsDataTestSubj="datasetWizardMappedFields"
+      >
         <MappedFieldsEditorComponent
           key={schemaEditorKey}
           value={mappings}
@@ -399,71 +407,72 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
           onFieldSourceNameChange={isFlow396 ? handleFieldSourceNameChange : undefined}
           onChange={onMappingsChange}
         />
-      </div>
+      </DatasetSettingsSectionAccordion>
 
-      <EuiSpacer size="xl" />
+      {/* Flow 3 9.6 offers this as a setting on the schema settings section instead. */}
+      {!isFlow396 ? (
+        <>
+          <EuiSpacer size="xl" />
 
-      <div data-test-subj="datasetWizardDynamicFields">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <div data-test-subj="datasetWizardDynamicFields">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h4>{datasetWizardStrings.dynamicFieldsTitle()}</h4>
-                </EuiTitle>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xs">
+                      <h4>{datasetWizardStrings.dynamicFieldsTitle()}</h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      compressed
+                      label={datasetWizardStrings.dynamicFieldsEnabledToggle()}
+                      checked={isDynamicEnabled}
+                      onChange={(event) => {
+                        dynamicFieldsEnabledField.onChange(event.target.checked);
+                      }}
+                      data-test-subj="datasetWizardDynamicFieldsEnabled"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  compressed
-                  label={datasetWizardStrings.dynamicFieldsEnabledToggle()}
-                  checked={isDynamicEnabled}
-                  onChange={(event) => {
-                    dynamicFieldsEnabledField.onChange(event.target.checked);
-                  }}
-                  data-test-subj="datasetWizardDynamicFieldsEnabled"
-                />
+                <EuiButton
+                  iconType="indexMapping"
+                  color="text"
+                  size="s"
+                  data-test-subj="datasetWizardInferSchema"
+                  onClick={handleInferSchema}
+                >
+                  {datasetWizardStrings.inferSchemaButton()}
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-          {!isFlow396 ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="indexMapping"
-                color="text"
-                size="s"
-                data-test-subj="datasetWizardInferSchema"
-                onClick={handleInferSchema}
-              >
-                {datasetWizardStrings.inferSchemaButton()}
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiText
-          size="s"
-          color="subdued"
-          data-test-subj={
-            isDynamicEnabled
-              ? 'datasetWizardDynamicFieldsEmpty'
-              : 'datasetWizardDynamicFieldsDisabled'
-          }
-        >
-          <p>
-            {isDynamicEnabled
-              ? isFlow396
-                ? datasetWizardStrings.dynamicFieldsEmptyFlow396()
-                : datasetWizardStrings.dynamicFieldsEmpty()
-              : datasetWizardStrings.dynamicFieldsDisabled()}
-          </p>
-        </EuiText>
-        {!isFlow396 && dynamicItems.length > 0 ? (
-          <>
             <EuiSpacer size="m" />
-            <DynamicFieldsTable items={dynamicItems} onMapField={handleMapField} />
-          </>
-        ) : null}
-      </div>
+            <EuiText
+              size="s"
+              color="subdued"
+              data-test-subj={
+                isDynamicEnabled
+                  ? 'datasetWizardDynamicFieldsEmpty'
+                  : 'datasetWizardDynamicFieldsDisabled'
+              }
+            >
+              <p>
+                {isDynamicEnabled
+                  ? datasetWizardStrings.dynamicFieldsEmpty()
+                  : datasetWizardStrings.dynamicFieldsDisabled()}
+              </p>
+            </EuiText>
+            {dynamicItems.length > 0 ? (
+              <>
+                <EuiSpacer size="m" />
+                <DynamicFieldsTable items={dynamicItems} onMapField={handleMapField} />
+              </>
+            ) : null}
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };

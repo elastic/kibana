@@ -500,7 +500,7 @@ export const datasetWizardStrings = {
 
   schemaMappingsTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingsTitle', {
-      defaultMessage: 'Schema mappings (optional)',
+      defaultMessage: 'Schema mappings',
     }),
 
   previewResultsTitle: () =>
@@ -542,7 +542,7 @@ export const datasetWizardStrings = {
 
   mappedFieldsTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldsTitle', {
-      defaultMessage: 'Mapped fields',
+      defaultMessage: 'Mapped fields (optional)',
     }),
 
   mapFieldButton: () =>
@@ -562,8 +562,8 @@ export const datasetWizardStrings = {
         'Fields that are not mapped will remain dynamic and will be inferred at query time. You can infer schema now to preview what the mapping would look like based on what is currently stored on your dataset.',
     }),
 
-  dynamicFieldsEmptyFlow396: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldsEmptyFlow396', {
+  dynamicFieldsEnabledHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldsEnabledHelp', {
       defaultMessage:
         'Fields that are not mapped will remain dynamic and will be inferred at query time.',
     }),

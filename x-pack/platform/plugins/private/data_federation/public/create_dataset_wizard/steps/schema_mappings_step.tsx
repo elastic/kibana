@@ -7,6 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useMemo } from 'react';
+import { css } from '@emotion/react';
 import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiSpacer, EuiText, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
@@ -24,6 +25,7 @@ import {
   isDatasetWizardFlow396,
 } from '../dataset_wizard_flow_variant';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
+import { DynamicFieldsSetting } from '../dynamic_fields_setting';
 import type { DatasetWizardFormValues, SchemaMappingMode } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { getSchemaMappingSettingsFieldIds } from '../schema_mapping_settings_fields';
@@ -48,6 +50,14 @@ const FORMAT_VALUES: Exclude<DatasetFormatFormValue, ''>[] = [
 
 const isKnownFormat = (value: string): value is Exclude<DatasetFormatFormValue, ''> =>
   FORMAT_VALUES.includes(value as Exclude<DatasetFormatFormValue, ''>);
+
+/**
+ * Both sections rule off every edge, so the edge they share would read as a
+ * doubled line while they sit back to back.
+ */
+const collapseSharedAccordionBorderCss = css`
+  margin-block-start: -1px;
+`;
 
 const SCHEMA_MAPPING_MODE_DESCRIPTIONS: Record<'automatic', () => string> = {
   automatic: datasetWizardStrings.schemaMappingAutomaticDescription,
@@ -154,39 +164,47 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
             : datasetWizardStrings.schemaMappingsDescription()}
         </p>
       </EuiText>
-      {isFlow396 && schemaMappingSettingsFields.length > 0 ? (
+      {isFlow396 ? (
         <>
           <EuiSpacer size="l" />
-          <DatasetSettingDefaultHintsProvider format={format} isEnabled>
-            <DatasetSettingsSectionAccordion
-              id={schemaSettingsAccordionId}
-              title={datasetWizardStrings.schemaSettingsTitle()}
-              hasPanelBackground={false}
-              initialIsOpen
-              dataTestSubj="datasetWizardSchemaSettingsAccordion"
-              fieldsDataTestSubj="datasetWizardSchemaMappingSettings"
-            >
-              <DatasetSettingsFieldsLayout
-                control={control}
-                fields={schemaMappingSettingsFields}
-                testSubjPrefix="datasetWizard"
-                columns={1}
-                rowSpacerSize="m"
-                constrainWidth={false}
-                variant="step"
-              />
-            </DatasetSettingsSectionAccordion>
-          </DatasetSettingDefaultHintsProvider>
+          <DatasetSettingsSectionAccordion
+            id={schemaSettingsAccordionId}
+            title={datasetWizardStrings.schemaSettingsTitle()}
+            contentLayout="indented"
+            initialIsOpen
+            dataTestSubj="datasetWizardSchemaSettingsAccordion"
+            fieldsDataTestSubj="datasetWizardSchemaMappingSettings"
+          >
+            <DynamicFieldsSetting control={control} />
+            {hasFormatSelected && schemaMappingSettingsFields.length > 0 ? (
+              <>
+                <EuiSpacer size="m" />
+                <DatasetSettingDefaultHintsProvider format={format} isEnabled>
+                  <DatasetSettingsFieldsLayout
+                    control={control}
+                    fields={schemaMappingSettingsFields}
+                    testSubjPrefix="datasetWizard"
+                    columns={1}
+                    rowSpacerSize="m"
+                    constrainWidth={false}
+                    variant="step"
+                  />
+                </DatasetSettingDefaultHintsProvider>
+              </>
+            ) : null}
+          </DatasetSettingsSectionAccordion>
         </>
       ) : null}
-      <EuiSpacer size="l" />
+      {isFlow396 ? null : <EuiSpacer size="l" />}
 
       {hideAwsGlueTable ? (
-        <InferredSchemaMappingsEditor
-          control={control}
-          flowVariant={flowVariant}
-          inferredFields={automaticSchemaSampleFields}
-        />
+        <div css={isFlow396 ? collapseSharedAccordionBorderCss : undefined}>
+          <InferredSchemaMappingsEditor
+            control={control}
+            flowVariant={flowVariant}
+            inferredFields={automaticSchemaSampleFields}
+          />
+        </div>
       ) : (
         <>
           <EuiButtonGroup

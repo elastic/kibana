@@ -101,7 +101,7 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
         id={commonSettingsAccordionId}
         title={commonSettingsTitle}
         borders={hasPanelBackground ? 'horizontal' : 'none'}
-        hasPanelBackground={hasPanelBackground}
+        contentLayout={hasPanelBackground ? 'panel' : 'indented'}
         initialIsOpen
         dataTestSubj={`${testSubjPrefix}Flow3CommonSettingsAccordion`}
         panelDataTestSubj={`${testSubjPrefix}Flow3CommonSettingsPanel`}
@@ -121,7 +121,7 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
         <DatasetSettingsSectionAccordion
           id={advancedSettingsAccordionId}
           title={advancedSettingsTitle}
-          hasPanelBackground={hasPanelBackground}
+          contentLayout={hasPanelBackground ? 'panel' : 'indented'}
           dataTestSubj={`${testSubjPrefix}Flow3AdvancedSettingsAccordion`}
           panelDataTestSubj={`${testSubjPrefix}Flow3AdvancedSettingsPanel`}
           fieldsDataTestSubj={`${testSubjPrefix}Flow3AdvancedSettingsFields`}

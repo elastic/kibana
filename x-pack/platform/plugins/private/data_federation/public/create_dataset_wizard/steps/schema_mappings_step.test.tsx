@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
@@ -96,7 +96,7 @@ describe('SchemaMappingsStep flow 1', () => {
   it('renders automatic and manual options for non-S3 data sources', () => {
     const { getByTestId, getByText, queryByTestId } = render(<TestHarness />);
 
-    expect(getByText('Schema mappings (optional)')).toBeInTheDocument();
+    expect(getByText('Schema mappings')).toBeInTheDocument();
     expect(getByTestId('datasetWizardSchemaMappingModeButtonGroup')).toBeInTheDocument();
     expect(getByTestId('datasetWizardSchemaMappingModeAutomatic')).toHaveAttribute(
       'aria-pressed',
@@ -162,7 +162,7 @@ describe('SchemaMappingsStep flow 2', () => {
       <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_2} />
     );
 
-    expect(getByText('Schema mappings (optional)')).toBeInTheDocument();
+    expect(getByText('Schema mappings')).toBeInTheDocument();
     expect(getByTestId('datasetWizardSchemaMappingModeButtonGroup')).toBeInTheDocument();
     expect(getByTestId('datasetWizardSchemaMappingModeAutomatic')).toHaveAttribute(
       'aria-pressed',
@@ -308,6 +308,45 @@ describe('SchemaMappingsStep flow 3 9.6', () => {
     expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
     expect(getByTestId('datasetWizardSettingsSchemaSampleSize')).toBeInTheDocument();
     expect(getByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeInTheDocument();
+  });
+
+  it('offers dynamic fields as the first schema setting and explains what it does', async () => {
+    const { getByTestId } = render(
+      <TestHarness
+        dataSources={[s3DataSource]}
+        dataSource="s3-source"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        defaultValues={{
+          ...emptyDatasetWizardFormValues(),
+          settings: {
+            ...emptyDatasetWizardFormValues().settings,
+            format: 'parquet',
+          },
+        }}
+      />
+    );
+
+    const setting = getByTestId('datasetWizardDynamicFieldsSetting');
+    const toggle = getByTestId('datasetWizardDynamicFieldsEnabled');
+
+    expect(getByTestId('datasetWizardSchemaMappingSettings')).toContainElement(setting);
+    expect(
+      setting.compareDocumentPosition(getByTestId('datasetWizardSettingsSchemaSampleSize')) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(toggle).toBeChecked();
+    expect(setting).toHaveTextContent(
+      'Fields that are not mapped will remain dynamic and will be inferred at query time.'
+    );
+
+    fireEvent.click(toggle);
+
+    await waitFor(() => {
+      expect(toggle).not.toBeChecked();
+      expect(setting).toHaveTextContent(
+        'Only mapped fields will be used. Unmapped fields will not be inferred at query time.'
+      );
+    });
   });
 
   it('groups the schema mapping settings in a section that opens by default', () => {

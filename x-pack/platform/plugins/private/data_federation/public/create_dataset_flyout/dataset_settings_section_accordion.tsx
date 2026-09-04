@@ -19,13 +19,23 @@ export const datasetSettingsAccordionButtonCss = css`
   }
 `;
 
+/**
+ * panel: the content sits in a filled panel.
+ * indented: the content sits on the page, lined up under the accordion arrow.
+ * plain: the content sits on the page at the full width of the step.
+ */
+export type DatasetSettingsSectionContentLayout = 'panel' | 'indented' | 'plain';
+
 export interface DatasetSettingsSectionAccordionProps {
   id: string;
   title: string;
   initialIsOpen?: boolean;
   borders?: EuiAccordionProps['borders'];
-  /** When false, the fields sit directly on the page instead of a filled panel. */
-  hasPanelBackground?: boolean;
+  contentLayout?: DatasetSettingsSectionContentLayout;
+  /** Sits on the header row, opposite the title, without toggling the section. */
+  extraAction?: ReactNode;
+  forceState?: EuiAccordionProps['forceState'];
+  onToggle?: (isOpen: boolean) => void;
   dataTestSubj?: string;
   panelDataTestSubj?: string;
   fieldsDataTestSubj?: string;
@@ -33,9 +43,9 @@ export interface DatasetSettingsSectionAccordionProps {
 }
 
 /**
- * A titled, collapsible section of dataset settings. Shared so that the settings
- * on the schema mappings step read as the same kind of section as the ones on the
- * additional settings step.
+ * A titled, collapsible section of dataset settings. Shared so that the sections on the
+ * schema mappings step read as the same kind of section as the ones on the additional
+ * settings step.
  */
 export const DatasetSettingsSectionAccordion: FunctionComponent<
   DatasetSettingsSectionAccordionProps
@@ -44,7 +54,10 @@ export const DatasetSettingsSectionAccordion: FunctionComponent<
   title,
   initialIsOpen = false,
   borders = 'horizontal',
-  hasPanelBackground = true,
+  contentLayout = 'panel',
+  extraAction,
+  forceState,
+  onToggle,
   dataTestSubj,
   panelDataTestSubj,
   fieldsDataTestSubj,
@@ -59,19 +72,21 @@ export const DatasetSettingsSectionAccordion: FunctionComponent<
    * on the fields rather than panel padding, so that it eats into their width
    * instead of shifting their right edge past the fields in the other sections.
    */
-  const panelProps = hasPanelBackground
-    ? ({ color: 'subdued', paddingSize: 'm' } as const)
-    : ({
-        color: 'transparent',
-        paddingSize: 'none',
-        css: css`
-          padding-block-end: ${euiTheme.size.m};
-        `,
-      } as const);
+  const panelProps =
+    contentLayout === 'panel'
+      ? ({ color: 'subdued', paddingSize: 'm' } as const)
+      : ({
+          color: 'transparent',
+          paddingSize: 'none',
+          css: css`
+            padding-block-end: ${euiTheme.size.m};
+          `,
+        } as const);
 
-  const fieldsCss = hasPanelBackground
-    ? undefined
-    : getIndentedDatasetSettingsFieldsWidthCss([euiTheme.size.l, euiTheme.size.xs]);
+  const contentCss =
+    contentLayout === 'indented'
+      ? getIndentedDatasetSettingsFieldsWidthCss([euiTheme.size.l, euiTheme.size.xs])
+      : undefined;
 
   return (
     <EuiAccordion
@@ -84,12 +99,15 @@ export const DatasetSettingsSectionAccordion: FunctionComponent<
           <h4>{title}</h4>
         </EuiTitle>
       }
+      extraAction={extraAction}
+      forceState={forceState}
+      onToggle={onToggle}
       data-test-subj={dataTestSubj}
       initialIsOpen={initialIsOpen}
       paddingSize="none"
     >
       <EuiPanel {...panelProps} hasShadow={false} data-test-subj={panelDataTestSubj}>
-        <div css={fieldsCss} data-test-subj={fieldsDataTestSubj}>
+        <div css={contentCss} data-test-subj={fieldsDataTestSubj}>
           {children}
         </div>
       </EuiPanel>
