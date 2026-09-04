@@ -47,10 +47,6 @@ export interface ScoutServerConfig {
     serverArgs: string[];
     useDedicatedTestRunner?: boolean;
     runOptions?: {
-      /**
-       * Log message to wait for before starting the tests. Defaults to waiting for Kibana to report
-       * the `available` status.
-       */
       wait?: RegExp;
       alwaysUseSource?: boolean;
     };

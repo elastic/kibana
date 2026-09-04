@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ERROR_CONFIGURE_FAILURE, ERROR_OUTSIDE_PREBOOT_STAGE } from '../../../../common';
@@ -33,7 +33,7 @@ import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup
  */
 apiTest.describe(
   'Interactive setup - manual configuration flow without TLS',
-  { tag: tags.local.stateful.classic },
+  { tag: ["@local-stateful-classic"] },
   () => {
     let verificationCode: string;
     let elasticsearchHost: string;

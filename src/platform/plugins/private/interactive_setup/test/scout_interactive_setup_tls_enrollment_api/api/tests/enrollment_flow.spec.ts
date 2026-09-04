@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ERROR_ENROLL_FAILURE, ERROR_OUTSIDE_PREBOOT_STAGE } from '../../../../common';
@@ -40,7 +40,7 @@ const UNRELATED_CA_FINGERPRINT = '3FDAEE71A3604070E6AE6B01412D19772DE5AE129F69C4
  */
 apiTest.describe(
   'Interactive setup - enrollment flow',
-  { tag: tags.local.stateful.classic },
+  { tag: ["@local-stateful-classic"] },
   () => {
     let verificationCode: string;
     let caFingerprint: string;

@@ -30,11 +30,6 @@ export const getPlaywrightTagsFor = (
 };
 
 export const tags = {
-  local: {
-    stateful: {
-      classic: getPlaywrightTagsFor('stateful', 'classic', 'local'),
-    },
-  },
   stateful: {
     classic: getPlaywrightTagsFor('stateful', 'classic'),
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ERROR_CONFIGURE_FAILURE, ERROR_OUTSIDE_PREBOOT_STAGE } from '../../../../common';
@@ -34,7 +34,7 @@ import { getElasticsearchCaCertificate } from '../../../helpers/tls_tools';
  */
 apiTest.describe(
   'Interactive setup - manual configuration flow',
-  { tag: tags.local.stateful.classic },
+  { tag: ["@local-stateful-classic"] },
   () => {
     let verificationCode: string;
     let elasticsearchHost: string;

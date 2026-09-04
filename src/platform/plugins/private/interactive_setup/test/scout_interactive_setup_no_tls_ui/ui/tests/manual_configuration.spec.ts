@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import {
@@ -29,7 +28,7 @@ import { test } from '../fixtures';
  */
 test.describe(
   'Interactive setup - manual configuration without TLS',
-  { tag: tags.local.stateful.classic },
+  { tag: ["@local-stateful-classic"] },
   () => {
     test('configures Kibana against a cluster without TLS', async ({
       pageObjects,

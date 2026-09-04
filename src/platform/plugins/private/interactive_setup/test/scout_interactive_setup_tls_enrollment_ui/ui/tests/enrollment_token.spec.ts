@@ -8,7 +8,6 @@
  */
 
 import { kibanaPackageJson } from '@kbn/repo-info';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import {
@@ -31,7 +30,7 @@ import { test } from '../fixtures';
  * and gives an unauthenticated page by default. The `elastic` credentials behind `esClient` are
  * only used to mint the API key the token carries.
  */
-test.describe('Interactive setup - enrollment token', { tag: tags.local.stateful.classic }, () => {
+test.describe('Interactive setup - enrollment token', { tag: ["@local-stateful-classic"] }, () => {
   let enrollmentApiKey: string;
 
   test.beforeEach(async ({ esClient }) => {
