@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +25,14 @@ interface DetailRow {
   content: React.ReactNode;
 }
 
-// Match Discover's result-panel table style: row separators only, no border on first/last row.
+function GenAiFieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <EuiText size="xs">
+      <strong>{children}</strong>
+    </EuiText>
+  );
+}
+
 const detailTableCss = css`
   thead {
     display: none;
@@ -45,11 +52,7 @@ const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
       defaultMessage: 'Field',
     }),
     width: '160px',
-    render: (label: React.ReactNode) => (
-      <EuiText size="xs">
-        <strong>{label}</strong>
-      </EuiText>
-    ),
+    render: (label: React.ReactNode) => <GenAiFieldLabel>{label}</GenAiFieldLabel>,
   },
   {
     field: 'content' as const,
@@ -59,6 +62,178 @@ const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
     render: (content: React.ReactNode) => content,
   },
 ];
+
+function GenAiDetailsTable({ rows }: { rows: DetailRow[] }) {
+  return (
+    <EuiBasicTable
+      itemId="id"
+      tableLayout="auto"
+      compressed
+      items={rows}
+      columns={DETAIL_COLUMNS}
+      data-test-subj="genAiDetails"
+      css={detailTableCss}
+      tableCaption={i18n.translate('apmUiShared.genAi.section.details.tableCaption', {
+        defaultMessage: 'GenAI details',
+      })}
+    />
+  );
+}
+
+interface GenAiToolDefinition {
+  type: string;
+  name: string;
+  description?: string;
+  parameters?: unknown;
+}
+
+function parseToolDefinitions(raw: unknown): GenAiToolDefinition[] | undefined {
+  let parsed = raw;
+  if (typeof raw === 'string') {
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return undefined;
+    }
+  }
+
+  if (!Array.isArray(parsed)) return undefined;
+
+  const definitions: GenAiToolDefinition[] = [];
+  for (const value of parsed) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+
+    const { type, name, description, parameters } = value as GenAiToolDefinition;
+    if (
+      typeof type !== 'string' ||
+      typeof name !== 'string' ||
+      (description != null && typeof description !== 'string')
+    ) {
+      return undefined;
+    }
+    definitions.push({
+      type,
+      name,
+      description: description ?? undefined,
+      parameters,
+    });
+  }
+
+  return definitions;
+}
+
+function ToolDefinitionsSection({ toolDefinitions }: Pick<GenAiFields, 'toolDefinitions'>) {
+  if (!toolDefinitions) return null;
+
+  const parsedToolDefinitions = parseToolDefinitions(toolDefinitions);
+  if (parsedToolDefinitions?.length === 0) return null;
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <GenAiSection
+        id="tools"
+        title={
+          parsedToolDefinitions
+            ? i18n.translate('apmUiShared.genAi.section.tools', {
+                defaultMessage: 'Tools ({count})',
+                values: { count: parsedToolDefinitions.length },
+              })
+            : i18n.translate('apmUiShared.genAi.section.rawTools', {
+                defaultMessage: 'Tools',
+              })
+        }
+        initialIsOpen={false}
+      >
+        {parsedToolDefinitions ? (
+          parsedToolDefinitions.map((tool, index) => (
+            <React.Fragment key={`${tool.name}-${index}`}>
+              <EuiAccordion
+                id={`genAiToolDef-${tool.name}-${index}`}
+                data-test-subj={`genAiToolDef-${tool.name}`}
+                buttonContent={<GenAiFieldLabel>{tool.name}</GenAiFieldLabel>}
+                paddingSize="s"
+              >
+                {tool.description && (
+                  <>
+                    <GenAiFieldValue value={tool.description} />
+                    {tool.parameters != null && <EuiSpacer size="s" />}
+                  </>
+                )}
+                {tool.parameters != null && <GenAiFieldValue value={tool.parameters} />}
+              </EuiAccordion>
+              <EuiSpacer size="s" />
+            </React.Fragment>
+          ))
+        ) : (
+          <>
+            <GenAiFieldLabel>gen_ai.tool.definitions</GenAiFieldLabel>
+            <EuiSpacer size="xs" />
+            <GenAiFieldValue value={toolDefinitions} />
+          </>
+        )}
+      </GenAiSection>
+    </>
+  );
+}
+
+function ToolCallSection({
+  toolName,
+  argumentsJson,
+  resultJson,
+}: {
+  toolName?: string;
+  argumentsJson?: unknown;
+  resultJson?: unknown;
+}) {
+  if (!toolName && argumentsJson == null && resultJson == null) return null;
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <GenAiSection
+        id="toolCall"
+        title={
+          toolName
+            ? i18n.translate('apmUiShared.genAi.section.toolCallNamed', {
+                defaultMessage: 'Tool call: {toolName}',
+                values: { toolName },
+              })
+            : i18n.translate('apmUiShared.genAi.section.toolCall', {
+                defaultMessage: 'Tool call',
+              })
+        }
+      >
+        {toolName && argumentsJson == null && resultJson == null && (
+          <GenAiFieldValue value={toolName} />
+        )}
+        {argumentsJson != null && (
+          <div data-test-subj="genAiToolCallArguments">
+            <GenAiFieldLabel>
+              {i18n.translate('apmUiShared.genAi.toolCall.arguments', {
+                defaultMessage: 'Arguments',
+              })}
+            </GenAiFieldLabel>
+            <EuiSpacer size="xs" />
+            <GenAiFieldValue value={argumentsJson} />
+          </div>
+        )}
+        {resultJson != null && (
+          <div data-test-subj="genAiToolCallResult">
+            {argumentsJson != null && <EuiSpacer size="s" />}
+            <GenAiFieldLabel>
+              {i18n.translate('apmUiShared.genAi.toolCall.result', {
+                defaultMessage: 'Result',
+              })}
+            </GenAiFieldLabel>
+            <EuiSpacer size="xs" />
+            <GenAiFieldValue value={resultJson} />
+          </div>
+        )}
+      </GenAiSection>
+    </>
+  );
+}
 
 interface Props {
   genAi: GenAiFields;
@@ -85,6 +260,10 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
     outputMessages,
     systemInstructions,
     conversationId,
+    toolDefinitions,
+    toolName,
+    toolCallArguments,
+    toolCallResult,
   } = genAi;
 
   // ── Field rows (single flat table — the former Summary fields lead) ───────
@@ -177,7 +356,6 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
     .forEach(([key, val]) => {
       detailRows.push({ id: key, label: key, content: <GenAiFieldValue value={val} /> });
     });
-
   const hasConversation =
     inputMessages.length > 0 || outputMessages.length > 0 || !!systemInstructions;
 
@@ -191,20 +369,7 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
             defaultMessage: 'Details',
           })}
         >
-          {detailsSlot ?? (
-            <EuiBasicTable
-              itemId="id"
-              tableLayout="auto"
-              compressed
-              items={detailRows}
-              columns={DETAIL_COLUMNS}
-              data-test-subj="genAiDetails"
-              css={detailTableCss}
-              tableCaption={i18n.translate('apmUiShared.genAi.section.details.tableCaption', {
-                defaultMessage: 'GenAI details',
-              })}
-            />
-          )}
+          {detailsSlot ?? <GenAiDetailsTable rows={detailRows} />}
         </GenAiSection>
       )}
 
@@ -227,6 +392,14 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
           </GenAiSection>
         </>
       )}
+
+      <ToolDefinitionsSection toolDefinitions={toolDefinitions} />
+
+      <ToolCallSection
+        toolName={toolName}
+        argumentsJson={toolCallArguments}
+        resultJson={toolCallResult}
+      />
     </>
   );
 }

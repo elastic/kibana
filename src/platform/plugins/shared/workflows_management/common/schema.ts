@@ -188,9 +188,13 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
 function convertDynamicConnectorsToContractsInternal(
   connectorTypes: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion[] {
+  const { inboundOnlyConnectorTypeIds } = getConnectorSchemas();
   const connectorContracts: ConnectorContractUnion[] = [];
   Object.values(connectorTypes).forEach((connectorType) => {
     if (connectorType.enabled === false) {
+      return;
+    }
+    if (inboundOnlyConnectorTypeIds.has(connectorType.actionTypeId)) {
       return;
     }
     try {

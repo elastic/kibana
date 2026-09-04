@@ -41,6 +41,7 @@ import {
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import { nodeBuilder } from '@kbn/es-query';
 import type { ExecutionContextStart } from '@kbn/core/server';
 
@@ -1429,8 +1430,17 @@ export function partialTaskInstanceToAttributes(
 export function savedObjectToConcreteTaskInstance(
   savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
 ): ConcreteTaskInstance {
+  const { userScope, ...attributes } = savedObject.attributes;
   return {
-    ...savedObject.attributes,
+    ...attributes,
+    ...(userScope
+      ? {
+          userScope: {
+            ...userScope,
+            ...(userScope.spaceId ? { spaceId: brandSpaceId(userScope.spaceId) } : {}),
+          },
+        }
+      : {}),
     id: savedObject.id,
     version: savedObject.version,
     scheduledAt: new Date(savedObject.attributes.scheduledAt),
