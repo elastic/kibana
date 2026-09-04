@@ -1189,7 +1189,7 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchWithTimeField.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
+      jest.spyOn(testServices.discoverSessionPersistence, 'get').mockResolvedValueOnce({
         ...savedSearchWithTimeField,
         id: savedSearchWithTimeField.id ?? '',
         title: savedSearchWithTimeField.title ?? '',
@@ -1234,7 +1234,7 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchMock.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
+      jest.spyOn(testServices.discoverSessionPersistence, 'get').mockResolvedValueOnce({
         ...savedSearchMock,
         id: savedSearchMock.id ?? '',
         title: savedSearchMock.title ?? '',

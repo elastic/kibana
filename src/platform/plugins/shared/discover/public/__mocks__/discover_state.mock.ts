@@ -198,14 +198,6 @@ export function getDiscoverInternalStateMock({
     return originalSearchSourceCreate(fields);
   });
 
-  jest.spyOn(services.savedSearch, 'saveDiscoverSession').mockImplementation((discoverSession) =>
-    Promise.resolve({
-      ...discoverSession,
-      id: discoverSession.id ?? 'new-session',
-      managed: false,
-    })
-  );
-
   const assertTabsAreInitialized = <T extends (...params: Parameters<T>) => ReturnType<T>>(
     fn: T
   ): T => {
@@ -232,7 +224,7 @@ export function getDiscoverInternalStateMock({
     }: { persistedDiscoverSession?: DiscoverSession } = {}) => {
       if (persistedDiscoverSession) {
         jest
-          .spyOn(services.savedSearch, 'getDiscoverSession')
+          .spyOn(services.discoverSessionPersistence, 'get')
           .mockResolvedValueOnce(persistedDiscoverSession);
       }
 

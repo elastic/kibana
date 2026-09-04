@@ -18,6 +18,7 @@ import * as tabsActions from './tabs';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
+import { FilterStateStore } from '@kbn/es-query';
 
 const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
   internalState.dispatch(
@@ -196,6 +197,34 @@ describe('resetDiscoverSession', () => {
 
     const refetchedTab = selectTab(internalState.getState(), persistedTab2.id);
     expect(refetchedTab.forceFetchOnSelect).toBe(false);
+  });
+
+  it('should preserve global filters when applying a save response', async () => {
+    const { internalState, persistedTab1, persistedDiscoverSession } = await setup();
+    const pinnedFilter = {
+      meta: { index: dataViewWithTimefieldMock.id },
+      query: { match_all: {} },
+      $state: { store: FilterStateStore.GLOBAL_STATE },
+    };
+
+    internalState.dispatch(
+      internalStateSlice.actions.setGlobalState({
+        tabId: persistedTab1.id,
+        globalState: { filters: [pinnedFilter] },
+      })
+    );
+
+    await internalState
+      .dispatch(
+        internalStateActions.resetDiscoverSession({
+          updatedDiscoverSession: cloneDeep(persistedDiscoverSession),
+        })
+      )
+      .unwrap();
+
+    expect(selectTab(internalState.getState(), persistedTab1.id).globalState.filters).toEqual([
+      pinnedFilter,
+    ]);
   });
 
   it('should keep current tab runtime state available while replacing all session tabs', async () => {

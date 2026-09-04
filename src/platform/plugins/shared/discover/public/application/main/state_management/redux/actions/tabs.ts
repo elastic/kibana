@@ -371,10 +371,18 @@ export const initializeTabs = createInternalStateAsyncThunk(
       }
     };
 
+    const getPersistedDiscoverSession = async () => {
+      if (!discoverSessionId) {
+        return undefined;
+      }
+
+      return services.discoverSessionPersistence.get(discoverSessionId);
+    };
+
     const [userId, spaceId, persistedDiscoverSession] = await Promise.all([
       existingUserId === undefined ? getUserId() : existingUserId,
       existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
-      discoverSessionId ? services.savedSearch.getDiscoverSession(discoverSessionId) : undefined,
+      getPersistedDiscoverSession(),
     ]);
 
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {

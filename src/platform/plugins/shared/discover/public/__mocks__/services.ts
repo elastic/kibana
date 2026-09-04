@@ -54,8 +54,13 @@ import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/moc
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
+import type { DiscoverSessionPersistence } from '../session';
 
-export function createDiscoverServicesMock(): DiscoverServices {
+export type DiscoverServicesMock = Omit<DiscoverServices, 'discoverSessionPersistence'> & {
+  discoverSessionPersistence: jest.Mocked<DiscoverSessionPersistence>;
+};
+
+export function createDiscoverServicesMock(): DiscoverServicesMock {
   const dataPlugin = dataPluginMock.createStartContract();
 
   dataPlugin.query.queryString.getDefaultQuery = jest.fn(() => ({ query: '', language: 'kuery' }));
@@ -194,6 +199,15 @@ export function createDiscoverServicesMock(): DiscoverServices {
   history.push('/');
 
   const { profilesManagerMock } = createContextAwarenessMocks();
+  const savedSearch = savedSearchPluginMock.createStartContract();
+  const discoverSessionPersistence: jest.Mocked<DiscoverSessionPersistence> = {
+    get: jest.fn(),
+    save: jest.fn(async (session, _options) => ({
+      ...session,
+      id: session.id ?? 'new-session',
+      managed: false,
+    })),
+  };
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
@@ -205,6 +219,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     getScopedHistory: () => scopedHistoryMock.create(),
     initialTabStateService: new InitialTabStateService(),
     data: dataPlugin,
+    discoverSessionPersistence,
     dataVisualizer: {
       FieldStatisticsTable: jest.fn(() => createElement('div')),
     },
@@ -289,7 +304,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
         updateTagsReferences: jest.fn(),
       },
     },
-    savedSearch: savedSearchPluginMock.createStartContract(),
+    savedSearch,
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {
@@ -336,7 +351,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },
-  } as unknown as DiscoverServices;
+  } as unknown as DiscoverServicesMock;
 }
 
 export const discoverServiceMock = createDiscoverServicesMock();

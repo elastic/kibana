@@ -71,12 +71,16 @@ export const fromSavedObjectTabToTabState = ({
 }): TabState => {
   const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
 
-  const globalState = {
+  const globalState: TabState['globalState'] = {
     timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
     refreshInterval: tab.timeRestore
       ? tab.refreshInterval
       : existingTab?.globalState.refreshInterval,
   };
+
+  if (existingTab?.globalState.filters !== undefined) {
+    globalState.filters = existingTab.globalState.filters;
+  }
 
   return {
     ...DEFAULT_TAB_STATE,
