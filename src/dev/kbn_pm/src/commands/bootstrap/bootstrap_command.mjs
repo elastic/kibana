@@ -25,6 +25,7 @@ import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 import { bootstrapBuildkite } from './buildkite.mjs';
+import { prefetchSharedTarballs } from './prefetch_shared_tarballs.mjs';
 
 const IS_CI = process.env.CI?.match(/(1|true)/i);
 
@@ -113,6 +114,10 @@ export const command = {
       if (shouldInstall) {
         if (forceInstall) {
           await removeYarnIntegrityFileIfExists();
+        }
+        if (!offline) {
+          // defuse yarn-classic duplicate-entry fetch race (yarnpkg/yarn#6407)
+          await prefetchSharedTarballs(log);
         }
         await yarnInstallDeps(log, { offline, quiet });
       }

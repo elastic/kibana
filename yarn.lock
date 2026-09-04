@@ -1807,13 +1807,13 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@72.0.1":
-  version "72.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-72.0.1.tgz#4c528c901b349b4720a379f56b5fbed5d1443614"
-  integrity sha512-+MZ0HvY4iop5T0eATek98PG8AQLL5S20SOp3k8cOkwGBFD83F6ctdXJCgDNgM93NOPHQSq3v4i/vvtKoLDP+NQ==
+"@elastic/charts@73.0.0":
+  version "73.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-73.0.0.tgz#6a7d569ccc08b7ac192832b4a7f78f8bdf39dd4d"
+  integrity sha512-EKciZkUxAIKkrlm2SSNBQ+nVMPlf5HTon9ovgfCte+fd0IZel+SIIRSwhoxMZ9GYA4fttp1c7DJ8Z0uJXarnYw==
   dependencies:
     "@popperjs/core" "^2.11.8"
-    "@reduxjs/toolkit" "1.9.7"
+    "@reduxjs/toolkit" "2.12.0"
     bezier-easing "^2.1.0"
     chroma-js "^2.4.2"
     classnames "^2.2.6"
@@ -1823,12 +1823,11 @@
     d3-interpolate "^3.0.1"
     d3-scale "^3.3.0"
     d3-shape "^2.0.0"
-    immer "^9.0.21"
+    immer "11.1.8"
     luxon "^1.25.0"
     prop-types "^15.7.2"
     re-reselect "^4.0.1"
-    react-redux "^8.1.3"
-    redux "^4.2.1"
+    react-redux "9.2.0"
     ts-debounce "^4.0.0"
     utility-types "^3.10.0"
     uuid "^14.0.0"
@@ -12329,16 +12328,6 @@
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@redux-saga/types/-/types-1.2.1.tgz#9403f51c17cae37edf870c6bc0c81c1ece5ccef8"
   integrity sha512-1dgmkh+3so0+LlBWRhGA33ua4MYr7tUOj+a9Si28vUi0IUFNbff1T3sgpeDJI/LaC75bBYnQ0A3wXjn0OrRNBA==
-
-"@reduxjs/toolkit@1.9.7", "@reduxjs/toolkit@npm:@reduxjs/toolkit@1.9.7":
-  version "1.9.7"
-  resolved "https://registry.npmjs.org/@reduxjs/toolkit/-/toolkit-1.9.7.tgz"
-  integrity sha512-t7v8ZPxhhKgOKtU+uyJT13lu4vL7az5aFi4IdoDs/eS548edn2M8Ik9h8fxgvMjGoAUVFSt6ZC1P5cWmQ014QQ==
-  dependencies:
-    immer "^9.0.21"
-    redux "^4.2.1"
-    redux-thunk "^2.4.2"
-    reselect "^4.1.8"
 
 "@reduxjs/toolkit@2.12.0":
   version "2.12.0"
@@ -23169,7 +23158,7 @@ immer@11.1.8, immer@^11.0.0:
   resolved "https://registry.yarnpkg.com/immer/-/immer-11.1.8.tgz#08a6426f7019dbce8d6dff8c4a43bb25c550a575"
   integrity sha512-/tbkHMW7y10Lx6i1crLjD4/OhNkRG+Fo7byZHtah0547nIeXYcpIXaUh0IAQY6gO5459qpGGYapcEOHtFXkIuA==
 
-immer@^9.0.21, "immer@npm:immer@9.0.21":
+immer@^9.0.21:
   version "9.0.21"
   resolved "https://registry.npmjs.org/immer/-/immer-9.0.21.tgz"
   integrity sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==
@@ -29557,18 +29546,6 @@ react-redux@9.2.0, react-redux@^9.2.0:
   dependencies:
     "@types/use-sync-external-store" "^0.0.6"
     use-sync-external-store "^1.4.0"
-
-react-redux@^8.1.3, "react-redux@npm:react-redux@7.2.8":
-  version "7.2.8"
-  resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-7.2.8.tgz#a894068315e65de5b1b68899f9c6ee0923dd28de"
-  integrity sha512-6+uDjhs3PSIclqoCk0kd6iX74gzrGc3W5zcAjbrFgEdIjRSQObdIwfx80unTkVUYvbQ95Y8Av3OvFHq1w5EOUw==
-  dependencies:
-    "@babel/runtime" "^7.15.4"
-    "@types/react-redux" "^7.1.20"
-    hoist-non-react-statics "^3.3.2"
-    loose-envify "^1.4.0"
-    prop-types "^15.7.2"
-    react-is "^17.0.2"
 
 react-refresh@0.18.0:
   version "0.18.0"

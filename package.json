@@ -124,16 +124,13 @@
     "@aws-sdk/client-bedrock-runtime": "3.1089.0",
     "@aws-sdk/client-kendra": "3.1089.0",
     "@aws-sdk/credential-provider-node": "3.972.70",
-    "@elastic/charts/@reduxjs/toolkit": "npm:@reduxjs/toolkit@1.9.7",
-    "@elastic/charts/immer": "npm:immer@9.0.21",
-    "@elastic/charts/react-redux": "npm:react-redux@7.2.8",
-    "@elastic/charts/redux": "npm:redux@4.2.1",
     "@elastic/elasticsearch/@elastic/transport": "9.4.0",
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
     "@types/react": "18.2.79",
     "@types/react-dom": "18.2.25",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "3.3.3"
+    "globby/fast-glob": "3.3.3",
+    "redux-thunk-v2/redux": "npm:redux@4.2.1"
   },
   "dependencies": {
     "@a2a-js/sdk": "0.3.4",
@@ -153,7 +150,7 @@
     "@elastic/apm-rum": "5.17.5",
     "@elastic/apm-rum-core": "5.25.3",
     "@elastic/apm-rum-react": "2.0.11",
-    "@elastic/charts": "72.0.1",
+    "@elastic/charts": "73.0.0",
     "@elastic/datemath": "5.0.3",
     "@elastic/ebt": "1.4.1",
     "@elastic/ecs": "9.3.0",
