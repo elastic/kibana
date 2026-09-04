@@ -215,42 +215,6 @@ export async function createConnectorFixture({
     return;
   }
 
-  // Old-shape OpenRouter (and any other `.gen-ai`) eval LLMs are provisioned as ES inference
-  // endpoints instead of `.gen-ai` stack connectors: new `.gen-ai` connectors can no longer be
-  // created, and the inference plugin resolves inference endpoint ids passed as connector ids.
-  if (predefinedConnector.actionTypeId === '.gen-ai') {
-    const inferenceId = predefinedConnector.id;
-    const { apiUrl, defaultModel } = predefinedConnector.config;
-
-    if (typeof apiUrl !== 'string' || typeof defaultModel !== 'string') {
-      throw new Error(
-        `Connector [${predefinedConnector.id}] is a .gen-ai connector without config.apiUrl/config.defaultModel. ` +
-          `.gen-ai eval connectors are created as chat_completion inference endpoints and require both fields.`
-      );
-    }
-
-    await createInferenceEndpointIfMissing(inferenceId, {
-      config: {
-        inferenceId,
-        provider: 'openai',
-        taskType: 'chat_completion',
-        providerConfig: {
-          model_id: defaultModel,
-          url: apiUrl,
-        },
-      },
-      secrets: {
-        providerSecrets: {
-          api_key: predefinedConnector.secrets?.apiKey,
-        },
-      },
-    });
-
-    log.info(`Binding connector ${predefinedConnector.id} to inference endpoint ${inferenceId}`);
-    await use({ ...predefinedConnector, id: inferenceId });
-    return;
-  }
-
   // If this connector is already preconfigured in the Kibana instance (e.g. connectors declared
   // via `xpack.actions.preconfigured` in a local kibana.yml), we should reuse it rather than
   // creating/deleting a saved object connector.

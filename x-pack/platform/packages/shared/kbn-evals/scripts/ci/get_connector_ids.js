@@ -28,15 +28,11 @@ const connectorIds =
     ? connectorEntries.map(([id]) => id)
     : connectorEntries
         .filter(([id, connector]) => {
-          // Old-shape `.gen-ai` defs (still accepted from locally-provided payloads).
-          const defaultModel = connector?.config?.defaultModel;
-          // Endpoint-shaped defs (EIS and OpenRouter) carry the model in providerConfig.
           const modelId = connector?.config?.providerConfig?.model_id;
           const isEis = connector?.config?.provider === 'elastic';
 
           const matchesRequested = (requestedValue) => {
             if (requestedValue === id) return true;
-            if (typeof defaultModel === 'string' && requestedValue === defaultModel) return true;
             if (requestedValue.startsWith('openrouter/') && slugifyId(requestedValue) === id) {
               return true;
             }
@@ -60,8 +56,6 @@ const connectorIds =
 if (requested.length > 0 && !requested.includes('all') && connectorIds.length === 0) {
   const availableModels = connectorEntries.flatMap(([, connector]) => {
     const out = [];
-    const defaultModel = connector?.config?.defaultModel;
-    if (typeof defaultModel === 'string') out.push(defaultModel);
     const modelId = connector?.config?.providerConfig?.model_id;
     if (typeof modelId === 'string') {
       out.push(connector?.config?.provider === 'elastic' ? `eis/${modelId}` : modelId);

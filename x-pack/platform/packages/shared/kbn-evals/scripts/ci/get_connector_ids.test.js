@@ -31,13 +31,6 @@ const OPENROUTER_GPT = {
   },
 };
 
-// Old-shape `.gen-ai` def, still accepted from locally-provided payloads.
-const LEGACY_OPENROUTER_GPT = {
-  'openrouter-openai-gpt-5-4': {
-    config: { defaultModel: 'openai/gpt-5.4' },
-  },
-};
-
 const EIS_GPT = {
   'eis-openai-gpt-5-4': {
     config: { provider: 'elastic', providerConfig: { model_id: 'openai-gpt-5.4' } },
@@ -51,10 +44,6 @@ describe('get_connector_ids', () => {
 
   it('matches a native OpenRouter id against providerConfig.model_id', () => {
     expect(run(OPENROUTER_GPT, 'openai/gpt-5.4')).toBe('openrouter-openai-gpt-5-4');
-  });
-
-  it('matches a native OpenRouter id against defaultModel on old-shape defs', () => {
-    expect(run(LEGACY_OPENROUTER_GPT, 'openai/gpt-5.4')).toBe('openrouter-openai-gpt-5-4');
   });
 
   it('still matches `eis/<modelId>` groups', () => {
