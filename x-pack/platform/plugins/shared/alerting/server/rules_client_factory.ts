@@ -396,21 +396,6 @@ export class RulesClientFactory {
       })
       .asScopedToNamespace(spaceId);
 
-    /**
-     * UIAM's authoritative verdict on the API key the request authenticated with, reported by the
-     * UIAM authentication provider on the current user: `true` for an internal key (granted
-     * through the internal grant path, so owned by an Elastic service and invalidated on that
-     * service's schedule), `false` for a user-created Cloud API key, and `undefined` when
-     * internality is not reported — session tokens and keys managed by Elasticsearch itself.
-     *
-     * The consumer below compares against `false` explicitly instead of relying on truthiness, so
-     * that an unreported verdict keeps the internal-key treatment (fail closed).
-     */
-    const getAuthenticatedApiKeyInternality = (): boolean | undefined =>
-      securityPluginStart
-        ? securityService.authc.getCurrentUser(request)?.api_key?.internal
-        : undefined;
-
     return new RulesClient({
       request,
       spaceId,
@@ -508,7 +493,13 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
-          const isExternalApiKey = getAuthenticatedApiKeyInternality() === false;
+          // UIAM's authoritative verdict on whether the authenticated API key is an external
+          // (user-created Cloud) key, reported by the UIAM authentication provider on the
+          // current user. `internal === false` is the only trustworthy "external" signal: the
+          // flag is absent for session tokens and for keys Kibana granted itself, both of
+          // which keep the internal-key treatment (fail closed).
+          const isExternalApiKey =
+            securityService.authc.getCurrentUser(request)?.api_key?.internal === false;
 
           // A raw UIAM credential (`essu_...`) means the request was authenticated with a
           // user-created Cloud API key (obtained from the Elastic Cloud UI). Unlike
