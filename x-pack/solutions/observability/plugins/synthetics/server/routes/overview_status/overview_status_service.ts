@@ -689,17 +689,19 @@ export class OverviewStatusService {
         // have no local saved object — both remote (CCS) monitors and local
         // Heartbeat / Elastic Agent managed monitors. Heartbeat detection is
         // always-on, so they are always retrieved.
-        // Note: _index is NOT included here because top_metrics does not support
-        // metadata fields. We use a separate terms sub-aggregation for _index instead.
-        // observer.geo.name is also excluded because it is a wildcard type field
+        // observer.geo.name is excluded because it is a wildcard type field
         // which top_metrics cannot collect. We use a separate terms sub-agg instead.
         { field: 'monitor.name' },
         { field: 'monitor.type' },
         { field: 'monitor.interval' },
         { field: 'config_id' },
         { field: 'tags' },
-        // kibanaUrl is only meaningful for remote deep-links (CCS / CPS).
-        ...(remoteIndexMetadataEnabled ? [{ field: 'kibanaUrl' }] : []),
+        // kibanaUrl / `_index` are only needed to detect and deep-link CCS / CPS
+        // remotes. `_index` is a virtual metadata field, but it still exposes
+        // keyword ordinals, so top_metrics can collect it from the same winning
+        // ping as the other metrics (rather than a sibling terms agg, which
+        // would return the most common index in the bucket, not the latest).
+        ...(remoteIndexMetadataEnabled ? [{ field: 'kibanaUrl' }, { field: '_index' }] : []),
       ];
 
       // The `timespan` filter is a "currently fresh" constraint anchored to
@@ -797,22 +799,6 @@ export class OverviewStatusService {
                       size: 1,
                     },
                   },
-                  // _index is a metadata field not supported by top_metrics,
-                  // so we use a separate terms agg to determine the source index.
-                  // For a given monitor+location bucket the latest ping typically
-                  // comes from a single index, so size:1 is sufficient. Only
-                  // needed to detect remote (CCS / CPS) monitors via their
-                  // cluster or project-alias prefix.
-                  ...(remoteIndexMetadataEnabled
-                    ? {
-                        index_name: {
-                          terms: {
-                            field: '_index',
-                            size: 1,
-                          },
-                        },
-                      }
-                    : {}),
                   // `error.message` is mapped as `text` so it can't be pulled
                   // via `top_metrics`; fetch the latest final summary doc and
                   // grab `error` + `state` from its source.
@@ -903,9 +889,9 @@ export class OverviewStatusService {
             monitorByIds.set(monitorId, []);
           }
 
-          // _index and observer.geo.name come from terms sub-aggs, not top_metrics
-          const indexNameAgg = remoteIndexMetadataEnabled ? (rest as any).index_name : undefined;
-          const indexName = indexNameAgg?.buckets?.[0]?.key;
+          // observer.geo.name comes from a terms sub-agg (wildcard, not
+          // collectable by top_metrics). `_index` is on the winning ping.
+          const indexName = remoteIndexMetadataEnabled ? metrics?._index : undefined;
           const locationNameAgg = (rest as any).location_name;
           const locationLabel =
             locationNameAgg?.buckets?.[0]?.key ??

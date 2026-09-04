@@ -12,6 +12,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { fillGapByIdRoute } from './fill_gap_by_id_route';
 import type { ScheduleBackfillResults } from '../../../../application/backfill/methods/schedule/types';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
@@ -55,7 +56,7 @@ describe('fillGapByIdRoute', () => {
         id: 'rule-1',
         actions: [],
       },
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       start: '2023-11-16T08:00:00.000Z',
       status: 'pending',
       schedule: [{ runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' }],

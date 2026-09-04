@@ -28,7 +28,7 @@ taskManager.registerTaskDefinitions({
     timeout: '2m',
     maxAttempts: 1,
     cost: TaskCost.Normal,
-    priority: TaskPriority.Normal,
+    priority: TaskPriority.Standard,
     paramsSchema: schema.object({ /* ... */ }),
     stateSchemaByVersion: { 1: { schema: stateSchemaV1, up: (s) => s } },
     createTaskRunner: (context) => {
@@ -257,7 +257,7 @@ If the task is fully stateless (every run starts from scratch), return `{ state:
 
 ## 8. `cost` and `priority` — capacity discipline
 
-**Rule:** Pick `cost` based on the task's actual resource footprint, not its perceived importance. Pick `priority` only when the task should preempt or yield to others; the default (`Normal`) is correct for most tasks.
+**Rule:** Pick `cost` based on the task's actual resource footprint, not its perceived importance. Pick `priority` only when the task should preempt or yield to others; the default (`Standard`) is correct for most tasks.
 
 `TaskCost` values are integers used by the capacity pool: `Tiny = 1`, `Normal = 2`, `Large = 4`, `ExtraLarge = 10`. Capacity is finite; an over-costed task starves its neighbours, an under-costed task gets starved by them.
 
@@ -270,11 +270,18 @@ If the task is fully stateless (every run starts from scratch), return `{ state:
 
 The memory budgets are the assumption capacity planning is built on; if the task's real footprint exceeds the budget for its tier, bump the cost rather than relying on the smaller tier's slot.
 
-| Priority | When to pick |
-|---|---|
-| `TaskPriority.Normal` | Default — almost always correct |
-| `TaskPriority.NormalLongRunning` | Long-running tasks that should not block the regular pool |
-| `TaskPriority.Low` | Background bookkeeping that may be deferred under load |
+`TaskPriority` members are named after what the task is *for*, and the integer is the claim-ordering tier — capacity is filled highest first, oldest first within a tier.
+
+| Priority | Value | When to pick |
+|---|---|---|
+| `TaskPriority.UserInteractive` | 100 | Work a user is directly waiting on, or with a tight latency budget. Displaces `Standard` work, so reserve it for user-visible delay |
+| `TaskPriority.Standard` | 50 | Default — almost always correct, and what you get when `priority` is omitted |
+| `TaskPriority.Deferrable` | 40 | Long-running tasks that should yield to `Standard` rather than hold the regular pool |
+| `TaskPriority.Maintenance` | 1 | Background bookkeeping that may be deferred under load — cleanup, rollups, backfills |
+
+`priority` is not importance and not `cost`: raise it only when the task must preempt or yield, not because the task matters to your plugin.
+
+The old positional names are deprecated aliases with unchanged numeric values — use the intent-based names in new code: `Low` → `Maintenance`, `NormalLongRunning` → `Deferrable`, `Normal` → `Standard`.
 
 ### `TaskCost` vs `InstanceTaskCost`
 
@@ -387,7 +394,7 @@ The assertion is a hard-coded sorted list of every registered task type, not a s
 | `stateSchemaByVersion` | Define when state is non-empty between runs | none | Silent state-shape drift after upgrade |
 | `maxAttempts` | `1` for one-shot; default for retryable recurring | global default | Duplicate side-effects on transient failures |
 | `cost` | Match real resource use; `Normal` default | `TaskCost.Normal` | Pool starvation either way |
-| `priority` | `Normal` unless preemption needed | `TaskPriority.Normal` | Long-running task blocks the regular pool |
+| `priority` | `Standard` unless preemption needed | `TaskPriority.Standard` | Long-running task blocks the regular pool |
 | `ensureScheduled` | Recurring + startup | n/a | Use of `schedule` here duplicates on every restart |
 
 ## Author checklist
@@ -436,7 +443,7 @@ When reviewing a PR that adds or modifies a task:
 - [ ] Each definition field listed above is set deliberately, not by default
 - [ ] `signal` is propagated through the entire `run()` call chain — search the diff for new ES/HTTP calls without `signal:` and reject
 - [ ] Errors are classified — search the diff for `throw new Error` inside `run()` and challenge each one
-- [ ] If `cost` or `priority` differs from `Normal`, the PR description justifies the choice
+- [ ] If `cost` differs from `Normal`, or `priority` from `Standard`, the PR description justifies the choice
 - [ ] If `stateSchemaByVersion` is added or modified, `up` migrations are pure and idempotent and cover every shape change
 - [ ] `schedule` is not used in plugin startup code — `ensureScheduled` instead
 - [ ] If the task is one-shot, `maxAttempts: 1` is set

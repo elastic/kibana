@@ -14,6 +14,7 @@ export { useGetEsIngestPipelines } from './use_get_es_ingest_pipelines';
 export { useGetTransformAuditMessages } from './use_get_transform_audit_messages';
 export { useGetTransform } from './use_get_transform';
 export { useGetTransformNodes } from './use_get_transform_nodes';
+export { useGetTransformCpsEnabled } from './use_get_transform_cps_enabled';
 export { useGetTransforms } from './use_get_transforms';
 export { useGetTransformsPreview } from './use_get_transforms_preview';
 export { useGetTransformStats } from './use_get_transform_stats';

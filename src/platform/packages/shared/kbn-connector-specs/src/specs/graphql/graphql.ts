@@ -320,6 +320,7 @@ export const GraphQLConnector: ConnectorSpec = {
     // ── Schema discovery ──────────────────────────────────────────────────────
     introspect: {
       isTool: true,
+      scope: 'read',
       description:
         'Introspect the GraphQL schema to discover available types, queries, and mutations. ' +
         'Returns a structured summary of the schema including all user-defined types, their ' +
@@ -368,6 +369,7 @@ export const GraphQLConnector: ConnectorSpec = {
     // ── Read operations ───────────────────────────────────────────────────────
     query: {
       isTool: true,
+      scope: 'read',
       description:
         'Execute a read-only GraphQL query against the configured endpoint. ' +
         'Returns the `data` field from the GraphQL response. ' +
@@ -393,6 +395,7 @@ export const GraphQLConnector: ConnectorSpec = {
     // ── Write operations ──────────────────────────────────────────────────────
     mutation: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Execute a GraphQL mutation against the configured endpoint. ' +
         'Use this to create, update, or delete data. ' +

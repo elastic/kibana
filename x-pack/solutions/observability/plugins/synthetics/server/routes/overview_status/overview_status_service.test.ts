@@ -1291,13 +1291,11 @@ describe('current status route', () => {
                     metrics: {
                       'monitor.status': 'up',
                       kibanaUrl: 'https://west.kibana.example.com',
+                      _index: 'cluster-west:synthetics-browser-default',
                     },
                     sort: ['2022-09-15T16:19:16.724Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'cluster-west:synthetics-browser-default', doc_count: 1 }],
               },
             },
             {
@@ -1316,9 +1314,6 @@ describe('current status route', () => {
                   },
                 ],
               },
-              index_name: {
-                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
-              },
             },
             {
               key: {
@@ -1335,9 +1330,6 @@ describe('current status route', () => {
                     sort: ['2022-09-15T16:19:16.724Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
               },
             },
           ],
@@ -1395,9 +1387,6 @@ describe('current status route', () => {
                   },
                 ],
               },
-              index_name: {
-                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
-              },
             },
             // Remote-only monitor (NO local saved object)
             {
@@ -1415,13 +1404,11 @@ describe('current status route', () => {
                       'monitor.name': 'Remote API Check',
                       'monitor.type': 'http',
                       config_id: 'remote-config-1',
+                      _index: 'cluster-east:synthetics-browser-default',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'cluster-east:synthetics-browser-default', doc_count: 1 }],
               },
             },
           ],
@@ -1483,14 +1470,10 @@ describe('current status route', () => {
                       'monitor.name': 'Linked HTTP check',
                       'monitor.type': 'http',
                       config_id: 'linked-config-1',
+                      _index: 'obs-prod:.ds-synthetics-http-default-2026.01.01-000001',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
-                ],
-              },
-              index_name: {
-                buckets: [
-                  { key: 'obs-prod:.ds-synthetics-http-default-2026.01.01-000001', doc_count: 1 },
                 ],
               },
             },
@@ -1539,7 +1522,11 @@ describe('current status route', () => {
       await overviewStatusService.getOverviewStatus();
 
       const searchCall = esClient.search.mock.calls[0][0] as any;
-      expect(searchCall.aggs.monitors.aggs.index_name).toBeDefined();
+      const metricFields = searchCall.aggs.monitors.aggs.status.top_metrics.metrics.map(
+        (m: { field: string }) => m.field
+      );
+      expect(metricFields).toContain('_index');
+      expect(searchCall.aggs.monitors.aggs.index_name).toBeUndefined();
       const filters = searchCall.query.bool.filter;
       const remoteFilter = filters.find((f: any) =>
         f.bool?.should?.some((s: any) => s.wildcard?._index === 'obs-prod:*')
@@ -1566,6 +1553,10 @@ describe('current status route', () => {
       await overviewStatusService.getOverviewStatus();
 
       const searchCall = esClient.search.mock.calls[0][0] as any;
+      const metricFields = searchCall.aggs.monitors.aggs.status.top_metrics.metrics.map(
+        (m: { field: string }) => m.field
+      );
+      expect(metricFields).not.toContain('_index');
       expect(searchCall.aggs.monitors.aggs.index_name).toBeUndefined();
       const filters = searchCall.query.bool.filter ?? [];
       const remoteFilter = filters.find((f: any) =>
@@ -1598,13 +1589,11 @@ describe('current status route', () => {
                       'monitor.name': 'Shared Remote Check',
                       'monitor.type': 'http',
                       config_id: 'shared-config',
+                      _index: 'cluster-east:synthetics-http-default',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'cluster-east:synthetics-http-default', doc_count: 1 }],
               },
             },
             {
@@ -1622,13 +1611,11 @@ describe('current status route', () => {
                       'monitor.name': 'Shared Remote Check',
                       'monitor.type': 'http',
                       config_id: 'shared-config',
+                      _index: 'cluster-west:synthetics-http-default',
                     },
                     sort: ['2022-09-15T16:21:00.000Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'cluster-west:synthetics-http-default', doc_count: 1 }],
               },
             },
           ],
@@ -1690,13 +1677,11 @@ describe('current status route', () => {
                       'monitor.status': 'down',
                       'monitor.name': 'Local No SO Monitor',
                       'monitor.type': 'http',
+                      _index: 'synthetics-http-default',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'synthetics-http-default', doc_count: 1 }],
               },
             },
           ],
@@ -1746,9 +1731,6 @@ describe('current status route', () => {
                     sort: ['2022-09-15T16:19:16.724Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
               },
             },
           ],
@@ -1918,13 +1900,11 @@ describe('current status route', () => {
                       'monitor.name': 'Remote Prod Check',
                       'monitor.type': 'http',
                       config_id: 'remote-prod-config',
+                      _index: 'cluster-east:synthetics-http-production',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'cluster-east:synthetics-http-production', doc_count: 1 }],
               },
             },
           ],
@@ -2147,12 +2127,16 @@ describe('current status route', () => {
       expect(spaceTerms.terms['meta.space_id']).toContain('default');
 
       const monitorAggs = searchCall.aggs.monitors.aggs;
+      const metricFields = monitorAggs.status.top_metrics.metrics.map(
+        (m: { field: string }) => m.field
+      );
+      expect(metricFields).not.toContain('_index');
       expect(monitorAggs.index_name).toBeUndefined();
       // `location_name` resolves the human-readable observer.geo.name label for
       // external monitors (remote CCS + local Heartbeat) that carry a location.
       // Heartbeat detection is always-on, so it runs even on serverless (unlike
-      // the CCS-gated `index_name`). Location-less pings don't rely on it — they
-      // fall back to the placeholder label.
+      // CCS/CPS-gated `_index` on top_metrics). Location-less pings don't rely
+      // on it — they fall back to the placeholder label.
       expect(monitorAggs.location_name).toBeDefined();
       // `space_id` presence tells a deleted Kibana monitor's leftover pings
       // (always stamped with `meta.space_id`) apart from autodiscovery pings.

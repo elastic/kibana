@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import extractZip from 'extract-zip';
+import AdmZip from 'adm-zip';
 import { ExtractError } from './extract_error';
 
 export async function unzip(filepath: string, target: string) {
   try {
-    await extractZip(filepath, { dir: target });
+    const zip = new AdmZip(filepath);
+    await zip.extractAllToAsync(target, /* overwrite */ true, /* keepOriginalPermission */ true);
   } catch (err) {
     throw new ExtractError(err);
   }
