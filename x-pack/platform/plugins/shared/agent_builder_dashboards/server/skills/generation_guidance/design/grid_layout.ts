@@ -27,6 +27,11 @@ Use these sizes — **do not make metric or gauge panels full-width**:
 - **Treemap / Waffle / Mosaic** → \`w: 24, h: 10\`.
 - **Markdown** → \`w: 24–48, h: 4–9\`. Size based on content length and layout needs — not always full-width.
 - **Datatable** → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
+- **Custom content** → \`w: 24–48\`, \`h\` from what the panel actually contains — the most common sizing mistake is making these too short, which leaves the panel scrolling inside its own frame:
+  - a single KPI or status card, or one short row of them: \`h: 6–8\`
+  - a list, table or status board of rows: \`h: 10–16\`, sized for the number of rows the ES|QL query returns
+  - a multi-section layout, or anything with a drawn chart or diagram: \`h: 16–20\`
+  Size for the rows the query actually returns (respect its \`LIMIT\`) rather than padding for rows that might appear later — an over-tall panel leaves a large empty gap under its content, which reads as broken just like a scrollbar does. When genuinely between two sizes, take the larger.
 
 Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
