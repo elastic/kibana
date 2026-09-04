@@ -193,8 +193,6 @@ export function getDashboardApi({
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
-  let isInteractiveSaveInProgress = false;
-
   const dashboardApi = {
     ...viewModeManager.api,
     ...dataLoadingManager.api,
@@ -240,10 +238,7 @@ export function getDashboardApi({
     }),
     setState,
     runInteractiveSave: async () => {
-      if (isInteractiveSaveInProgress) return;
-      isInteractiveSaveInProgress = true;
       trackOverlayApi.clearOverlays();
-      trackOverlayApi.hasOverlays$.next(true); // disable Save button while modal is open
       const previousDashboardId = savedObjectId$.value;
 
       const {
@@ -254,28 +249,23 @@ export function getDashboardApi({
         title,
       } = settingsManager.api.getSettings();
 
-      let saveResult: Awaited<ReturnType<typeof openSaveModal>> | undefined;
-      try {
-        saveResult = await openSaveModal({
-          description,
-          isManaged,
-          lastSavedId: savedObjectId$.value,
-          serializeState: getState,
-          setTimeRestore: (newTimeRestore: boolean) =>
-            settingsManager.api.setSettings({ time_restore: newTimeRestore }),
-          setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
-            settingsManager.api.setSettings({ project_routing_restore: newProjectRoutingRestore }),
-          tags,
-          timeRestore,
-          projectRoutingRestore,
-          title,
-          viewMode: viewModeManager.api.viewMode$.value,
-          accessControl: accessControlManager.api.accessControl$.value,
-        });
-      } finally {
-        isInteractiveSaveInProgress = false;
-        trackOverlayApi.clearOverlays(); // reset hasOverlays$ to false
-      }
+      const saveResult = await openSaveModal({
+        description,
+        isManaged,
+        lastSavedId: savedObjectId$.value,
+        serializeState: getState,
+        setTimeRestore: (newTimeRestore: boolean) =>
+          settingsManager.api.setSettings({ time_restore: newTimeRestore }),
+        setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
+          settingsManager.api.setSettings({ project_routing_restore: newProjectRoutingRestore }),
+        tags,
+        timeRestore,
+        projectRoutingRestore,
+        title,
+        viewMode: viewModeManager.api.viewMode$.value,
+        accessControl: accessControlManager.api.accessControl$.value,
+        parentApi: trackOverlayApi,
+      });
 
       if (!saveResult || saveResult.error) {
         return;
