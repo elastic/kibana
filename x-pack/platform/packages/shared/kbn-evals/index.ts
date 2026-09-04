@@ -77,6 +77,13 @@ export type { DefaultEvaluators, EvaluatorKind, ReportDisplayOptions } from './s
 export type { Direction } from '@kbn/evals-common';
 export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
+export {
+  ensureGroundTruthDir,
+  readGroundTruthTreeSync,
+  GROUND_TRUTH_DIR_ENV,
+  type GroundTruthSource,
+  type GroundTruthEntry,
+} from './src/ground_truth/ground_truth';
 export type {
   Example,
   TaskOutput,
