@@ -1007,9 +1007,8 @@ describe('project watch', () => {
         expect(fanOut.type).toBe('parallel');
         // Settled: one failed proposal must not skip the other rules' gates.
         expect(fanOut.mode).toBe('settled');
-        // Throttles launches; parked branches free their slot, so every harvested
-        // rule still reaches its gate.
-        expect(fanOut.concurrency).toEqual({ max: 5, 'count-waiting': false });
+        // A slot per harvested rule (max_rules_per_sweep) so every gate opens at once.
+        expect(fanOut.concurrency).toEqual({ max: 10, 'count-waiting': false });
         // A timeout here would abort branches and cancel children mid-approval;
         // the child gate's own timeout is the only clock.
         expect(fanOut).not.toHaveProperty('timeout');

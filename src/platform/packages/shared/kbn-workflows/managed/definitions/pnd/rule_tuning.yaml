@@ -194,12 +194,9 @@ steps:
     # gates. Failures stay visible in the aggregate results and counts.
     mode: settled
     concurrency:
-      # Caps how many branches the engine drives at once, which staggers the
-      # child launches (each one costs an agent diagnosis and two previews)
-      # instead of firing all max_rules_per_sweep at the same instant.
-      max: 5
-      # A branch parked in WAITING_FOR_CHILD frees its slot, so the cap throttles
-      # launches without limiting how many gates can be pending together.
+      # Must cover consts.max_rules_per_sweep so every gate opens at once.
+      max: 10
+      # A branch parked in WAITING_FOR_CHILD frees its slot.
       count-waiting: false
     steps:
       # ES|QL rows arrive as positional arrays in the harvest's KEEP order.
