@@ -23,6 +23,7 @@ import {
   ListChannelMembersInputSchema,
   ListChannelsInputSchema,
   ListPostsInputSchema,
+  MAX_POST_FILE_IDS,
   MattermostConfigSchema,
   PostIdInputSchema,
   ReactionInputSchema,
@@ -362,7 +363,7 @@ const trimPost = (value: unknown) => {
     type: stringValue(post.type, 200),
     fileIds: Array.isArray(post.file_ids)
       ? post.file_ids
-          .slice(0, 10)
+          .slice(0, MAX_POST_FILE_IDS)
           .map((fileId) => stringValue(fileId, 200))
           .filter((fileId): fileId is string => fileId !== undefined)
       : undefined,
@@ -389,7 +390,7 @@ const trimValidatedPost = (value: unknown, action: string) => {
     if (!Array.isArray(value.file_ids)) {
       return malformedResponse(action, 'Post');
     }
-    for (const fileId of value.file_ids.slice(0, 10)) {
+    for (const fileId of value.file_ids.slice(0, MAX_POST_FILE_IDS)) {
       requiredResponseId(fileId, action, 'Post');
     }
   }

@@ -13,6 +13,7 @@ import { UISchemas } from '../../connector_spec';
 
 const MAX_ID_LENGTH = 200;
 const MAX_MESSAGE_LENGTH = 16_383;
+export const MAX_POST_FILE_IDS = 5;
 const MAX_PROPS_KEYS = 50;
 const MAX_PROPS_SERIALIZED_LENGTH = 20_000;
 const MAX_PAGE = 10_000;
@@ -246,10 +247,10 @@ export const CreatePostInputSchema = lazySchema(() =>
       rootId: idSchema('Root post ID when creating a reply').optional(),
       fileIds: z
         .array(idSchema('ID of a file that is already uploaded to Mattermost'))
-        .max(10)
+        .max(MAX_POST_FILE_IDS)
         .optional()
         .describe(
-          'Previously uploaded file IDs to attach, up to the Mattermost limit of ten. Requires upload_file'
+          'Previously uploaded file IDs to attach, up to the Mattermost limit of five. Requires upload_file'
         ),
       props: z
         .record(z.string().min(1).max(128), z.unknown())

@@ -146,7 +146,7 @@ action available to Agent Builder tools. Confirm the target before running a sta
     - `channelId` (required): The destination channel ID.
     - `message` (required): Mattermost Markdown, up to 16,383 Unicode code points.
     - `rootId` (optional): The root post ID for a thread reply.
-    - `fileIds` (optional): Up to ten IDs for existing Mattermost files. Requires `upload_file`.
+    - `fileIds` (optional): Up to five IDs for existing Mattermost files. Requires `upload_file`.
       Binary upload is not included.
     - `props` (optional): JSON with at most 50 keys and a serialized limit of 20,000 characters.
     - `priority` (optional): `important` or `urgent` metadata for a root post. It requires

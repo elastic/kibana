@@ -381,19 +381,19 @@ describe('Mattermost connector', () => {
       ).toBe(false);
     });
 
-    it('limits posts to the ten file IDs allowed by Mattermost', () => {
+    it('limits posts to the five file IDs allowed by Mattermost', () => {
       expect(
         CreatePostInputSchema.safeParse({
           channelId: CHANNEL_ID,
           message: 'message',
-          fileIds: Array.from({ length: 10 }, (_, index) => `${index}`.padEnd(26, 'a')),
+          fileIds: Array.from({ length: 5 }, (_, index) => `${index}`.padEnd(26, 'a')),
         }).success
       ).toBe(true);
       expect(
         CreatePostInputSchema.safeParse({
           channelId: CHANNEL_ID,
           message: 'message',
-          fileIds: Array.from({ length: 11 }, (_, index) => `${index}`.padEnd(26, 'a')),
+          fileIds: Array.from({ length: 6 }, (_, index) => `${index}`.padEnd(26, 'a')),
         }).success
       ).toBe(false);
     });
@@ -1093,7 +1093,7 @@ describe('Mattermost connector', () => {
 
   describe('createPost', () => {
     it('sends required and optional fields with Mattermost wire names', async () => {
-      const responseFileIds = Array.from({ length: 11 }, (_, index) => `${index}`.padEnd(26, 'f'));
+      const responseFileIds = Array.from({ length: 6 }, (_, index) => `${index}`.padEnd(26, 'f'));
       mockPost.mockResolvedValue({
         data: { ...rawPost, file_ids: responseFileIds },
         status: 201,
@@ -1127,7 +1127,7 @@ describe('Mattermost connector', () => {
           originalId: '',
           message: 'Investigating the alert',
           type: '',
-          fileIds: responseFileIds.slice(0, 10),
+          fileIds: responseFileIds.slice(0, 5),
           replyCount: 2,
         },
       });
