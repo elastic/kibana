@@ -67,7 +67,11 @@ describe('EsApiKeyStrategy', () => {
 
     test('records a "none" task run for a user-scoped task without an ES apiKey', () => {
       const task = mockTaskInstance({
-        userScope: { apiKeyId: 'es-key-id', spaceId: asSpaceId('default'), apiKeyCreatedByUser: false },
+        userScope: {
+          apiKeyId: 'es-key-id',
+          spaceId: asSpaceId('default'),
+          apiKeyCreatedByUser: false,
+        },
       });
       expect(strategy.getApiKeyForFakeRequest(task)).toBeUndefined();
       expect(recordTaskRunSpy).toHaveBeenCalledWith('none', 'not_set');

@@ -247,7 +247,11 @@ describe('EsAndUiamApiKeyStrategy', () => {
     test('records a "none" task run when typeToUse is UIAM and a user-scoped task has no keys', () => {
       const { strategy } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance({
-        userScope: { apiKeyId: 'es-key-id', apiKeyCreatedByUser: false, spaceId: asSpaceId('default') },
+        userScope: {
+          apiKeyId: 'es-key-id',
+          apiKeyCreatedByUser: false,
+          spaceId: asSpaceId('default'),
+        },
       });
 
       expect(strategy.getApiKeyForFakeRequest(task)).toBeUndefined();

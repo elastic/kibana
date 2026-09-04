@@ -68,7 +68,11 @@ describe('invalidate api keys task - in-use guard', () => {
       startedAt: null,
       retryAt: null,
       ownerId: null,
-      userScope: { apiKeyId: sharedKeyId, apiKeyCreatedByUser: false, spaceId: asSpaceId('default') },
+      userScope: {
+        apiKeyId: sharedKeyId,
+        apiKeyCreatedByUser: false,
+        spaceId: asSpaceId('default'),
+      },
     });
 
     // Both keys are queued for invalidation, created far enough in the past to clear removalDelay.
