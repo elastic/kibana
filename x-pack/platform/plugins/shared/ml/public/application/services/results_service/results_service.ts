@@ -10,11 +10,35 @@ import { each, get } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+
+import type { MlApi } from '../ml_api_service';
+import type { ResultResponse } from './result_service_rx';
+
+export interface ScoresByBucketResults extends ResultResponse {
+  cardinality: number;
+  results: Record<string, Record<string, number>>;
+}
+
+export interface OverallBucketScoresResults extends ResultResponse {
+  results: Record<string, number>;
+}
+
+export interface EventRateDataResults extends ResultResponse {
+  total: number;
+  results: Record<string, number>;
+}
+
+export interface RecordMaxScoreByTimeResults extends ResultResponse {
+  results: Record<string, { score: number | undefined }>;
+}
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
  */
-export function resultsServiceProvider(mlApi) {
+export function resultsServiceProvider(mlApi: MlApi, isMlCpsEnabled: boolean) {
   return {
     // Obtains the maximum bucket anomaly scores by job ID and time.
     // Pass an empty array or ['*'] to search over all job IDs.
@@ -22,23 +46,24 @@ export function resultsServiceProvider(mlApi) {
     // which has results for the specified time range.
     // TODO: Remove once all occurencies are refactored to use the new API
     getScoresByBucket(
-      jobIds,
-      earliestMs,
-      latestMs,
-      intervalMs,
+      jobIds: string[],
+      earliestMs: number,
+      latestMs: number,
+      intervalMs: number,
       perPage = 10,
       fromPage = 1,
-      swimLaneSeverity = [{ min: 0 }]
-    ) {
+      swimLaneSeverity: Array<{ min: number; max?: number }> = [{ min: 0 }]
+    ): Promise<ScoresByBucketResults> {
       return new Promise((resolve, reject) => {
-        const obj = {
+        const obj: ScoresByBucketResults = {
           success: true,
+          cardinality: 0,
           results: {},
         };
 
         // Build the criteria to use in the bool filter part of the request.
         // Adds criteria for the time range plus any specified job IDs.
-        const boolCriteria = [
+        const boolCriteria: any[] = [
           {
             range: {
               timestamp: {
@@ -87,65 +112,63 @@ export function resultsServiceProvider(mlApi) {
           .anomalySearch(
             {
               size: 0,
-              body: {
-                query: {
-                  bool: {
-                    filter: [
-                      {
-                        query_string: {
-                          query: 'result_type:bucket',
-                          analyze_wildcard: false,
-                        },
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      query_string: {
+                        query: 'result_type:bucket',
+                        analyze_wildcard: false,
                       },
-                      {
-                        bool: {
-                          must: boolCriteria,
-                        },
+                    },
+                    {
+                      bool: {
+                        must: boolCriteria,
                       },
-                    ],
+                    },
+                  ],
+                },
+              },
+              aggs: {
+                jobsCardinality: {
+                  cardinality: {
+                    field: 'job_id',
                   },
                 },
-                aggs: {
-                  jobsCardinality: {
-                    cardinality: {
-                      field: 'job_id',
+                jobId: {
+                  terms: {
+                    field: 'job_id',
+                    size: jobIds?.length ?? 1,
+                    order: {
+                      anomalyScore: 'desc',
                     },
                   },
-                  jobId: {
-                    terms: {
-                      field: 'job_id',
-                      size: jobIds?.length ?? 1,
-                      order: {
-                        anomalyScore: 'desc',
+                  aggs: {
+                    anomalyScore: {
+                      max: {
+                        field: 'anomaly_score',
                       },
                     },
-                    aggs: {
-                      anomalyScore: {
-                        max: {
-                          field: 'anomaly_score',
+                    bucketTruncate: {
+                      bucket_sort: {
+                        from: (fromPage - 1) * perPage,
+                        size: perPage === 0 ? 1 : perPage,
+                      },
+                    },
+                    byTime: {
+                      date_histogram: {
+                        field: 'timestamp',
+                        fixed_interval: `${intervalMs}ms`,
+                        min_doc_count: 1,
+                        extended_bounds: {
+                          min: earliestMs,
+                          max: latestMs,
                         },
                       },
-                      bucketTruncate: {
-                        bucket_sort: {
-                          from: (fromPage - 1) * perPage,
-                          size: perPage === 0 ? 1 : perPage,
-                        },
-                      },
-                      byTime: {
-                        date_histogram: {
-                          field: 'timestamp',
-                          fixed_interval: `${intervalMs}ms`,
-                          min_doc_count: 1,
-                          extended_bounds: {
-                            min: earliestMs,
-                            max: latestMs,
-                          },
-                        },
-                        aggs: {
-                          anomalyScore: {
-                            max: {
-                              field: 'anomaly_score',
-                            },
+                      aggs: {
+                        anomalyScore: {
+                          max: {
+                            field: 'anomaly_score',
                           },
                         },
                       },
@@ -158,13 +181,13 @@ export function resultsServiceProvider(mlApi) {
           )
           .then((resp) => {
             const dataByJobId = get(resp, ['aggregations', 'jobId', 'buckets'], []);
-            each(dataByJobId, (dataForJob) => {
+            each(dataByJobId, (dataForJob: any) => {
               const jobId = dataForJob.key;
 
-              const resultsForTime = {};
+              const resultsForTime: Record<string, number> = {};
 
               const dataByTime = get(dataForJob, ['byTime', 'buckets'], []);
-              each(dataByTime, (dataForTime) => {
+              each(dataByTime, (dataForTime: any) => {
                 const value = get(dataForTime, ['anomalyScore', 'value']);
                 if (value !== undefined) {
                   const time = dataForTime.key;
@@ -173,7 +196,7 @@ export function resultsServiceProvider(mlApi) {
               });
               obj.results[jobId] = resultsForTime;
             });
-            obj.cardinality = resp.aggregations?.jobsCardinality?.value ?? 0;
+            obj.cardinality = get(resp, ['aggregations', 'jobsCardinality', 'value'], 0);
 
             resolve(obj);
           })
@@ -186,14 +209,21 @@ export function resultsServiceProvider(mlApi) {
     // Obtains the overall bucket scores for the specified job ID(s).
     // Pass ['*'] to search over all job IDs.
     // Returned response contains a results property as an object of max score by time.
-    getOverallBucketScores(jobIds, topN, earliestMs, latestMs, interval, overallScore) {
+    getOverallBucketScores(
+      jobIds: string[],
+      topN: number,
+      earliestMs: number,
+      latestMs: number,
+      interval: string,
+      overallScore?: number
+    ): Promise<OverallBucketScoresResults> {
       return new Promise((resolve, reject) => {
-        const obj = { success: true, results: {} };
+        const obj: OverallBucketScoresResults = { success: true, results: {} };
 
         mlApi
           .overallBuckets({
             jobId: jobIds,
-            topN: topN,
+            topN,
             bucketSpan: interval,
             start: earliestMs,
             end: latestMs,
@@ -201,7 +231,7 @@ export function resultsServiceProvider(mlApi) {
           })
           .then((resp) => {
             const dataByTime = get(resp, ['overall_buckets'], []);
-            each(dataByTime, (dataForTime) => {
+            each(dataByTime, (dataForTime: any) => {
               const value = get(dataForTime, ['overall_score']);
               if (value !== undefined) {
                 obj.results[dataForTime.timestamp] = value;
@@ -223,23 +253,23 @@ export function resultsServiceProvider(mlApi) {
     // Returned response contains a results property, which is an object
     // of document counts against time (epoch millis).
     getEventRateData(
-      index,
-      query,
-      timeFieldName,
-      earliestMs,
-      latestMs,
-      intervalMs,
-      runtimeMappings,
-      indicesOptions,
-      projectRouting
-    ) {
+      index: string | string[],
+      query: object | undefined,
+      timeFieldName: string,
+      earliestMs: number,
+      latestMs: number,
+      intervalMs: number,
+      runtimeMappings?: RuntimeMappings,
+      indicesOptions?: IndicesOptions,
+      projectRouting?: string
+    ): Promise<EventRateDataResults> {
       return new Promise((resolve, reject) => {
-        const obj = { success: true, results: {} };
+        const obj: EventRateDataResults = { success: true, total: 0, results: {} };
 
         // Build the criteria to use in the bool filter part of the request.
         // Add criteria for the time range, entity fields,
         // plus any additional supplied query.
-        const mustCriteria = [
+        const mustCriteria: object[] = [
           {
             range: {
               [timeFieldName]: {
@@ -289,11 +319,11 @@ export function resultsServiceProvider(mlApi) {
                 : {}),
             },
             ...(indicesOptions ?? {}),
-            ...(projectRouting ? { project_routing: projectRouting } : {}),
+            ...(isMlCpsEnabled && projectRouting ? { project_routing: projectRouting } : {}),
           })
-          .then((resp) => {
+          .then((resp: any) => {
             const dataByTimeBucket = get(resp, ['aggregations', 'eventRate', 'buckets'], []);
-            each(dataByTimeBucket, (dataForTime) => {
+            each(dataByTimeBucket, (dataForTime: any) => {
               const time = dataForTime.key;
               obj.results[time] = dataForTime.doc_count;
             });
@@ -312,21 +342,21 @@ export function resultsServiceProvider(mlApi) {
     // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
     // 'fieldValue' properties.
     getRecordMaxScoreByTime(
-      jobId,
-      criteriaFields,
-      earliestMs,
-      latestMs,
-      intervalMs,
-      actualPlotFunctionIfMetric
-    ) {
+      jobId: string,
+      criteriaFields: CriteriaField[],
+      earliestMs: number,
+      latestMs: number,
+      intervalMs: number,
+      actualPlotFunctionIfMetric?: string
+    ): Promise<RecordMaxScoreByTimeResults> {
       return new Promise((resolve, reject) => {
-        const obj = {
+        const obj: RecordMaxScoreByTimeResults = {
           success: true,
           results: {},
         };
 
         // Build the criteria to use in the bool filter part of the request.
-        const mustCriteria = [
+        const mustCriteria: object[] = [
           {
             range: {
               timestamp: {
@@ -362,36 +392,34 @@ export function resultsServiceProvider(mlApi) {
           .anomalySearch(
             {
               size: 0,
-              body: {
-                query: {
-                  bool: {
-                    filter: [
-                      {
-                        query_string: {
-                          query: 'result_type:record',
-                          analyze_wildcard: true,
-                        },
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      query_string: {
+                        query: 'result_type:record',
+                        analyze_wildcard: true,
                       },
-                      {
-                        bool: {
-                          must: mustCriteria,
-                        },
-                      },
-                    ],
-                  },
-                },
-                aggs: {
-                  times: {
-                    date_histogram: {
-                      field: 'timestamp',
-                      fixed_interval: `${intervalMs}ms`,
-                      min_doc_count: 1,
                     },
-                    aggs: {
-                      recordScore: {
-                        max: {
-                          field: 'record_score',
-                        },
+                    {
+                      bool: {
+                        must: mustCriteria,
+                      },
+                    },
+                  ],
+                },
+              },
+              aggs: {
+                times: {
+                  date_histogram: {
+                    field: 'timestamp',
+                    fixed_interval: `${intervalMs}ms`,
+                    min_doc_count: 1,
+                  },
+                  aggs: {
+                    recordScore: {
+                      max: {
+                        field: 'record_score',
                       },
                     },
                   },
@@ -402,7 +430,7 @@ export function resultsServiceProvider(mlApi) {
           )
           .then((resp) => {
             const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
-            each(aggregationsByTime, (dataForTime) => {
+            each(aggregationsByTime, (dataForTime: any) => {
               const time = dataForTime.key;
               obj.results[time] = {
                 score: get(dataForTime, ['recordScore', 'value']),

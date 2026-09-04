@@ -18,6 +18,7 @@ export interface CategorizeFieldContext {
     field?: { name: string; value: string };
   };
   focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
+  projectRouting?: string;
 }
 
 export const ACTION_CATEGORIZE_FIELD = 'ACTION_CATEGORIZE_FIELD';

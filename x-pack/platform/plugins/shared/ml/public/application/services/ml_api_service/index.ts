@@ -369,7 +369,7 @@ export function mlApiProvider(httpService: HttpService) {
       overallScore,
     }: {
       jobId: string[];
-      topN: string;
+      topN: number;
       bucketSpan: string;
       start: number;
       end: number;

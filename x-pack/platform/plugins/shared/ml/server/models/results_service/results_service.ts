@@ -27,6 +27,7 @@ import type {
   DatafeedResultsChartDataParams,
 } from '@kbn/ml-common-types/results';
 import { defaultSearchQuery } from '@kbn/ml-common-types/results';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
 import { getSeverityThresholdMax } from '../../../common/util/severity_threshold';
 import { getIndicesOptions } from '../../../common/util/datafeed_utils';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
@@ -706,6 +707,11 @@ export function resultsServiceProvider(
       datafeedQueryClone = { bool: { must: [datafeedQueryClone], filter: [rangeFilter] } };
     }
 
+    const projectRouting =
+      serverless?.isServerless && serverless.cpsEnabled
+        ? getProjectRoutingFromDatafeed(datafeedConfig)
+        : null;
+
     if (client && serverless) {
       const esSearchRequest = {
         index: datafeedConfig.indices.join(','),
@@ -723,9 +729,7 @@ export function resultsServiceProvider(
         },
         size: 0,
         ...getIndicesOptions(datafeedConfig),
-        ...(serverless.isServerless && serverless.cpsEnabled && datafeedConfig.project_routing
-          ? { project_routing: datafeedConfig.project_routing }
-          : {}),
+        ...(projectRouting ? { project_routing: projectRouting } : {}),
       };
 
       const { aggregations } = await client.asCurrentUser.search(esSearchRequest, {

@@ -49,6 +49,7 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -1002,6 +1003,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
                     }
                   : {}),
               },
+              projectRouting: job.datafeed_config
+                ? getProjectRoutingFromDatafeed(job.datafeed_config)
+                : undefined,
               focusTrapProps,
             });
           }}
