@@ -6,6 +6,7 @@
  */
 
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 export interface ServiceFlyoutService {
   name: string;
@@ -16,4 +17,9 @@ export interface ServiceFlyoutOptions {
   transactionType?: string;
   rangeFrom?: string;
   rangeTo?: string;
+  /** Initial latency aggregation type, e.g. inherited from a rule or the host page. */
+  latencyAggregationType?: LatencyAggregationType;
+  /** Previous-period comparison, matching the host page's comparison toggle. */
+  comparisonEnabled?: boolean;
+  offset?: string;
 }

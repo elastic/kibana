@@ -29,7 +29,8 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
 import { useProjectRouting } from '../hooks/use_project_routing';
-import { getChartDefinitions } from './chart_configs';
+import { ServiceFlyoutApmCharts } from './apm_charts';
+import { getEsqlKeyMetricCharts, getInfrastructureMetricCharts } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
 
@@ -85,6 +86,39 @@ interface FlyoutLensChartDefinition {
   config?: LensESQLConfig;
 }
 
+function ServiceFlyoutSectionTitle({
+  id,
+  title,
+  description,
+}: {
+  id: string;
+  title: string;
+  description?: string;
+}) {
+  return (
+    <>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        data-test-subj={`serviceFlyoutSection-${id}`}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {description && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip content={description} size="s" color="subdued" aria-label={description} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
+  );
+}
+
 function ServiceFlyoutChartsSection({
   id,
   title,
@@ -110,24 +144,7 @@ function ServiceFlyoutChartsSection({
 
   return (
     <>
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="xs"
-        responsive={false}
-        data-test-subj={`serviceFlyoutSection-${id}`}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        {description && (
-          <EuiFlexItem grow={false}>
-            <EuiIconTip content={description} size="s" color="subdued" aria-label={description} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <ServiceFlyoutSectionTitle id={id} title={title} description={description} />
       {isLoading ? (
         <LensChartsSkeleton
           count={charts.length}
@@ -166,14 +183,24 @@ function ServiceFlyoutChartsSection({
 }
 
 export function ServiceFlyoutOverview() {
-  const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
   const {
     deps: { core, share },
     service,
     capabilities,
     indices,
-    filters: { environment, rangeFrom, rangeTo, transactionType, refreshToken },
+    preferDocumentBasedCharts,
+    filters: {
+      environment,
+      rangeFrom,
+      rangeTo,
+      transactionType,
+      refreshToken,
+      latencyAggregationType: initialLatencyAggregationType,
+    },
   } = useServiceFlyoutContext();
+  const [latencyAggregationType, setLatencyAggregationType] = useState(
+    initialLatencyAggregationType ?? LatencyAggregationType.avg
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
@@ -186,25 +213,34 @@ export function ServiceFlyoutOverview() {
   // the same projects as the surrounding APM APIs (which forward it via `x-project-routing`).
   const projectRouting = useProjectRouting();
 
-  const { keyMetrics, infrastructureMetrics } = useMemo(
+  // ES|QL charts over raw documents for: unprocessed OTel services (invisible to
+  // the APM chart APIs) and document-based hosts like Discover (whose surrounding
+  // RED charts read the raw documents). Every other case renders the same APM
+  // chart components as the alert details page.
+  const useEsqlKeyMetrics = Boolean(preferDocumentBasedCharts) || capabilities.schema === 'otel';
+
+  const esqlKeyMetrics = useMemo(
     () =>
-      getChartDefinitions({
-        indices: indices ?? undefined,
-        schema: capabilities.schema,
-        serviceName: service.name,
-        environment,
-        transactionType: transactionType ?? '',
-        latencyAggregationType,
-        latencyTitleAction: (
-          <LatencyAggregationTypeSelect
-            latencyAggregationType={latencyAggregationType}
-            onChange={setLatencyAggregationType}
-            ebt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.CHART_CONTROLS }}
-          />
-        ),
-        projectRouting,
-      }),
+      useEsqlKeyMetrics
+        ? getEsqlKeyMetricCharts({
+            indices: indices ?? undefined,
+            schema: capabilities.schema,
+            serviceName: service.name,
+            environment,
+            transactionType: transactionType ?? '',
+            latencyAggregationType,
+            latencyTitleAction: (
+              <LatencyAggregationTypeSelect
+                latencyAggregationType={latencyAggregationType}
+                onChange={setLatencyAggregationType}
+                ebt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.CHART_CONTROLS }}
+              />
+            ),
+            projectRouting,
+          })
+        : [],
     [
+      useEsqlKeyMetrics,
       capabilities.schema,
       environment,
       indices,
@@ -213,6 +249,17 @@ export function ServiceFlyoutOverview() {
       transactionType,
       projectRouting,
     ]
+  );
+
+  const infrastructureMetrics = useMemo(
+    () =>
+      getInfrastructureMetricCharts({
+        indices: indices ?? undefined,
+        serviceName: service.name,
+        environment,
+        projectRouting,
+      }),
+    [environment, indices, service.name, projectRouting]
   );
 
   if (capabilities.loading) {
@@ -235,16 +282,27 @@ export function ServiceFlyoutOverview() {
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
         <EuiFlexItem>
-          <ServiceFlyoutChartsSection
-            id="keyMetrics"
-            title={KEY_METRICS_SECTION_TITLE}
-            charts={keyMetrics}
-            isLoading={indices === undefined}
-            hasError={indices === null}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            refreshToken={refreshToken}
-          />
+          {useEsqlKeyMetrics ? (
+            <ServiceFlyoutChartsSection
+              id="keyMetrics"
+              title={KEY_METRICS_SECTION_TITLE}
+              charts={esqlKeyMetrics}
+              isLoading={indices === undefined}
+              hasError={indices === null}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              refreshToken={refreshToken}
+            />
+          ) : (
+            <>
+              <ServiceFlyoutSectionTitle id="keyMetrics" title={KEY_METRICS_SECTION_TITLE} />
+              <ServiceFlyoutApmCharts
+                key={refreshToken}
+                latencyAggregationType={latencyAggregationType}
+                setLatencyAggregationType={setLatencyAggregationType}
+              />
+            </>
+          )}
         </EuiFlexItem>
         {capabilities.overview?.infraMetrics &&
           (isSystemMetricsLoading ? (

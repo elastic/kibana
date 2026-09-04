@@ -36,6 +36,9 @@ export function useServiceMapFlyoutProps({
               rangeFrom: flyoutOptions?.rangeFrom ?? start,
               rangeTo: flyoutOptions?.rangeTo ?? end,
               transactionType: flyoutOptions?.transactionType,
+              latencyAggregationType: flyoutOptions?.latencyAggregationType,
+              comparisonEnabled: flyoutOptions?.comparisonEnabled,
+              offset: flyoutOptions?.offset,
             },
           }
         : null,
@@ -45,6 +48,9 @@ export function useServiceMapFlyoutProps({
       flyoutOptions?.rangeFrom,
       flyoutOptions?.rangeTo,
       flyoutOptions?.transactionType,
+      flyoutOptions?.latencyAggregationType,
+      flyoutOptions?.comparisonEnabled,
+      flyoutOptions?.offset,
       start,
       end,
     ]
