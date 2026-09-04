@@ -43,7 +43,7 @@ export function useSloAppMenu({
         label: i18n.translate('xpack.slo.home.manage', {
           defaultMessage: 'Manage SLOs',
         }),
-        iconType: 'list',
+        iconType: 'tableOfContents',
         href: http.basePath.prepend(paths.slosManagement),
         testId: 'sloHeaderManageLink',
       },
