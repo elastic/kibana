@@ -38,6 +38,12 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
       alertData: options?.alertData,
       space: options?.space,
       error,
+      // Rule-run dispatches stored content for saved_query_id / pack_id.
+      useStoredQuery: true,
+      // A throw here would be swallowed by osqueryResponseAction and the rule run would still
+      // report success; record the failure on the action document so the alert's Osquery
+      // Results tab shows why nothing ran.
+      reportErrorsOnAction: true,
     });
   };
 
