@@ -25,10 +25,10 @@ describe('updateAlertStatus', () => {
     jest.clearAllMocks();
   });
 
-  it('should throw an error if neither query nor signalIds are provided', () => {
-    expect(() => {
-      updateAlertStatus({ status });
-    }).toThrowError('Either query or signalIds must be provided');
+  it('should throw an error if neither query nor signalIds are provided', async () => {
+    await expect(updateAlertStatus({ status })).rejects.toThrowError(
+      'Either query or signalIds must be provided'
+    );
   });
 
   it('should call updateAlertStatusByIds if signalIds are provided', () => {
