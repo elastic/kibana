@@ -6,17 +6,19 @@
  */
 
 import type { ICMPFields } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, Mode } from '../../../../common/runtime_types';
 import { secondsToCronFormatter } from '../formatting_utils';
 import type { Formatter } from './common';
 import { commonFormatters } from './common';
+import { omitDefaultFormatter } from './formatting_utils';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
+// wait (1s) and mode (any) match Heartbeat's defaults (elastic/kibana#241818).
 export const icmpFormatters: ICMPFormatMap = {
   ...commonFormatters,
   [ConfigKey.HOSTS]: null,
-  [ConfigKey.WAIT]: secondsToCronFormatter,
-  [ConfigKey.MODE]: null,
+  [ConfigKey.WAIT]: omitDefaultFormatter('1', secondsToCronFormatter),
+  [ConfigKey.MODE]: omitDefaultFormatter(Mode.ANY),
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
 };

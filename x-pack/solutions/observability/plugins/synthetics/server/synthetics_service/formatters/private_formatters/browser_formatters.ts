@@ -10,8 +10,9 @@ import type { Formatter } from './common_formatters';
 import { commonFormatters } from './common_formatters';
 import {
   arrayToJsonFormatter,
-  objectToJsonFormatter,
   stringToJsonFormatter,
+  omitDefaultFormatter,
+  omitFieldFormatter,
 } from './formatting_utils';
 
 import { tlsFormatters } from './tls_formatters';
@@ -36,14 +37,17 @@ export const throttlingFormatter: Formatter = (fields) => {
 
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
-  [ConfigKey.SCREENSHOTS]: null,
+  // 'on' matches Heartbeat's default (elastic/kibana#241818).
+  [ConfigKey.SCREENSHOTS]: omitDefaultFormatter('on'),
+  // ignore_https_errors (default false) is dropped by the template's {{#if}} guard.
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: arrayToJsonFormatter,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   [ConfigKey.TEXT_ASSERTION]: stringToJsonFormatter,
   [ConfigKey.PORT]: stringToJsonFormatter,
   [ConfigKey.URLS]: stringToJsonFormatter,
-  [ConfigKey.METADATA]: objectToJsonFormatter,
+  // __ui is UI-only metadata that Heartbeat ignores; drop it from the policy.
+  [ConfigKey.METADATA]: omitFieldFormatter,
   // Private browser monitors encode SOURCE_INLINE in formatSyntheticsPolicy and set
   // source.inline.encoding=base64. Keep this null so the generic string formatter
   // does not JSON-stringify the script before that private-location encoding step.
