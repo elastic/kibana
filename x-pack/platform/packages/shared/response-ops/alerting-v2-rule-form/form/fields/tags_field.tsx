@@ -88,7 +88,6 @@ export const TagsField = () => {
               isInvalid={!!error}
               fullWidth
               compressed={layout === 'flyout'}
-              data-test-subj="ruleTagsInput"
             />
           </EuiFormRow>
         );
