@@ -24,6 +24,13 @@ export const getAuthoringContextTool = (): BuiltinToolDefinition<
 Call this before composing a ViewSpec for \`${adaptiveUiTools.renderView}\` when you need the exact node shapes. The payload is large; call it once per conversation and reuse the result.`,
   schema: getAuthoringContextSchema,
   tags: ['adaptive-ui'],
+  annotations: {
+    title: 'Get Adaptive UI authoring context',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   handler: async () => {
     const { guide, rules, schema, primitives, views } = getAuthoringContext();
     return {
