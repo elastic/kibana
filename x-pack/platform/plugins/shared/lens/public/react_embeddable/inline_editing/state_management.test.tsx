@@ -50,6 +50,30 @@ describe('getStateManagementForInlineEditing', () => {
     );
   });
 
+  it('serializes only the active datasource state when allDatasourceStates is not passed (legacy 4-arg call)', () => {
+    const { updatePanelState } = getStateManagementForInlineEditing(
+      'textBased',
+      () => attributes,
+      jest.fn(),
+      {},
+      {},
+      jest.fn()
+    );
+
+    updatePanelState('activeState', 'newVisState', 'testVis', 'textBased');
+
+    expect(mergeToNewDoc).toHaveBeenCalledWith(
+      attributes,
+      expect.anything(),
+      { textBased: { isLoading: false, state: 'activeState' } },
+      expect.anything(),
+      expect.anything(),
+      'textBased',
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
   it('always includes the active datasource state even if the slice entry is loading', () => {
     const { updatePanelState } = getStateManagementForInlineEditing(
       'textBased',
