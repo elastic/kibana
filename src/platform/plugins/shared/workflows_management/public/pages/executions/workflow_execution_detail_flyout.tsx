@@ -23,6 +23,7 @@ export interface WorkflowExecutionDetailFlyoutProps {
 
 /**
  * Executions-page adapter for the shared execution flyout (same UI as workflow detail).
+ * This route is already gated by `workflowsManagement:globalExecutionsView:enabled`.
  */
 export const WorkflowExecutionDetailFlyout = React.memo<WorkflowExecutionDetailFlyoutProps>(
   ({ executionId, onClose }) => {

@@ -38,7 +38,7 @@ export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library
 
 /**
  * Global Advanced Setting gating the global Workflow Executions view
- * (`/app/workflows/executions`).
+ * (`/app/workflows/executions`) and the execution flyout on workflow detail.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is
  * readable from any browser plugin that consumes the workflows UI without

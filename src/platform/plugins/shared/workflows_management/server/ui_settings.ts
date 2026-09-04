@@ -11,8 +11,8 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
-  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID,
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
@@ -132,7 +132,8 @@ export const registerUISettings = (
       description: i18n.translate(
         'workflowsManagement.uiSettings.globalExecutionsViewEnabled.description',
         {
-          defaultMessage: 'Enables the global Workflow Executions view.',
+          defaultMessage:
+            'Enables the global Workflow Executions view and the execution flyout on the workflow detail page.',
         }
       ),
       schema: schema.boolean(),

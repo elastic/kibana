@@ -44,8 +44,11 @@ import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_de
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowChangeHistoryProvider } from '../../../features/change_history';
 import { WorkflowExecutionFlyout } from '../../../features/workflow_execution_detail';
+import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail_old';
 import { WorkflowExecutionListFlyout } from '../../../features/workflow_execution_list/ui/workflow_execution_list_flyout';
+import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_executions_view_enabled';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
@@ -91,6 +94,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   useWorkflowsBreadcrumbs(workflowName);
 
   const { canExecuteWorkflow, canReadWorkflowExecution } = useWorkflowsCapabilities();
+  const isExecutionsViewEnabled = useGlobalExecutionsViewEnabled();
   const {
     activeTab,
     selectedExecutionId,
@@ -258,6 +262,20 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     );
   }
 
+  const showExecutionFlyouts = isExecutionsViewEnabled && Boolean(id) && canReadWorkflowExecution;
+  const sidebarExecutionList =
+    !isExecutionsViewEnabled &&
+    id &&
+    activeTab === 'executions' &&
+    !selectedExecutionId &&
+    canReadWorkflowExecution ? (
+      <WorkflowExecutionList workflowId={id} />
+    ) : null;
+  const sidebarExecutionDetail =
+    !isExecutionsViewEnabled && selectedExecutionId && canReadWorkflowExecution ? (
+      <WorkflowExecutionDetail executionId={selectedExecutionId} onClose={onCloseExecutionDetail} />
+    ) : null;
+
   const pageContent = (
     <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
       <EuiFlexItem grow={false}>
@@ -265,7 +283,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
-          onOpenExecutionList={id && canReadWorkflowExecution ? onOpenExecutionList : undefined}
+          onOpenExecutionList={showExecutionFlyouts ? onOpenExecutionList : undefined}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
@@ -275,17 +293,17 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           <>
             <WorkflowEditorLayout
               editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
-              executionList={null}
-              executionDetail={null}
+              executionList={sidebarExecutionList}
+              executionDetail={sidebarExecutionDetail}
             />
-            {id && isExecutionListOpen && canReadWorkflowExecution && (
+            {showExecutionFlyouts && id && isExecutionListOpen && (
               <WorkflowExecutionListFlyout
                 workflowId={id}
                 onClose={onCloseExecutionList}
                 isHidden={Boolean(selectedExecutionId)}
               />
             )}
-            {selectedExecutionId && canReadWorkflowExecution && (
+            {showExecutionFlyouts && selectedExecutionId && (
               <WorkflowExecutionFlyout
                 executionId={selectedExecutionId}
                 workflowName={workflowName ?? ''}
