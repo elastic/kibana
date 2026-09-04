@@ -110,7 +110,7 @@ export const RuleActionsMenu = ({
         data-test-subj={`runRule-${rule.id}`}
       >
         {i18n.translate('xpack.alertingV2.rulesList.action.run', {
-          defaultMessage: 'Run rule',
+          defaultMessage: 'Run',
         })}
       </EuiContextMenuItem>
     ) : null;
@@ -126,7 +126,7 @@ export const RuleActionsMenu = ({
       data-test-subj={`editRule-${rule.id}`}
     >
       {i18n.translate('xpack.alertingV2.rulesList.action.edit', {
-        defaultMessage: 'Edit rule',
+        defaultMessage: 'Edit',
       })}
     </EuiContextMenuItem>
   ) : null;
@@ -142,7 +142,7 @@ export const RuleActionsMenu = ({
       data-test-subj={`cloneRule-${rule.id}`}
     >
       {i18n.translate('xpack.alertingV2.rulesList.action.clone', {
-        defaultMessage: 'Clone rule',
+        defaultMessage: 'Clone',
       })}
     </EuiContextMenuItem>
   ) : null;
@@ -205,7 +205,7 @@ export const RuleActionsMenu = ({
     >
       <EuiTextColor color="danger">
         {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
-          defaultMessage: 'Delete rule',
+          defaultMessage: 'Delete',
         })}
       </EuiTextColor>
     </EuiContextMenuItem>
