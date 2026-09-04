@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/283350
+issues:
+- https://github.com/elastic/security-team/issues/19065
+- https://github.com/elastic/security-team/issues/19063
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Enforce required global fields and workflow `extended_fields`
+description: With case templates enabled, API and workflow case creates enforce required global fields. Workflow and public case create/update APIs accept `extended_fields`.

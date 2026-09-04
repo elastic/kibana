@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/286578
+issues:
+- https://github.com/elastic/enhancements/issues/26370
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Alerting and reporting
+title: Support context variables in ServiceNow and Jira additional fields
+description: Context variables can now be used in the `Additional fields` of the ServiceNow ITSM, ServiceNow SecOps and Jira connectors.

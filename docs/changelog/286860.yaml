@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/286860
+issues:
+- https://github.com/elastic/search-team/issues/15820
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- AI and machine Learning
+title: Improve Agent Builder conversation layout and message attribution
