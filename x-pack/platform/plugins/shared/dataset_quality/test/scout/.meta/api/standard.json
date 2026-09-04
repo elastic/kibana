@@ -1,5 +1,5 @@
 {
-  "sha1": "c4a7bebd1e73a79bb5532ae5c416282f8e5421b2",
+  "sha1": "216491581a96a291d649038dae07473db73ecea4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -961,7 +961,7 @@
     {
       "id": "707f589a7687e92-a55eba2c4c08cc3",
       "title": "Dataset quality - data stream stats across data stream types returns the stats of every requested data stream type",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",

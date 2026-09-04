@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  IndicesStatsIndicesStats,
+  IndicesStatsShardStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 
 interface ApiKeysStats {
@@ -20,15 +24,6 @@ interface MeteringIndexStat {
 interface MeteringStatsResponse {
   _total: { num_docs: number; size_in_bytes: number };
   indices: MeteringIndexStat[];
-}
-
-interface VectorStats {
-  value_count?: number;
-}
-
-interface IndexStatsWithVectors {
-  dense_vector?: VectorStats;
-  sparse_vector?: VectorStats;
 }
 
 interface IndexStats {
@@ -73,22 +68,56 @@ export const hasIndexMonitorPrivilege = async (
   }
 };
 
+const shardVectorCount = (shard: IndicesStatsShardStats): number =>
+  (shard.dense_vector?.value_count ?? 0) + (shard.sparse_vector?.value_count ?? 0);
+
 /**
- * Counts indexed dense + sparse vectors via `_stats` (operator-only in serverless), aggregated at
- * the cluster level. Excluding dot indices keeps the total scoped to the same indices as the
- * metering-derived index and size counts. `open` is already the default for `expand_wildcards`, but
- * is pinned so hidden indices can't be pulled in by a later edit.
+ * Sums vector counts across indices, counting each logical shard exactly once. Neither of the
+ * `_all` rollups is usable in stateless: `primaries` reports nothing for an index whose indexing
+ * shard has been released as idle, and `total` counts every shard copy of an active index. The max
+ * across a shard's copies tolerates refresh lag between them.
  */
-const countVectors = async (client: IScopedClusterClient): Promise<number> => {
-  const stats = await client.asInternalUser.indices.stats({
+const sumVectorCounts = (indices: Record<string, IndicesStatsIndicesStats> | undefined): number => {
+  let count = 0;
+  for (const index of Object.values(indices ?? {})) {
+    for (const copies of Object.values(index.shards ?? {})) {
+      if (copies.length > 0) {
+        count += Math.max(...copies.map(shardVectorCount));
+      }
+    }
+  }
+  return count;
+};
+
+/**
+ * Counts indexed dense + sparse vectors, counting each logical shard exactly once.
+ * In stateless 'total' and 'primaries' can both return the wrong counts because they might not be loaded onto nodes.
+ * Returns null when not all shards responded.
+ */
+const countVectors = async (
+  client: IScopedClusterClient,
+  logger: Logger
+): Promise<number | null> => {
+  const { _shards: shards, indices } = await client.asInternalUser.indices.stats({
     index: USER_INDICES_PATTERN,
     expand_wildcards: ['open'],
-    level: 'cluster',
+    level: 'shards',
     metric: ['dense_vector', 'sparse_vector'],
+    filter_path: [
+      '_shards',
+      'indices.*.shards.*.dense_vector.value_count',
+      'indices.*.shards.*.sparse_vector.value_count',
+    ],
   });
 
-  const primaries = stats._all?.primaries as IndexStatsWithVectors | undefined;
-  return (primaries?.dense_vector?.value_count ?? 0) + (primaries?.sparse_vector?.value_count ?? 0);
+  if (!shards || shards.successful !== shards.total) {
+    logger.warn(
+      `Vector count covered only ${shards?.successful ?? 0} of ${shards?.total ?? 0} shards.`
+    );
+    return null;
+  }
+
+  return sumVectorCounts(indices);
 };
 
 /**
@@ -153,7 +182,7 @@ export const fetchIndexStats = async (
     if (indicesCount > 0) {
       [vectorCount, documentsCount] = await Promise.all([
         canMonitorAllIndices
-          ? countVectors(client).catch((error) => {
+          ? countVectors(client, logger).catch((error) => {
               logger.warn(
                 `Failed to compute vector count for vectordb deployment stats. Returning partial stats: ${error.message}`
               );

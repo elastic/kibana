@@ -484,7 +484,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.device_control.filter_images',
       {
         defaultMessage:
-          'Filter out file backed images and CD-ROM volumes from consideration by device control. Default: true.',
+          '[WARNING: this can prevent applications and macOS updates] Filter out file backed images mounted from internal drive from consideration by device control. Default: true.',
       }
     ),
   },

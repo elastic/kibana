@@ -60,6 +60,7 @@ describe('SavedObjectEdition', () => {
     uiSettings = uiSettingsServiceMock.createStartContract();
     settings = settingsServiceMock.createStartContract();
     history = scopedHistoryMock.create();
+    history.createHref.mockImplementation((location) => location.pathname ?? '/');
     docLinks = docLinksServiceMock.createStartContract();
     applications = applicationServiceMock.createStartContract();
     theme = themeServiceMock.createStartContract();
