@@ -546,7 +546,11 @@ def deploy(ip: str) -> None:
         f"grep -c withRetry ~/{CHAT_CLIENT_REMOTE}; "
         f"grep -c messageSource ~/{CHAT_CLIENT_REMOTE}",
     )
-    if _gate.split() != ["1", "1"]:
+    try:
+        _counts = [int(x) for x in _gate.split()]
+    except ValueError:
+        _counts = [0, 0]
+    if len(_counts) != 2 or _counts[0] < 1 or _counts[1] < 1:
         raise RuntimeError(
             f"chat_client overlay did not land on {ip} (withRetry/messageSource "
             f"missing): {_gate!r} -- VM would run main's retries=0 converse path"
