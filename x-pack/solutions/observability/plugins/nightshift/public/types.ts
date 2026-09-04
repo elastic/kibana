@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -30,6 +31,7 @@ export interface NightshiftStartDependencies {
   significantEvents: SignificantEventsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
   serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
 }
