@@ -2607,6 +2607,8 @@
       "@kbn/stdio-dev-helpers/*": ["./src/platform/packages/private/kbn-stdio-dev-helpers/*"],
       "@kbn/storage-adapter": ["./src/platform/packages/shared/kbn-storage-adapter"],
       "@kbn/storage-adapter/*": ["./src/platform/packages/shared/kbn-storage-adapter/*"],
+      "@kbn/storage-adapter-heap-lab-plugin": ["./x-pack/platform/plugins/private/storage_adapter_heap_lab"],
+      "@kbn/storage-adapter-heap-lab-plugin/*": ["./x-pack/platform/plugins/private/storage_adapter_heap_lab/*"],
       "@kbn/storybook": ["./src/platform/packages/shared/kbn-storybook"],
       "@kbn/storybook/*": ["./src/platform/packages/shared/kbn-storybook/*"],
       "@kbn/streamlang": ["./x-pack/platform/packages/shared/kbn-streamlang"],

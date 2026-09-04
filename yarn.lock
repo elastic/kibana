@@ -9366,6 +9366,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/storage-adapter-heap-lab-plugin@link:x-pack/platform/plugins/private/storage_adapter_heap_lab":
+  version "0.0.0"
+  uid ""
+
 "@kbn/storage-adapter@link:src/platform/packages/shared/kbn-storage-adapter":
   version "0.0.0"
   uid ""

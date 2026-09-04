@@ -1252,6 +1252,7 @@
     "@kbn/status-plugin-b-plugin": "link:src/platform/test/server_integration/plugins/status_plugin_b",
     "@kbn/std": "link:src/platform/packages/shared/kbn-std",
     "@kbn/storage-adapter": "link:src/platform/packages/shared/kbn-storage-adapter",
+    "@kbn/storage-adapter-heap-lab-plugin": "link:x-pack/platform/plugins/private/storage_adapter_heap_lab",
     "@kbn/streamlang": "link:x-pack/platform/packages/shared/kbn-streamlang",
     "@kbn/streamlang-yaml-editor": "link:x-pack/platform/packages/shared/kbn-streamlang-yaml-editor",
     "@kbn/streams-ai": "link:x-pack/platform/packages/shared/kbn-streams-ai",
