@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { getProjectRoutingFromDatafeed, getProjectRoutingFromJob } from './utils';
+export {
+  getProjectRoutingFromDatafeed,
+  getProjectRoutingFromJob,
+  getProjectRoutingFromJobSummary,
+  type JobSummaryProjectScopeFields,
+} from './utils';
