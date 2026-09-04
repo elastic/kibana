@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClientProvider } from '@kbn/react-query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
-import { createQueryClientWrapper } from '../../test_utils';
+import { createQueryClientWrapper, createTestQueryClient } from '../../test_utils';
 import { useFetchRuleTags } from './use_fetch_rule_tags';
+import { ruleFormKeys } from './query_key_factory';
 
 describe('useFetchRuleTags', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -85,6 +88,30 @@ describe('useFetchRuleTags', () => {
     await waitFor(() => {
       expect(first.current.data).toEqual(['prod']);
       expect(second.current.data).toEqual(['staging']);
+    });
+
+    expect(http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('uses the plugin rule-tags query key prefix so mutations refresh suggestions', async () => {
+    expect(ruleFormKeys.tags('pro')).toEqual(['rule', 'tags', { search: 'pro' }]);
+
+    http.get.mockResolvedValueOnce({ tags: [] }).mockResolvedValueOnce({ tags: ['cpu'] });
+
+    const queryClient = createTestQueryClient();
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+    const { result } = renderHook(() => useFetchRuleTags({ http }), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual([]);
+    });
+
+    await queryClient.invalidateQueries({ queryKey: ['rule', 'tags'] });
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual(['cpu']);
     });
 
     expect(http.get).toHaveBeenCalledTimes(2);

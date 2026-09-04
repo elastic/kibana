@@ -171,7 +171,7 @@ describe('TagsField', () => {
   });
 
   it('selects a suggested tag from another rule', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderTagsField({ suggestions: [['tagA']] });
 
     await user.click(screen.getByRole('combobox'));
@@ -202,30 +202,22 @@ describe('TagsField', () => {
     expect(selectedTagPills()).toEqual(['prod']);
   });
 
-  it('does not create a 21st tag when already at the limit', async () => {
-    const user = userEvent.setup();
-    renderTagsField({
-      values: formWithTags(Array.from({ length: 20 }, (_, i) => `tag-${i}`)),
-    });
-
-    await user.click(screen.getByRole('combobox'));
-    await user.type(screen.getByRole('combobox'), 'extra-tag');
-    await user.keyboard('{Enter}');
-
-    expect(selectedTagPills()).not.toContain('extra-tag');
-  });
-
-  it('does not select a 21st suggested tag when already at the limit', async () => {
-    const user = userEvent.setup();
+  it('shows validation error on submit after selecting a 21st suggested tag', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderTagsField({
       values: formWithTags(Array.from({ length: 20 }, (_, i) => `tag-${i}`)),
       suggestions: [['extra-tag']],
+      withSubmit: true,
     });
 
     await user.click(screen.getByRole('combobox'));
     await user.click(await screen.findByText('extra-tag'));
 
-    expect(selectedTagPills()).not.toContain('extra-tag');
+    expect(selectedTagPills()).toContain('extra-tag');
+
+    await user.click(screen.getByTestId('submitButton'));
+
+    expect(await screen.findByText('You can add up to 20 tags.')).toBeInTheDocument();
   });
 
   it('shows validation error on submit when more than 20 tags are added', async () => {

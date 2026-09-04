@@ -50,7 +50,6 @@ export const TagsField = () => {
       rules={{ validate: validateTags }}
       render={({ field, fieldState: { error } }) => {
         const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));
-        const atTagCountLimit = (field.value?.length ?? 0) >= MAX_TAGS;
 
         return (
           <EuiFormRow
@@ -76,23 +75,14 @@ export const TagsField = () => {
               options={tagOptions}
               selectedOptions={selectedOptions}
               onSearchChange={setSearchQuery}
-              onChange={(selected) => {
-                const next = selected.map(({ label }) => label);
-                if (next.length > MAX_TAGS) {
-                  return;
+              onBlur={field.onBlur}
+              onChange={(selected) => field.onChange(selected.map(({ label }) => label))}
+              onCreateOption={(searchValue) => {
+                const trimmed = searchValue.trim();
+                if (trimmed.length > 0 && !(field.value ?? []).includes(trimmed)) {
+                  field.onChange([...(field.value ?? []), trimmed]);
                 }
-                field.onChange(next);
               }}
-              onCreateOption={
-                atTagCountLimit
-                  ? undefined
-                  : (searchValue) => {
-                      const trimmed = searchValue.trim();
-                      if (trimmed.length > 0 && !(field.value ?? []).includes(trimmed)) {
-                        field.onChange([...(field.value ?? []), trimmed]);
-                      }
-                    }
-              }
               isClearable={true}
               isInvalid={!!error}
               fullWidth
