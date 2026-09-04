@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -50,6 +51,7 @@ export class WorkflowsExtensionsServerPlugin
   private readonly managedWorkflowPluginIds = new Set<string>();
   private workflowsClientProvider: WorkflowsClientProvider | undefined;
   private managedWorkflowsSystemApiProvider: ManagedWorkflowsSystemApiProvider | undefined;
+  private actionsStart: ActionsPluginStartContract | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -59,7 +61,7 @@ export class WorkflowsExtensionsServerPlugin
 
   public setup(
     core: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>,
-    plugins: WorkflowsExtensionsServerPluginSetupDeps
+    _plugins: WorkflowsExtensionsServerPluginSetupDeps
   ): WorkflowsExtensionsServerPluginSetup {
     // Register the workflows client provider to the workflows request context
     core.http.registerRouteHandlerContext<WorkflowsExtensionsRequestHandlerContext, 'workflows'>(
@@ -77,7 +79,9 @@ export class WorkflowsExtensionsServerPlugin
     registerGetStepDefinitionsRoute(router, this.stepRegistry, this.logger);
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
 
-    registerInternalStepDefinitions(this.stepRegistry);
+    registerInternalStepDefinitions(this.stepRegistry, {
+      getActionsStart: () => this.actionsStart,
+    });
     registerInternalTriggerDefinitions(this.triggerRegistry);
 
     return {
@@ -110,8 +114,9 @@ export class WorkflowsExtensionsServerPlugin
 
   public start(
     _core: CoreStart,
-    _plugins: WorkflowsExtensionsServerPluginStartDeps
+    plugins: WorkflowsExtensionsServerPluginStartDeps
   ): WorkflowsExtensionsServerPluginStart {
+    this.actionsStart = plugins.actions;
     this.triggerRegistry.freeze();
 
     return {
