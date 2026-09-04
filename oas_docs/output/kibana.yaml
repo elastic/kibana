@@ -98070,13 +98070,13 @@ components:
               maxLength: 256
               type: string
             tags:
-              description: Tags for categorization, e.g. ["production", "infra"].
               items:
                 maxLength: 128
                 minLength: 1
                 type: string
               maxItems: 20
               minItems: 1
+              nullable: true
               type: array
         no_data_strategy:
           anyOf:
@@ -107922,6 +107922,8 @@ components:
             template:
               maxLength: 510000
               type: string
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
             title:
               description: The panel title.
               type: string
@@ -107938,7 +107940,7 @@ components:
         - type
         - grid
         - config
-      title: Custom content
+      title: Custom panel
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session:
       additionalProperties: false
