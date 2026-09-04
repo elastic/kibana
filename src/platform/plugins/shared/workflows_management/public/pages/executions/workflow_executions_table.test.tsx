@@ -11,6 +11,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
+import { useSerialPolling } from '../../hooks/use_serial_polling';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
@@ -22,6 +23,12 @@ const mockUseWorkflowUrlState = jest.fn(() => ({
 jest.mock('../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
+
+jest.mock('../../hooks/use_serial_polling', () => ({
+  useSerialPolling: jest.fn(),
+}));
+
+const mockUseSerialPolling = jest.mocked(useSerialPolling);
 
 jest.mock('./workflow_executions_data_grid', () => ({
   WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
@@ -75,6 +82,42 @@ describe('WorkflowExecutionsTable', () => {
         }),
       })
     );
+  });
+
+  it('configures live polling with the current search key', async () => {
+    const services = createStartServicesMock();
+    jest.mocked(services.http.get).mockResolvedValue({
+      results: [],
+      page: 1,
+      size: 25,
+      total: 0,
+    });
+
+    render(
+      <WorkflowExecutionsTable
+        filters={[]}
+        liveUpdateIntervalMs={2500}
+        query={defaultQuery}
+        spaceId="my-space"
+        timeRange={defaultTimeRange}
+      />,
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflowExecutionsTableEmpty')).toBeInTheDocument();
+    });
+    expect(mockUseSerialPolling).toHaveBeenCalledWith({
+      enabled: true,
+      immediate: false,
+      intervalMs: 2500,
+      pollKey: expect.any(String),
+      poll: expect.any(Function),
+    });
+
+    const { poll } = mockUseSerialPolling.mock.calls[0][0];
+    await poll();
+    await waitFor(() => expect(services.http.get).toHaveBeenCalledTimes(2));
   });
 
   it('shows empty state when search returns no executions', async () => {
