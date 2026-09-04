@@ -16,18 +16,16 @@ export {
   getRuleBuilderCreateOptions,
   registerRuleBuilder,
   fromBuilderFields,
-  toBuilderSubmission,
   useBuilderState,
+  thresholdRuleBuilderDefinition,
 } from './flyout/compose_discover/rule_builder';
 export type {
   BuilderState,
-  BuilderSubmission,
   RuleBuilderCreateOption,
   RuleBuilderCreateOptionItem,
   RuleBuilderDefinition,
   RuleBuilderStepProps,
 } from './flyout/compose_discover/rule_builder';
-export type { BuilderState, BuilderSubmission } from './flyout/compose_discover/rule_builder';
 
 // Compose Discover sandbox — embeddable ES|QL editor + results panel (props-only)
 export { QuerySandboxFlyout } from './flyout/compose_discover';

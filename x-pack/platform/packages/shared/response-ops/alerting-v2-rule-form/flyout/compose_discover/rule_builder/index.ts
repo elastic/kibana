@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-export type {
-  RuleBuilderDefinition,
-  RuleBuilderStepProps,
-  BuilderState,
-  BuilderSubmission,
-} from './types';
+export type { RuleBuilderDefinition, RuleBuilderStepProps, BuilderState } from './types';
 export { getRuleBuilderCreateOptions } from './create_options';
 export type { RuleBuilderCreateOptionItem } from './create_options';
 export { RULE_BUILDER_REGISTRY, registerRuleBuilder } from './registry';
-export { fromBuilderFields, toBuilderSubmission } from './builder_fields';
+export { fromBuilderFields } from './builder_fields';
 export { BuilderStateProvider, useBuilderState } from './builder_state_context';
 export { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 export { buildThresholdEsql } from './threshold/build_esql';
@@ -29,3 +24,4 @@ export type {
   ConditionOperator,
 } from './threshold/form_types';
 export { DEFAULT_THRESHOLD_FORM_VALUES, generateId } from './threshold/form_types';
+export { thresholdRuleBuilderDefinition } from './threshold/threshold_rule_builder';

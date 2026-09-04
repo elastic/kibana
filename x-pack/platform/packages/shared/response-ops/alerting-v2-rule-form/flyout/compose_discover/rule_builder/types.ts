@@ -16,16 +16,6 @@ import type { RuleFormServices } from '../../../form/contexts/rule_form_context'
 export type BuilderState = unknown;
 
 /**
- * The active builder's contribution to a save: its type plus the parameters the
- * server generates the query from. Carries no query, because the server rejects
- * one sent alongside builder fields.
- */
-export interface BuilderSubmission {
-  type: string;
-  fields: Record<string, unknown>;
-}
-
-/**
  * How a builder presents itself on the create-rule options panel. Supplying
  * this is what makes a builder reachable from the UI, so no shared component
  * needs editing to add one.
@@ -41,7 +31,6 @@ export interface RuleBuilderCreateOption {
   order?: number;
 }
 
-
 export interface RuleBuilderStepProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
@@ -51,6 +40,7 @@ export interface RuleBuilderStepProps {
 export interface RuleBuilderDefinition<TState = BuilderState> {
   type: string;
   stepTitle: string;
+  createOption?: RuleBuilderCreateOption;
   createDefaultState: () => TState;
   renderStep: (props: RuleBuilderStepProps) => React.ReactNode;
   renderRecoveryStep?: (props: CustomRecoveryRenderProps) => React.ReactNode;
@@ -68,7 +58,7 @@ export interface RuleBuilderDefinition<TState = BuilderState> {
    * strict, would reject.
    *
    * Returns `object` rather than a record because a builder names its fields
-   * with a declared type; `toBuilderSubmission` widens it after checking.
+   * with a declared type; the caller widens it after checking.
    */
   toFields?: (state: TState) => object;
   /**

@@ -109,6 +109,11 @@ export const THRESHOLD_CREATE_OPTION_TITLE = i18n.translate(
   { defaultMessage: 'Threshold rule' }
 );
 
+export const THRESHOLD_CREATE_FLYOUT_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleFlyoutTitle',
+  { defaultMessage: 'Create Threshold rule' }
+);
+
 export const THRESHOLD_CREATE_OPTION_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
   { defaultMessage: 'Monitor metrics against one or more threshold conditions.' }
