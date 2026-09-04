@@ -17,12 +17,7 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import { replayMoves } from '@kbn/core-chrome-navigation-customization';
-import { i18n } from '@kbn/i18n';
 import { flattenNav, getRenderableNodes, parseNavigationTree } from './utils';
-
-const HOME_TITLE = i18n.translate('core.ui.chrome.sideNavigation.homeItemTitle', {
-  defaultMessage: 'Home',
-});
 
 export interface ParsedNavigation {
   id: SolutionId;
@@ -48,9 +43,6 @@ export interface ParsedNavigation {
  *
  * `defaultItemIds` is captured from the *original* body (before any moves) so
  * callers can always determine which items ship with the solution by default.
- *
- * The `renderAs: 'home'` node is normalized to the shared "Home" title and icon
- * so the customize modal and the rendered sidebar present it identically.
  */
 export const applyCustomization = (
   solutionId: SolutionId,
@@ -80,20 +72,13 @@ export const applyCustomization = (
     { deepLinks, cloudLinks }
   );
 
-  // The home node renders as a regular sidebar item, so normalize its title/icon
-  // here once. Both `treeUI` (rendered sidebar) and `renderableNodes` (customize
-  // modal) read from the same normalized body.
-  const bodyUI = navigationTreeUI.body.map((node) =>
-    node.renderAs === 'home' ? { ...node, title: HOME_TITLE, icon: 'home' } : node
-  );
-
   return {
     id: solutionId,
-    treeUI: { ...navigationTreeUI, body: bodyUI },
+    treeUI: navigationTreeUI,
     tree: navigationTree,
     flattened: flattenNav(navigationTree),
     overflowItemIds,
     defaultItemIds,
-    renderableNodes: getRenderableNodes(bodyUI),
+    renderableNodes: getRenderableNodes(navigationTreeUI.body),
   };
 };

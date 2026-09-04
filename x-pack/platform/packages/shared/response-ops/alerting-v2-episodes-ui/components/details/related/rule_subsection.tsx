@@ -11,7 +11,6 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { css } from '@emotion/react';
 import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
 import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
@@ -102,19 +101,7 @@ export function RelatedEpisodesRuleSubsection({
   }
 
   return (
-    <div
-      data-test-subj="alertingV2RelatedEpisodesRuleSubsection"
-      css={
-        compressed
-          ? css`
-              padding-bottom: ${euiTheme.size.m};
-            `
-          : css`
-              padding-inline: ${euiTheme.size.m};
-              padding-bottom: ${euiTheme.size.m};
-            `
-      }
-    >
+    <div data-test-subj="alertingV2RelatedEpisodesRuleSubsection">
       <EuiTitle size={compressed ? 'xxs' : 'xs'}>
         <h4>
           {currentGroupHash ? i18n.RELATED_OTHER_GROUPS_TITLE : i18n.RELATED_RULE_ONLY_LIST_TITLE}

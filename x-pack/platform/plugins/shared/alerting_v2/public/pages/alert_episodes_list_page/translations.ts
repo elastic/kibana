@@ -34,9 +34,19 @@ export const EPISODES_LIST_COLUMN_ACTIONS = i18n.translate(
   }
 );
 
-export const EPISODES_LIST_COLUMN_TAGS = i18n.translate('xpack.alertingV2.episodes.columns.tags', {
-  defaultMessage: 'Tags',
-});
+export const EPISODES_LIST_COLUMN_ALERT_TAGS = i18n.translate(
+  'xpack.alertingV2.episodes.columns.tags',
+  {
+    defaultMessage: 'Alert tags',
+  }
+);
+
+export const EPISODES_LIST_COLUMN_RULE_TAGS = i18n.translate(
+  'xpack.alertingV2.episodes.columns.ruleTags',
+  {
+    defaultMessage: 'Rule tags',
+  }
+);
 
 export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
   'xpack.alertingV2.episodes.columns.assignees',
@@ -117,7 +127,7 @@ export const BULK_UNRESOLVE = i18n.translate('xpack.alertingV2.episodes.bulkActi
 });
 
 export const BULK_EDIT_TAGS = i18n.translate('xpack.alertingV2.episodes.bulkActions.editTags', {
-  defaultMessage: 'Edit tags',
+  defaultMessage: 'Edit alert tags',
 });
 
 export const BULK_ERROR_TOAST = i18n.translate('xpack.alertingV2.episodes.bulkActions.errorToast', {

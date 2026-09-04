@@ -61,6 +61,9 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/find_user_actions_extended_fields'));
     loadTestFile(require.resolve('./internal/required_on_close'));
     loadTestFile(require.resolve('./internal/search_cases_extended_fields'));
+    // workflow execution API — trial-only because workflowsManagement sub-feature privileges
+    // (workflow_execute) require at least a trial license
+    loadTestFile(require.resolve('./internal/run_workflow'));
 
     /**
      * Telemetry
