@@ -7,10 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { validateView } from '@kbn/adaptive-ui';
-import {
-  sampleConnectorSetup,
-  toConnectorSetupViewSpec,
-} from '@kbn/adaptive-ui-adapters';
+import { sampleConnectorSetup, toConnectorSetupViewSpec } from '@kbn/adaptive-ui-adapters';
 import { getAdaptiveViewText, renderCrossSurface } from './cross_surface.test.helpers';
 
 describe('connector_setup attachment adapter (prompt subset)', () => {

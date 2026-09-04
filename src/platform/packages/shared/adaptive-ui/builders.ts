@@ -18,7 +18,7 @@
 
 export {
   actions,
-  badge,
+  badgeGroup,
   barList,
   boxPlot,
   breadcrumbs,
@@ -26,7 +26,7 @@ export {
   bullet,
   callout,
   card,
-  checkList,
+  checklist,
   codeBlock,
   contextStrip,
   dashboardGrid,
@@ -35,6 +35,7 @@ export {
   divider,
   donut,
   emptyPrompt,
+  entityList,
   gauge,
   graph,
   health,
@@ -42,7 +43,6 @@ export {
   heatmapStrip,
   histogram,
   image,
-  itemList,
   list,
   mediaEmbed,
   metricTrend,

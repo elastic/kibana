@@ -21,7 +21,7 @@ export const toEsqlViewSpec = ({ query, description }: EsqlAttachmentData): View
       {description && <Text body={description} />}
       <CodeBlock language="esql" code={query} />
     </View>
-  ) as ViewSpec;
+  );
 
 export const sampleEsqlAttachment: EsqlAttachmentData = {
   description: 'Top 5 hosts by failed authentications in the last 24 hours.',

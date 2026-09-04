@@ -6,7 +6,7 @@
  */
 
 import {
-  badge,
+  badgeGroup,
   codeBlock,
   contextStrip,
   descriptionList,
@@ -63,7 +63,7 @@ const queryLanguageToken = (language?: string): string =>
 /**
  * Alternate rendering for the `security.rule` attachment: a detection rule as an
  * inline `Severity | Risk score` context strip over a `descriptionList` mixing a
- * prose author, the highlighted query `codeBlock`, and `badge` rows for index
+ * prose author, the highlighted query `codeBlock`, and `badgeGroup` rows for index
  * patterns and tags.
  */
 export const buildSecurityRuleViewSpec = (rule: SecurityRule): ViewSpec => {
@@ -83,13 +83,13 @@ export const buildSecurityRuleViewSpec = (rule: SecurityRule): ViewSpec => {
   if (rule.index && rule.index.length > 0) {
     items.push({
       title: 'Index patterns',
-      description: badge({ items: rule.index.map((label) => ({ label })) }),
+      description: badgeGroup({ items: rule.index.map((label) => ({ label })) }),
     });
   }
   if (rule.tags && rule.tags.length > 0) {
     items.push({
       title: 'Tags',
-      description: badge({ items: rule.tags.map((label) => ({ label })) }),
+      description: badgeGroup({ items: rule.tags.map((label) => ({ label })) }),
     });
   }
   const mitre = mitreLabel(rule.threat);
