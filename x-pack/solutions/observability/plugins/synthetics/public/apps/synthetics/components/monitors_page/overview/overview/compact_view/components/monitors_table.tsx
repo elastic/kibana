@@ -36,6 +36,57 @@ const SORT_FIELD_TO_COLUMN = Object.fromEntries(
 );
 
 /**
+ * Decides whether a `MonitorsTable` instance should adopt the server's
+ * paginated result set or fall back to slicing its own `items` locally.
+ *
+ * `MonitorsTable` is rendered twice: once for the single, whole-result-set
+ * table (which should follow the server's page/total), and once per group
+ * inside `GroupGridItem` with only that group's `items` (which must paginate
+ * itself locally — a group is a subset, never the server's page). Callers
+ * that render a subset must pass `enableServerPagination: false`, otherwise
+ * the group's footer shows the *global* page count and its pager writes the
+ * shared Redux page state, corrupting the ungrouped view's position.
+ */
+export function resolveTablePaginationState({
+  enableServerPagination,
+  items,
+  status,
+  total,
+  pageState,
+  localPageOfItems,
+  localPagination,
+}: {
+  enableServerPagination: boolean;
+  items: OverviewStatusMetaData[];
+  status: { configs?: OverviewStatusMetaData[] | null } | null | undefined;
+  total: number | undefined;
+  pageState: Pick<MonitorOverviewPageState, 'page' | 'perPage'>;
+  localPageOfItems: OverviewStatusMetaData[];
+  localPagination: EuiBasicTableProps<OverviewStatusMetaData>['pagination'];
+}): {
+  isPaginated: boolean;
+  pageOfItems: OverviewStatusMetaData[];
+  pagination: EuiBasicTableProps<OverviewStatusMetaData>['pagination'];
+} {
+  const isPaginated = enableServerPagination && status?.configs != null;
+
+  if (!isPaginated) {
+    return { isPaginated: false, pageOfItems: localPageOfItems, pagination: localPagination };
+  }
+
+  return {
+    isPaginated: true,
+    pageOfItems: items,
+    pagination: {
+      pageIndex: (pageState.page ?? 1) - 1,
+      pageSize: pageState.perPage ?? 20,
+      totalItemCount: total ?? items.length,
+      pageSizeOptions: [10, 20, 50, 100],
+    },
+  };
+}
+
+/**
  * Map an EUI table `onChange` to overview pageState. EUI always includes the
  * current `page` on sort clicks, which would otherwise bypass the reducer's
  * "reset to page 1 on non-pagination changes" guard.
@@ -73,12 +124,15 @@ const EMPTY_ITEMS: OverviewStatusMetaData[] = [];
 export const MonitorsTable = ({
   items,
   setFlyoutConfigCallback,
+  enableServerPagination = true,
 }: {
   items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  // Set to `false` when `items` is a subset of the overall result set (e.g. a
+  // single group's monitors) — see `resolveTablePaginationState` above.
+  enableServerPagination?: boolean;
 }) => {
   const { loaded, status, loading, total } = useOverviewStatusState();
-  const isPaginated = status?.configs != null;
 
   const {
     pageOfItems: localPageOfItems,
@@ -93,15 +147,15 @@ export const MonitorsTable = ({
   const isFlyoutOpen = Boolean(flyoutConfig?.configId);
   const { sortField, sortOrder } = pageState;
 
-  const pageOfItems = isPaginated ? items : localPageOfItems;
-  const pagination = isPaginated
-    ? {
-        pageIndex: (pageState.page ?? 1) - 1,
-        pageSize: pageState.perPage ?? 20,
-        totalItemCount: total ?? items.length,
-        pageSizeOptions: [10, 20, 50, 100],
-      }
-    : localPagination;
+  const { isPaginated, pageOfItems, pagination } = resolveTablePaginationState({
+    enableServerPagination,
+    items,
+    status,
+    total,
+    pageState,
+    localPageOfItems,
+    localPagination,
+  });
 
   useOverviewTrendsRequests(isFlyoutOpen ? EMPTY_ITEMS : pageOfItems);
 
