@@ -55,6 +55,12 @@ export enum DataGridDensity {
   NORMAL = 'normal',
 }
 
+/** Identifies the experience represented by a Discover tab. */
+export enum DiscoverTabType {
+  Default = 'default',
+  Metrics = 'metrics',
+}
+
 export enum UnifiedHistogramSuggestionType {
   unsupported = 'unsupported',
   lensSuggestion = 'lensSuggestion',
