@@ -53,6 +53,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import { Subject } from 'rxjs';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -156,6 +157,7 @@ interface State {
   isCustomEditorOpen: boolean;
   localFilter: Filter;
   isLoadingDataView?: boolean;
+  resetVisibleHeight$: Subject<void>;
 }
 
 class FilterEditorComponent extends Component<FilterEditorProps, State> {
@@ -170,6 +172,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       isCustomEditorOpen: this.isUnknownFilterType() || !!this.props.filter?.meta.isMultiIndex,
       localFilter: dataView ? merge({}, props.filter) : buildEmptyFilter(false),
       isLoadingDataView: !Boolean(dataView),
+      resetVisibleHeight$: new Subject(),
     };
   }
 
@@ -240,7 +243,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     );
 
     return (
-      <ScrollableContainer>
+      <ScrollableContainer resetVisibleHeight$={this.state.resetVisibleHeight$}>
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
             <EuiFlexItem>
@@ -614,6 +617,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       );
     }
 
+    this.state.resetVisibleHeight$.next();
     this.setState({ localFilter: newFilter });
     this.props.onLocalFilterUpdate?.(newFilter);
   };

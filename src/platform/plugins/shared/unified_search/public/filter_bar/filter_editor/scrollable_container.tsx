@@ -8,7 +8,8 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { Subject } from 'rxjs';
 
 function getVisibleHeightInViewport(element: HTMLDivElement) {
   const rect = element.getBoundingClientRect();
@@ -23,7 +24,13 @@ function getVisibleHeightInViewport(element: HTMLDivElement) {
 
 // Provides a scrollable container that dynamically sets maxHeight to the element's visible height in the viewport,
 // ensuring the content remains scrollable without overflowing off-screen.
-export function ScrollableContainer({ children }: { children: ReactNode }) {
+export function ScrollableContainer({
+  children,
+  resetVisibleHeight$,
+}: {
+  children: ReactNode;
+  resetVisibleHeight$: Subject<void>;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleHeight, setVisibleHeigth] = useState(0);
 
@@ -40,6 +47,13 @@ export function ScrollableContainer({ children }: { children: ReactNode }) {
       resizeObserver.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    const subscription = resetVisibleHeight$.subscribe(() => setVisibleHeigth(0));
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [resetVisibleHeight$]);
 
   return (
     <div
