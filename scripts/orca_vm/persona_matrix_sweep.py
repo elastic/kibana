@@ -1138,6 +1138,10 @@ def main() -> int:
                          "runs a stride slice (PERSONA_MATRIX_SHARD=i/N). Use "
                          "for slow models: GLM-5.3 needs ~174min on one VM, "
                          "~45min at --shards 4. Frontier models need 1.")
+    ap.add_argument("--only-shard", type=int, default=None,
+                    help="backfill a single shard i of a --shards N sweep; "
+                         "keeps VM names + example stride identical to the "
+                         "original run so the golden gate merges cleanly")
     ap.add_argument("--suite", default="security-persona-matrix",
                     choices=sorted(SUITE_PROFILES),
                     help="eval suite to sweep; selects overlays, VM prefix and doc gate")
@@ -1232,6 +1236,19 @@ def main() -> int:
     else:
         units = [(m, f"{i}/{args.shards}")
                  for m in models for i in range(1, args.shards + 1)]
+    # --only-shard: backfill one failed shard of a larger sweep without
+    # re-provisioning the passing shards. Must be used with --shards N so the
+    # shard string (and thus VM name + example stride) matches the original.
+    if args.only_shard is not None:
+        if args.shards == 1:
+            print("--only-shard requires --shards > 1", flush=True)
+            return 2
+        keep = f"{args.only_shard}/{args.shards}"
+        units = [(m, s) for m, s in units if s == keep]
+        if not units:
+            print(f"--only-shard {keep}: no unit matched", flush=True)
+            return 2
+        print(f"only-shard backfill: {keep}", flush=True)
     print(f"sweep models ({len(models)}): {', '.join(models)}", flush=True)
     # Fail before provisioning: a missing local asset otherwise surfaces as an
     # scp error on every VM, after the whole farm is already booted and billing.
