@@ -48,6 +48,7 @@ export type { EpisodeActionRow } from './episode_actions_query';
 export { buildEpisodeActionsHistoryQuery } from './episode_actions_history_query';
 export type {
   EpisodeActionHistoryEntry,
+  RawEpisodeActionHistoryEntry,
   BuildEpisodeActionsHistoryQueryOptions,
 } from './episode_actions_history_query';
 
