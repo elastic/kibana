@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { KbnPaletteId } from '@kbn/palettes';
 
 /**
@@ -41,3 +42,8 @@ export interface GradientColor {
 }
 
 export type Color = ColorCode | CategoricalColor | LoopColor | GradientColor;
+
+export interface ThemeColor {
+  type: 'theme';
+  color: Record<EuiThemeColorModeStandard, ColorCode | CategoricalColor>;
+}

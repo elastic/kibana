@@ -19,6 +19,7 @@ import type { ColorRule, RuleMatch, RuleMatchRaw } from '../../config/types';
 import type { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 import { DuplicateWarning } from './duplicate_warning';
 import { getValueKey } from '../../color/utils';
+import { OTHER_BUCKET_VALUE } from '../../special_tokens';
 
 export const isNotNull = <T,>(value: T | null): value is NonNullable<T> => value !== null;
 
@@ -48,6 +49,11 @@ export const Match: React.FC<{
   const rawCategoryValueMap = categories.reduce<Map<string, RawValue>>(
     (acc, value: SerializedValue) => {
       const option = getOptionForRawValue(value);
+
+      if (option.key === OTHER_BUCKET_VALUE) {
+        return acc;
+      }
+
       availableOptions.push(option);
       acc.set(option.key, value);
       return acc;

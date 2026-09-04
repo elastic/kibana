@@ -7,7 +7,7 @@
 
 import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
 import type { ColorMapping } from '@kbn/coloring';
-import { DEFAULT_COLOR_MAPPING_CONFIG, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, DEFAULT_OTHER_ASSIGNMENT } from '@kbn/coloring';
 import { KbnPalette } from '@kbn/palettes';
 import { faker } from '@faker-js/faker';
 
@@ -69,7 +69,7 @@ const MANUAL_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
 
 const specialAssignmentsPalette: ColorMapping.Config['specialAssignments'] = [
   {
-    ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
+    ...DEFAULT_OTHER_ASSIGNMENT,
     color: {
       type: 'categorical',
       paletteId: KbnPalette.Kibana7,
@@ -79,7 +79,7 @@ const specialAssignmentsPalette: ColorMapping.Config['specialAssignments'] = [
 ];
 const specialAssignmentsCustom1: ColorMapping.Config['specialAssignments'] = [
   {
-    ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
+    ...DEFAULT_OTHER_ASSIGNMENT,
     color: {
       type: 'colorCode',
       colorCode: '#501a0e',
@@ -88,7 +88,7 @@ const specialAssignmentsCustom1: ColorMapping.Config['specialAssignments'] = [
 ];
 const specialAssignmentsCustom2: ColorMapping.Config['specialAssignments'] = [
   {
-    ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
+    ...DEFAULT_OTHER_ASSIGNMENT,
     color: {
       type: 'colorCode',
       colorCode: 'red',

@@ -13,6 +13,7 @@ import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorSwatch } from '../color_picker/color_swatch';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';
 import type { ColorCode, CategoricalColor } from '../../config/types';
+import type { ColorMapping } from '../../config';
 
 export function SpecialAssignment({
   assignmentColor,
@@ -21,6 +22,7 @@ export function SpecialAssignment({
   palettes,
   isDarkMode,
   total,
+  type,
 }: {
   isDarkMode: boolean;
   index: number;
@@ -28,6 +30,7 @@ export function SpecialAssignment({
   palette: IKbnPalette;
   palettes: KbnPalettes;
   total: number;
+  type: ColorMapping.Config['specialAssignments'][number]['rules'][number]['type'];
 }) {
   const dispatch = useDispatch();
   return (
@@ -44,7 +47,7 @@ export function SpecialAssignment({
       onColorChange={(color) => {
         dispatch(
           updateSpecialAssignmentColor({
-            assignmentIndex: index,
+            rule: type,
             color,
           })
         );

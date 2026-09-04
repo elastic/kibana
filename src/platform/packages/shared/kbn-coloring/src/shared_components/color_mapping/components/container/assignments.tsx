@@ -43,6 +43,7 @@ import { selectColorMode, selectComputedAssignments, selectPalette } from '../..
 import type { ColorMappingInputData } from '../../categorical_color_mapping';
 import type { ColorMapping } from '../../config';
 import { getColorAssignmentMatcher } from '../../color/color_assignment_matcher';
+import { OTHER_BUCKET_VALUE } from '../../special_tokens';
 
 export function Assignments({
   data,
@@ -69,14 +70,25 @@ export function Assignments({
   const colorMode = useSelector(selectColorMode);
   const assignments = useSelector(selectComputedAssignments);
   const assignmentMatcher = useMemo(() => getColorAssignmentMatcher(assignments), [assignments]);
+  const assignableData = useMemo((): ColorMappingInputData => {
+    if (data.type !== 'categories') {
+      return data;
+    }
+    return {
+      ...data,
+      categories: data.categories.filter(
+        (category) => deserializeField(category) !== OTHER_BUCKET_VALUE
+      ),
+    };
+  }, [data]);
   const unmatchingCategories = useMemo(() => {
-    return data.type === 'categories'
-      ? data.categories.filter((category) => {
+    return assignableData.type === 'categories'
+      ? assignableData.categories.filter((category) => {
           const rawValue = deserializeField(category);
           return !assignmentMatcher.hasMatch(rawValue);
         })
       : [];
-  }, [data, assignmentMatcher]);
+  }, [assignableData, assignmentMatcher]);
 
   const onClickAddNewAssignment = useCallback(() => {
     const lastCategorical = assignments.findLast((a) => {
@@ -155,7 +167,7 @@ export function Assignments({
             return (
               <Assignment
                 key={i}
-                data={data}
+                data={assignableData}
                 index={i}
                 assignments={assignments}
                 colorMode={colorMode}
@@ -252,7 +264,7 @@ export function Assignments({
                     disableScreenReaderOutput
                   >
                     <EuiButtonIcon
-                      iconType="boxesVertical"
+                      iconType="ellipsis"
                       color="text"
                       aria-label={i18n.translate(
                         'coloring.colorMapping.container.OpenAdditionalActionsButtonLabel',

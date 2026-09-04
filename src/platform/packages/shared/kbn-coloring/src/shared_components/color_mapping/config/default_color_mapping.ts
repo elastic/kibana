@@ -11,10 +11,11 @@ import type { KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '.';
 import { getColor, getGradientColorScale } from '../color/color_handling';
-import { getOtherAssignmentColor } from './utils';
+import { getOtherAssignmentColor, getOtherBucketAssignment } from './utils';
+import { getColorAssignmentMatcher } from '../color/color_assignment_matcher';
+import { OTHER_BUCKET_VALUE } from '../special_tokens';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
-export const DEFAULT_OTHER_ASSIGNMENT_INDEX = 0;
 
 export const DEFAULT_OTHER_ASSIGNMENT: ColorMapping.AssignmentBase<
   ColorMapping.RuleOthers,
@@ -24,12 +25,31 @@ export const DEFAULT_OTHER_ASSIGNMENT: ColorMapping.AssignmentBase<
   color: { type: 'loop' },
   touched: false,
 };
+
+export const DEFAULT_OTHERS_BUCKET_ASSIGNMENT: ColorMapping.AssignmentBase<
+  ColorMapping.RuleOthersBucket,
+  ColorMapping.ThemeColor
+> = {
+  rules: [{ type: 'others_bucket' }],
+  color: {
+    type: 'theme',
+    color: {
+      LIGHT: { type: 'categorical', paletteId: KbnPalette.Neutral, colorIndex: 1 },
+      // neutral palette is ordered from light to dark in both themes, so we mirror
+      // the index to keep a comparable contrast against the background for each
+      // theme
+      DARK: { type: 'categorical', paletteId: KbnPalette.Neutral, colorIndex: 3 },
+    },
+  },
+  touched: false,
+};
+
 /**
  * The default color mapping used in Kibana, starts with the EUI color palette
  */
 export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
   assignments: [],
-  specialAssignments: [DEFAULT_OTHER_ASSIGNMENT],
+  specialAssignments: [DEFAULT_OTHER_ASSIGNMENT, DEFAULT_OTHERS_BUCKET_ASSIGNMENT],
   paletteId: KbnPalette.Default,
   colorMode: {
     type: 'categorical',
@@ -67,16 +87,36 @@ export function getColorsFromMapping(
     return Array.from({ length: 6 }, (d, i) => colorScale(i / 6));
   } else {
     const palette = palettes.get(paletteId);
+    const assignmentMatcher = getColorAssignmentMatcher(assignments);
 
     const otherColor = getOtherAssignmentColor(specialAssignments, assignments);
+
     const otherColors = otherColor.isLoop
       ? Array.from({ length: palette.colorCount }, (d, i) => palette.getColor(i))
       : [getColor(otherColor.color, palettes)];
+
+    const otherAssignmentIndex = assignmentMatcher.getIndex(OTHER_BUCKET_VALUE);
+
+    const otherAssignment =
+      otherAssignmentIndex !== -1 && assignments[otherAssignmentIndex].rules.length === 1
+        ? assignments[otherAssignmentIndex]
+        : getOtherBucketAssignment(specialAssignments)?.assignment;
+
+    const otherBucketColor =
+      otherAssignment && otherAssignment.color.type !== 'gradient'
+        ? getColor(otherAssignment.color, palettes, isDarkMode)
+        : '';
+
     return [
-      ...assignments.map((a) => {
-        return a.color.type === 'gradient' ? '' : getColor(a.color, palettes);
+      ...assignments.map((a, i) => {
+        if (i === otherAssignmentIndex) {
+          // covered by the other bucket color
+          if (a.rules.length === 1) return '';
+        }
+        return a.color.type === 'gradient' ? '' : getColor(a.color, palettes, isDarkMode);
       }),
       ...otherColors,
+      otherBucketColor,
     ].filter((color) => color !== '');
   }
 }

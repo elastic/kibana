@@ -87,6 +87,13 @@ export interface RuleOthers {
 }
 
 /**
+ * A specific rule that applies to Others aggregation bucket
+ */
+export interface RuleOthersBucket {
+  type: 'others_bucket';
+}
+
+/**
  * All available color rules
  */
 export type ColorRule = RuleMatchRaw | RuleMatch | RuleRegExp | RuleRange;

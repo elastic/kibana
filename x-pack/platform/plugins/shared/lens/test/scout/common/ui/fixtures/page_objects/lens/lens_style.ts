@@ -337,15 +337,27 @@ export class LensStyle {
   }
 
   /**
-   * Sets a hex value in the currently open EUI color picker (dimension editor color mode),
-   * replacing any existing value. The recolor is debounced, so callers should assert the
-   * settled effect (computed tile/badge color) rather than the input value.
+   * Sets a hex value in the currently open EUI color picker, replacing any existing value.
+   * Defaults to the dimension-editor's `euiColorPickerAnchor`. The recolor is debounced, so
+   * callers should assert the settled effect (computed tile/badge color) rather than the input.
    */
-  async setColorPickerValue(hex: string) {
-    const colorPicker = this.page.testSubj.locator('euiColorPickerAnchor');
+  async setColorPickerValue(hex: string, testSubj: string = 'euiColorPickerAnchor') {
+    const colorPicker = this.page.testSubj.locator(testSubj);
     await colorPicker.clear();
     await colorPicker.fill(hex);
     await this.page.keyboard.press('Tab');
+  }
+
+  async setOtherBucketColorMode(mode: 'none' | 'neutral' | 'static') {
+    await this.page.testSubj.click(`lns-colorMapping-otherBucketMode-${mode}`);
+  }
+
+  /** Sets the custom hex value for the "Other" bucket in the color-mapping popover. */
+  async setOtherBucketCustomHex(hex: string) {
+    const otherBucketConfig = this.page.testSubj.locator('lns-colorMapping-otherBucketConfig');
+    await otherBucketConfig.getByTestId('lns-colorMapping-colorSwatch-0').click();
+    await this.page.testSubj.click('lns-colorMapping-colorPicker-tab-custom');
+    await this.setColorPickerValue(hex, 'lns-colorMapping-colorPicker-custom-input');
   }
 
   /** Enables the "fill below" style for the reference line in the open dimension editor. */

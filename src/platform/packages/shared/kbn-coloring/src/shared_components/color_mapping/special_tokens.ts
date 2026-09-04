@@ -10,10 +10,12 @@
 import { i18n } from '@kbn/i18n';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
 
+export const OTHER_BUCKET_VALUE = '__other__';
+
 // TODO: move in some data/table related package
 export const SPECIAL_TOKENS_STRING_CONVERSION = new Map([
   [
-    '__other__',
+    OTHER_BUCKET_VALUE,
     i18n.translate('coloring.colorMapping.terms.otherBucketLabel', {
       defaultMessage: 'Other',
     }),

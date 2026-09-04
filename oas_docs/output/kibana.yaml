@@ -99104,6 +99104,12 @@ components:
           enum:
             - categorical
           type: string
+        other:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_themeColor'
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorFromPalette'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_color_code'
         palette:
           description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
@@ -99490,6 +99496,17 @@ components:
       default:
         mapping: []
         mode: categorical
+        other:
+          color:
+            DARK:
+              index: 3
+              palette: neutral
+              type: from_palette
+            LIGHT:
+              index: 1
+              palette: neutral
+              type: from_palette
+          type: theme
         palette: default
       description: Color mapping for dimension values, either categorical (for specific values) or as a gradient.
       title: Color Mapping
@@ -105243,6 +105260,12 @@ components:
           enum:
             - gradient
           type: string
+        other:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_themeColor'
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorFromPalette'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_color_code'
         palette:
           description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
@@ -122735,6 +122758,26 @@ components:
       required:
         - type
       title: Terms Rank By Significance
+      type: object
+    Kibana_HTTP_APIs_themeColor:
+      additionalProperties: false
+      description: A color that switches based on the light/dark theme mode.
+      properties:
+        color:
+          additionalProperties:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorFromPalette'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_color_code'
+          description: Color per theme color mode (LIGHT/DARK).
+          type: object
+        type:
+          enum:
+            - theme
+          type: string
+      required:
+        - type
+        - color
+      title: Theme Color
       type: object
     Kibana_HTTP_APIs_transform-health-create-rule-body-alerting:
       additionalProperties: false

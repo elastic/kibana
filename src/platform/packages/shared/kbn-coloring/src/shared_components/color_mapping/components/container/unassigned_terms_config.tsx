@@ -87,7 +87,7 @@ export function UnassignedTermsConfig({
             onChange={(optionId) => {
               dispatch(
                 updateSpecialAssignmentColor({
-                  assignmentIndex: 0,
+                  rule: 'other',
                   color:
                     optionId === 'loop'
                       ? {
@@ -116,12 +116,13 @@ export function UnassignedTermsConfig({
           >
             {data.type === 'categories' && otherAssignmentColor.isLoop === false && (
               <SpecialAssignment
+                type="other"
                 index={0}
                 palette={palette}
                 isDarkMode={isDarkMode}
                 palettes={palettes}
                 assignmentColor={otherAssignmentColor.color}
-                total={specialAssignments.length}
+                total={1}
               />
             )}
           </div>
