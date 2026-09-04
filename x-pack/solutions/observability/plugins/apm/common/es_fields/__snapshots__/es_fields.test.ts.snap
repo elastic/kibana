@@ -51,6 +51,14 @@ exports[`Error ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
 
 exports[`Error ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
 
+exports[`Error ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_TOOL_NAME 1`] = `undefined`;
+
 exports[`Error ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
 
 exports[`Error ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
@@ -557,6 +565,14 @@ exports[`Span ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
 
 exports[`Span ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
 
+exports[`Span ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_TOOL_NAME 1`] = `undefined`;
+
 exports[`Span ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
 
 exports[`Span ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
@@ -1045,6 +1061,14 @@ exports[`Transaction ATTRIBUTE_GEN_AI_RESPONSE_MODEL 1`] = `undefined`;
 exports[`Transaction ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
 
 exports[`Transaction ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_TOOL_NAME 1`] = `undefined`;
 
 exports[`Transaction ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
 
