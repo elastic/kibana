@@ -64,6 +64,7 @@ import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { MIDDLE_TRUNCATION_PROPS, SINGLE_SELECTION_AS_TEXT_PROPS } from './lib/helpers';
 import { flattenFilters } from '../lib/flatten_filters';
 import { filterBadgeStyle, filterPreviewLabelStyle } from './filter_editor.styles';
+import { ScrollableContainer } from './scrollable_container';
 
 const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
 
@@ -239,7 +240,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     );
 
     return (
-      <div>
+      <ScrollableContainer>
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
             <EuiFlexItem>
@@ -310,7 +311,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             <EuiFlexItem />
           </EuiFlexGroup>
         </EuiPopoverFooter>
-      </div>
+      </ScrollableContainer>
     );
   }
 

@@ -26,7 +26,6 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import { layoutVar } from '@kbn/core-chrome-layout';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import type { FilterPanelOption } from '../../types';
@@ -383,8 +382,6 @@ export const getFilterItemEditorContainerStyle = ({ euiTheme }: UseEuiTheme) =>
   css({
     width: 1200,
     maxWidth: '100%',
-    maxHeight: `calc(80vh - max(${layoutVar('application.content.top', '0px')}, 80px))`,
-    overflow: 'auto',
   });
 
 const filterItemStyles = {
