@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mergeWith } from 'lodash';
 import { parse } from 'yaml';
 
 import type { Logger } from '@kbn/logging';
@@ -31,6 +32,8 @@ import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
 import { hasDynamicSignalTypes } from '../../../common/services';
+
+import { buildOtelEsExporterConfig, parseYamlRecord } from './otel_output_settings';
 
 /**
  * Builds OpenTelemetry Collector fragments merged into the full agent policy.
@@ -740,29 +743,19 @@ function attachOtelcolExporter(
   return config;
 }
 
-function parseOtelExporterConfigYaml(
+const parseOtelExporterConfigYaml = (
   yaml: string | null | undefined,
   logger?: Logger
-): Record<string, unknown> {
-  if (!yaml) return {};
-  try {
-    const parsed = parse(yaml);
-    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-    logger?.warn(
-      'otel_exporter_config_yaml did not parse to an object, skipping extra exporter config'
-    );
-    return {};
-  } catch (e) {
+): Record<string, unknown> =>
+  parseYamlRecord(yaml, (e) =>
     // Malformed YAML — skip extra config rather than crashing policy generation.
     // The UI validates YAML before saving; this path is only reachable via direct API writes.
     logger?.warn(
-      `Failed to parse otel_exporter_config_yaml, skipping extra exporter config: ${e.message}`
-    );
-    return {};
-  }
-}
+      `Failed to parse otel_exporter_config_yaml, skipping extra exporter config: ${
+        e instanceof Error ? e.message : String(e)
+      }`
+    )
+  );
 
 function generateOtelcolExporter(
   dataOutput: Output,
@@ -780,15 +773,31 @@ function generateOtelcolExporter(
         dataOutput.otel_exporter_config_yaml,
         logger
       );
+      // Batching, queueing, retry and compression settings translated from the Fleet output,
+      // so this exporter behaves like the one the agent generates for Beats-based inputs.
+      // User-supplied exporter YAML wins over the translated values at the individual field
+      // level (deep merge). Arrays in the user YAML are replaced wholesale rather than merged
+      // position-by-position (e.g. retry_on_status is replaced, not extended).
+      const outputExporterConfig = buildOtelEsExporterConfig(dataOutput);
+      // Deep-merge: translated settings are the base; user YAML overrides individual fields;
+      // arrays from user YAML replace rather than position-merge. endpoints/auth are forced
+      // last so they always take precedence regardless of what the user YAML contains.
+      const mergedExporterConfig = mergeWith(
+        {},
+        outputExporterConfig,
+        extraExporterConfig,
+        (_dst: unknown, src: unknown) => (Array.isArray(src) ? src : undefined)
+      ) as Record<string, unknown>;
 
-      // When otel_disable_beatsauth is set, skip the beatsauth extension entirely and
-      // pass only the endpoint + any user-supplied exporter YAML to the ES exporter.
+      // When otel_disable_beatsauth is set, skip the beatsauth extension entirely. The
+      // output's own exporter settings still apply — beatsauth only carries transport
+      // (ssl/proxy/timeout) configuration.
       if (dataOutput.otel_disable_beatsauth) {
         return {
           extensions: {},
           exporters: {
             [`elasticsearch/${outputID}`]: {
-              ...extraExporterConfig,
+              ...mergedExporterConfig,
               endpoints: dataOutput.hosts,
             },
           },
@@ -802,7 +811,7 @@ function generateOtelcolExporter(
         extensions: hasBeatsauthConfig ? { [beatsauthID]: beatsauthConfig } : {},
         exporters: {
           [`elasticsearch/${outputID}`]: {
-            ...extraExporterConfig,
+            ...mergedExporterConfig,
             // endpoints and auth always take precedence over user-supplied YAML
             endpoints: dataOutput.hosts,
             ...(hasBeatsauthConfig ? { auth: { authenticator: beatsauthID } } : {}),
