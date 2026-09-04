@@ -281,6 +281,15 @@ describe('kevAdapter', () => {
       kevAdapter.run(makeSource(), makeContext(JSON.stringify({ catalogVersion: '2024.01.01' })))
     ).rejects.toThrow(/vulnerabilities array/);
   });
+
+  it('does not blame JSON parsing when the feed parsed but has no vulnerabilities array', async () => {
+    // Well-formed JSON that is missing the array must not be reported as a parse
+    // failure: that sends an operator debugging a feed-schema change into the
+    // parser instead.
+    await expect(
+      kevAdapter.run(makeSource(), makeContext(JSON.stringify({ catalogVersion: '2024.01.01' })))
+    ).rejects.toThrow(/^(?!.*not valid JSON).*vulnerabilities array/s);
+  });
 });
 
 describe('kev enrich isolation', () => {

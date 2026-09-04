@@ -10,7 +10,7 @@ import { buildFingerprint } from '../fingerprint';
 import { severityScore } from '../../services/severity';
 import { buildReportContent } from '../../services/report_content';
 import { normalizeProvenanceUrl } from '../../services/provenance_url';
-import { resolveCatalogSourceUrl } from '../../../../common/threat_intel';
+import { GLOBAL_SPACE_ID, resolveCatalogSourceUrl } from '../../../../common/threat_intel';
 import type { FetchAdapter, NormalizedReport, SourceHit, AdapterRunContext } from '../types';
 
 /**
@@ -184,7 +184,7 @@ export const kevAdapter: FetchAdapter = {
     const feedUrl = readFeedUrl(source);
     const provenanceUrl = normalizeProvenanceUrl(feedUrl);
     const ingestedAt = now().toISOString();
-    const spaceId = source._source.space_id ?? '*';
+    const spaceId = source._source.space_id ?? GLOBAL_SPACE_ID;
 
     const response = await fetchUrl(feedUrl, {
       abortSignal,
@@ -199,23 +199,19 @@ export const kevAdapter: FetchAdapter = {
       );
     }
 
-    let envelope: KevEnvelope;
+    let parsed: unknown;
     try {
-      const parsed = JSON.parse(response.body) as unknown;
-      if (!isRecord(parsed) || !Array.isArray(parsed.vulnerabilities)) {
-        throw new Error('KEV feed missing vulnerabilities array');
-      }
-      envelope = parsed as unknown as KevEnvelope;
+      parsed = JSON.parse(response.body) as unknown;
     } catch (err) {
       throw new Error(`KEV feed response is not valid JSON: ${(err as Error).message}`);
     }
 
-    const vulnerabilities = envelope.vulnerabilities;
-    if (!Array.isArray(vulnerabilities)) {
-      throw new Error(
-        `KEV feed missing vulnerabilities array (catalogVersion=${envelope.catalogVersion})`
-      );
+    if (!isRecord(parsed) || !Array.isArray(parsed.vulnerabilities)) {
+      throw new Error('KEV feed missing vulnerabilities array');
     }
+
+    const envelope = parsed as unknown as KevEnvelope;
+    const vulnerabilities = envelope.vulnerabilities;
 
     const reports: NormalizedReport[] = [];
     for (const rawEntry of vulnerabilities) {
