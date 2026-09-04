@@ -36,9 +36,7 @@ export class Chrome {
     this.searchInput = page.testSubj.locator('nav-search-input');
     this.searchNoResults = page.getByRole('status').getByTestId('nav-search-no-results');
     this.nextChromeHeader = page.testSubj.locator('chromeNextGlobalHeader');
-    this.searchButton = page.testSubj
-      .locator('chromeNextGlobalHeaderSearchButton')
-      .or(page.testSubj.locator('nav-search-reveal'));
+    this.searchButton = page.testSubj.locator('chromeNextGlobalHeaderSearchButton');
   }
 
   async isNextChrome(): Promise<boolean> {

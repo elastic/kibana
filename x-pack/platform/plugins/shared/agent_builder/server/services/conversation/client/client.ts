@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { GetResponse, SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
@@ -21,6 +21,7 @@ import {
   type ConversationAccessControlEntry,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   isConversationAccessControlRole,
@@ -52,19 +53,21 @@ import {
 } from '../access_control';
 import type {
   AddAttachmentsToLastRoundRequest,
+  AppendEventsRequest,
   ConversationCreateRequest,
   ConversationUpdatableFields,
   ConversationUpdateRequest,
   ConversationListOptions,
   NormalizedConversation,
+  ReplaceRoundEventsRequest,
   ConversationListResult,
   UpsertRoundRequest,
 } from './types';
-import { createSpaceDslFilter } from '../../../utils/spaces';
+import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
 import { MAX_CONVERSATIONS_PER_PAGE, MAX_RESULT_WINDOW } from '../../../../common/constants';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
-import type { ConversationStorage } from './storage';
-import { createStorage } from './storage';
+import type { ConversationProperties, ConversationStorage } from './storage';
+import { conversationIndexName, createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
@@ -115,6 +118,14 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  appendEvents(
+    request: AppendEventsRequest,
+    options?: { access: ConversationAccess }
+  ): Promise<Conversation>;
+  replaceRoundEvents(
+    request: ReplaceRoundEventsRequest,
+    options?: { access: ConversationAccess }
+  ): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
   setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
   updateRoundFeedback(
@@ -162,6 +173,7 @@ export const createClient = ({
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
     storage,
+    esClient,
     user,
     space,
     agentRegistry,
@@ -173,6 +185,7 @@ export const createClient = ({
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
+  private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
@@ -180,6 +193,7 @@ class ConversationClientImpl implements ConversationClient {
 
   constructor({
     storage,
+    esClient,
     user,
     space,
     agentRegistry,
@@ -187,6 +201,7 @@ class ConversationClientImpl implements ConversationClient {
     onMetadataPatched,
   }: {
     storage: ConversationStorage;
+    esClient: ElasticsearchClient;
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
@@ -194,6 +209,7 @@ class ConversationClientImpl implements ConversationClient {
     onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
   }) {
     this.storage = storage;
+    this.esClient = esClient;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
@@ -502,6 +518,92 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
+  /** Appends timeline events onto a conversation.*/
+  async appendEvents(
+    request: AppendEventsRequest,
+    options: { access: ConversationAccess } = { access: 'converse' }
+  ): Promise<Conversation> {
+    const { id: conversationId, events, title, status, state, attachments, workspaceId } = request;
+    const { access } = options;
+
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        const currentEvents = current.events ?? [];
+        const existingIds = new Set(currentEvents.map((event) => event.id));
+        const newEvents = events.filter((event) => !existingIds.has(event.id));
+        const appended = [...currentEvents, ...newEvents];
+        return {
+          events: appended,
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+          ...(title !== undefined ? { title } : {}),
+          ...(status ? { status } : {}),
+          ...(state ? { state } : {}),
+          ...(attachments
+            ? {
+                attachments: reconcileAttachments({
+                  snapshot: attachments.snapshot,
+                  stored: current.attachments ?? [],
+                  produced: attachments.produced,
+                }),
+              }
+            : {}),
+          ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+          read_by: [],
+          read: false,
+        };
+      },
+    });
+  }
+
+  async replaceRoundEvents(
+    request: ReplaceRoundEventsRequest,
+    options: { access: ConversationAccess } = { access: 'converse' }
+  ): Promise<Conversation> {
+    const {
+      id: conversationId,
+      roundId,
+      events,
+      title,
+      status,
+      state,
+      attachments,
+      workspaceId,
+    } = request;
+    const { access } = options;
+    const roundPrefix = `${roundId}::`;
+
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        const currentEvents = current.events ?? [];
+        const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
+        const replaced = [...nonRoundEvents, ...events];
+        return {
+          events: replaced,
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+          ...(title !== undefined ? { title } : {}),
+          ...(status ? { status } : {}),
+          ...(state ? { state } : {}),
+          ...(attachments
+            ? {
+                attachments: reconcileAttachments({
+                  snapshot: attachments.snapshot,
+                  stored: current.attachments ?? [],
+                  produced: attachments.produced,
+                }),
+              }
+            : {}),
+          ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+          read_by: [],
+          read: false,
+        };
+      },
+    });
+  }
+
   async markRead(conversationId: string, read: boolean): Promise<Conversation> {
     return this.writeConversation({
       conversationId,
@@ -723,29 +825,40 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {
-    const response = await this.storage.getClient().search({
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      seq_no_primary_term: true,
-      query: {
-        bool: {
-          filter: [createSpaceDslFilter(this.space), { term: { _id: conversationId } }],
-        },
-      },
-    });
+    let response: GetResponse<ConversationProperties>;
+    try {
+      // Bypass the storage adapter (whose `get` still routes through `search`) and use the raw
+      // ES `get` API — reads by id must be immediate, not subject to search-refresh latency.
+      response = await this.esClient.get<ConversationProperties>({
+        index: conversationIndexName,
+        id: conversationId,
+      });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404 || err?.statusCode === 404) {
+        return undefined;
+      }
+      throw err;
+    }
 
-    const hit = response.hits.hits[0];
-
-    if (!hit || !hit._id || !hit._source) {
+    if (!response.found || !response._source) {
       return undefined;
     }
 
-    if (!isConversationDocument(hit)) {
+    // Mirror `createSpaceDslFilter`: any space-mismatched hit is treated as not-found so callers
+    // cannot cross a space boundary via a known id.
+    const docSpace = response._source.space;
+    const spaceMatches = isDefaultSpace(this.space)
+      ? docSpace === undefined || docSpace === this.space
+      : docSpace === this.space;
+    if (!spaceMatches) {
+      return undefined;
+    }
+
+    if (!isConversationDocument(response as Partial<Document>)) {
       throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
     }
 
-    return hit;
+    return response as Document;
   }
 
   private async findChildConversationIds(parentId: string): Promise<string[]> {
