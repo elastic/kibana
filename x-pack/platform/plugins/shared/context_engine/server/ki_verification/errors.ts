@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { transformUpdateConnectorResponse } from './v1';
+export class KiVerificationInputError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'KiVerificationInputError';
+  }
+}

@@ -23,7 +23,10 @@ import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { z } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
+import { getConnectorSpec } from '@kbn/connector-specs';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
+import { generateConfigSchema } from '../../../../lib/single_file_connectors/generate_config_schema';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -1209,6 +1212,57 @@ describe('create()', () => {
       });
 
       expect(result.isDeprecated).toBe(true);
+    });
+  });
+
+  describe('inbound ingress credentials', () => {
+    const inboundSpec = getConnectorSpec('.inboundWebhook');
+    if (inboundSpec === undefined) {
+      throw new Error('Expected .inboundWebhook spec');
+    }
+
+    const inboundContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: 'default',
+    };
+
+    beforeEach(() => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.inboundWebhook',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: generateConfigSchema(inboundSpec.schema),
+            secrets: { schema: z4.object({}) },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes, options) => ({
+        id: options?.id ?? 'mock-saved-object-id',
+        type: 'action',
+        attributes,
+        references: [],
+      }));
+    });
+
+    test('does not mint credentials or return secrets', async () => {
+      const result = await create({
+        context: inboundContext,
+        action: {
+          name: 'Sales ingress',
+          actionTypeId: '.inboundWebhook',
+          config: { ingestTokenHash: 'a'.repeat(64) },
+          secrets: {},
+        },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        config: { ingestTokenHash?: string };
+      };
+
+      expect(result).not.toHaveProperty('secrets');
+      expect(saved.config.ingestTokenHash).toBeUndefined();
     });
   });
 });
