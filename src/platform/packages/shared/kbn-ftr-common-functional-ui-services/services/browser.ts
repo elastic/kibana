@@ -58,9 +58,8 @@ class BrowserService extends FtrService {
   }
 
   /**
-   * Runs a navigation command, retrying once if it is blocked by a `beforeunload` dialog
-   * leaked by a prior spec. ChromeDriver 148+ rejects every window command in that state
-   * instead of honouring `unhandledPromptBehavior` (see #271881, #289092).
+   * Retries a navigation once after dismissing a `beforeunload` dialog leaked by a prior
+   * spec, which ChromeDriver 148+ no longer handles via `unhandledPromptBehavior` (#289092).
    */
   private async withOpenDialogRetry<T>(command: () => Promise<T>): Promise<T> {
     try {

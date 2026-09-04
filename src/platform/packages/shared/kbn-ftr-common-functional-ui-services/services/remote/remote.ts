@@ -90,9 +90,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     if (lifecycle.isAborting) {
       return;
     }
-    // A `beforeunload` dialog leaked by the previous suite's teardown can still be open
-    // here, since `afterTestSuite` only clears it on the browser we control, not one a
-    // spec navigated away from directly (see #271881, #289092).
+    // a `beforeunload` dialog leaked by the previous suite blocks `getRect` below (#289092)
     await tryWebDriverCall(async () => {
       await dismissOpenDialog(driver, log);
     });
@@ -113,8 +111,6 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       return;
     }
     await tryWebDriverCall(async () => {
-      // Dismiss a dialog left open by the suite's own cleanup navigation before running
-      // the WebDriver commands below (see #271881).
       await dismissOpenDialog(driver, log);
       // global cleanup
       const { width, height } = windowSizeStack.shift()!;

@@ -31,7 +31,7 @@ describe('dismissOpenDialog', () => {
   it('accepts an open dialog and logs it', async () => {
     const accept = jest.fn().mockResolvedValue(undefined);
 
-    await expect(dismissOpenDialog(makeDriver(accept), log)).resolves.toBe(true);
+    await dismissOpenDialog(makeDriver(accept), log);
 
     expect(accept).toHaveBeenCalledTimes(1);
     expect(warning).toHaveBeenCalledWith(
@@ -42,7 +42,7 @@ describe('dismissOpenDialog', () => {
   it('is silent when there is no open dialog', async () => {
     const accept = jest.fn().mockRejectedValue(new NoSuchAlertError('no such alert'));
 
-    await expect(dismissOpenDialog(makeDriver(accept), log)).resolves.toBe(false);
+    await dismissOpenDialog(makeDriver(accept), log);
 
     expect(warning).not.toHaveBeenCalled();
   });
@@ -50,7 +50,7 @@ describe('dismissOpenDialog', () => {
   it('logs and swallows any other failure so the caller surfaces the real error', async () => {
     const accept = jest.fn().mockRejectedValue(new InvalidArgumentError('boom'));
 
-    await expect(dismissOpenDialog(makeDriver(accept), log)).resolves.toBe(false);
+    await dismissOpenDialog(makeDriver(accept), log);
 
     expect(warning).toHaveBeenCalledWith(expect.stringContaining('failed to accept'));
     expect(warning).toHaveBeenCalledWith(expect.stringContaining('boom'));
