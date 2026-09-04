@@ -16,7 +16,7 @@
 export interface PiiRegexRule {
   /** Token prefix for matches of this rule, e.g. `EMAIL`, `HOST_NAME`. */
   entityClass: string;
-  /** RE2 syntax. Lookahead, lookbehind and backreferences are not supported. */
+  /** Regex pattern. RE2JS is tried first; native RegExp is used as a fallback for constructs RE2 does not support (lookahead, lookbehind, backreferences). */
   pattern: string;
   /**
    * Maximum length of an accepted match, in characters. Matches longer than this are
