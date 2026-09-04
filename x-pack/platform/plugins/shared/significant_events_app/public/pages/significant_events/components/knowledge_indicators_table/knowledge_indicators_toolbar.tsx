@@ -15,7 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React from 'react';
 import { TableTitle } from '../../../../components/features/table_title';
 import { KnowledgeIndicatorsTypeFilter } from '../../../../components/knowledge_indicators/knowledge_indicators_type_filter';

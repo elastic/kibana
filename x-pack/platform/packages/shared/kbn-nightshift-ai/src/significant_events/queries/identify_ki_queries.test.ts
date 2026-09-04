@@ -12,7 +12,7 @@ import type {
   ToolCallback,
 } from '@kbn/inference-common';
 import type { Feature } from '@kbn/significant-events-schema';
-import type { Streams } from '@kbn/streams-schema';
+import type { AnalysisTarget } from '../../shared/analysis_target';
 
 jest.mock('@kbn/inference-prompt-utils', () => ({
   executeAsReasoningAgent: jest.fn(),
@@ -163,10 +163,13 @@ describe('computeValidationLookback', () => {
 
 const inferenceClient = {} as BoundInferenceClient;
 
-const stream = {
+const target: AnalysisTarget = {
+  id: 'logs',
   name: 'logs',
   description: 'A test stream',
-} as Streams.all.Definition;
+  sources: ['logs', 'logs.*'],
+  samplingSource: 'logs',
+};
 
 const callTool = (
   callback: ToolCallback,
@@ -196,8 +199,8 @@ interface HarnessOptions {
   collectQueryAttempts?: boolean;
   existingQueries?: ExistingQuerySummary[];
   maxExistingQueriesForContext?: number;
-  /** Overrides the stream, so tests can reproduce the eval's wildcard stream name. */
-  stream?: Streams.all.Definition;
+  /** Overrides the target, so tests can reproduce the eval's wildcard stream name. */
+  target?: AnalysisTarget;
   /** Each array of query payloads is issued as its own `add_queries` call. */
   scriptedAddQueries?: Array<Array<Record<string, unknown>>>;
   callGetStreamFeatures?: boolean;
@@ -254,7 +257,7 @@ const runIdentifyKIQueries = async (options: HarnessOptions = {}) => {
   });
 
   const result = await identifyKIQueries({
-    stream: options.stream ?? stream,
+    target: options.target ?? target,
     esClient: options.esClient ?? createEsClient().esClient,
     getFeatures,
     inferenceClient,
@@ -531,13 +534,16 @@ describe('identifyKIQueries agent', () => {
     it('rejects a duplicate when the seed FROM differs from the stream sources', async () => {
       // Mirrors the eval: the stream name is a wildcard and seeds are authored un-rewritten, so
       // the candidate's FROM is rewritten to `logs*, logs*.*` while the seed says `logs`.
-      const wildcardStream = {
+      const wildcardTarget: AnalysisTarget = {
+        id: 'logs*',
         name: 'logs*',
         description: 'A test stream',
-      } as Streams.all.Definition;
+        sources: ['logs*', 'logs*.*'],
+        samplingSource: 'logs*',
+      };
 
       const { result, addQueriesResponses } = await runIdentifyKIQueries({
-        stream: wildcardStream,
+        target: wildcardTarget,
         requireQueryIntent: true,
         collectQueryAttempts: true,
         existingQueries: [

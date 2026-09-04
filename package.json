@@ -952,6 +952,7 @@
     "@kbn/navigation-plugin": "link:src/platform/plugins/shared/navigation",
     "@kbn/newsfeed-plugin": "link:src/platform/plugins/shared/newsfeed",
     "@kbn/newsfeed-test-plugin": "link:src/platform/test/common/plugins/newsfeed",
+    "@kbn/nightshift-ai": "link:x-pack/platform/packages/shared/kbn-nightshift-ai",
     "@kbn/nightshift-investigations-plugin": "link:x-pack/platform/plugins/shared/nightshift_investigations",
     "@kbn/nightshift-plugin": "link:x-pack/solutions/observability/plugins/nightshift",
     "@kbn/no-data-page-plugin": "link:src/platform/plugins/shared/no_data_page",

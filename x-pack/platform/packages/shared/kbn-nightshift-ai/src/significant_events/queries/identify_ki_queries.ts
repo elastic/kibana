@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
 import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
@@ -13,7 +12,6 @@ import {
   extractReferencedColumns,
   findOverBroadMatchPredicates,
   renderOverBroadMatchError,
-  getSourcesForStream,
   getStatsQueryHints,
   normalizeEsqlSafe,
   replaceFromSources,
@@ -32,9 +30,10 @@ import {
   type ReasoningPromptDiagnostics,
 } from '@kbn/inference-prompt-utils';
 import { withSpan } from '@kbn/apm-utils';
+import type { AnalysisTarget } from '../../shared/analysis_target';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
-import { sumTokens } from '../helpers/sum_tokens';
+import { sumTokens } from '../../shared/tokens/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
 import {
   SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
@@ -91,7 +90,7 @@ function getErrorMessage(error: unknown): string {
  * Sizes the `@timestamp` lookback used to validate candidate KI queries.
  *
  * `sources` may be an ES|QL view (query streams resolve to a `$.`-prefixed
- * view with no backing index - see `getSourcesForStream`), so volume is
+ * view with no backing index), so volume is
  * probed via ES|QL rather than the `_count` API, which cannot resolve views.
  *
  * @internal Exported for testing purposes only
@@ -202,7 +201,7 @@ export interface QueryAttempt {
  * stream features (including computed dataset analysis) via tool calls.
  */
 export async function identifyKIQueries({
-  stream,
+  target,
   esClient,
   getFeatures,
   inferenceClient,
@@ -219,7 +218,7 @@ export async function identifyKIQueries({
   requireQueryIntent = false,
   collectQueryAttempts = false,
 }: {
-  stream: Streams.all.Definition;
+  target: AnalysisTarget;
   esClient: ElasticsearchClient;
   getFeatures(params?: {
     type?: string[];
@@ -263,7 +262,7 @@ export async function identifyKIQueries({
     additionalTools,
     requireQueryIntent,
   });
-  const targetSources = getSourcesForStream(stream);
+  const targetSources = target.sources;
 
   const [validationLookback, mappingConflicts] = await Promise.all([
     computeValidationLookback({
@@ -323,8 +322,8 @@ export async function identifyKIQueries({
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
       input: {
-        name: stream.name,
-        description: stream.description,
+        name: target.name,
+        description: target.description ?? '',
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(
           QUERY_GENERATION_EXCLUDED_FEATURE_TYPES

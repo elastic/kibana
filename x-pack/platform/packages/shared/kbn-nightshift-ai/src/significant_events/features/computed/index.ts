@@ -133,7 +133,7 @@ export async function generateAllComputedFeatures({
       options.logger.warn(`Computed feature generator "${generator.type}" failed: ${message}`);
       errors.push({ feature: generator.type, error: message });
     } else if (result.value !== undefined) {
-      features.push(toComputedFeature(generator, result.value, options.stream.name));
+      features.push(toComputedFeature(generator, result.value, options.target.id));
     }
   }
 

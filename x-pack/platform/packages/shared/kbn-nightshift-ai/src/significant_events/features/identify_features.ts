@@ -22,9 +22,10 @@ import {
 import { withSpan } from '@kbn/apm-utils';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
+import type { AnalysisTarget } from '../../shared/analysis_target';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import type { InferenceDocument } from './utils/format_raw_document';
-import { sumTokens } from '../helpers/sum_tokens';
+import { sumTokens } from '../../shared/tokens/sum_tokens';
 
 /**
  * Mirrors the "2–5 evidence strings" guidance in the system prompt. Capping here rather than
@@ -79,7 +80,7 @@ export interface SimilarFeatureHit {
 }
 
 export interface IdentifyFeaturesOptions {
-  streamName: string;
+  target: AnalysisTarget;
   sampleDocuments: InferenceDocument[];
   excludedFeatures?: ExcludedFeatureSummary[];
   inferenceClient: BoundInferenceClient;
@@ -93,7 +94,7 @@ export interface IdentifyFeaturesOptions {
 }
 
 export async function identifyFeatures({
-  streamName,
+  target,
   sampleDocuments,
   excludedFeatures,
   systemPrompt,
@@ -150,7 +151,7 @@ export async function identifyFeatures({
     for (const feature of features) {
       const candidate = {
         ...feature,
-        stream_name: streamName,
+        stream_name: target.id,
         filter: tryParseFilter(feature.filter),
         ...(Array.isArray(feature.evidence)
           ? { evidence: feature.evidence.slice(0, MAX_EVIDENCE_ITEMS) }

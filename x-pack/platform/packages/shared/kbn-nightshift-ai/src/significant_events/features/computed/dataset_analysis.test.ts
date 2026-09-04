@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Streams } from '@kbn/streams-schema';
 import { describeDataset, formatDocumentAnalysis, getMappingConflicts } from '@kbn/ai-tools';
+import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 
 jest.mock('@kbn/ai-tools', () => ({
@@ -20,7 +20,12 @@ const describeDatasetMock = jest.mocked(describeDataset);
 const formatDocumentAnalysisMock = jest.mocked(formatDocumentAnalysis);
 const getMappingConflictsMock = jest.mocked(getMappingConflicts);
 
-const stream = { name: 'logs.test-default' } as Streams.all.Definition;
+const target: AnalysisTarget = {
+  id: 'logs.test-default',
+  name: 'logs.test-default',
+  sources: ['logs.test-default', 'logs.test-default.*'],
+  samplingSource: 'logs.test-default',
+};
 const esClient = {} as ElasticsearchClient;
 const logger = { debug: jest.fn() } as unknown as Logger;
 const signal = new AbortController().signal;
@@ -41,7 +46,7 @@ describe('datasetAnalysisGenerator', () => {
     ]);
 
     const result = await datasetAnalysisGenerator.generate({
-      stream,
+      target,
       start: 100,
       end: 200,
       esClient,
@@ -69,7 +74,7 @@ describe('datasetAnalysisGenerator', () => {
     getMappingConflictsMock.mockRejectedValueOnce(new Error('probe boom'));
 
     const result = await datasetAnalysisGenerator.generate({
-      stream,
+      target,
       start: 100,
       end: 200,
       esClient,

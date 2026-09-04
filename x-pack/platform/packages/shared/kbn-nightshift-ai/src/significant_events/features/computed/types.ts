@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Streams } from '@kbn/streams-schema';
+import type { AnalysisTarget } from '../../../shared/analysis_target';
 
 /**
  * A provider that computes the value for an externally-backed computed feature.
@@ -26,7 +26,7 @@ export type ComputedFeatureProvider = (
  * Options passed to each computed feature generator.
  */
 export interface ComputedFeatureGeneratorOptions {
-  stream: Streams.all.Definition;
+  target: AnalysisTarget;
   start: number;
   end: number;
   esClient: ElasticsearchClient;

@@ -7,7 +7,7 @@
 
 import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React, { useMemo } from 'react';
 import { matchesKnowledgeIndicatorFilters } from '../utils/matches_knowledge_indicator_filters';
 

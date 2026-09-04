@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { formatRawDocument, type InferenceDocument } from '@kbn/streams-ai';
+import { formatRawDocument, type InferenceDocument } from '@kbn/nightshift-ai';
 import { MANAGED_STREAM_SEARCH_PATTERN } from '../../src/datasets';
 
 export async function fetchSampleDocuments({

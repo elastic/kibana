@@ -7,8 +7,7 @@
 
 import type { Feature, FeatureUpsert } from '@kbn/significant-events-schema';
 import { computeFeatureUuid } from '@kbn/significant-events-schema';
-import { selectLogPatternsForLlm } from '@kbn/streams-ai/src/features/computed/log_patterns';
-import { pickErrorLogFields } from '@kbn/streams-ai/src/features/computed/error_logs';
+import { pickErrorLogFields, selectLogPatternsForLlm } from '@kbn/nightshift-ai';
 
 const ERROR_KEYWORDS = ['error', 'exception', 'fatal', 'fail', 'panic', 'timeout', 'traceback'];
 const MAX_FIELD_VALUE_SAMPLES = 5;

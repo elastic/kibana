@@ -13,7 +13,15 @@ jest.mock('@kbn/inference-prompt-utils', () => ({
 }));
 
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import type { AnalysisTarget } from '../../shared/analysis_target';
 import { identifyFeatures, MAX_IDENTIFIED_FEATURES_PER_ITERATION } from './identify_features';
+
+const target: AnalysisTarget = {
+  id: 'logs.test',
+  name: 'logs.test',
+  sources: ['logs.test', 'logs.test.*'],
+  samplingSource: 'logs.test',
+};
 
 const executeAsReasoningAgentMock = executeAsReasoningAgent as jest.MockedFunction<
   typeof executeAsReasoningAgent
@@ -106,7 +114,7 @@ describe('identifyFeatures', () => {
     });
 
     const result = await identifyFeatures({
-      streamName: 'logs.test',
+      target,
       sampleDocuments: [{ _id: 'doc-1', fields: { message: 'test message' } }],
       inferenceClient,
       systemPrompt: 'system prompt',
@@ -225,7 +233,7 @@ describe('identifyFeatures', () => {
     );
 
     const result = await identifyFeatures({
-      streamName: 'logs.test',
+      target,
       sampleDocuments: [],
       inferenceClient,
       systemPrompt: 'system prompt',
@@ -261,7 +269,7 @@ describe('identifyFeatures', () => {
     );
 
     const result = await identifyFeatures({
-      streamName: 'logs.test',
+      target,
       sampleDocuments: [],
       inferenceClient,
       systemPrompt: 'system prompt',
@@ -277,7 +285,7 @@ describe('identifyFeatures', () => {
 
     await expect(
       identifyFeatures({
-        streamName: 'logs.test',
+        target,
         sampleDocuments: [],
         inferenceClient,
         systemPrompt: 'system prompt',
@@ -294,7 +302,7 @@ describe('identifyFeatures', () => {
 
     await expect(
       identifyFeatures({
-        streamName: 'logs.test',
+        target,
         sampleDocuments: [],
         inferenceClient,
         systemPrompt: 'system prompt',

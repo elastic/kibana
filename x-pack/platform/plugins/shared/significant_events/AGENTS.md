@@ -21,6 +21,15 @@ The guideline is: if a concept is meant to be used outside the context of the pl
 
 When something is related to the Knowledge Indicator (KI) system, it should be indicated as such. `KnowledgeIndicator` (or `knowledgeIndicator`), or the use of `KI` are ok. `Ki` is not.
 
+## Cross-package ownership
+
+KI feature extraction, query generation, KI search, token helpers, and diverse
+sampling live in `@kbn/nightshift-ai`
+(`x-pack/platform/packages/shared/kbn-nightshift-ai`), co-owned by
+`@elastic/obs-sig-events-team` and `@elastic/nightshift-sre-agent-team`. This
+plugin adapts stream definitions through `streamToAnalysisTarget` before calling
+into that package.
+
 ## Keeping this file current
 
 Update this file when you make a change that would mislead an agent reading it: cross-package ownership changes, pipeline restructuring, addition or removal of concepts relevant to the pipeline, or naming convention updates. Do not update it for type field additions or directory reorganisations within a package — those are discoverable from the code.

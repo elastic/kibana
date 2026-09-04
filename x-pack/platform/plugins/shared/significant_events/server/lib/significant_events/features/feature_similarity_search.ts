@@ -11,7 +11,7 @@ import {
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
 } from '@kbn/significant-events-schema';
-import type { SimilarFeatureHit } from '@kbn/streams-ai';
+import type { SimilarFeatureHit } from '@kbn/nightshift-ai';
 import { z } from '@kbn/zod/v4';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 

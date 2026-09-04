@@ -6,8 +6,6 @@
  */
 
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
-import type { QueryAttempt, SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { ReasoningPromptDiagnostics } from '@kbn/inference-prompt-utils';
 import {
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
@@ -15,7 +13,10 @@ import {
   SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
   SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
-} from '@kbn/streams-ai/src/significant_events/types';
+  type QueryAttempt,
+  type SignificantEventType,
+  type SignificantEventsToolUsage,
+} from '@kbn/nightshift-ai';
 
 export const ALLOWED_CATEGORIES = [
   SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
@@ -35,7 +36,7 @@ export interface Query {
   expects_matches?: boolean;
 }
 
-/** Eval-only: a query attempt from add_queries, incl. rejected ones. Owned by `@kbn/streams-ai`. */
+/** Eval-only: a query attempt from add_queries, incl. rejected ones. Owned by `@kbn/nightshift-ai`. */
 export type { QueryAttempt };
 
 export interface KIQueryGenerationEvaluationExample {
