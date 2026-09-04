@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getBuiltInStepDefinition, MAX_HITL_RESPONDED_BY_LENGTH } from '@kbn/workflows';
+import { getBuiltInStepDefinition, hitlAuditOutputFields } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isAtomic } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
@@ -37,7 +37,7 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
         if (zodSchema) {
           return z.object({
             response: zodSchema as z.ZodSchema,
-            respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+            ...hitlAuditOutputFields,
           });
         }
       } catch {
@@ -46,7 +46,7 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
     }
     return z.object({
       response: waitForInputFallbackSchema,
-      respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+      ...hitlAuditOutputFields,
     });
   }
 

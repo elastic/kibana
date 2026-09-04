@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
+import { getConnectorSpec, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs';
 import type { ConnectorZodSchema } from '@kbn/connector-specs';
@@ -113,6 +114,8 @@ export function transformSpecToActionTypeModel(
   docLinks: DocLinksStart,
   uiSettings?: IUiSettingsClient
 ): ActionTypeModel {
+  const registeredSpec = getConnectorSpec(spec.metadata.id);
+
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
@@ -204,31 +207,44 @@ export function transformSpecToActionTypeModel(
     actionParamsFields: lazy(async () => ({ default: () => null })),
     validateParams: async () => ({ errors: {} }),
     connectorForm: {
-      serializer: ((formData: Record<string, unknown>) => {
-        const secrets = formData?.secrets as Record<string, unknown> | undefined;
-        const config = formData?.config as Record<string, unknown> | undefined;
-
-        const updatedConfig: Record<string, unknown> = {
-          ...(config ?? {}),
-          ...(secrets?.authType ? { authType: secrets.authType } : {}),
-        };
-
-        if (updatedConfig.selectedActions == null) {
-          delete updatedConfig.selectedActions;
-        }
-
-        return { ...formData, config: updatedConfig };
-      }) as unknown as NonNullable<ActionTypeModel['connectorForm']>['serializer'],
-      deserializer: ((apiData: Record<string, unknown>) => {
-        const config = apiData?.config as Record<string, unknown> | undefined;
-        const secrets = apiData?.secrets as Record<string, unknown> | undefined;
-
-        if (!config?.authType || secrets?.authType) {
-          return apiData;
-        }
-
-        return { ...apiData, secrets: { ...(secrets ?? {}), authType: config.authType } };
-      }) as unknown as NonNullable<ActionTypeModel['connectorForm']>['deserializer'],
+      serializer: createConnectorFormSerializer() as unknown as NonNullable<
+        ActionTypeModel['connectorForm']
+      >['serializer'],
+      deserializer: createConnectorFormDeserializer() as unknown as NonNullable<
+        ActionTypeModel['connectorForm']
+      >['deserializer'],
+      hideSettingsTitle: registeredSpec !== undefined && isInboundOnlyConnectorSpec(registeredSpec),
     },
+  };
+}
+
+function createConnectorFormSerializer() {
+  return (formData: Record<string, unknown>) => {
+    const secrets = formData?.secrets as Record<string, unknown> | undefined;
+    const config = formData?.config as Record<string, unknown> | undefined;
+
+    const updatedConfig: Record<string, unknown> = {
+      ...(config ?? {}),
+      ...(secrets?.authType ? { authType: secrets.authType } : {}),
+    };
+
+    if (updatedConfig.selectedActions == null) {
+      delete updatedConfig.selectedActions;
+    }
+
+    return { ...formData, config: updatedConfig };
+  };
+}
+
+function createConnectorFormDeserializer() {
+  return (apiData: Record<string, unknown>) => {
+    const config = apiData?.config as Record<string, unknown> | undefined;
+    const secrets = apiData?.secrets as Record<string, unknown> | undefined;
+
+    if (!config?.authType || secrets?.authType) {
+      return apiData;
+    }
+
+    return { ...apiData, secrets: { ...(secrets ?? {}), authType: config.authType } };
   };
 }
