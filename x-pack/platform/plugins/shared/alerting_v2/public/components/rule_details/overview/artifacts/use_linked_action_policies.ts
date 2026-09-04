@@ -22,14 +22,14 @@ export interface UseLinkedActionPoliciesResult {
   error: Error | null;
 }
 
-export const useLinkedActionPolicies = (ruleId: string): UseLinkedActionPoliciesResult => {
+export const useLinkedActionPolicies = (tags: string[]): UseLinkedActionPoliciesResult => {
   const http = useService(CoreStart('http'));
-  const { isLoading, error, items, total } = useMatchedActionPolicies({ http, ruleId });
+  const { isLoading, error, items, total } = useMatchedActionPolicies({ http, tags });
 
   return {
     totalCount: items.length,
-    catchAllCount: items.filter((item) => item.category === 'global').length,
-    matchingCriteriaCount: items.filter((item) => item.category === 'global-filtered').length,
+    catchAllCount: items.filter((item) => item.category === 'catch-all').length,
+    matchingCriteriaCount: items.filter((item) => item.category === 'tags').length,
     isCountTruncated: total > LINKED_ACTION_POLICIES_FETCH_LIMIT,
     isLoading,
     isError: error != null,

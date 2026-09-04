@@ -276,7 +276,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
 
   it('clones a rule-scoped policy carrying over the matcher', async () => {
     mockUseFetchActionPolicy.mockReturnValue({
-      data: buildPolicy({ matcher: 'rule.id: "rule-1"' }),
+      data: buildPolicy({ matcher: { tags: ['rule-1'] } }),
     });
     renderContainer();
 
@@ -285,7 +285,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     expect(mockCreateActionPolicy).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'My Policy [clone]',
-        matcher: 'rule.id: "rule-1"',
+        matcher: { tags: ['rule-1'] },
       })
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);

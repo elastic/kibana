@@ -13,6 +13,7 @@ import {
   groupingModeSchema,
   throttleStrategySchema,
   durationSchema,
+  policyMatcherSchema,
   tagsSchema,
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
@@ -69,11 +70,9 @@ export const setDestinationsOperationSchema = z
 export const setMatcherOperationSchema = z
   .object({
     operation: z.literal('set_matcher'),
-    matcher: z
-      .string()
-      .max(4096)
+    matcher: policyMatcherSchema
       .nullable()
-      .describe('A KQL query to match alert episodes, or null for a catch-all.'),
+      .describe('Structured matcher for alert episodes, or null for a catch-all.'),
   })
   .describe(
     'Use `set_matcher` to limit which alert episodes this policy notifies on. An empty or null matcher matches all episodes in the space.'

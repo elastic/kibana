@@ -12,6 +12,7 @@ import {
   actionPolicyDestinationSchema,
   throttleStrategySchema,
 } from './action_policy_data_schema';
+import { policyMatcherSchema } from './policy_matcher_schema';
 
 export const actionPolicyResponseSchema = z
   .object({
@@ -24,7 +25,11 @@ export const actionPolicyResponseSchema = z
     description: z.string().describe('A description of the action policy.'),
     enabled: z.boolean().describe('Whether the action policy is enabled.'),
     destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
-    matcher: z.string().nullable().describe('A KQL query to match alerts, or null to match all.'),
+    matcher: policyMatcherSchema
+      .nullable()
+      .describe(
+        'Structured matcher: `tags` values are OR-ed into a rule-tag clause, `expression` is a KQL string evaluated against alert data, and both clauses are AND-ed together. `null` means the policy matches all alerts (catch-all).'
+      ),
     group_by: z
       .array(z.string())
       .nullable()

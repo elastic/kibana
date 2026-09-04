@@ -15,9 +15,9 @@ import {
   MAX_DESCRIPTION_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
-  MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
 } from './constants';
+import { policyMatcherSchema } from './policy_matcher_schema';
 
 /**
  * The set of supported action policy destination types. Single source of truth
@@ -183,11 +183,7 @@ const createActionPolicyDataBaseSchema = z
       .min(1, 'At least one destination must be provided')
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .describe('The list of destinations. At least one is required.'),
-    matcher: z
-      .string()
-      .max(MAX_KQL_LENGTH)
-      .optional()
-      .describe('A KQL query string to match alerts.'),
+    matcher: policyMatcherSchema.optional().describe('Structured matcher for the action policy.'),
     group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)
@@ -227,12 +223,12 @@ export const updateActionPolicyDataSchema = z
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .optional()
       .describe('The list of destinations. At least one is required.'),
-    matcher: z
-      .string()
-      .max(MAX_KQL_LENGTH)
-      .optional()
+    matcher: policyMatcherSchema
       .nullable()
-      .describe('A KQL query string to match alerts.'),
+      .optional()
+      .describe(
+        'Structured matcher, replaced as a whole on update. To preserve an existing `expression` while changing `tags`, send both fields. `null` clears the matcher (catch-all).'
+      ),
     group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)

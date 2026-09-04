@@ -53,8 +53,8 @@ describe('DispatchSection', () => {
     mockUseFetchRuleEventFields.mockReturnValue({ data: undefined, isLoading: false });
   });
 
-  it('passes the form matcher value to useFetchRuleEventFields', () => {
-    renderSection({ ...DEFAULT_FORM_STATE, matcher: 'rule.id : "r1"' });
+  it('passes the expression from the form matcher to useFetchRuleEventFields', () => {
+    renderSection({ ...DEFAULT_FORM_STATE, matcher: { expression: 'rule.id : "r1"' } });
 
     expect(mockUseFetchRuleEventFields).toHaveBeenCalledWith('rule.id : "r1"');
   });

@@ -69,7 +69,7 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
     { type: 'workflow', id: 'wf-1' },
     { type: 'workflow', id: 'wf-2' },
   ],
-  matcher: 'data.severity : "critical"',
+  matcher: { expression: 'data.severity : "critical"' },
   group_by: ['host.name', 'service.name'],
   tags: ['production', 'oncall'],
   grouping_mode: 'per_field',

@@ -310,7 +310,6 @@ describe('step validation', () => {
           onRecoveryTypeChange={jest.fn()}
           onKindChange={jest.fn()}
           isEditing={ruleId !== undefined}
-          ruleId={ruleId}
         />,
         { wrapper: createComposeFormWrapper() }
       );

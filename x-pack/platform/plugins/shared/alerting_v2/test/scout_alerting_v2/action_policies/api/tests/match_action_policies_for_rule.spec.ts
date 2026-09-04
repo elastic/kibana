@@ -28,7 +28,7 @@ apiTest.describe('Match action policies for rule API', { tag: '@local-stateful-c
       const response = await apiClient.post(MATCH_ACTION_POLICIES_FOR_RULE_URL, {
         headers: readerHeaders,
         body: {
-          rule: { id: 'rule-1' },
+          rule: { tags: ['prod'] },
           unknownField: 'x',
         },
       });

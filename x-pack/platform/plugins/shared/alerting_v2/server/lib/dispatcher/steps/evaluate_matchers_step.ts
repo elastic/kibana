@@ -10,7 +10,7 @@ import { evaluateKql } from '@kbn/eval-kql';
 import { injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { EpisodeTriage, PolicyCatalog, RuleCatalog } from '../state';
+import { EpisodeTriage, PolicyCatalog, PolicyMatcher, RuleCatalog } from '../state';
 import type {
   AlertEpisode,
   DispatcherPipelineState,
@@ -46,6 +46,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
     logger: LoggerServiceContract
   ): MatchedPair[] {
     const matched: MatchedPair[] = [];
+    const now = Date.now();
 
     for (const episode of dispatchable) {
       if (rules.isOrphanedInternalEpisode(episode)) continue;
@@ -56,17 +57,19 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
       for (const policy of spacePolicies) {
         if (!policy.enabled) continue;
-        if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
+        if (policy.snoozedUntil && new Date(policy.snoozedUntil).getTime() > now) continue;
 
-        if (!policy.matcher) {
+        const policyMatcher = PolicyMatcher.of(policy.matcher);
+        if (policyMatcher.isCatchAll()) {
           matched.push({ episode, policy });
           continue;
         }
 
         context ??= createMatcherContext(episode, rule);
+        const kql = policyMatcher.toKql()!;
         let isMatch = false;
         try {
-          isMatch = evaluateKql(policy.matcher, context);
+          isMatch = evaluateKql(kql, context);
         } catch {
           logger.warn({
             message: 'Policy matcher failed to evaluate; treating as no-match',

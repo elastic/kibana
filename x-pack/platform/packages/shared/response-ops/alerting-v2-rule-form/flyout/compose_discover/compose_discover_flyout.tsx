@@ -84,6 +84,7 @@ import {
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
 import { useResolveTimeField } from './use_resolve_time_field';
+import { buildRuleNotificationTag } from '../../actions_form/helpers/rule_scoped_action_policies';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -972,10 +973,22 @@ export function ComposeDiscoverFlyout({
         return;
       }
     }
+
+    let submitted = values;
+    if (values.notifications?.workflows?.length && !values.metadata.tags?.length) {
+      const tags = [buildRuleNotificationTag(values.metadata.name)];
+      methods.setValue('metadata.tags', tags, { shouldDirty: true });
+      submitted = { ...values, metadata: { ...values.metadata, tags } };
+    }
+
     if (isCreate) {
-      onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
+      onCreateRule(composeFormToCreateRequest(submitted, builderType), submitted.notifications);
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType), values.notifications);
+      onUpdateRule(
+        ruleId,
+        composeFormToUpdateRequest(submitted, builderType),
+        submitted.notifications
+      );
     }
   });
 
@@ -1372,7 +1385,6 @@ export function ComposeDiscoverFlyout({
                       onRecoveryTypeChange={handleRecoveryTypeChange}
                       onKindChange={handleKindChange}
                       isEditing={isEditing}
-                      ruleId={ruleId}
                       builderType={builderType}
                     />
                   </BuilderStateProvider>

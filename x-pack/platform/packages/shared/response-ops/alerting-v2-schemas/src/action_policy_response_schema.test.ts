@@ -17,7 +17,7 @@ const validResponse = {
   description: 'A test policy',
   enabled: true,
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
-  matcher: 'host.name: "server-1"',
+  matcher: { expression: 'host.name: "server-1"' },
   group_by: ['host.name'],
   tags: ['production'],
   grouping_mode: 'per_episode' as const,

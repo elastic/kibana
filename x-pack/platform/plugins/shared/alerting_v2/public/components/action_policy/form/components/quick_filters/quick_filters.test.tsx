@@ -10,28 +10,12 @@ import { render, screen } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QuickFilters } from './quick_filters';
-import { RuleFilter } from './rule_filter';
-import { StatusFilter } from './status_filter';
 import { TagsFilter } from './tags_filter';
-
-const mockUseFetchRules = jest.fn();
-jest.mock('../../../../../hooks/use_fetch_rules', () => ({
-  useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
-}));
 
 const mockUseFetchRuleTags = jest.fn();
 jest.mock('../../../../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: (...args: unknown[]) => mockUseFetchRuleTags(...args),
 }));
-
-jest.mock('@kbn/react-hooks', () => ({
-  useDebouncedValue: (value: string) => value,
-}));
-
-const MOCK_RULES = [
-  { id: 'rule-1', kind: 'alert' as const, metadata: { name: 'CPU Alert' } },
-  { id: 'rule-2', kind: 'signal' as const, metadata: { name: 'Memory Alert' } },
-];
 
 const MOCK_TAGS = ['production', 'staging', 'critical'];
 
@@ -57,233 +41,13 @@ const clickOption = async (
 describe('QuickFilters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFetchRules.mockReturnValue({
-      data: { items: MOCK_RULES, total: 2 },
-      isLoading: false,
-    });
     mockUseFetchRuleTags.mockReturnValue({ data: MOCK_TAGS, isLoading: false });
   });
 
-  it('renders all three filter buttons', () => {
-    renderWithI18n(<QuickFilters matcher="" onChange={jest.fn()} />);
+  it('renders the tags filter button', () => {
+    renderWithI18n(<QuickFilters matcher={null} onChange={jest.fn()} />);
 
-    expect(screen.getByTestId('quickFilterRule')).toBeInTheDocument();
-    expect(screen.getByTestId('quickFilterStatus')).toBeInTheDocument();
     expect(screen.getByTestId('quickFilterTags')).toBeInTheDocument();
-  });
-});
-
-describe('RuleFilter', () => {
-  let user: ReturnType<typeof userEvent.setup>;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    user = userEvent.setup(USER_EVENT_OPTIONS);
-    mockUseFetchRules.mockReturnValue({
-      data: { items: MOCK_RULES, total: 2 },
-      isLoading: false,
-    });
-  });
-
-  it('defers fetching until popover is first opened', () => {
-    renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
-
-    expect(mockUseFetchRules).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
-  });
-
-  it('enables fetching when popover opens', async () => {
-    renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
-
-    await user.click(screen.getByTestId('quickFilterRule'));
-
-    expect(mockUseFetchRules).toHaveBeenLastCalledWith(expect.objectContaining({ enabled: true }));
-  });
-
-  it('restricts fetched rules to kind:alert', () => {
-    renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
-
-    expect(mockUseFetchRules).toHaveBeenCalledWith(
-      expect.objectContaining({ filter: 'kind:alert' })
-    );
-  });
-
-  it('displays rules from API', async () => {
-    renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
-
-    await user.click(screen.getByTestId('quickFilterRule'));
-
-    expect(screen.getByText('CPU Alert')).toBeInTheDocument();
-    expect(screen.getByText('Memory Alert')).toBeInTheDocument();
-  });
-
-  it('shows kind badges for rules', async () => {
-    renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
-
-    await user.click(screen.getByTestId('quickFilterRule'));
-
-    expect(screen.getByText('Alerts')).toBeInTheDocument();
-    expect(screen.getByText('Events')).toBeInTheDocument();
-  });
-
-  it('calls onChange with rule.id clause when selecting a rule', async () => {
-    const onChange = jest.fn();
-    renderWithI18n(<RuleFilter matcher="" onChange={onChange} />);
-
-    await user.click(screen.getByTestId('quickFilterRule'));
-    await clickOption(user, 'quickFilterRuleList', 'CPU Alert');
-
-    expect(onChange).toHaveBeenCalledWith('rule.id : "rule-1"');
-  });
-
-  it('produces OR group when selecting multiple rules', async () => {
-    const onChange = jest.fn();
-    renderWithI18n(<RuleFilter matcher='rule.id : "rule-1"' onChange={onChange} />);
-
-    await user.click(screen.getByTestId('quickFilterRule'));
-    await clickOption(user, 'quickFilterRuleList', 'Memory Alert');
-
-    expect(onChange).toHaveBeenCalledWith('(rule.id : "rule-1" OR rule.id : "rule-2")');
-  });
-
-  it('reflects existing rule.id from matcher as checked', async () => {
-    renderWithI18n(<RuleFilter matcher='rule.id : "rule-1"' onChange={jest.fn()} />);
-
-    await user.click(screen.getByTestId('quickFilterRule'));
-
-    const list = screen.getByTestId('quickFilterRuleList');
-    const options = list.querySelectorAll('li[role="option"]');
-    const cpuOption = Array.from(options).find((li) => li.textContent?.includes('CPU Alert'));
-    const memOption = Array.from(options).find((li) => li.textContent?.includes('Memory Alert'));
-
-    expect(cpuOption).toHaveAttribute('aria-checked', 'true');
-    expect(memOption).toHaveAttribute('aria-checked', 'false');
-  });
-
-  it('shows active filter count', () => {
-    renderWithI18n(
-      <RuleFilter matcher='(rule.id : "rule-1" or rule.id : "rule-2")' onChange={jest.fn()} />
-    );
-
-    const button = screen.getByTestId('quickFilterRule');
-    expect(button.querySelector('.euiNotificationBadge')).toHaveTextContent('2');
-  });
-
-  it('clears rule.id from matcher when deselecting', async () => {
-    const onChange = jest.fn();
-    renderWithI18n(
-      <RuleFilter matcher='rule.id : "rule-1" AND episode_status : "active"' onChange={onChange} />
-    );
-
-    await user.click(screen.getByTestId('quickFilterRule'));
-    await clickOption(user, 'quickFilterRuleList', 'CPU Alert');
-
-    expect(onChange).toHaveBeenCalledWith('episode_status : "active"');
-  });
-
-  it('shows synthetic entries for rule IDs in matcher but not in API results', async () => {
-    renderWithI18n(<RuleFilter matcher='rule.id : "unknown-id"' onChange={jest.fn()} />);
-
-    await user.click(screen.getByTestId('quickFilterRule'));
-
-    expect(screen.getByText('unknown-id')).toBeInTheDocument();
-    expect(screen.getByText('Selected')).toBeInTheDocument();
-  });
-
-  it('preserves unrelated clauses when modifying rule selection', async () => {
-    const onChange = jest.fn();
-    renderWithI18n(
-      <RuleFilter matcher='episode_status : "active" AND rule.tags : "prod"' onChange={onChange} />
-    );
-
-    await user.click(screen.getByTestId('quickFilterRule'));
-    await clickOption(user, 'quickFilterRuleList', 'CPU Alert');
-
-    expect(onChange).toHaveBeenCalledWith(
-      'episode_status : "active" AND rule.tags : "prod" AND rule.id : "rule-1"'
-    );
-  });
-});
-
-describe('StatusFilter', () => {
-  let user: ReturnType<typeof userEvent.setup>;
-
-  beforeEach(() => {
-    user = userEvent.setup(USER_EVENT_OPTIONS);
-  });
-
-  it('displays all four status options', async () => {
-    renderWithI18n(<StatusFilter matcher="" onChange={jest.fn()} />);
-
-    await user.click(screen.getByTestId('quickFilterStatus'));
-
-    expect(screen.getByText('Active')).toBeInTheDocument();
-    expect(screen.getByText('Recovering')).toBeInTheDocument();
-    expect(screen.getByText('Pending')).toBeInTheDocument();
-    expect(screen.getByText('Inactive')).toBeInTheDocument();
-  });
-
-  it('shows descriptions for each status', async () => {
-    renderWithI18n(<StatusFilter matcher="" onChange={jest.fn()} />);
-
-    await user.click(screen.getByTestId('quickFilterStatus'));
-
-    expect(screen.getByText('Episode is confirmed and ongoing')).toBeInTheDocument();
-    expect(screen.getByText('Episode is fully resolved')).toBeInTheDocument();
-  });
-
-  it('calls onChange with episode_status clause when selecting a status', async () => {
-    const onChange = jest.fn();
-    renderWithI18n(<StatusFilter matcher="" onChange={onChange} />);
-
-    await user.click(screen.getByTestId('quickFilterStatus'));
-    await clickOption(user, 'quickFilterStatusList', 'Active');
-
-    expect(onChange).toHaveBeenCalledWith('episode_status : "active"');
-  });
-
-  it('produces OR group when selecting multiple statuses', async () => {
-    const onChange = jest.fn();
-    renderWithI18n(<StatusFilter matcher='episode_status : "active"' onChange={onChange} />);
-
-    await user.click(screen.getByTestId('quickFilterStatus'));
-    await clickOption(user, 'quickFilterStatusList', 'Pending');
-
-    expect(onChange).toHaveBeenCalledWith(
-      '(episode_status : "active" OR episode_status : "pending")'
-    );
-  });
-
-  it('reflects existing episode_status from matcher as checked', async () => {
-    renderWithI18n(<StatusFilter matcher='episode_status : "active"' onChange={jest.fn()} />);
-
-    await user.click(screen.getByTestId('quickFilterStatus'));
-
-    const list = screen.getByTestId('quickFilterStatusList');
-    const options = list.querySelectorAll('li[role="option"]');
-    const activeOption = Array.from(options).find((li) => li.textContent?.includes('Active'));
-    const pendingOption = Array.from(options).find((li) => li.textContent?.includes('Pending'));
-
-    expect(activeOption).toHaveAttribute('aria-checked', 'true');
-    expect(pendingOption).toHaveAttribute('aria-checked', 'false');
-  });
-
-  it('removes status clause when deselecting all', async () => {
-    const onChange = jest.fn();
-    renderWithI18n(
-      <StatusFilter matcher='episode_status : "active" AND rule.id : "x"' onChange={onChange} />
-    );
-
-    await user.click(screen.getByTestId('quickFilterStatus'));
-    await clickOption(user, 'quickFilterStatusList', 'Active');
-
-    expect(onChange).toHaveBeenCalledWith('rule.id : "x"');
-  });
-
-  it('shows active filter count', () => {
-    renderWithI18n(<StatusFilter matcher='episode_status : "active"' onChange={jest.fn()} />);
-
-    const button = screen.getByTestId('quickFilterStatus');
-    expect(button.querySelector('.euiNotificationBadge')).toHaveTextContent('1');
   });
 });
 
@@ -297,13 +61,13 @@ describe('TagsFilter', () => {
   });
 
   it('defers fetching until popover is first opened', () => {
-    renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
+    renderWithI18n(<TagsFilter matcher={null} onChange={jest.fn()} />);
 
     expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
   });
 
   it('enables fetching when popover opens', async () => {
-    renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
+    renderWithI18n(<TagsFilter matcher={null} onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
 
@@ -313,7 +77,7 @@ describe('TagsFilter', () => {
   });
 
   it('restricts fetched tags to kind: alert (typed, not raw KQL)', () => {
-    renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
+    renderWithI18n(<TagsFilter matcher={null} onChange={jest.fn()} />);
 
     expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ kind: 'alert' }));
     // must NOT use raw KQL filter anymore
@@ -323,7 +87,7 @@ describe('TagsFilter', () => {
   });
 
   it('displays tags from API', async () => {
-    renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
+    renderWithI18n(<TagsFilter matcher={null} onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
 
@@ -332,28 +96,30 @@ describe('TagsFilter', () => {
     expect(screen.getByText('critical')).toBeInTheDocument();
   });
 
-  it('calls onChange with rule.tags clause when selecting a tag', async () => {
+  it('calls onChange with tags array when selecting a tag', async () => {
     const onChange = jest.fn();
-    renderWithI18n(<TagsFilter matcher="" onChange={onChange} />);
+    renderWithI18n(<TagsFilter matcher={null} onChange={onChange} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
     await clickOption(user, 'quickFilterTagsList', 'production');
 
-    expect(onChange).toHaveBeenCalledWith('rule.tags : "production"');
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ tags: ['production'] }));
   });
 
-  it('produces OR group when selecting multiple tags', async () => {
+  it('accumulates tags when selecting multiple', async () => {
     const onChange = jest.fn();
-    renderWithI18n(<TagsFilter matcher='rule.tags : "production"' onChange={onChange} />);
+    renderWithI18n(<TagsFilter matcher={{ tags: ['production'] }} onChange={onChange} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
     await clickOption(user, 'quickFilterTagsList', 'staging');
 
-    expect(onChange).toHaveBeenCalledWith('(rule.tags : "production" OR rule.tags : "staging")');
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: expect.arrayContaining(['production', 'staging']) })
+    );
   });
 
-  it('reflects existing rule.tags from matcher as checked', async () => {
-    renderWithI18n(<TagsFilter matcher='rule.tags : "production"' onChange={jest.fn()} />);
+  it('reflects existing tags from matcher as checked', async () => {
+    renderWithI18n(<TagsFilter matcher={{ tags: ['production'] }} onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
 
@@ -367,7 +133,7 @@ describe('TagsFilter', () => {
   });
 
   it('shows orphaned tags from matcher that are not in API results', async () => {
-    renderWithI18n(<TagsFilter matcher='rule.tags : "legacy-tag"' onChange={jest.fn()} />);
+    renderWithI18n(<TagsFilter matcher={{ tags: ['legacy-tag'] }} onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
 
@@ -381,56 +147,49 @@ describe('TagsFilter', () => {
 
   it('shows active filter count', () => {
     renderWithI18n(
-      <TagsFilter
-        matcher='(rule.tags : "production" or rule.tags : "staging")'
-        onChange={jest.fn()}
-      />
+      <TagsFilter matcher={{ tags: ['production', 'staging'] }} onChange={jest.fn()} />
     );
 
     const button = screen.getByTestId('quickFilterTags');
     expect(button.querySelector('.euiNotificationBadge')).toHaveTextContent('2');
   });
 
-  it('removes tags clause when deselecting all', async () => {
+  it('sets tags to null when deselecting all', async () => {
     const onChange = jest.fn();
-    renderWithI18n(
-      <TagsFilter matcher='rule.tags : "production" AND rule.id : "x"' onChange={onChange} />
-    );
+    renderWithI18n(<TagsFilter matcher={{ tags: ['production'] }} onChange={onChange} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
     await clickOption(user, 'quickFilterTagsList', 'production');
 
-    expect(onChange).toHaveBeenCalledWith('rule.id : "x"');
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ tags: null }));
   });
 
   it('shows cap guidance when API returns exactly 20 tags', async () => {
     const twentyTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
     mockUseFetchRuleTags.mockReturnValue({ data: twentyTags, isLoading: false });
 
-    renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
+    renderWithI18n(<TagsFilter matcher={null} onChange={jest.fn()} />);
     await user.click(screen.getByTestId('quickFilterTags'));
 
     expect(screen.getByTestId('quickFilterTagsCapGuidance')).toBeInTheDocument();
   });
 
   it('does not show cap guidance when API returns fewer than 20 tags', async () => {
-    renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
+    renderWithI18n(<TagsFilter matcher={null} onChange={jest.fn()} />);
     await user.click(screen.getByTestId('quickFilterTags'));
 
     expect(screen.queryByTestId('quickFilterTagsCapGuidance')).not.toBeInTheDocument();
   });
 
-  it('preserves out-of-result selected tags during subsequent selection changes', async () => {
-    // 'orphan' is selected but won't come back from the API
+  it('preserves other matcher fields during tag selection changes', async () => {
     const onChange = jest.fn();
-    renderWithI18n(<TagsFilter matcher='rule.tags : "orphan"' onChange={onChange} />);
+    renderWithI18n(<TagsFilter matcher={{ tags: ['orphan'] }} onChange={onChange} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
-    // select a tag that IS in the API results
     await clickOption(user, 'quickFilterTagsList', 'production');
 
-    // Both the orphaned tag and the newly selected one must be in the result
-    expect(onChange).toHaveBeenCalledWith(expect.stringContaining('orphan'));
-    expect(onChange).toHaveBeenCalledWith(expect.stringContaining('production'));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: expect.arrayContaining(['orphan', 'production']) })
+    );
   });
 });

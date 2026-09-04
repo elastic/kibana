@@ -221,7 +221,7 @@ describe('manageActionPolicyTool', () => {
             operation: 'set_destinations',
             destinations: [{ type: 'workflow', id: 'wf-1' }],
           },
-          { operation: 'set_matcher', matcher: 'rule.id: "rule-abc"' },
+          { operation: 'set_matcher', matcher: { tags: ['rule-abc'] } },
         ],
       },
       ctx
@@ -232,14 +232,14 @@ describe('manageActionPolicyTool', () => {
         type: string;
         data?: {
           actionPolicyAttachment?: {
-            matcher?: string | null;
+            matcher?: unknown;
             name?: string;
           };
         };
       }>;
     };
     expect(results[0].type).toBe(ToolResultType.other);
-    expect(results[0].data?.actionPolicyAttachment?.matcher).toBe('rule.id: "rule-abc"');
+    expect(results[0].data?.actionPolicyAttachment?.matcher).toEqual({ tags: ['rule-abc'] });
     expect(results[0].data?.actionPolicyAttachment?.name).toBe('Rule-scoped Policy');
   });
 

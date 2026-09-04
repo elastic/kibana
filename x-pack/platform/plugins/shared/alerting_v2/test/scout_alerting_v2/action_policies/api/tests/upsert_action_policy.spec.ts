@@ -72,7 +72,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         buildCreateRuleData({ metadata: { name: 'rule-for-upsert-scoped' } })
       );
 
-      const matcher = `rule.id: "${rule.id}"`;
+      const matcher = { expression: `rule.id: "${rule.id}"` };
       const response = await apiClient.put(getActionPolicyUrl('upsert-rule-scoped-policy'), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
@@ -82,7 +82,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body.matcher).toBe(matcher);
+      expect(response.body.matcher).toMatchObject(matcher);
     }
   );
 
@@ -95,7 +95,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({
           name: 'first-version',
           description: 'before replace',
-          matcher: 'env == "production"',
+          matcher: { expression: 'env == "production"' },
           group_by: ['service.name'],
           throttle: { interval: '5m' },
         })
@@ -133,7 +133,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         id,
         buildCreateActionPolicyData({
           name: 'with-optional-fields',
-          matcher: 'env == "production"',
+          matcher: { expression: 'env == "production"' },
           group_by: ['service.name'],
           throttle: { interval: '5m' },
         })

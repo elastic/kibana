@@ -194,7 +194,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       name: 'Matcher Policy',
       description: 'Only matches critical severity',
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      matcher: 'data.severity: "critical"',
+      matcher: { expression: 'data.severity: "critical"' },
     });
 
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_MATCHER_ID);
@@ -213,7 +213,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       name: 'Rule-scoped policy bound to rule-001',
       description: 'Must filter to its linked rule only',
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      matcher: 'rule.id: "rule-001"',
+      matcher: { expression: 'rule.id: "rule-001"' },
     });
 
     await apiServices.alertingV2.actionPolicies.disable(SINGLE_RULE_POLICY_ID);

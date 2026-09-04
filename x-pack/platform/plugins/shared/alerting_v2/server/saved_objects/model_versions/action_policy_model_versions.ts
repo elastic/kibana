@@ -10,6 +10,7 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import {
   actionPolicySavedObjectAttributesSchemaV1,
   actionPolicySavedObjectAttributesSchemaV2,
+  actionPolicySavedObjectAttributesSchemaV3,
 } from '../schemas/action_policy_saved_object_attributes';
 import type { ActionPolicySavedObjectAttributesV1 } from '../schemas/action_policy_saved_object_attributes';
 
@@ -91,6 +92,38 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
         { unknowns: 'ignore' }
       ),
       create: actionPolicySavedObjectAttributesSchemaV2,
+    },
+  },
+  /**
+   * v3 migrates `matcher` from a raw KQL string to a structured object
+   * `{ tags, expression }`. Existing string matchers are wrapped in
+   * `{ expression: oldMatcher }` so they continue to evaluate identically
+   * via `PolicyMatcher.toKql()`.
+   *
+   * This reshapes an existing attribute, so it is NOT rollback-compatible: the
+   * v1/v2 `forwardCompatibility` schemas type `matcher` as a string and reject
+   * the object, meaning a node rolled back to v2 fails to read any policy that
+   * carries a matcher. Accepted while alerting v2 is in technical preview; the
+   * SO migration fixtures therefore only cover matcher-less documents, and the
+   * string → object conversion is covered by unit tests instead.
+   */
+  '3': {
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const matcher = (doc.attributes as { matcher?: unknown }).matcher;
+          if (typeof matcher !== 'string') return { attributes: {} };
+          return { attributes: { matcher: { expression: matcher } } };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV3.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV3,
     },
   },
 };

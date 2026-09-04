@@ -207,7 +207,7 @@ export const DEFAULT_FORM_STATE: ActionPolicyFormState = {
   name: '',
   description: '',
   tags: [],
-  matcher: '',
+  matcher: null,
   groupingMode: 'per_episode',
   groupBy: [],
   throttleStrategy: 'on_status_change',

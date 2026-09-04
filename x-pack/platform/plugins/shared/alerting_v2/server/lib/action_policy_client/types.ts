@@ -62,8 +62,6 @@ export interface FindActionPoliciesResponse {
 }
 
 export interface MatchActionPoliciesForRuleParams {
-  ruleId?: string;
-  ruleName?: string;
   ruleTags?: string[];
 }
 

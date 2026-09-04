@@ -114,12 +114,12 @@ describe('executeActionPolicyOperations', () => {
 
     it('applies set_matcher', () => {
       const ops: ActionPolicyOperation[] = [
-        { operation: 'set_matcher', matcher: 'rule.name: "test"' },
+        { operation: 'set_matcher', matcher: { expression: 'rule.name: "test"' } },
       ];
 
       const result = executeActionPolicyOperations({}, ops);
 
-      expect(result.matcher).toBe('rule.name: "test"');
+      expect(result.matcher).toEqual({ expression: 'rule.name: "test"' });
     });
 
     it('applies set_grouping', () => {
@@ -151,13 +151,13 @@ describe('executeActionPolicyOperations', () => {
         operation: 'set_destinations',
         destinations: [{ type: 'workflow', id: '00000000-0000-0000-0000-000000000001' }],
       },
-      { operation: 'set_matcher', matcher: 'rule.id: "rule-123"' },
+      { operation: 'set_matcher', matcher: { tags: ['critical'] } },
       { operation: 'validate' },
     ];
 
     const result = executeActionPolicyOperations({}, ops, { isNew: true });
 
-    expect(result.matcher).toBe('rule.id: "rule-123"');
+    expect(result.matcher).toEqual({ tags: ['critical'] });
   });
 
   describe('agent-builder provenance tag', () => {

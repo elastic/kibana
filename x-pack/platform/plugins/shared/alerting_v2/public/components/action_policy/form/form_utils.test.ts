@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse, PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { toCreatePayload, toFormState, toUpdatePayload } from './form_utils';
 
 describe('action policy form utils', () => {
@@ -13,7 +13,7 @@ describe('action policy form utils', () => {
     name: 'Policy',
     description: 'Description',
     tags: [],
-    matcher: '',
+    matcher: null as PolicyMatcher | null,
     groupingMode: 'per_episode' as const,
     groupBy: [],
     throttleStrategy: 'on_status_change' as const,
@@ -41,7 +41,7 @@ describe('action policy form utils', () => {
       expect(payload.destinations).toEqual([{ type: 'workflow', id: 'workflow-1' }]);
     });
 
-    it('includes groupingMode and throttle strategy, omits empty nullable fields', () => {
+    it('includes groupingMode and throttle strategy, omits null matcher', () => {
       expect(toCreatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
@@ -88,6 +88,33 @@ describe('action policy form utils', () => {
 
       expect(payload.throttle).toEqual({ strategy: 'on_status_change', interval: null });
     });
+
+    it('includes structured matcher when present', () => {
+      const payload = toCreatePayload({
+        ...state,
+        matcher: { expression: 'event.severity: critical' },
+      });
+
+      expect(payload.matcher).toEqual({ expression: 'event.severity: critical' });
+    });
+
+    it('omits matcher when only null/empty parts remain (all-null object)', () => {
+      expect(
+        toCreatePayload({ ...state, matcher: { tags: null, expression: null } })
+      ).not.toHaveProperty('matcher');
+    });
+
+    it('omits matcher when expression is whitespace-only', () => {
+      expect(toCreatePayload({ ...state, matcher: { expression: '   ' } })).not.toHaveProperty(
+        'matcher'
+      );
+    });
+
+    it('omits matcher when tags array is empty and expression is null', () => {
+      expect(
+        toCreatePayload({ ...state, matcher: { tags: [], expression: null } })
+      ).not.toHaveProperty('matcher');
+    });
   });
 
   describe('toUpdatePayload', () => {
@@ -105,13 +132,21 @@ describe('action policy form utils', () => {
       });
     });
 
+    it('normalizes an all-null matcher object to null', () => {
+      const payload = toUpdatePayload(
+        { ...state, matcher: { tags: null, expression: null } },
+        'WzEsMV0='
+      );
+      expect(payload.matcher).toBeNull();
+    });
+
     it('preserves concrete nullable values', () => {
       expect(
         toUpdatePayload(
           {
             ...state,
             tags: ['production'],
-            matcher: 'event.severity: critical',
+            matcher: { expression: 'event.severity: critical' },
             groupingMode: 'per_field',
             groupBy: ['host.name'],
             throttleStrategy: 'time_interval',
@@ -125,7 +160,7 @@ describe('action policy form utils', () => {
         description: 'Description',
         grouping_mode: 'per_field',
         tags: ['production'],
-        matcher: 'event.severity: critical',
+        matcher: { expression: 'event.severity: critical' },
         group_by: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
@@ -134,13 +169,15 @@ describe('action policy form utils', () => {
   });
 
   describe('toFormState', () => {
+    const severityMatcher: PolicyMatcher = { expression: 'data.severity : "critical"' };
+
     const baseResponse: ActionPolicyResponse = {
       id: 'policy-1',
       version: 'WzEsMV0=',
       name: 'Test Policy',
       description: 'A test policy',
       enabled: true,
-      matcher: 'data.severity : "critical"',
+      matcher: severityMatcher,
       group_by: ['host.name'],
       tags: ['production'],
       grouping_mode: 'per_field',
@@ -159,7 +196,7 @@ describe('action policy form utils', () => {
         name: 'Test Policy',
         description: 'A test policy',
         tags: ['production'],
-        matcher: 'data.severity : "critical"',
+        matcher: severityMatcher,
         groupingMode: 'per_field',
         groupBy: ['host.name'],
         throttleStrategy: 'time_interval',
@@ -182,7 +219,7 @@ describe('action policy form utils', () => {
         name: 'Test Policy',
         description: 'A test policy',
         tags: [],
-        matcher: 'data.severity : "critical"',
+        matcher: severityMatcher,
         groupingMode: 'per_episode',
         groupBy: [],
         throttleStrategy: 'on_status_change',

@@ -62,18 +62,17 @@ export type {
 export {
   buildInlineWorkflowYaml,
   buildRuleScopedMatcher,
+  buildRuleNotificationTag,
+  resolveRuleNotificationTag,
+  ruleHasNotificationTag,
   InlineWorkflowEditor,
   INLINE_ACTION_STEP_DEFINITIONS,
   getInlineActionStepDefinition,
   getDefaultInlineActionStepDefinition,
   isActionValid,
-  isExplicitlyLinkedToRule,
-  isRuleScopedCatchAllMatcher,
-  summarizeExplicitlyLinkedActionPolicies,
 } from './actions_form';
 export type {
   ActionDraft,
-  LinkedActionPolicySummary,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,
