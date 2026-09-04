@@ -32,6 +32,7 @@ jest.mock('@kbn/dev-utils', () => {
     CA_CERT_PATH: '/some/path/ca.crt',
     KBN_CERT_PATH: '/some/path/kibana.crt',
     KBN_KEY_PATH: '/some/path/kibana.key',
+    RELAY_CA_CERT_PATH: '/some/path/relay_ca.crt',
   };
 });
 
@@ -166,6 +167,8 @@ describe(`#runUiamContainer()`, () => {
             "--volume",
             "/some/path/ca.crt:/tmp/ca.crt:z",
             "--volume",
+            "/some/path/relay_ca.crt:/tmp/relay_service_ca.crt:z",
+            "--volume",
             "/some/path/kibana.key:/tmp/server.key:z",
             "--volume",
             "/some/path/kibana.crt:/tmp/server.crt:z",
@@ -182,7 +185,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "quarkus.tls.https.key-store.pem.0.key=/tmp/server.key",
             "--env",
-            "quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt",
+            "quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt,/tmp/relay_service_ca.crt",
             "--env",
             "quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt",
             "--env",
@@ -220,11 +223,17 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "uiam.cosmos.container.apikey=api-keys",
             "--env",
+            "uiam.cosmos.organization_service_account.enabled=true",
+            "--env",
             "uiam.cosmos.container.oauth_authorization_code=oauth-authorization-codes",
             "--env",
             "uiam.cosmos.container.oauth_client=oauth-clients",
             "--env",
             "uiam.cosmos.container.oauth_app_connection=oauth-app-connections",
+            "--env",
+            "uiam.cosmos.container.organization_service_account=organization-service-accounts",
+            "--env",
+            "uiam.cosmos.organization_service_account.enabled=true",
             "--env",
             "uiam.cosmos.container.token_invalidation=token-invalidation",
             "--env",
@@ -410,7 +419,7 @@ describe('#initializeUiamContainers', () => {
     expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
     expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(mockUndiciFetch).toHaveBeenCalledTimes(7);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(8);
     expect(mockUndiciFetch.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -532,6 +541,23 @@ describe('#initializeUiamContainers', () => {
             "method": "POST",
           },
         ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"organization-service-accounts\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
       ]
     `);
   });
@@ -544,7 +570,7 @@ describe('#initializeUiamContainers', () => {
     expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
     expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(mockUndiciFetch).toHaveBeenCalledTimes(7);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(8);
   });
 
   test('fails if cannot create database', async () => {

@@ -18,6 +18,7 @@ import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import type { InternalAuthenticationServiceStart } from './authentication';
 import { createFakeRequestEnrichment } from './authentication/fake_request_enrichment';
+import type { ServiceAccountsServiceStart } from './service_accounts';
 import type { Session } from './session_management';
 import { getPrintableSessionId } from './session_management';
 import type { UserProfileServiceStartInternal } from './user_profile';
@@ -25,17 +26,27 @@ import type { UserProfileServiceStartInternal } from './user_profile';
 export const buildSecurityApi = ({
   getAuthc,
   getSession,
+  getServiceAccounts,
   audit,
   config,
   logger,
 }: {
   getAuthc: () => InternalAuthenticationServiceStart;
   getSession: () => Pick<Session, 'getSID'>;
+  getServiceAccounts: () => ServiceAccountsServiceStart | null;
   audit: AuditServiceSetup;
   config: { uiam?: { enabled: boolean }; serviceAccounts?: { enabled: boolean } };
   logger: Logger;
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
+
+  const getWorkloads = () => {
+    const serviceAccounts = getServiceAccounts();
+    if (!serviceAccounts) {
+      throw new Error('Service accounts are not enabled');
+    }
+    return serviceAccounts.workloads;
+  };
 
   return {
     authc: {
@@ -89,6 +100,31 @@ export const buildSecurityApi = ({
     },
     serviceAccounts: {
       isEnabled: () => config.serviceAccounts?.enabled === true,
+      // `async` so that a disabled feature surfaces as a rejected promise rather than a
+      // synchronous throw, which callers of a promise-returning API would not expect.
+      create: async (request, params) => {
+        const serviceAccounts = getServiceAccounts();
+        if (!serviceAccounts) {
+          throw new Error('Service accounts are not enabled');
+        }
+        return serviceAccounts.create(request, params);
+      },
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: async (serviceAccountId) => {
+        const serviceAccounts = getServiceAccounts();
+        if (!serviceAccounts) {
+          throw new Error('Service accounts are not enabled');
+        }
+        return serviceAccounts.exchangeToken(serviceAccountId);
+      },
+      attachWorkload: async (operationType, request, params) =>
+        getWorkloads().attach(operationType, request, params),
+      detachWorkload: async (operationType, request, params) =>
+        getWorkloads().detach(operationType, request, params),
+      getWorkloadBinding: async (operationType, params) =>
+        getWorkloads().getBinding(operationType, params),
+      withScopedRequestForWorkload: async (operationType, params, fn) =>
+        getWorkloads().withScopedRequest(operationType, params, fn),
     },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };

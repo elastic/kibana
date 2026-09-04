@@ -7,6 +7,7 @@
 
 import { of } from 'rxjs';
 
+import type { Capabilities } from '@kbn/core/public';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import type { UserProfileAPIClient } from '@kbn/security-plugin-types-public';
@@ -14,14 +15,27 @@ import type { UserProfileAPIClient } from '@kbn/security-plugin-types-public';
 import { authenticationMock } from './authentication/index.mock';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_api';
 import { securityMock } from './mocks';
+import type { ServiceAccountsAPIClient } from './service_accounts';
 
 describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationMock.createSetup>;
+  let serviceAccounts: jest.Mocked<ServiceAccountsAPIClient>;
+  let capabilities: Capabilities | undefined;
   let api: CoreSecurityDelegateContract;
+
+  const build = (config: Parameters<typeof buildSecurityApi>[0]['config'] = {}) =>
+    buildSecurityApi({
+      authc,
+      config,
+      serviceAccounts,
+      getCapabilities: () => capabilities,
+    });
 
   beforeEach(() => {
     authc = authenticationMock.createSetup();
-    api = buildSecurityApi({ authc, config: {} });
+    serviceAccounts = { create: jest.fn() } as unknown as jest.Mocked<ServiceAccountsAPIClient>;
+    capabilities = undefined;
+    api = build();
   });
 
   describe('authc.getCurrentUser', () => {
@@ -44,25 +58,67 @@ describe('buildSecurityApi', () => {
 
   describe('serviceAccounts.isEnabled', () => {
     it('returns true when service accounts are enabled', () => {
-      const enabledApi = buildSecurityApi({
-        authc,
-        config: { serviceAccounts: { enabled: true } },
-      });
-
-      expect(enabledApi.serviceAccounts.isEnabled()).toBe(true);
+      expect(build({ serviceAccounts: { enabled: true } }).serviceAccounts.isEnabled()).toBe(true);
     });
 
     it('returns false when service accounts are disabled', () => {
-      const disabledApi = buildSecurityApi({
-        authc,
-        config: { serviceAccounts: { enabled: false } },
-      });
-
-      expect(disabledApi.serviceAccounts.isEnabled()).toBe(false);
+      expect(build({ serviceAccounts: { enabled: false } }).serviceAccounts.isEnabled()).toBe(
+        false
+      );
     });
 
     it('returns false when the setting is not available, as is the case outside of serverless', () => {
       expect(api.serviceAccounts.isEnabled()).toBe(false);
+    });
+  });
+
+  describe('serviceAccounts.canCreate', () => {
+    it('returns true when the current user holds the `save` capability', () => {
+      capabilities = { service_accounts: { save: true } } as unknown as Capabilities;
+
+      expect(api.serviceAccounts.canCreate()).toBe(true);
+    });
+
+    it('returns false when the current user does not hold the `save` capability', () => {
+      capabilities = { service_accounts: { save: false } } as unknown as Capabilities;
+
+      expect(api.serviceAccounts.canCreate()).toBe(false);
+    });
+
+    it('returns false when the capability is absent', () => {
+      capabilities = {} as unknown as Capabilities;
+
+      expect(api.serviceAccounts.canCreate()).toBe(false);
+    });
+
+    // The delegate is registered during `setup`, before capabilities are captured in `start`.
+    it('fails closed when capabilities have not been captured yet', () => {
+      expect(api.serviceAccounts.canCreate()).toBe(false);
+    });
+  });
+
+  describe('serviceAccounts.create', () => {
+    const params = { name: 'nightshift-relay' };
+
+    it('properly delegates to the API client', async () => {
+      await api.serviceAccounts.create(params);
+
+      expect(serviceAccounts.create).toHaveBeenCalledTimes(1);
+      expect(serviceAccounts.create).toHaveBeenCalledWith(params);
+    });
+
+    it('returns the result from the API client', async () => {
+      const created = {
+        id: 'service-account-id',
+        type: 'project' as const,
+        name: 'nightshift-relay',
+        organization_id: 'organization-id',
+        role_assignments: {},
+        assumable_by: [],
+      };
+      serviceAccounts.create.mockResolvedValue(created);
+
+      await expect(api.serviceAccounts.create(params)).resolves.toBe(created);
     });
   });
 });

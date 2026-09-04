@@ -17,6 +17,7 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
   MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL,
@@ -31,7 +32,7 @@ import execa from 'execa';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { Agent } from 'undici';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, RELAY_CA_CERT_PATH } from '@kbn/dev-utils';
 import {
   SERVERLESS_UIAM_ENTRYPOINT_PATH,
   SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH,
@@ -148,6 +149,8 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--volume',
       `${CA_CERT_PATH}:/tmp/ca.crt:z`,
       '--volume',
+      `${RELAY_CA_CERT_PATH}:/tmp/relay_service_ca.crt:z`,
+      '--volume',
       `${KBN_KEY_PATH}:/tmp/server.key:z`,
       '--volume',
       `${KBN_CERT_PATH}:/tmp/server.crt:z`,
@@ -168,7 +171,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--env',
       'quarkus.tls.https.key-store.pem.0.key=/tmp/server.key',
       '--env',
-      'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
+      'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt,/tmp/relay_service_ca.crt',
 
       '--env',
       'quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt',
@@ -213,6 +216,10 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       `uiam.cosmos.container.oauth_client=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS}`,
       '--env',
       `uiam.cosmos.container.oauth_app_connection=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS}`,
+      '--env',
+      `uiam.cosmos.container.organization_service_account=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS}`,
+      '--env',
+      'uiam.cosmos.organization_service_account.enabled=true',
       '--env',
       `uiam.cosmos.container.token_invalidation=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION}`,
       '--env',
@@ -262,6 +269,8 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--volume',
     `${CA_CERT_PATH}:/tmp/ca.crt:z`,
     '--volume',
+    `${RELAY_CA_CERT_PATH}:/tmp/relay_service_ca.crt:z`,
+    '--volume',
     `${KBN_KEY_PATH}:/tmp/server.key:z`,
     '--volume',
     `${KBN_CERT_PATH}:/tmp/server.crt:z`,
@@ -282,7 +291,7 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--env',
     'quarkus.tls.https.key-store.pem.0.key=/tmp/server.key',
     '--env',
-    'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
+    'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt,/tmp/relay_service_ca.crt',
 
     '--env',
     'quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt',
@@ -487,6 +496,10 @@ export async function initializeUiamContainers(log: ToolingLog) {
     {
       id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
       partitionKeyPath: '/client_id',
+    },
+    {
+      id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS,
+      partitionKeyPath: '/id',
     },
   ];
 

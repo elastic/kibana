@@ -21,6 +21,8 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/cps'
   - '@kbn/cps-utils'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/es-query'
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'
@@ -121,6 +123,7 @@ dependsOn:
   - '@kbn/projects-solutions-groups'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/ui-callout'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

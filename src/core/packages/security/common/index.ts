@@ -14,3 +14,15 @@ export type {
   AuthenticationProvider,
 } from './src/authentication';
 export { isUserAnonymous, canUserHaveProfile } from './src/authentication';
+export type {
+  ServiceAccount,
+  ServiceAccountAssumableBy,
+  ProjectServiceAccountAssumableBy,
+  PlatformServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
+  CreateServiceAccountParams,
+  ServiceAccountWorkloadAttacher,
+  ServiceAccountWorkloadBinding,
+  AttachServiceAccountWorkloadParams,
+  ServiceAccountWorkloadCoordinates,
+} from './src/service_accounts';

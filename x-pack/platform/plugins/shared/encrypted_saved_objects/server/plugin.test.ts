@@ -6,7 +6,6 @@
  */
 
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsService } from './crypto';
@@ -18,8 +17,7 @@ describe('EncryptedSavedObjects Plugin', () => {
       const plugin = new EncryptedSavedObjectsPlugin(
         coreMock.createPluginInitializerContext(ConfigSchema.validate({}, { dist: true }))
       );
-      expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
-        .toMatchInlineSnapshot(`
+      expect(plugin.setup(coreMock.createSetup())).toMatchInlineSnapshot(`
         Object {
           "__testCreateDangerousExtension": [Function],
           "canEncrypt": false,
@@ -37,8 +35,7 @@ describe('EncryptedSavedObjects Plugin', () => {
 
       const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
 
-      expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
-        .toMatchInlineSnapshot(`
+      expect(plugin.setup(coreMock.createSetup())).toMatchInlineSnapshot(`
         Object {
           "__testCreateDangerousExtension": [Function],
           "canEncrypt": true,
@@ -68,7 +65,7 @@ describe('EncryptedSavedObjects Plugin', () => {
       );
 
       const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-      plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() });
+      plugin.setup(coreMock.createSetup());
 
       const infoLogs = loggingSystemMock.collect(mockInitializerContext.logger).info;
 
@@ -87,9 +84,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
         const extension = setupContract.__testCreateDangerousExtension(mockTypeRegistry, []);
@@ -103,9 +98,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
         const typeRegistration = {
@@ -125,9 +118,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         setupContract.registerType({
           type: 'existing-type',
@@ -146,9 +137,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         setupContract.registerType({
           type: 'shared-type',
@@ -176,9 +165,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         setupContract.registerType({
           type: 'existing-type-1',
@@ -210,9 +197,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({}, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
 
@@ -227,9 +212,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
@@ -260,9 +243,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
@@ -293,9 +274,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         setupContract.registerType({
           type: 'existing-type',
@@ -323,9 +302,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
@@ -351,9 +328,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
         );
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
-        const setupContract = plugin.setup(coreMock.createSetup(), {
-          security: securityMock.createSetup(),
-        });
+        const setupContract = plugin.setup(coreMock.createSetup());
 
         const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
@@ -381,7 +356,7 @@ describe('EncryptedSavedObjects Plugin', () => {
       const plugin = new EncryptedSavedObjectsPlugin(
         coreMock.createPluginInitializerContext(ConfigSchema.validate({}, { dist: true }))
       );
-      plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() });
+      plugin.setup(coreMock.createSetup());
 
       const startContract = plugin.start();
       expect(startContract).toMatchInlineSnapshot(`

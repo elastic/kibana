@@ -9018,6 +9018,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/service-accounts-example-plugin@link:examples/service_accounts_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/session-notifications-plugin@link:src/platform/test/plugin_functional/plugins/session_notifications":
   version "0.0.0"
   uid ""

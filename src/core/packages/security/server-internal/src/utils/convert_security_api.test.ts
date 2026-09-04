@@ -44,18 +44,48 @@ describe('convertSecurityApi', () => {
       },
       serviceAccounts: {
         isEnabled: jest.fn(),
+        create: jest.fn(),
+        // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+        exchangeToken: jest.fn(),
+        attachWorkload: jest.fn(),
+        detachWorkload: jest.fn(),
+        getWorkloadBinding: jest.fn(),
+        withScopedRequestForWorkload: jest.fn(),
       },
       fakeRequestEnricher: jest.fn(),
     };
   });
 
-  it('passes through delegate apiKeys, audit, serviceAccounts, and getRedactedSessionId', () => {
+  it('passes through delegate apiKeys, audit, and getRedactedSessionId', () => {
     const output = convertSecurityApi(source);
     expect(output.authc.apiKeys).toBe(source.authc.apiKeys);
     expect(output.authc.getRedactedSessionId).toBe(source.authc.getRedactedSessionId);
     expect(output.audit.asScoped).toBe(source.audit.asScoped);
     expect(output.audit.withoutRequest).toBe(source.audit.withoutRequest);
-    expect(output.serviceAccounts).toBe(source.serviceAccounts);
+  });
+
+  describe('serviceAccounts', () => {
+    it('exposes the start-contract methods', () => {
+      const output = convertSecurityApi(source);
+
+      expect(output.serviceAccounts.isEnabled).toBe(source.serviceAccounts.isEnabled);
+      expect(output.serviceAccounts.create).toBe(source.serviceAccounts.create);
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      expect(output.serviceAccounts.exchangeToken).toBe(source.serviceAccounts.exchangeToken);
+    });
+
+    // The workload methods take an operation type as an argument, so exposing them on the start
+    // contract would let any plugin address any operation's bindings. A capability handle from
+    // `registerOperation` is meant to be the only way to reach them.
+    it('does not leak the operation-keyed workload methods', () => {
+      const output = convertSecurityApi(source);
+
+      expect(Object.keys(output.serviceAccounts).sort()).toEqual([
+        'create',
+        'exchangeToken',
+        'isEnabled',
+      ]);
+    });
   });
 
   describe('getCurrentUser', () => {

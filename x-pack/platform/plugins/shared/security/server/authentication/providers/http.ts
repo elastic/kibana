@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { timingSafeEqual } from 'crypto';
+
 import type { KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import {
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
@@ -99,13 +105,25 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       if (request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)) {
         return this.authenticateViaUiamOAuth(request, authorizationHeader);
       }
-
-      this.logger.warn(
-        `Detected UIAM OAuth token on a non-MCP endpoint: ` +
-          `${request.route.method.toUpperCase()} ${request.route.path}. ` +
-          `OAuth tokens are only accepted on routes tagged with "${ROUTE_TAG_ACCEPT_UIAM_OAUTH}". ` +
-          `This may indicate a misconfigured MCP client or token misuse.`
+      const authHeaders = this.options.uiam!.getAuthenticationHeaders(
+        authorizationHeader.credentials
       );
+
+      const user = await this.getUser(request, authHeaders);
+      console.log(user);
+      // Trusted loopback callers (e.g. workloads running as a service account) legitimately
+      // present internal UIAM credentials on ordinary routes, and identify themselves with a
+      // verifiable internal-caller attestation. Only warn when that attestation is absent or
+      // fails verification — this gates log noise only; the security-relevant verification
+      // happens in the ES cluster client, which withholds the shared secret without it.
+      if (!this.hasVerifiedInternalCallerAttestation(request, authorizationHeader)) {
+        this.logger.warn(
+          `Detected UIAM OAuth token on a non-MCP endpoint: ` +
+            `${request.route.method.toUpperCase()} ${request.route.path}. ` +
+            `OAuth tokens are only accepted on routes tagged with "${ROUTE_TAG_ACCEPT_UIAM_OAUTH}". ` +
+            `This may indicate a misconfigured MCP client or token misuse.`
+        );
+      }
     }
 
     try {
@@ -171,18 +189,55 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    * Exchanges a UIAM OAuth access token for an ephemeral token via the UIAM service, verifies
    * the audience, and resolves the user via Elasticsearch using the ephemeral token.
    */
+  /**
+   * Whether the request carries an internal-caller attestation that verifies against the presented
+   * credential, marking it as coming from a trusted in-process loopback caller rather than an
+   * external client. Used to suppress log noise only: mere presence of the header is not enough,
+   * since anything else would let an external caller silence the misuse warning.
+   */
+  private hasVerifiedInternalCallerAttestation(
+    request: KibanaRequest,
+    authorizationHeader: HTTPAuthorizationHeader
+  ): boolean {
+    const presented = request.headers[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER];
+    if (typeof presented !== 'string' || presented.length === 0) {
+      return false;
+    }
+
+    const expected =
+      this.options.uiam!.getInternalCallerAttestationHeaders(authorizationHeader)[
+        UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
+      ];
+    const presentedBuffer = Buffer.from(presented);
+    const expectedBuffer = Buffer.from(expected);
+
+    return (
+      presentedBuffer.length === expectedBuffer.length &&
+      timingSafeEqual(presentedBuffer, expectedBuffer)
+    );
+  }
+
   private async authenticateViaUiamOAuth(
     request: KibanaRequest,
     authorizationHeader: HTTPAuthorizationHeader
   ): Promise<AuthenticationResult> {
     try {
+      const clientSans = request.headers['x-client-sans'];
+      console.log('clientSans', clientSans);
       const ephemeralToken = await this.options.uiam!.exchangeOAuthToken(
-        authorizationHeader.credentials
+        authorizationHeader.credentials,
+        Array.isArray(clientSans) ? clientSans.join(',') : clientSans
       );
+
+      console.log('ephemeralToken', ephemeralToken);
 
       const authHeaders = this.options.uiam!.getAuthenticationHeaders(ephemeralToken);
 
+      console.log('authHeaders', authHeaders);
+
       const user = await this.getUser(request, authHeaders);
+
+      console.log('user', user);
 
       this.logger.debug('Request authenticated via UIAM OAuth token exchange.');
 

@@ -20,6 +20,13 @@ export const convertSecurityApi = (
       apiKeys: privateApi.authc.apiKeys,
     },
     audit: privateApi.audit,
-    serviceAccounts: privateApi.serviceAccounts,
+    // The delegate also carries the operation-keyed workload methods.
+    // These are intentionally not exposed here, and are only accessible through a capability handle.
+    serviceAccounts: {
+      isEnabled: privateApi.serviceAccounts.isEnabled,
+      create: privateApi.serviceAccounts.create,
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: privateApi.serviceAccounts.exchangeToken,
+    },
   };
 };

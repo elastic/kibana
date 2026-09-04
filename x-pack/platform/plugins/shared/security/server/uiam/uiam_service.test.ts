@@ -14,6 +14,7 @@ import {
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
+import type { ServiceAccount } from '@kbn/core-security-server';
 
 import {
   type GrantUiamApiKeyRequestBody,
@@ -482,6 +483,35 @@ describe('UiamService', () => {
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
         { outcome: 'success' }
+      );
+    });
+
+    it('forwards x-client-sans header to UIAM when provided', async () => {
+      const mockResponse = {
+        token: 'essu_ephemeral_token_value',
+        credentials: {
+          oauth: {
+            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+          },
+        },
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.exchangeOAuthToken('essu_oauth_access_token', 'relay.example.com')
+      ).resolves.toBe('essu_ephemeral_token_value');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'x-client-sans': 'relay.example.com',
+          }),
+        })
       );
     });
 
@@ -1053,6 +1083,337 @@ describe('UiamService', () => {
         }),
         dispatcher: AGENT_MOCK,
       });
+    });
+  });
+
+  describe('#createServiceAccount', () => {
+    const body = {
+      name: 'nightshift-relay',
+      role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+      assumable_by: [
+        {
+          type: 'project-service-account' as const,
+          organization_id: 'organization-id',
+          project_type: 'security',
+          project_id: 'project-id',
+        },
+      ],
+    };
+
+    it('properly calls UIAM service to create a service account', async () => {
+      const mockResponse: ServiceAccount = {
+        id: 'service-account-id',
+        type: 'project',
+        name: 'nightshift-relay',
+        organization_id: 'organization-id',
+        role_assignments: body.role_assignments,
+        assumable_by: body.assumable_by,
+      };
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(uiamService.createServiceAccount('access-token', body)).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/service-accounts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        body: JSON.stringify({
+          ...body,
+          type: 'project',
+        }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('reproduces the UIAM status code and payload when creation fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 409,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'SERVICE_ACCOUNT_LIMIT_REACHED',
+            type: 'conflict',
+            message: 'Project has reached its service account limit',
+          },
+        }),
+      });
+
+      await expect(uiamService.createServiceAccount('access-token', body)).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+    });
+
+    it('logs and rethrows transport errors', async () => {
+      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+
+      await expect(uiamService.createServiceAccount('access-token', body)).rejects.toThrowError(
+        'socket hang up'
+      );
+    });
+  });
+
+  describe('#listServiceAccounts', () => {
+    const mockResponse = {
+      service_accounts: [
+        {
+          id: 'service-account-id',
+          type: 'project',
+          name: 'nightshift-relay',
+          organization_id: 'organization-id',
+          role_assignments: {},
+          assumable_by: [],
+          creator: { type: 'user', id: 'user-id', first_name: 'Ada', last_name: 'Lovelace' },
+        },
+      ],
+    };
+
+    it('authenticates with client authentication only, without a user credential', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(uiamService.listServiceAccounts()).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/service-accounts', {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Kibana/9.0.0',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        dispatcher: AGENT_MOCK,
+      });
+
+      const [, { headers }] = fetchSpy.mock.calls[0];
+      expect(headers).not.toHaveProperty('Authorization');
+      expect(headers).not.toHaveProperty('authorization');
+    });
+
+    it('forwards limit, after, and q as query parameters', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await uiamService.listServiceAccounts({
+        limit: 25,
+        after: 'cursor',
+        q: 'name:nightshift',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts?limit=25&after=cursor&q=name%3Anightshift',
+        expect.anything()
+      );
+    });
+
+    it('reproduces the UIAM status code when listing is unsupported', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 501,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'NOT_IMPLEMENTED',
+            type: 'not_implemented',
+            message: 'Listing service accounts is not implemented',
+          },
+        }),
+      });
+
+      await expect(uiamService.listServiceAccounts()).rejects.toMatchObject({
+        output: { statusCode: 501 },
+      });
+    });
+
+    it('reproduces a 403 when Kibana is not in assumable_by', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'FORBIDDEN',
+            type: 'authorization',
+            message: 'The assumable_by list doesn’t authorize the principal',
+          },
+        }),
+      });
+
+      await expect(uiamService.listServiceAccounts()).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
+
+    it('reproduces a 401 when client credentials cannot be authenticated', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'UNAUTHORIZED',
+            type: 'authentication',
+            message: 'Credentials could not be authenticated',
+          },
+        }),
+      });
+
+      await expect(uiamService.listServiceAccounts()).rejects.toMatchObject({
+        output: { statusCode: 401 },
+      });
+    });
+
+    it('logs and rethrows transport errors', async () => {
+      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+
+      await expect(uiamService.listServiceAccounts()).rejects.toThrowError('socket hang up');
+    });
+  });
+
+  describe('#getServiceAccount', () => {
+    const mockResponse = {
+      id: 'service-account-id',
+      type: 'project',
+      name: 'nightshift-relay',
+      organization_id: 'organization-id',
+      role_assignments: {},
+      assumable_by: [],
+      creator: { type: 'user', id: 'user-id', first_name: 'Ada', last_name: 'Lovelace' },
+    };
+
+    it('authenticates with client authentication only, without a user credential', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(uiamService.getServiceAccount('service-account-id')).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/service-account-id',
+        {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+
+      const [, { headers }] = fetchSpy.mock.calls[0];
+      expect(headers).not.toHaveProperty('Authorization');
+      expect(headers).not.toHaveProperty('authorization');
+    });
+
+    it('URL-encodes the service account id', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await uiamService.getServiceAccount('id/with spaces');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/id%2Fwith%20spaces',
+        expect.anything()
+      );
+    });
+
+    it('reproduces a 404 when the account is missing', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'NOT_FOUND',
+            type: 'not_found',
+            message: 'Not found',
+          },
+        }),
+      });
+
+      await expect(uiamService.getServiceAccount('missing')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('logs and rethrows transport errors', async () => {
+      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+
+      await expect(uiamService.getServiceAccount('service-account-id')).rejects.toThrowError(
+        'socket hang up'
+      );
+    });
+  });
+
+  describe('#exchangeServiceAccountToken', () => {
+    it('authenticates with client authentication only, without a user credential', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ token: 'essu_token' }) });
+
+      await expect(uiamService.exchangeServiceAccountToken('service-account-id')).resolves.toEqual({
+        token: 'essu_token',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/service-account-id/credentials/_exchange',
+        {
+          method: 'POST',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+
+      const [, { headers }] = fetchSpy.mock.calls[0];
+      expect(headers).not.toHaveProperty('Authorization');
+      expect(headers).not.toHaveProperty('authorization');
+    });
+
+    it('URL-encodes the service account id', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ token: 'essu_token' }) });
+
+      await uiamService.exchangeServiceAccountToken('id/../with special?chars');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        `https://uiam.service/uiam/api/v1/service-accounts/${encodeURIComponent(
+          'id/../with special?chars'
+        )}/credentials/_exchange`,
+        expect.anything()
+      );
+    });
+
+    it('reproduces the UIAM status code and payload when the exchange fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'FORBIDDEN',
+            type: 'authorization',
+            message: 'Principal is not authorized to assume this service account',
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.exchangeServiceAccountToken('service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+    });
+
+    it('logs and rethrows transport errors', async () => {
+      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+
+      await expect(
+        uiamService.exchangeServiceAccountToken('service-account-id')
+      ).rejects.toThrowError('socket hang up');
     });
   });
 

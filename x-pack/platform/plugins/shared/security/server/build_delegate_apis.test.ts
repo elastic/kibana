@@ -16,6 +16,7 @@ import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import { securityMock } from './mocks';
+import { serviceAccountsServiceMock } from './service_accounts/service_accounts_service.mock';
 import { getPrintableSessionId } from './session_management';
 import { sessionMock } from './session_management/session.mock';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
@@ -24,6 +25,7 @@ describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationServiceMock.createStart>;
   let auditService: ReturnType<typeof auditServiceMock.create>;
   let session: ReturnType<typeof sessionMock.create>;
+  let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart> | null;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let api: CoreSecurityDelegateContract;
 
@@ -31,10 +33,12 @@ describe('buildSecurityApi', () => {
     authc = authenticationServiceMock.createStart();
     auditService = auditServiceMock.create();
     session = sessionMock.create();
+    serviceAccounts = serviceAccountsServiceMock.createStart();
     logger = loggingSystemMock.createLogger();
     api = buildSecurityApi({
       getAuthc: () => authc,
       getSession: () => session,
+      getServiceAccounts: () => serviceAccounts,
       audit: auditService,
       config: { uiam: { enabled: false } },
       logger,
@@ -167,6 +171,7 @@ describe('buildSecurityApi', () => {
       buildSecurityApi({
         getAuthc: () => authc,
         getSession: () => session,
+        getServiceAccounts: () => serviceAccounts,
         audit: auditService,
         config,
         logger,
@@ -189,6 +194,174 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('serviceAccounts.create', () => {
+    const params = { name: 'nightshift-relay' };
+
+    it('resolves the service lazily rather than at build time', () => {
+      const getServiceAccounts = jest.fn().mockReturnValue(serviceAccounts);
+
+      buildSecurityApi({
+        getAuthc: () => authc,
+        getSession: () => session,
+        getServiceAccounts,
+        audit: auditService,
+        config: {},
+        logger,
+      });
+
+      expect(getServiceAccounts).not.toHaveBeenCalled();
+    });
+
+    it('properly delegates to the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await api.serviceAccounts.create(request, params);
+
+      expect(serviceAccounts!.create).toHaveBeenCalledTimes(1);
+      expect(serviceAccounts!.create).toHaveBeenCalledWith(request, params);
+    });
+
+    it('returns the result from the service', async () => {
+      const created = {
+        id: 'service-account-id',
+        type: 'project' as const,
+        name: 'nightshift-relay',
+        organization_id: 'organization-id',
+        role_assignments: {},
+        assumable_by: [],
+      };
+      serviceAccounts!.create.mockResolvedValue(created);
+
+      await expect(
+        api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
+      ).resolves.toBe(created);
+    });
+
+    it('throws when service accounts are not enabled', async () => {
+      serviceAccounts = null;
+
+      await expect(
+        api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
+    });
+  });
+
+  // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+  describe('serviceAccounts.exchangeToken', () => {
+    it('properly delegates to the service', async () => {
+      await api.serviceAccounts.exchangeToken('service-account-id');
+
+      expect(serviceAccounts!.exchangeToken).toHaveBeenCalledTimes(1);
+      expect(serviceAccounts!.exchangeToken).toHaveBeenCalledWith('service-account-id');
+    });
+
+    it('returns the result from the service', async () => {
+      serviceAccounts!.exchangeToken.mockResolvedValue({ token: 'essu_new_token' });
+
+      await expect(api.serviceAccounts.exchangeToken('service-account-id')).resolves.toEqual({
+        token: 'essu_new_token',
+      });
+    });
+
+    it('throws when service accounts are not enabled', async () => {
+      serviceAccounts = null;
+
+      await expect(
+        api.serviceAccounts.exchangeToken('service-account-id')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
+    });
+  });
+
+  describe('workload bindings', () => {
+    const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
+
+    it('delegates attach, forwarding the operation type Core supplied', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const params = { serviceAccountId: 'service-account-id', ...WORKLOAD };
+
+      await api.serviceAccounts.attachWorkload('alerting_rule', request, params);
+
+      expect(serviceAccounts!.workloads.attach).toHaveBeenCalledWith(
+        'alerting_rule',
+        request,
+        params
+      );
+    });
+
+    it('delegates detach', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await api.serviceAccounts.detachWorkload('alerting_rule', request, WORKLOAD);
+
+      expect(serviceAccounts!.workloads.detach).toHaveBeenCalledWith(
+        'alerting_rule',
+        request,
+        WORKLOAD
+      );
+    });
+
+    it('delegates getBinding and returns its result', async () => {
+      const binding = { operationType: 'alerting_rule' } as never;
+      serviceAccounts!.workloads.getBinding.mockResolvedValue(binding);
+
+      await expect(api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD)).resolves.toBe(
+        binding
+      );
+      expect(serviceAccounts!.workloads.getBinding).toHaveBeenCalledWith('alerting_rule', WORKLOAD);
+    });
+
+    it('delegates withScopedRequest, passing the callback through', async () => {
+      const fn = jest.fn();
+
+      await api.serviceAccounts.withScopedRequestForWorkload('alerting_rule', WORKLOAD, fn);
+
+      expect(serviceAccounts!.workloads.withScopedRequest).toHaveBeenCalledWith(
+        'alerting_rule',
+        WORKLOAD,
+        fn
+      );
+    });
+
+    it.each([
+      [
+        'attachWorkload',
+        () =>
+          api.serviceAccounts.attachWorkload(
+            'alerting_rule',
+            httpServerMock.createKibanaRequest(),
+            {
+              serviceAccountId: 'sa',
+              ...WORKLOAD,
+            }
+          ),
+      ],
+      [
+        'detachWorkload',
+        () =>
+          api.serviceAccounts.detachWorkload(
+            'alerting_rule',
+            httpServerMock.createKibanaRequest(),
+            WORKLOAD
+          ),
+      ],
+      [
+        'getWorkloadBinding',
+        () => api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD),
+      ],
+      [
+        'withScopedRequestForWorkload',
+        () =>
+          api.serviceAccounts.withScopedRequestForWorkload('alerting_rule', WORKLOAD, jest.fn()),
+      ],
+    ])('rejects %s when service accounts are not enabled', async (_name, invoke) => {
+      serviceAccounts = null;
+
+      await expect(invoke()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Service accounts are not enabled"`
+      );
+    });
+  });
+
   describe('config.uiam', () => {
     describe('when uiam is enabled', () => {
       beforeEach(() => {
@@ -198,6 +371,7 @@ describe('buildSecurityApi', () => {
         api = buildSecurityApi({
           getAuthc: () => authc,
           getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
           audit: auditService,
           config: { uiam: { enabled: true } },
           logger,
@@ -259,6 +433,7 @@ describe('buildSecurityApi', () => {
         api = buildSecurityApi({
           getAuthc: () => authc,
           getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
           audit: auditService,
           config: { uiam: { enabled: false } },
           logger,
@@ -278,6 +453,7 @@ describe('buildSecurityApi', () => {
         api = buildSecurityApi({
           getAuthc: () => authc,
           getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
           audit: auditService,
           config: {},
           logger,

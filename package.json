@@ -1181,6 +1181,7 @@
     "@kbn/serverless-vectordb-settings": "link:src/platform/packages/shared/serverless/settings/vectordb_project",
     "@kbn/serverless-workplace-ai": "link:x-pack/solutions/workplaceai/plugins/serverless_workplace_ai",
     "@kbn/serverless-workplace-ai-settings": "link:src/platform/packages/shared/serverless/settings/workplace_ai_project",
+    "@kbn/service-accounts-example-plugin": "link:examples/service_accounts_example",
     "@kbn/session-notifications-plugin": "link:src/platform/test/plugin_functional/plugins/session_notifications",
     "@kbn/session-view-plugin": "link:x-pack/solutions/security/plugins/session_view",
     "@kbn/setup-node-env": "link:src/setup_node_env",

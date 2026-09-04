@@ -11,6 +11,7 @@ import type {
   SecurityServiceSetup,
   SecurityServiceStart,
   SecurityRequestHandlerContext,
+  ServiceAccountOperationHandle,
 } from '@kbn/core-security-server';
 import type {
   InternalSecurityServiceSetup,
@@ -23,11 +24,23 @@ import type { MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
+const createServiceAccountOperationHandleMock =
+  (): jest.MockedObjectDeep<ServiceAccountOperationHandle> =>
+    lazyObject({
+      attach: jest.fn(),
+      detach: jest.fn(),
+      getBinding: jest.fn().mockResolvedValue(null),
+      withScopedRequest: jest.fn(),
+    });
+
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn(),
     acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
+    serviceAccounts: lazyObject({
+      registerOperation: jest.fn(createServiceAccountOperationHandleMock),
+    }),
   });
 
   return mock;
@@ -47,6 +60,9 @@ const createStartMock = (): SecurityStartMock => {
     audit: auditServiceMock.create(),
     serviceAccounts: lazyObject({
       isEnabled: jest.fn().mockReturnValue(false),
+      create: jest.fn(),
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: jest.fn(),
     }),
   });
 
@@ -61,6 +77,9 @@ const createInternalSetupMock = () => {
     registerSecurityDelegate: jest.fn(),
     acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
+    serviceAccounts: lazyObject({
+      registerOperation: jest.fn(createServiceAccountOperationHandleMock),
+    }),
     uiam: {
       getElasticsearchClientAuthentication: jest.fn(uiam.getElasticsearchClientAuthentication),
     },
@@ -85,6 +104,9 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
     audit: auditServiceMock.create(),
     serviceAccounts: lazyObject({
       isEnabled: jest.fn().mockReturnValue(false),
+      create: jest.fn(),
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: jest.fn(),
     }),
   });
 
@@ -132,6 +154,7 @@ const createRequestHandlerContextMock = () => {
 export const securityServiceMock = {
   create: createServiceMock,
   createSetup: createSetupMock,
+  createServiceAccountOperationHandle: createServiceAccountOperationHandleMock,
   createStart: createStartMock,
   createInternalSetup: createInternalSetupMock,
   createInternalStart: createInternalStartMock,

@@ -6,7 +6,10 @@
  */
 
 export interface RelayInstallRequest {
-  kibana_api_key: string;
+  /** M1 managed scoped ES API key. Optional when `uiam_service_account_id` is provided. */
+  kibana_api_key?: string;
+  /** M2 UIAM service account id the relay assumes on the reactive leg. */
+  uiam_service_account_id?: string;
   kibana_url: string;
   kibana_version: string;
   license_info: string;
@@ -63,7 +66,7 @@ export interface RelayBindingsPage {
 }
 
 export interface RelayClientContract {
-  startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse>;
+  startInstall(body: RelayInstallRequest, bearerToken?: string): Promise<RelayInstallResponse>;
   fetchClaim(claimId: string): Promise<RelayClaimResponse>;
   /** Unbind a single workspace binding identified by its tenant key. */
   unbind(tenantKey: string): Promise<void>;

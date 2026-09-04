@@ -12,6 +12,9 @@ import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 const API_KEYS_DISABLED_ERROR = new Error('API keys are disabled');
 const REJECT_WHEN_API_KEYS_DISABLED = () => Promise.reject(API_KEYS_DISABLED_ERROR);
 
+const SERVICE_ACCOUNTS_DISABLED_ERROR = new Error('Service accounts are disabled');
+const REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED = () => Promise.reject(SERVICE_ACCOUNTS_DISABLED_ERROR);
+
 export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract => {
   return {
     authc: {
@@ -42,6 +45,13 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     },
     serviceAccounts: {
       isEnabled: () => false,
+      create: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      attachWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      detachWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      getWorkloadBinding: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      withScopedRequestForWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
     },
     // No security delegate registered, so there are no user profiles to bind.
     fakeRequestEnricher: () => undefined,

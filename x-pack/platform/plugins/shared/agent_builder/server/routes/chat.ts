@@ -506,7 +506,10 @@ export function registerChatRoutes({
       access: 'internal',
       summary: 'Send chat message with callback delivery',
       options: {
-        tags: ['oas-tag:agent builder'],
+        tags: [
+          'oas-tag:agent builder',
+          // 'security:acceptUiamOAuth'
+        ],
         availability: {
           since: '9.5.0',
         },

@@ -26,7 +26,7 @@ const connectSlackAppRoute = createServerRoute({
     access: 'internal',
     summary: 'Start the Elastic Slack App install',
     description:
-      'Mints a managed Agent Builder API key for the Nightshift Relay, starts the Slack OAuth install, and returns the Slack authorization URL.',
+      'Starts the Slack OAuth install and returns the Slack authorization URL. On Serverless, Kibana creates (or reuses) a UIAM service account as the relay credential. On stateful, a managed ES API key is minted instead.',
   },
   security: {
     authz: {

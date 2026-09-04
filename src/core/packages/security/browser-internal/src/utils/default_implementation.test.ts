@@ -25,9 +25,19 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
-  describe('serviceAccounts.isEnabled', () => {
-    it('returns false', () => {
+  describe('serviceAccounts', () => {
+    it('isEnabled returns false', () => {
       expect(implementation.serviceAccounts.isEnabled()).toBe(false);
+    });
+
+    it('canCreate returns false', () => {
+      expect(implementation.serviceAccounts.canCreate()).toBe(false);
+    });
+
+    it('create rejects', async () => {
+      await expect(
+        implementation.serviceAccounts.create({ name: 'my-service-account' })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
     });
   });
 });
