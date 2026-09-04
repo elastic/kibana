@@ -61,7 +61,8 @@ export const currentMembersLabel = i18n.translate(
 
 export const agentAccessHelpLabel = (agentName: string) =>
   i18n.translate('xpack.agentBuilder.conversationSharing.agentAccessHelp', {
-    defaultMessage: 'Members must have access to the {agentName} agent to see this chat.',
+    defaultMessage:
+      'User search results include everyone, even users without access to the {agentName} agent. Only members with access to it can see this chat.',
     values: { agentName },
   });
 
