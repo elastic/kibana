@@ -244,7 +244,7 @@ export const applyCustomContentTemplates = async (
       if (!prompt || persistedConfig.template) return;
 
       try {
-        const template = await resolveTemplate({ prompt, esqlQuery });
+        const { template } = await resolveTemplate({ prompt, esqlQuery });
         panel.panelContent = {
           ...panel.panelContent,
           config: { ...persistedConfig, esql_query: toEsqlQueryState(esqlQuery), template },
@@ -270,7 +270,7 @@ export const mergeAndResolveCustomContentEdit = async (
     editConfig.esqlQuery,
     readEsqlQuery(existing)
   );
-  const template = await resolveTemplate({
+  const { template } = await resolveTemplate({
     prompt: editConfig.prompt ?? '',
     esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
     existingTemplate: existing.template,

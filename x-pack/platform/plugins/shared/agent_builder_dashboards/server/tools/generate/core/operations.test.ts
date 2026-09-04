@@ -1733,7 +1733,7 @@ describe('executeDashboardOperations', () => {
       >();
       const resolveCustomContentTemplate = jest
         .fn()
-        .mockResolvedValue('<div>Server generated</div>');
+        .mockResolvedValue({ template: '<div>Server generated</div>', height: 320 });
 
       const existingPanel: AttachmentPanel = {
         id: 'cc-1',
@@ -1794,7 +1794,7 @@ describe('executeDashboardOperations', () => {
     it('removes esqlQuery when null is passed in a custom_content config-source edit', async () => {
       const resolveCustomContentTemplate = jest
         .fn()
-        .mockResolvedValue('<div>Server generated</div>');
+        .mockResolvedValue({ template: '<div>Server generated</div>', height: 320 });
 
       const existingPanel: AttachmentPanel = {
         id: 'cc-1',

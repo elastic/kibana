@@ -184,7 +184,10 @@ describe('createVisualizationTool handler', () => {
       to: 'now',
       mode: 'relative',
     });
-    mockResolveTemplate.mockResolvedValue('<div>{{ row["host"].value }}</div>');
+    mockResolveTemplate.mockResolvedValue({
+      template: '<div>{{ row["host"].value }}</div>',
+      height: 420,
+    });
     mockCreateTemplateResolver.mockReturnValue(mockResolveTemplate);
   });
 
@@ -483,7 +486,7 @@ describe('createVisualizationTool handler', () => {
           type: VISUALIZATION_ATTACHMENT_TYPE,
           data: expect.objectContaining({
             renderer: 'custom_content',
-            visualization: { template: '<div>{{ row["host"].value }}</div>' },
+            visualization: { template: '<div>{{ row["host"].value }}</div>', height: 420 },
             esql: 'FROM logs | STATS count() BY host',
           }),
         })

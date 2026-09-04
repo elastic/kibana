@@ -6,7 +6,12 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '@kbn/custom-content-common';
+import {
+  CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
+  CUSTOM_CONTENT_DEFAULT_HEIGHT,
+  CUSTOM_CONTENT_MIN_HEIGHT,
+  CUSTOM_CONTENT_MAX_HEIGHT,
+} from '@kbn/custom-content-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -80,7 +85,7 @@ describe('createCustomContentTemplateResolver — output validation', () => {
 
     const result = await resolve({ prompt: 'Show a KPI' });
 
-    expect(result).toBe('<div>hello</div>');
+    expect(result.template).toBe('<div>hello</div>');
   });
 
   it('throws when the LLM output contains a <script> tag', async () => {
@@ -119,8 +124,57 @@ describe('createCustomContentTemplateResolver — output validation', () => {
 
     const result = await resolve({ prompt: 'Show a KPI' });
 
-    expect(result).toBe('<div>hello</div>');
-    expect(result).not.toContain('```');
+    expect(result.template).toBe('<div>hello</div>');
+    expect(result.template).not.toContain('```');
+  });
+
+  it('reads and strips the declared height', async () => {
+    mockChatComplete.mockResolvedValue({
+      content: '<!-- cc-height: 480 -->\n<div>hello</div>',
+    });
+
+    const result = await resolve({ prompt: 'Show a KPI' });
+
+    expect(result.height).toBe(480);
+    // The declaration is metadata about the template, not part of what renders.
+    expect(result.template).toBe('<div>hello</div>');
+  });
+
+  it('reads the declared height through a markdown fence', async () => {
+    mockChatComplete.mockResolvedValue({
+      content: '```html\n<!-- cc-height: 400 -->\n<div>hello</div>\n```',
+    });
+
+    const result = await resolve({ prompt: 'Show a KPI' });
+
+    expect(result.height).toBe(400);
+    expect(result.template).toBe('<div>hello</div>');
+  });
+
+  it('falls back to the default height when none is declared', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
+
+    const result = await resolve({ prompt: 'Show a KPI' });
+
+    expect(result.height).toBe(CUSTOM_CONTENT_DEFAULT_HEIGHT);
+    expect(result.template).toBe('<div>hello</div>');
+  });
+
+  // The value is model-authored, so it is clamped rather than trusted.
+  it('clamps a declared height above the maximum', async () => {
+    mockChatComplete.mockResolvedValue({
+      content: '<!-- cc-height: 99999 -->\n<div>hello</div>',
+    });
+
+    expect((await resolve({ prompt: 'Show a KPI' })).height).toBe(CUSTOM_CONTENT_MAX_HEIGHT);
+  });
+
+  it('clamps a declared height below the minimum', async () => {
+    mockChatComplete.mockResolvedValue({
+      content: '<!-- cc-height: 5 -->\n<div>hello</div>',
+    });
+
+    expect((await resolve({ prompt: 'Show a KPI' })).height).toBe(CUSTOM_CONTENT_MIN_HEIGHT);
   });
 });
 
@@ -170,9 +224,9 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
   it('still generates a template when a valid query matches no rows', async () => {
     mockEsqlQuery.mockResolvedValue({ columns: [{ name: 'count', type: 'long' }], values: [] });
 
-    await expect(resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' })).resolves.toBe(
-      '<div>ok</div>'
-    );
+    await expect(
+      resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' })
+    ).resolves.toMatchObject({ template: '<div>ok</div>' });
   });
 
   it('binds ?_tstart and ?_tend when sampling a time-picker query', async () => {
