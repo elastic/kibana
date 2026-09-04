@@ -18,7 +18,6 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment
 dependsOn:
   - '@kbn/evals'
-  - '@kbn/scout'
   - '@kbn/tooling-log'
   - '@kbn/kbn-client'
 tags:

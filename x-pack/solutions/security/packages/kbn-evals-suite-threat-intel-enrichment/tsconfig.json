@@ -6,5 +6,5 @@
   },
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/evals", "@kbn/scout", "@kbn/tooling-log", "@kbn/kbn-client"]
+  "kbn_references": ["@kbn/evals", "@kbn/tooling-log", "@kbn/kbn-client"]
 }
