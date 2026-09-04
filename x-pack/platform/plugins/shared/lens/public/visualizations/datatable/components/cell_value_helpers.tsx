@@ -166,7 +166,12 @@ export const LinkCell = ({
     data-test-subj="lnsTableCellContent"
     className={getCellClassName(alignment, fitRowToContent)}
   >
-    <EuiLink style={linkColor ? { color: linkColor } : undefined} onClick={onClick}>
+    <EuiLink
+      // Pin primary so these stay action-colored if EuiLink's default becomes `text`.
+      color="primary"
+      style={linkColor ? { color: linkColor } : undefined}
+      onClick={onClick}
+    >
       {content}
     </EuiLink>
   </div>
