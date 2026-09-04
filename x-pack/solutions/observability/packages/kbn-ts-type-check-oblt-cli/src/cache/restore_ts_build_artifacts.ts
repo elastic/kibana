@@ -272,7 +272,7 @@ export async function resolveRestoreStrategy(
   }
 
   // Phase 1.5: cache-invalidation file check — git diff, no network I/O.
-  // Changes to yarn.lock, .nvmrc, or .node-version mean node_modules may have
+  // Changes to pnpm-lock.yaml, .nvmrc, or .node-version mean node_modules may have
   // changed since the local artifacts were built. tsc's .tsbuildinfo incremental
   // check compares the hashes of dependency .d.ts outputs in target/types — if
   // those outputs are still from the old node_modules version, tsc considers
@@ -297,10 +297,10 @@ export async function resolveRestoreStrategy(
           `Local artifacts may be stale — cleaning them.`
       );
     }
-    if (changedInvalidationFiles?.includes('yarn.lock')) {
+    if (changedInvalidationFiles?.includes('pnpm-lock.yaml')) {
       log.warning(
-        '[Bootstrap] yarn.lock changed — if you recently switched branches, ' +
-          'run: yarn kbn bootstrap'
+        '[Bootstrap] pnpm-lock.yaml changed — if you recently switched branches, ' +
+          'run: pnpm kbn bootstrap'
       );
     }
 
@@ -418,8 +418,8 @@ export async function resolveRestoreStrategy(
   }
 
   // Discard the archive if it was built against a different node_modules.
-  // If the top pick is a PR archive with a newer yarn.lock, fall back to the
-  // best commit archive (which shares the same yarn.lock as HEAD).
+  // If the top pick is a PR archive with a newer pnpm-lock.yaml, fall back to the
+  // best commit archive (which shares the same pnpm-lock.yaml as HEAD).
   const validGcsArchive = await resolveNonInvalidatedArchive(bestGcsArchive, log);
 
   if (!validGcsArchive) {

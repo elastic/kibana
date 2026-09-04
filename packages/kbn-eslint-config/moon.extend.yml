@@ -13,7 +13,7 @@ tasks:
       CI_STATS_DISABLED: 'true'
     inputs:
       - /package.json
-      - /yarn.lock
+      - /pnpm-lock.yaml
     outputs:
       - version_dependencies.txt
     options:

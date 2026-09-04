@@ -40,6 +40,12 @@ export const command = {
     await cleanPaths(log, [
       Path.resolve(REPO_ROOT, 'node_modules'),
       Path.resolve(REPO_ROOT, 'x-pack/node_modules'),
+      // pnpm store + virtual store
+      Path.resolve(REPO_ROOT, '.pnpm-store'),
+      Path.resolve(REPO_ROOT, '.pnpm'),
+      // yarn-era caches, left over when swapping between yarn and pnpm branches
+      Path.resolve(REPO_ROOT, '.yarn'),
+      Path.resolve(REPO_ROOT, '.yarn-local-mirror'),
       Path.resolve(REPO_ROOT, 'data'),
       Path.resolve(REPO_ROOT, '.es'),
       Path.resolve(REPO_ROOT, 'target'),

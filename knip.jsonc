@@ -1,19 +1,19 @@
 // Configuration for `knip` (https://knip.dev).
 //
-// Kibana uses a single root `package.json` and links packages via `link:` rather than yarn workspaces,
-// so this file is the source of truth for what knip should analyze. Add more workspaces here as
-// additional areas of the monorepo are brought under knip-managed lint coverage.
+// Kibana is a pnpm workspace monorepo. Knip auto-discovers workspaces from `pnpm-workspace.yaml`.
 //
 // Usage:
 //   node scripts/knip [...args]
 //
-// Check for unused root dependencies (ignores @kbn/* and @elastic/*):
-//   node scripts/knip --workspace . --include dependencies,devDependencies
+// Find unused root dependencies/devDependencies:
+//   node scripts/knip --include dependencies,devDependencies
 //
-// Scope to a single workspace:
+// Scope to a single workspace (its ancestors, including root, are included automatically):
 //   node scripts/knip --workspace src/platform/packages/shared/kbn-safer-lodash-set --include unlisted
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "playwright": false,
+  "cypress": false,
   // @kbn/* and @elastic/* are internal linked packages managed outside of knip.
   // @babel/plugin-* and babel-plugin-* are consumed via require.resolve() in
   // packages/kbn-babel-preset/ which knip cannot trace (it only detects require/import).
@@ -32,8 +32,10 @@
     "geckodriver",
     // these are used as Cypress reporters via reporter_config.json; knip can't trace the
     // cypress-multi-reporters -> configFile -> reporterEnabled chain.
-    "buildkite-test-collector",
     "cypress-multi-reporters",
+    "buildkite-test-collector",
+    // This provides the moon binary used by @kbn/moon; knip can't trace this.
+    "@moonrepo/cli",
     "marge",
     "mocha-junit-reporter",
     "mocha-multi-reporters",
@@ -42,33 +44,48 @@
     // oxlint is invoked as a binary via procRunner in @kbn/lint-cli;
     // knip can't trace dynamic cmd invocations.
     "oxlint",
+    // Imported by the maps plugin (public/classes/styles/vector/symbol_utils.tsx),
+    // which relies on root hoisting; knip can't trace it through the workspace graph.
+    "canvg",
+    // Declared once in the root package.json but consumed only by kbnGenerated
+    // packages, which carry no dependency manifest and resolve everything via root
+    // hoisting: svgo by @kbn/dev (src/dev/build/tasks/copy_source_worker.js),
+    // http-proxy/@types/http-proxy by @kbn/test-suites-xpack-platform (x-pack/platform/test
+    // alerting_api_integration connector_types). Knip attributes those imports to the
+    // nested package (which can't declare them), so the root declaration looks unused.
+    // NOTE: knip may hint to remove http-proxy/@types/http-proxy because it traces them
+    // locally with a complete module graph — keep them: CI's partial graph still flags them.
+    "svgo",
+    "http-proxy",
+    "@types/http-proxy",
     // typescript-7 is invoked via resolveTypeCheckCompiler() in kbn-ts-type-check-cli;
     // knip can't trace dynamic require.resolve() calls.
     "typescript-7",
     // @rsdoctor/rspack-plugin is loaded lazily via nativeRequire() in the
     // @kbn/rspack-optimizer rspack_runtime shim; knip can't trace dynamic require.
-    "@rsdoctor/rspack-plugin"
+    "@rsdoctor/rspack-plugin",
+    // Owned by @kbn/connector-specs (which declares its own graphql) and referenced
+    // as a dynamic string by @kbn/evals-phoenix-executor's codegen script; the root
+    // declaration backs that untraceable usage, so knip's partial graph flags it.
+    "graphql",
+    // Consumed only by @kbn/cli-dev-mode (packages/kbn-cli-dev-mode/src/base_path_proxy/http2.ts)
+    // for the HTTP/2 dev base-path proxy. That package declares no deps and resolves via root
+    // hoisting, so knip attributes the imports to it; the root declaration then looks unused on
+    // CI's partial graph (it traces fine locally with the complete module graph).
+    "http2-proxy",
+    "http2-wrapper"
   ],
   "workspaces": {
     ".": {
-      "entry": [
-        "src/**/*.{ts,tsx,js,jsx}",
-        "x-pack/**/*.{ts,tsx,js,jsx}",
-        "packages/**/*.{ts,tsx,js,jsx}",
-        "examples/**/*.{ts,tsx,js,jsx}",
-        "plugins/**/*.{ts,tsx,js,jsx}"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}",
-        "x-pack/**/*.{ts,tsx,js,jsx}",
-        "packages/**/*.{ts,tsx,js,jsx}",
-        "examples/**/*.{ts,tsx,js,jsx}",
-        "plugins/**/*.{ts,tsx,js,jsx}"
-      ],
       "ignore": [
         "**/node_modules/**",
         "**/target/**",
         "**/build/**"
+      ],
+      "entry": [
+        "scripts/**/*.{js,ts}",
+        "src/**/*.{js,ts,tsx}",
+        "x-pack/**/*.{js,ts,tsx}"
       ],
       "storybook": {
         "config": [
@@ -99,6 +116,34 @@
     },
     "src/platform/packages/shared/kbn-safer-lodash-set": {
       "entry": ["set.js", "setWith.js", "fp/*.js"]
+    },
+    "src/platform/packages/private/kbn-esql-scripts": {
+      // These are standalone CLI scripts invoked via ts-node from the package's shell scripts
+      // (definitions/make_defs.sh, documentation/make_docs.sh), not from an index/main entry.
+      // Declaring them as entries lets knip follow their imports.
+      "entry": ["definitions/generate_*.ts", "documentation/generate_*.ts"]
+    },
+    "src/platform/packages/shared/kbn-test": {
+      // Jest setup/polyfill/serializer files referenced from jest-preset.js via `<rootDir>/...`.
+      // knip can't resolve `<rootDir>` inside a shared preset.
+      "entry": ["**/*.{js,ts}"]
+    },
+    "x-pack/platform/test": {
+      "entry": ["**/*.{js,ts,tsx}"]
+    },
+    "src/platform/packages/private/kbn-scout-reporting": {
+      "entry": ["**/*.{js,ts}"]
+    },
+    // The cypress plugin for knip is disabled because it cannot parse the JSX syntax that our config files transitively include.
+    // These entries allow knip to follow the cypress config files without parsing the JSX.
+    "x-pack/platform/plugins/shared/fleet/cypress": {
+      "entry": ["**/*.ts"]
+    },
+    "x-pack/solutions/observability/plugins/apm/ftr_e2e": {
+      "entry": ["**/*.ts"]
+    },
+    "x-pack/solutions/security/plugins/security_solution": {
+      "entry": ["public/management/cypress/**/*.{ts,tsx}"]
     }
   }
 }

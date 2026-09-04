@@ -2,11 +2,12 @@
 idiomatic_version_file_enable_tools = ["node"]
 
 [tools]
-yarn = "1.22.22"
+# Keep in sync with package.json engines.pnpm (and corepack prepare elsewhere).
+pnpm = "11.21.0"
 
 [tasks.bootstrap]
 description = "Install and link Kibana dependencies"
-run = "yarn kbn bootstrap"
+run = "pnpm kbn bootstrap"
 
 [tasks."river:prebuild"]
 description = "Prebuild River sandbox image"

@@ -406,10 +406,10 @@ describe('resolveRestoreStrategy', () => {
       accessSpy.mockResolvedValue(undefined);
       readFileSpy.mockImplementation(makeReadFileMock('known-sha', ['some/tsconfig.json']));
 
-      // Phase 1.5: yarn.lock changed; Phase 1.5 GCS archive check: also changed.
+      // Phase 1.5: pnpm-lock.yaml changed; Phase 1.5 GCS archive check: also changed.
       mockedExeca
-        .mockResolvedValueOnce({ stdout: 'yarn.lock\n' })
-        .mockResolvedValueOnce({ stdout: 'yarn.lock\n' });
+        .mockResolvedValueOnce({ stdout: 'pnpm-lock.yaml\n' })
+        .mockResolvedValueOnce({ stdout: 'pnpm-lock.yaml\n' });
 
       const log = createLog();
       await resolveRestoreStrategy(log, []);
@@ -428,7 +428,7 @@ describe('resolveRestoreStrategy', () => {
 
       // Phase 1.5: local state stale; GCS archive built after the change — clean.
       mockedExeca
-        .mockResolvedValueOnce({ stdout: 'yarn.lock\n' })
+        .mockResolvedValueOnce({ stdout: 'pnpm-lock.yaml\n' })
         .mockResolvedValueOnce({ stdout: '' });
 
       const log = createLog();
@@ -443,10 +443,10 @@ describe('resolveRestoreStrategy', () => {
       accessSpy.mockResolvedValue(undefined);
       readFileSpy.mockImplementation(makeReadFileMock('known-sha', ['some/tsconfig.json']));
 
-      // Both local state and GCS archive predate the yarn.lock change.
+      // Both local state and GCS archive predate the pnpm-lock.yaml change.
       mockedExeca
-        .mockResolvedValueOnce({ stdout: 'yarn.lock\n' })
-        .mockResolvedValueOnce({ stdout: 'yarn.lock\n' });
+        .mockResolvedValueOnce({ stdout: 'pnpm-lock.yaml\n' })
+        .mockResolvedValueOnce({ stdout: 'pnpm-lock.yaml\n' });
 
       const log = createLog();
       const result = await resolveRestoreStrategy(log, []);
@@ -573,8 +573,8 @@ describe('resolveRestoreStrategy', () => {
 
     it('skips restore when no local artifacts exist but archive has a node_modules change', async () => {
       // Default beforeEach: no local artifacts, GCS has 'ancestor-sha'.
-      // Simulate yarn.lock changing between ancestor-sha and HEAD.
-      mockedExeca.mockResolvedValueOnce({ stdout: 'yarn.lock\n' });
+      // Simulate pnpm-lock.yaml changing between ancestor-sha and HEAD.
+      mockedExeca.mockResolvedValueOnce({ stdout: 'pnpm-lock.yaml\n' });
 
       const log = createLog();
       const result = await resolveRestoreStrategy(log, []);
@@ -615,8 +615,8 @@ describe('resolveRestoreStrategy', () => {
 
       // Phase 1.5 git diff (localStateSha → HEAD): clean.
       mockedExeca.mockResolvedValueOnce({ stdout: '' });
-      // Phase 3 archive validity check (ancestor-sha → HEAD): yarn.lock changed.
-      mockedExeca.mockResolvedValueOnce({ stdout: 'yarn.lock\n' });
+      // Phase 3 archive validity check (ancestor-sha → HEAD): pnpm-lock.yaml changed.
+      mockedExeca.mockResolvedValueOnce({ stdout: 'pnpm-lock.yaml\n' });
 
       const log = createLog();
       const result = await resolveRestoreStrategy(log, []);
@@ -797,7 +797,7 @@ const PR = {
   sha: 'prmerge00000',
   prNumber: '12345',
   prTipSha: 'prtip0000000',
-  prBuildFileHashes: { 'yarn.lock': 'abc123' },
+  prBuildFileHashes: { 'pnpm-lock.yaml': 'abc123' },
 };
 
 describe('selectBestArchive', () => {

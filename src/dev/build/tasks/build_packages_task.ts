@@ -364,5 +364,5 @@ export async function buildWebpackBundles({
     ? ['ignore', 'pipe', 'pipe']
     : ['inherit', 'inherit', 'inherit'];
 
-  await execa('yarn', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
+  await execa('pnpm', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
 }

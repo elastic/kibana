@@ -115,7 +115,7 @@ export async function invalidateTsBuildInfoFiles(
 /**
  * Returns the subset of CACHE_INVALIDATION_FILES that changed between the
  * given commit SHA and HEAD. Used to detect whether local build artifacts
- * were created against different node_modules (e.g. after a yarn.lock update)
+ * were created against different node_modules (e.g. after a pnpm-lock.yaml update)
  * and therefore can no longer be trusted for incremental tsc correctness.
  */
 export async function getChangedInvalidationFiles(fromSha: string): Promise<string[] | undefined> {

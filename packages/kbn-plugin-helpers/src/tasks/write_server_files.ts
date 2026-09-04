@@ -36,7 +36,7 @@ export async function writeServerFiles({
         '.i18nrc.json',
         ...(plugin.manifest.server
           ? config.serverSourcePatterns || [
-              'yarn.lock',
+              'pnpm-lock.yaml',
               'tsconfig.json',
               'package.json',
               'index.{js,ts}',

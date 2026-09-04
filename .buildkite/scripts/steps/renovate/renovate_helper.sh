@@ -35,13 +35,13 @@ regenerate_gh_aw_locks() {
   gh aw lint
 }
 
-echo --- Deduplicate yarn.lock
+echo --- Deduplicate pnpm-lock.yaml
 cmd="node scripts/yarn_deduplicate.js && yarn kbn bootstrap && node scripts/yarn_deduplicate.js"
 eval "$cmd"
 
 commit_message_parts=()
 if [[ -n "$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')" ]]; then
-  commit_message_parts+=("yarn dedupe")
+  commit_message_parts+=("pnpm dedupe")
 fi
 
 if has_gh_aw_version_change; then

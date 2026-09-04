@@ -139,7 +139,7 @@ export class Watcher {
         // some basic high-level ignore statements. Additional filtering is done above
         // before paths are passed to `fire()`, using the RepoSourceClassifier mostly
         ignore: [
-          '**/{node_modules,target,public,coverage,__*__,build,.chromium,.es,.yarn-local-mirror,.git,.github,.buildkite,.vscode,.idea}/**',
+          '**/{node_modules,target,public,coverage,__*__,build,.chromium,.es,.yarn-local-mirror,.pnpm-store,.git,.github,.buildkite,.vscode,.idea}/**',
           '**/{bazel-bin,bazel-kibana,bazel-out,bazel-testlogs}/**',
           '**/{.cache,.temp,.tmp,temp,tmp}/**',
           '**/*.{test,spec,story,stories}.*',

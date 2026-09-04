@@ -2,7 +2,7 @@
 # Index per-(package, dep) dependency usage docs into Elasticsearch.
 #
 # Requires: Node 24+ (uses --experimental-strip-types to run TS natively)
-#           and root node_modules installed (yarn install).
+#           and root node_modules installed (pnpm install).
 #
 # Usage:
 #   bash scripts/index_dependency_usage.sh --group <group> [options]
