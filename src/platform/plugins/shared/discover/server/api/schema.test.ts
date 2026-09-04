@@ -552,8 +552,7 @@ describe('discoverSessionApiDataSchema', () => {
       {
         field: 'column_order',
         max: CURRENT_API_LIMITS.columnOrder,
-        buildValue: (size: number) =>
-          Array.from({ length: size }, (_, index) => `field-${index}`),
+        buildValue: (size: number) => Array.from({ length: size }, (_, index) => `field-${index}`),
       },
       {
         field: 'sort',
