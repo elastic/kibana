@@ -95,10 +95,9 @@ apiTest.describe(
         kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
         elasticsearch: { cluster: [], indices: [] },
       });
-      const response = await apiClient.get(
-        'internal/observability/alerts/investigation/availability',
-        { headers: { ...KIBANA_HEADERS, ...cookieHeader } }
-      );
+      const response = await apiClient.get('internal/nightshift/investigations/availability', {
+        headers: { ...KIBANA_HEADERS, ...cookieHeader },
+      });
       expect(response).toHaveStatusCode(403);
     });
 
