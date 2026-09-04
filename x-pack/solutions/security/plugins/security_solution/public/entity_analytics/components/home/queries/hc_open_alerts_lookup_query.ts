@@ -37,7 +37,10 @@ export const buildEntitiesWithAlertsCountQuery = (
   parts.push(`| RENAME event_timestamp AS @timestamp`);
 
   parts.push(`| WHERE entity.risk.calculated_level IN ("High", "Critical")`);
-  parts.push(`| STATS value = COUNT_DISTINCT(entity.id), entity_ids = VALUES(entity.id)`);
+  parts.push(
+    `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
+  );
+  parts.push(`| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`);
 
   return parts.join('\n');
 };

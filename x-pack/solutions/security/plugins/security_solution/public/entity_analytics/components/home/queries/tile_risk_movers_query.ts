@@ -31,6 +31,7 @@ export const buildRiskMoversCountQuery = (spaceId: string, entitiesIndexName: st
     `| WHERE today_score IS NOT NULL AND yday_score IS NOT NULL AND today_score - yday_score >= 10`,
     `| EVAL entity.id = entity_name`,
     `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
-    `| STATS value = COUNT(*), entity_ids = VALUES(entity.id)`,
+    `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
+    `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`,
   ].join('\n');
 };

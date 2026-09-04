@@ -36,6 +36,7 @@ export const buildNewlyHighCriticalCountQuery = (
     `| WHERE today_level_num >= 3 AND (yday_level_num IS NULL OR yday_level_num < 3)`,
     `| EVAL entity.id = entity_name`,
     `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
-    `| STATS value = COUNT(*), entity_ids = VALUES(entity.id)`,
+    `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
+    `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`,
   ].join('\n');
 };
