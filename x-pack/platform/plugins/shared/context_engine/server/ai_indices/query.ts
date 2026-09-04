@@ -26,22 +26,21 @@ export interface QueryAiIndicesParams extends QueryAiIndicesRequest {
   spaceId: string;
 }
 
-/**
- * Runs caller-supplied ES|QL with server-owned space filter and row cap. Pass-through otherwise:
- * `query` decides target, ES RBAC bounds it. `allow_partial_results` may silently drop failed shards.
- */
-export const queryAiIndices = async ({
+export interface ExecuteScopedEsqlParams extends QueryAiIndicesParams {
+  limit: number;
+  /** `true` may silently drop failed shards; internal reads that must be complete pass `false`. */
+  allowPartialResults: boolean;
+}
+
+/** Space filter, row cap and response cap applied to trusted ES|QL; no input validation. */
+export const executeScopedEsql = async ({
   esClient,
   spaceId,
   query,
   params,
   limit,
-}: QueryAiIndicesParams): Promise<QueryAiIndicesResponse> => {
-  const validationError = validateQueryAiIndicesRequest({ query, params, limit });
-  if (validationError) {
-    throw new InvalidAiIndexQueryError(validationError);
-  }
-
+  allowPartialResults,
+}: ExecuteScopedEsqlParams): Promise<QueryAiIndicesResponse> => {
   const namedParams: EsqlNamedValue[] = Object.entries(params ?? {}).map(([name, value]) => ({
     [name]: value,
   }));
@@ -49,10 +48,10 @@ export const queryAiIndices = async ({
   try {
     const { columns, values } = await esClient.esql.query(
       {
-        query: applyLimit(query, limit ?? DEFAULT_AI_INDEX_QUERY_LIMIT),
+        query: applyLimit(query, limit),
         filter: buildAiIndexSpaceFilter(spaceId),
         drop_null_columns: true,
-        allow_partial_results: true,
+        allow_partial_results: allowPartialResults,
         ...(namedParams.length > 0 ? { params: namedParams } : {}),
       },
       { maxResponseSize: MAX_AI_INDEX_QUERY_RESPONSE_BYTES }
@@ -64,4 +63,27 @@ export const queryAiIndices = async ({
     }
     throw error;
   }
+};
+
+/**
+ * Runs caller-supplied ES|QL with server-owned space filter and row cap. Pass-through otherwise:
+ * `query` decides target, ES RBAC bounds it.
+ */
+export const queryAiIndices = async ({
+  query,
+  params,
+  limit,
+  ...rest
+}: QueryAiIndicesParams): Promise<QueryAiIndicesResponse> => {
+  const validationError = validateQueryAiIndicesRequest({ query, params, limit });
+  if (validationError) {
+    throw new InvalidAiIndexQueryError(validationError);
+  }
+  return executeScopedEsql({
+    ...rest,
+    query,
+    params,
+    limit: limit ?? DEFAULT_AI_INDEX_QUERY_LIMIT,
+    allowPartialResults: true,
+  });
 };

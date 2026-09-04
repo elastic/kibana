@@ -52,10 +52,10 @@ export class AiIndexReadService implements AiIndexReadServiceApi {
   }
 
   async describe(id: string): Promise<DescribeAiIndexResult> {
-    const { esClient, auditLogger, aiIndexService } = this.deps;
+    const { esClient, spaceId, auditLogger, aiIndexService } = this.deps;
     try {
       const aiIndex = await aiIndexService.get(id);
-      const result = await describeAiIndex({ esClient, aiIndex });
+      const result = await describeAiIndex({ esClient, aiIndex, spaceId });
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DESCRIBE, id }));
       return { status: 'ok', result };
     } catch (error) {

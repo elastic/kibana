@@ -78,13 +78,32 @@ query: it returns the registry entry plus what its backing indices expose.
   `type: "conflict"`.
 - `semantic_fields` lists the searchable `semantic_text` fields among `fields`,
   detected from the mapping type rather than the field name.
-- `ki_type_counts`, `tag_counts`, `query_templates` and `suggested_queries`
-  are placeholders (empty) until a follow-up fills them in.
+- `ki_type_counts` and `tag_counts` are `terms` counts on `type` / `tags` over
+  the KIs visible in the current space, most common first, up to 20 each. Each
+  is empty unless its field is an aggregatable keyword with one type across
+  the matched indices.
+- `query_templates` are the runnable ES|QL queries KIs carry in
+  `attributes.esql` (requires `attributes` mapped as `flattened`), one entry
+  per query string, ordered by `@timestamp` descending when mapped, then `_id`.
+  Fetched through the same ES|QL path as `_query`. Capped at 50 entries,
+  10,000 characters each and 200 KB serialized; any clipping sets
+  `truncated.query_templates`.
+- `suggested_queries` are ES|QL strings built from the real mapping:
+  `keyword_search` (`MATCH` over searchable `text` fields, or `keyword` fields
+  when there are none), `hybrid_search` (FORK/FUSE over those plus
+  `semantic_fields`), `scoped_hybrid_search` (same, filtered to the most common
+  `type`) and `extract_esql_attribute` (pulls `attributes.esql`). Search
+  queries take the term as the `?query` named param: pass
+  `params: { query: "..." }` to `_query`. Each key is omitted when the fields
+  it needs are missing; identifiers are backtick-quoted.
 
-Field metadata is read as the current user. 404 when the AI index is not
-registered; Elasticsearch 4xx (missing index privilege) is returned with its
-status. Each `_mapping` / `_field_caps` response is capped at 20 MB before the
-field cap applies; a target broad enough to exceed it returns 400.
+Everything is read as the current user; counts and templates also apply the
+space filter. Unlike `_query`, describe refuses partial results: a shard
+failure is an error, never a silently short list or undercount. 404 when the
+AI index is not registered; Elasticsearch 4xx (missing index privilege) is
+returned with its status. Each Elasticsearch
+response behind describe is capped at 20 MB before result caps apply; a
+target broad enough to exceed it returns 400.
 
 ### Privileges
 

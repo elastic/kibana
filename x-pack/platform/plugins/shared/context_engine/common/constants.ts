@@ -99,9 +99,13 @@ export const MAX_AI_INDEX_QUERY_RESPONSE_BYTES = 20 * 1024 * 1024;
 
 /** AI-index describe API bounds. */
 export const MAX_AI_INDEX_DESCRIBE_FIELDS = 500;
-/** Byte cap per `_mapping` / `_field_caps` response; field cap applies after download. */
+/** Byte cap per Elasticsearch response behind describe; result caps apply after download. */
 export const MAX_AI_INDEX_DESCRIBE_METADATA_BYTES = 20 * 1024 * 1024;
+/** Wider than UI's `MAX_KI_TYPE_FILTER_COUNT`: agents need a broader distribution than filter chips. */
+export const MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS = 20;
 export const MAX_AI_INDEX_DESCRIBE_TAG_COUNTS = 20;
+/** Searchable `text` / `semantic_text` fields a suggested query references per branch. */
+export const MAX_AI_INDEX_SUGGESTED_QUERY_FIELDS = 5;
 export const MAX_AI_INDEX_QUERY_TEMPLATES = 50;
 export const MAX_AI_INDEX_QUERY_TEMPLATE_ESQL_LENGTH = 10000;
 /** Serialized size of all `query_templates` in one response. */

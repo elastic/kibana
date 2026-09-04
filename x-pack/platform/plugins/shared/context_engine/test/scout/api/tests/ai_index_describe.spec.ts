@@ -12,6 +12,7 @@ import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
 const AI_INDEX_COLLECTION_PATH = 'api/context_engine/ai_index';
+const QUERY_PATH = `${AI_INDEX_COLLECTION_PATH}/_query`;
 const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
@@ -30,8 +31,55 @@ interface DescribedFields {
   semantic_fields: string[];
 }
 
+interface DescribedContent {
+  ki_type_counts: Array<{ type: string; count: number }>;
+  tag_counts: Array<{ tag: string; count: number }>;
+  query_templates: Array<{ ki_id: string; title: string; description?: string; esql: string }>;
+  suggested_queries: Record<string, string>;
+}
+
+interface EsqlResponse {
+  columns: Array<{ name: string }>;
+  values: unknown[][];
+}
+
 const fieldNamed = (fields: DescribedFields['fields'], path: string) =>
   fields.find((field) => field.path === path);
+
+const columnValues = ({ columns, values }: EsqlResponse, name: string): unknown[] => {
+  const index = columns.findIndex((column) => column.name === name);
+  return values.map((row) => row[index]);
+};
+
+const spaceScoped = (spaceId: string) => ({
+  permissions: { kibana: { privileges: [{ space: spaceId }] } },
+});
+
+/** KIs in INDEX_A; `other` is scoped to a space tests never use. */
+const KI_DOCS = {
+  detection: {
+    type: 'detection',
+    title: 'Billing errors',
+    description: 'Failed invoice runs',
+    tags: ['billing', 'errors'],
+    attributes: { esql: 'FROM logs-* | LIMIT 5' },
+  },
+  guide: {
+    type: 'document',
+    title: 'Billing guide',
+    tags: ['billing'],
+    attributes: { esql: ['FROM a | LIMIT 1', 'FROM b | LIMIT 1'] },
+    ...spaceScoped('default'),
+  },
+  plain: { type: 'document', title: 'Plain document', tags: [] },
+  other: {
+    type: 'hidden',
+    title: 'Billing secret',
+    tags: ['secret'],
+    attributes: { esql: 'FROM secret | LIMIT 1' },
+    ...spaceScoped(`other-space-${RUN_ID}`),
+  },
+};
 
 const API_HEADERS = {
   ...testData.COMMON_HEADERS,
@@ -89,6 +137,10 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       mappings: {
         properties: {
           title: { type: 'text', fields: { keyword: { type: 'keyword' } } },
+          description: { type: 'text' },
+          type: { type: 'keyword' },
+          tags: { type: 'keyword' },
+          attributes: { type: 'flattened' },
           status: { type: 'keyword' },
           permissions: {
             properties: {
@@ -110,6 +162,11 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       mappings: { properties: { title: { type: 'text' }, status: { type: 'long' } } },
     });
     await esClient.indices.createDataStream({ name: DATA_STREAM });
+    await esClient.bulk({
+      index: INDEX_A,
+      refresh: true,
+      operations: Object.entries(KI_DOCS).flatMap(([id, doc]) => [{ index: { _id: id } }, doc]),
+    });
 
     for (const body of [
       registerAiIndex(PATTERN_AI_INDEX_ID, { type: 'index', value: INDEX_PATTERN }),
@@ -190,6 +247,83 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       searchable: true,
       aggregatable: true,
     });
+  });
+
+  apiTest('counts types and tags for KIs visible in the current space', async ({ apiClient }) => {
+    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    const { ki_type_counts: typeCounts, tag_counts: tagCounts } = response.body as DescribedContent;
+    expect(typeCounts).toStrictEqual([
+      { type: 'document', count: 2 },
+      { type: 'detection', count: 1 },
+    ]);
+    expect(tagCounts).toStrictEqual([
+      { tag: 'billing', count: 2 },
+      { tag: 'errors', count: 1 },
+    ]);
+  });
+
+  apiTest('lists query templates from visible KIs, one per query, by id', async ({ apiClient }) => {
+    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    const { query_templates: templates } = response.body as DescribedContent;
+    expect(templates).toStrictEqual([
+      {
+        ki_id: 'detection',
+        title: 'Billing errors',
+        description: 'Failed invoice runs',
+        esql: 'FROM logs-* | LIMIT 5',
+      },
+      { ki_id: 'guide', title: 'Billing guide', esql: 'FROM a | LIMIT 1' },
+      { ki_id: 'guide', title: 'Billing guide', esql: 'FROM b | LIMIT 1' },
+    ]);
+  });
+
+  apiTest('suggests queries that run as-is through _query', async ({ apiClient }) => {
+    const described = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
+    expect(described).toHaveStatusCode(200);
+    const { suggested_queries: suggested } = described.body as DescribedContent;
+    expect(Object.keys(suggested).sort()).toStrictEqual([
+      'extract_esql_attribute',
+      'hybrid_search',
+      'keyword_search',
+      'scoped_hybrid_search',
+    ]);
+    // Semantic branches need a deployed inference endpoint, so hybrid variants are checked
+    // structurally here and by the ES|QL parser in unit tests.
+    expect(suggested.hybrid_search).toContain('| FORK\n');
+    expect(suggested.hybrid_search).toContain('| FUSE\n');
+    expect(suggested.scoped_hybrid_search).toContain('| WHERE `type` == "document"\n| FORK\n');
+
+    const run = async (query: string, params?: Record<string, string>) => {
+      const response = await apiClient.post(QUERY_PATH, {
+        headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+        body: { query, ...(params && { params }) },
+      });
+      expect(response).toHaveStatusCode(200);
+      return columnValues(response.body as EsqlResponse, 'title').sort();
+    };
+
+    expect(await run(suggested.keyword_search, { query: 'billing' })).toStrictEqual([
+      'Billing errors',
+      'Billing guide',
+    ]);
+    expect(await run(suggested.extract_esql_attribute)).toStrictEqual([
+      'Billing errors',
+      'Billing guide',
+    ]);
   });
 
   apiTest('resolves a data stream through its backing indices', async ({ apiClient }) => {

@@ -8,9 +8,9 @@
 export class AiIndexDescribeResponseTooLargeError extends Error {
   constructor(maxBytes: number) {
     super(
-      `Field metadata for the AI index exceeded the maximum allowed size of ${Math.floor(
+      `Describing the AI index read more than the maximum allowed ${Math.floor(
         maxBytes / (1024 * 1024)
-      )}MB. Point the AI index at fewer or smaller indices.`
+      )}MB from Elasticsearch. Point the AI index at fewer or smaller indices.`
     );
     this.name = 'AiIndexDescribeResponseTooLargeError';
   }
