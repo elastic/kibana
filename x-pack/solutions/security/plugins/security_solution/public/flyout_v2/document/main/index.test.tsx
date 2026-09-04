@@ -59,17 +59,17 @@ jest.mock('./header', () => ({
   Header: ({
     onAlertUpdated,
     onShowNotes,
-    isPaginationLoading,
+    isDocumentStale,
   }: {
     onAlertUpdated: () => void;
     onShowNotes: () => void;
-    isPaginationLoading?: boolean;
+    isDocumentStale?: boolean;
   }) => (
     <button
       type="button"
       data-test-subj="mock-header"
       data-has-on-assignees-updated={String(onAlertUpdated != null)}
-      data-is-pagination-loading={String(Boolean(isPaginationLoading))}
+      data-is-document-stale={String(Boolean(isDocumentStale))}
       onClick={onShowNotes}
     />
   ),
@@ -282,7 +282,7 @@ describe('<DocumentFlyout />', () => {
       // Header is preserved so the in-flyout pagination control (rendered by
       // it) remains operable while the new alert loads.
       expect(getByTestId('mock-header')).toBeInTheDocument();
-      expect(getByTestId('mock-header')).toHaveAttribute('data-is-pagination-loading', 'true');
+      expect(getByTestId('mock-header')).toHaveAttribute('data-is-document-stale', 'true');
       expect(getByTestId(FLYOUT_V2_LOADING_SPINNER_TEST_ID)).toBeInTheDocument();
       // The body and footer are replaced by the spinner branch — neither
       // tab content nor footer should render.
@@ -305,7 +305,53 @@ describe('<DocumentFlyout />', () => {
 
       expect(getByTestId('mock-overview-tab')).toBeInTheDocument();
       expect(getByTestId('mock-footer')).toBeInTheDocument();
-      expect(getByTestId('mock-header')).toHaveAttribute('data-is-pagination-loading', 'false');
+      expect(getByTestId('mock-header')).toHaveAttribute('data-is-document-stale', 'false');
+      expect(queryByTestId(FLYOUT_V2_LOADING_SPINNER_TEST_ID)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('unavailable document branch', () => {
+    it('renders the callout in the body while keeping the header mounted', () => {
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={createAlertHit()}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+            unavailableDocumentCallout={<div data-test-subj="mock-unavailable-callout" />}
+          />
+        </TestProviders>
+      );
+
+      // The header — and therefore the pagination control it renders — survives a document that
+      // could not be resolved, so the user can page back instead of reopening the flyout.
+      expect(getByTestId('mock-header')).toBeInTheDocument();
+      expect(getByTestId('mock-unavailable-callout')).toBeInTheDocument();
+      // The stale hit must not be actionable: no tab content, and no footer take-action menu.
+      expect(getByTestId('mock-header')).toHaveAttribute('data-is-document-stale', 'true');
+      expect(queryByTestId('mock-overview-tab')).not.toBeInTheDocument();
+      expect(queryByTestId('mock-footer')).not.toBeInTheDocument();
+      expect(queryByTestId(FLYOUT_V2_LOADING_SPINNER_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('prefers the callout over the pagination spinner', () => {
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={createAlertHit()}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+            isPaginationLoading
+            unavailableDocumentCallout={<div data-test-subj="mock-unavailable-callout" />}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('mock-unavailable-callout')).toBeInTheDocument();
       expect(queryByTestId(FLYOUT_V2_LOADING_SPINNER_TEST_ID)).not.toBeInTheDocument();
     });
   });

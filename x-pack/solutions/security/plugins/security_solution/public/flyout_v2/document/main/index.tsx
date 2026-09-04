@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -110,6 +111,13 @@ export interface DocumentFlyoutProps {
    * header keeps its pagination controls) while the body shows a spinner.
    */
   isPaginationLoading?: boolean;
+  /**
+   * Callout rendered in the flyout body when the requested document could not be resolved (it was
+   * not found, or the fetch failed). `hit` then holds the last document that did resolve, so the
+   * header — and with it the pagination controls — survives a bad target and the user can page back
+   * instead of having to close and reopen the flyout.
+   */
+  unavailableDocumentCallout?: ReactNode;
 }
 
 /**
@@ -122,8 +130,12 @@ export const DocumentFlyout = memo(
     renderCellActions,
     dataTestSubj,
     isPaginationLoading = false,
+    unavailableDocumentCallout,
   }: DocumentFlyoutProps) => {
     const { openNotes, openDocumentFlyoutFromIndex } = useFlyoutApi();
+    // In both cases the rendered `hit` is no longer the document the flyout is resolving, so the
+    // body is swapped out and the controls that would act on `hit` are withheld.
+    const isDocumentStale = isPaginationLoading || unavailableDocumentCallout != null;
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -230,7 +242,7 @@ export const DocumentFlyout = memo(
       <>
         <RemoteDocumentCallout hit={hit} />
         <EuiFlyoutHeader
-          css={isPaginationLoading ? undefined : headerStyles}
+          css={isDocumentStale ? undefined : headerStyles}
           data-test-subj={dataTestSubj}
         >
           <Header
@@ -238,11 +250,13 @@ export const DocumentFlyout = memo(
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
             onShowNotes={onShowNotesFromHeader}
-            isPaginationLoading={isPaginationLoading}
+            isDocumentStale={isDocumentStale}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {isPaginationLoading ? (
+          {unavailableDocumentCallout ? (
+            unavailableDocumentCallout
+          ) : isPaginationLoading ? (
             <EuiFlexGroup
               alignItems="center"
               justifyContent="center"
@@ -301,7 +315,7 @@ export const DocumentFlyout = memo(
             </>
           )}
         </EuiFlyoutBody>
-        {!isRulePreview && !isPaginationLoading && (
+        {!isRulePreview && !isDocumentStale && (
           <EuiFlyoutFooter css={footerStyles}>
             <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotesFromFooter} />
           </EuiFlyoutFooter>
