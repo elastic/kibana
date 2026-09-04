@@ -7,30 +7,43 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonLoading,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
+  EuiSpacer,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { AppHeader } from '@kbn/app-header';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
-import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SecurityPageName } from '../../../app/types';
 
 import { MigrationRulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingPrivilegesCallOut } from './missing_privileges_callout';
-import { HeaderButtons, UnknownMigration } from '../../common/components';
+import { UnknownMigration } from '../../common/components';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
 import { RuleMigrationDataInputWrapper } from '../components/data_input_flyout/data_input_wrapper';
 import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
 import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
 import { useInvalidateGetMigrationRules } from '../logic/use_get_migration_rules';
-import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
+import {
+  useGetMigrationTranslationStats,
+  useInvalidateGetMigrationTranslationStats,
+} from '../logic/use_get_migration_translation_stats';
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
 import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
+import { useMigrationAppHeaderProps } from '../../common/hooks/use_migration_app_header_props';
+import { MigrationSelector } from '../../common/components/migration_selector';
+import { MigrationStatsBadges } from '../../common/components/migration_stats_badges';
 import { EmptyMigrationRulesPage } from './empty';
 import * as i18n from './translations';
-import { PageTitle } from '../../common/components/page_title';
 
 export type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -68,9 +81,17 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       }
     }, [isLoading, migrationId, navigateTo, ruleMigrationsStats]);
 
-    const onMigrationIdChange = (selectedId?: string) => {
-      navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
-    };
+    const onMigrationIdChange = useCallback(
+      (selectedId?: string) => {
+        navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
+      },
+      [navigateTo]
+    );
+
+    const { menu } = useMigrationAppHeaderProps({
+      migrationType: 'rule',
+      migrationsStats: ruleMigrationsStats,
+    });
 
     const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
     const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
@@ -88,11 +109,23 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       refreshStats,
     ]);
 
+    const selectedMigrationStats = useMemo(
+      () => ruleMigrationsStats.find((stats) => stats.id === migrationId),
+      [ruleMigrationsStats, migrationId]
+    );
+
+    // Translation stats for the selected migration, shared with MigrationRulesTable via the
+    // react-query cache (same cache key), so no extra network request is made.
+    const { data: selectedTranslationStats } = useGetMigrationTranslationStats(
+      migrationId ?? '',
+      !!migrationId
+    );
+
     const content = useMemo(() => {
       if (ruleMigrationsStats.length === 0 && !migrationId) {
         return <EmptyMigrationRulesPage />;
       }
-      const migrationStats = ruleMigrationsStats.find((stats) => stats.id === migrationId);
+      const migrationStats = selectedMigrationStats;
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
       }
@@ -127,18 +160,43 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
           </>
         </RuleMigrationDataInputWrapper>
       );
-    }, [migrationId, refetchData, ruleMigrationsStats, integrations, isIntegrationsLoading]);
+    }, [
+      migrationId,
+      refetchData,
+      ruleMigrationsStats,
+      selectedMigrationStats,
+      integrations,
+      isIntegrationsLoading,
+    ]);
 
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} />} border>
-          <HeaderButtons
-            migrationType="rule"
-            migrationsStats={ruleMigrationsStats}
-            selectedMigrationId={migrationId}
-            onMigrationIdChange={onMigrationIdChange}
-          />
-        </HeaderPage>
+        <AppHeader title={i18n.PAGE_TITLE} menu={menu} spacing="largeBleed" />
+        {ruleMigrationsStats.length > 0 && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup alignItems="center" gutterSize="l" responsive>
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  flex-basis: 40%;
+                  min-width: 40%;
+                `}
+              >
+                <MigrationSelector
+                  migrationsStats={ruleMigrationsStats}
+                  selectedMigrationId={migrationId}
+                  onMigrationIdChange={onMigrationIdChange}
+                />
+              </EuiFlexItem>
+              {selectedTranslationStats && (
+                <EuiFlexItem grow>
+                  <MigrationStatsBadges translationStats={selectedTranslationStats} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </>
+        )}
         <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
         <EuiSkeletonLoading
