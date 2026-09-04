@@ -165,6 +165,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-http-server'
   - '@kbn/ui-callout'
+  - '@kbn/discover-session-constants'
 tags:
   - plugin
   - prod
