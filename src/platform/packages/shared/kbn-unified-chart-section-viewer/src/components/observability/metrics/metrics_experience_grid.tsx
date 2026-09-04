@@ -21,7 +21,7 @@ import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
 import { GridSettingsFlyout } from '../../flyout';
-import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
+import type { UnifiedMetricsGridProps } from '../../../types';
 import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
@@ -44,7 +44,6 @@ export const MetricsExperienceGrid = ({
   isComponentVisible,
   isTabSelected,
   breakdownField,
-  onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
@@ -96,22 +95,12 @@ export const MetricsExperienceGrid = ({
 
   useResetPageOnDimensionsChange(selectedDimensions, onPageChange);
 
-  const onToolbarDimensionsChange = useCallback(
-    (nextSelectedDimensions: Dimension[]) => {
-      onDimensionsChange(nextSelectedDimensions);
-      onBreakdownFieldChange?.(nextSelectedDimensions[0]?.name);
-    },
-    [onDimensionsChange, onBreakdownFieldChange]
-  );
-
   useDimensionsWipe({
     selectedDimensions,
     allDimensions,
     isLoading: isDiscoverLoading,
     hasError: metricsInfoError != null,
-    breakdownField,
     onSelectedDimensionsChange: onDimensionsChange,
-    onBreakdownFieldChange,
   });
 
   const { onPageReady } = usePerformanceContext();
@@ -140,7 +129,7 @@ export const MetricsExperienceGrid = ({
     allDimensions,
     metricItems,
     renderToggleActions,
-    onDimensionsChange: onToolbarDimensionsChange,
+    onDimensionsChange,
     isLoading: isDiscoverLoading,
     onOpenGridSettings: toggleGridSettingsFlyout,
   });

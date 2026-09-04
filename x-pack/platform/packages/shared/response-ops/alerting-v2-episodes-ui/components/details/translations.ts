@@ -267,7 +267,7 @@ export const METADATA_LIST_ASSIGNEE_LABEL = i18n.translate(
 export const METADATA_LIST_TAGS_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.tagsLabel',
   {
-    defaultMessage: 'Tags',
+    defaultMessage: 'Alert tags',
   }
 );
 

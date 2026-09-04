@@ -518,6 +518,161 @@ _meta:
     ]);
   });
 
+  test('drains ALL accumulated stale YAML versions on upgrade, not just the first', async () => {
+    // Regression test for the YAML-path .find() → .filter() fix.
+    // If two stale YAML fleet_transform_versions accumulate (e.g. a cluster that went
+    // 0.1.0 → 0.15.0 and the 0.1.0 transforms leaked), upgrading to 0.2.0 must stop and
+    // delete BOTH old versions, not just the first one .find() would have returned.
+    const sourceData = getYamlTestData(undefined, '0.2.0');
+
+    const previousInstallation: Installation = {
+      installed_es: [
+        { id: 'metrics-endpoint.policy-0.16.0-dev.0', type: ElasticsearchAssetType.ingestPipeline },
+        {
+          id: 'logs-endpoint.metadata_current-default-0.1.0',
+          type: ElasticsearchAssetType.transform,
+        },
+        {
+          id: 'logs-endpoint.metadata_current-default-0.15.0',
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown as Installation;
+
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+      Promise.resolve(previousInstallation)
+    );
+    currentAttributes = { installed_es: previousInstallation.installed_es };
+
+    // getTransform is consumed by reconcileTransforms — return no orphans for this test.
+    esClient.transform.getTransform.mockResponseOnce({ count: 0, transforms: [] });
+
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: { name: 'endpoint', version: '0.16.0-dev.0' },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              Buffer.from(sourceData.MANIFEST),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ])
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
+
+    // Both 0.1.0 and 0.15.0 must be stopped and deleted — not just one.
+    const stoppedIds = (esClient.transform.stopTransform.mock.calls as any[])
+      .map((c) => c[0].transform_id)
+      .sort();
+    expect(stoppedIds).toEqual([
+      'logs-endpoint.metadata_current-default-0.1.0',
+      'logs-endpoint.metadata_current-default-0.15.0',
+    ]);
+
+    const deletedIds = (esClient.transform.deleteTransform.mock.calls as any[])
+      .map((c) => c[0].transform_id)
+      .sort();
+    expect(deletedIds).toEqual([
+      'logs-endpoint.metadata_current-default-0.1.0',
+      'logs-endpoint.metadata_current-default-0.15.0',
+    ]);
+  });
+
+  test('removes ALL old JSON schema transforms when migrating to YAML schema', async () => {
+    // Regression test for the versionsFromOldJsonSchema .find() → .filter() fix.
+    // If multiple legacy JSON schema transforms accumulated (e.g. both 0.1.0 and 0.15.0 leaked),
+    // migrating to a YAML package must add ALL of them to transformsToRemoveWithDestIndex.
+    const sourceData = getYamlTestData(undefined, '0.2.0');
+
+    const previousInstallation: Installation = {
+      installed_es: [
+        { id: 'metrics-endpoint.policy-0.1.0-dev.0', type: ElasticsearchAssetType.ingestPipeline },
+        // Two legacy JSON schema transform refs for the same module at different versions
+        {
+          id: 'endpoint.metadata_current-default-0.1.0',
+          type: ElasticsearchAssetType.transform,
+        },
+        {
+          id: 'endpoint.metadata_current-default-0.15.0',
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown as Installation;
+
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+      Promise.resolve(previousInstallation)
+    );
+    currentAttributes = { installed_es: previousInstallation.installed_es };
+
+    // getTransform is consumed by reconcileTransforms — return no orphans for this test.
+    esClient.transform.getTransform.mockResponseOnce({ count: 0, transforms: [] });
+
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: { name: 'endpoint', version: '0.16.0-dev.0' },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              Buffer.from(sourceData.MANIFEST),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ])
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
+
+    // Both legacy JSON schema transforms must be stopped and deleted (with dest index).
+    const stoppedIds = (esClient.transform.stopTransform.mock.calls as any[])
+      .map((c) => c[0].transform_id)
+      .sort();
+    expect(stoppedIds).toEqual([
+      'endpoint.metadata_current-default-0.1.0',
+      'endpoint.metadata_current-default-0.15.0',
+    ]);
+
+    const deleteCalls = esClient.transform.deleteTransform.mock.calls as any[];
+    const deletedWithDestIndex = deleteCalls.filter((c) => c[0].delete_dest_index === true);
+    expect(deletedWithDestIndex.map((c) => c[0].transform_id).sort()).toEqual([
+      'endpoint.metadata_current-default-0.1.0',
+      'endpoint.metadata_current-default-0.15.0',
+    ]);
+  });
+
   test('can install new versions and removes older version when upgraded from old json schema to new yml schema', async () => {
     const sourceData = getYamlTestData(undefined, '0.2.0');
     const expectedData = getExpectedData('0.2.0');
@@ -1327,6 +1482,73 @@ _meta:
     // No new transform is created or started
     expect(esClient.transform.putTransform.mock.calls).toEqual([]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([]);
+  });
+
+  test('reconciler does not delete unchanged transform when fleet_transform_version is the same', async () => {
+    // Regression test for the YAML-path reconcileTransforms keepIds bug:
+    // When a module's fleet_transform_version is unchanged, currentTransformSameAsPrev is true and
+    // the transform id is omitted from transformRefs. The reconciler must still treat it as a
+    // keeper (via previousInstalledTransformEsAssets minus explicit removals) — not delete it.
+    const sourceData = getYamlTestData(false, '0.1.0');
+    const unchangedId = 'logs-endpoint.metadata_current-default-0.1.0';
+
+    const previousInstallation: Installation = {
+      installed_es: [{ id: unchangedId, type: ElasticsearchAssetType.transform }],
+    } as unknown as Installation;
+
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+      Promise.resolve(previousInstallation)
+    );
+    currentAttributes = { installed_es: previousInstallation.installed_es };
+
+    // Simulate the unchanged transform present in ES with _meta.package.name stamped by Fleet.
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        // @ts-expect-error incomplete data
+        {
+          id: unchangedId,
+          _meta: { package: { name: 'endpoint' } },
+        },
+      ],
+    });
+
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: { name: 'endpoint', version: '0.16.0-dev.0' },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              sourceData.FIELDS,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
+
+    // The unchanged transform must NOT be deleted by the reconciler.
+    const deletedIds = (esClient.transform.deleteTransform.mock.calls as any[]).map(
+      (c) => c[0].transform_id
+    );
+    expect(deletedIds).not.toContain(unchangedId);
   });
 });
 
