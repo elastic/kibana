@@ -65,6 +65,7 @@ Reach for custom content only when nothing above fits:
 **Creating a custom content panel:**
 - Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` — it is generated server-side from the prompt.
 - Set \`config.esqlQuery\` when the panel needs live data.
+- Give it enough height. These panels lay out as HTML and scroll inside their own frame when the grid is too short for the content, so size \`grid.h\` from what you asked for — see the custom content entry in the grid sizes below.
 
 **Editing a custom content panel:**
 - Use \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) and set \`panelId\` to the target panel.
