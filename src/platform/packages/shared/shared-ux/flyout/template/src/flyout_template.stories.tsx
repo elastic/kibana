@@ -350,7 +350,7 @@ const TabsRender = (args: Args): React.JSX.Element => {
         {headerZone(args, 'Tabs demo', undefined, { collapsed: args.headerIsCollapsed })}
 
         <FlyoutTemplate.Body>
-          {visibleTabs.map(({ id, label, detail }) => (
+          {visibleTabs.map(({ id, detail }) => (
             <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
               {unstructuredBlocks(args.numUnstructuredBlocks)}
               <EuiText size="s">
