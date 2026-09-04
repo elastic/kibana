@@ -9,6 +9,7 @@ import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import {
   formatRawDocument,
   identifyFeatures,
+  sumTokens,
   toPreviouslyIdentifiedFeature,
   type InferenceDocument,
   type SearchSimilarFeaturesArguments,
@@ -320,6 +321,7 @@ evaluate.describe(
                   const accumulated = new FeatureAccumulator();
                   const mergeEvents = [];
                   const fingerprintOnlyMergeEvents = [];
+                  let tokensUsed = sumTokens({});
 
                   for (let i = 0; i < input.iterations; i++) {
                     const sampledHits = await collectSampleDocuments({
@@ -354,6 +356,10 @@ evaluate.describe(
                       converseResult.steps,
                       input.stream_name
                     );
+                    tokensUsed = sumTokens({
+                      accumulated: tokensUsed,
+                      added: converseResult.tokensUsed,
+                    });
 
                     iterations.push({
                       features: identifiedFeatures,
@@ -382,6 +388,7 @@ evaluate.describe(
                     mergeEvents,
                     fingerprintOnlyMergeEvents,
                     finalFeatures: accumulated.getAll(),
+                    tokens_used: tokensUsed,
                     traceId: getCurrentTraceId(),
                   };
                 },

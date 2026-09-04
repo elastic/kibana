@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatRawDocument, type InferenceDocument } from '@kbn/streams-ai';
+import { formatRawDocument, sumTokens, type InferenceDocument } from '@kbn/streams-ai';
 import {
   FEATURE_IDENTIFICATION_AGENT_ID,
   buildFeatureIdentificationUserMessage,
@@ -169,6 +169,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
                 return {
                   features,
+                  tokens_used: sumTokens({ added: result.tokensUsed }),
                   traceId: getCurrentTraceId(),
                   sample_documents: heavy.sampleDocuments,
                 };
