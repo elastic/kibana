@@ -42,19 +42,19 @@ import {
   isInProgressStatus,
   isTerminalStatus,
 } from '@kbn/workflows';
+import { StepIcon } from './shared/step_icon';
+import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
+import { useTelemetry } from '../../../hooks/use_telemetry';
+import type { ChildWorkflowExecutionsMap } from '../../workflow_execution_detail/model/use_child_workflow_executions';
 import type { StepExecutionTreeItem } from '../../workflow_execution_detail/ui/build_step_executions_tree';
 import {
   buildStepExecutionsTree,
   injectChildWorkflowSteps,
 } from '../../workflow_execution_detail/ui/build_step_executions_tree';
-import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from '../../workflow_execution_detail/ui/workflow_pseudo_step_context';
-import { useTelemetry } from '../../../hooks/use_telemetry';
-import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
-import type { ChildWorkflowExecutionsMap } from '../../workflow_execution_detail/model/use_child_workflow_executions';
 
 const TRIGGER_BOLT_ICON_SVG =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="%23535966" d="M7.04 13.274a.5.5 0 1 0 .892.453l3.014-5.931a.5.5 0 0 0-.445-.727H5.316L8.03 1.727a.5.5 0 1 0-.892-.453L4.055 7.343a.5.5 0 0 0 .446.726h5.185L7.04 13.274Z"/></svg>';

@@ -32,15 +32,15 @@ import type {
 } from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import {
-  type ApprovalLabels,
-  ResumeExecutionButton,
-} from '../../workflow_execution_detail/ui/resume_execution_button';
+import { getExecutionStatusIcon } from './shared/status_badge';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
-import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import {
+  type ApprovalLabels,
+  ResumeExecutionButton,
+} from '../../workflow_execution_detail/ui/resume_execution_button';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;

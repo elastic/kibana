@@ -14,16 +14,16 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto, WorkflowTokenUsage } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import {
-  type ApprovalLabels,
-  ResumeExecutionButton,
-} from '../../workflow_execution_detail/ui/resume_execution_button';
+import { getExecutionStatusIcon } from './shared/status_badge';
+import { TokenUsageBadge } from './shared/token_usage_badge';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
-import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
-import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
+import {
+  type ApprovalLabels,
+  ResumeExecutionButton,
+} from '../../workflow_execution_detail/ui/resume_execution_button';
 
 interface WorkflowExecutionOverviewProps {
   stepExecution: WorkflowStepExecutionDto;

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionDataViewer } from '../../../shared/ui/execution_data_viewer';
+import { ExecutionDataViewer } from './shared/execution_data_viewer';
 
 const Titles = {
   output: i18n.translate('workflowsManagement.stepExecutionDataView.outputTitle', {

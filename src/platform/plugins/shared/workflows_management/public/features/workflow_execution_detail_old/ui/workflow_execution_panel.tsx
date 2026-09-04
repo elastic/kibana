@@ -27,12 +27,12 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { CancelExecutionButton } from '../../workflow_execution_detail/ui/cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 import { getTestRunTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';
 import type { ChildWorkflowExecutionsMap } from '../../workflow_execution_detail/model/use_child_workflow_executions';
+import { CancelExecutionButton } from '../../workflow_execution_detail/ui/cancel_execution_button';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {

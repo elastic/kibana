@@ -22,12 +22,7 @@ import {
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import type { ApprovalLabels } from '../../workflow_execution_detail/ui/resume_execution_button';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
-import {
-  buildOverviewStepExecutionFromContext,
-  buildTriggerStepExecutionFromContext,
-} from '../../workflow_execution_detail/ui/workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import {
@@ -38,6 +33,11 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 import { useChildWorkflowExecutions } from '../../workflow_execution_detail/model/use_child_workflow_executions';
 import { useStepExecution } from '../../workflow_execution_detail/model/use_step_execution';
+import type { ApprovalLabels } from '../../workflow_execution_detail/ui/resume_execution_button';
+import {
+  buildOverviewStepExecutionFromContext,
+  buildTriggerStepExecutionFromContext,
+} from '../../workflow_execution_detail/ui/workflow_pseudo_step_context';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
 const DefaultSidebarWidth = 300;

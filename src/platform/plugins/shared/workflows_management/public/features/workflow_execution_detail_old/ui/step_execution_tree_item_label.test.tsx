@@ -93,9 +93,9 @@ describe('StepExecutionTreeItemLabel', () => {
     expect(screen.queryByText(/\ds/)).not.toBeInTheDocument();
   });
 
-  it('renders styled 0ms duration when executionTimeMs is 0', () => {
+  it('renders styled <1ms duration when executionTimeMs is 0', () => {
     renderWithIntl({ ...defaultProps, executionTimeMs: 0 });
-    expect(screen.getByText('0ms')).toBeInTheDocument();
+    expect(screen.getByText('<1ms')).toBeInTheDocument();
     expect(screen.queryByText('0', { exact: true })).not.toBeInTheDocument();
   });
 

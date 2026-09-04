@@ -89,7 +89,7 @@ describe('WorkflowExecutionOverview', () => {
     it.each([
       [ExecutionStatus.COMPLETED, 'Success'],
       [ExecutionStatus.RUNNING, 'Running'],
-      [ExecutionStatus.FAILED, 'Error'],
+      [ExecutionStatus.FAILED, 'Failed'],
       [ExecutionStatus.PENDING, 'Pending'],
       [ExecutionStatus.CANCELLED, 'Canceled'],
     ])('should display correct status label for %s', (status, expectedLabel) => {

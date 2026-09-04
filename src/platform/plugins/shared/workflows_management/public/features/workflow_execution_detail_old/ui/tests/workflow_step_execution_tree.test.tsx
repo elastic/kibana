@@ -73,7 +73,7 @@ jest.mock('../step_execution_tree_item_label', () => ({
   ),
 }));
 
-jest.mock('../../../../shared/ui/step_icons/step_icon', () => ({
+jest.mock('../shared/step_icon', () => ({
   StepIcon: ({
     stepType,
     executionStatus,

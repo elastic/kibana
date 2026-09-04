@@ -15,9 +15,9 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowTokenUsage } from '@kbn/workflows';
 import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
+import { TokenUsageBadge } from './shared/token_usage_badge';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
-import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
 
 const actionRequiredLabel = i18n.translate(
   'workflowsManagement.stepExecutionTreeItemLabel.actionRequired',
