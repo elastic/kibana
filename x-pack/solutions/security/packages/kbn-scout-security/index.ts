@@ -9,6 +9,7 @@
 export { test, spaceTest } from './src/playwright';
 
 // Security-specific test constants
+export { getEndpointArtifactsApiService } from './src/playwright/fixtures/worker/apis/endpoint_artifacts';
 export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
 export { PREVALENCE_HOST_NAME } from './src/playwright/fixtures/worker/apis/prevalence';
 export { ANALYZER_ORIGIN_PROCESS_NAME } from './src/playwright/fixtures/worker/apis/analyzer';

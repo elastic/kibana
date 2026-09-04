@@ -9,7 +9,9 @@
 
 // This file is auto-generated. Do not edit it manually.
 
-export const commandsMetadata: Record<string, unknown> = {
+import type { ElasticsearchCommandDefinition } from '../../../../..';
+
+export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = {
   change_point: {
     type: 'command',
     name: 'change_point',

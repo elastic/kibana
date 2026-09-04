@@ -64,6 +64,11 @@ export function StreamsLayout() {
   }
 
   const { Component, noPadding } = streamsLayoutTabs[tab];
+  const body = (
+    <StreamsAppPageTemplate.Body noPadding={noPadding} paddingSize="m">
+      <Component />
+    </StreamsAppPageTemplate.Body>
+  );
 
   return (
     <>
@@ -77,9 +82,7 @@ export function StreamsLayout() {
         })}
         tabs={appHeaderTabs}
       />
-      <StreamsAppPageTemplate.Body noPadding={noPadding} paddingSize="m">
-        <Component />
-      </StreamsAppPageTemplate.Body>
+      {body}
     </>
   );
 }

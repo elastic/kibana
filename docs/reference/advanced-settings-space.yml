@@ -526,7 +526,7 @@ groups:
         description: |
           Sets the file size limit when importing files. The highest supported value for this setting is `1GB`.
         datatype: string
-        default: 100MB
+        default: 500MB
         applies_to:
           stack: ga
           ech: ga
@@ -534,6 +534,9 @@ groups:
           eck: ga
           self: ga
           serverless: unavailable
+        note: |
+          :applies_to: stack: ga 9.0-9.3
+          In these versions, this setting defaults to `100MB`.
 
       - setting: enableESQL
         id: enableESQL

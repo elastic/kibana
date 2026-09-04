@@ -1285,6 +1285,10 @@ describe('autocomplete', () => {
     it.each([
       ['CASE', 'FROM index | WHERE CASE(doubleField IN /'],
       ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN /'],
+      ['EVAL CASE', 'FROM index | EVAL col0 = CASE(doubleField IN /'],
+      ['EVAL COALESCE', 'FROM index | EVAL col0 = COALESCE(doubleField IN /'],
+      ['STATS WHERE', 'FROM index | STATS COUNT(*) WHERE doubleField IN /'],
+      ['INLINE STATS WHERE', 'FROM index | INLINE STATS COUNT(*) WHERE doubleField IN /'],
     ])('suggests subqueries inside %s', async (_, query) => {
       const { suggest: suggestFn } = await setup();
       const suggestedTexts = (await suggestFn(query)).map(({ text }) => text);
@@ -1315,6 +1319,9 @@ describe('autocomplete', () => {
         'COALESCE inside a FROM subquery',
         'FROM index, (TS timeseries_index | WHERE COALESCE(doubleField IN (FROM /)))',
       ],
+      ['EVAL CASE', 'FROM index | EVAL col0 = CASE(doubleField IN (FROM /), true, false)'],
+      ['STATS WHERE', 'FROM index | STATS COUNT(*) WHERE doubleField IN (FROM /)'],
+      ['INLINE STATS WHERE', 'FROM index | INLINE STATS COUNT(*) WHERE doubleField IN (FROM /)'],
     ])('suggests sources inside an IN subquery nested in %s', async (_, query) => {
       const { suggest: suggestFn } = await setup();
       const suggestions = await suggestFn(query);

@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { INpreClient } from '@kbn/cps/server/npre';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -33,15 +33,16 @@ const createMockNpreClient = (): INpreClient => {
   } as unknown as INpreClient;
 };
 
-const createMockConfig = (
-  mockConfig: ConfigType = {
+const createMockConfig = (mockConfig: Partial<ConfigType> = {}) => {
+  const config: ConfigType = {
     enabled: true,
     maxSpaces: 1000,
     allowFeatureVisibility: true,
     allowSolutionVisibility: true,
-  }
-) => {
-  return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
+    initialSolutionSetup: { enabled: false },
+    ...mockConfig,
+  };
+  return ConfigSchema.validate(config, { serverless: !config.allowFeatureVisibility });
 };
 
 const features = [
@@ -504,6 +505,118 @@ describe('#getPersistedFeatureVisibility', () => {
   });
 });
 
+describe('#isInitialSolutionSetupRequired', () => {
+  test('returns true when the marker is set on the default space', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: { name: 'Default', solutionSetupRequired: true },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.isInitialSolutionSetupRequired()).resolves.toBe(true);
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', 'default');
+  });
+
+  test('returns false when the marker is unset', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: { name: 'Default' },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.isInitialSolutionSetupRequired()).resolves.toBe(false);
+  });
+});
+
+describe('#completeInitialSolutionSetup', () => {
+  test('persists the selected solution and clears the marker with optimistic concurrency', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      version: 'v42',
+      attributes: { name: 'Default', solutionSetupRequired: true },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await client.completeInitialSolutionSetup('oblt');
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      'default',
+      { solution: 'oblt', solutionSetupRequired: false },
+      { version: 'v42' }
+    );
+  });
+
+  test('rejects when setup is already complete', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: { name: 'Default', solutionSetupRequired: false },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.completeInitialSolutionSetup('es')).rejects.toThrow(
+      'Initial solution setup is already complete'
+    );
+    expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
+  });
+});
+
 describe('#create', () => {
   const id = asSpaceId('foo');
   const attributes = {
@@ -946,7 +1059,61 @@ describe('#update', () => {
       ...attributes,
       solution: 'es',
     });
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      id,
+      expect.not.objectContaining({ solutionSetupRequired: expect.anything() })
+    );
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+  });
+
+  test(`clears solutionSetupRequired when updating the default space solution`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: {
+        name: 'Default',
+        description: '',
+        color: '#FFFFFF',
+        initials: 'D',
+        disabledFeatures: [],
+        solutionSetupRequired: true,
+      },
+    });
+    featuresStart.getKibanaFeatures.mockReturnValue([...features]);
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await client.update(DEFAULT_SPACE_ID, {
+      id: DEFAULT_SPACE_ID,
+      name: 'Default',
+      description: '',
+      color: '#FFFFFF',
+      initials: 'D',
+      disabledFeatures: [],
+      solution: 'oblt',
+    });
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      'default',
+      expect.objectContaining({
+        solution: 'oblt',
+        solutionSetupRequired: false,
+      })
+    );
   });
 
   test(`preserves existing leading/trailing whitespace in name when updating a space with the same name`, async () => {

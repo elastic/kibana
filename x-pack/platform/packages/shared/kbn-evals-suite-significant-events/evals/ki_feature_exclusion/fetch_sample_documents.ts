@@ -6,8 +6,8 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { formatRawDocument, type InferenceDocument } from '@kbn/streams-ai';
 import { MANAGED_STREAM_SEARCH_PATTERN } from '../../src/datasets';
 
 export async function fetchSampleDocuments({
@@ -18,7 +18,7 @@ export async function fetchSampleDocuments({
   esClient: Client;
   sampleSize: number;
   log: ToolingLog;
-}): Promise<Array<SearchHit<Record<string, unknown>>>> {
+}): Promise<InferenceDocument[]> {
   const result = await esClient.search<Record<string, unknown>>({
     index: MANAGED_STREAM_SEARCH_PATTERN,
     size: sampleSize,
@@ -37,5 +37,8 @@ export async function fetchSampleDocuments({
     );
   }
 
-  return sampleDocuments;
+  return sampleDocuments.flatMap((hit) => {
+    const document = formatRawDocument({ hit });
+    return document ? [document] : [];
+  });
 }

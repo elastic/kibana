@@ -14,6 +14,7 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 import { registerRoutes as registerServerRoutes } from '@kbn/server-route-repository';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
 import type { AlertDetailsContextualInsightsService } from '../services';
 import type { AbstractObservabilityServerRouteRepository } from './types';
 
@@ -38,6 +39,7 @@ export interface RegisterRoutesDependencies {
     alertDetailsContextualInsightsService: AlertDetailsContextualInsightsService;
   };
   getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
+  nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
 
 export function registerRoutes({ repository, core, logger, dependencies, isDev }: RegisterRoutes) {

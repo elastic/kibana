@@ -58,7 +58,9 @@ const buildProps = (overrides?: Partial<ContextSwitcherProps>): ContextSwitcherP
 describe('ContextSwitcher', () => {
   it('renders the trigger button with the active space name', () => {
     render(<ContextSwitcher {...buildProps()} />);
-    expect(screen.getByTestId('contextSwitcherTriggerButton')).toBeInTheDocument();
+    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
+    expect(trigger).toBeInTheDocument();
+    expect(trigger).toHaveAttribute('data-space-name', 'Default');
     expect(screen.getByText('Default')).toBeInTheDocument();
   });
 
@@ -164,6 +166,7 @@ describe('ContextSwitcher', () => {
 
     const trigger = screen.getByTestId('contextSwitcherTriggerButton');
     expect(trigger).toHaveTextContent('My Awesome Project: Default');
+    expect(trigger).toHaveAttribute('data-space-name', 'Default');
   });
 
   it('shows two-step navigation when environmentContext is present', async () => {
