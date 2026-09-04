@@ -14,7 +14,11 @@ import type {
 } from '../../api_schemas/reset_transforms';
 import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
-import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
+import { isRequestTimeout, fillResultsWithTimeouts, getErrorBody } from '../../utils/error_utils';
+
+const getResetTimeoutResult = (error: NonNullable<ResponseStatus['error']>) => ({
+  transformReset: { success: false, error },
+});
 
 export async function resetTransforms(
   reqBody: ResetTransformsRequestSchema,
@@ -37,7 +41,16 @@ export async function resetTransforms(
         });
         transformReset.success = true;
       } catch (resetTransformJobError) {
-        transformReset.error = resetTransformJobError.meta.body.error;
+        if (isRequestTimeout(resetTransformJobError)) {
+          return fillResultsWithTimeouts({
+            results,
+            id: transformInfo.id,
+            items: transformsInfo,
+            action: TRANSFORM_ACTIONS.RESET,
+            getResult: getResetTimeoutResult,
+          });
+        }
+        transformReset.error = getErrorBody(resetTransformJobError);
         if (resetTransformJobError.statusCode === 403) {
           return response.forbidden();
         }
@@ -53,9 +66,10 @@ export async function resetTransforms(
           id: transformInfo.id,
           items: transformsInfo,
           action: TRANSFORM_ACTIONS.RESET,
+          getResult: getResetTimeoutResult,
         });
       }
-      results[transformId] = { transformReset: { success: false, error: e.meta.body.error } };
+      results[transformId] = { transformReset: { success: false, error: getErrorBody(e) } };
     }
   }
   return results;

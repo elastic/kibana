@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { allChangedFilesInScope } from '../../affected-packages';
+import { allChangedFilesInScope, createScopeMatcher } from '../../affected-packages';
 
 /**
  * Scout-tests-only fast path for the Jest/FTR orchestrator.
@@ -43,6 +43,11 @@ const SCOUT_TESTS_ONLY_EXCLUDE_GLOBS: readonly string[] = [
   '**/test/scout{_*,}/{api,ui}/fixtures/**',
   '**/test/scout{_*,}/*/{api,ui}/fixtures/**',
 ];
+
+/**
+ * Returns `true` when a single file sits inside a Scout test scope (fixtures included).
+ */
+export const isScoutTestPath = createScopeMatcher(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
 
 /**
  * Returns `true` only when every changed file is either documentation noise

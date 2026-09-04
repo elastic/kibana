@@ -39,6 +39,7 @@ export const ResolverWithoutProviders = React.memo(
     {
       className,
       databaseDocumentID,
+      databaseDocumentTimestamp,
       resolverComponentInstanceID,
       indices,
       shouldUpdate,
@@ -55,6 +56,7 @@ export const ResolverWithoutProviders = React.memo(
      */
     useStateSyncingActions({
       databaseDocumentID,
+      databaseDocumentTimestamp,
       resolverComponentInstanceID,
       indices,
       shouldUpdate,
