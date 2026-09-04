@@ -96,7 +96,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     }),
     render: (props) => (
       <>
-        <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
+        <LinkedActionPoliciesStep http={props.services.http} />
         <EuiHorizontalRule margin="m" />
         <NotificationsStep />
       </>
