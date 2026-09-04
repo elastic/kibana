@@ -1280,9 +1280,9 @@ groups:
         datatype: string
         default: "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()"
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: preview"
+          - "ech: ga"
+          - "self: ga"
 
       - setting: server.securityResponseHeaders.permissionsPolicyReportOnly
         id: server-securityresponseheaders-permissionspolicyreportonly
@@ -1290,9 +1290,9 @@ groups:
           Controls whether the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format.
         datatype: string
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: preview"
+          - "ech: ga"
+          - "self: ga"
 
       - setting: server.securityResponseHeaders.disableEmbedding
         id: server-securityresponseheaders-disableembedding
