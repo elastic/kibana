@@ -9,4 +9,10 @@ import { schema } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  codebox: schema.object({
+    url: schema.string({ defaultValue: '' }),
+    apiKey: schema.string({ defaultValue: '' }),
+  }),
 });
+
+export type SignificantEventsConfig = ReturnType<(typeof ConfigSchema)['validate']>;

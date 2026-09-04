@@ -22,8 +22,10 @@ import { SparkPlot } from '../../../../components/spark_plot';
 import { DurabilityBadge } from '../durability_badge/durability_badge';
 import { getKnowledgeIndicatorExpiresAt } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_expires_at';
 import { KnowledgeIndicatorActionsCell } from '../../../../components/knowledge_indicators/knowledge_indicator_actions_cell';
+import { KnowledgeIndicatorSourceBadge } from '../../../../components/knowledge_indicators/knowledge_indicator_source_badge';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSource } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_source';
 import { getKnowledgeIndicatorTitle } from './use_knowledge_indicators_table';
 import {
   TITLE_COLUMN_LABEL,
@@ -32,6 +34,7 @@ import {
   MATCH_QUERY_TYPE_LABEL,
   STATS_QUERY_TYPE_LABEL,
   STREAM_COLUMN_LABEL,
+  SOURCE_COLUMN_LABEL,
   DURABILITY_COLUMN_LABEL,
   ACTIONS_COLUMN_LABEL,
   VIEW_DETAILS_ARIA_LABEL,
@@ -130,6 +133,13 @@ export const useKnowledgeIndicatorsColumns = ({
             </EuiBadge>
           );
         },
+      },
+      {
+        name: SOURCE_COLUMN_LABEL,
+        width: '130px',
+        render: (ki: KnowledgeIndicator) => (
+          <KnowledgeIndicatorSourceBadge source={getKnowledgeIndicatorSource(ki)} />
+        ),
       },
       {
         name: STREAM_COLUMN_LABEL,

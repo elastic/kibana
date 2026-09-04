@@ -63,7 +63,7 @@ test.describe(
       );
     });
 
-    test('renders all 7 navigation tabs', async ({ page }) => {
+    test('renders all 8 navigation tabs', async ({ page }) => {
       await page.gotoApp('significant_events/streams');
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
@@ -72,6 +72,7 @@ test.describe(
         'Streams',
         'Knowledge Indicators',
         'Rules',
+        'Code Intelligence',
         'Detections',
         'Significant Events',
         'Memory',
@@ -79,6 +80,18 @@ test.describe(
       ]) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
       }
+    });
+
+    test('shows Code Intelligence setup when optional prerequisites are unavailable', async ({
+      page,
+    }) => {
+      await page.gotoApp('significant_events/code_intelligence');
+      await expect(page).toHaveURL(/\/app\/significant_events\/code_intelligence/, {
+        timeout: 60_000,
+      });
+      await expect(page.testSubj.locator('codeIntelligencePlaceholder')).toBeVisible({
+        timeout: 60_000,
+      });
     });
 
     test('shows the not-enabled empty prompt when the feature flag is disabled', async ({

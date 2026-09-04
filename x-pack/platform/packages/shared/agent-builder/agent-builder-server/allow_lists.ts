@@ -154,6 +154,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
+  `${internalNamespaces.platformSignificantEvents}.logging-wrappers-type`,
   `${internalNamespaces.security}.alertzero-type`,
 ] as const;
 

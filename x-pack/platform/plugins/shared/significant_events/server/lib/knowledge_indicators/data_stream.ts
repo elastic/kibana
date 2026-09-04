@@ -33,6 +33,13 @@ export const knowledgeIndicatorsMappings = {
     description: mappings.text(),
     tags: mappings.keyword(),
     evidence: mappings.keyword(),
+    source: mappings.object({
+      properties: {
+        id: mappings.keyword(),
+        ids: mappings.keyword(),
+      },
+    }),
+    // Retained for reset/migration coverage of legacy KI revisions.
     stream: mappings.object({
       properties: {
         name: mappings.keyword(),
@@ -76,7 +83,12 @@ export const knowledgeIndicatorsMappings = {
 interface StoredKiRevisionIdentity {
   '@timestamp': string;
   id: string;
+  /** Elasticsearch document id, populated only on reads for exact revision ranking. */
+  _revision_id?: string;
+  /** Legacy Streams partition key, retained as the bridge compatibility partition. */
   'stream.name': string;
+  'source.id'?: string;
+  'source.ids'?: string[];
 }
 
 export interface StoredFeature {
@@ -126,8 +138,11 @@ export interface StoredQueryKnowledgeIndicator extends StoredKiRevisionIdentity 
 export interface StoredTombstone {
   '@timestamp': string;
   id: string;
+  _revision_id?: string;
   type: KnowledgeIndicatorType;
   'stream.name': string;
+  'source.id'?: string;
+  'source.ids'?: string[];
   deleted: true;
 }
 
@@ -165,7 +180,7 @@ export const knowledgeIndicatorsDataStream: DataStreamDefinition<
   StoredKnowledgeIndicator & Record<string, unknown>
 > = {
   name: KNOWLEDGE_INDICATORS_DATA_STREAM,
-  version: 2,
+  version: 3,
   hidden: true,
   template: {
     priority: 500,

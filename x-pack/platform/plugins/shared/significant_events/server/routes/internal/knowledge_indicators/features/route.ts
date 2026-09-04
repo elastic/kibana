@@ -17,11 +17,14 @@ import {
 import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { StatusError } from '../../../../lib/errors/status_error';
+import { SignificantEventsPausedError } from '../../../../lib/errors/significant_events_paused_error';
 import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 
 const MAX_INPUT_STRING_LENGTH = 255;
+const BULK_FEATURE_OPERATION_LIMIT = 1000;
 
 const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features',
@@ -345,7 +348,8 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
             z.object({ restore: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
           ])
         )
-        .min(1),
+        .min(1)
+        .max(BULK_FEATURE_OPERATION_LIMIT),
     }),
   }),
   handler: async ({
@@ -354,6 +358,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    maintenanceService,
   }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
     const scopedClients = await getScopedClients({
       request,
@@ -361,6 +366,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     const { licensing, streamsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
@@ -375,7 +381,12 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       opsByUuid.set(id, kiOp);
     }
     const requestedUuids = Array.from(opsByUuid.keys());
-    const resolved = await kiClient.findFeaturesByIds(requestedUuids);
+    const accessibleStreams = new Set(
+      (await streamsClient.listStreams()).map((stream) => stream.name)
+    );
+    const resolved = (await kiClient.findFeaturesByIds(requestedUuids)).filter(({ stream_name }) =>
+      accessibleStreams.has(stream_name)
+    );
     const skippedFromLookup = requestedUuids.length - resolved.length;
 
     // Group resolved ops by stream.
@@ -406,6 +417,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     for (const [streamName, ops] of Object.entries(byStream)) {
       try {
+        await assertNotPaused({ maintenanceService, request });
         const { applied, skipped: streamSkipped } = await kiClient.bulk(streamName, ops);
         succeeded += applied;
         skipped += streamSkipped;
@@ -413,6 +425,9 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
           streamsWithShrinkingOps.add(streamName);
         }
       } catch (error) {
+        if (error instanceof SignificantEventsPausedError) {
+          throw error;
+        }
         logger.error(
           `Bulk feature operation failed for stream ${streamName}: ${
             error instanceof Error ? error.message : String(error)
@@ -424,6 +439,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     for (const streamName of streamsWithShrinkingOps) {
       try {
+        await assertNotPaused({ maintenanceService, request });
         const definition = await streamsClient.getStream(streamName);
         await kiClient.reconcileStream(definition);
       } catch (err) {

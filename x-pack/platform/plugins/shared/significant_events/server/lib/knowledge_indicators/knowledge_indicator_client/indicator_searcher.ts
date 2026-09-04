@@ -34,7 +34,6 @@ import {
   SEARCH_EMBEDDING,
   STREAM_NAME,
   TAGS,
-  TIMESTAMP,
   TITLE,
   TYPE,
   type KnowledgeIndicatorType,
@@ -54,12 +53,7 @@ import type { RuleUnbackedFilter } from './types';
 const SEARCH_SIZE_LIMIT = 10_000;
 const QUERY_FEATURE_ID = 'query.features.id';
 
-type RankedIndicatorRow = Record<string, unknown> & {
-  id?: string;
-  'stream.name'?: string;
-  type?: KnowledgeIndicatorType;
-  '@timestamp'?: string;
-};
+type RankedIndicatorRow = Record<string, unknown> & { _id?: string };
 
 interface KeywordClause {
   readonly condition: LatestSourceWhereCondition;
@@ -88,13 +82,8 @@ const combineKeywordClauses = (clauses: KeywordClause[]): KeywordExpressions => 
   };
 };
 
-// Columns ranking must return so the caller can key each row and match the phase-1 latest revision.
-const rankGroupKeyColumns = () => [
-  esql.col(ID),
-  esql.col(STREAM_NAME),
-  esql.col(TYPE),
-  esql.col(TIMESTAMP),
-];
+// Exact Elasticsearch revision identity selected by phase 1.
+const rankRevisionColumns = () => [esql.col('_id')];
 
 export class IndicatorSearcher {
   constructor(
@@ -121,6 +110,12 @@ export class IndicatorSearcher {
       queryIds?: string[];
       ruleIds?: string[];
       ruleUnbacked?: RuleUnbackedFilter;
+      /**
+       * Overrides the configured `semantic_min_score` floor for this call.
+       * Callers making destructive decisions from search results (e.g. query
+       * reconciliation) pass a stricter floor than the recall-tuned default.
+       */
+      minScore?: number;
     } = {}
   ): Promise<{ hits: KnowledgeIndicator[] }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
@@ -163,6 +158,7 @@ export class IndicatorSearcher {
       queryTypes?: string[];
       queryIds?: string[];
       ruleIds?: string[];
+      minScore?: number;
     },
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {
@@ -173,6 +169,7 @@ export class IndicatorSearcher {
       queryIds: filters?.queryIds,
       ruleIds: filters?.ruleIds,
       ruleUnbacked: filters?.ruleUnbacked,
+      minScore: filters?.minScore,
     });
     const queryLinks = hits.flatMap((h) => (h.type === 'query' ? [h.query] : []));
     return queryLinks;
@@ -192,6 +189,7 @@ export class IndicatorSearcher {
       queryIds?: string[];
       ruleIds?: string[];
       ruleUnbacked?: RuleUnbackedFilter;
+      minScore?: number;
     }
   ): Promise<{ hits: KnowledgeIndicator[] }> {
     const hasFeatureKind = options.types?.length === 1 && options.types[0] === KI_TYPE_FEATURE;
@@ -226,43 +224,48 @@ export class IndicatorSearcher {
         : undefined;
 
     // Phase 1: ES|QL latest-per-group reduction.
+    // Only immutable identity belongs before precedence/latest selection.
     const where = combineWhere(
       inPredicate(STREAM_NAME, streamNames),
       inPredicate(TYPE, options.types ?? []),
-      featureTypesFilter,
       featureIdsFilter,
-      queryTypesFilter,
-      queryIdsFilter,
-      ruleIdsFilter
+      queryIdsFilter
     );
 
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
       options.includeExcluded ? undefined : IS_NOT_EXCLUDED,
+      featureTypesFilter,
+      queryTypesFilter,
+      ruleIdsFilter,
       ruleBackedFilter
     );
 
     const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
-    const docById = new Map(docs.map((d) => [`${d['stream.name']}:${d.type}:${d.id}`, d]));
+    const docByRevisionId = new Map(
+      docs.flatMap((doc) => (doc._revision_id ? [[doc._revision_id, doc] as const] : []))
+    );
 
-    // Phase 2: rank via ES|QL on the latest doc subset. We re-issue a query
-    // constrained by the (stream.name, type, id) tuples from phase 1.
-    if (docById.size === 0) {
+    // Phase 2 ranks only the exact authoritative Elasticsearch documents from
+    // phase 1. Logical IDs are insufficient because spaces and revisions collide.
+    if (docByRevisionId.size === 0) {
       return { hits: [] };
     }
 
-    const ids = Array.from(new Set(docs.map((d) => d.id)));
     const limit = options.limit ?? SEARCH_SIZE_LIMIT;
-    const phase2Where = combineWhere(
-      inPredicate(ID, ids),
-      inPredicate(STREAM_NAME, streamNames),
-      inPredicate(TYPE, options.types ?? [])
-    );
+    const phase2Where = inPredicate('_id', [...docByRevisionId.keys()]);
     if (!phase2Where) {
       return { hits: [] };
     }
 
-    const query = this.buildRankQuery(mode, phase2Where, queryText, options.types ?? [], limit);
+    const query = this.buildRankQuery(
+      mode,
+      phase2Where,
+      queryText,
+      options.types ?? [],
+      limit,
+      options.minScore
+    );
     const rankedRows = esqlToObjects<RankedIndicatorRow>(
       await queryEsql({ esClient: this.esClient, query })
     );
@@ -276,25 +279,11 @@ export class IndicatorSearcher {
     const seen = new Set<string>();
     const hits: KnowledgeIndicator[] = [];
     for (const row of rankedRows) {
-      const id = row[ID];
-      const streamName = row[STREAM_NAME];
-      const type = row[TYPE];
-      const timestamp = row[TIMESTAMP];
-      if (
-        typeof id !== 'string' ||
-        typeof streamName !== 'string' ||
-        typeof type !== 'string' ||
-        typeof timestamp !== 'string'
-      ) {
-        continue;
-      }
-      const key = `${streamName}:${type}:${id}`;
-      if (seen.has(key)) continue;
-      const latest = docById.get(key);
-      if (!latest || new Date(latest[TIMESTAMP]).getTime() !== new Date(timestamp).getTime()) {
-        continue;
-      }
-      seen.add(key);
+      const revisionId = row._id;
+      if (typeof revisionId !== 'string' || seen.has(revisionId)) continue;
+      const latest = docByRevisionId.get(revisionId);
+      if (!latest) continue;
+      seen.add(revisionId);
       if (isStoredFeatureKnowledgeIndicator(latest)) {
         hits.push({ type: 'feature', feature: fromStoredFeature(latest) });
       } else if (isStoredQueryKnowledgeIndicator(latest)) {
@@ -310,8 +299,10 @@ export class IndicatorSearcher {
     where: LatestSourceWhereCondition,
     queryText: string,
     types: KnowledgeIndicatorType[],
-    limit: number
+    limit: number,
+    minScoreOverride?: number
   ): ComposerQuery {
+    const semanticMinScore = minScoreOverride ?? this.config.semantic_min_score;
     if (mode === 'semantic') {
       return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
         | WHERE ${where}
@@ -321,8 +312,8 @@ export class IndicatorSearcher {
             | LIMIT ${limit}
           )
         | FUSE LINEAR WITH {"normalizer":"minmax"}
-        | WHERE _score >= ${this.config.semantic_min_score}
-        | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+        | WHERE _score >= ${semanticMinScore}
+        | KEEP _index, _score, ${rankRevisionColumns()}
         | SORT _score DESC
         | LIMIT ${limit}`;
     }
@@ -334,7 +325,7 @@ export class IndicatorSearcher {
         | WHERE ${keyword.condition}
         | EVAL _score = ${keyword.score}
         | WHERE _score > 0
-        | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+        | KEEP _index, _score, ${rankRevisionColumns()}
         | SORT _score DESC
         | LIMIT ${limit}`;
     }
@@ -349,8 +340,8 @@ export class IndicatorSearcher {
             | LIMIT ${limit}
             | EVAL label = "semantic"
             | FUSE LINEAR GROUP BY label WITH {"normalizer":"minmax"}
-            | WHERE _score >= ${this.config.semantic_min_score}
-            | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+            | WHERE _score >= ${semanticMinScore}
+            | KEEP _index, _score, ${rankRevisionColumns()}
             | SORT _score DESC
             | LIMIT ${limit}
           )
@@ -360,11 +351,11 @@ export class IndicatorSearcher {
             | WHERE _score > 0
             | SORT _score DESC
             | LIMIT ${limit}
-            | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+            | KEEP _index, _score, ${rankRevisionColumns()}
           )
       | FUSE RRF WITH {"rank_constant":${this.config.rrf_rank_constant}}
       | SORT _score DESC
-      | KEEP ${rankGroupKeyColumns()}, _score
+      | KEEP ${rankRevisionColumns()}, _score
       | LIMIT ${limit}`;
   }
 

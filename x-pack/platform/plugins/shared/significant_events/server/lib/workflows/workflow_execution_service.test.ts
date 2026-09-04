@@ -166,6 +166,43 @@ describe('WorkflowExecutionService', () => {
       });
     });
 
+    it('reads an explicitly requested execution instead of the latest one', async () => {
+      const { service, managementApi } = createService({
+        getWorkflowExecution: jest.fn().mockResolvedValue({
+          id: 'exec-started',
+          workflowId: WORKFLOW_ID,
+          status: ExecutionStatus.RUNNING,
+        }),
+      });
+
+      await expect(
+        service.getStatus({ spaceId: 'space-a', executionId: 'exec-started' })
+      ).resolves.toEqual({
+        status: SignificantEventsWorkflowStatus.InProgress,
+        executionId: 'exec-started',
+      });
+      expect(managementApi.getWorkflowExecution).toHaveBeenCalledWith(
+        'exec-started',
+        'space-a',
+        undefined
+      );
+      expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
+    });
+
+    it('rejects an execution from a different workflow', async () => {
+      const { service } = createService({
+        getWorkflowExecution: jest.fn().mockResolvedValue({
+          id: 'exec-other',
+          workflowId: 'other-workflow',
+          status: ExecutionStatus.RUNNING,
+        }),
+      });
+
+      await expect(
+        service.getStatus({ spaceId: 'space-a', executionId: 'exec-other' })
+      ).rejects.toThrow('was not found');
+    });
+
     it('always fetches exactly one execution', async () => {
       const { service, managementApi } = createService();
 
@@ -200,6 +237,20 @@ describe('WorkflowExecutionService', () => {
         expect.objectContaining({ concurrencyGroupKey: 'group-1' }),
         'space-a'
       );
+    });
+  });
+
+  describe('isInstalled', () => {
+    it('requires an installed workflow definition', async () => {
+      const { service: missing } = createService({
+        getWorkflow: jest.fn().mockResolvedValue(null),
+      });
+      const { service: installed } = createService({
+        getWorkflow: jest.fn().mockResolvedValue({ definition: {} }),
+      });
+
+      await expect(missing.isInstalled()).resolves.toBe(false);
+      await expect(installed.isInstalled()).resolves.toBe(true);
     });
   });
 

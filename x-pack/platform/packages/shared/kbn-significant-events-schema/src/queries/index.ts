@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Feature } from '../feature';
 import type { QueryWithOccurrences } from '../api/significant_events';
+import { type KnowledgeIndicatorSource } from '../source';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '../significant_events/constants';
 
 export function isExpirable<T extends { expires_at?: string }>(
@@ -70,6 +71,8 @@ export interface StreamQuery extends StreamQueryBase {
   evidence?: string[];
   features?: QueryFeature[];
   expires_at?: string;
+  /** Derived, read-only evidence source(s). Never persisted. */
+  source?: KnowledgeIndicatorSource[];
 }
 
 /**
@@ -109,6 +112,9 @@ export interface QueriesOccurrencesGetResponse {
 
 export interface QueryLink {
   query: StreamQuery;
+  /** First-class Significant Events source that owns this query. */
+  source_id?: string;
+  /** @deprecated Legacy Streams partition key. */
   stream_name: string;
   /** Whether a Kibana rule exists for this query. */
   rule_backed: boolean;

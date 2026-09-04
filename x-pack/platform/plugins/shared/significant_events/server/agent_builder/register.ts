@@ -6,7 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, FeatureFlagsStart, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -50,6 +50,11 @@ export const createMemoryToolsOptions = ({
  * Discovery agents are registered as agent types from plugin setup (see
  * `registerSignificantEventsDiscoveryAgentTypes`) and installed as editable profiles via
  * `installDiscoveryAgents`.
+ *
+ * Code Intelligence KI extraction is driven by the externally-installed Sourcerer
+ * agent (`sourcerer setup`), so this plugin registers no code-research agent/tools/
+ * skills of its own; the extraction workflow targets that agent and gates on its
+ * presence.
  */
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -57,13 +62,22 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
+  featureFlags,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
+  featureFlags: FeatureFlagsStart;
 }): Promise<void> => {
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  registerAgentBuilderTools({
+    agentBuilder,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    featureFlags,
+  });
 };

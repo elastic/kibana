@@ -9,6 +9,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   type ManagedWorkflowId,
   type TemplatedManagedWorkflowId,
@@ -18,12 +19,14 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import { installMemoryWorkflows } from '../../../memory_and_investigation/lib/memory/install_managed_workflows';
 import { GLOBAL_CORE_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
 
-// Groupings come from `managed_workflow_targets.ts` so install and pause stay in sync.
-// These are all non-templated workflows, so they install without template `values`.
-const WORKFLOWS_TO_INSTALL: Array<{
+interface WorkflowInstall {
   workflowId: Exclude<ManagedWorkflowId, TemplatedManagedWorkflowId>;
   spaceId: string;
-}> = [
+}
+
+// Groupings come from `managed_workflow_targets.ts` so install and pause stay in sync.
+// These are all non-templated workflows, so they install without template `values`.
+export const BASE_WORKFLOWS_TO_INSTALL: readonly WorkflowInstall[] = [
   ...GLOBAL_CORE_WORKFLOW_IDS.map((workflowId) => ({
     workflowId,
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
@@ -47,14 +50,41 @@ const WORKFLOWS_TO_INSTALL: Array<{
   },
 ];
 
-export const installWorkflows = async ({ client }: { client: PluginScopedManagedWorkflowsApi }) => {
+// Code Intelligence (Stage 1) extraction. Installed globally whenever the
+// code-KI extraction feature flag is on.
+const CODE_EXTRACTION_WORKFLOW: WorkflowInstall = {
+  workflowId: SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
+  spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+};
+
+export const installWorkflows = async ({
+  client,
+  includeCodeExtraction,
+}: {
+  client: PluginScopedManagedWorkflowsApi;
+  includeCodeExtraction: boolean;
+}): Promise<void> => {
+  const workflowsToInstall = includeCodeExtraction
+    ? [...BASE_WORKFLOWS_TO_INSTALL, CODE_EXTRACTION_WORKFLOW]
+    : BASE_WORKFLOWS_TO_INSTALL;
+
   // Install every workflow independently and report all failures at once. A fail-fast Promise.all
   // would hide the other failed ids, so the caller could not tell which workflows still need a retry.
   const installs: Array<{ id: string; run: Promise<void> }> = [
-    ...WORKFLOWS_TO_INSTALL.map(({ workflowId, spaceId }) => ({
+    ...workflowsToInstall.map(({ workflowId, spaceId }) => ({
       id: workflowId,
       run: client.install(workflowId, { spaceId }),
     })),
+    ...(!includeCodeExtraction
+      ? [
+          {
+            id: `${SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID} uninstall`,
+            run: client.uninstall(SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID, {
+              spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+            }),
+          },
+        ]
+      : []),
     { id: 'memory workflows', run: installMemoryWorkflows({ client }) },
   ];
 

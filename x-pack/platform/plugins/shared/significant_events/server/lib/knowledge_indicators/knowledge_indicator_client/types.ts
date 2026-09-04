@@ -23,7 +23,11 @@ interface KIBulkIndexFeatureOperation {
   index: { feature: FeatureUpsert };
 }
 interface KIBulkIndexQueryOperation {
-  index: { query: StreamQuery & { rule_backed?: boolean; rule_id?: string } };
+  index: {
+    query: StreamQuery & { rule_backed?: boolean; rule_id?: string };
+    /** Forward-facing source ownership used by the Code Intelligence bridge. */
+    sourceId?: string;
+  };
 }
 interface KIBulkDeleteOperation {
   delete: { type: KnowledgeIndicatorType; id: string };
@@ -45,5 +49,7 @@ export interface KnowledgeIndicatorClientDeps {
   dataStreamClient: KnowledgeIndicatorDataStreamClient;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  /** Active Kibana space for every KI read and write. */
+  space: string;
   logger: Logger;
 }

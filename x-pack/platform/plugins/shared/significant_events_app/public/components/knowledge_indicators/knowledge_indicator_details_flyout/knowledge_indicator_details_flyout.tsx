@@ -56,6 +56,9 @@ import { useBlocksNewActivity } from '../../../hooks/use_significant_events_main
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorRepository } from '../utils/get_knowledge_indicator_repository';
+import { getKnowledgeIndicatorSource } from '../utils/get_knowledge_indicator_source';
+import { KnowledgeIndicatorSourceBadge } from '../knowledge_indicator_source_badge';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 
@@ -68,6 +71,8 @@ interface Props {
   pageIndex?: number;
   pageCount?: number;
   onSelectPage?: (pageIndex: number) => void;
+  canManage?: boolean;
+  onDataChanged?: () => void;
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
@@ -79,6 +84,8 @@ export function KnowledgeIndicatorDetailsFlyout({
   pageIndex,
   pageCount,
   onSelectPage,
+  canManage = true,
+  onDataChanged,
 }: Props) {
   const {
     dependencies: {
@@ -91,6 +98,10 @@ export function KnowledgeIndicatorDetailsFlyout({
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+  const source = getKnowledgeIndicatorSource(knowledgeIndicator);
+  const repository = source.includes('code')
+    ? getKnowledgeIndicatorRepository(knowledgeIndicator)
+    : undefined;
 
   const featureFilter =
     knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
@@ -114,11 +125,23 @@ export function KnowledgeIndicatorDetailsFlyout({
     promoteQuery,
     setDurability,
     isMutating: isActionMutating,
-  } = useKnowledgeIndicatorActions({ streamName, onSuccess: onClose });
+  } = useKnowledgeIndicatorActions({
+    streamName,
+    onSuccess: () => {
+      onClose();
+      onDataChanged?.();
+    },
+  });
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { deleteKnowledgeIndicatorsInBulk, isDeleting: isKIDeleting } =
-    useStreamKnowledgeIndicatorsBulkDelete({ streamName, onSuccess: onClose });
+    useStreamKnowledgeIndicatorsBulkDelete({
+      streamName,
+      onSuccess: () => {
+        onClose();
+        onDataChanged?.();
+      },
+    });
 
   const { demoteRules, isPending: isDemoting } = useRulesDemote({ onSuccess: onClose });
 
@@ -156,7 +179,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   }, [openFeatureInDiscover]);
 
   const featureActionItems = useMemo(() => {
-    if (knowledgeIndicator.kind !== 'feature') {
+    if (!canManage || knowledgeIndicator.kind !== 'feature') {
       return [];
     }
 
@@ -169,7 +192,7 @@ export function KnowledgeIndicatorDetailsFlyout({
           <EuiContextMenuItem
             key="feature-restore"
             icon="eye"
-            disabled={isMutating}
+            disabled={isMutating || blocksActivity}
             onClick={() => {
               setIsActionsMenuOpen(false);
               restoreFeature(knowledgeIndicator.feature.uuid);
@@ -183,7 +206,7 @@ export function KnowledgeIndicatorDetailsFlyout({
           <EuiContextMenuItem
             key="feature-exclude"
             icon="eyeSlash"
-            disabled={isMutating}
+            disabled={isMutating || blocksActivity}
             onClick={() => {
               setIsActionsMenuOpen(false);
               excludeFeature(knowledgeIndicator.feature.uuid);
@@ -211,7 +234,7 @@ export function KnowledgeIndicatorDetailsFlyout({
         key="feature-delete"
         icon="trash"
         color="danger"
-        disabled={isMutating}
+        disabled={isMutating || blocksActivity}
         onClick={() => {
           setIsActionsMenuOpen(false);
           setShowDeleteModal(true);
@@ -222,10 +245,18 @@ export function KnowledgeIndicatorDetailsFlyout({
     );
 
     return items;
-  }, [excludeFeature, isMutating, knowledgeIndicator, restoreFeature, setDurability]);
+  }, [
+    blocksActivity,
+    canManage,
+    excludeFeature,
+    isMutating,
+    knowledgeIndicator,
+    restoreFeature,
+    setDurability,
+  ]);
 
   const queryActionItems = useMemo(() => {
-    if (knowledgeIndicator.kind !== 'query') {
+    if (!canManage || knowledgeIndicator.kind !== 'query') {
       return [];
     }
 
@@ -262,7 +293,7 @@ export function KnowledgeIndicatorDetailsFlyout({
         key="query-delete"
         icon="trash"
         color="danger"
-        disabled={isMutating}
+        disabled={isMutating || blocksActivity}
         onClick={() => {
           setIsActionsMenuOpen(false);
           setShowDeleteModal(true);
@@ -274,6 +305,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   }, [
     activityBlockTooltip,
     blocksActivity,
+    canManage,
     isMutating,
     knowledgeIndicator,
     promoteQuery,
@@ -323,7 +355,7 @@ export function KnowledgeIndicatorDetailsFlyout({
                     iconType="boxesVertical"
                     aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
                     isLoading={isMutating}
-                    isDisabled={isMutating}
+                    isDisabled={isMutating || blocksActivity}
                     onClick={() => setIsActionsMenuOpen((open) => !open)}
                   />
                 </EuiToolTip>
@@ -387,10 +419,21 @@ export function KnowledgeIndicatorDetailsFlyout({
               </>
             )}
             <EuiFlexItem>
-              <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {streamName}
-                </EuiBadge>
+              {repository ? (
+                <FlyoutMetadataCard title={REPOSITORY_LABEL}>
+                  <EuiBadge color="hollow">{repository}</EuiBadge>
+                </FlyoutMetadataCard>
+              ) : (
+                <FlyoutMetadataCard title={STREAM_LABEL}>
+                  <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
+                    {streamName}
+                  </EuiBadge>
+                </FlyoutMetadataCard>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={SOURCE_LABEL}>
+                <KnowledgeIndicatorSourceBadge source={source} />
               </FlyoutMetadataCard>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -466,6 +509,20 @@ const STREAM_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.streamLabel',
   {
     defaultMessage: 'Stream',
+  }
+);
+
+const REPOSITORY_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.repositoryLabel',
+  {
+    defaultMessage: 'Repository',
+  }
+);
+
+const SOURCE_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.sourceLabel',
+  {
+    defaultMessage: 'Source',
   }
 );
 

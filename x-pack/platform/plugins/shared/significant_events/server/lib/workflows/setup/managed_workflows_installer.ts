@@ -21,6 +21,12 @@ export interface ManagedWorkflowsInstaller {
 export interface CreateManagedWorkflowsInstallerOptions {
   getClient: () => Promise<PluginScopedManagedWorkflowsApi>;
   isAvailable: () => Promise<boolean>;
+  /**
+   * Whether the code-intelligence extraction workflow should be part of the
+   * installed set. Re-evaluated on every install so a runtime flip (or the
+   * Sourcerer agent appearing/disappearing) reconciles the workflow in or out.
+   */
+  isCodeExtractionAvailable: () => Promise<boolean>;
   logger: Logger;
 }
 
@@ -36,6 +42,7 @@ export interface CreateManagedWorkflowsInstallerOptions {
 export const createManagedWorkflowsInstaller = ({
   getClient,
   isAvailable,
+  isCodeExtractionAvailable,
   logger,
 }: CreateManagedWorkflowsInstallerOptions): ManagedWorkflowsInstaller => {
   let queue: Promise<void> = Promise.resolve();
@@ -51,7 +58,8 @@ export const createManagedWorkflowsInstaller = ({
 
     const client = await getClient();
 
-    await installWorkflows({ client });
+    const includeCodeExtraction = await isCodeExtractionAvailable();
+    await installWorkflows({ client, includeCodeExtraction });
 
     // Log success only after the whole sequence (including reconciliation) has actually landed, and
     // only once at INFO. Re-installs on later flag flips are routine, so keep them at debug.

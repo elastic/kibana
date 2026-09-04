@@ -13,7 +13,11 @@ import type {
 } from '@kbn/significant-events-schema';
 import { deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import { computeFeatureUuid, normalizeFeatureSlug } from '@kbn/significant-events-schema';
+import {
+  computeFeatureUuid,
+  deriveKnowledgeIndicatorSource,
+  normalizeFeatureSlug,
+} from '@kbn/significant-events-schema';
 import type {
   StoredFeatureKnowledgeIndicator,
   StoredKnowledgeIndicator,
@@ -63,6 +67,7 @@ export function toStoredFeature(
     description: feature.description,
     tags: feature.tags,
     evidence: feature.evidence,
+    'source.ids': feature.source_ids ?? [streamName],
     'stream.name': streamName,
     excluded: feature.excluded,
     run_id: feature.run_id,
@@ -85,7 +90,8 @@ export function toStoredQuery(
   streamName: string,
   query: StreamQuery & { rule_backed?: boolean; rule_id?: string },
   includeEmbedding: boolean,
-  expiresAt?: string
+  expiresAt?: string,
+  sourceId: string = streamName
 ): StoredQueryKnowledgeIndicator {
   const embedding = buildSearchEmbeddingQuery(query, streamName);
   const derivedType = deriveQueryType(query.esql.query);
@@ -101,6 +107,7 @@ export function toStoredQuery(
     title: query.title,
     description: query.description,
     evidence: query.evidence,
+    'source.id': sourceId,
     'stream.name': streamName,
     ...(expiresAt ? { expires_at: expiresAt } : {}),
     query: {
@@ -117,12 +124,16 @@ export function toStoredQuery(
 
 export function toTombstone(
   streamName: string,
-  identity: Pick<StoredKnowledgeIndicator, 'id' | 'type'>
+  identity: Pick<StoredKnowledgeIndicator, 'id' | 'type' | 'source.id' | 'source.ids'>
 ): StoredTombstone {
+  const sourceId = identity['source.id'];
+  const sourceIds = identity['source.ids'];
   return {
     '@timestamp': new Date().toISOString(),
     id: identity.id,
     type: identity.type,
+    ...(sourceId ? { 'source.id': sourceId } : {}),
+    ...(sourceIds ? { 'source.ids': sourceIds } : {}),
     'stream.name': streamName,
     deleted: true,
   };
@@ -136,7 +147,8 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
   return {
     id: doc.feature.slug,
     uuid: doc.id,
-    stream_name: doc['stream.name'],
+    stream_name: doc['stream.name'] ?? doc['source.ids']?.[0] ?? '',
+    source_ids: doc['source.ids'],
     type: doc.feature.type,
     description: doc.description,
     properties: doc.feature.properties,
@@ -152,6 +164,7 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
     excluded: doc.excluded,
     updated_at: doc['@timestamp'],
     expires_at: doc.expires_at,
+    source: deriveKnowledgeIndicatorSource(doc.evidence),
   };
 }
 
@@ -167,7 +180,8 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
   const ruleBacked = rule_backed;
 
   return {
-    stream_name: doc['stream.name'],
+    stream_name: doc['stream.name'] ?? doc['source.id'] ?? '',
+    source_id: doc['source.id'],
     rule_backed: ruleBacked,
     rule_id,
     updated_at: doc['@timestamp'],
@@ -181,6 +195,7 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
       severity_score,
       features,
       evidence: doc.evidence,
+      source: deriveKnowledgeIndicatorSource(doc.evidence),
     },
   };
 }

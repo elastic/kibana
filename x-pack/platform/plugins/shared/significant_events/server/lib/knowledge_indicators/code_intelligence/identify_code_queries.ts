@@ -1,0 +1,195 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { StreamQuery } from '@kbn/significant-events-schema';
+import { normalizeEsqlSafe } from '@kbn/streams-schema';
+import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicator_client';
+import { FALLBACK_LOG_INDEX_PATTERN, FALLBACK_LOG_MESSAGE_FIELD } from './constants';
+import { extractLogSignatures } from './extract_log_signatures';
+import { getCodePredictiveSourceId } from './identify_code_features';
+import { generatePredictiveQueries } from './generate_predictive_queries';
+import type {
+  LogStreamBinding,
+  ServiceCodeMetadata,
+  StreamSamplingSource,
+} from './link_ingesting_streams';
+import type { LoggingChunk } from './types';
+
+export type IdentifyCodeQueriesStatus =
+  | 'generated'
+  | 'no_service'
+  | 'no_repo'
+  | 'no_signatures'
+  | 'no_ingesting'
+  | 'otel_gated';
+
+export interface IdentifyCodeQueriesResult {
+  status: IdentifyCodeQueriesStatus;
+  serviceName?: string;
+  generatedCount?: number;
+  /** Real ingesting stream(s) the predictive queries were written to. */
+  streams?: string[];
+}
+
+/** Keeps Code Intelligence queries assigned to any defined severity band. */
+export const shouldPersistCodeIntelligenceQuery = (
+  query: Pick<StreamQuery, 'severity_score'>
+): boolean => query.severity_score !== undefined;
+
+export interface IdentifyCodeQueriesOptions {
+  /** The code KI key (service name) whose Stage 1 features drive query generation. */
+  serviceName: string;
+  /** GitHub repository containing the service. */
+  repository: string;
+  /** Immutable GitHub commit SHA used for evidence. */
+  gitSha: string;
+  /** Real streams (name + index) to resolve the service's ingesting stream from. */
+  streams: StreamSamplingSource[];
+  /** Code-derived service metadata used only as optional enrichment. */
+  metadata?: ServiceCodeMetadata;
+  /** Active Kibana space used to derive the stable predictive source owner. */
+  spaceId: string;
+  kiClient: KnowledgeIndicatorClient;
+  loggingChunks: LoggingChunk[];
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  /** OTel services use typed queries unless their OTel stream resolution was bypassed. */
+  hasOtel?: boolean;
+  otelGateBypassed?: boolean;
+  /**
+   * Stream names the request is authorized to access. When the predictive
+   * fallback would target the root `logs` stream, it is only allowed if `logs`
+   * is in this set, so a caller cannot write KIs to a stream it cannot access.
+   */
+  authorizedStreamNames?: Set<string>;
+  /** Rechecks pause and live feature state immediately before each mutation. */
+  beforeWrite: () => Promise<void>;
+}
+
+/**
+ * Stage 2 (code-driven): generate predictive Query KIs from the logger call
+ * sites found by the GitHub research agent, targeting the **real stream(s)**
+ * that ingest the service (e.g. `logs.otel`) with the concrete fields that
+ * stream uses. Storing the queries on the ingesting stream — alongside any
+ * log-derived queries — is what lets the per-stream reconciler merge code and
+ * log KIs. Queries are predictive: they match log lines the code emits even
+ * before those lines have appeared in the data.
+ *
+ * Persisted as durable, non-rule-backed (draft) Query KIs; promotion to
+ * alerting rules remains a separate, user-driven step.
+ */
+export async function identifyCodeQueries({
+  serviceName: serviceKey,
+  repository,
+  gitSha,
+  streams,
+  metadata,
+  spaceId,
+  kiClient,
+  loggingChunks,
+  esClient,
+  logger,
+  hasOtel = false,
+  otelGateBypassed = false,
+  authorizedStreamNames,
+  beforeWrite,
+}: IdentifyCodeQueriesOptions): Promise<IdentifyCodeQueriesResult> {
+  // The KI key is the service name; the service identity itself is represented as
+  // an entity/service KI on the ingesting stream (not a code_analysis feature).
+  const serviceName = serviceKey;
+  if (hasOtel && !otelGateBypassed) {
+    logger.debug(`code_queries: skipped message-string queries for OTel service "${serviceName}"`);
+    return { status: 'otel_gated', serviceName, generatedCount: 0, streams: [] };
+  }
+  if (hasOtel && otelGateBypassed) {
+    logger.warn(`otel gate bypassed for service "${serviceName}"; using template query fallback`);
+  }
+  const resolvedRepository = repository;
+  const fingerprint = gitSha;
+
+  const signatures = loggingChunks.flatMap((chunk) => extractLogSignatures(chunk));
+
+  if (signatures.length === 0) {
+    logger.debug(`code_queries: no log signatures found for service "${serviceName}"`);
+    return { status: 'no_signatures', serviceName };
+  }
+
+  // Code-first: always write predictive queries against the broad `logs*`
+  // index pattern on the root `logs` stream. They activate automatically when
+  // log data arrives. Stream-to-service correlation is a future concern;
+  // for now, all code-derived queries target the same default.
+  const bindings: LogStreamBinding[] = [
+    {
+      stream: getCodePredictiveSourceId(spaceId, 'logs'),
+      index: FALLBACK_LOG_INDEX_PATTERN,
+      convention: 'ecs',
+      messageField: FALLBACK_LOG_MESSAGE_FIELD,
+      messageIsText: true,
+    },
+  ];
+
+  let generatedCount = 0;
+  const writtenStreams: string[] = [];
+
+  for (const binding of bindings) {
+    const candidates = generatePredictiveQueries({
+      serviceName,
+      samplingSource: binding.index,
+      signatures,
+      repository: resolvedRepository,
+      fingerprint,
+      messageField: binding.messageField,
+      messageIsText: binding.messageIsText,
+    });
+
+    // Retain predictions assigned to any defined severity band after their
+    // final deterministic classification, before persistence.
+    const retainedCandidates = candidates.filter(shouldPersistCodeIntelligenceQuery);
+
+    // De-duplicate against queries already on this stream (any source).
+    const { [binding.stream]: existingLinks } = await kiClient.getStreamToQueryLinksMap([
+      binding.stream,
+    ]);
+    const existingEsql = new Set(
+      existingLinks.map((link) => normalizeEsqlSafe(link.query.esql.query))
+    );
+    const newQueries = retainedCandidates.filter(
+      (query) => !existingEsql.has(normalizeEsqlSafe(query.esql.query))
+    );
+
+    if (newQueries.length === 0) {
+      // Existing templates are valid fallback coverage on retry. Report their
+      // owner so callers do not mistake an idempotent run for no coverage.
+      writtenStreams.push(binding.stream);
+      continue;
+    }
+
+    const operations: KIBulkOperation[] = newQueries.map((query) => ({
+      index: {
+        query: { ...query, rule_backed: false },
+        sourceId: binding.stream,
+      },
+    }));
+    await beforeWrite();
+    await kiClient.bulk(binding.stream, operations);
+    generatedCount += newQueries.length;
+    writtenStreams.push(binding.stream);
+
+    logger.debug(
+      `code_queries: persisted ${newQueries.length} predictive query KI(s) on stream "${binding.stream}" for service "${serviceName}"`
+    );
+  }
+
+  return {
+    status: 'generated',
+    serviceName,
+    generatedCount,
+    streams: writtenStreams,
+  };
+}

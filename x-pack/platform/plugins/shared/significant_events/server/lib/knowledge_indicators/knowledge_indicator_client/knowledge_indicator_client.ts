@@ -54,13 +54,14 @@ export class KnowledgeIndicatorClient {
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
     > = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
   ) {
-    const revisionReader = new RevisionReader(deps.esClient, deps.logger);
+    const revisionReader = new RevisionReader(deps.esClient, deps.logger, deps.space);
     this.ttlDays = config.feature_ttl_days;
     this.writer = new IndicatorWriter(
       deps.dataStreamClient,
       deps.logger,
       revisionReader,
-      config.feature_ttl_days
+      config.feature_ttl_days,
+      deps.space
     );
     this.reader = new IndicatorReader(revisionReader);
     this.searcher = new IndicatorSearcher(deps.esClient, deps.logger, config, revisionReader);
@@ -90,6 +91,13 @@ export class KnowledgeIndicatorClient {
 
   deleteIndicators(stream: string) {
     return this.writer.deleteIndicators(stream);
+  }
+
+  deleteUnscopedLegacyIndicators(
+    stream: string,
+    identities: Array<{ type: KnowledgeIndicatorType; id: string }>
+  ): Promise<{ applied: number }> {
+    return this.writer.deleteUnscopedLegacyIndicators(stream, identities);
   }
 
   getFeatures(
@@ -133,6 +141,7 @@ export class KnowledgeIndicatorClient {
       ruleIds?: string[];
       minSeverityScore?: number;
       includeExpired?: boolean;
+      limit?: number;
     }
   ): Promise<QueryLink[]> {
     return this.reader.getQueryLinks(streamNames, filters);
@@ -167,6 +176,28 @@ export class KnowledgeIndicatorClient {
 
   getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
     return this.reader.getStreamNamesWithKnowledgeIndicators();
+  }
+
+  getScopedIndicators(streamNames: string[]): Promise<{
+    features: Feature[];
+    queries: QueryLink[];
+  }> {
+    return this.reader.getScopedIndicators(streamNames);
+  }
+
+  getScopedStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    return this.reader.getScopedStreamNamesWithKnowledgeIndicators();
+  }
+
+  getUnscopedLegacyIndicators(streamNames: string[]): Promise<{
+    features: Feature[];
+    queries: QueryLink[];
+  }> {
+    return this.reader.getUnscopedLegacyIndicators(streamNames);
+  }
+
+  getUnscopedLegacyStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    return this.reader.getUnscopedLegacyStreamNamesWithKnowledgeIndicators();
   }
 
   /**
@@ -224,6 +255,7 @@ export class KnowledgeIndicatorClient {
       queryTypes?: string[];
       queryIds?: string[];
       ruleIds?: string[];
+      minScore?: number;
     },
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {

@@ -76,10 +76,18 @@ import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
 } from './agent_builder/agents/discovery';
+import {
+  installLoggingWrappersAgents,
+  registerSignificantEventsLoggingWrappersAgentTypes,
+} from './agent_builder/agents/logging_wrappers';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
+import {
+  SIGNIFICANT_EVENTS_CODE_KI_EXTRACTION_ENABLED_FLAG,
+  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+} from '../common/feature_flags';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
+import { isCodeKiExtractionEnabled } from './lib/knowledge_indicators/code_intelligence/is_code_ki_extraction_enabled';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
@@ -191,7 +199,7 @@ export class SignificantEventsPlugin
       });
 
       const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
+        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space);
 
       const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
         if (ruleIds.length === 0) {
@@ -216,6 +224,7 @@ export class SignificantEventsPlugin
           esClient: scopedClusterClient.asInternalUser,
           soClient,
           context,
+          space,
           config: tuningConfig,
         });
 
@@ -272,9 +281,10 @@ export class SignificantEventsPlugin
 
     if (plugins.agentBuilder) {
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
+      registerSignificantEventsLoggingWrappersAgentTypes({ agentBuilder: plugins.agentBuilder });
       void core
         .getStartServices()
-        .then(async () => {
+        .then(async ([coreStart]) => {
           const { getScopedClients, server } = this;
           if (!getScopedClients || !server) return;
           await registerStreamsAgentBuilder({
@@ -283,6 +293,7 @@ export class SignificantEventsPlugin
             server,
             logger: this.logger,
             telemetry: telemetryClient,
+            featureFlags: coreStart.featureFlags,
           });
         })
         .catch((err) => {
@@ -396,6 +407,10 @@ export class SignificantEventsPlugin
       core.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
       plugins.licensing.license$,
     ]).pipe(switchMap(isAvailable), distinctUntilChanged());
+    const codeExtractionEnabled$ = core.featureFlags.getBooleanValue$(
+      SIGNIFICANT_EVENTS_CODE_KI_EXTRACTION_ENABLED_FLAG,
+      false
+    );
 
     // The availability observable emits its current value on subscribe. `skip(1)` drops that
     // initial emission so the stream represents *changes* only; the initial install/registration is
@@ -417,6 +432,13 @@ export class SignificantEventsPlugin
         getClient: () =>
           workflowsExtensions.initManagedWorkflowsClient(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER),
         isAvailable,
+        // Code Intelligence extraction installs whenever its feature flag is on. The
+        // code-intelligence agent (Sourcerer) is persisted and only readable through a
+        // request-scoped Agent Builder registry, so agent presence cannot be checked
+        // here (install runs with no user request). It is enforced at request time in
+        // the `_run` route instead — the same runtime, request-scoped degrade the SCS
+        // grounding path uses.
+        isCodeExtractionAvailable: async () => isCodeKiExtractionEnabled(core.featureFlags),
         logger: this.logger,
       });
     }
@@ -433,7 +455,17 @@ export class SignificantEventsPlugin
         void this.ensureSignificantEventsInstalled(core, isAvailable).catch((error: unknown) => {
           this.logManagedResourceError('availability flag change', error);
         });
-      })
+      }),
+      combineLatest([available$, codeExtractionEnabled$])
+        .pipe(
+          skip(1),
+          filter(([available]) => available)
+        )
+        .subscribe(() => {
+          void this.managedWorkflowsInstaller?.install().catch((error: unknown) => {
+            this.logManagedResourceError('code extraction flag change', error);
+          });
+        })
     );
 
     // Editable discovery agents: installed via agents.ensure when significant events is
@@ -447,11 +479,12 @@ export class SignificantEventsPlugin
         server: this.server,
         logger: this.logger,
       });
-      void installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }).catch(
-        (error: unknown) => {
-          this.logManagedResourceError('significant events agents', error);
-        }
-      );
+      void Promise.all([
+        installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
+        installLoggingWrappersAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
+      ]).catch((error: unknown) => {
+        this.logManagedResourceError('significant events agents', error);
+      });
     }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {

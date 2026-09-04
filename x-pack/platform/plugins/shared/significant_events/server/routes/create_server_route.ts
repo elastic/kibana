@@ -7,7 +7,7 @@
 
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
-import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom';
+import { badRequest, conflict, forbidden, internal, notFound, serverUnavailable } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import type { SignificantEventsRouteHandlerResources } from './types';
 import { StatusError } from '../lib/errors/status_error';
@@ -37,6 +37,8 @@ export const createServerRoute: CreateServerRouteFactory<
               throw notFound(error.message);
             case 409:
               throw conflict(error.message);
+            case 503:
+              throw serverUnavailable(error.message);
             default:
               throw internal(error.message);
           }
@@ -58,6 +60,9 @@ export const createServerRoute: CreateServerRouteFactory<
 
             case 500:
               throw internal(error, 'data' in error ? error.data : undefined);
+
+            case 503:
+              throw serverUnavailable(error, 'data' in error ? error.data : undefined);
           }
         }
         throw error;

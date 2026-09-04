@@ -71,7 +71,12 @@ export class QueryRuleOrchestrator {
     const toCreate: QueryLink[] = [];
     const toUpdate: QueryLink[] = [];
     const demotedIneligible: QueryLink[] = [];
-    const allNext: Array<{ query: StreamQuery; rule_backed: boolean; rule_id: string }> = [];
+    const allNext: Array<{
+      query: StreamQuery;
+      rule_backed: boolean;
+      rule_id: string;
+      sourceId: string;
+    }> = [];
 
     for (const query of queries) {
       const current = currentByQueryId.get(query.id);
@@ -87,19 +92,30 @@ export class QueryRuleOrchestrator {
           query: typedQuery,
         };
         if (ruleBacked) toCreate.push(link);
-        allNext.push({ query: typedQuery, rule_backed: ruleBacked, rule_id: ruleId });
+        allNext.push({
+          query: typedQuery,
+          rule_backed: ruleBacked,
+          rule_id: ruleId,
+          sourceId: stream,
+        });
       } else if (!current.rule_backed) {
         // Preserve intentionally unbacked queries; promotion is explicit via promoteQueries.
         allNext.push({
           query: typedQuery,
           rule_backed: false,
           rule_id: current.rule_id,
+          sourceId: current.source_id ?? stream,
         });
       } else if (!ruleBacked) {
         // Was rule-backed but is no longer installable (STATS, or MATCH that is
         // not filter-only). Keep the KI stored; uninstall the rule.
         demotedIneligible.push(current);
-        allNext.push({ query: typedQuery, rule_backed: false, rule_id: current.rule_id });
+        allNext.push({
+          query: typedQuery,
+          rule_backed: false,
+          rule_id: current.rule_id,
+          sourceId: current.source_id ?? stream,
+        });
       } else if (!hasSameEsql(current.query.esql.query, query.esql.query)) {
         const link: QueryLink = {
           stream_name: stream,
@@ -108,11 +124,21 @@ export class QueryRuleOrchestrator {
           query: typedQuery,
         };
         toCreate.push(link); // breaking change → recreate
-        allNext.push({ query: typedQuery, rule_backed: true, rule_id: ruleId });
+        allNext.push({
+          query: typedQuery,
+          rule_backed: true,
+          rule_id: ruleId,
+          sourceId: current.source_id ?? stream,
+        });
       } else {
         const link: QueryLink = { ...current, query: typedQuery };
         toUpdate.push(link);
-        allNext.push({ query: typedQuery, rule_backed: true, rule_id: current.rule_id });
+        allNext.push({
+          query: typedQuery,
+          rule_backed: true,
+          rule_id: current.rule_id,
+          sourceId: current.source_id ?? stream,
+        });
       }
     }
 
@@ -150,6 +176,7 @@ export class QueryRuleOrchestrator {
     for (const next of allNext) {
       operations.push({
         index: {
+          sourceId: next.sourceId,
           query: {
             ...next.query,
             rule_backed: next.rule_backed,
@@ -312,6 +339,7 @@ export class QueryRuleOrchestrator {
         streamName,
         toPromote.map((link) => ({
           index: {
+            sourceId: link.source_id ?? streamName,
             query: {
               ...queryFromLink(link),
               rule_backed: true,
@@ -493,6 +521,7 @@ export class QueryRuleOrchestrator {
       streamName,
       toDemote.map((link) => ({
         index: {
+          sourceId: link.source_id ?? streamName,
           query: {
             ...queryFromLink(link),
             rule_backed: false,

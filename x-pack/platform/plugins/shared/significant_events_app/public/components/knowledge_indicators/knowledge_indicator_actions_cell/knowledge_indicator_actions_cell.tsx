@@ -32,17 +32,19 @@ interface Props {
   streamName: string;
   knowledgeIndicator: KnowledgeIndicator;
   onDeleteRequest: (knowledgeIndicator: KnowledgeIndicator) => void;
+  onDataChanged?: () => void;
 }
 
 export function KnowledgeIndicatorActionsCell({
   streamName,
   knowledgeIndicator,
   onDeleteRequest,
+  onDataChanged,
 }: Props) {
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const { excludeFeature, restoreFeature, promoteQuery, setDurability, isMutating } =
-    useKnowledgeIndicatorActions({ streamName });
+    useKnowledgeIndicatorActions({ streamName, onSuccess: onDataChanged });
 
   const featureActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'feature') {
@@ -58,7 +60,7 @@ export function KnowledgeIndicatorActionsCell({
           <EuiContextMenuItem
             key="feature-restore"
             icon="eye"
-            disabled={isMutating}
+            disabled={isMutating || blocksActivity}
             onClick={() => {
               setIsActionsMenuOpen(false);
               restoreFeature(knowledgeIndicator.feature.uuid);
@@ -72,7 +74,7 @@ export function KnowledgeIndicatorActionsCell({
           <EuiContextMenuItem
             key="feature-exclude"
             icon="eyeSlash"
-            disabled={isMutating}
+            disabled={isMutating || blocksActivity}
             onClick={() => {
               setIsActionsMenuOpen(false);
               excludeFeature(knowledgeIndicator.feature.uuid);
@@ -100,7 +102,7 @@ export function KnowledgeIndicatorActionsCell({
         key="feature-delete"
         icon="trash"
         color="danger"
-        disabled={isMutating}
+        disabled={isMutating || blocksActivity}
         onClick={() => {
           setIsActionsMenuOpen(false);
           onDeleteRequest(knowledgeIndicator);
@@ -112,6 +114,7 @@ export function KnowledgeIndicatorActionsCell({
 
     return items;
   }, [
+    blocksActivity,
     excludeFeature,
     isMutating,
     knowledgeIndicator,
@@ -153,7 +156,7 @@ export function KnowledgeIndicatorActionsCell({
       <EuiContextMenuItem
         key="query-delete"
         icon="trash"
-        disabled={isMutating}
+        disabled={isMutating || blocksActivity}
         onClick={() => {
           setIsActionsMenuOpen(false);
           onDeleteRequest(knowledgeIndicator);
@@ -181,7 +184,7 @@ export function KnowledgeIndicatorActionsCell({
             iconType="boxesVertical"
             aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
             isLoading={isMutating}
-            isDisabled={isMutating}
+            isDisabled={isMutating || blocksActivity}
             onClick={() => setIsActionsMenuOpen((current) => !current)}
           />
         </EuiToolTip>

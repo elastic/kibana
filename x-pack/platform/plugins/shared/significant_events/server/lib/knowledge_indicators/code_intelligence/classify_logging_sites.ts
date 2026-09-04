@@ -1,0 +1,233 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/logging';
+import type { InferenceClient } from '@kbn/inference-common';
+import pLimit from 'p-limit';
+import {
+  SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+} from '@kbn/significant-events-schema';
+import type { LoggingCandidate, LoggingChunk } from './types';
+
+/**
+ * Judge the deterministically-grepped candidate logging lines with batched LLM
+ * calls. The idiom grep matches log-shaped lines but cannot tell a real emission
+ * from a test assertion, a build script, or a commented-out call, and cannot
+ * infer a severity level for a bare `panic("...")`. The classifier does both —
+ * keep/drop + level + the static message — in bounded concurrent batches of at
+ * most 200 candidates. The task is a per-line judgment, so batching is
+ * order-independent.
+ *
+ * Bounded, tool-less, temperature 0: the cheapest inference tier handles it.
+ * The connector is the KI-extraction inference feature's mapped connector, so
+ * it is swappable by remapping that feature (recommended: a fast, cheap model).
+ */
+
+const CLASSIFY_SYSTEM = `You classify source-code excerpts as production log statements emitted by a running service. Each candidate is given as: id, the source FILE PATH it came from, the LANGUAGE, then a small excerpt window (the matched line and +/-1 neighbour lines, joined by newlines).
+
+For each id decide:
+- keep: true ONLY if the excerpt emits a runtime log/diagnostic MESSAGE that a RUNNING SERVICE writes to its logs. This includes logger calls (logger.info/error/warn/...), application print/eprintln/println to standard streams from service code, process-aborting emits that print their own message (panic("..."), .expect("...")), and structured/source-generated logging (e.g. [LoggerMessage(... Message="...")]).
+- keep: false for VALUE-RETURNING error constructors such as fmt.Errorf("..."), errors.New("..."), or throw new SomeError("..."). The returned error is recomposed by whatever logs it upstream, so this literal does not appear verbatim in the logs.
+- keep: false for metric or span attribute names/keys, config values, i18n/UI strings, code comments, test assertions, enum/const string values, and raw JSON payloads.
+- keep: false for BUILD / TOOLING / CI output. If the FILE PATH is a build or automation file — Makefile or *.mk, shell scripts (*.sh, *.bash), Dockerfile, CI config (.github/, .gitlab-ci, .buildkite/, *.yml pipelines), or package-manager scripts — the excerpt is developer/CLI output, NOT a running-service log. Set keep=false even when it contains words like "Error:" or prints to stdout (e.g. a shell \`echo "Error: ..."\` in a Makefile recipe).
+- keep: false for CLI USAGE / HELP text: strings describing how to invoke a command ("USAGE:", "Usage:", option/argument descriptions, --help output), even if prefixed with "Error:".
+- keep: false for USAGE TEMPLATES with placeholder enumerations (e.g. "resource1 resource2 ..."): the literal text never appears verbatim in real logs, so it cannot match.
+- level: if keep, exactly one of fatal|error|warn|info|debug. Infer from the message: failures/exceptions/panic => error (fatal if it aborts the process); could-not/deprecated/retry => warn; started/listening/received/connected/processing => info.
+- message: if keep, the STATIC human-readable text of the log message with interpolation/format placeholders removed (e.g. panic(fmt.Sprintf("failed to charge card: %+v", err)) => "failed to charge card"). Empty string when keep is false.
+
+Return one result per id. Be strict: when unsure whether an excerpt is a real running-service log emission, set keep=false.`;
+
+const classifySchema = {
+  type: 'object',
+  properties: {
+    results: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'number', description: 'The candidate id being classified.' },
+          keep: { type: 'boolean', description: 'Whether this is a real production log emission.' },
+          level: {
+            type: 'string',
+            description:
+              'Severity when keep is true: fatal|error|warn|info|debug. Empty otherwise.',
+          },
+          message: {
+            type: 'string',
+            description: 'Static log message text when keep is true. Empty otherwise.',
+          },
+        },
+        required: ['id', 'keep'],
+      },
+    },
+  },
+  required: ['results'],
+} as const;
+
+const VALID_LEVELS = new Set(['fatal', 'error', 'warn', 'warning', 'info', 'debug', 'trace']);
+const CLASSIFY_BATCH_SIZE = 200;
+const CLASSIFY_BATCH_CONCURRENCY = 5;
+const CLASSIFY_BATCH_TIMEOUT_MS = 60_000;
+
+export interface ClassifyLoggingSitesOptions {
+  inferenceClient: InferenceClient;
+  connectorId: string;
+  candidates: LoggingCandidate[];
+  logger: Logger;
+  abortSignal?: AbortSignal;
+  /** Per-inference-call deadline. Exposed for focused timeout tests. */
+  batchTimeoutMs?: number;
+}
+
+/**
+ * Classifies candidate logging lines and returns kept ones as {@link LoggingChunk}s.
+ * Candidates are kept when the model is unavailable or omits an id: they matched
+ * a logger idiom, so they are high-confidence log sites the regex extractor can
+ * parse on its own.
+ */
+export async function classifyLoggingSites({
+  inferenceClient,
+  connectorId,
+  candidates,
+  logger,
+  abortSignal,
+  batchTimeoutMs = CLASSIFY_BATCH_TIMEOUT_MS,
+}: ClassifyLoggingSitesOptions): Promise<LoggingChunk[]> {
+  if (candidates.length === 0) {
+    return [];
+  }
+
+  const byId = new Map<number, LoggingCandidate>();
+  candidates.forEach((candidate, index) => byId.set(index, candidate));
+
+  const decisions = new Map<number, { keep: boolean; level?: string; message?: string }>();
+  const batchCount = Math.ceil(candidates.length / CLASSIFY_BATCH_SIZE);
+  const totalStart = Date.now();
+  const limit = pLimit(CLASSIFY_BATCH_CONCURRENCY);
+
+  await Promise.all(
+    Array.from({ length: batchCount }, (_, batchIndex) =>
+      limit(async () => {
+        const start = batchIndex * CLASSIFY_BATCH_SIZE;
+        const batchStart = Date.now();
+        const batch = candidates.slice(start, start + CLASSIFY_BATCH_SIZE);
+        const input =
+          'Classify these excerpts (TAB-separated: id, file path, language, excerpt; newlines shown as \u23ce):\n' +
+          batch
+            .map((candidate, offset) => {
+              const path = candidate.location?.replace(/:\d+$/, '') || 'unknown';
+              const language = candidate.language || 'unknown';
+              const excerpt = candidate.content.replace(/\n/g, ' \u23ce ');
+              return `${start + offset}\t${path}\t${language}\t${excerpt}`;
+            })
+            .join('\n');
+
+        const batchAbortController = new AbortController();
+        const abortBatch = () => batchAbortController.abort();
+        if (abortSignal?.aborted) abortBatch();
+        else abortSignal?.addEventListener('abort', abortBatch, { once: true });
+        const timeout = setTimeout(abortBatch, batchTimeoutMs);
+
+        try {
+          const { output } = await inferenceClient.output({
+            id: 'classify_logging_sites',
+            connectorId,
+            system: CLASSIFY_SYSTEM,
+            input,
+            schema: classifySchema,
+            abortSignal: batchAbortController.signal,
+            metadata: {
+              connectorTelemetry: {
+                pluginId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+                aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+              },
+            },
+          });
+          for (const result of output?.results ?? []) {
+            if (
+              typeof result?.id === 'number' &&
+              result.id >= start &&
+              result.id < start + batch.length
+            ) {
+              decisions.set(result.id, {
+                keep: Boolean(result.keep),
+                level: result.level,
+                message: result.message,
+              });
+            }
+          }
+          logger.debug(
+            `classify_logging_sites: completed batch ${batchIndex + 1}/${batchCount} in ${
+              Date.now() - batchStart
+            }ms`
+          );
+        } catch (error) {
+          // Degrade only this batch: the missing-decision fallback below keeps its
+          // candidates unjudged rather than dropping them.
+          logger.warn(
+            `classify_logging_sites: inference failed for batch ${
+              batchIndex + 1
+            }/${batchCount} after ${
+              Date.now() - batchStart
+            }ms, keeping its idiom candidates unjudged (${
+              error instanceof Error ? error.message : String(error)
+            })`
+          );
+        } finally {
+          clearTimeout(timeout);
+          abortSignal?.removeEventListener('abort', abortBatch);
+        }
+      })
+    )
+  );
+  logger.debug(
+    `classify_logging_sites: completed ${batchCount} batch(es) in ${Date.now() - totalStart}ms`
+  );
+
+  const chunks: LoggingChunk[] = [];
+  let keptWithClassification = 0;
+  for (const [id, candidate] of byId) {
+    const decision = decisions.get(id);
+    // If the model omitted an id, keep the candidate: every candidate matched a
+    // logger idiom, so the regex extractor can still parse a signature from it.
+    if (!decision) {
+      chunks.push({
+        content: candidate.content,
+        language: candidate.language,
+        location: candidate.location,
+      });
+      continue;
+    }
+    if (!decision.keep) {
+      continue;
+    }
+
+    const chunk: LoggingChunk = {
+      content: candidate.content,
+      language: candidate.language,
+      location: candidate.location,
+    };
+    // When the classifier supplied a usable level + message, attach it so a line
+    // the regex cannot parse (e.g. `panic("...")`) still yields a signature. A
+    // valid classification is preferred even for parseable lines: it strips
+    // interpolation and normalises the level.
+    const level = decision.level?.trim().toLowerCase();
+    const message = decision.message?.trim();
+    if (level && VALID_LEVELS.has(level) && message) {
+      chunk.classified = { level, message };
+      keptWithClassification += 1;
+    }
+    chunks.push(chunk);
+  }
+
+  logger.debug(
+    `classify_logging_sites: ${candidates.length} candidate(s) -> ${chunks.length} kept ` +
+      `(${keptWithClassification} with classifier level+message)`
+  );
+  return chunks;
+}

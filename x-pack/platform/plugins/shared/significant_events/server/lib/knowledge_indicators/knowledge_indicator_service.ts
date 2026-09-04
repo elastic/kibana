@@ -39,11 +39,13 @@ export class KnowledgeIndicatorService {
     esClient,
     soClient,
     context,
+    space,
     config = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   }: {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     context: SignificantEventsAlertingContext;
+    space: string;
     config?: Pick<
       SignificantEventsTuningConfig,
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
@@ -67,6 +69,7 @@ export class KnowledgeIndicatorService {
         dataStreamClient,
         esClient,
         soClient,
+        space,
         logger: this.logger.get('knowledge_indicators'),
       },
       significantEventsAvailable,

@@ -1,0 +1,241 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export type RepoType = 'app' | 'iac' | 'both';
+
+export interface LanguageCount {
+  language: string;
+  count: number;
+}
+
+/** Counts of OTel imports and instrumentation idioms found in service source. */
+export interface OtelSignalCounts {
+  instrumentation_grpc: number;
+  instrumentation_http: number;
+  instrumentation_other: number;
+  start_span: number;
+  set_attribute: number;
+  add_event: number;
+  record_exception: number;
+  set_status_error: number;
+  create_metric: number;
+}
+
+export interface OtelDetection {
+  hasOtel: boolean;
+  signalCounts: OtelSignalCounts;
+}
+
+export type OtelSignalKind =
+  | 'span_name'
+  | 'event_name'
+  | 'attr_key'
+  | 'metric_name'
+  | 'error_status'
+  | 'record_exception';
+
+export type OtelValueHint = 'bool' | 'number' | 'enum' | 'id' | 'unknown';
+
+/**
+ * OTel metric instrument kind, inferred from the constructor call
+ * (createCounter / createHistogram / createUpDownCounter / createObservableGauge…).
+ * Drives the TSDB-correct aggregation in `generate_otel_queries` — counters need
+ * `RATE()`, gauges need `*_OVER_TIME()`. Never `AVG()`/`SUM()` a raw counter.
+ */
+export type OtelMetricKind = 'counter' | 'histogram' | 'updown' | 'gauge';
+
+/** One source-grounded OTel instrumentation signal. */
+export interface OtelSignal {
+  kind: OtelSignalKind;
+  value?: string;
+  valueHint?: OtelValueHint;
+  /** Only set for `metric_name` signals — selects the time-series aggregation. */
+  metricKind?: OtelMetricKind;
+  templated?: boolean;
+  language: string;
+  file: string;
+  line: number;
+}
+
+/** A recognized Infrastructure-as-Code technology detected from file paths. */
+export type IacKind = 'kubernetes' | 'helm' | 'compose' | 'terraform' | 'pulumi' | 'cloudformation';
+
+/** An IaC signal: the technology detected and an example file evidencing it. */
+export interface IacSignal {
+  kind: IacKind;
+  /** Example repository-relative file path evidencing this signal. */
+  path: string;
+}
+
+export interface RepoClassification {
+  repoType: RepoType;
+  isApp: boolean;
+  isIac: boolean;
+  /** Highest-volume application (programming) language, if any. */
+  primaryLanguage?: string;
+  languages: LanguageCount[];
+  /** IaC file-path signals that contributed to the classification (may be empty). */
+  iacSignals: IacSignal[];
+}
+
+/**
+ * A source-code citation the code-intelligence agent used to identify a
+ * service — the file (and optionally line/snippet) that supports the decision.
+ */
+export interface CodeEvidenceCitation {
+  path: string;
+  line?: number;
+  snippet?: string;
+}
+
+/**
+ * A log-emitting source excerpt. `content` is a small source window (the matched
+ * line +/- 1 neighbor) so multi-line logger calls keep their `logger.x(` context.
+ */
+export interface LoggingChunk {
+  content: string;
+  language?: string;
+  /** Best-effort repository-relative file and line location. */
+  location?: string;
+  /**
+   * Pre-classified signature. When the deterministic regex in
+   * {@link extractLogSignatures} cannot parse a `(level, message)` from `content`
+   * (e.g. a `panic("...")` with no severity token), the classifier supplies the
+   * level + static message so the candidate still yields a signature. Chunks the
+   * regex can parse leave this unset.
+   */
+  classified?: { level: string; message: string };
+}
+
+/**
+ * A candidate logging line found by deterministic grep, before the classifier
+ * decides keep/drop + level. `content` is the +/-1 line window.
+ */
+export interface LoggingCandidate {
+  /** Repository-relative `path:line`. */
+  location: string;
+  /** The +/-1 line source window. */
+  content: string;
+  language?: string;
+}
+
+/** An indexed repository ref enumerated from the Sourcerer refs index. */
+export interface IndexedRepoRef {
+  /** `"org/repo"`. */
+  repository: string;
+  org: string;
+  repo: string;
+  /** Immutable commit SHA to scope every subsequent grep to. */
+  gitSha: string;
+  /** Branch/tag name, if recorded. */
+  ref?: string;
+  /**
+   * Composite ref key (`git.ref_key`) from the refs index, used to scope an
+   * incremental (branch-indexed) corpus via a `LOOKUP JOIN`. Empty/undefined for
+   * a snapshot-indexed corpus, which is scoped by `git.commit` instead.
+   */
+  refKey?: string;
+}
+
+/**
+ * A directory flagged by deterministic marker/manifest grep as a *candidate*
+ * deployable service, before the classifier judges + collapses it. Produced by
+ * {@link discoverCandidateRoots}; consumed by {@link classifyServices}.
+ */
+export interface ServiceCandidateRoot {
+  /** `"org/repo"`. */
+  repository: string;
+  gitSha: string;
+  /** Repository-relative directory holding the marker(s). */
+  serviceRoot: string;
+  /** Deploy-marker basenames found in this root (e.g. `Dockerfile`, `go.mod`). */
+  markers: string[];
+  /** Language implied by the markers (deterministic), or `unknown`. */
+  language: string;
+  /** Whether an entrypoint signature was found under this root. */
+  hasEntrypoint: boolean;
+}
+
+/**
+ * A logical service after {@link classifyServices} judges candidate roots and
+ * collapses environment/region duplicates. Shaped to match the `services[]`
+ * items the extraction workflow's `_identify_service` fan-out already consumes.
+ */
+export interface DiscoveredService {
+  repository: string;
+  gitSha: string;
+  /**
+   * Composite ref key (`git.ref_key`) from the refs index, threaded downstream
+   * to scope content queries via a `LOOKUP JOIN` for an incremental
+   * (branch-indexed) corpus. Empty/undefined for a snapshot-indexed corpus.
+   */
+  refKey?: string;
+  serviceRoot: string;
+  name: string;
+  language: string;
+  repositoryLanguages?: LanguageCount[];
+  iacSignals?: IacSignal[];
+  hasOtel: boolean;
+  signalCounts: OtelSignalCounts;
+}
+
+/**
+ * A log statement extracted from a logging chunk: its severity level and the
+ * static (non-interpolated) portion of the message used to build a match query.
+ */
+export interface LogSignature {
+  level: string;
+  severity: number;
+  /** The full literal message as written in code (may contain placeholders). */
+  message: string;
+  /** The leading static text before any interpolation placeholder. */
+  staticPrefix: string;
+  /**
+   * All static (non-interpolated) segments of the message, in source order, with
+   * interpolation placeholders removed. A message like
+   * `"orderId: {id} total: {n}"` yields `["orderId:", "total:"]`. Used to build a
+   * segment-AND predictive query that still matches once the variables are filled
+   * at runtime (the collapsed single-phrase form cannot). Always contains at least
+   * `staticPrefix` when that is non-trivial.
+   */
+  staticSegments: string[];
+  location?: string;
+}
+
+/**
+ * One validated grep in a {@link LoggingProfile}. The regex matches the call sites
+ * of a repository-defined house logging wrapper; `expect_call_sites` is the hit
+ * count `validate_queries` reported on the indexed commit (the drift baseline).
+ */
+export interface LoggingProfileGrep {
+  /** Lucene RLIKE regex; whole-value anchored (wrap in `.*`). */
+  regex: string;
+  /**
+   * Validated hit count on the indexed commit. Must be greater than zero (INV-001)
+   * and its ratio to the repo total must be under the over-capture ceiling (INV-006).
+   */
+  expect_call_sites: number;
+  /** The `path:line` the agent based this grep on (the wrapper's defining location). */
+  evidence: { path: string; line: number };
+}
+
+/**
+ * A persisted logging profile for a repository + commit: the repo-specific idiom
+ * greps an agent generated and validated against the indexed commit. Stored as a
+ * `code_analysis` feature with subtype `logging_profile` on the repository feature
+ * stream, reusing the same persistence path as the other code-feature subtypes.
+ */
+export interface LoggingProfile {
+  /** Repository as `"org/repo"`. */
+  repository: string;
+  /** Immutable commit SHA the greps were validated against. */
+  commit: string;
+  /** Validated greps (each with a non-zero `expect_call_sites`). */
+  greps: LoggingProfileGrep[];
+  /** Generation timestamp (ISO 8601). */
+  generated_at: string;
+}
