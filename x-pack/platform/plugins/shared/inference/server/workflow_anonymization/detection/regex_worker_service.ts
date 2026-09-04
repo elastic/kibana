@@ -77,10 +77,12 @@ export class PiiRegexWorkerService {
       try {
         return await this.worker.run(payload, { signal: controller.signal });
       } catch (err) {
-        if (err?.name === 'AbortError') {
+        if (err instanceof Error && err.name === 'AbortError') {
           await this.worker.destroy().catch(() => {});
           this.worker = this.createWorkerPool();
-          throw new Error('PII regex anonymization task timed out');
+          throw new Error(
+            `PII regex detection task timed out after ${this.config.taskTimeout.asMilliseconds()}ms`
+          );
         }
         throw err;
       } finally {
