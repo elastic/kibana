@@ -144,6 +144,16 @@ steps:
         since those stay manual analyst actions. This rule has type
         "{{ steps.fetch_rule.output.type }}", so propose a query change only when
         that type is "query".
+
+        Write proposed_query in this rule's language,
+        "{{ steps.fetch_rule.output.language }}". In KQL a quoted value is a phrase
+        and a * inside quotes is a literal asterisk, so every substring match must
+        be unquoted: process.command_line: *create shadow* excludes nothing when
+        written as "*create shadow*". Unquoted values may contain spaces, but a
+        backslash escapes the character after it, so match on a distinctive
+        substring rather than a full path: *corp-agent-signed.msi*, not
+        *\deploy-share\packages\corp-agent-signed.msi*. Keep exact field values
+        (process.name, user.name) quoted; only wildcard matches go unquoted.
       schema:
         type: object
         properties:
