@@ -20,6 +20,7 @@ import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { escapeQuotes } from '@kbn/es-query';
 
 const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;
 const mockedUseWaffleOptionsContext = useWaffleOptionsContext as jest.Mock<
@@ -172,5 +173,42 @@ describe('ConditionalToolTip', () => {
     } as UseSnapshotRequest);
 
     expect(tooltip).toMatchSnapshot();
+  });
+
+  it('passes ARN identifiers containing colons in the filter query', () => {
+    const arn = 'arn:aws:rds:us-west-2:123456789012:db:my-db';
+    const ARN_NODE: InfraWaffleMapNode = {
+      pathId: arn,
+      id: arn,
+      name: 'my-db',
+      path: [{ value: arn, label: 'my-db' }],
+      metrics: [{ name: 'cpu' }],
+    };
+
+    mockedUseSnapshot.mockReturnValue({
+      nodes: [],
+      error: null,
+      loading: false,
+      interval: '60s',
+      reload: jest.fn(() => Promise.resolve({} as SnapshotNodeResponse)),
+    });
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      mockedUseWaffleOptionsContextReturnValue as unknown as ReturnType<
+        typeof useWaffleOptionsContext
+      >
+    );
+
+    render(<ConditionalToolTip currentTime={currentTime} node={ARN_NODE} nodeType="awsRDS" />);
+
+    const useSnapshotCall = mockedUseSnapshot.mock.calls[0][0] as UseSnapshotRequest;
+    expect(useSnapshotCall.filterQuery).toBe(
+      JSON.stringify({
+        bool: {
+          filter: {
+            match_phrase: { 'aws.rds.db_instance.arn': escapeQuotes(arn) },
+          },
+        },
+      })
+    );
   });
 });

@@ -7,6 +7,7 @@
 
 import { identity } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
@@ -93,6 +94,7 @@ export const searchAfterAndBulkCreateFactory = async ({
     let sortIds: estypes.SortResults | undefined;
 
     const maxSignals = maxSignalsOverride ?? tuple.maxSignals;
+    let searchSize = Math.ceil(Math.min(maxSignals, pageSize));
 
     while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
@@ -110,7 +112,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           to: tuple.to.toISOString(),
           runtimeMappings,
           filter,
-          size: Math.ceil(Math.min(maxSignals, pageSize)),
+          size: searchSize,
           sortOrder,
           searchAfterSortIds: sortIds,
           primaryTimestamp,
@@ -216,17 +218,31 @@ export const searchAfterAndBulkCreateFactory = async ({
           break;
         }
       } catch (exc: unknown) {
-        ruleExecutionLogger.error(
-          'Unable to extract/process events or create alerts',
-          JSON.stringify(exc)
-        );
-        return mergeReturns([
-          toReturn,
-          createSearchAfterReturnType({
-            success: false,
-            errors: [`${exc}`],
-          }),
-        ]);
+        if (isMaximumResponseSizeExceededError(exc) && searchSize > 1) {
+          // halve the page size and retry the same search_after window with the reduced size
+          const reducedSearchSize = Math.floor(searchSize / 2);
+          const warningMessage = `The search response exceeded the "elasticsearch.maxResponseSize" limit, reducing the number of events fetched per page from ${searchSize} to ${reducedSearchSize} and retrying. Error: ${exc.message}`;
+
+          ruleExecutionLogger.warn(`[${cycleNum}] ${warningMessage}`);
+          toReturn.warningMessages.push(warningMessage);
+          searchSize = reducedSearchSize;
+        } else {
+          const errorMessage = isMaximumResponseSizeExceededError(exc)
+            ? `A single event exceeded the "elasticsearch.maxResponseSize" limit, it is impossible to fetch events for this rule. Error: ${exc.message}`
+            : `${exc}`;
+
+          ruleExecutionLogger.error(
+            'Unable to extract/process events or create alerts',
+            JSON.stringify(exc)
+          );
+          return mergeReturns([
+            toReturn,
+            createSearchAfterReturnType({
+              success: false,
+              errors: [errorMessage],
+            }),
+          ]);
+        }
       }
     }
     ruleExecutionLogger.debug(`Completed bulk indexing of ${toReturn.createdSignalsCount} alert`);

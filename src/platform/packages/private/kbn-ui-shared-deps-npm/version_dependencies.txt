@@ -372,7 +372,7 @@ property-information@5.5.0
 public-encrypt@4.0.3
 punycode@1.4.1
 punycode@2.3.1
-qs@6.15.2
+qs@6.16.0
 querystring-es3@0.2.1
 querystringify@2.1.1
 raf-schd@4.0.3
@@ -433,10 +433,10 @@ set-function-length@1.2.2
 setimmediate@1.0.5
 sha.js@2.4.12
 shallowequal@1.1.0
-side-channel-list@1.0.0
+side-channel-list@1.0.1
 side-channel-map@1.0.1
 side-channel-weakmap@1.0.2
-side-channel@1.1.0
+side-channel@1.1.1
 source-map-js@1.2.1
 source-map-support@0.5.21
 source-map@0.5.7
@@ -497,7 +497,7 @@ use-sync-external-store@1.4.0
 util-deprecate@1.0.2
 util@0.12.5
 utility-types@3.11.0
-uuid@14.0.1
+uuid@14.0.2
 value-equal@0.4.0
 vfile-location@3.0.1
 vfile-message@2.0.4

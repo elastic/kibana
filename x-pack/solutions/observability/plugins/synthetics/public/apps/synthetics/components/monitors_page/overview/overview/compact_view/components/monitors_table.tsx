@@ -46,7 +46,7 @@ export const MonitorsTable = ({
             dispatch(
               setFlyoutConfigCallback({
                 configId,
-                id: configId,
+                id: monitor.monitorQueryId,
                 location: locationLabel,
                 locationId,
                 spaces,
