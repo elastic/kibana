@@ -107,6 +107,10 @@ const attributesSchemaV6 = attributesSchemaV5.extends({
   }),
 });
 
+const attributesSchemaV7 = attributesSchemaV6.extends({
+  maskAllText: schema.boolean({ defaultValue: false }),
+});
+
 export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
   name: SESSION_REPLAY_SETTINGS_SO_TYPE,
   hidden: false,
@@ -245,6 +249,22 @@ export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: attributesSchemaV6.extends({}, { unknowns: 'ignore' }),
         create: attributesSchemaV6,
+      },
+    },
+    7: {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: () => ({
+            attributes: {
+              maskAllText: false,
+            },
+          }),
+        },
+      ],
+      schemas: {
+        forwardCompatibility: attributesSchemaV7.extends({}, { unknowns: 'ignore' }),
+        create: attributesSchemaV7,
       },
     },
   },

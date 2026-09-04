@@ -70,7 +70,7 @@ describe('buildSessionReplaySdkHtmlSnippet', () => {
     expect(html).toContain('colleague-app');
     expect(html).toContain('"recordCanvas": true');
     expect(html).toContain('"maskAllInputs": true');
-    expect(html).toContain('"maskTextSelector": "*"');
+    expect(html).not.toContain('"maskTextSelector"');
     expect(html).toContain('"maxMs": 14400000');
     expect(html).toContain('"idleMs": 1800000');
     expect(html).toContain('"persistSession": true');

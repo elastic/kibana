@@ -45,22 +45,30 @@ describe('normalizeSessionReplaySettings', () => {
     expect(settings.selectedRemoteClusters).toEqual([]);
   });
 
-  it('defaults privacy on and canvas on', () => {
+  it('defaults input masking and canvas on, page text unmasked', () => {
     const settings = normalizeSessionReplaySettings({});
     expect(settings.maskAllInputs).toBe(true);
-    expect(settings.maskAllText).toBe(true);
+    expect(settings.maskAllText).toBe(false);
     expect(settings.recordCanvas).toBe(true);
     expect(settings.sessionMaxMs).toBe(SESSION_MAX_MS_DEFAULT);
     expect(settings.sessionIdleMs).toBe(SESSION_IDLE_MS_DEFAULT);
     expect(sdkPrivacyFromSettings(settings)).toEqual({
       maskAllInputs: true,
-      maskTextSelector: '*',
     });
     expect(sdkReplayFromSettings(settings).quality).toEqual({ recordCanvas: true });
     expect(sdkSessionFromSettings(settings, true)).toEqual({
       persistSession: true,
       maxMs: SESSION_MAX_MS_DEFAULT,
       idleMs: SESSION_IDLE_MS_DEFAULT,
+    });
+  });
+
+  it('masks all page text only when opted in', () => {
+    expect(
+      sdkPrivacyFromSettings(normalizeSessionReplaySettings({ maskAllText: true }))
+    ).toEqual({
+      maskAllInputs: true,
+      maskTextSelector: '*',
     });
   });
 

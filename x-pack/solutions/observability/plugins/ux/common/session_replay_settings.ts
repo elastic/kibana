@@ -30,7 +30,7 @@ export interface SessionReplaySettings {
   maskTextSelector: string;
   /** Mask `<input>` / `<textarea>` values in replay. Default on. */
   maskAllInputs: boolean;
-  /** Mask all DOM text (`maskTextSelector: '*'` unless a narrower selector is set). Default on. */
+  /** Mask all DOM text (`maskTextSelector: '*'` unless a narrower selector is set). Default off. */
   maskAllText: boolean;
   /** Record `<canvas>` pixels. Default on. */
   recordCanvas: boolean;
@@ -85,7 +85,7 @@ export const DEFAULT_SESSION_REPLAY_SETTINGS: SessionReplaySettings = {
   urlGroupingRules: '',
   maskTextSelector: '',
   maskAllInputs: true,
-  maskAllText: true,
+  maskAllText: false,
   recordCanvas: true,
   sessionMaxMs: SESSION_MAX_MS_DEFAULT,
   sessionIdleMs: SESSION_IDLE_MS_DEFAULT,
@@ -130,7 +130,7 @@ export const normalizeSessionReplaySettings = (
   urlGroupingRules: String(input.urlGroupingRules ?? '').slice(0, URL_GROUPING_RULES_MAX_LENGTH),
   maskTextSelector: String(input.maskTextSelector ?? '').slice(0, MASK_TEXT_SELECTOR_MAX_LENGTH),
   maskAllInputs: input.maskAllInputs !== false,
-  maskAllText: input.maskAllText !== false,
+  maskAllText: input.maskAllText === true,
   recordCanvas: input.recordCanvas !== false,
   sessionMaxMs: clampInt(
     input.sessionMaxMs,
@@ -167,7 +167,7 @@ export const sdkCaptureFromSettings = (settings: SessionReplaySettings) => ({
   graphql: settings.captureGraphql,
 });
 
-/** rrweb privacy block — inputs and text masked unless the operator opts out. */
+/** rrweb privacy block — inputs masked by default; page text only when opted in. */
 export const sdkPrivacyFromSettings = (
   settings: Pick<SessionReplaySettings, 'maskAllInputs' | 'maskAllText' | 'maskTextSelector'>
 ): { maskAllInputs: boolean; maskTextSelector?: string } => {

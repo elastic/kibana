@@ -414,7 +414,7 @@ export function CaptureSettingsPanel() {
             <p>
               {i18n.translate('xpack.ux.sessionReplaySettings.privacyHelp', {
                 defaultMessage:
-                  'Applied to the inject snippet and Kibana auto-capture. Masking and canvas recording are on by default.',
+                  'Applied to the inject snippet and Kibana auto-capture. Form inputs are masked by default. Page text is recorded unless you turn masking on.',
               })}
             </p>
           </EuiText>
