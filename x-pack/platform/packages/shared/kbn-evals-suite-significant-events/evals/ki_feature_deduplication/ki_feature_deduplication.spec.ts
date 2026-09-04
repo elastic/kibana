@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import {
   EMPTY_TOKENS,
   formatRawDocument,
@@ -406,6 +407,49 @@ evaluate.describe(
               }
 
               const searchCalls: SearchSimilarFeaturesArguments[] = [];
+              const searchTool: ToolDefinition = {
+                description:
+                  'Search known features by meaning. Pass every uncertain candidate in the candidates array; results are grouped by candidate_id.',
+                schema: {
+                  type: 'object',
+                  properties: {
+                    candidates: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          candidate_id: { type: 'string' },
+                          title: { type: 'string' },
+                          description: { type: 'string' },
+                          type: { type: 'string' },
+                        },
+                        required: ['candidate_id', 'title', 'description', 'type'],
+                      },
+                    },
+                  },
+                  required: ['candidates'],
+                },
+              };
+              const searchCallback: ToolCallback = async (toolCall) => {
+                const rawCandidates = toolCall.function.arguments?.candidates;
+                const candidates = (
+                  Array.isArray(rawCandidates) ? rawCandidates : []
+                ) as SearchSimilarFeaturesArguments[];
+                const results = candidates.map((candidate) => {
+                  searchCalls.push(candidate);
+                  const searchText =
+                    `${candidate.candidate_id} ${candidate.title} ${candidate.description}`.toLowerCase();
+                  const features: SimilarFeatureHit[] =
+                    input.similarFeature &&
+                    candidate.type === 'entity' &&
+                    searchText.includes('checkout')
+                      ? [input.similarFeature]
+                      : [];
+                  return { candidate_id: candidate.candidate_id, features };
+                });
+                return { response: { results } };
+              };
+
               const { features } = await identifyFeatures({
                 streamName: MANAGED_STREAM_NAME,
                 sampleDocuments: input.sampleDocuments,
@@ -414,19 +458,8 @@ evaluate.describe(
                 logger,
                 signal: new AbortController().signal,
                 knownFeatureIds: input.knownFeatureIds,
-                searchSimilarFeatures: async (args) => {
-                  searchCalls.push(args);
-                  const searchText =
-                    `${args.candidate_id} ${args.title} ${args.description}`.toLowerCase();
-                  if (
-                    input.similarFeature &&
-                    args.type === 'entity' &&
-                    searchText.includes('checkout')
-                  ) {
-                    return [input.similarFeature];
-                  }
-                  return [];
-                },
+                additionalTools: { search_similar_features: searchTool },
+                additionalToolCallbacks: { search_similar_features: searchCallback },
               });
 
               return { features, searchCalls };

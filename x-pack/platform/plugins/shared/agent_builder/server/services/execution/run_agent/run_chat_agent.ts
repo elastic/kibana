@@ -21,6 +21,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
+  ChatEventType,
   ConversationRoundStatus,
   AgentExecutionMode,
   isToolCallStep,
@@ -103,6 +104,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     configurationOverrides,
     action,
     executionId,
+    roundId: providedRoundId,
   },
   context
 ) => {
@@ -137,7 +139,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context.attachmentStateManager.clearAccessTracking();
   }
 
-  const roundId = uuidv4();
+  const roundId = providedRoundId ?? uuidv4();
 
   // Create background execution service from conversation state
   const backgroundExecutionService = new BackgroundExecutionService({
@@ -426,7 +428,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachment_refs: processedConversation.nextInput.attachment_refs,
   };
 
-  // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
+  manualEvents$.next({
+    type: ChatEventType.roundStarted,
+    data: {
+      round_id: roundId,
+      input: processedInput,
+      started_at: startTime.toISOString(),
+      ...(author ? { author } : {}),
+      ...(origin ? { origin: { type: origin.type } } : {}),
+      ...(pendingRound ? { resumed: true } : {}),
+    },
+  });
+
   const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(

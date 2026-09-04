@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { createContext } from 'react';
 import {
   METRICS_GRID_SETTINGS_DEFAULTS,
@@ -28,7 +28,9 @@ import {
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   profileId: string;
   gridSettings: MetricsGridSettings;
+  searchTerm: string;
   metricsSort: MetricsSort;
+  selectedDimensions: Dimension[];
   recentlyExploredMetrics: readonly string[];
   onMetricExplored?: (metricUniqueKey: string) => void;
   onPageChange: (value: number) => void;
@@ -67,10 +69,9 @@ export function MetricsExperienceStateProvider({
   discoverFetch$?: UnifiedMetricsGridProps['fetch$'];
 }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
-  const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
-  const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
   const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
+  const { searchTerm } = gridSettings;
 
   const isSortingEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_SORTING_ENABLED,
@@ -79,6 +80,11 @@ export function MetricsExperienceStateProvider({
 
   // When sorting is disabled, ignore any host-provided sort
   const effectiveMetricsSort = isSortingEnabled ? metricsSort : METRICS_GRID_SORT_DEFAULTS;
+
+  const selectedDimensions = useMemo<Dimension[]>(
+    () => gridSettings.dimensions.map((name) => ({ name })),
+    [gridSettings.dimensions]
+  );
 
   const recentlyExploredMetrics = useRecentlyExploredMetrics({
     getRecentlyExploredMetrics,
@@ -90,9 +96,9 @@ export function MetricsExperienceStateProvider({
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
-      setSelectedDimensions(nextDimensions);
+      onGridSettingsChange?.({ dimensions: nextDimensions.map(({ name }) => name) });
     },
-    [setSelectedDimensions]
+    [onGridSettingsChange]
   );
 
   const onPageChange = useCallback(
@@ -104,14 +110,12 @@ export function MetricsExperienceStateProvider({
 
   const onSearchTermChange = useCallback(
     (term: string) => {
-      setSearchTerm((prevTerm) => {
-        if (prevTerm !== term) {
-          setCurrentPage(0);
-        }
-        return term;
-      });
+      if (searchTerm !== term) {
+        setCurrentPage(0);
+      }
+      onGridSettingsChange?.({ searchTerm: term });
     },
-    [setSearchTerm, setCurrentPage]
+    [onGridSettingsChange, searchTerm, setCurrentPage]
   );
 
   const handleMetricsSortChange = useCallback(

@@ -26,7 +26,13 @@ import {
   mintHitlExternalResumeToken,
 } from './hitl_external_resume_helpers';
 import { hasHitlWaitExpired } from './hitl_timeout_helpers';
-import { resumeHitlWaitStep, shouldSkipHitlWaitEntry, tryEnterHitlWait } from './hitl_wait_helpers';
+import {
+  emitHitlWaitingAudit,
+  failHitlWaitOnTimeout,
+  resumeHitlWaitStep,
+  shouldSkipHitlWaitEntry,
+  tryEnterHitlWait,
+} from './hitl_wait_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 import { getKibanaUrl } from '../../utils/get_kibana_url';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -82,6 +88,11 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
     if (!withConfig) {
       this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for human input`, {
         event: { action: 'hitl:waiting' },
+      });
+      emitHitlWaitingAudit({
+        executionId: this.workflowRuntime.getWorkflowExecution().id,
+        stepExecutionId: this.stepExecutionRuntime.stepExecutionId,
+        stepType: this.node.stepType,
       });
       return;
     }
@@ -154,6 +165,11 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for human input`, {
       event: { action: 'hitl:waiting' },
     });
+    emitHitlWaitingAudit({
+      executionId: this.workflowRuntime.getWorkflowExecution().id,
+      stepExecutionId: this.stepExecutionRuntime.stepExecutionId,
+      stepType: this.node.stepType,
+    });
   }
 
   private async resume(): Promise<void> {
@@ -165,12 +181,15 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
 
     if (resumeInput == null && hasHitlWaitExpired(startedAt, timeout)) {
       invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
-      this.stepExecutionRuntime.failStep(
-        new ExecutionError({
+      failHitlWaitOnTimeout({
+        stepExecutionRuntime: this.stepExecutionRuntime,
+        executionId: execution.id,
+        stepType: this.node.stepType,
+        error: new ExecutionError({
           type: 'TimeoutError',
           message: `Input wait exceeded the configured timeout of ${timeout}.`,
-        })
-      );
+        }),
+      });
       return;
     }
 

@@ -169,6 +169,8 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/global-search-plugin'
+  - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
@@ -181,7 +183,7 @@ fileGroups:
     - public/**/*
     - public/**/*.json
     - server/**/*
-    - test/scout/**/*
+    - test/scout*/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -6,12 +6,13 @@
  */
 
 import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { getUnusableQueryParams } from './query_params';
 import { loadApi } from './load_api';
 import type { LoadApiFailure } from './load_api';
 import { getValidator } from './validate_params';
 import type { ParamsValidationError, ParamsValidator } from './validate_params';
-import type { ApiRegistryDefinition, ApiRequest, ApiTarget } from './types';
+import type { ApiRegistryDefinition, ApiRequest } from './types';
 
 /**
  * Explains why an API cannot be called at all, for the cases we refuse up front rather
