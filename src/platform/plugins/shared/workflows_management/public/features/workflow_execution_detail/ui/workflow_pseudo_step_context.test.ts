@@ -59,6 +59,18 @@ describe('buildTriggerContextFromExecution', () => {
     });
   });
 
+  it('should detect manual trigger when a legacy row has event.type === manual', () => {
+    const inputs = { severity: 'high', hostId: 'host-1' };
+    const result = buildTriggerContextFromExecution({
+      event: { type: 'manual', inputs, spaceId: 'default' },
+      inputs,
+    });
+    expect(result).toEqual({
+      triggerType: 'manual',
+      input: inputs,
+    });
+  });
+
   it('should not treat custom provenance strings as event-driven without an event payload', () => {
     const result = buildTriggerContextFromExecution(
       { inputs: { query: 'gen' } },
@@ -220,6 +232,22 @@ describe('buildTriggerStepExecutionFromContext', () => {
     });
     expect(result?.stepId).toBe('event');
     expect(result?.stepType).toBe('trigger_event');
+  });
+
+  it('uses context.inputs as trigger input when a legacy row has event.type === manual', () => {
+    const inputs = { severity: 'high' };
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      stepExecutions: [completedActionStep],
+      context: {
+        event: { type: 'manual', inputs, spaceId: 'default' },
+        inputs,
+      },
+    });
+    expect(result).not.toBeNull();
+    expect(result?.stepId).toBe('manual');
+    expect(result?.stepType).toBe('trigger_manual');
+    expect(result?.input).toEqual(inputs);
   });
 
   it('exposes manual inputs as output when both event and inputs are present', () => {
