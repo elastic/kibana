@@ -10,13 +10,11 @@
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { combineLatest, debounceTime, map } from 'rxjs';
-import type { Observable } from 'rxjs';
 import type {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
-  ChromeNavControl,
   ChromeNavLink,
   GlobalSearchConfig,
 } from '@kbn/core-chrome-browser';
@@ -132,27 +130,6 @@ export function useCustomNavLink() {
   const chrome = useChromeService();
   const customNavLink$ = useMemo(() => chrome.getCustomNavLink$(), [chrome]);
   return useObservable(customNavLink$, undefined);
-}
-
-export type NavControlPosition = 'left' | 'center' | 'right';
-
-const navControlGetters: Record<
-  NavControlPosition,
-  (chrome: ReturnType<typeof useChromeService>) => Observable<ChromeNavControl[]>
-> = {
-  left: (chrome) => chrome.navControls.getLeft$(),
-  center: (chrome) => chrome.navControls.getCenter$(),
-  right: (chrome) => chrome.navControls.getRight$(),
-};
-
-/**
- * Returns the nav controls for a given position.
- * Used by `HeaderNavControls` (instantiated in both classic and project headers).
- */
-export function useNavControls(position: NavControlPosition): ChromeNavControl[] {
-  const chrome = useChromeService();
-  const controls$ = useMemo(() => navControlGetters[position](chrome), [chrome, position]);
-  return useObservable(controls$, []);
 }
 
 interface HelpMenuState {
