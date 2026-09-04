@@ -155,6 +155,7 @@ export interface EnsureScoutOptions {
   log: ToolingLog;
   gcsCredentials: string | undefined;
   tracingExporters: string | undefined;
+  agentBuilderTracingExporters?: string | undefined;
   serverConfigSet?: string;
 }
 
@@ -167,6 +168,7 @@ export const ensureScout = async ({
   log,
   gcsCredentials,
   tracingExporters,
+  agentBuilderTracingExporters,
   serverConfigSet = 'evals_tracing',
 }: EnsureScoutOptions): Promise<void> => {
   const scoutEnv: Record<string, string> = {};
@@ -175,6 +177,9 @@ export const ensureScout = async ({
   }
   if (tracingExporters) {
     scoutEnv.TRACING_EXPORTERS = tracingExporters;
+  }
+  if (agentBuilderTracingExporters) {
+    scoutEnv.AGENT_BUILDER_TRACING_EXPORTERS = agentBuilderTracingExporters;
   }
 
   const scoutAlive = isServiceRunning(repoRoot, 'scout');
@@ -293,6 +298,7 @@ export const ensureEvalStack = async ({
     log,
     gcsCredentials: profileEnvOverrides.GCS_CREDENTIALS,
     tracingExporters: profileEnvOverrides.TRACING_EXPORTERS,
+    agentBuilderTracingExporters: profileEnvOverrides.AGENT_BUILDER_TRACING_EXPORTERS,
     serverConfigSet,
   });
 

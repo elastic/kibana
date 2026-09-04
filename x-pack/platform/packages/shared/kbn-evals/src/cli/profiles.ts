@@ -48,6 +48,7 @@ interface VaultConfig {
   evaluationsKbn?: { url?: string; apiKey?: string };
   tracingEs?: { url?: string; apiKey?: string };
   tracingExporters?: unknown;
+  agentBuilderTracingExporters?: unknown;
   gcsDatasetAccessCredentials?: unknown;
 }
 
@@ -178,6 +179,17 @@ export const envFromExportProfile = (
     next.TRACING_EXPORTERS = JSON.stringify(cfg.tracingExporters);
   } else if (options?.defaultTracingExporters) {
     next.TRACING_EXPORTERS = JSON.stringify([{ http: { url: 'http://localhost:4318/v1/traces' } }]);
+  }
+
+  // Agent Builder runs its own tracer provider (see register_tracing.ts); its
+  // spans are what trace-based evaluators query and they do NOT flow through
+  // telemetry.tracing.exporters. Kept separate so the built-in local-ES
+  // exporter stays intact and this only ADDS a remote destination.
+  if (
+    Array.isArray(cfg.agentBuilderTracingExporters) &&
+    cfg.agentBuilderTracingExporters.length > 0
+  ) {
+    next.AGENT_BUILDER_TRACING_EXPORTERS = JSON.stringify(cfg.agentBuilderTracingExporters);
   }
 
   maybeSetGcsCredentialsEnv(cfg, next);
