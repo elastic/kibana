@@ -8,6 +8,7 @@
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
 import type { ApiTarget } from '@kbn/agent-builder-common';
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { toSelfFetchQuery } from './query_params';
 import { isRecord } from './types';
 import type { ApiRequest } from './types';
@@ -30,10 +31,8 @@ const isAlertingRuleCreate = (method: string, path: string): boolean =>
 // task, which TM invalidates once the task drains. Alerting persists an API-key caller's
 // credential on created rules by default ("the user owns this key"), which for this borrowed key
 // would kill every rule from the conversation about an hour after the task completes. This header
-// tells alerting to mint the rule its own framework-managed key instead. A header rather than a
-// body field keeps the directive out of the public create-rule contract. Duplicates
-// `ALERTING_CLONE_API_KEY_HEADER` from the alerting plugin, which this plugin cannot depend on.
-const CLONE_API_KEY_HEADER = 'x-kbn-alerting-clone-api-key';
+// tells alerting to mint the rule its own framework-managed key instead.
+const cloneApiKeyHeaders = { [ALERTING_CLONE_API_KEY_HEADER]: 'true' };
 
 /**
  * Sends a prepared API request to its backend on behalf of the current user.
@@ -57,9 +56,7 @@ export const dispatchApiRequest = async ({
       method,
       query: toSelfFetchQuery(querystring),
       body,
-      ...(isAlertingRuleCreate(method, path)
-        ? { headers: { [CLONE_API_KEY_HEADER]: 'true' } }
-        : {}),
+      ...(isAlertingRuleCreate(method, path) ? { headers: cloneApiKeyHeaders } : {}),
       access: path.startsWith('/internal') ? 'internal' : 'public',
     });
   }

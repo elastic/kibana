@@ -7,10 +7,9 @@
 
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { HttpSelfService } from '@kbn/core-http-server';
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { dispatchApiRequest } from './dispatch_request';
 import type { ApiRequest } from './types';
-
-const CLONE_API_KEY_HEADER = 'x-kbn-alerting-clone-api-key';
 
 describe('dispatchApiRequest', () => {
   const fetchMock = jest.fn();
@@ -53,7 +52,7 @@ describe('dispatchApiRequest', () => {
         '/api/alerting/rule',
         expect.objectContaining({
           body: { name: 'my rule', rule_type_id: '.es-query' },
-          headers: { [CLONE_API_KEY_HEADER]: 'true' },
+          headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
         })
       );
     });
@@ -69,7 +68,7 @@ describe('dispatchApiRequest', () => {
         '/api/alerting/rule/some-rule-id',
         expect.objectContaining({
           body: { name: 'my rule' },
-          headers: { [CLONE_API_KEY_HEADER]: 'true' },
+          headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
         })
       );
     });

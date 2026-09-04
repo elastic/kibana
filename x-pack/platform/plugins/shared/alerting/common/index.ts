@@ -207,7 +207,6 @@ export const BASE_ALERTING_API_PATH = '/api/alerting';
  * become the API key the rule runs with; alerting mints the rule its own framework-managed key
  * instead. A header rather than a body field because it is a request-handling directive between
  * Kibana services, not rule content, and it must stay out of the public create-rule contract.
- * Duplicated in the Agent Builder plugin (`dispatch_request.ts`), which cannot depend on alerting.
  */
 export const ALERTING_CLONE_API_KEY_HEADER = 'x-kbn-alerting-clone-api-key';
 
