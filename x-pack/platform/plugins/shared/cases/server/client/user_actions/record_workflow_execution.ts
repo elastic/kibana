@@ -6,11 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import { createCaseError, isSOError } from '../../common/error';
+import { createCaseError } from '../../common/error';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import type { WorkflowOrigin, WorkflowPayload } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
-import { WORKFLOW_RUN_AUTHZ_OPERATION } from '../cases/ensure_authorized_to_run_workflow';
+import { ensureAuthorizedToRunWorkflow } from '../cases/ensure_authorized_to_run_workflow';
 import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 
 export interface PreflightWorkflowExecutionArgs {
@@ -77,36 +77,14 @@ export const recordWorkflowExecution = async (
   const {
     logger,
     user,
-    authorization,
-    services: { caseService, userActionService },
+    services: { userActionService },
   } = clientArgs;
 
   try {
-    let entities: Array<{ id: string; owner: string }>;
-
-    if (preAuthorizedEntities) {
-      // Reuse the entities already fetched and authorized by ensureAuthorizedToRunWorkflow to
-      // avoid a second getCases + ensureAuthorized round-trip for the same cases.
-      entities = preAuthorizedEntities;
-    } else {
-      // Fallback: fetch and authorize when called without pre-authorized entities.
-      const { saved_objects: cases } = await caseService.getCases({ caseIds });
-
-      entities = cases
-        .filter((c) => !isSOError(c))
-        .map((c) => ({
-          id: c.id,
-          owner: (c as Exclude<typeof c, { error: unknown }>).attributes.owner,
-        }));
-
-      // All-or-nothing authorization: one privilege round-trip across all owners.
-      // Use the workflow-specific access operation so the audit log emits an 'access'
-      // event rather than a 'change' event.
-      await authorization.ensureAuthorized({
-        operation: WORKFLOW_RUN_AUTHZ_OPERATION,
-        entities,
-      });
-    }
+    // Reuse entities already fetched and authorized by ensureAuthorizedToRunWorkflow, or delegate
+    // to the same all-or-nothing authorization path when called without them.
+    const entities =
+      preAuthorizedEntities ?? (await ensureAuthorizedToRunWorkflow({ ids: caseIds }, clientArgs));
 
     // Build one user action per case in a single bulk write.
     const userActions = entities.map(({ id: caseId, owner }) => ({
