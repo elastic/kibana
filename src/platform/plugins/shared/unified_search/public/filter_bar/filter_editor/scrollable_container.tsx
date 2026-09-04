@@ -50,7 +50,6 @@ export function ScrollableContainer({
     const resizeObserver = new ResizeObserver(updateClippedHeight);
     resizeObserver.observe(containerRef.current);
 
-    // Clear visible height on window resize to allow children to grow to new window size
     window.addEventListener('resize', updateClippedHeight);
 
     return () => {
