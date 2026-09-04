@@ -10,6 +10,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowExecutionsPage } from './executions_page';
+import { EXECUTION_TABLE_DEFAULT_PAGE_SIZE } from './workflow_executions_page_constants';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
@@ -45,7 +46,7 @@ describe('WorkflowExecutionsPage', () => {
     jest.mocked(services.http.get).mockResolvedValue({
       results: [],
       page: 1,
-      size: 25,
+      size: EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
       total: 0,
     });
 

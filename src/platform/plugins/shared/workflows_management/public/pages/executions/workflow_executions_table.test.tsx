@@ -9,6 +9,7 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { EXECUTION_TABLE_DEFAULT_PAGE_SIZE } from './workflow_executions_page_constants';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
 import { createStartServicesMock } from '../../mocks';
@@ -27,6 +28,11 @@ jest.mock('./workflow_executions_data_grid', () => ({
   WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
 }));
 
+const lastReachablePageIndex = Math.max(
+  0,
+  Math.floor(WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW / EXECUTION_TABLE_DEFAULT_PAGE_SIZE) - 1
+);
+
 describe('WorkflowExecutionsTable', () => {
   const defaultQuery = { query: '', language: 'kuery' as const };
   const defaultTimeRange = { from: 'now-24h', to: 'now' };
@@ -44,7 +50,7 @@ describe('WorkflowExecutionsTable', () => {
     jest.mocked(services.http.get).mockResolvedValue({
       results: [],
       page: 1,
-      size: 25,
+      size: EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
       total: 0,
     });
 
@@ -68,7 +74,7 @@ describe('WorkflowExecutionsTable', () => {
         version: '2023-10-31',
         query: expect.objectContaining({
           page: 1,
-          size: 25,
+          size: EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
           trackTotalHits: true,
           sortField: expect.any(String),
           sortOrder: expect.any(String),
@@ -82,7 +88,7 @@ describe('WorkflowExecutionsTable', () => {
     jest.mocked(services.http.get).mockResolvedValue({
       results: [],
       page: 1,
-      size: 25,
+      size: EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
       total: 0,
     });
 
@@ -120,7 +126,7 @@ describe('WorkflowExecutionsTable', () => {
         },
       ],
       page: 1,
-      size: 25,
+      size: EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
       total: WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW + 500,
     });
 
@@ -160,7 +166,7 @@ describe('WorkflowExecutionsTable', () => {
         },
       ],
       page: 1,
-      size: 25,
+      size: EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
       total: WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW + 500,
     });
 
@@ -178,8 +184,7 @@ describe('WorkflowExecutionsTable', () => {
       expect(screen.getByTestId('workflowExecutionsTable')).toBeInTheDocument();
     });
 
-    // Jump to the last reachable page (page 400 → index 399 at 25 rows/page).
-    fireEvent.click(screen.getByTestId('pagination-button-399'));
+    fireEvent.click(screen.getByTestId(`pagination-button-${lastReachablePageIndex}`));
 
     await waitFor(() => {
       expect(screen.getByTestId('executionsTableEndOfResults')).toBeInTheDocument();
