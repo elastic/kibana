@@ -233,7 +233,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
         render: (name: string, action: ConnectorActionDef) => (
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
                     <strong>{name}</strong>
