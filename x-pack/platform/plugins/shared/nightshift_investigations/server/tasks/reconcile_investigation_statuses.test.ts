@@ -103,7 +103,8 @@ describe('reconcileInvestigationStatuses', () => {
   });
 
   it('patches the investigation in the space it was found in', async () => {
-    const { investigationSweepRepository, getExecutionSummaries, resolveAllExecutionsTo, run } = setup();
+    const { investigationSweepRepository, getExecutionSummaries, resolveAllExecutionsTo, run } =
+      setup();
     investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
       page([investigation({ id: 'inv-1', spaceId: 'team-a', version: 'v1' })])
     );
@@ -123,7 +124,8 @@ describe('reconcileInvestigationStatuses', () => {
   });
 
   it('looks executions up once per space rather than once per investigation', async () => {
-    const { investigationSweepRepository, getExecutionSummaries, resolveAllExecutionsTo, run } = setup();
+    const { investigationSweepRepository, getExecutionSummaries, resolveAllExecutionsTo, run } =
+      setup();
     investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
       page([
         investigation({ id: 'inv-1', spaceId: 'team-a' }),
@@ -152,7 +154,9 @@ describe('reconcileInvestigationStatuses', () => {
     'maps terminal execution status "%s" to investigation status "%s"',
     async (from, to) => {
       const { investigationSweepRepository, resolveAllExecutionsTo, run } = setup();
-      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(page([investigation({ id: 'inv-1' })]));
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
+        page([investigation({ id: 'inv-1' })])
+      );
       resolveAllExecutionsTo(execution(from));
 
       await run();
@@ -191,7 +195,9 @@ describe('reconcileInvestigationStatuses', () => {
     ExecutionStatus.WAITING_FOR_CHILD,
   ])('leaves the investigation alone while the execution is "%s"', async (status) => {
     const { investigationSweepRepository, resolveAllExecutionsTo, run } = setup();
-    investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(page([investigation({ id: 'inv-1' })]));
+    investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
+      page([investigation({ id: 'inv-1' })])
+    );
     resolveAllExecutionsTo(execution(status));
 
     const result = await run();
@@ -202,7 +208,9 @@ describe('reconcileInvestigationStatuses', () => {
 
   it('waits out the grace period when a recent investigation has no execution', async () => {
     const { investigationSweepRepository, run } = setup();
-    investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(page([investigation({ id: 'inv-1' })]));
+    investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
+      page([investigation({ id: 'inv-1' })])
+    );
 
     await run();
 
@@ -292,7 +300,9 @@ describe('reconcileInvestigationStatuses', () => {
       page([investigation({ id: 'inv-1' }), investigation({ id: 'inv-2' })])
     );
     resolveAllExecutionsTo(execution(ExecutionStatus.COMPLETED));
-    investigationSweepRepository.updateInSpace.mockRejectedValueOnce(new Error('elasticsearch unavailable'));
+    investigationSweepRepository.updateInSpace.mockRejectedValueOnce(
+      new Error('elasticsearch unavailable')
+    );
 
     const result = await run();
 
@@ -301,9 +311,13 @@ describe('reconcileInvestigationStatuses', () => {
 
   it('treats a stale write as already reconciled', async () => {
     const { investigationSweepRepository, resolveAllExecutionsTo, run } = setup();
-    investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(page([investigation({ id: 'inv-1' })]));
+    investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
+      page([investigation({ id: 'inv-1' })])
+    );
     resolveAllExecutionsTo(execution(ExecutionStatus.COMPLETED));
-    investigationSweepRepository.updateInSpace.mockRejectedValue(new InvestigationStaleWriteError('inv-1'));
+    investigationSweepRepository.updateInSpace.mockRejectedValue(
+      new InvestigationStaleWriteError('inv-1')
+    );
 
     const result = await run();
 

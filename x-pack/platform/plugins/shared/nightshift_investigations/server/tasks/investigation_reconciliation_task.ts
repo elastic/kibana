@@ -22,7 +22,7 @@ import { reconcileInvestigationStatuses } from './reconcile_investigation_status
 export const INVESTIGATION_RECONCILIATION_TASK_TYPE =
   'nightshift-investigations:reconcile_investigation_statuses';
 
-const SCHEDULE_INTERVAL = '1m';
+const SCHEDULE_INTERVAL = '5m';
 
 export interface RegisterInvestigationReconciliationTaskDeps {
   core: CoreSetup<NightshiftInvestigationsStartDeps, NightshiftInvestigationsServerStart>;
