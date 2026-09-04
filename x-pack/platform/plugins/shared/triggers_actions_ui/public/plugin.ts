@@ -16,7 +16,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { from, map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import type { ComponentType, ReactElement } from 'react';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
@@ -116,18 +115,13 @@ import type { UntrackAlertsModalProps } from './application/sections/common/comp
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
+import { getClassicRulesPageLazy } from './common/get_classic_rules_page';
 import type {
-  ClassicRulesPageInternalDeps,
+  ClassicRulesPagePluginsStart,
   ClassicRulesPageProps,
 } from './application/classic_rules_page';
 
 export type { ClassicRulesPageProps } from './application/classic_rules_page';
-
-const LazyComposableClassicRulesPage = React.lazy(() =>
-  import('./application/composable_rules_page').then((m) => ({
-    default: m.ComposableClassicRulesPage,
-  }))
-);
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -534,27 +528,16 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
-    const internalDeps: ClassicRulesPageInternalDeps = {
-      actions:
-        this.actionsSetup ??
-        ({
-          validateEmailAddresses: this.connectorServices?.validateEmailAddresses ?? (() => []),
-          enabledEmailServices: this.connectorServices?.enabledEmailServices ?? [],
-        } as ActionsPublicPluginSetup),
+    const ClassicRulesPage = getClassicRulesPageLazy({
+      actions: this.actionsSetup,
+      connectorServices: this.connectorServices,
       security: plugins.security,
       cloud: this.cloud,
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
       isServerless: this.isServerless,
-      pluginsStart: plugins as ClassicRulesPageInternalDeps['pluginsStart'],
-    };
-
-    const ClassicRulesPage: ComponentType<ClassicRulesPageProps> = (props) =>
-      React.createElement(
-        React.Suspense,
-        { fallback: null },
-        React.createElement(LazyComposableClassicRulesPage, { ...props, internalDeps })
-      );
+      pluginsStart: plugins as ClassicRulesPagePluginsStart,
+    });
 
     const createAlertRuleAction = async () => {
       const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
