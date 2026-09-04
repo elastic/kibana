@@ -76,10 +76,10 @@ export const CREATE_MAINTENANCE_WINDOW_DESCRIPTION = i18n.translate(
   }
 );
 
-export const MAINTENANCE_WINDOWS_RETURN_LINK = i18n.translate(
-  'xpack.maintenanceWindows.returnLink',
+export const LOADING_MAINTENANCE_WINDOW = i18n.translate(
+  'xpack.maintenanceWindows.edit.loadingMaintenanceWindow',
   {
-    defaultMessage: 'Return',
+    defaultMessage: 'Loading…',
   }
 );
 

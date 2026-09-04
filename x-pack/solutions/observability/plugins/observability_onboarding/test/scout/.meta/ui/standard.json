@@ -1,5 +1,5 @@
 {
-  "sha1": "483c111a51ea9e18622a17afd6cc9cc12db39ae4",
+  "sha1": "b0b66f0dd511ef50ca20f710ecfe840b83c49fd8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -202,15 +202,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@local-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 36,
+        "line": 37,
         "column": 15
       }
     },
@@ -220,15 +217,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@local-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 20
       }
     },
@@ -238,16 +232,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@local-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 72,
-        "column": 26
+        "line": 73,
+        "column": 13
       }
     },
     {
@@ -255,13 +246,12 @@
       "title": "Onboarding UI Validation validates logs-essentials tier restrictions",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@local-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 91,
-        "column": 38
+        "line": 94,
+        "column": 18
       }
     }
   ]
