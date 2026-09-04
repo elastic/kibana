@@ -21,10 +21,22 @@ export const cleanupPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => 
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { server, request } = routeContext;
+    const { server, request, response } = routeContext;
     const { hasAlreadyDoneCleanup } = request.query;
 
-    await resetSyncPrivateCleanUpState({ server, hasAlreadyDoneCleanup });
+    try {
+      await resetSyncPrivateCleanUpState({ server, hasAlreadyDoneCleanup });
+    } catch (error) {
+      // Reporting success here would claim cleanup was scheduled when it was not,
+      // leaving the caller to wait on work that only happens whenever the periodic
+      // sync next runs.
+      return response.customError({
+        statusCode: 500,
+        body: {
+          message: `Failed to schedule private location cleanup: ${error.message}`,
+        },
+      });
+    }
 
     return {
       success: true,
