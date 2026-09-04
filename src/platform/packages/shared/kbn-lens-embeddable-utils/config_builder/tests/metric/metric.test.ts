@@ -531,4 +531,55 @@ describe('Metric', () => {
       expect(outViz.palette?.params?.colorStops).toBeUndefined();
     });
   });
+
+  describe('ES|QL Control Variable', () => {
+    const builder = new LensConfigBuilder(undefined, true);
+    const esqlControlMetric = {
+      type: 'metric',
+      title: 'Identifier Control variable',
+      data_source: {
+        type: 'esql',
+        query: 'FROM logs | STATS count = COUNT(*) BY ??field',
+      },
+      metrics: [{ type: 'primary', column: 'count' }],
+      breakdown_by: { column: '??field', columns: 3 },
+      sampling: 1,
+      ignore_global_filters: true,
+    } satisfies MetricConfig;
+
+    const getColumnByFieldName = (
+      attributes: ReturnType<LensConfigBuilder['fromAPIFormat']>,
+      fieldName: string
+    ) =>
+      Object.values(attributes.state.datasourceStates.textBased?.layers ?? {})
+        .flatMap((layer) => layer.columns)
+        .find((column) => column.fieldName === fieldName);
+
+    it('(SO -> API -> SO) preserves `variable`', () => {
+      const original = builder.fromAPIFormat(esqlControlMetric);
+      expect(getColumnByFieldName(original, '??field')?.variable).toBe('field');
+
+      const api = builder.toAPIFormat(original) as MetricConfig;
+      const so = builder.fromAPIFormat(api);
+      expect(getColumnByFieldName(so, '??field')?.variable).toBe('field');
+    });
+
+    it('(SO -> API -> SO) does not stamp `variable` for a Value (`?`) control', () => {
+      const original = builder.fromAPIFormat({
+        ...esqlControlMetric,
+        title: 'Value Control variable',
+        data_source: {
+          ...esqlControlMetric.data_source,
+          query: 'FROM logs | STATS count = COUNT(*) BY ??field, ?os',
+        },
+        breakdown_by: { ...esqlControlMetric.breakdown_by, column: '?os' },
+      } satisfies MetricConfig);
+      expect(getColumnByFieldName(original, '?os')?.variable).toBeUndefined();
+
+      const api = builder.toAPIFormat(original) as MetricConfig;
+      const so = builder.fromAPIFormat(api);
+
+      expect(getColumnByFieldName(so, '?os')?.variable).toBeUndefined();
+    });
+  });
 });
