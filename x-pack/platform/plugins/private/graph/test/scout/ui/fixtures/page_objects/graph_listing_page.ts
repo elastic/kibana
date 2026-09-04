@@ -35,13 +35,13 @@ export class GraphListingPage {
   }
 
   /**
-   * Wait for the search input or empty state. `contentListToolbar` sits on the
-   * EuiSearchBar root and is often not Playwright-visible even when the bar is.
+   * Wait for the search input or empty state. Do not `.or()` the empty-state
+   * create button — it is nested inside `content-list-emptyState` and trips
+   * Playwright strict mode when both are visible.
    */
   async waitForReady() {
-    await this.contentList.searchBox
-      .or(this.emptyState)
-      .or(this.emptyPromptCreateButton)
+    await this.emptyState
+      .or(this.contentList.searchBox)
       .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
   }
 

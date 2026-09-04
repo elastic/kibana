@@ -101,9 +101,10 @@ export class GraphPage {
   }
 
   async waitForListing() {
-    await this.contentList.searchBox
-      .or(this.emptyState)
-      .or(this.createGraphPromptButton)
+    // Empty prompt button lives inside `content-list-emptyState`; do not `.or()`
+    // both or Playwright strict mode fails when the empty listing is ready.
+    await this.emptyState
+      .or(this.contentList.searchBox)
       .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
   }
 
