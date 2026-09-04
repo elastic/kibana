@@ -7,8 +7,10 @@
 
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
@@ -25,9 +27,20 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   onRemoveAttachment,
 }) => {
   const { attachmentsService } = useAgentBuilderServices();
+  const {
+    services: { analytics },
+  } = useKibana();
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
   const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
+
+  const handleRemove = useCallback(() => {
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+      ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
+    });
+    onRemoveAttachment?.();
+  }, [analytics, onRemoveAttachment]);
 
   if (onRemoveAttachment) {
     return (
@@ -36,7 +49,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
         data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
         iconType="cross"
         iconSide="right"
-        iconOnClick={onRemoveAttachment}
+        iconOnClick={handleRemove}
         iconOnClickAriaLabel={removeAriaLabel}
       >
         {displayName}
