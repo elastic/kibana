@@ -201,6 +201,45 @@ When the labels match, PR CI triggers the dedicated
 surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
 results and triage.
 
+#### Per-spec model groups
+
+By default every model in a suite's list runs against every spec. A suite can instead pin a model
+list per spec with `specModelGroups` in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json).
+Each entry lists spec `files` (paths relative to the suite config directory) and the `models` those
+specs run against. `specModelGroups` (model config) and `shards` (CI batching) are independent: a
+spec's models come from `specModelGroups`, its CI step from `shards`, and either can be absent.
+
+```jsonc
+{
+  "id": "significant-events",
+  "weeklyEisModelGroups": [
+    /* suite fallback + provisioning universe */
+  ],
+  "specModelGroups": [
+    {
+      "files": ["evals/discovery/discovery.spec.ts"],
+      "models": ["eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4"]
+    },
+    {
+      "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"],
+      "models": ["eis/openai-gpt-5.4-mini"]
+    }
+  ],
+  "shards": [
+    /* optional; batching only, purely about CI step timeouts */
+  ]
+}
+```
+
+A spec resolves its models in this order: its own `specModelGroups` list, then the suite's
+`weeklyEisModelGroups`, then the requested `EVAL_MODEL_GROUPS`. `models` is optional (omit it to use
+the weekly list), and each model must be within `weeklyEisModelGroups` (the list CI provisions
+connectors for). The specs to run come from `specModelGroups[].files` plus `shards[].specFiles` in
+`evals.suites.json` (the single source of truth), so per-spec model config works with or without
+shards. Per-spec resolution applies only to the weekly run (`KBN_EVALS_WEEKLY` in `llm_evals.yml`);
+an explicit `models:<model-group>` selection overrides it and runs that set against every spec.
+Suites without `specModelGroups` overrides fan out unchanged.
+
 ---
 
 ### 1.3 On-demand evals (Buildkite)
