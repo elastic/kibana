@@ -218,7 +218,6 @@ export function LensEditConfigurationFlyout({
 
   const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
     useCurrentAttributes({
-      textBasedMode,
       initialAttributes: attributes,
     });
 

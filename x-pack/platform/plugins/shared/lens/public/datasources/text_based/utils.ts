@@ -66,6 +66,53 @@ export const getAllColumns = (
   });
 };
 
+export const reconcileQueryColumns = (
+  existingColumns: TextBasedLayerColumn[],
+  columnsFromQuery: DatatableColumn[]
+): TextBasedLayerColumn[] => {
+  const usedColumnIds = new Set<string>();
+
+  return columnsFromQuery.map((queryColumn, index) => {
+    const exactMatch = existingColumns.find(
+      (column) =>
+        !usedColumnIds.has(column.columnId) &&
+        (column.fieldName === queryColumn.id || column.fieldName === queryColumn.name)
+    );
+    const positionalMatch = existingColumns[index];
+    const compatiblePositionalMatch =
+      positionalMatch &&
+      !usedColumnIds.has(positionalMatch.columnId) &&
+      positionalMatch.meta?.type === queryColumn.meta?.type
+        ? positionalMatch
+        : undefined;
+    const compatibleMatch = existingColumns.find(
+      (column) =>
+        !usedColumnIds.has(column.columnId) && column.meta?.type === queryColumn.meta?.type
+    );
+    const existingColumn = exactMatch ?? compatiblePositionalMatch ?? compatibleMatch;
+
+    if (!existingColumn) {
+      return {
+        columnId: queryColumn.id,
+        fieldName: queryColumn.id,
+        label: queryColumn.name,
+        meta: queryColumn.meta,
+        ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
+      };
+    }
+
+    usedColumnIds.add(existingColumn.columnId);
+    const { variable, ...restOfExistingColumn } = existingColumn;
+    return {
+      ...restOfExistingColumn,
+      fieldName: queryColumn.id,
+      label: existingColumn.customLabel ? existingColumn.label : queryColumn.name,
+      meta: queryColumn.meta,
+      ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
+    };
+  });
+};
+
 export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
   column?.meta?.type === 'number';
 

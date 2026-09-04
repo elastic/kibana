@@ -20,6 +20,7 @@ import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type {
   TypedLensSerializedState,
   DatasourceMap,
+  DatasourceStates,
   VisualizationMap,
   LensAppServices,
   LensStoreDeps,
@@ -27,7 +28,9 @@ import type {
   LensSerializedState,
   LensByRefSerializedState,
   LensByValueSerializedState,
+  LensDatasourceId,
 } from '@kbn/lens-common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
 import type { LensRootStore } from '../../../state_management';
@@ -38,6 +41,7 @@ import {
   initExisting,
   initEmpty,
   setSelectedLayerId,
+  selectAdHocDataViews,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
@@ -67,7 +71,10 @@ function LoadingSpinnerWithOverlay() {
 type UpdaterType = (
   datasourceState: unknown,
   visualizationState: unknown,
-  visualizationType?: string
+  visualizationType?: string,
+  datasourceId?: LensDatasourceId,
+  allDatasourceStates?: DatasourceStates,
+  adHocDataViews?: Record<string, DataViewSpec>
 ) => void;
 
 // exported for testing
@@ -104,7 +111,12 @@ export const updatingMiddleware =
       updater(
         datasourceStates[activeDatasourceId].state,
         visualization.state,
-        visualization.activeId
+        visualization.activeId,
+        undefined,
+        datasourceStates,
+        // ad hoc data views created during the editing session (e.g. for a new
+        // reference line layer) are not part of the persisted attributes yet
+        selectAdHocDataViews(store.getState())
       );
     }
   };

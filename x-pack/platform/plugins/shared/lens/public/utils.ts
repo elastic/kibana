@@ -32,6 +32,7 @@ import type {
   DatasourceStates,
   VisualizationState,
   TriggerEvent,
+  FramePublicAPI,
 } from '@kbn/lens-common';
 import type { LensDatasourceId } from '@kbn/lens-common';
 import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
@@ -78,17 +79,44 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
   return configuredTimeZone;
 }
 
+/**
+ * Returns true when the chart's data is powered by ES|QL (text-based datasource),
+ * i.e. at least one layer resolves to the text-based datasource.
+ *
+ * Complements the existing text-based checks, which don't cover this case:
+ * - `isTextBasedAttributes` / `hasTextBasedLayers` (`@kbn/lens-common`) inspect the
+ *   persisted document, which is not available in runtime call sites like
+ *   `getConfiguration`, `hasLayerSettings`, or layer headers — these only get a
+ *   `FramePublicAPI`.
+ * - `DatasourcePublicAPI.isTextBasedLanguage()` is per-layer and returns false for
+ *   form-based helper layers (e.g. reference lines) that coexist with ES|QL data
+ *   layers, even though the chart as a whole is ES|QL-powered.
+ * - `selectCanEditTextBasedQuery` gates editor visibility off the legacy
+ *   `state.query` shape, not the chart type.
+ *
+ * The "any layer is text-based" semantics are sound because mixing DSL and ES|QL
+ * data layers is not allowed; the only form-based layers on an ES|QL chart are
+ * helper layers (reference lines).
+ */
+export const isEsqlChart = (datasourceLayers: FramePublicAPI['datasourceLayers']): boolean =>
+  Object.values(datasourceLayers).some(
+    (layer) => layer?.datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
+  );
+
 export function getActiveDatasourceIdFromDoc(doc?: LensDocument): LensDatasourceId | null {
   if (!doc) {
     return null;
   }
 
-  const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
-  if (
-    firstDatasourceFromDoc === LENS_DATASOURCE_ID.FORM_BASED ||
-    firstDatasourceFromDoc === LENS_DATASOURCE_ID.TEXT_BASED
-  ) {
-    return firstDatasourceFromDoc as LensDatasourceId;
+  const datasourceIds = Object.keys(doc.state.datasourceStates);
+  // Mixed panels can hold both datasources (e.g. ES|QL data layers plus a
+  // form-based reference line layer). The text-based datasource always owns the
+  // data layers in that case, so it wins regardless of key order.
+  if (datasourceIds.includes(LENS_DATASOURCE_ID.TEXT_BASED)) {
+    return LENS_DATASOURCE_ID.TEXT_BASED;
+  }
+  if (datasourceIds.includes(LENS_DATASOURCE_ID.FORM_BASED)) {
+    return LENS_DATASOURCE_ID.FORM_BASED;
   }
   return null;
 }
