@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
+import { tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
 import { extractDiamondDataset } from '../../src/datasets/extract_diamond_dataset';
 import {
