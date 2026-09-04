@@ -239,10 +239,10 @@ export interface CustomFieldsSolutionTelemetry {
   customFields: CustomFieldsTelemetry;
 }
 
-/** How many live templates sit at `version`. Each template falls in exactly one bucket. */
-export interface TemplatesVersionCount {
-  version: number;
-  count: number;
+export interface TemplatesVersionPercentiles {
+  p50: number;
+  p90: number;
+  p99: number;
 }
 
 /**
@@ -280,7 +280,7 @@ export interface TemplatesSolutionTelemetry {
   totalDisabled: number;
   totalSoftDeleted: number;
   totalMigratedFromV1: number;
-  versionDistribution: TemplatesVersionCount[];
+  versionPercentiles: TemplatesVersionPercentiles;
   fieldCount: TemplatesFieldCountTelemetry;
   fieldDefinitions: TemplatesFieldTypesTelemetry;
   cases: TemplatesCasesTelemetry;

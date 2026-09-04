@@ -16,7 +16,7 @@ const emptyScope = {
   totalDisabled: 0,
   totalSoftDeleted: 0,
   totalMigratedFromV1: 0,
-  versionDistribution: [],
+  versionPercentiles: { p50: 0, p90: 0, p99: 0 },
   fieldCount: { total: 0, max: 0, average: 0 },
   fieldDefinitions: { totalsByControl: {}, totalsByType: {} },
   cases: {
@@ -47,7 +47,7 @@ const emptyInventoryScope = {
   doc_count: 0,
   enabledStates: { buckets: [] },
   migratedFromV1: { doc_count: 0 },
-  versions: { buckets: [] },
+  versionPercentiles: { values: { '50.0': null, '90.0': null, '99.0': null } },
   totalFieldCount: { value: 0 },
   maxFieldCount: { value: null },
   averageFieldCount: { value: null },
@@ -71,11 +71,8 @@ const securitySolutionInventory = {
     ],
   },
   migratedFromV1: { doc_count: 2 },
-  versions: {
-    buckets: [
-      { key: 1, doc_count: 3 },
-      { key: 4, doc_count: 1 },
-    ],
+  versionPercentiles: {
+    values: { '50.0': 1, '90.0': 3.6, '99.0': 4 },
   },
   totalFieldCount: { value: 12 },
   maxFieldCount: { value: 8 },
@@ -104,12 +101,8 @@ const inventoryFindResponse = {
       ],
     },
     migratedFromV1: { doc_count: 3 },
-    versions: {
-      buckets: [
-        { key: 1, doc_count: 4 },
-        { key: 2, doc_count: 2 },
-        { key: 5, doc_count: 1 },
-      ],
+    versionPercentiles: {
+      values: { '50.0': 1, '90.0': 4.6, '99.0': 5 },
     },
     totalFieldCount: { value: 21 },
     maxFieldCount: { value: 8 },
@@ -210,11 +203,7 @@ describe('templates', () => {
           totalDisabled: 2,
           totalSoftDeleted: 3,
           totalMigratedFromV1: 3,
-          versionDistribution: [
-            { version: 1, count: 4 },
-            { version: 2, count: 2 },
-            { version: 5, count: 1 },
-          ],
+          versionPercentiles: { p50: 1, p90: 5, p99: 5 },
           fieldCount: { total: 21, max: 8, average: 3 },
           fieldDefinitions: {
             totalsByControl: { input_text: 12, select: 9 },
@@ -231,10 +220,7 @@ describe('templates', () => {
           totalDisabled: 1,
           totalSoftDeleted: 2,
           totalMigratedFromV1: 2,
-          versionDistribution: [
-            { version: 1, count: 3 },
-            { version: 4, count: 1 },
-          ],
+          versionPercentiles: { p50: 1, p90: 4, p99: 4 },
           fieldCount: { total: 12, max: 8, average: 3 },
           fieldDefinitions: {
             totalsByControl: { input_text: 7 },
@@ -321,11 +307,10 @@ describe('templates', () => {
           terms: { field: 'cases-templates.attributes.isEnabled', missing: true },
         },
         migratedFromV1: { filter: { exists: { field: 'cases-templates.attributes.legacyKey' } } },
-        versions: {
-          terms: {
+        versionPercentiles: {
+          percentiles: {
             field: 'cases-templates.attributes.templateVersion',
-            size: 20,
-            order: { _count: 'desc' },
+            percents: [50, 90, 99],
           },
         },
         totalFieldCount: { sum: { field: 'cases-templates.attributes.fieldCount' } },

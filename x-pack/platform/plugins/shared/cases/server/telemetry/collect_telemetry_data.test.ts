@@ -72,7 +72,7 @@ const zeroedTemplatesScope = {
   totalDisabled: 0,
   totalSoftDeleted: 0,
   totalMigratedFromV1: 0,
-  versionDistribution: [],
+  versionPercentiles: { p50: 0, p90: 0, p99: 0 },
   fieldCount: { total: 0, max: 0, average: 0 },
   fieldDefinitions: { totalsByControl: {}, totalsByType: {} },
   cases: { withTemplate: zeroCount, withoutTemplate: zeroCount },
