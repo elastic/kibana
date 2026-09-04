@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ProjectRouting } from '@kbn/es-query';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { useActorRef, useSelector } from '@xstate/react';
 import createContainer from 'constate';
@@ -27,12 +28,18 @@ import type { ILogViewsClient } from '../services/log_views';
 export const useLogView = ({
   initialLogViewReference,
   logViews,
+  projectRouting,
   initializeFromUrl,
   updateContextInUrl,
   listenForUrlChanges,
 }: {
   initialLogViewReference?: LogViewReference;
   logViews: ILogViewsClient;
+  /**
+   * Scopes the log view status query to the given CPS projects. When omitted, the query falls back to the
+   * global project routing or remains undefined in non CPS contexts.
+   */
+  projectRouting?: ProjectRouting;
   initializeFromUrl?: InitializeFromUrl;
   updateContextInUrl?: UpdateContextInUrl;
   listenForUrlChanges?: ListenForUrlChanges;
@@ -43,6 +50,7 @@ export const useLogView = ({
     logViewStateMachine.provide(
       createLogViewStateMachineImplementations({
         logViews,
+        projectRouting,
         notificationChannel: logViewStateNotifications,
         initializeFromUrl,
         updateContextInUrl,
