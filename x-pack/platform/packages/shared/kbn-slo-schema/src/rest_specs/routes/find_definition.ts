@@ -4,42 +4,49 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { toBooleanRt } from '@kbn/io-ts-utils/src/to_boolean_rt';
-import * as t from 'io-ts';
-import { sloDefinitionSchema, transformHealthSchema } from '../../schema';
+import { BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod';
 
-const findSloDefinitionsParamsSchema = t.partial({
-  query: t.partial({
-    search: t.string,
-    includeOutdatedOnly: toBooleanRt,
-    includeHealth: toBooleanRt,
-    tags: t.string,
-    page: t.string,
-    perPage: t.string,
-  }),
+import { MAX_KEYWORD_LENGTH, MAX_QUERY_LENGTH } from '../../schema/zod/limits';
+import { transformHealthSchema } from '../../schema/zod/health';
+import { sloDefinitionSchema } from '../../schema/zod/slo';
+
+const findSloDefinitionsParamsSchema = z.object({
+  query: z
+    .object({
+      search: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      includeOutdatedOnly: BooleanFromString.optional(),
+      includeHealth: BooleanFromString.optional(),
+      tags: z.string().max(MAX_QUERY_LENGTH).optional(),
+      page: z.string().optional(),
+      perPage: z.string().optional(),
+    })
+    .optional(),
 });
 
-const healthMetadataSchema = t.partial({
-  health: t.type({
-    isProblematic: t.boolean,
-    rollup: transformHealthSchema,
-    summary: transformHealthSchema,
-  }),
+const healthMetadataSchema = z.object({
+  health: z
+    .object({
+      isProblematic: z.boolean(),
+      rollup: transformHealthSchema,
+      summary: transformHealthSchema,
+    })
+    .optional(),
 });
 
-const sloDefinitionResponseSchema = t.intersection([sloDefinitionSchema, healthMetadataSchema]);
+const sloDefinitionResponseSchema = sloDefinitionSchema.merge(healthMetadataSchema);
 
-const findSloDefinitionsResponseSchema = t.type({
-  page: t.number,
-  perPage: t.number,
-  total: t.number,
-  results: t.array(sloDefinitionResponseSchema),
+const findSloDefinitionsResponseSchema = z.object({
+  page: z.number(),
+  perPage: z.number(),
+  total: z.number(),
+  results: z.array(sloDefinitionResponseSchema),
 });
 
-type FindSLODefinitionsParams = t.TypeOf<typeof findSloDefinitionsParamsSchema.props.query>;
-type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
+type FindSLODefinitionsParams = NonNullable<z.output<typeof findSloDefinitionsParamsSchema.shape.query>>;
+type FindSLODefinitionsResponse = z.input<typeof findSloDefinitionsResponseSchema>;
 
-type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionResponseSchema>;
+type SLODefinitionResponse = z.input<typeof sloDefinitionResponseSchema>;
 
 export {
   findSloDefinitionsParamsSchema,

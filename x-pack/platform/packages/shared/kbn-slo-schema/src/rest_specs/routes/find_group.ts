@@ -4,45 +4,51 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { groupSummarySchema } from '../../schema/common';
+import { z } from '@kbn/zod';
 
-const groupBySchema = t.union([
-  t.literal('ungrouped'),
-  t.literal('slo.tags'),
-  t.literal('status'),
-  t.literal('slo.indicator.type'),
-  t.literal('slo.instanceId'),
-  t.literal('_index'),
-  t.literal('slo.id'),
+import { MAX_KEYWORD_LENGTH, MAX_QUERY_LENGTH } from '../../schema/zod/limits';
+import { groupSummarySchema } from '../../schema/zod/common';
+
+const groupBySchema = z.union([
+  z.literal('ungrouped'),
+  z.literal('slo.tags'),
+  z.literal('status'),
+  z.literal('slo.indicator.type'),
+  z.literal('slo.instanceId'),
+  z.literal('_index'),
+  z.literal('slo.id'),
 ]);
 
-const findSLOGroupsParamsSchema = t.partial({
-  query: t.partial({
-    page: t.string,
-    perPage: t.string,
-    groupBy: groupBySchema,
-    groupsFilter: t.union([t.array(t.string), t.string]),
-    kqlQuery: t.string,
-    filters: t.string,
-  }),
+const findSLOGroupsParamsSchema = z.object({
+  query: z
+    .object({
+      page: z.string().optional(),
+      perPage: z.string().optional(),
+      groupBy: groupBySchema.optional(),
+      groupsFilter: z
+        .union([z.array(z.string().max(MAX_KEYWORD_LENGTH)), z.string().max(MAX_KEYWORD_LENGTH)])
+        .optional(),
+      kqlQuery: z.string().max(MAX_QUERY_LENGTH).optional(),
+      filters: z.string().max(MAX_QUERY_LENGTH).optional(),
+    })
+    .optional(),
 });
 
-const sloGroupWithSummaryResponseSchema = t.type({
-  group: t.string,
+const sloGroupWithSummaryResponseSchema = z.object({
+  group: z.string(),
   groupBy: groupBySchema,
   summary: groupSummarySchema,
 });
 
-const findSLOGroupsResponseSchema = t.type({
-  page: t.number,
-  perPage: t.number,
-  total: t.number,
-  results: t.array(sloGroupWithSummaryResponseSchema),
+const findSLOGroupsResponseSchema = z.object({
+  page: z.number(),
+  perPage: z.number(),
+  total: z.number(),
+  results: z.array(sloGroupWithSummaryResponseSchema),
 });
 
-type FindSLOGroupsParams = t.TypeOf<typeof findSLOGroupsParamsSchema.props.query>;
-type FindSLOGroupsResponse = t.OutputOf<typeof findSLOGroupsResponseSchema>;
+type FindSLOGroupsParams = NonNullable<z.output<typeof findSLOGroupsParamsSchema.shape.query>>;
+type FindSLOGroupsResponse = z.output<typeof findSLOGroupsResponseSchema>;
 
 export {
   findSLOGroupsParamsSchema,

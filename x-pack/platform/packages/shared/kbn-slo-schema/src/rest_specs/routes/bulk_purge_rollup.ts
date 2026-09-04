@@ -4,44 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { dateType, durationType } from '../../schema';
 
-const fixedAgePurgeVal = t.literal('fixed_age');
-const fixedTimePurgeVal = t.literal('fixed_time');
+import { dateType } from '../../schema/zod/common';
+import { durationType } from '../../schema/zod/duration';
 
-const fixedAgePurge = t.type({
-  purgeType: fixedAgePurgeVal,
+const fixedAgePurge = z.object({
+  purgeType: z.literal('fixed_age'),
   age: durationType,
 });
 
-const fixedTimePurge = t.type({
-  purgeType: fixedTimePurgeVal,
+const fixedTimePurge = z.object({
+  purgeType: z.literal('fixed_time'),
   timestamp: dateType,
 });
 
-const bulkPurgePolicy = t.union([fixedAgePurge, fixedTimePurge]);
+const bulkPurgePolicy = z.discriminatedUnion('purgeType', [fixedAgePurge, fixedTimePurge]);
 
-const bulkPurgeRollupSchema = t.type({
-  body: t.intersection([
-    t.type({
-      list: t.array(t.string),
-      purgePolicy: bulkPurgePolicy,
-    }),
-    t.partial({
-      force: t.boolean,
-    }),
-  ]),
+const bulkPurgeRollupSchema = z.object({
+  body: z.object({
+    list: z.array(z.string()),
+    purgePolicy: bulkPurgePolicy,
+    force: z.boolean().optional(),
+  }),
 });
 
 interface BulkPurgeRollupResponse {
   taskId?: DeleteByQueryResponse['task'];
 }
 
-type BulkPurgePolicyInput = t.OutputOf<typeof bulkPurgePolicy>;
-type BulkPurgeRollupInput = t.OutputOf<typeof bulkPurgeRollupSchema.props.body>; // Raw payload sent by the frontend
-type BulkPurgeRollupParams = t.TypeOf<typeof bulkPurgeRollupSchema.props.body>;
+type BulkPurgePolicyInput = z.input<typeof bulkPurgePolicy>;
+type BulkPurgeRollupInput = z.input<typeof bulkPurgeRollupSchema.shape.body>;
+type BulkPurgeRollupParams = z.output<typeof bulkPurgeRollupSchema.shape.body>;
 
 export type {
   BulkPurgeRollupResponse,
