@@ -1,24 +1,21 @@
 ---
-id: kibDevDocsChromeSidebar
-slug: /kibana-dev-docs/chrome/sidebar
-title: Chrome Sidebar
-description: Build sidebar apps with the Chrome sidebar service.
-date: 2026-01-29
-tags: ['kibana', 'dev', 'contributor', 'chrome', 'shared-ux']
+navigation_title: Sidebar
 ---
+
+# Chrome sidebar [chrome-sidebar]
 
 ## Introduction
 
 Chrome Sidebar lets plugins provide supplemental tools without disrupting the main app content.
 Sidebar apps are global and can stay open across navigation and page reloads.
 
-![Chrome sidebar](./sidebar.png)
+![Chrome sidebar](assets/sidebar.png)
 
 ## Register a sidebar app
 
 Register apps during the plugin `setup()` phase. Each app provides an async component loader and can optionally define a store for state management.
 
-Before registering, confirm the `appId` is allowed. Valid app ids are restricted and new ones should be added only after discussing with the UX team.
+Before registering, confirm the `appId` is allowed. Production ids are `agentBuilder` and `newsfeed`. Example and test ids must start with `sidebarExample`.
 
 ```tsx
 import { z } from '@kbn/zod/v4';
@@ -43,7 +40,7 @@ const mySidebarStore = createSidebarStore({
 });
 
 core.chrome.sidebar.registerApp({
-  appId: 'mySidebarApp',
+  appId: 'sidebarExampleMyApp',
   store: mySidebarStore,
   loadComponent: () => import('./my_sidebar_app').then((m) => m.MySidebarApp),
   status: 'available',
@@ -122,7 +119,7 @@ import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components'
 
 // Register without store
 core.chrome.sidebar.registerApp({
-  appId: 'helpPanel',
+  appId: 'sidebarExampleHelpPanel',
   restoreOnReload: false,
   loadComponent: () => import('./help_panel').then((m) => m.HelpPanel),
 });
@@ -210,7 +207,7 @@ const store = createSidebarStore({
 ### Accessing state externally
 
 ```tsx
-const myApp = core.chrome.sidebar.getApp('mySidebarApp');
+const myApp = core.chrome.sidebar.getApp('sidebarExampleMyApp');
 
 // Call actions to open with state
 myApp.actions.openConversation('abc-123');
@@ -227,7 +224,7 @@ myApp.getState$().subscribe((next) => {
 Use the app-bound API during the plugin `start()` phase. Open the sidebar via actions to set initial state:
 
 ```tsx
-const myApp = core.chrome.sidebar.getApp('mySidebarApp');
+const myApp = core.chrome.sidebar.getApp('sidebarExampleMyApp');
 
 // Open with state via action
 myApp.actions.openConversation('abc-123');
@@ -249,7 +246,7 @@ import { useSidebar, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 
 function MyToolbarButton() {
   const { close, isOpen } = useSidebar();
-  const myApp = useSidebarApp('mySidebarApp');
+  const myApp = useSidebarApp('sidebarExampleMyApp');
 
   return (
     <>
@@ -275,12 +272,12 @@ Sidebar apps have three possible statuses to handle async checks (license, permi
 
 ```tsx
 const updateMySidebarApp = core.chrome.sidebar.registerApp({
-  appId: 'mySidebarApp',
+  appId: 'sidebarExampleMyApp',
   loadComponent: () => import('./my_sidebar_app').then((m) => m.MySidebarApp),
   status: 'pending',
 });
 
-core.chrome.sidebar.getApp('mySidebarApp').open(); // Shows loading skeleton
+core.chrome.sidebar.getApp('sidebarExampleMyApp').open(); // Shows loading skeleton
 
 // After async checks complete
 updateMySidebarApp({ status: 'available' }); // App component appears
@@ -295,7 +292,7 @@ Use `getStatus()` / `getStatus$()` or the `useSidebarApp` hook to check status r
 import { useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 
 function MyComponent() {
-  const { status, open } = useSidebarApp('mySidebarApp');
+  const { status, open } = useSidebarApp('sidebarExampleMyApp');
   
   return (
     <button disabled={status === 'unavailable'} onClick={open}>
