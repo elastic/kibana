@@ -6,37 +6,17 @@
  */
 
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import { v5 } from 'uuid';
 import pRetry from 'p-retry';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getStatusCode } from './retry_utils';
-
-/**
- * When running locally, only UUIDs are allowed for non-preconfigured connectors.
- * We generate a deterministic UUID from the logical connector id so runs are stable/idempotent.
- */
-export function getConnectorIdAsUuid(connectorId: string) {
-  return v5(connectorId, v5.DNS);
-}
-
-/**
- * Returns the connector id to use at runtime.
- * When `KBN_EVALS_SKIP_CONNECTOR_SETUP` is set, the original id is returned as-is
- * (preconfigured connectors don't need UUID mapping).
- * Otherwise, a deterministic UUID is generated.
- */
-export function resolveConnectorId(connectorId: string): string {
-  return process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP
-    ? connectorId
-    : getConnectorIdAsUuid(connectorId);
-}
+import { createStackConnectorFixture } from './create_stack_connector_fixture';
 
 /**
  * Inference connectors may return 400 (not 409) when the backing inference endpoint
  * was created by another parallel worker — treat as success and reuse.
  */
-function isAlreadyExistsConnectorError(error: unknown): boolean {
+function isAlreadyExistsEndpointError(error: unknown): boolean {
   const status = getStatusCode(error);
   if (status === 409) {
     return true;
@@ -54,27 +34,6 @@ function isAlreadyExistsConnectorError(error: unknown): boolean {
   return /already exists/i.test(message);
 }
 
-export async function deleteConnectorById({
-  fetch,
-  connectorId,
-  log,
-}: {
-  fetch: HttpHandler;
-  connectorId: string;
-  log: ToolingLog;
-}) {
-  log.info(`Deleting connector: ${connectorId}`);
-  await fetch({
-    path: `/api/actions/connector/${connectorId}`,
-    method: 'DELETE',
-  }).catch((error) => {
-    if (getStatusCode(error) === 404) {
-      return;
-    }
-    throw error;
-  });
-}
-
 /**
  * Returns the inference endpoint id for `.inference` connectors whose config
  * names the backing inference endpoint, or undefined otherwise.
@@ -87,6 +46,16 @@ function getInferenceEndpointId(connector: AvailableConnectorWithId): string | u
   return typeof inferenceId === 'string' && inferenceId.length > 0 ? inferenceId : undefined;
 }
 
+/**
+ * Routes to the appropriate provisioning strategy based on the connector definition shape:
+ *
+ * - `KBN_EVALS_SKIP_CONNECTOR_SETUP` → use predefinedConnector as-is (no-op)
+ * - `.inference` with `config.inferenceId` + `provider === 'elastic'` (EIS) → wait for the
+ *   pre-provisioned endpoint; bind to it without touching the Actions API
+ * - `.inference` with `config.inferenceId` + other provider (OpenRouter) → create the inference
+ *   endpoint if missing; bind to it without touching the Actions API
+ * - everything else → delegate to `createStackConnectorFixture` (generic Actions API path)
+ */
 export async function createConnectorFixture({
   predefinedConnector,
   fetch,
@@ -98,10 +67,6 @@ export async function createConnectorFixture({
   log: ToolingLog;
   use: (connector: AvailableConnectorWithId) => Promise<void>;
 }) {
-  interface ConnectorGetResponse {
-    is_preconfigured?: boolean;
-  }
-
   async function inferenceEndpointExists(inferenceId: string): Promise<boolean> {
     const res = (await fetch({
       path: `/internal/_inference/_exists/${encodeURIComponent(inferenceId)}`,
@@ -118,7 +83,18 @@ export async function createConnectorFixture({
 
     await pRetry(
       async () => {
-        if (!(await inferenceEndpointExists(inferenceId))) {
+        let exists: boolean;
+        try {
+          exists = await inferenceEndpointExists(inferenceId);
+        } catch (error) {
+          const status = getStatusCode(error);
+          // Abort immediately on permanent client errors.
+          if (status === 400 || status === 401 || status === 403) {
+            throw new pRetry.AbortError(error instanceof Error ? error : new Error(String(error)));
+          }
+          throw error;
+        }
+        if (!exists) {
           throw new Error(`Inference endpoint [${inferenceId}] does not exist`);
         }
       },
@@ -130,30 +106,6 @@ export async function createConnectorFixture({
           `so make sure the EIS/CCM setup has created the endpoint before running evals. ` +
           `Original error: ${error instanceof Error ? error.message : String(error)}`
       );
-    });
-  }
-
-  async function isPreconfiguredConnector(connectorId: string): Promise<boolean> {
-    const retries = process.env.KBN_EVALS_AWAIT_CCM_CONNECTORS ? 3 : 0;
-
-    return pRetry(
-      async () => {
-        try {
-          const res = (await fetch({
-            path: `/api/actions/connector/${encodeURIComponent(connectorId)}`,
-            method: 'GET',
-          })) as ConnectorGetResponse;
-
-          return res?.is_preconfigured === true;
-        } catch (error) {
-          if (getStatusCode(error) === 404) throw error;
-          throw new pRetry.AbortError(error instanceof Error ? error : new Error(String(error)));
-        }
-      },
-      { retries, minTimeout: 3000, factor: 1 }
-    ).catch((error) => {
-      if (getStatusCode(error) === 404) return false;
-      throw error;
     });
   }
 
@@ -170,7 +122,7 @@ export async function createConnectorFixture({
         body: JSON.stringify(body),
       });
     } catch (error) {
-      if (isAlreadyExistsConnectorError(error)) {
+      if (isAlreadyExistsEndpointError(error)) {
         log.info(`Inference endpoint already exists, reusing: ${inferenceId}`);
       } else {
         throw error;
@@ -215,47 +167,6 @@ export async function createConnectorFixture({
     return;
   }
 
-  // If this connector is already preconfigured in the Kibana instance (e.g. connectors declared
-  // via `xpack.actions.preconfigured` in a local kibana.yml), we should reuse it rather than
-  // creating/deleting a saved object connector.
-  if (await isPreconfiguredConnector(predefinedConnector.id)) {
-    log.info(`Reusing preconfigured connector: ${predefinedConnector.id}`);
-    await use(predefinedConnector);
-    return;
-  }
-
-  // When running locally, the connectors we read from kibana.yml
-  // are not configured in the kibana instance, so we install the
-  // one for this test run. only UUIDs are allowed for non-preconfigured
-  // connectors, so we generate a seeded uuid using the preconfigured
-  // connector id.
-  const connectorIdAsUuid = getConnectorIdAsUuid(predefinedConnector.id);
-
-  const connectorWithUuid = {
-    ...predefinedConnector,
-    id: connectorIdAsUuid,
-  };
-
-  log.info(`Creating connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
-
-  try {
-    await fetch({
-      path: `/api/actions/connector/${connectorWithUuid.id}`,
-      method: 'POST',
-      body: JSON.stringify({
-        config: connectorWithUuid.config,
-        connector_type_id: connectorWithUuid.actionTypeId,
-        name: connectorWithUuid.name,
-        secrets: connectorWithUuid.secrets,
-      }),
-    });
-  } catch (error) {
-    if (isAlreadyExistsConnectorError(error)) {
-      log.info(`Connector or inference endpoint already exists, reusing: ${connectorIdAsUuid}`);
-    } else {
-      throw error;
-    }
-  }
-
-  await use(connectorWithUuid);
+  // Non-LLM connectors (e.g. `.email`, `.slack`, `.gen-ai`) go through the generic Actions API.
+  await createStackConnectorFixture({ predefinedConnector, fetch, log, use });
 }
