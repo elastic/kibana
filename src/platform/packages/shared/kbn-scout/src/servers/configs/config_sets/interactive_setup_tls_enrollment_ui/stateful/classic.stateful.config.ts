@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { tlsServers } from '../../interactive_setup.preboot_base';
+import { createTlsServers } from '../../interactive_setup.preboot_base';
 
 /**
  * Serves `test/scout_interactive_setup_tls_enrollment_ui/ui` — the enrollment-token wizard flow.
@@ -16,4 +16,4 @@ import { tlsServers } from '../../interactive_setup.preboot_base';
  * Deliberately a dedicated config set for a single Playwright config: see "Why there is one config
  * set per Playwright config" in `interactive_setup.preboot_base.ts`.
  */
-export const servers: ScoutServerConfig = tlsServers;
+export const servers: ScoutServerConfig = createTlsServers();

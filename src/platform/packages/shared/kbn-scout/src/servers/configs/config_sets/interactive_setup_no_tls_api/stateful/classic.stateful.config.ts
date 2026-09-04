@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { noTlsServers } from '../../interactive_setup.preboot_base';
+import { createNoTlsServers } from '../../interactive_setup.preboot_base';
 
 /**
  * Serves `test/scout_interactive_setup_no_tls_api/api` — the manual-configuration API flow without TLS.
@@ -16,4 +16,4 @@ import { noTlsServers } from '../../interactive_setup.preboot_base';
  * Deliberately a dedicated config set for a single Playwright config: see "Why there is one config
  * set per Playwright config" in `interactive_setup.preboot_base.ts`.
  */
-export const servers: ScoutServerConfig = noTlsServers;
+export const servers: ScoutServerConfig = createNoTlsServers();

@@ -178,42 +178,33 @@ export const createPrebootConfig = ({
   };
 };
 
-/** TLS-enabled, security-enabled cluster with enrollment turned on. */
-export const tlsServers: ScoutServerConfig = createPrebootConfig({
-  esProtocol: 'https',
-  esSsl: true,
-  esCertificateAuthorities: [readFileSync(CA_CERT_PATH)],
-  esServerArgs: [
-    ...defaultConfig.esTestCluster.serverArgs,
-    'xpack.security.enabled=true',
-    'xpack.security.enrollment.enabled=true',
-    `xpack.security.http.ssl.keystore.path=${ES_HTTP_KEYSTORE_PATH}`,
-    `xpack.security.http.ssl.keystore.secure_password=${ES_HTTP_KEYSTORE_PASSWORD}`,
-  ],
-});
+export const createTlsServers = (): ScoutServerConfig =>
+  createPrebootConfig({
+    esProtocol: 'https',
+    esSsl: true,
+    esCertificateAuthorities: [readFileSync(CA_CERT_PATH)],
+    esServerArgs: [
+      ...defaultConfig.esTestCluster.serverArgs,
+      'xpack.security.enabled=true',
+      'xpack.security.enrollment.enabled=true',
+      `xpack.security.http.ssl.keystore.path=${ES_HTTP_KEYSTORE_PATH}`,
+      `xpack.security.http.ssl.keystore.secure_password=${ES_HTTP_KEYSTORE_PASSWORD}`,
+    ],
+  });
 
-/** Security-enabled cluster served over plain HTTP, so the wizard offers no CA step. */
-export const noTlsServers: ScoutServerConfig = createPrebootConfig({
-  esServerArgs: [...defaultConfig.esTestCluster.serverArgs, 'xpack.security.enabled=true'],
-});
+export const createNoTlsServers = (): ScoutServerConfig =>
+  createPrebootConfig({
+    esServerArgs: [...defaultConfig.esTestCluster.serverArgs, 'xpack.security.enabled=true'],
+  });
 
-/**
- * Cluster with security disabled entirely, so the wizard asks only for an address.
- *
- * Every `xpack.security.*` Elasticsearch arg has to go rather than just be overridden, and the
- * stateful `roles.yml` with it, since file-based roles are meaningless without security. On the
- * Kibana side `withoutKibanaSecurity` drops the mock-IdP SAML provider — which would otherwise
- * reference a realm that cannot exist — and falls back to basic auth.
- *
- * Kibana reports security as unavailable either way, so basic auth is not actually usable. That is
- * expected and matches the FTR suite this replaced: no interactive-setup test ever logs in, the
- * flow only needs Kibana to boot cleanly and leave the setup page.
- */
-export const noSecurityServers: ScoutServerConfig = createPrebootConfig({
-  esFiles: [],
-  withoutKibanaSecurity: true,
-  esServerArgs: [
-    ...defaultConfig.esTestCluster.serverArgs.filter((arg) => !arg.startsWith('xpack.security.')),
-    'xpack.security.enabled=false',
-  ],
-});
+export const createNoSecurityServers = (): ScoutServerConfig =>
+  createPrebootConfig({
+    esFiles: [],
+    withoutKibanaSecurity: true,
+    esServerArgs: [
+      ...defaultConfig.esTestCluster.serverArgs.filter(
+        (arg) => !arg.startsWith('xpack.security.')
+      ),
+      'xpack.security.enabled=false',
+    ],
+  });

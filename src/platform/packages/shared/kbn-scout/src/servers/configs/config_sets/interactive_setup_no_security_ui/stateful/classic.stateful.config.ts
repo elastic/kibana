@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { noSecurityServers } from '../../interactive_setup.preboot_base';
+import { createNoSecurityServers } from '../../interactive_setup.preboot_base';
 
 /**
  * Serves `test/scout_interactive_setup_no_security_ui/ui` — the manual-configuration wizard flow against a cluster with security disabled.
@@ -16,4 +16,4 @@ import { noSecurityServers } from '../../interactive_setup.preboot_base';
  * Deliberately a dedicated config set for a single Playwright config: see "Why there is one config
  * set per Playwright config" in `interactive_setup.preboot_base.ts`.
  */
-export const servers: ScoutServerConfig = noSecurityServers;
+export const servers: ScoutServerConfig = createNoSecurityServers();
