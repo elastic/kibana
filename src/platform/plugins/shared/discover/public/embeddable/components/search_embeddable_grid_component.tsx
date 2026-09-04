@@ -44,11 +44,8 @@ import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
 import type { DiscoverAppLocatorParams } from '../../../common';
-import {
-  getExpandedDocLinkability,
-  getExpandedDocRef,
-} from '../../application/main/utils/expanded_doc';
-import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
+import { getExpandedDocLinkability } from '../../application/main/utils/expanded_doc';
+import { getExpandedDocLocatorParams } from '../utils/get_discover_locator_params';
 import {
   useCopyLocatorLink,
   useShareDirectLinkAction,
@@ -185,22 +182,41 @@ export function SearchEmbeddableGridComponent({
     [savedSearchQuery, expandedDoc]
   );
 
-  const buildExpandedDocLocatorParams = useCallback((): DiscoverAppLocatorParams => {
-    const expandedDocRef = getExpandedDocRef(expandedDoc);
-    // Freeze the panel's window so the shared link reproduces the same results instead of drifting
-    // with a relative range like "Last 15 minutes".
-    const bounds = timeRange ? discoverServices.timefilter.calculateBounds(timeRange) : undefined;
-    const absoluteTimeRange =
-      bounds?.min && bounds?.max
-        ? { from: bounds.min.toISOString(), to: bounds.max.toISOString() }
-        : timeRange;
-
-    return {
-      ...getDiscoverLocatorParams(api),
-      ...(expandedDocRef ? { expandedDoc: expandedDocRef } : {}),
-      ...(absoluteTimeRange ? { timeRange: absoluteTimeRange } : {}),
-    };
-  }, [api, expandedDoc, timeRange, discoverServices.timefilter]);
+  const buildExpandedDocLocatorParams = useCallback(
+    (): DiscoverAppLocatorParams =>
+      getExpandedDocLocatorParams({
+        api,
+        savedSearch,
+        dataView,
+        query: savedSearchQuery,
+        panelFilters: savedSearchFilters,
+        dashboardFilters: fetchContext?.filters,
+        columns,
+        sort,
+        grid,
+        isEsql,
+        esqlVariables,
+        expandedDoc,
+        timeRange,
+        timefilter: discoverServices.timefilter,
+      }),
+    [
+      api,
+      dataView,
+      savedSearchQuery,
+      savedSearchFilters,
+      fetchContext,
+      columns,
+      sort,
+      grid,
+      savedSearch,
+      isEsql,
+      esqlVariables,
+      expandedDoc,
+      timeRange,
+      discoverServices.timefilter,
+    ]
+  );
 
   const copyExpandedDocLink = useCopyLocatorLink(buildExpandedDocLocatorParams);
   const shareDirectLinkActions = useShareDirectLinkAction({
