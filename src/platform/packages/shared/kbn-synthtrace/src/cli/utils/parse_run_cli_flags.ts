@@ -125,7 +125,7 @@ const SCENARIO_ALIASES: Record<string, string> = {
 };
 
 function getParsedFiles(flags: RunCliFlags) {
-  const { _: parsedFiles } = flags;
+  const parsedFiles = flags._.map(String);
 
   if (!parsedFiles.length) {
     throw new Error('Please specify at least one scenario to run');

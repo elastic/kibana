@@ -33,7 +33,7 @@ const {
   _,
   $0,
   ...otherArgs
-} = yargs(process.argv.slice(2)).argv;
+} = yargs(process.argv.slice(2)).parseSync();
 
 const skipPackages = typeof skipPackagesArg === 'string' ? skipPackagesArg.split(',') : [];
 const printUsage = () =>

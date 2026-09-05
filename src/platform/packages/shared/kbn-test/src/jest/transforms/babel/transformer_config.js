@@ -7,7 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const transformImportMetaUrl = ({ types: t }) => ({
+  visitor: {
+    Program(path) {
+      if (path.scope.hasOwnBinding('require')) {
+        path.scope.rename('require');
+      }
+    },
+    MemberExpression(path) {
+      const { node } = path;
+      if (
+        t.isMetaProperty(node.object) &&
+        node.object.meta.name === 'import' &&
+        node.object.property.name === 'meta' &&
+        t.isIdentifier(node.property)
+      ) {
+        if (node.property.name === 'resolve') {
+          path.replaceWith(t.memberExpression(t.identifier('require'), t.identifier('resolve')));
+          return;
+        }
+        if (node.property.name !== 'url') {
+          return;
+        }
+        path.replaceWith(
+          t.memberExpression(
+            t.callExpression(
+              t.memberExpression(
+                t.callExpression(t.identifier('require'), [t.stringLiteral('url')]),
+                t.identifier('pathToFileURL')
+              ),
+              [t.identifier('__filename')]
+            ),
+            t.identifier('href')
+          )
+        );
+      }
+    },
+  },
+});
+
 module.exports = () => ({
+  plugins: [transformImportMetaUrl],
   presets: [
     [
       require.resolve('@kbn/babel-preset/node_preset'),

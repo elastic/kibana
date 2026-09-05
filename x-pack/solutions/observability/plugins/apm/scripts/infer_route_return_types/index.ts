@@ -16,8 +16,9 @@ import type {
 import { Project, Node, SyntaxKind, ts, TypeFormatFlags } from 'ts-morph';
 import Path from 'path';
 import { execSync } from 'child_process';
-import { argv } from 'yargs';
+import yargs from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
+const argv = yargs(process.argv.slice(2)).parseSync();
 
 // This script adds explicit return types to route handlers,
 // for performance reasons. See https://github.com/elastic/kibana/pull/123266

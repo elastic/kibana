@@ -334,7 +334,8 @@ const argv = yargs(process.argv.slice(2))
     default: true,
     description: 'Generate scheduled response documents',
   })
-  .help().argv;
+  .help()
+  .parseSync();
 
 const {
   count,

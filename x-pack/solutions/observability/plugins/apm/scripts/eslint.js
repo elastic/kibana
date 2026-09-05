@@ -9,9 +9,10 @@
 const { ESLint } = require('eslint');
 const { resolve } = require('path');
 //eslint-disable-next-line import/no-extraneous-dependencies
-const { argv } = require('yargs');
+const yargs = require('yargs');
 
 async function run() {
+  const { argv } = yargs(process.argv.slice(2));
   const fix = !!argv.fix;
 
   const eslint = new ESLint({

@@ -77,7 +77,7 @@ const filterCompletedSpecs = async (
 export const cli = () => {
   run(
     async ({ log: _cliLogger }) => {
-      const { argv } = yargs(process.argv.slice(2))
+      const argv = yargs(process.argv.slice(2))
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('env', (arg: string) =>
@@ -91,7 +91,8 @@ export const cli = () => {
             return acc;
           }, {} as Record<string, string | number>)
         )
-        .boolean('inspect');
+        .boolean('inspect')
+        .parseSync();
 
       const USE_CHROME_BETA = process.env.USE_CHROME_BETA?.match(/(1|true)/i);
 
