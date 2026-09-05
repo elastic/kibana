@@ -61,6 +61,19 @@ export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
     values: { count },
   });
 
+export const EPISODES_LIST_ITEM_COUNT_CAPPED = (count: number) =>
+  i18n.translate('xpack.alertingV2.episodes.itemCountCapped', {
+    defaultMessage: 'Showing first {count} episodes',
+    values: { count },
+  });
+
+export const EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP = (count: number) =>
+  i18n.translate('xpack.alertingV2.episodes.itemCountCappedTooltip', {
+    defaultMessage:
+      'The table loads at most {count} episodes. Narrow the time range or filters to find others.',
+    values: { count },
+  });
+
 export const EPISODES_ASSIGNEE_EMPTY = i18n.translate('xpack.alertingV2.episodes.assignees.empty', {
   defaultMessage: '—',
 });
