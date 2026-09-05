@@ -30,6 +30,21 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pr-size-guard.mjs"
+          }
+        ]
+      }
     ]
+  },
+  "env": {
+    "PR_SIZE_SOFT_LINES": "500",
+    "PR_SIZE_SOFT_FILES": "15",
+    "PR_SIZE_DEBOUNCE_SECS": "30"
   }
 }
