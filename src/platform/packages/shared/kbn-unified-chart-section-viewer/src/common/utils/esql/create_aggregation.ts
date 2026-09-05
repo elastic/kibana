@@ -12,10 +12,21 @@ import { synth, BasicPrettyPrinter } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FunctionNames } from '@kbn/esql-language';
-import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
+import {
+  METRICS_GRID_SETTINGS_DEFAULTS,
+  type MetricsGridSettings,
+  type SimpleAggregation,
+} from '@kbn/discover-utils';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
 import { HISTOGRAM_PERCENTILE_VALUES } from '../../../components/flyout/metrics_grid_settings_flyout/constants';
+
+const GAUGE_OVER_TIME_FN: Record<SimpleAggregation, FunctionNames> = {
+  [FunctionNames.AVG]: FunctionNames.AVG_OVER_TIME,
+  [FunctionNames.MIN]: FunctionNames.MIN_OVER_TIME,
+  [FunctionNames.MAX]: FunctionNames.MAX_OVER_TIME,
+  [FunctionNames.SUM]: FunctionNames.SUM_OVER_TIME,
+};
 
 /**
  * Gets the appropriate casting function name for a field type.
@@ -96,6 +107,11 @@ function buildAggregationNode(
   }
 
   const fn = settings.gaugeAggregation.toUpperCase();
+  if (instrument === 'gauge') {
+    const overTimeFn = GAUGE_OVER_TIME_FN[settings.gaugeAggregation].toUpperCase();
+    return synth.exp`${synth.kwd(fn)}(${synth.kwd(overTimeFn)}(${resolvedField}))`;
+  }
+
   return synth.exp`${synth.kwd(fn)}(${resolvedField})`;
 }
 
@@ -105,7 +121,8 @@ function buildAggregationNode(
  * - For legacy histogram (field type + instrument both histogram): `PERCENTILE(TO_TDIGEST(...), 95)`
  * - For `histogram` instrument: `PERCENTILE(..., 95)` if type is `exponential_histogram` or `tdigest`
  * - `SUM(RATE(...))` for counter instruments
- * - `AVG(...)` for other metric types
+ * - `AVG(AVG_OVER_TIME(...))` for gauge instruments
+ * - `AVG(...)` for other metric types that fall through (e.g. traces latency)
  *
  * When multiple field types are present (from different backing indices with conflicting mappings),
  * the aggregation will wrap the field in an appropriate casting function (e.g., TO_DOUBLE) to resolve the ambiguity.
