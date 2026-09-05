@@ -108,7 +108,7 @@ steps:
             with:
               channel: '${{ variables.channelId }}'
               ts: '${{ variables.threadTs }}'
-              limit: '{{ consts.replyPageSize }}'
+              limit: ${{ consts.replyPageSize }}
               cursor: '${{ variables.replyCursor }}'
 
           - name: index_replies
@@ -138,7 +138,6 @@ steps:
                           text: '${{ foreach.item.text }}'
                           reply_count: 0
                           is_thread_reply: true
-                        payload: '${{ foreach.item }}'
 
                   - name: increment_replies_indexed
                     type: data.set

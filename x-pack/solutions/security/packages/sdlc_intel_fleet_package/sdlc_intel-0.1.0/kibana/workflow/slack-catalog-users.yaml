@@ -59,7 +59,7 @@ steps:
         type: slack2.listUsersIngest
         connector-id: '{{ consts.slackConnectorId }}'
         with:
-          limit: '{{ consts.pageSize }}'
+          limit: ${{ consts.pageSize }}
           cursor: '{{ variables.cursor }}'
 
       - name: build_bulk_ops

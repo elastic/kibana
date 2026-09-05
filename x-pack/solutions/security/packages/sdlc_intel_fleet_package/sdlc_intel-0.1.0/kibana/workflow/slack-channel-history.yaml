@@ -55,7 +55,7 @@ steps:
           types:
             - public_channel
             - private_channel
-          limit: '{{ consts.channelPageSize }}'
+          limit: ${{ consts.channelPageSize }}
           cursor: '${{ variables.channelCursor }}'
 
       - name: sync_channel_history
@@ -107,7 +107,7 @@ steps:
                 with:
                   channel: '${{ variables.channelId }}'
                   oldest: '${{ variables.messageWatermark }}'
-                  limit: '{{ consts.historyPageSize }}'
+                  limit: ${{ consts.historyPageSize }}
                   cursor: '${{ variables.historyCursor }}'
 
               - name: index_messages
@@ -134,7 +134,6 @@ steps:
                         channel:
                           id: '${{ variables.channelId }}'
                           name: '${{ variables.channelName }}'
-                        payload: '${{ foreach.item }}'
 
               - name: advance_history_cursor
                 type: data.set
