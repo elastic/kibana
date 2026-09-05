@@ -8,6 +8,7 @@
  */
 
 import React, { type PropsWithChildren, createContext, useContext, useState } from 'react';
+import type { ToastsStart } from '@kbn/core/public';
 
 import type { ShareConfigs, ShareTypes, ShowShareMenuOptions } from '../../types';
 
@@ -15,6 +16,7 @@ export interface IShareContext extends Omit<ShowShareMenuOptions, 'onClose'> {
   onClose: () => void;
   shareMenuItems: ShareConfigs[];
   isSaving?: boolean;
+  toastNotifications?: ToastsStart;
 }
 
 const ShareContext = createContext<IShareContext | null>(null);
