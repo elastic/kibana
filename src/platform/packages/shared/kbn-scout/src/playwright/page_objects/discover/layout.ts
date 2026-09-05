@@ -59,7 +59,7 @@ export abstract class LayoutMixin extends SaveMixin {
     }: { createAdHocIfMissing?: boolean; waitForFieldList?: boolean } = {}
   ) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
-    const currentValue = await dataViewSwitch.innerText();
+    const currentValue = await dataViewSwitch.locator('[data-test-subj="fullText"]').innerText();
     if (currentValue === name) {
       return;
     }
@@ -87,7 +87,8 @@ export abstract class LayoutMixin extends SaveMixin {
   getSelectedDataView(): Locator {
     return this.page.testSubj
       .locator('discover-dataView-switch-link')
-      .or(this.page.testSubj.locator('dataView-switch-link'));
+      .or(this.page.testSubj.locator('dataView-switch-link'))
+      .locator('[data-test-subj="fullText"]');
   }
 
   /**

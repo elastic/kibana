@@ -57,14 +57,16 @@ export class UnifiedSearchPageObject extends FtrService {
   }
 
   public async getSelectedDataView(switchButtonSelector: string) {
-    let visibleText = '';
+    let selectedDataView = '';
 
     await this.retry.waitFor('wait for updating switcher', async () => {
-      visibleText = await this.testSubjects.getVisibleText(switchButtonSelector);
-      return Boolean(visibleText);
+      const switchButton = await this.testSubjects.find(switchButtonSelector);
+      const fullText = await switchButton.findByTestSubject('fullText');
+      selectedDataView = await fullText.getVisibleText();
+      return Boolean(selectedDataView);
     });
 
-    return visibleText;
+    return selectedDataView;
   }
 
   public async selectTextBasedLanguage(language: string) {
