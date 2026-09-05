@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/zod'
   - '@kbn/adaptive-ui'
+  - '@kbn/adaptive-ui-adapters'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
