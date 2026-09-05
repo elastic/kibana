@@ -46,7 +46,11 @@ SSH_KEY = os.path.expanduser("~/.ssh/azure_eval_farm")
 SSH_USER = "orcaeval"
 IMAGE = json.load(open(Path(__file__).parent / ".azure-state.json"))["imageId"]
 RG = "orca-eval-farm"
-VM_SIZE = "Standard_D8s_v5"
+# Thinking-model sweeps (selfhost-qwen38 etc.) accumulate huge trace state in
+# the Kibana dev server; D8s_v5 OOM-killed Kibana mid-run on all 3 shards
+# (converse ECONNREFUSED after ~14 examples, 2026-09-05). Use D16s_v5 for
+# selfhost models.
+VM_SIZE = os.environ.get("SWEEP_VM_SIZE", "Standard_D8s_v5")
 
 # ---------------------------------------------------------------------------
 # Suite profiles.
@@ -1329,7 +1333,9 @@ def main() -> int:
         # One base per sweep, suffixed per shard in launch(). Computing the
         # base inside launch() would stamp each shard with a different base
         # and leave the slices unrelatable after the fact.
-        os.environ.setdefault("TEST_RUN_ID", f"sweep-{int(time.time())}")
+        os.environ.setdefault(
+            "TEST_RUN_ID", f"sweep-{int(time.time())}{('-' + os.environ['VM_NAME_SUFFIX']) if os.environ.get('VM_NAME_SUFFIX') else ''}"
+        )
         print(f"run id base: {os.environ['TEST_RUN_ID']}", flush=True)
 
     # Provision + deploy in parallel (independent per VM); launches stay serial.
