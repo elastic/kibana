@@ -50,10 +50,9 @@ export class EisModelsPage {
   readonly manageRegionsLoading: Locator;
   readonly manageRegionsNoGeos: Locator;
   readonly manageRegionsNoRegions: Locator;
-  readonly manageRegionsGeoTab: Locator;
-  readonly manageRegionsRegionsTab: Locator;
+  readonly manageRegionsLocationTypeGeo: Locator;
+  readonly manageRegionsLocationTypeRegions: Locator;
   readonly manageRegionsSelectAllButton: Locator;
-  readonly manageRegionsExpandAllButton: Locator;
   readonly manageRegionsCustomPolicyToggle: Locator;
   // Confirm Region Change Modal
   readonly confirmRegionChangeModal: Locator;
@@ -124,10 +123,11 @@ export class EisModelsPage {
     this.manageRegionsLoading = this.page.testSubj.locator('manageRegionsLoading');
     this.manageRegionsNoGeos = this.page.testSubj.locator('manageRegionsNoGeos');
     this.manageRegionsNoRegions = this.page.testSubj.locator('manageRegionsNoRegions');
-    this.manageRegionsGeoTab = this.page.testSubj.locator('manageRegionsGeoTab');
-    this.manageRegionsRegionsTab = this.page.testSubj.locator('manageRegionsRegionsTab');
+    this.manageRegionsLocationTypeGeo = this.page.testSubj.locator('manageRegionsLocationTypeGeo');
+    this.manageRegionsLocationTypeRegions = this.page.testSubj.locator(
+      'manageRegionsLocationTypeRegions'
+    );
     this.manageRegionsSelectAllButton = this.page.testSubj.locator('manageRegionsSelectAllButton');
-    this.manageRegionsExpandAllButton = this.page.testSubj.locator('manageRegionsExpandAllButton');
     this.manageRegionsCustomPolicyToggle = this.page.testSubj.locator(
       'manageRegionsCustomPolicyToggle'
     );
@@ -210,10 +210,6 @@ export class EisModelsPage {
     return this.page.testSubj.locator(`deleteEndpointButton-${inferenceId}`);
   }
 
-  public geoZoneRow(geo: string): Locator {
-    return this.page.testSubj.locator(`geoZoneRow-${geo}`);
-  }
-
   public geoZoneCheckbox(geo: string): Locator {
     return this.page.testSubj.locator(`geoZoneCheckbox-${geo}`);
   }
@@ -232,10 +228,6 @@ export class EisModelsPage {
 
   public regionZonePanel(geo: string): Locator {
     return this.page.testSubj.locator(`manageRegionsZone-${geo}`);
-  }
-
-  public regionZoneToggle(geo: string): Locator {
-    return this.page.testSubj.locator(`manageRegionsZoneToggle-${geo}`);
   }
 
   public regionCheckbox(cspRegionKey: string): Locator {

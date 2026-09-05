@@ -22,6 +22,8 @@ import { computeSeedState } from '../../utils/compute_seed_state';
 import { useSetSelection } from '../../hooks/use_set_selection';
 import { useRegionTabState } from './use_region_tab_state';
 
+export type ManageRegionsState = ReturnType<typeof useManageRegionsState>;
+
 export const useManageRegionsState = (onClose: () => void) => {
   const { data: policy, isLoading: isPolicyLoading, isError: isPolicyError } = useRegionPolicy();
   const {
@@ -173,32 +175,36 @@ export const useManageRegionsState = (onClose: () => void) => {
     setIsCallOutDismissed(true);
   }, []);
 
+  const { reset: resetGeoSelection } = geoSelection;
+  const { reset: resetRegionSelection } = regionTab.regionSelection;
+  const handleLocationTypeChange = useCallback(
+    (next: PolicyMode) => {
+      if (next === activeTab) return;
+      setActiveTab(next);
+      resetGeoSelection();
+      resetRegionSelection();
+    },
+    [activeTab, setActiveTab, resetGeoSelection, resetRegionSelection]
+  );
+
   const regionTabReturn = useMemo(
     () => ({
       zoneGroups: regionTab.zoneGroups,
       checkedKeys: regionTab.regionSelection.selected,
-      expandedZones: regionTab.expandedZones,
       totalRegions: regionTab.regionSelection.total,
       totalSelected: regionTab.regionSelection.totalSelected,
       allSelected: regionTab.regionSelection.allSelected,
-      isAllExpanded: regionTab.isAllExpanded,
       onSelectAll: regionTab.regionSelection.selectAll,
       onToggleRegion: regionTab.regionSelection.toggle,
-      onToggleExpand: regionTab.handleToggleExpand,
-      onExpandAll: regionTab.handleExpandAll,
     }),
     [
       regionTab.zoneGroups,
       regionTab.regionSelection.selected,
-      regionTab.expandedZones,
       regionTab.regionSelection.total,
       regionTab.regionSelection.totalSelected,
       regionTab.regionSelection.allSelected,
-      regionTab.isAllExpanded,
       regionTab.regionSelection.selectAll,
       regionTab.regionSelection.toggle,
-      regionTab.handleToggleExpand,
-      regionTab.handleExpandAll,
     ]
   );
 
@@ -244,6 +250,7 @@ export const useManageRegionsState = (onClose: () => void) => {
       setActiveTab,
       setUseCustomPolicy,
       handleDismissCallOut,
+      handleLocationTypeChange,
       handleRequestSave,
       handleConfirmSave,
       handleCancelConfirmation,
