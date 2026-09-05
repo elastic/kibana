@@ -8,11 +8,15 @@
  */
 
 import {
-  SIMPLE_AGGREGATION_OPTIONS,
+  METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_SETTINGS_DEFAULTS,
+  METRICS_GRID_SIMPLE_AGGREGATIONS,
+} from '@kbn/discover-utils';
+import {
   HISTOGRAM_PERCENTILE_OPTIONS,
   HISTOGRAM_PERCENTILE_VALUES,
+  SIMPLE_AGGREGATION_OPTIONS,
 } from './constants';
-import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 
 describe('grid_settings constants', () => {
   it('exposes defaults matching the pre-existing hardcoded aggregation behavior', () => {
@@ -25,12 +29,12 @@ describe('grid_settings constants', () => {
     });
   });
 
-  it('exposes exactly the four simple aggregation options', () => {
-    expect(SIMPLE_AGGREGATION_OPTIONS).toEqual(['avg', 'sum', 'min', 'max']);
+  it('uses the canonical simple aggregation options', () => {
+    expect(SIMPLE_AGGREGATION_OPTIONS).toBe(METRICS_GRID_SIMPLE_AGGREGATIONS);
   });
 
-  it('exposes exactly the five histogram percentile options', () => {
-    expect(HISTOGRAM_PERCENTILE_OPTIONS).toEqual(['p50', 'p75', 'p90', 'p95', 'p99']);
+  it('uses the canonical histogram percentile options', () => {
+    expect(HISTOGRAM_PERCENTILE_OPTIONS).toBe(METRICS_GRID_HISTOGRAM_PERCENTILES);
   });
 
   it('maps every histogram percentile option to its numeric value', () => {

@@ -13,8 +13,8 @@ import {
 } from '@kbn/as-code-data-views-schema';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { type DiscoverSessionTabTypeState, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiData,
@@ -28,6 +28,7 @@ import {
 } from './transform_discover_session.fixtures';
 
 describe('discover session API transforms', () => {
+  const defaultProfile = { type: DiscoverTabType.Default } as const;
   const apiData: DiscoverSessionApiData = {
     title: 'Session',
     description: 'Session description',
@@ -36,6 +37,7 @@ describe('discover session API transforms', () => {
       {
         id: 'tab-classic',
         label: 'Classic',
+        profile: defaultProfile,
         data_source: {
           type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
           ref_id: 'logs-data-view',
@@ -62,6 +64,7 @@ describe('discover session API transforms', () => {
       {
         id: 'tab-esql',
         label: 'ES|QL',
+        profile: defaultProfile,
         data_source: {
           type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
           query: 'FROM logs-* | LIMIT 10',
@@ -383,6 +386,14 @@ describe('discover session API transforms', () => {
                   title: 'field_value',
                 },
               }),
+              tabTypeState: {
+                type: DiscoverTabType.Metrics,
+                dimensions: ['host.name'],
+                searchTerm: 'cpu',
+                counterAggregation: 'max',
+                gaugeAggregation: 'min',
+                histogramPercentile: 'p99',
+              },
             },
           },
         ],
@@ -654,6 +665,45 @@ describe('discover session API transforms', () => {
       expect(apiDataFromStored).toEqual(discoverSessionApiData);
       expect(roundTripped).toEqual(discoverSessionApiData);
       expect(references).toEqual([]);
+    });
+
+    it('preserves saved metrics profile state through an API read and write', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const savedTabTypeState: DiscoverSessionTabTypeState = {
+        type: DiscoverTabType.Metrics,
+        dimensions: ['host.name', 'service.name'],
+        searchTerm: 'cpu',
+        counterAggregation: 'max',
+        gaugeAggregation: 'min',
+        histogramPercentile: 'p99',
+      };
+      const savedMetricsSession = {
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              tabTypeState: savedTabTypeState,
+            },
+          },
+        ],
+      };
+
+      const { sessionState } = transformDiscoverSessionOut(savedMetricsSession);
+
+      expect(sessionState.tabs[0].profile).toEqual({
+        type: DiscoverTabType.Metrics,
+        dimensions: ['host.name', 'service.name'],
+        search_term: 'cpu',
+        counter_aggregation: 'max',
+        gauge_aggregation: 'min',
+        histogram_percentile: 'p99',
+      });
+
+      const { attributes: writtenBack } = transformDiscoverSessionIn(sessionState);
+
+      expect(writtenBack.tabs[0].attributes.tabTypeState).toEqual(savedTabTypeState);
     });
 
     it('round-trips fixture saved object attributes preserving API-representable persistence values', () => {

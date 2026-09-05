@@ -33,7 +33,6 @@
     "@kbn/discover-utils",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/logging-mocks",
-    "@kbn/esql-language",
   ],
   "exclude": ["target/**/*"]
 }
