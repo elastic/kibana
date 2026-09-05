@@ -10,10 +10,7 @@ import { render } from '@testing-library/react';
 import { clearSyntaxGrammars, registerDefaultSyntaxGrammars } from '@kbn/adaptive-ui/syntax';
 import { coreMock } from '@kbn/core/public/mocks';
 import { validateView } from '@kbn/adaptive-ui';
-import {
-  sampleSecurityRuleAttachment,
-  toSecurityRuleViewSpec,
-} from '@kbn/adaptive-ui-adapters';
+import { sampleSecurityRuleAttachment, toSecurityRuleViewSpec } from '@kbn/adaptive-ui-adapters';
 import { getAdaptiveViewText, renderCrossSurface } from './cross_surface.test.helpers';
 import { AdaptiveViewContainer } from './view_renderer';
 

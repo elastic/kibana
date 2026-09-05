@@ -9,11 +9,12 @@ import React from 'react';
 import type { ViewSpec } from '@kbn/adaptive-ui';
 import {
   Badge,
+  BadgeGroup,
   DescriptionList,
+  DescriptionListItem,
   Text,
   View,
   toViewSpec,
-  type BadgeProps,
 } from '@kbn/adaptive-ui/jsx';
 
 /**
@@ -48,37 +49,34 @@ export const toActionPolicyViewSpec = ({
   tags,
   enabled,
 }: ActionPolicyData): ViewSpec => {
-  const details: Array<{ title: string; description: string }> = [];
-  if (matcher) {
-    details.push({ title: 'Matcher', description: matcher });
-  }
-  if (groupBy && groupBy.length > 0) {
-    details.push({ title: 'Group by', description: groupBy.join(', ') });
-  }
-  details.push({ title: 'Destinations', description: String(destinations?.length ?? 0) });
-
-  const badgeItems: NonNullable<BadgeProps['items']> = [
-    {
-      label: enabled === false ? 'Disabled' : 'Enabled',
-      tone: enabled === false ? 'neutral' : 'success',
-      variant: 'fill',
-    },
-  ];
-  if (throttle) {
-    badgeItems.push({ label: `Throttle ${throttle}`, tone: 'primary', variant: 'hollow' });
-  }
-  if (groupingMode) {
-    badgeItems.push({ label: groupingMode, tone: 'neutral', variant: 'hollow' });
-  }
-
   return toViewSpec(
     <View title={name ?? 'Action policy'} subtitle="Action policy">
-      <Badge items={badgeItems} />
-      <DescriptionList label="Policy" layout="inline" items={details} />
+      <BadgeGroup>
+        <Badge
+          label={enabled === false ? 'Disabled' : 'Enabled'}
+          tone={enabled === false ? 'neutral' : 'success'}
+          variant="fill"
+        />
+        {throttle && <Badge label={`Throttle ${throttle}`} tone="primary" variant="hollow" />}
+        {groupingMode && <Badge label={groupingMode} tone="neutral" variant="hollow" />}
+      </BadgeGroup>
+      <DescriptionList label="Policy" layout="inline">
+        {matcher && <DescriptionListItem title="Matcher" description={matcher} />}
+        {groupBy && groupBy.length > 0 && (
+          <DescriptionListItem title="Group by" description={groupBy.join(', ')} />
+        )}
+        <DescriptionListItem title="Destinations" description={String(destinations?.length ?? 0)} />
+      </DescriptionList>
       {description && <Text body={description} />}
-      {tags && tags.length > 0 && <Badge label="Tags" items={tags.map((label) => ({ label }))} />}
+      {tags && tags.length > 0 && (
+        <BadgeGroup label="Tags">
+          {tags.map((label) => (
+            <Badge key={label} label={label} />
+          ))}
+        </BadgeGroup>
+      )}
     </View>
-  ) as ViewSpec;
+  );
 };
 
 export const sampleActionPolicy: ActionPolicyData = {

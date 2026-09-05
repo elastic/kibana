@@ -7,7 +7,17 @@
 
 import React from 'react';
 import type { Tone, ViewSpec } from '@kbn/adaptive-ui';
-import { Donut, ItemList, StatGroup, Table, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
+import {
+  Donut,
+  Entity,
+  EntityList,
+  Stat,
+  StatGroup,
+  Table,
+  Text,
+  View,
+  toViewSpec,
+} from '@kbn/adaptive-ui/jsx';
 import { severityTone, titleCase } from './shared';
 
 /**
@@ -62,7 +72,7 @@ const segmentsFromSeverityCount = (
 /**
  * Alternate rendering for the `security.entity_analytics_dashboard` attachment: a
  * risk-level stat row, a distribution `donut` (from `distribution` or
- * `severity_count`), a top-entities `table`, the prose summary, and an `itemList`
+ * `severity_count`), a top-entities `table`, the prose summary, and an `entityList`
  * of anomaly highlights.
  */
 export const toEntityAnalyticsDashboardViewSpec = ({
@@ -80,15 +90,12 @@ export const toEntityAnalyticsDashboardViewSpec = ({
   return toViewSpec(
     <View title="Entity analytics" subtitle="Risk overview">
       {severityCount && (
-        <StatGroup
-          label="Entities by risk level"
-          stats={[
-            { label: 'Critical', value: String(severityCount.critical ?? 0), tone: 'danger' },
-            { label: 'High', value: String(severityCount.high ?? 0), tone: 'risk' },
-            { label: 'Medium', value: String(severityCount.medium ?? 0), tone: 'warning' },
-            { label: 'Low', value: String(severityCount.low ?? 0), tone: 'success' },
-          ]}
-        />
+        <StatGroup label="Entities by risk level">
+          <Stat label="Critical" value={String(severityCount.critical ?? 0)} tone="danger" />
+          <Stat label="High" value={String(severityCount.high ?? 0)} tone="risk" />
+          <Stat label="Medium" value={String(severityCount.medium ?? 0)} tone="warning" />
+          <Stat label="Low" value={String(severityCount.low ?? 0)} tone="success" />
+        </StatGroup>
       )}
       {donutSegments.length > 0 && (
         <Donut
@@ -123,16 +130,14 @@ export const toEntityAnalyticsDashboardViewSpec = ({
       )}
       {summary && <Text body={summary} />}
       {anomalyHighlights && anomalyHighlights.length > 0 && (
-        <ItemList
-          label="Anomaly highlights"
-          items={anomalyHighlights.map((anomaly) => ({
-            title: anomaly.title,
-            body: anomaly.description,
-          }))}
-        />
+        <EntityList label="Anomaly highlights">
+          {anomalyHighlights.map((anomaly) => (
+            <Entity key={anomaly.title} title={anomaly.title} body={anomaly.description} />
+          ))}
+        </EntityList>
       )}
     </View>
-  ) as ViewSpec;
+  );
 };
 
 export const sampleEntityAnalyticsDashboard: EntityAnalyticsDashboardData = {

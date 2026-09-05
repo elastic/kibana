@@ -7,10 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { validateView } from '@kbn/adaptive-ui';
-import {
-  sampleSigEventDetection,
-  toSigEventDetectionViewSpec,
-} from '@kbn/adaptive-ui-adapters';
+import { sampleSigEventDetection, toSigEventDetectionViewSpec } from '@kbn/adaptive-ui-adapters';
 import { getAdaptiveViewText, renderCrossSurface } from './cross_surface.test.helpers';
 
 describe('platform.sig_event_detection attachment adapter', () => {

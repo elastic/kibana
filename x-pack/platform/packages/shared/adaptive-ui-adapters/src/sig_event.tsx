@@ -11,9 +11,12 @@ import {
   Action,
   Actions,
   Badge,
+  BadgeGroup,
   Callout,
   DescriptionList,
+  DescriptionListItem,
   List,
+  ListItem,
   Stat,
   StatGroup,
   Table,
@@ -149,11 +152,11 @@ export const buildSignificantEventSpec = (event: SignificantEventInput): ViewSpe
         {event.root_cause}
       </Callout>
       {event.recommendations.length > 0 && (
-        <List
-          label="Recommended remediations"
-          ordered
-          items={event.recommendations.map((content) => ({ content }))}
-        />
+        <List label="Recommended remediations" ordered>
+          {event.recommendations.map((content) => (
+            <ListItem key={content} content={content} />
+          ))}
+        </List>
       )}
       {event.evidences.length > 0 && (
         <Table
@@ -177,27 +180,30 @@ export const buildSignificantEventSpec = (event: SignificantEventInput): ViewSpe
         />
       )}
       {event.cause_kis.length > 0 && (
-        <DescriptionList
-          label="Contributing factors"
-          layout="inline"
-          items={event.cause_kis.map((ki) => ({
-            title: ki.name,
-            description: ki.stream_name ?? '—',
-            tone: 'warning',
-          }))}
-        />
+        <DescriptionList label="Contributing factors" layout="inline">
+          {event.cause_kis.map((ki) => (
+            <DescriptionListItem
+              key={ki.name}
+              title={ki.name}
+              description={ki.stream_name ?? '—'}
+              tone="warning"
+            />
+          ))}
+        </DescriptionList>
       )}
       {event.stream_names.length > 0 && (
-        <Badge
-          label="Streams"
-          items={event.stream_names.map((stream) => ({ label: stream, variant: 'hollow' }))}
-        />
+        <BadgeGroup label="Streams">
+          {event.stream_names.map((stream) => (
+            <Badge key={stream} label={stream} variant="hollow" />
+          ))}
+        </BadgeGroup>
       )}
       {event.rule_names.length > 0 && (
-        <Badge
-          label="Detection rules"
-          items={event.rule_names.map((rule) => ({ label: rule, variant: 'hollow' }))}
-        />
+        <BadgeGroup label="Detection rules">
+          {event.rule_names.map((rule) => (
+            <Badge key={rule} label={rule} variant="hollow" />
+          ))}
+        </BadgeGroup>
       )}
       <Actions>
         {nightshiftHref && (
@@ -210,7 +216,7 @@ export const buildSignificantEventSpec = (event: SignificantEventInput): ViewSpe
         />
       </Actions>
     </View>
-  ) as ViewSpec;
+  );
 };
 
 export const significantEventSpec = buildSignificantEventSpec(significantEventFixture);

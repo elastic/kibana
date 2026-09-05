@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ViewSpec } from '@kbn/adaptive-ui';
-import { ItemList, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
+import { Entity, EntityList, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 import { severityTone, titleCase } from './shared';
 import { type CaseData, sampleCase } from './case';
 
@@ -23,34 +23,36 @@ export interface CasesData {
 
 /**
  * Alternate rendering for the `cases` attachment ([cases_attachment_definition.tsx](../../../../plugins/shared/cases/public/agent_builder/attachments/cases_attachment_definition.tsx)):
- * a collection as an `itemList`, each row a `#nnn` reference, external title, a
+ * a collection as an `entityList`, each row a `#nnn` reference, external title, a
  * pill row of alert/comment counts, and a trailing severity status.
  */
 export const toCasesViewSpec = ({ cases, total }: CasesData): ViewSpec =>
   toViewSpec(
     <View title="Cases" subtitle={`${total} ${total === 1 ? 'case' : 'cases'}`}>
-      <ItemList
-        label="Cases"
-        items={cases.map((item) => ({
-          identifier: item.incremental_id != null ? `#${item.incremental_id}` : undefined,
-          title: item.title,
-          external: true,
-          body: item.description,
-          pills: [
-            {
-              type: 'badge',
-              label: 'Alerts',
-              count: item.totalAlerts ?? 0,
-              tone: 'warning',
-            },
-            { type: 'badge', label: 'Comments', count: item.totalComment ?? 0 },
-          ],
-          status: { label: titleCase(item.severity), tone: severityTone(item.severity) },
-          action: { label: 'Open case', href: item.url ?? `/app/security/cases/${item.id}` },
-        }))}
-      />
+      <EntityList label="Cases">
+        {cases.map((item) => (
+          <Entity
+            key={item.id}
+            identifier={item.incremental_id != null ? `#${item.incremental_id}` : undefined}
+            title={item.title}
+            external
+            body={item.description}
+            pills={[
+              {
+                type: 'badge',
+                label: 'Alerts',
+                count: item.totalAlerts ?? 0,
+                tone: 'warning',
+              },
+              { type: 'badge', label: 'Comments', count: item.totalComment ?? 0 },
+            ]}
+            status={{ label: titleCase(item.severity), tone: severityTone(item.severity) }}
+            action={{ label: 'Open case', href: item.url ?? `/app/security/cases/${item.id}` }}
+          />
+        ))}
+      </EntityList>
     </View>
-  ) as ViewSpec;
+  );
 
 export const sampleCases: CasesData = {
   total: 3,

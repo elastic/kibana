@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ViewSpec } from '@kbn/adaptive-ui';
-import { Badge, Callout, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
+import { Badge, BadgeGroup, Callout, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 
 /**
  * Mirror of the `connector_setup` attachment data (Agent Builder platform). Only
@@ -33,13 +33,13 @@ export const toConnectorSetupViewSpec = ({
   const label = connectorType ? `${connectorType} connector` : 'Connector';
   return toViewSpec(
     <View title={label} subtitle="Connector setup">
-      <Badge
-        items={[
-          connected
-            ? { label: 'Connected', tone: 'success', variant: 'fill' }
-            : { label: 'Setup needed', tone: 'warning', variant: 'fill' },
-        ]}
-      />
+      <BadgeGroup>
+        {connected ? (
+          <Badge label="Connected" tone="success" variant="fill" />
+        ) : (
+          <Badge label="Setup needed" tone="warning" variant="fill" />
+        )}
+      </BadgeGroup>
       {reason && (
         <Callout
           tone={connected ? 'success' : 'warning'}
@@ -49,7 +49,7 @@ export const toConnectorSetupViewSpec = ({
         </Callout>
       )}
     </View>
-  ) as ViewSpec;
+  );
 };
 
 export const sampleConnectorSetup: ConnectorSetupData = {

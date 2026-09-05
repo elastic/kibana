@@ -71,7 +71,7 @@ export const toWorkflowYamlDiffViewSpec = ({
         <Diff title={name ?? 'Workflow changes'} language="yaml" hunks={hunks} />
       )}
     </View>
-  ) as ViewSpec;
+  );
 };
 
 export const sampleWorkflowYamlDiff: WorkflowYamlDiffData = {
