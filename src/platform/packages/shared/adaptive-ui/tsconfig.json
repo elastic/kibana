@@ -14,7 +14,9 @@
     "react.ts",
     "node.ts",
     "builders.ts",
-    "syntax.ts"
+    "syntax.ts",
+    "compose.ts",
+    "sdk.ts"
   ],
   "kbn_references": [],
   "exclude": [

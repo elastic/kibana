@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Server-only: PNG and SVG rendering, drawn through the two-pack Kibana
+// Server-only: PNG and SVG rendering, drawn through the three-pack Kibana
 // runtime rather than either pack's own image renderer — which is what lets a
-// chart node rasterize. Pulls in `satori` and native `@resvg/resvg-js`, so
-// import this lazily from anything that might not rasterize.
+// chart node rasterize. Pulls in `@takumi-rs/core`, so import this lazily from
+// anything that might not rasterize.
 
 export {
   getBundledSvgFontsDir,

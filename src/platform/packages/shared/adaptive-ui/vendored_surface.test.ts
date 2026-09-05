@@ -13,8 +13,13 @@
 // to a relative path, so a missed entry point in that rewrite surfaces here as
 // a module-resolution failure rather than at Kibana startup.
 
-import { donut, graph, statGroup, view } from './builders';
+import { createElement } from 'react';
+import { z } from '@kbn/zod';
+
 import { getViewSpecSchema, renderHTML, renderMarkdown, renderText, validateView } from '.';
+import { donut, graph, statGroup, view } from './builders';
+import { createKibanaRuntime } from './compose';
+import { definePrimitive, definePrimitivePack, type PrimitiveNode } from './sdk';
 
 describe('vendored @elastic/adaptive-ui-host-kibana surface', () => {
   const spec = view({
@@ -51,5 +56,45 @@ describe('vendored @elastic/adaptive-ui-host-kibana surface', () => {
     const { css, html } = renderHTML(spec, { css: 'inline' });
     expect(css).toContain('.aui{');
     expect(html).toContain('<style>');
+  });
+
+  it('defines a pack via /sdk, composes it via /compose, and renders it', () => {
+    interface KbnHostNoteNode extends PrimitiveNode {
+      type: 'kbnHostNote';
+      text: string;
+    }
+
+    const hostNote = definePrimitive<KbnHostNoteNode, unknown>({
+      type: 'kbnHostNote',
+      catalog: {
+        type: 'kbnHostNote',
+        purpose: 'Throwaway host-private note for composition tests.',
+        useWhen: ['A Kibana pack needs a unique type to compose.'],
+        avoidWhen: ['The official vocabulary already covers the case.'],
+        example: { type: 'kbnHostNote', text: 'Hello' },
+      },
+      examples: [{ type: 'kbnHostNote', text: 'Hello' }],
+      schema: z.object({
+        type: z.literal('kbnHostNote'),
+        text: z.string().min(1),
+      }),
+      renderers: {
+        react: (node) => createElement('span', null, node.text),
+        text: (node) => node.text,
+        markdown: (node) => node.text,
+      },
+    });
+    const hostNotePack = definePrimitivePack({
+      id: 'test.kbn-host-note',
+      surfaces: [],
+      primitives: [hostNote],
+    });
+    const runtime = createKibanaRuntime({ extraPacks: [hostNotePack] });
+    const extraSpec = {
+      type: 'view' as const,
+      body: [{ type: 'kbnHostNote' as const, text: 'composed' }],
+    };
+
+    expect(renderText(extraSpec, { runtime })).toBe('composed');
   });
 });

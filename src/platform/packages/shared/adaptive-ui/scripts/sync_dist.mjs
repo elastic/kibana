@@ -18,10 +18,10 @@
 //   node src/platform/packages/shared/adaptive-ui/scripts/sync_dist.mjs \
 //     --from /path/to/adaptive-ui-poc
 //
-// An `@elastic/*` specifier outside the closure below is left alone: it is a
-// peer Kibana supplies itself (`@elastic/eui`, `@elastic/prismjs-esql`). An
-// unknown *subpath* of a package that IS in the closure throws, so a new
-// upstream entry point surfaces here instead of at runtime.
+// An `@elastic/adaptive-ui-*` specifier outside the closure throws, so a new
+// upstream package surfaces here instead of at Kibana startup. Other `@elastic/*`
+// specifiers (EUI, prismjs-esql) are peers Kibana supplies and are left alone.
+// An unknown *subpath* of a package that IS in the closure also throws.
 //
 // The vendored `vendor/` tree and the `.vendored_upstream.json` stamp are
 // gitignored: built output and the revision it came from live on disk only.
@@ -57,7 +57,7 @@ const CLOSURE = {
   'adaptive-ui-primitives-charts': 'packages/primitives/adaptive-ui-primitives-charts',
   'adaptive-ui-primitives-diagrams': 'packages/primitives/adaptive-ui-primitives-diagrams',
   'adaptive-ui-render-svg': 'packages/image/adaptive-ui-render-svg',
-  'adaptive-ui-rasterize-resvg': 'packages/image/adaptive-ui-rasterize-resvg',
+  'adaptive-ui-svg-takumi': 'packages/image/adaptive-ui-svg-takumi',
 };
 
 // `from '...'`, `import('...')`, and bare `import '...'`, single or double
@@ -123,6 +123,11 @@ const rewriteFile = (source, fileDir, exportMaps, isDeclaration) =>
     const { name, subpath } = splitSpecifier(specifier);
     const subpaths = exportMaps.get(name);
     if (subpaths === undefined) {
+      if (specifier.startsWith('@elastic/adaptive-ui-')) {
+        throw new Error(
+          `"${specifier}" is an Adaptive UI package outside this script's CLOSURE. Add it to CLOSURE, or Kibana cannot resolve the rewritten specifier.`
+        );
+      }
       return match; // a peer Kibana supplies: `@elastic/eui`, `@elastic/prismjs-esql`
     }
     const distPath = subpaths.get(subpath);
