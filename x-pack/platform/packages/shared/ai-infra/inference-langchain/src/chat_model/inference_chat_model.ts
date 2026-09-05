@@ -221,7 +221,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
       metadata: {
-        connectorTelemetry: this.telemetryMetadata,
+        ...(this.telemetryMetadata ? { connectorTelemetry: this.telemetryMetadata } : {}),
         ...(this.anonymizationMetadata ? { anonymization: this.anonymizationMetadata } : {}),
       },
       timeout: options.timeout ?? this.timeout,
