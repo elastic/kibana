@@ -24,9 +24,13 @@
     "@kbn/logging-mocks",
     "@kbn/significant-events-schema",
     "@kbn/agent-builder-server",
+    "@elastic/eui",
+    "@emotion/react",
     "@kbn/i18n",
+    "react",
     "@kbn/core-saved-objects-server",
     "@kbn/es-query",
-    "@kbn/search-inference-endpoints"
+    "@kbn/search-inference-endpoints",
+    "@kbn/investigation-output"
   ]
 }
