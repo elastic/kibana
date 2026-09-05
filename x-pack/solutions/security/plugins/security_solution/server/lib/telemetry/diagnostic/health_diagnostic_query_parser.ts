@@ -145,9 +145,10 @@ const transformIndexQuery = (data: IndexQueryRaw): IndexQuery => {
 // Per-version schemas
 // ---------------------------------------------------------------------------
 
-// V1: index is required; no integrations/datastreamTypes support.
+// V1: index is required; integrations/datastreamTypes are not supported and are stripped.
+const { integrations: _i, datastreamTypes: _d, index: _ix, ...v1BaseFields } = indexQueryFields;
 const v1Schema = z
-  .object({ version: z.literal(1), ...indexQueryFields, index: z.string().min(1) })
+  .object({ version: z.literal(1), ...v1BaseFields, index: z.string().min(1) })
   .transform(transformIndexQuery);
 
 // V2: integrations XOR index (cross-field constraint in validateIndexQuery).
@@ -168,12 +169,14 @@ const v3IndexSchema = z
 const v3IntegrationsSchema = z.preprocess((val) => {
   if (val === undefined || val === null) return undefined;
   if (typeof val === 'string') {
-    return val
+    const parts = val
       .split(',')
       .map((p) => p.trim())
       .filter((p) => p.length > 0);
+    return parts.length > 0 ? parts : undefined;
   }
-  return val; // arrays and invalid types pass through to schema validation
+  if (Array.isArray(val)) return val.length > 0 ? val : undefined;
+  return val; // invalid types pass through to schema validation
 }, z.array(z.string().min(1)).min(1).optional());
 
 // V3 API: targets a Kibana/ES HTTP endpoint.

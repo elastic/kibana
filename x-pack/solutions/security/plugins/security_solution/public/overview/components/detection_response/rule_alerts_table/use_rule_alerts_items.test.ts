@@ -72,7 +72,7 @@ describe('useRuleAlertsItems', () => {
       isLoading: false,
       updatedAt: dateNow,
     });
-    expect(mockUseQueryAlerts).toBeCalledWith({
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith({
       query: severityRuleAlertsQuery,
       indexName: 'signal-alerts',
       skip: false,
@@ -117,7 +117,7 @@ describe('useRuleAlertsItems', () => {
   it('should skip the query', () => {
     const { result } = renderUseRuleAlertsItems({ skip: true });
 
-    expect(mockUseQueryAlerts).toBeCalledWith({
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith({
       query: severityRuleAlertsQuery,
       indexName: 'signal-alerts',
       skip: true,

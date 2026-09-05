@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import {
@@ -19,7 +20,6 @@ import {
 
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_ENGINE_BULK_ACTION_URL = '/api/detection_engine/rules/_bulk_action';
-const RULE_API_VERSION = '2023-10-31';
 const CREATE_RULE_STEP_ID = 'create_rule';
 
 const validRuleWorkflowYaml = (ruleName: string) => `
@@ -119,7 +119,7 @@ apiTest.describe('security.createRule workflow step', { tag: [...tags.stateful.c
       expect(output?.enabled).toBe(false);
 
       const readResponse = await apiClient.get(`${DETECTION_ENGINE_RULES_URL}?id=${ruleId}`, {
-        headers: { ...editorHeaders, 'elastic-api-version': RULE_API_VERSION },
+        headers: { ...editorHeaders, ...PUBLIC_API_HEADERS },
         responseType: 'json',
       });
       expect(readResponse).toHaveStatusCode(200);

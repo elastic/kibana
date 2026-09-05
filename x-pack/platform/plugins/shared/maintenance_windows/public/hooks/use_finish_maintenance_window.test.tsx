@@ -63,7 +63,7 @@ describe('useFinishMaintenanceWindow', () => {
       await result.current.mutate('123');
     });
     await waitFor(() =>
-      expect(mockAddSuccess).toBeCalledWith("Cancelled running maintenance window 'cancel'")
+      expect(mockAddSuccess).toHaveBeenCalledWith("Cancelled running maintenance window 'cancel'")
     );
   });
 
@@ -79,7 +79,7 @@ describe('useFinishMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to cancel maintenance window.')
+      expect(mockAddDanger).toHaveBeenCalledWith('Failed to cancel maintenance window.')
     );
   });
 });

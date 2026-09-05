@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import { Provider } from 'react-redux-v7';
+import { Provider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Workspace } from '../types';
@@ -30,14 +30,12 @@ export const WorkspaceRoute = ({
     graphSavePolicy,
     canEditDrillDownUrls,
     overlays,
-    navigation,
     capabilities,
     storage,
     data,
     kql,
     getBasePath,
     addBasePath,
-    setHeaderActionMenu,
     spaces,
     dataViews,
     inspect,
@@ -138,9 +136,7 @@ export const WorkspaceRoute = ({
           renderCounter={renderCounter}
           workspace={workspaceRef.current}
           loading={loading}
-          setHeaderActionMenu={setHeaderActionMenu}
           graphSavePolicy={graphSavePolicy}
-          navigation={navigation}
           capabilities={capabilities}
           coreStart={coreStart}
           canEditDrillDownUrls={canEditDrillDownUrls}

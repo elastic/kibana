@@ -17,6 +17,7 @@ const createMockCriteriaFn = () => {
       ({
         name: 'mock_criteria',
         kind: 'LLM',
+        direction: 'maximize',
         evaluate: innerEvaluate,
       } as unknown as Evaluator)
   );

@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 3928
   advancedSettings: 1981
   agentBuilder: 644
-  agentBuilderDashboards: 3598
+  agentBuilderDashboards: 3743
   agentBuilderPlatform: 21685
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
@@ -39,7 +39,7 @@ pageLoadAssetSize:
   crossClusterReplication: 7691
   customContent: 2714
   customIntegrations: 636
-  dashboard: 452
+  dashboard: 536
   dashboardMarkdown: 4012
   data: 11798
   dataFederation: 4838
@@ -67,7 +67,7 @@ pageLoadAssetSize:
   esql: 306
   esqlDataGrid: 215
   esUiShared: 2284
-  evals: 4483
+  evals: 4875
   eventAnnotation: 17278
   eventAnnotationListing: 2952
   exploratoryView: 971
@@ -127,6 +127,7 @@ pageLoadAssetSize:
   maps: 1201
   mapsEms: 3256
   metricsDataAccess: 1947
+  mitreAttack: 2022
   ml: 950
   mockIdpPlugin: 3990
   monitoring: 22416
@@ -183,8 +184,8 @@ pageLoadAssetSize:
   serverless: 1571
   serverlessObservability: 14136
   serverlessSearch: 18103
-  serverlessVectordb: 7165
-  serverlessWorkplaceAI: 3338
+  serverlessVectordb: 9436
+  serverlessWorkplaceAI: 3723
   sessionView: 647
   share: 379
   shared-core: 311749
@@ -234,5 +235,5 @@ pageLoadAssetSize:
   visualizations: 1147
   watcher: 5497
   workflowsExtensions: 38186
-  workflowsManagement: 32428
+  workflowsManagement: 36613
   workplaceAIApp: 1800

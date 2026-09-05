@@ -92,7 +92,7 @@ describe('StubBrowserStorage', () => {
       store.setItem('key', 'val');
       expect(() => {
         store.setStubbedSizeLimit(5);
-      }).toThrowError(Error);
+      }).toThrow(Error);
     });
 
     it('respects removed items', () => {

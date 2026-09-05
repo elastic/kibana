@@ -16,6 +16,7 @@ import {
   DEFAULT_CASES_TABLE_STATE,
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,
+  DEFAULT_TABLE_ACTIVE_PAGE,
 } from '../../containers/constants';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import type { AllCasesTableState, AllCasesURLState } from './types';
@@ -107,7 +108,10 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
     setFilterOptions: (newFilterOptions: Partial<FilterOptions>) => {
       setState({
         filterOptions: { ...allCasesTableState.filterOptions, ...newFilterOptions },
-        queryParams: allCasesTableState.queryParams,
+        // Filtering changes the size of the result set, so a stale page index can
+        // land past the end of it — ES returns `total > 0` with zero hits and the
+        // list renders empty while the stats still show a count.  Reset to page 1.
+        queryParams: { ...allCasesTableState.queryParams, page: DEFAULT_TABLE_ACTIVE_PAGE },
       });
     },
   };

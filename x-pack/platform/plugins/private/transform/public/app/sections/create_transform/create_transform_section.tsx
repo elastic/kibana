@@ -7,11 +7,12 @@
 
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
+import { useHistory, type RouteComponentProps } from 'react-router-dom';
 import { parse } from 'query-string';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { TRANSFORM_FUNCTION, type TransformFunction } from '../../../../common/constants';
@@ -38,28 +39,23 @@ export const CreateTransformSection: FC<Props> = ({ location, match }) => {
     docTitleService.setTitle('createTransform');
   }, []);
 
+  const history = useHistory();
   const { esTransform } = useDocumentationLinks();
 
   const initialTransformFunction = getInitialTransformFunction(location.search);
+  const pageTitle =
+    initialTransformFunction === TRANSFORM_FUNCTION.LATEST
+      ? i18n.translate('xpack.transform.transformsWizard.createLatestTransformTitle', {
+          defaultMessage: 'Create latest transform',
+        })
+      : i18n.translate('xpack.transform.transformsWizard.createPivotTransformTitle', {
+          defaultMessage: 'Create pivot transform',
+        });
   const {
     error: searchItemsError,
     searchItems,
     setSavedObjectId,
   } = useSearchItems(match.params.savedObjectId);
-
-  const docsLink = (
-    <EuiButtonEmpty
-      href={esTransform}
-      target="_blank"
-      iconType="question"
-      data-test-subj="documentationLink"
-    >
-      <FormattedMessage
-        id="xpack.transform.transformsWizard.transformDocsLinkText"
-        defaultMessage="Transform docs"
-      />
-    </EuiButtonEmpty>
-  );
 
   return (
     <CapabilitiesWrapper
@@ -70,16 +66,16 @@ export const CreateTransformSection: FC<Props> = ({ location, match }) => {
         'canStartStopTransform',
       ]}
     >
-      <EuiPageTemplate.Header
-        pageTitle={
-          <FormattedMessage
-            id="xpack.transform.transformsWizard.createTransformTitle"
-            defaultMessage="Create transform"
-          />
-        }
-        rightSideItems={[docsLink]}
-        bottomBorder
-        paddingSize={'none'}
+      <AppHeader
+        title={pageTitle}
+        back={{
+          href: history.createHref({ pathname: '/' }),
+          label: i18n.translate('xpack.transform.transformList.transformTitle', {
+            defaultMessage: 'Transforms',
+          }),
+        }}
+        docLink={esTransform}
+        spacing="bleed"
       />
 
       <EuiSpacer size="l" />

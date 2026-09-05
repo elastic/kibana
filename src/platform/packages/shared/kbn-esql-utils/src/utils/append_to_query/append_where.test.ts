@@ -289,7 +289,7 @@ AND \`ip\` != "127.0.0.2/32"`
       )
     ).toBe(
       `from logstash-*
-| WHERE MV_CONTAINS(\`range\`, ["a", "b"])`
+| WHERE MV_CONTAINS(\`range\`, ["a", "b"]::double_range)`
     );
   });
 

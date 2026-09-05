@@ -60,14 +60,14 @@ describe('getDescriptor', () => {
 
   it('throws error on conflicting union types', () => {
     const usageInterface = usageInterfaces.get('WithConflictingUnion');
-    expect(() => getDescriptor(usageInterface!, tsProgram)).toThrowError(
+    expect(() => getDescriptor(usageInterface!, tsProgram)).toThrow(
       'Mapping does not support conflicting union types.'
     );
   });
 
   it('throws error on unsupported union types', () => {
     const usageInterface = usageInterfaces.get('WithUnsupportedUnion');
-    expect(() => getDescriptor(usageInterface!, tsProgram)).toThrowError(
+    expect(() => getDescriptor(usageInterface!, tsProgram)).toThrow(
       'Mapping does not support conflicting union types.'
     );
   });

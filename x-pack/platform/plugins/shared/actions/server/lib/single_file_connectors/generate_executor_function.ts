@@ -7,13 +7,19 @@
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
+  authTypeUsesRelay,
   getAuthModeForAuthTypeId,
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
   clientTypes as defaultClientTypes,
 } from '@kbn/connector-specs';
-import type { ActionContext, ClientTypeSpec, ConnectorNetworkSettings } from '@kbn/connector-specs';
+import type {
+  ActionContext,
+  ClientTypeSpec,
+  ConnectorNetworkSettings,
+  RelayActionClient,
+} from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import type { ExecutorParams } from '../../sub_action_framework/types';
@@ -83,6 +89,7 @@ export const generateExecutorFunction = ({
   getAxiosInstanceWithAuth,
   getCredential,
   getClientLeasePool,
+  getRelayClient,
   networkSettings,
   clientTypes = defaultClientTypes,
 }: {
@@ -90,6 +97,7 @@ export const generateExecutorFunction = ({
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
   getCredential: GetCredentialFn;
   getClientLeasePool: () => LeasePool<unknown>;
+  getRelayClient?: () => RelayActionClient | undefined;
   networkSettings: ConnectorNetworkSettings;
   clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
 }) =>
@@ -133,18 +141,22 @@ export const generateExecutorFunction = ({
     }
 
     const pool = getClientLeasePool();
+    // Shared by getClient (authMode) and the Relay gate. Specs that route through the Relay
+    // (isRelayAuth) read this same secrets.authType, so the two cannot disagree: the discriminated
+    // union makes authType mandatory on saved connectors and buildConnector sets it on the
+    // in-memory one. We read the auth type from `secrets` rather than the connector's persisted
+    // `authMode`, which is inferred once when the connector is created and so can be absent (no
+    // `authType` field, an auth type unknown at creation time, or an in-memory connector) and
+    // would then fall back to `shared`.
+    const authTypeId = (secrets as { authType?: string }).authType ?? 'none';
     const getClient = async (id: string): Promise<unknown> => {
       const clientType = clientTypes[id];
       if (!clientType) {
         throw new Error(`[Action][ExternalService] Unknown client type ${id}.`);
       }
-      // The lease key is derived from the auth type in `secrets` rather than the connector's
-      // persisted `authMode`. A per-user credential leased under a `shared` identity would serve
-      // one user's warm client, and its captured credential accessor, to every other user.
-      // `authMode` is inferred once when the connector is created, so it can be absent (no
-      // `authType` field, an auth type unknown at creation time, or an in-memory connector) and
-      // would then fall back to `shared`.
-      const authTypeId = (secrets as { authType?: string }).authType ?? 'none';
+      // The lease key uses this derived mode, not the persisted `authMode`: a per-user credential
+      // leased under a `shared` identity would serve one user's warm client, and its captured
+      // credential accessor, to every other user.
       const derivedAuthMode = getAuthModeForAuthTypeId(authTypeId);
 
       if (derivedAuthMode === 'per-user' && authMode !== 'per-user') {
@@ -204,6 +216,7 @@ export const generateExecutorFunction = ({
       secrets,
       config,
       getClient: getClient as ActionContext['getClient'],
+      relay: authTypeUsesRelay(authTypeId) ? getRelayClient?.() : undefined,
     };
 
     try {

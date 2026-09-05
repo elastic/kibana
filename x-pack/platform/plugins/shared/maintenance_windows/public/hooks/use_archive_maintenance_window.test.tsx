@@ -63,7 +63,7 @@ describe('useArchiveMaintenanceWindow', () => {
       await result.current.mutate({ maintenanceWindowId: '123', archive: true });
     });
     await waitFor(() =>
-      expect(mockAddSuccess).toBeCalledWith("Archived maintenance window 'archive'")
+      expect(mockAddSuccess).toHaveBeenCalledWith("Archived maintenance window 'archive'")
     );
   });
 
@@ -79,7 +79,7 @@ describe('useArchiveMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to archive maintenance window.')
+      expect(mockAddDanger).toHaveBeenCalledWith('Failed to archive maintenance window.')
     );
   });
 
@@ -92,7 +92,7 @@ describe('useArchiveMaintenanceWindow', () => {
       await result.current.mutate({ maintenanceWindowId: '123', archive: false });
     });
     await waitFor(() =>
-      expect(mockAddSuccess).toBeCalledWith("Unarchived maintenance window 'archive'")
+      expect(mockAddSuccess).toHaveBeenCalledWith("Unarchived maintenance window 'archive'")
     );
   });
 
@@ -108,7 +108,7 @@ describe('useArchiveMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to unarchive maintenance window.')
+      expect(mockAddDanger).toHaveBeenCalledWith('Failed to unarchive maintenance window.')
     );
   });
 });

@@ -28,6 +28,7 @@ const defaultProps = {
   projectRouting: undefined,
   query: undefined,
   filters: undefined,
+  esqlVariables: undefined,
   previewHtml: null,
   onLoadingChange: jest.fn(),
 };

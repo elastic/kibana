@@ -29,6 +29,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
 import { getTelemetry } from '../telemetry';
@@ -46,6 +47,7 @@ export interface EditCustomContentFlyoutProps {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
+  esqlVariables: ESQLControlVariable[] | undefined;
   isNewPanel?: boolean;
   ariaLabelledBy?: string;
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
@@ -62,6 +64,7 @@ export const EditCustomContentFlyout = ({
   projectRouting,
   query,
   filters,
+  esqlVariables,
   isNewPanel,
   ariaLabelledBy,
   onSave,
@@ -91,6 +94,7 @@ export const EditCustomContentFlyout = ({
     projectRouting,
     query,
     filters,
+    esqlVariables,
     colorMode,
     euiTheme,
     onRunPreview,
@@ -231,7 +235,7 @@ export const EditCustomContentFlyout = ({
           fullWidth
           helpText={i18n.translate('xpack.customContent.editFlyout.templateHelpText', {
             defaultMessage:
-              'Liquid template filled with ES|QL results. Each column is an object — use row["col"].value for the raw value and row["col"].pct for its share of the column maximum (0–100, useful for bar widths).',
+              'HTML and CSS, with Liquid tags to insert ES|QL results. For each row, row["column"].value is the value and row["column"].pct is its percentage of the column\'s highest value, useful for bar widths.',
           })}
         >
           <EuiResizeObserver onResize={onEditorContainerResize}>
@@ -246,7 +250,7 @@ export const EditCustomContentFlyout = ({
                     isAiAvailable
                       ? i18n.translate('xpack.customContent.editFlyout.templatePlaceholderAi', {
                           defaultMessage:
-                            '<!-- Write your HTML, CSS, and Liquid here, or use "Generate with chat" above. -->',
+                            '<!-- Write your HTML, CSS, and Liquid here, or select Generate with chat. -->',
                         })
                       : i18n.translate('xpack.customContent.editFlyout.templatePlaceholderNoAi', {
                           defaultMessage: '<!-- Write your HTML, CSS, and Liquid here. -->',
@@ -295,6 +299,7 @@ export const EditCustomContentFlyout = ({
                 esqlData={esqlData}
                 esqlDataError={esqlDataError}
                 onFetchData={handleFetchData}
+                esqlVariables={esqlVariables}
               />
             </div>
           )}

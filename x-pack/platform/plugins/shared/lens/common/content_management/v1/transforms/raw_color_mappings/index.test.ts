@@ -59,7 +59,7 @@ describe('Legend stat transforms', () => {
     } as LensAttributes;
     const result = convertToRawColorMappingsFn(attributes);
 
-    expect(convertXYToRawColorMappings).toBeCalledWith('xyVisState', 'datasourceStates');
+    expect(convertXYToRawColorMappings).toHaveBeenCalledWith('xyVisState', 'datasourceStates');
     expect(result.state).toMatchObject({
       visualization: 'new xyVisState',
     });
@@ -75,7 +75,10 @@ describe('Legend stat transforms', () => {
     } as LensAttributes;
     const result = convertToRawColorMappingsFn(attributes);
 
-    expect(convertPieToRawColorMappings).toBeCalledWith('partitionVisState', 'datasourceStates');
+    expect(convertPieToRawColorMappings).toHaveBeenCalledWith(
+      'partitionVisState',
+      'datasourceStates'
+    );
     expect(result.state).toMatchObject({
       visualization: 'new partitionVisState',
     });
@@ -91,7 +94,7 @@ describe('Legend stat transforms', () => {
     } as LensAttributes;
     const result = convertToRawColorMappingsFn(attributes);
 
-    expect(convertDatatableToRawColorMappings).toBeCalledWith(
+    expect(convertDatatableToRawColorMappings).toHaveBeenCalledWith(
       'datatableVisState',
       'datasourceStates'
     );
@@ -110,7 +113,7 @@ describe('Legend stat transforms', () => {
     } as LensAttributes;
     const result = convertToRawColorMappingsFn(attributes);
 
-    expect(convertTagcloudToRawColorMappings).toBeCalledWith(
+    expect(convertTagcloudToRawColorMappings).toHaveBeenCalledWith(
       'tagcloudVisState',
       'datasourceStates'
     );

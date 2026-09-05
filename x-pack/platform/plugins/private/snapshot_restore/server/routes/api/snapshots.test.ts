@@ -213,7 +213,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       getRepoFn.mockRejectedValue(new Error());
       getSnapshotFn.mockRejectedValue(new Error());
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
 
     describe('last successful managed snapshot protection', () => {

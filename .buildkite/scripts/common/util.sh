@@ -305,13 +305,18 @@ upload_tmp_artifact() {
   return 0
 }
 
-upload_tmp_artifact_to_region() {
+upload_tmp_artifact_to_region() (
   local local_path="$1" artifact_name="$2" build_id="$3" region="$4"
+  local config_dir
 
-  retry 3 5 env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
+  config_dir="$(mktemp -d -t gcloud-upload-XXXXXX)"
+  trap 'rm -rf "$config_dir"' EXIT
+  cp -a "${CLOUDSDK_CONFIG:-$HOME/.config/gcloud}/." "$config_dir/"
+
+  retry 3 5 env "CLOUDSDK_CONFIG=$config_dir" gcloud storage cp \
     "$local_path" \
     "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
-}
+)
 
 print_if_dry_run() {
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then

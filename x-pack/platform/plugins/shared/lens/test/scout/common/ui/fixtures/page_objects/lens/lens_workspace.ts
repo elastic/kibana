@@ -43,6 +43,7 @@ export class LensWorkspace {
   readonly inlineEditor;
   readonly discardChangesModal;
   readonly autoApplyToggle;
+  readonly noResults;
 
   private readonly goBackToAppButton;
   private readonly confirmModalConfirmButton;
@@ -74,6 +75,9 @@ export class LensWorkspace {
     this.inlineEditor = this.page.getByTestId('customizeLens');
     this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
     this.autoApplyToggle = this.page.testSubj.locator('lnsToggleAutoApply');
+    this.noResults = this.page.testSubj
+      .locator('lnsVisualizationContainer')
+      .getByText('No results found', { exact: true });
 
     this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
@@ -327,6 +331,25 @@ export class LensWorkspace {
     await this.deps.waitForVisualization(visType);
     const chart = this.page.testSubj.locator('lnsWorkspace').getByTestId(visType);
     // Elastic Charts status node — no Lens data-test-subj; same signal as FTR / open-in-Lens helpers.
+    await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
+      state: 'attached',
+    });
+    const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
+    if (!debugJson) {
+      throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
+    }
+    return JSON.parse(debugJson) as DebugState;
+  }
+
+  /**
+   * Reads `@elastic/charts` debug state from a chart rendered inside a dashboard panel.
+   * Unlike {@link getCurrentChartDebugState}, it does not scope its locators under
+   * `lnsWorkspace`, which does not exist on dashboards. Requires `enableElasticChartDebug`
+   * (or equivalent init script) before navigation.
+   */
+  async getDashboardChartDebugState(chartTestSubj: string): Promise<DebugState> {
+    const chart = this.page.testSubj.locator(chartTestSubj);
+    // Elastic Charts status node — no Lens data-test-subj; same signal as the editor helper.
     await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
       state: 'attached',
     });

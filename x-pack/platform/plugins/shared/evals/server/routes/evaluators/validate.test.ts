@@ -123,6 +123,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     kind: 'llm',
     origin: 'built_in',
     description: 'Groundedness evaluator',
+    direction: 'maximize',
     evidenceSchema: z.object({
       input: z.object({
         message: z.string().trim().min(1),
@@ -141,6 +142,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     kind: 'code',
     origin: 'built_in',
     description: 'Latency evaluator',
+    direction: 'minimize',
     evaluate: jest.fn(),
   };
 

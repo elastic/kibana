@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   RunContext,
@@ -13,17 +12,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
-import { severityTTLQuery } from '../lib/severity_ttl_query';
-import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
+import { cleanupExpiredNotifications } from './cleanup_expired_notifications';
 
 export const CLEANUP_TASK_TYPE = 'notification-center:cleanup';
 export const CLEANUP_TASK_ID = 'notification-center:cleanup';
-
-/**
- * ES query matching every notification doc past its severity's TTL
- */
-export const buildCleanupQuery = (): QueryDslQueryContainer => severityTTLQuery('expired');
 
 export const registerNotificationCleanupTask = (
   core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>,
@@ -35,22 +28,14 @@ export const registerNotificationCleanupTask = (
       title: 'Notification Center retention cleanup',
       // First run may scan up to 180d of data; 10m gives headroom without tying up TM slots.
       timeout: '10m',
-      cost: TaskCost.Tiny,
+      // Composite aggregation plus batched deletion is a normal-cost ES workload.
+      cost: TaskCost.Normal,
       createTaskRunner: ({ signal }: RunContext) => ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
           const esClient = coreStart.elasticsearch.client.asInternalUser;
           try {
-            await esClient.deleteByQuery(
-              {
-                index: NOTIFICATION_DATA_STREAM_NAME,
-                ignore_unavailable: true,
-                conflicts: 'proceed',
-                refresh: false,
-                query: buildCleanupQuery(),
-              },
-              { signal }
-            );
+            await cleanupExpiredNotifications(esClient, signal);
           } catch (err) {
             logger.error(`Notification Center cleanup task failed: ${err.message}`);
           }

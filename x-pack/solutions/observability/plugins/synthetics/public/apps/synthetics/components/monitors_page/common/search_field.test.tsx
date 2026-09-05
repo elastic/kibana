@@ -37,7 +37,7 @@ describe('SearchField', () => {
     });
 
     await waitFor(() => {
-      expect(updateUrlParamsMock).toBeCalledWith({
+      expect(updateUrlParamsMock).toHaveBeenCalledWith({
         query: searchInput,
       });
     });

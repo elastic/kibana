@@ -245,12 +245,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       } else {
         await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
-      if (opts.field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
-        // Field must commit to Lens state before close, or close discards the transition.
+      const field = opts.field;
+      if (field) {
+        await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
+        // Close too early discards the operation→field transition. Do not wait on the
+        // combobox input: setElement types `field` as a filter before the option is
+        // clicked. data-selected-field is the committed option display name and
+        // updates only after insertOrReplaceColumn. Independent of aria-invalid
+        // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
         await retry.waitFor('field selection to commit', async () => {
           const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-          return await comboBox.isOptionSelected(fieldCombo, opts.field!);
+          const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
+          return committedLabel === field;
         });
       }
 
@@ -664,10 +670,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         ? `lns-indexPatternDimension-${operation} incompatible`
         : `lns-indexPatternDimension-${operation}`;
       async function getAriaPressed() {
-        const operationSelectorContainer = await testSubjects.find(operationSelector);
-        await testSubjects.click(operationSelector);
-        const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
-        return ariaPressed;
+        await testSubjects.click(`${operationSelector}-label`);
+        const operationButton = await testSubjects.find(operationSelector);
+        return await operationButton.getAttribute('aria-pressed');
       }
 
       // adding retry here as it seems that there is a flakiness of the operation click
@@ -875,9 +880,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
-      await retry.waitFor(`name-input value to be "${label}"`, async () => {
-        return (await testSubjects.getAttribute('name-input', 'value')) === label;
+      // NameInput sits in the Appearance block at the bottom of the flyout and
+      // remounts when the column label commits (DebouncedInput key). Wait for it
+      // to exist, then type+assert in one retry so a remount cannot leave the
+      // wait looking at a detached node.
+      await retry.waitFor('name-input to exist', async () =>
+        testSubjects.exists('name-input', { timeout: 1000 })
+      );
+      await retry.try(async () => {
+        await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+        expect(
+          await testSubjects.getAttribute('name-input', 'value', {
+            findTimeout: 2000,
+            tryTimeout: 5000,
+          })
+        ).to.eql(label);
       });
     },
     async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
@@ -2354,12 +2371,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
+    /** Returns `undefined` when the name is hidden, as the chart omits the element for an empty label. */
     async getSecondaryMetricLabel(tile?: WebElementWrapper) {
       const ECH_SECONDARY_METRIC_LABEL_SELECTOR = '.echSecondaryMetric__label';
-      const label = tile
-        ? await this.getMetricElementIfExists(ECH_SECONDARY_METRIC_LABEL_SELECTOR, tile)
-        : await find.byCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR);
-      return label ? label.getAttribute('innerText') : undefined;
+      if (tile) {
+        const label = await this.getMetricElementIfExists(
+          ECH_SECONDARY_METRIC_LABEL_SELECTOR,
+          tile
+        );
+        return label ? label.getAttribute('innerText') : undefined;
+      }
+      if (!(await find.existsByCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR))) {
+        return undefined;
+      }
+      const label = await find.byCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR);
+      return label.getAttribute('innerText');
     },
 
     async hasSecondaryMetricBadge(tile?: WebElementWrapper) {

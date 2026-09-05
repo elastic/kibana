@@ -55,6 +55,6 @@ describe('ExitFullScreen', () => {
     );
 
     exitFullScreen.find('button[data-test-subj="exit-full-screen"]').first().simulate('click');
-    expect(setFullScreen).toBeCalledWith(false);
+    expect(setFullScreen).toHaveBeenCalledWith(false);
   });
 });

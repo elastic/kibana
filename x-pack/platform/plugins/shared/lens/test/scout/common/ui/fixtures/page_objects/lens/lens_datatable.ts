@@ -29,6 +29,18 @@ export class LensDatatable {
     );
   }
 
+  getHeaderLocator(name: string) {
+    return this.dataTable.getByRole('columnheader', { name });
+  }
+
+  async filterOutCell(rowIndex = 0, colIndex = 0): Promise<void> {
+    const cell = this.getCellLocator(rowIndex, colIndex);
+    await cell.hover();
+
+    const filterOutButton = cell.getByTestId('lensDatatableFilterOut');
+    await filterOutButton.click();
+  }
+
   private cell(rowIndex: number, colIndex: number, addRowNumberColumn: boolean) {
     return this.getCellLocator(rowIndex, colIndex, addRowNumberColumn);
   }

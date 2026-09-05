@@ -250,7 +250,7 @@ describe('OpenAPI Merger - unresolvable operation object conflicts', () => {
         1: spec1,
         2: spec2,
       })
-    ).rejects.toThrowError('"Operation objects are incompatible"');
+    ).rejects.toThrow('"Operation objects are incompatible"');
   });
 
   it("throws an error when operation's request body has a top level $ref", async () => {
@@ -286,7 +286,7 @@ describe('OpenAPI Merger - unresolvable operation object conflicts', () => {
         1: spec1,
         2: spec2,
       })
-    ).rejects.toThrowError('Request body top level $ref is not supported');
+    ).rejects.toThrow('Request body top level $ref is not supported');
   });
 
   it("throws an error when one of operation's responses has a top level $ref", async () => {
@@ -323,6 +323,6 @@ describe('OpenAPI Merger - unresolvable operation object conflicts', () => {
         1: spec1,
         2: spec2,
       })
-    ).rejects.toThrowError('Response object top level $ref is not supported');
+    ).rejects.toThrow('Response object top level $ref is not supported');
   });
 });

@@ -54,6 +54,13 @@ import { reportRuleCreatedEvent } from '../common_utils/event_based_telemetry';
 export interface CreateRuleOptions {
   id?: string;
   initialRevision?: number;
+  /**
+   * Declares that the API key the request authenticated with is borrowed (e.g. granted by Task
+   * Manager for a background task) and must not become the rule's key: a framework-owned key with
+   * the same privileges is minted for the rule instead. A no-op when the request is not
+   * authenticated with an API key, so callers may set it unconditionally.
+   */
+  cloneApiKey?: boolean;
 }
 
 /** Matches HTTP create `template_id` maxLength. */
@@ -173,7 +180,9 @@ export async function createRule<Params extends RuleParams = never>(
   let isAuthTypeApiKey = false;
   try {
     const apiKeyName = generateAPIKeyName(ruleType.id, data.name);
-    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled);
+    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled, {
+      cloneApiKey: options?.cloneApiKey,
+    });
     createdAPIKey = resolved.createdAPIKey;
     isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {

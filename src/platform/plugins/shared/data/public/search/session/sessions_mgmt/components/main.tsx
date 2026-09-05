@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
@@ -30,24 +31,47 @@ interface Props {
   searchSessionEBTManager: ISearchSessionEBTManager;
 }
 
+const pageTitle = i18n.translate('data.mgmt.searchSessions.main.backgroundSearchSectionTitle', {
+  defaultMessage: 'Background Search',
+});
+
+const pageDescription = i18n.translate(
+  'data.mgmt.searchSessions.main.backgroundSearchSectionDescription',
+  { defaultMessage: 'Manage your background searches.' }
+);
+
+const refreshButtonLabel = i18n.translate('data.mgmt.searchSessions.search.tools.refresh', {
+  defaultMessage: 'Refresh',
+});
+
 export function SearchSessionsMgmtMain({ share, ...tableProps }: Props) {
+  const refreshRef = useRef<() => void>(() => undefined);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const onRefreshReady = useCallback((refresh: () => void) => {
+    refreshRef.current = refresh;
+  }, []);
+
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      primaryActionItem: {
+        id: 'refresh',
+        label: refreshButtonLabel,
+        iconType: 'refresh',
+        testId: 'sessionManagementRefreshBtn',
+        run: () => {
+          refreshRef.current();
+        },
+        isLoading: isRefreshing,
+        disableButton: isRefreshing,
+      },
+    }),
+    [isRefreshing]
+  );
+
   return (
     <>
-      <EuiPageHeader
-        pageTitle={
-          <FormattedMessage
-            id="data.mgmt.searchSessions.main.backgroundSearchSectionTitle"
-            defaultMessage="Background Search"
-          />
-        }
-        description={
-          <FormattedMessage
-            id="data.mgmt.searchSessions.main.backgroundSearchSectionDescription"
-            defaultMessage="Manage your background searches."
-          />
-        }
-        bottomBorder
-      />
+      <AppHeader title={pageTitle} description={pageDescription} menu={menu} spacing="bleed" />
 
       <EuiSpacer size="l" />
       <SearchSessionsMgmtTable
@@ -55,6 +79,9 @@ export function SearchSessionsMgmtMain({ share, ...tableProps }: Props) {
         locators={share.url.locators}
         trackingProps={{ renderedIn: 'management', openedFrom: 'management' }}
         {...tableProps}
+        hideRefreshButton
+        onRefreshReady={onRefreshReady}
+        onRefreshLoadingChange={setIsRefreshing}
       />
     </>
   );

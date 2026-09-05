@@ -10,7 +10,7 @@
     "server/**/*",
     "typings/**/*",
     "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "test/scout*/**/*"
   ],
   "kbn_references": [
     "@kbn/rule-data-utils",
@@ -151,6 +151,7 @@
     "@kbn/management-settings-ids",
     "@kbn/alerting-v2-utils",
     "@kbn/deeplinks-workflows",
+    "@kbn/deeplinks-evals",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/kql",
     "@kbn/shared-ux-utility",
@@ -163,7 +164,9 @@
     "@kbn/core-spaces-common",
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu-components",
-    "@kbn/global-search-plugin"
+    "@kbn/global-search-plugin",
+    "@kbn/nightshift-investigations-plugin",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }

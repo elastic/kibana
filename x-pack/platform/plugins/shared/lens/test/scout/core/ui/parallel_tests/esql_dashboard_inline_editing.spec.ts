@@ -107,6 +107,17 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
           'from logstash-* | stats maxB = max(bytes) by geo.dest'
         );
 
+        // Anchor on the Y dimension first so the config panel is known to have
+        // rendered the new suggestion before checking the split state.
+        const yDimensionTrigger = page.testSubj.locator(
+          'lnsXY_yDimensionPanel > lns-dimensionTrigger-textBased'
+        );
+        await expect(yDimensionTrigger).toHaveText(/maxB/);
+
+        // The ES|QL suggestion may assign `geo.dest` to "Break down by"; a split
+        // dimension disables the series color picker, so remove it if present
+        // (parity with the original FTR test, which removed the split panel).
+        await lens.workspace.removeAllDimensions('lnsXY_splitDimensionPanel');
         const splitTriggers = page.testSubj.locator(
           'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
         );
@@ -114,8 +125,11 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
         await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Line');
 
         // change the color to red
-        await page.testSubj.click('lnsXY_yDimensionPanel > lns-dimensionTrigger-textBased');
+        await yDimensionTrigger.click();
         const colorPickerInput = page.getByTestId(/indexPattern-dimension-colorPicker/);
+        // A disabled color picker means a split dimension is still present; fail
+        // fast with a clear assertion instead of a fill-retry timeout.
+        await expect(colorPickerInput).toBeEnabled();
         await colorPickerInput.fill('');
         await colorPickerInput.fill('#ff0000');
         await expect(colorPickerInput).toHaveValue('#FF0000');

@@ -21,6 +21,6 @@ const { Example } = composeStories(stories);
 
 describe('ErrorGroupList', () => {
   it('renders', () => {
-    expect(() => render(<Example />)).not.toThrowError();
+    expect(() => render(<Example />)).not.toThrow();
   });
 });

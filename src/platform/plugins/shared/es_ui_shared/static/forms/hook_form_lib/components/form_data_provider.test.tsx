@@ -46,7 +46,7 @@ describe('<FormDataProvider />', () => {
 
     render(<TestComp />);
 
-    expect(onFormData).toBeCalledTimes(1);
+    expect(onFormData).toHaveBeenCalledTimes(1);
 
     expect(onFormData).toHaveBeenCalledWith({
       name: 'Initial value',
@@ -97,7 +97,7 @@ describe('<FormDataProvider />', () => {
 
     render(<TestComp />);
 
-    expect(onFormData).toBeCalledTimes(0); // Not present in the DOM yet
+    expect(onFormData).toHaveBeenCalledTimes(0); // Not present in the DOM yet
 
     // Make some changes to the form fields
     const nameField = screen.getByTestId('nameField');
@@ -174,7 +174,7 @@ describe('<FormDataProvider />', () => {
     await user.type(companyField, 'updated value');
 
     // No re-render
-    expect(onFormData).toBeCalledTimes(0);
+    expect(onFormData).toHaveBeenCalledTimes(0);
 
     // Make some changes to fields in the watch list
     const nameField = screen.getByTestId('nameField');

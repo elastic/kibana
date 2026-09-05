@@ -64,7 +64,7 @@ describe('useDataGridDensity', () => {
 
     onChangeDataGridDensity(DATA_GRID_STYLE_EXPANDED);
 
-    expect(localStorageMock.set).toBeCalledWith(
+    expect(localStorageMock.set).toHaveBeenCalledWith(
       'discover:dataGridDensity',
       DataGridDensity.EXPANDED
     );
@@ -85,6 +85,6 @@ describe('useDataGridDensity', () => {
 
     onChangeDataGridDensity(DATA_GRID_STYLE_EXPANDED);
 
-    expect(onUpdateDataGridDensity).toBeCalledWith(DataGridDensity.EXPANDED);
+    expect(onUpdateDataGridDensity).toHaveBeenCalledWith(DataGridDensity.EXPANDED);
   });
 });

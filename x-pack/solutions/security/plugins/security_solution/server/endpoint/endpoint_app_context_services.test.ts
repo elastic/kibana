@@ -93,8 +93,11 @@ describe('test endpoint app context services', () => {
     let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
     const request = httpServerMock.createKibanaRequest();
 
-    const startService = (cpsEnabled: boolean) => {
-      startContract = { ...createMockEndpointAppContextServiceStartContract(), cpsEnabled };
+    const startService = (cpsActive: boolean) => {
+      startContract = {
+        ...createMockEndpointAppContextServiceStartContract(),
+        isCpsActive: jest.fn().mockResolvedValue(cpsActive),
+      };
       service.setup(createMockEndpointAppContextServiceSetupContract());
       service.start(startContract);
     };
@@ -107,37 +110,47 @@ describe('test endpoint app context services', () => {
       service.stop();
     });
 
-    it('reports CPS as disabled when the deployment and flag check resolved to false', () => {
+    it('reports CPS as inactive when the resolver resolves to false', async () => {
       startService(false);
 
-      expect(service.isCpsEnabled()).toBe(false);
+      expect(await service.isCpsActive(request)).toBe(false);
     });
 
-    it('returns the internal ES client when CPS is disabled', () => {
+    it('returns the internal ES client when CPS is inactive', async () => {
       startService(false);
 
-      expect(service.getReadEsClient(request)).toBe(startContract.esClient);
+      expect(await service.getReadEsClient(request)).toBe(startContract.esClient);
       expect(startContract.clusterClient.asScoped).not.toHaveBeenCalled();
     });
 
-    it('reports a read with no request identity as not fanning out, whatever the flag says', () => {
-      startService(true);
+    it('reads origin-only when the resolver reports no linked projects, and never scopes the cluster client', async () => {
+      // Capability and feature flag may both be on; the resolver still returns false when this
+      // principal can see no linked projects (or listing them failed). That must not fan out.
+      startService(false);
 
-      expect(service.isCpsRead()).toBe(false);
-      expect(service.isCpsRead(request)).toBe(true);
-    });
-
-    it('returns the internal ES client when CPS is enabled but the caller has no request', () => {
-      startService(true);
-
-      expect(service.getReadEsClient()).toBe(startContract.esClient);
+      expect(await service.isCpsRead(request)).toBe(false);
+      expect(await service.getReadEsClient(request)).toBe(startContract.esClient);
       expect(startContract.clusterClient.asScoped).not.toHaveBeenCalled();
     });
 
-    it('returns a current-user client with space project routing when CPS is enabled', () => {
+    it('reports a read with no request identity as not fanning out, whatever the flag says', async () => {
       startService(true);
 
-      const client = service.getReadEsClient(request);
+      expect(await service.isCpsRead()).toBe(false);
+      expect(await service.isCpsRead(request)).toBe(true);
+    });
+
+    it('returns the internal ES client when CPS is active but the caller has no request', async () => {
+      startService(true);
+
+      expect(await service.getReadEsClient()).toBe(startContract.esClient);
+      expect(startContract.clusterClient.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('returns a current-user client with space project routing when CPS is active', async () => {
+      startService(true);
+
+      const client = await service.getReadEsClient(request);
 
       expect(startContract.clusterClient.asScoped).toHaveBeenCalledWith(request, {
         projectRouting: 'space',
@@ -146,18 +159,18 @@ describe('test endpoint app context services', () => {
       expect(client).not.toBe(startContract.esClient);
     });
 
-    it('scopes the search client without project routing when CPS is disabled', () => {
+    it('scopes the search client without project routing when CPS is inactive', async () => {
       startService(false);
 
-      service.getScopedSearchClient(request);
+      await service.getScopedSearchClient(request);
 
       expect(startContract.dataStart.search.asScoped).toHaveBeenCalledWith(request);
     });
 
-    it('scopes the search client with space project routing when CPS is enabled', () => {
+    it('scopes the search client with space project routing when CPS is active', async () => {
       startService(true);
 
-      service.getScopedSearchClient(request);
+      await service.getScopedSearchClient(request);
 
       expect(startContract.dataStart.search.asScoped).toHaveBeenCalledWith(request, {
         projectRouting: 'space',
@@ -170,8 +183,11 @@ describe('test endpoint app context services', () => {
     let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
     const request = httpServerMock.createKibanaRequest();
 
-    const startService = (cpsEnabled: boolean) => {
-      startContract = { ...createMockEndpointAppContextServiceStartContract(), cpsEnabled };
+    const startService = (cpsActive: boolean) => {
+      startContract = {
+        ...createMockEndpointAppContextServiceStartContract(),
+        isCpsActive: jest.fn().mockResolvedValue(cpsActive),
+      };
       service.setup(createMockEndpointAppContextServiceSetupContract());
       service.start(startContract);
     };
@@ -184,22 +200,22 @@ describe('test endpoint app context services', () => {
       service.stop();
     });
 
-    it('isCpsRead() returns false when the flag is off', () => {
+    it('isCpsRead() returns false when the resolver is inactive', async () => {
       startService(false);
 
-      expect(service.asScoped(request).isCpsRead()).toBe(false);
+      expect((await service.asScoped(request)).isCpsRead()).toBe(false);
     });
 
-    it('isCpsRead() returns true when the flag is on and a request is present', () => {
+    it('isCpsRead() returns true when the resolver is active and a request is present', async () => {
       startService(true);
 
-      expect(service.asScoped(request).isCpsRead()).toBe(true);
+      expect((await service.asScoped(request)).isCpsRead()).toBe(true);
     });
 
-    it('getEsClient() returns a different client than the internal one when the flag is on', () => {
+    it('getEsClient() returns a different client than the internal one when the resolver is active', async () => {
       startService(true);
 
-      const scoped = service.asScoped(request);
+      const scoped = await service.asScoped(request);
 
       expect(scoped.getEsClient()).not.toBe(startContract.esClient);
     });
@@ -213,7 +229,7 @@ describe('test endpoint app context services', () => {
       };
       jest.spyOn(service, 'getActiveSpace').mockResolvedValue(expectedSpace);
 
-      const result = await service.asScoped(request).getSpace();
+      const result = await (await service.asScoped(request)).getSpace();
 
       expect(result).toBe(expectedSpace);
       expect(service.getActiveSpace).toHaveBeenCalledWith(request);

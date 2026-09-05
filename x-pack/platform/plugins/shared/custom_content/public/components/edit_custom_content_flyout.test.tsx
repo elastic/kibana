@@ -63,6 +63,7 @@ const defaultProps = {
   projectRouting: undefined,
   query: undefined,
   filters: undefined,
+  esqlVariables: undefined,
   onSave: jest.fn(),
   onClose: jest.fn(),
   onRunPreview: jest.fn(),
