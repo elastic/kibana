@@ -10,7 +10,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EuiBreakpointSize } from '@elastic/eui';
-import { AppMenuComponent, AppMenuComponentInternal } from './app_menu';
+import { AppMenuComponent, AppMenuComponentInternal, type AppMenuItemsProps } from './app_menu';
 import type { AppMenuConfig, AppMenuItemType } from '../types';
 import { APP_MENU_TEST_SUBJECTS, getAppMenuActionButtonTestSubj } from '../test_subjects';
 
@@ -400,6 +400,24 @@ describe('AppMenu', () => {
 
       expect(container).not.toBeEmptyDOMElement();
       expect(screen.getByTestId('inline-sentinel')).toBeInTheDocument();
+    });
+
+    it('drops a cast-in beforePrimaryAction on ordinary AppMenuComponent', () => {
+      render(
+        <AppMenuComponent
+          {...({
+            config: defaultConfig,
+            beforePrimaryAction: {
+              inline: <button type="button" data-test-subj="cast-inline-sentinel" />,
+              collapsed: <button type="button" data-test-subj="cast-collapsed-sentinel" />,
+            },
+          } as unknown as AppMenuItemsProps)}
+        />
+      );
+
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.queryByTestId('cast-inline-sentinel')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cast-collapsed-sentinel')).not.toBeInTheDocument();
     });
   });
 });

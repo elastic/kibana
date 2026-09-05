@@ -53,9 +53,19 @@ export type AppMenuComponentInternalProps = AppMenuItemsProps & {
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.switch;
 
-export const AppMenuComponent = (props: AppMenuItemsProps) => {
-  return <AppMenuComponentInternal {...props} />;
-};
+export const AppMenuComponent = ({
+  config,
+  visible,
+  breakpointSource,
+  staticItems,
+}: AppMenuItemsProps) => (
+  <AppMenuComponentInternal
+    config={config}
+    visible={visible}
+    breakpointSource={breakpointSource}
+    staticItems={staticItems}
+  />
+);
 
 export const AppMenuComponentInternal = ({
   config,
