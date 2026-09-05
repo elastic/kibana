@@ -15,7 +15,7 @@ import type { Attributes } from '@opentelemetry/api';
 export interface ChatCompleteMetadata {
   connectorTelemetry?: ConnectorTelemetryMetadata;
   anonymization?: ChatCompleteAnonymizationMetadata;
-  workflowAnonymization?: WorkflowAnonymizationContext;
+  agentId?: string;
   attributes?: Attributes;
 }
 
@@ -40,9 +40,4 @@ export interface ChatCompleteAnonymizationMetadata {
   profileId?: string;
   replacementsId?: string;
   target?: ChatCompleteAnonymizationTarget;
-}
-
-export interface WorkflowAnonymizationContext {
-  sessionId?: string;
-  agentId?: string;
 }
