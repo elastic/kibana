@@ -751,6 +751,13 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       );
     }
 
+    // Run the warm-start memory check systematically; it is non-blocking.
+    if (!scoutTestsOnly) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/warm_start_memory_bench.yml', cancelable)
+      );
+    }
+
     if (GITHUB_PR_LABELS.includes('ci:run-code-quality')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/code_quality.yml', cancelable));
     }
