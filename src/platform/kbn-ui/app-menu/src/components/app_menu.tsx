@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
@@ -39,15 +39,44 @@ export interface AppMenuItemsProps {
   staticItems?: AppMenuStaticItem[];
 }
 
+/**
+ * Temporary Dashboard-only pinned seam. Do not adopt.
+ * Inline is a direct App Menu child after visible secondary items and before More.
+ */
+export interface AppMenuPinnedAction {
+  inline: ReactNode;
+  collapsed: ReactNode;
+}
+
+export type AppMenuComponentInternalProps = AppMenuItemsProps & {
+  /** Temporary Dashboard-only escape hatch. Not part of the public App Menu API. */
+  pinnedAction?: AppMenuPinnedAction;
+};
+
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.switch;
 
 export const AppMenuComponent = ({
   config,
+  visible,
+  breakpointSource,
+  staticItems,
+}: AppMenuItemsProps) => (
+  <AppMenuComponentInternal
+    config={config}
+    visible={visible}
+    breakpointSource={breakpointSource}
+    staticItems={staticItems}
+  />
+);
+
+export const AppMenuComponentInternal = ({
+  config,
   visible = true,
   breakpointSource = 'application',
   staticItems,
-}: AppMenuItemsProps) => {
+  pinnedAction,
+}: AppMenuComponentInternalProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
 
   /**
@@ -59,7 +88,7 @@ export const AppMenuComponent = ({
    */
   const hasVisibleStaticItems = hasNonGlobalStaticItems(staticItems);
 
-  if ((!config || hasNoItems(config)) && !hasVisibleStaticItems) {
+  if ((!config || hasNoItems(config)) && !hasVisibleStaticItems && !pinnedAction) {
     return null;
   }
 
@@ -113,12 +142,21 @@ export const AppMenuComponent = ({
     const inlineItems = displayedItems.slice(0, inlineItemLimit);
     const responsiveOverflowItems = [...displayedItems.slice(inlineItemLimit), ...overflowItems];
     const shouldShowOverflow = responsiveOverflowItems.length > 0 || hasStaticItems;
-    const hasSecondaryActions =
-      Boolean(switchConfig) || inlineItems.length > 0 || shouldShowOverflow;
+    const overflowComponent = shouldShowOverflow ? (
+      <AppMenuOverflowButton
+        items={responsiveOverflowItems}
+        staticItems={processedStaticItems}
+        isPopoverOpen={openPopoverId === showMoreButtonId}
+        onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+        onPopoverClose={handleOnPopoverClose}
+      />
+    ) : undefined;
+    const hasVisibleSecondaryItems = Boolean(switchConfig) || inlineItems.length > 0;
+    const hasSecondaryCluster = hasVisibleSecondaryItems || (!pinnedAction && shouldShowOverflow);
 
     return (
       <>
-        {hasSecondaryActions && (
+        {hasSecondaryCluster && (
           <div css={secondaryActionsCss}>
             {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
             {inlineItems.map((menuItem) => (
@@ -130,24 +168,23 @@ export const AppMenuComponent = ({
                 onPopoverClose={handleOnPopoverClose}
               />
             ))}
-            {shouldShowOverflow && (
-              <AppMenuOverflowButton
-                items={responsiveOverflowItems}
-                staticItems={processedStaticItems}
-                isPopoverOpen={openPopoverId === showMoreButtonId}
-                onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-                onPopoverClose={handleOnPopoverClose}
-              />
-            )}
+            {!pinnedAction ? overflowComponent : undefined}
           </div>
         )}
+        {pinnedAction?.inline}
+        {pinnedAction ? overflowComponent : undefined}
         {primaryActionComponent}
       </>
     );
   };
 
   const content: Record<AppMenuLayout, React.ReactNode> = {
-    collapsed: collapsedComponent,
+    collapsed: (
+      <>
+        {collapsedComponent}
+        {pinnedAction?.collapsed}
+      </>
+    ),
     minimal: renderInlineContent(0),
     expanded: renderInlineContent(displayedItems.length),
   };

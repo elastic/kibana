@@ -18,7 +18,7 @@ import type { ChromeBadge, ChromeHelpExtension } from '@kbn/core-chrome-browser'
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/ui-app-header';
-import { AppHeader, AppHeaderView, DiscoverAppHeader } from './app_header';
+import { AppHeader, AppHeaderView, DiscoverAppHeader, type AppHeaderProps } from './app_header';
 
 const createChromeWithIntegrationsAccess = (canAccessIntegrations: boolean) => {
   const chrome = chromeServiceMock.createStartContract();
@@ -256,5 +256,25 @@ describe('AppHeader adapter', () => {
     unmount();
 
     expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+  });
+
+  it('drops a cast-in pinnedMenuAction on ordinary AppHeader', async () => {
+    renderAppHeader(
+      <AppHeader
+        {...({
+          title: 'Dashboard',
+          pinnedMenuAction: {
+            inline: <button type="button" data-test-subj="cast-inline-sentinel" />,
+            collapsed: <button type="button" data-test-subj="cast-collapsed-sentinel" />,
+          },
+        } as unknown as AppHeaderProps)}
+      />
+    );
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Dashboard'
+    );
+    expect(screen.queryByTestId('cast-inline-sentinel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cast-collapsed-sentinel')).not.toBeInTheDocument();
   });
 });
