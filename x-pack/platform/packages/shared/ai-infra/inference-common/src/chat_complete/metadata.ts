@@ -36,9 +36,7 @@ export interface ChatCompleteAnonymizationTarget {
  * field-based policy for a target.
  */
 export interface ChatCompleteAnonymizationMetadata {
-  /** Stable conversation scope used by workflow-driven anonymization. */
   sessionId?: string;
-  /** Active agent identity used only for workflow policy selection. */
   agentId?: string;
   profileId?: string;
   replacementsId?: string;
