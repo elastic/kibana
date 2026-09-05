@@ -45,6 +45,7 @@ import type {
 } from '@kbn/ml-common-types/results';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
 import { getSeverityThresholdMax } from '../../../common/util/severity_threshold';
 
 import {
@@ -63,6 +64,7 @@ import { getChartType } from '../../../common/util/chart_utils';
 
 import type { MlClient } from '../../lib/ml_client';
 import type { MlJob } from '../..';
+import { getIsMlCpsEnabled } from '../../lib/cps_utils';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {
@@ -1684,6 +1686,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     const datafeedQuery = get(config, 'datafeedConfig.query', null);
+    const isMlCpsEnabled = await getIsMlCpsEnabled(client);
+    const projectRouting =
+      isMlCpsEnabled && config.datafeedConfig
+        ? getProjectRoutingFromDatafeed(config.datafeedConfig) ?? undefined
+        : undefined;
 
     try {
       return await getEventDistributionData(
@@ -1699,7 +1706,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         range.min,
         range.max,
         config.bucketSpanSeconds * 1000,
-        config.datafeedConfig.project_routing
+        projectRouting
       );
     } catch (e) {
       handleError(
