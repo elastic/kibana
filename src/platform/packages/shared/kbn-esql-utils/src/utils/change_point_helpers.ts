@@ -6,12 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser, WrappingPrettyPrinter } from '@elastic/esql';
+import { Parser, WrappingPrettyPrinter, isColumn, isOptionNode } from '@elastic/esql';
 import { CommandNames } from '@kbn/esql-language';
 import type {
   ESQLAstChangePointCommand,
   ESQLAstQueryExpression,
   ESQLAstCommand,
+  ESQLCommandOption,
 } from '@elastic/esql/types';
 import { escapeStringValue } from './append_to_query/utils';
 import { sanitazeESQLInput } from './sanitaze_input';
@@ -75,6 +76,28 @@ export const getChangePointSeriesColumns = (
     const valueColumn = cp.value.parts.join('.');
     const timeColumn = cp.key?.parts?.length ? cp.key.parts.join('.') : '@timestamp';
     return { valueColumn, timeColumn };
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Column names from `CHANGE_POINT ... BY col[, col]` on the first top-level CHANGE_POINT command.
+ */
+export const getChangePointByColumns = (esql?: string): string[] | undefined => {
+  if (!esql) return undefined;
+  try {
+    const { root } = Parser.parse(esql);
+    const cp = root.commands.find((c) => c.name === CommandNames.CHANGE_POINT) as
+      | ESQLAstChangePointCommand
+      | undefined;
+    if (!cp) return undefined;
+    const byOption = cp.args.find((arg) => isOptionNode(arg) && arg.name === 'by') as
+      | ESQLCommandOption
+      | undefined;
+    if (!byOption) return undefined;
+    const cols = byOption.args.filter(isColumn).map((c) => c.parts.join('.'));
+    return cols.length ? cols : undefined;
   } catch {
     return undefined;
   }

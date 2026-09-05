@@ -12,6 +12,9 @@ import {
   buildChangePointCards,
   formatAnnotationTimestamp,
   getCardForRow,
+  getChangePointRowTimestamp,
+  getEntityKey,
+  isChangePointTableRow,
 } from './derive_change_point_cards';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -53,6 +56,63 @@ const COLUMNS_WITH_HOST = [
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('derive_change_point_cards', () => {
+  describe('getEntityKey', () => {
+    it('returns empty string when there are no entity columns', () => {
+      expect(getEntityKey({ host: 'a' }, [])).toBe('');
+    });
+
+    it('builds col=value keys joined by comma-space', () => {
+      expect(getEntityKey({ host: 'a' }, ['host'])).toBe('host=a');
+      expect(getEntityKey({ host: 'web-1', service: 'orders' }, ['host', 'service'])).toBe(
+        'host=web-1, service=orders'
+      );
+    });
+
+    it('serializes null as (null) to match Discover / card grouping', () => {
+      expect(getEntityKey({ host: null }, ['host'])).toBe('host=(null)');
+    });
+  });
+
+  describe('isChangePointTableRow', () => {
+    it('requires a non-empty type and a defined pvalue', () => {
+      expect(isChangePointTableRow({ type: 'mean_shift', pvalue: 0.01 }, 'type', 'pvalue')).toBe(
+        true
+      );
+      expect(isChangePointTableRow({ type: '', pvalue: 0.01 }, 'type', 'pvalue')).toBe(false);
+      expect(isChangePointTableRow({ type: 'mean_shift', pvalue: null }, 'type', 'pvalue')).toBe(
+        false
+      );
+    });
+  });
+
+  describe('getChangePointRowTimestamp', () => {
+    it('falls back to another date column when the ON column is null', () => {
+      const table = makeTable(
+        [
+          { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
+          { id: 'other_date', name: 'other_date', meta: { type: 'date' as const } },
+          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
+          { id: 'type', name: 'type', meta: { type: 'string' as const } },
+          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
+        ],
+        []
+      );
+      const iso = getChangePointRowTimestamp(
+        {
+          bucket: null,
+          other_date: '2023-11-15T00:00:00.000Z',
+          avg_bytes: 14,
+          type: 'mean_shift',
+          pvalue: 0.001,
+        },
+        'bucket',
+        table,
+        new Set(['type', 'pvalue', 'avg_bytes'])
+      );
+      expect(iso).toBe('2023-11-15T00:00:00.000Z');
+    });
+  });
+
   describe('formatAnnotationTimestamp', () => {
     it('formats epoch ms as ISO', () => {
       const ms = Date.parse('2023-11-14T22:13:20.000Z');

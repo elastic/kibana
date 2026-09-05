@@ -7,46 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker, Parser, isColumn } from '@elastic/esql';
-import type {
-  ESQLAstChangePointCommand,
-  ESQLCommandOption,
-  ESQLAstItem,
-} from '@elastic/esql/types';
 import {
   appendEntityFiltersToChangePointLineEsql,
   buildChangePointLineDataQuery,
+  getChangePointByColumns,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
 } from '@kbn/esql-utils';
-import { CommandNames } from '@kbn/esql-language';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CHANGE_POINT_TYPE_COLUMN, CHANGE_POINT_PVALUE_COLUMN } from '../constants';
 import { formatPvalueLabel } from './get_pvalue_impact';
-
-const isByOption = (a: ESQLAstItem): a is ESQLCommandOption =>
-  (a as { type?: string; name?: string }).type === 'option' &&
-  (a as { type?: string; name?: string }).name === 'by';
-
-const getChangePointByColumns = (esql?: string): string[] | undefined => {
-  if (!esql) return undefined;
-  try {
-    const { root } = Parser.parse(esql);
-    const changePointCommands = Walker.findAll(
-      root,
-      (node) => node.type === 'command' && node.name === CommandNames.CHANGE_POINT
-    );
-    const cp = changePointCommands[0] as ESQLAstChangePointCommand | undefined;
-    if (!cp) return undefined;
-    const byOption = cp.args.find(isByOption);
-    if (!byOption) return undefined;
-    const cols = byOption.args.filter(isColumn).map((c) => c.parts.join('.'));
-    return cols.length ? cols : undefined;
-  } catch {
-    return undefined;
-  }
-};
 
 export interface ChangePointCardModel {
   readonly id: string;
@@ -92,8 +63,20 @@ const serializeCell = (value: unknown): string => {
   return String(value);
 };
 
+/**
+ * Stable map key for which time series a row belongs to.
+ * Matches card grouping / `cp-card-${key}` ids (`col=value` joined by `, `). Empty when there is no BY.
+ */
+export const getEntityKey = (
+  row: Readonly<Record<string, unknown>>,
+  entityColumnIds: readonly string[]
+): string => {
+  if (entityColumnIds.length === 0) return '';
+  return entityColumnIds.map((id) => `${id}=${serializeCell(row[id])}`).join(', ');
+};
+
 const pickTimestampCell = (
-  row: Record<string, unknown>,
+  row: Readonly<Record<string, unknown>>,
   timeColumn: string,
   table: Datatable,
   reservedColumnIds: ReadonlySet<string>
@@ -132,9 +115,9 @@ export const formatAnnotationTimestamp = (value: unknown): string | undefined =>
   return undefined;
 };
 
-/** Change-point rows: non-empty type and a defined pvalue column. */
-const isChangePointTableRow = (
-  row: Record<string, unknown>,
+/** Change-point rows - non-empty type and a defined pvalue column. */
+export const isChangePointTableRow = (
+  row: Readonly<Record<string, unknown>>,
   typeColumnId: string,
   pvalueColumnId: string
 ): boolean => {
@@ -145,6 +128,15 @@ const isChangePointTableRow = (
   const p = row[pvalueColumnId];
   return p !== null && p !== undefined;
 };
+
+/** ISO timestamp for a row's change-point marker, with date-column fallback when ON is null. */
+export const getChangePointRowTimestamp = (
+  row: Readonly<Record<string, unknown>>,
+  timeColumn: string,
+  table: Datatable,
+  reservedColumnIds: ReadonlySet<string>
+): string | undefined =>
+  formatAnnotationTimestamp(pickTimestampCell(row, timeColumn, table, reservedColumnIds));
 
 /**
  * Builds a human-readable card title from entity columns and their values in the first row.
@@ -177,7 +169,7 @@ interface ChangePointCardsBuildContext {
   readonly pvalueColumnId: string;
   readonly timeColumn: string;
   /**
-   * Columns used to identify distinct entities. Comes from the explicit `BY` clause when present;
+   * Columns used to identify distinct entities. Comes from the explicit `BY` clause when present -
    * otherwise derived heuristically as the result columns that are not reserved (value, time,
    * type, pvalue).
    */
@@ -239,10 +231,7 @@ const getChangePointCardsBuildContext = (params: {
   const groups = new Map<string, { entityLabel: string; rows: ChangePointRow[] }>();
 
   for (const row of table.rows as ChangePointRow[]) {
-    const entityLabel =
-      entityColumnIds.length > 0
-        ? entityColumnIds.map((id: string) => `${id}=${serializeCell(row[id])}`).join(', ')
-        : '';
+    const entityLabel = getEntityKey(row, entityColumnIds);
     const existing = groups.get(entityLabel);
     if (existing) {
       existing.rows.push(row);
@@ -285,13 +274,18 @@ export const buildChangePointCards = (params: {
     groups,
   } = ctx;
 
+  const baseLineEsql = buildChangePointLineDataQuery(esql);
+  if (!baseLineEsql) return undefined;
+
   const cards: ChangePointCardModel[] = [];
 
   for (const [entityLabel, { rows }] of groups.entries()) {
     const firstRow = rows[0];
-    let lineEsql = buildChangePointLineDataQuery(esql);
-    if (!lineEsql) continue;
-    lineEsql = appendEntityFiltersToChangePointLineEsql(lineEsql, firstRow, entityColumnIds);
+    const lineEsql = appendEntityFiltersToChangePointLineEsql(
+      baseLineEsql,
+      firstRow,
+      entityColumnIds
+    );
 
     const annotationEvents: ChangePointCardModel['annotationEvents'] = [];
     let hasDetectedChangePoint = false;
@@ -307,8 +301,7 @@ export const buildChangePointCards = (params: {
       // Track detection before the timestamp guard so that a change point with an unresolvable
       // timestamp (e.g. a null bucket at the edge of the time range) is still counted.
       hasDetectedChangePoint = true;
-      const timeCell = pickTimestampCell(row, timeColumn, table, timestampReservedIds);
-      const datetime = formatAnnotationTimestamp(timeCell);
+      const datetime = getChangePointRowTimestamp(row, timeColumn, table, timestampReservedIds);
       if (!datetime) continue;
 
       const label = isByMode
@@ -392,14 +385,14 @@ export const getCardForRow = (
     // actual change points (non-empty type + defined pvalue). All other rows (e.g. regular
     // time-series buckets without a detected change) should show an empty state.
     const { typeColumnId, pvalueColumnId } = firstCard;
-    if (!isChangePointTableRow(row as Record<string, unknown>, typeColumnId, pvalueColumnId)) {
+    if (!isChangePointTableRow(row, typeColumnId, pvalueColumnId)) {
       return undefined;
     }
     return firstCard;
   }
 
   const entityCols = Object.keys(firstCard.entityValues);
-  const entityLabel = entityCols.map((col) => `${col}=${serializeCell(row[col])}`).join(', ');
+  const entityLabel = getEntityKey(row, entityCols);
   const card = cards.find((c) => c.id === `cp-card-${entityLabel}`);
   if (!card) return undefined;
 
@@ -410,7 +403,7 @@ export const getCardForRow = (
     card.changePointTypes.length > 0 || card.minPvalue !== undefined;
   if (
     cardHasTypedChangePointRows &&
-    !isChangePointTableRow(row as Record<string, unknown>, card.typeColumnId, card.pvalueColumnId)
+    !isChangePointTableRow(row, card.typeColumnId, card.pvalueColumnId)
   ) {
     return undefined;
   }
