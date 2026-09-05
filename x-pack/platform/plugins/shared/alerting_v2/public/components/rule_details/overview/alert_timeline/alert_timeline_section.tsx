@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
@@ -195,7 +196,9 @@ export const AlertTimelineSection: React.FC = () => {
         {!isLoading && isError && (
           <EuiEmptyPrompt
             color="danger"
-            iconType="warning"
+            icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
+            titleSize="xs"
+            paddingSize="m"
             data-test-subj="alertTimelineSectionError"
             title={
               <h4>
@@ -217,7 +220,9 @@ export const AlertTimelineSection: React.FC = () => {
 
         {!isLoading && !isError && timelineData.rows.length === 0 && (
           <EuiEmptyPrompt
-            iconType="bell"
+            icon={<EuiIcon type="bell" size="l" aria-hidden={true} />}
+            titleSize="xs"
+            paddingSize="m"
             data-test-subj="alertTimelineSectionEmpty"
             title={
               <h4>
