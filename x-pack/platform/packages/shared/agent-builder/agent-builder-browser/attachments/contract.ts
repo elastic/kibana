@@ -178,6 +178,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getIcon?: () => IconType;
   /**
+   * Returns a URL (or data URL) to use as a thumbnail image for the attachment.
+   * When provided, renders an <img> instead of an EuiIcon in the pill icon slot.
+   */
+  getThumbnail?: (attachment: TAttachment) => string | undefined;
+  /**
    * Returns header metadata (icon, subtitle, badges) for the attachment header
    * (inline / canvas). Omitted fields fall back to their defaults (no icon, no
    * subtitle, no badges).

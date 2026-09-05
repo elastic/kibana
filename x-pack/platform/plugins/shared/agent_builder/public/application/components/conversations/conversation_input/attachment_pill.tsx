@@ -22,6 +22,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { ThumbnailAttachmentPill } from './thumbnail_attachment_pill';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
   defaultMessage: 'Remove attachment',
@@ -30,6 +31,9 @@ const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.remove
 export interface AttachmentPillProps {
   attachment: Attachment;
   onRemoveAttachment?: () => void;
+  isHighlighted?: boolean;
+  onHoverStart?: () => void;
+  onHoverEnd?: () => void;
 }
 
 const DEFAULT_ICON = 'document';
@@ -37,14 +41,34 @@ const DEFAULT_ICON = 'document';
 export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
+  isHighlighted = false,
+  onHoverStart,
+  onHoverEnd,
 }) => {
   const { attachmentsService } = useAgentBuilderServices();
   const { euiTheme } = useEuiTheme();
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
   const [isHovered, setIsHovered] = useState(false);
 
-  const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
   const canRemoveAttachment = Boolean(onRemoveAttachment);
+  const label = uiDefinition?.getLabel(attachment) ?? attachment.type;
+  const thumbnailUrl = uiDefinition?.getThumbnail?.(attachment);
+
+  if (thumbnailUrl) {
+    return (
+      <ThumbnailAttachmentPill
+        attachmentId={attachment.id}
+        thumbnailUrl={thumbnailUrl}
+        label={label}
+        onRemoveAttachment={onRemoveAttachment}
+        isHighlighted={isHighlighted}
+        onHoverStart={onHoverStart}
+        onHoverEnd={onHoverEnd}
+      />
+    );
+  }
+
+  const displayName = label;
   const iconType = uiDefinition?.getIcon?.() ?? DEFAULT_ICON;
 
   const iconContainerStyles = css`
@@ -55,6 +79,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     height: ${euiTheme.size.xl};
     border-radius: ${euiTheme.border.radius.small};
     background-color: ${euiTheme.colors.backgroundBasePrimary};
+    overflow: hidden;
   `;
 
   const titleStyles = css`

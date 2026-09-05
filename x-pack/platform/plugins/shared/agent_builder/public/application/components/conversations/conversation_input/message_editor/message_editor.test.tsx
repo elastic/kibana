@@ -8,14 +8,25 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
-import { createTextFragment } from './utils';
+import { createTextFragment, NON_BREAKING_SPACE } from './utils';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
 import { CommandId } from './command_menu';
+import {
+  createImagePlaceholderElement,
+  IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE,
+} from './image_placeholder';
 import type {
   CommandMenuComponentProps,
   CommandMenuHandle,
   CommandBadgeData,
 } from './command_menu';
+import {
+  COMMAND_BADGE_ATTRIBUTE,
+  COMMAND_ID_ATTRIBUTE,
+  createCommandBadgeElement,
+} from './command_badge';
+import { COMMAND_METADATA_ATTRIBUTE } from './command_badge/attributes';
+import { serializeEditorContent } from './serialize';
 
 jest.mock('./command_menu/cursor_rect', () => ({
   getRectAtOffset: () => ({
@@ -75,6 +86,8 @@ const createMockMessageEditor = (): {
       getContent: jest.fn(() => ''),
       setContent: jest.fn(),
       isEmpty: false,
+      getPlaceholderNames: jest.fn(() => []),
+      removePlaceholderByName: jest.fn(),
     },
   };
 };
@@ -365,6 +378,337 @@ describe('MessageEditor', () => {
     expect(editor.querySelectorAll('br').length).toBe(5);
     expect(editor.textContent).toContain('Create ES|QL SIEM detection rule');
     expect(editor.textContent).toContain('==== YOUR DESCRIPTION HERE====');
+  });
+
+  it('preserves a valid command badge when pasting HTML', () => {
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    window.getSelection()?.removeAllRanges();
+    window.getSelection()?.addRange(range);
+
+    const badge = createCommandBadgeElement(mockBadgeData);
+    badge.setAttribute('contenteditable', 'false');
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: (type: string) =>
+          type === 'text/html' ? badge.outerHTML : '[/Summarize](skill://skill-1)',
+        items: [],
+      },
+    });
+
+    const pastedBadge = editor.querySelector(`[${COMMAND_BADGE_ATTRIBUTE}]`);
+    expect(pastedBadge).toHaveAttribute(COMMAND_ID_ATTRIBUTE, CommandId.Skill);
+    expect(JSON.parse(pastedBadge?.getAttribute(COMMAND_METADATA_ATTRIBUTE) ?? '')).toEqual({
+      id: 'skill-1',
+    });
+    expect(pastedBadge).toHaveAttribute('contenteditable', 'false');
+    expect(serializeEditorContent(editor)).toBe('[/Summarize](skill://skill-1)');
+  });
+
+  it('removes executable content from pasted command badge HTML', () => {
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    window.getSelection()?.removeAllRanges();
+    window.getSelection()?.addRange(range);
+
+    const maliciousHtml = `
+      <span
+        data-command-badge="true"
+        data-command-id="skill"
+        data-command-metadata='{"id":"skill-1"}'
+        contenteditable="false"
+        class="malicious"
+        style="background-image: url(javascript:alert(1))"
+        data-untrusted="true"
+        onmouseover="alert(1)"
+      >
+        <span data-command-badge-label="true">/Summarize</span>
+        <img src="invalid" onerror="alert(1)">
+        <script>alert(1)</script>
+        <svg onload="alert(1)"></svg>
+        <a href="javascript:alert(1)">link</a>
+      </span>
+    `;
+
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: (type: string) => (type === 'text/html' ? maliciousHtml : '/Summarize'),
+        items: [],
+      },
+    });
+
+    const pastedBadge = editor.querySelector(`[${COMMAND_BADGE_ATTRIBUTE}]`);
+    expect(pastedBadge).not.toBeNull();
+    expect(pastedBadge).not.toHaveAttribute('class');
+    expect(pastedBadge).not.toHaveAttribute('style');
+    expect(pastedBadge).not.toHaveAttribute('data-untrusted');
+    expect(pastedBadge).not.toHaveAttribute('onmouseover');
+    expect(pastedBadge?.querySelector('img, script, svg, a')).toBeNull();
+  });
+
+  it('calls onPasteFile and inserts a placeholder chip when pasting an image', () => {
+    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+    const dataTransfer = {
+      getData: jest.fn().mockReturnValue(''),
+      items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+    };
+
+    fireEvent.paste(editor, { clipboardData: dataTransfer });
+
+    expect(onPasteFile).toHaveBeenCalledWith(pngFile);
+    expect(editor.querySelector('[data-image-placeholder]')).not.toBeNull();
+  });
+
+  it('marks a pasted placeholder chip as uploading immediately', () => {
+    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        uploadingNames={new Set(['screenshot.png'])}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: jest.fn().mockReturnValue(''),
+        items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+      },
+    });
+
+    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    expect(chip).not.toBeNull();
+    expect(chip.getAttribute('data-uploading')).toBe('true');
+  });
+
+  it('removes data-uploading from a chip when its name leaves uploadingNames', () => {
+    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const { messageEditor } = createMockMessageEditor();
+    const { rerender } = render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        uploadingNames={new Set(['screenshot.png'])}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: jest.fn().mockReturnValue(''),
+        items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+      },
+    });
+
+    // Upload finishes — rerender with empty uploadingNames
+    rerender(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        uploadingNames={new Set()}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    expect(chip).not.toBeNull();
+    expect(chip.getAttribute('data-uploading')).toBeNull();
+  });
+
+  it('pasting an image inserts a trailing non-breaking space and places the caret after it', () => {
+    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: jest.fn().mockReturnValue(''),
+        items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+      },
+    });
+
+    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    expect(chip).not.toBeNull();
+
+    const spaceNode = chip.nextSibling;
+    expect(spaceNode).not.toBeNull();
+    expect(spaceNode?.nodeType).toBe(Node.TEXT_NODE);
+    expect(spaceNode?.textContent).toBe(NON_BREAKING_SPACE);
+
+    const currentSel = window.getSelection()!;
+    expect(currentSel.rangeCount).toBeGreaterThan(0);
+    const currentRange = currentSel.getRangeAt(0);
+    expect(currentRange.collapsed).toBe(true);
+    expect(currentRange.startContainer).toBe(spaceNode);
+    expect(currentRange.startOffset).toBe(1);
+  });
+
+  it('does not insert a placeholder when onPasteFile returns undefined', () => {
+    const onPasteFile = jest.fn().mockReturnValue(undefined);
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+    const dataTransfer = {
+      getData: jest.fn().mockReturnValue(''),
+      items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+    };
+
+    fireEvent.paste(editor, { clipboardData: dataTransfer });
+
+    expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+  });
+
+  it('plain-text paste still works when an image paste handler is registered', () => {
+    const onPasteFile = jest.fn();
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    window.getSelection()!.removeAllRanges();
+    window.getSelection()!.addRange(range);
+
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: (type: string) => (type === 'text/plain' ? 'hello world' : ''),
+        items: [],
+      },
+    });
+
+    expect(onPasteFile).not.toHaveBeenCalled();
+    expect(editor.textContent).toContain('hello world');
+  });
+
+  it('clicking the cross icon removes the chip and fires onChange and onAfterInput', () => {
+    const onAfterInput = jest.fn();
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onAfterInput={onAfterInput}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    const chip = createImagePlaceholderElement('test.png');
+    editor.appendChild(chip);
+    expect(editor.querySelector('[data-image-placeholder]')).not.toBeNull();
+
+    const crossIcon = chip.querySelector(
+      `[${IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE}]`
+    ) as SVGSVGElement;
+    expect(crossIcon).not.toBeNull();
+
+    fireEvent.mouseDown(crossIcon);
+
+    expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+    expect(messageEditor.onChange).toHaveBeenCalled();
+    expect(onAfterInput).toHaveBeenCalled();
   });
 
   it('calls handleCommandSelect when a menu option is clicked', () => {
