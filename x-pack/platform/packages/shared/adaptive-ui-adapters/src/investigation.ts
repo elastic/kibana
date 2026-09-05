@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { actions, badge, callout, codeBlock, itemList, view } from '@kbn/adaptive-ui/builders';
+import {
+  actions,
+  badgeGroup,
+  callout,
+  codeBlock,
+  entityList,
+  view,
+} from '@kbn/adaptive-ui/builders';
 import type { BodyNode, Tone, ViewSpec } from '@kbn/adaptive-ui';
 import { normalizeInvestigationInput } from './investigation_markdown';
 import { buildNightshiftEventHref, titleCase } from './shared';
@@ -156,7 +163,7 @@ export const toInvestigationViewSpec = (raw: InvestigationInput): ViewSpec => {
     });
   }
   if (badges.length > 0) {
-    body.push(badge({ items: badges }));
+    body.push(badgeGroup({ items: badges }));
   }
 
   if (input.conclusion) {
@@ -166,7 +173,7 @@ export const toInvestigationViewSpec = (raw: InvestigationInput): ViewSpec => {
   const recommendations = input.recommendations ?? [];
   if (recommendations.length > 0) {
     body.push(
-      itemList({
+      entityList({
         label: 'Recommended remediations',
         items: recommendations.map((recommendation, index) => ({
           identifier: String(index + 1),
@@ -191,7 +198,7 @@ export const toInvestigationViewSpec = (raw: InvestigationInput): ViewSpec => {
   const blindSpots = input.blind_spots ?? [];
   if (blindSpots.length > 0) {
     body.push(
-      itemList({
+      entityList({
         label: 'Blind spots',
         items: blindSpots.map((spot) => ({
           title: spot.title,
@@ -204,7 +211,7 @@ export const toInvestigationViewSpec = (raw: InvestigationInput): ViewSpec => {
   const evidence = flattenEvidence(hypotheses);
   if (evidence.length > 0) {
     body.push(
-      itemList({
+      entityList({
         label: 'Evidence',
         items: evidence.map((item) => {
           const href = item.code ? codeReferenceHref(item.code) : undefined;
