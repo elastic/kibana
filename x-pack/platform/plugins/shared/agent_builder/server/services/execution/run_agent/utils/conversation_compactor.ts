@@ -19,7 +19,7 @@ import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ContextBudget } from './context_budget';
 import { shouldTriggerCompaction } from './context_budget';
-import { convertPreviousRounds } from './to_langchain_messages';
+import { prepareMessages } from './to_langchain_messages';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { llmCompactionSchema, COMPACTION_SYSTEM_PROMPT } from './compaction_schema';
 import type { LlmCompactionOutput } from './compaction_schema';
@@ -345,7 +345,7 @@ const summarizeOlderRounds = async (
  *
  * When an existing summary is provided, only the rounds beyond its coverage
  * are sent as raw history. The existing summary is injected as a prior context
- * block via convertPreviousRounds so the LLM can build on it without
+ * block via prepareMessages so the LLM can build on it without
  * re-processing already-summarized rounds.
  */
 const generateLlmSummary = async (
@@ -370,7 +370,7 @@ const generateLlmSummary = async (
     previousRounds: newRounds,
   };
 
-  const historyMessages = await convertPreviousRounds({
+  const historyMessages = await prepareMessages({
     conversation: tempConversation,
     compactionSummary: existingSummary,
   });

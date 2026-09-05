@@ -13,6 +13,7 @@ import type {
   ConversationWithoutRounds,
   CurrentUser,
   ToolResult,
+  TimelineEvent,
   UserIdAndName,
   SerializedMetadataValue,
   ConversationParentRelation,
@@ -59,7 +60,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
+import { isRoundDerivedEventId, roundToEvents, roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 
 export type Document = Omit<
@@ -80,14 +81,33 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
+/** True when a round's stored timeline spans more than one execution (a HITL resume). */
+const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boolean =>
+  storedEvents.some((event) => event.id.startsWith(`${roundId}::execution::`));
+
 /**
- * Rebuilds the stored timeline on write: round events keep their order, and additive events
- * (like errors) get slotted in by timestamp. That keeps a future error where it actually
- * happened instead of dumped at the end.
+ * Rebuilds the stored timeline on a rounds-path write. Each round's round-derived events are
+ * regenerated from the round, EXCEPT a round that has already been resumed (a multi-execution HITL
+ * round): its stored events are the source of truth and are preserved verbatim, because
+ * `roundsToEvents` can only emit a single execution and would collapse the pause history. Additive
+ * events (like errors) keep their timestamp slot. This runs only when the write did not itself carry
+ * events, so `merged.events` are the currently stored events.
  */
-const reconcileEvents = (merged: Conversation) => {
-  const roundDerived = roundsToEvents(merged);
-  const additive = (merged.events ?? []).filter((event) => !isRoundDerivedEventId(event.id));
+const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
+  const stored = merged.events ?? [];
+  const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
+
+  const roundDerived: TimelineEvent[] = [];
+  for (const round of merged.rounds) {
+    const storedForRound = stored.filter(
+      (event) => event.id.startsWith(`${round.id}::`) && isRoundDerivedEventId(event.id)
+    );
+    if (hasResumeExecution(round.id, storedForRound)) {
+      roundDerived.push(...storedForRound);
+    } else {
+      roundDerived.push(...roundToEvents(round, merged));
+    }
+  }
 
   const events = [...roundDerived];
   for (const event of additive) {

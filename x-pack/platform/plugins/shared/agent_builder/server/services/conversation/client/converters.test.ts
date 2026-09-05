@@ -32,6 +32,7 @@ import {
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import { roundsToEvents } from './rounds_to_events';
+import { eventsToRounds } from './events_to_rounds';
 import {
   fromEs,
   toEs,
@@ -1589,6 +1590,103 @@ describe('conversation model converters', () => {
       expect(updated.title).toBe('renamed');
       expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
       expect(updated.events?.map((event) => event.id)).toEqual(originalEventIds);
+    });
+
+    it('preserves a multi-execution (resumed HITL) timeline on a rounds-path update', () => {
+      // A round that paused (exec_0, prompt_requested) and resumed (prompt_response + exec_1). A
+      // rounds-path write (e.g. markRead / rename) must NOT collapse it back to a single execution.
+      const actor = { type: 'user', id: 'u1' } as never;
+      const agent = { type: 'agent', id: 'a1' } as never;
+      const summary = {
+        model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+        time_to_first_token: 1,
+        time_to_last_token: 2,
+      };
+      const events = [
+        {
+          id: 'mr::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: '2025-08-04T07:00:00.000Z',
+          actor,
+          data: { message: 'do it' },
+        },
+        {
+          id: 'mr::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:00:00.000Z',
+          actor: agent,
+          execution_id: 'mr::execution',
+          trigger_event_id: 'mr::user_message',
+          data: { trigger_type: 'user_message' },
+        },
+        {
+          id: 'mr::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:00:01.000Z',
+          actor: agent,
+          execution_id: 'mr::execution',
+          trigger_event_id: 'mr::user_message',
+          data: {
+            ...summary,
+            outcome: {
+              type: 'prompt_requested',
+              prompts: [{ type: AgentPromptType.confirmation, id: 'p1' }],
+            },
+          },
+        },
+        {
+          id: 'mr::prompt_response::1',
+          type: TimelineEventType.promptResponse,
+          created_at: '2025-08-04T07:05:00.000Z',
+          actor,
+          data: {
+            prompt_requested_event_id: 'mr::execution_terminated',
+            responses: { p1: { allow: true } },
+          },
+        },
+        {
+          id: 'mr::execution::1::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:05:00.000Z',
+          actor: agent,
+          execution_id: 'mr::execution::1',
+          trigger_event_id: 'mr::prompt_response::1',
+          data: { trigger_type: 'prompt_response' },
+        },
+        {
+          id: 'mr::execution::1::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:05:01.000Z',
+          actor: agent,
+          execution_id: 'mr::execution::1',
+          trigger_event_id: 'mr::prompt_response::1',
+          data: { ...summary, outcome: { type: 'responded', response: { message: 'done' } } },
+        },
+      ] as never[];
+
+      const base = eventsNativeStored();
+      const conversation: Conversation = {
+        ...base,
+        id: 'conv-multi-exec',
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        events,
+        rounds: eventsToRounds(events),
+      };
+
+      const updated = updateConversation({
+        conversation,
+        update: { id: conversation.id, read: true },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      const updatedIds = updated.events?.map((event) => event.id) ?? [];
+      // The resume execution + prompt_response survive — the pause history is not collapsed.
+      expect(updatedIds).toEqual(expect.arrayContaining(['mr::prompt_response::1']));
+      expect(updatedIds).toEqual(expect.arrayContaining(['mr::execution::1::execution_started']));
+      expect(updatedIds).toEqual(
+        expect.arrayContaining(['mr::execution::1::execution_terminated'])
+      );
     });
 
     it('regenerates round-derived events when rounds change', () => {

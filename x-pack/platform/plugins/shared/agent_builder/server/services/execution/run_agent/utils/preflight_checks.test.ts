@@ -18,7 +18,7 @@ describe('preflight_checks', () => {
       it('should not throw when message is provided', () => {
         const input: ConverseInput = { message: 'hello' };
 
-        expect(() => ensureValidInput({ input })).not.toThrow();
+        expect(() => ensureValidInput({ input, previousRounds: [] })).not.toThrow();
       });
 
       it('should not throw when attachments are provided', () => {
@@ -26,7 +26,7 @@ describe('preflight_checks', () => {
           attachments: [{ type: AttachmentType.text, data: { content: 'content' } }],
         };
 
-        expect(() => ensureValidInput({ input })).not.toThrow();
+        expect(() => ensureValidInput({ input, previousRounds: [] })).not.toThrow();
       });
 
       it('should not throw when both message and attachments are provided', () => {
@@ -35,13 +35,13 @@ describe('preflight_checks', () => {
           attachments: [{ type: AttachmentType.text, data: { content: 'content' } }],
         };
 
-        expect(() => ensureValidInput({ input })).not.toThrow();
+        expect(() => ensureValidInput({ input, previousRounds: [] })).not.toThrow();
       });
 
       it('should throw when no input is provided', () => {
         const input: ConverseInput = {};
 
-        expect(() => ensureValidInput({ input })).toThrow(
+        expect(() => ensureValidInput({ input, previousRounds: [] })).toThrow(
           /No standard input was provided to continue the conversation/
         );
       });
@@ -49,7 +49,7 @@ describe('preflight_checks', () => {
       it('should throw when only empty attachments array is provided', () => {
         const input: ConverseInput = { attachments: [] };
 
-        expect(() => ensureValidInput({ input })).toThrow(
+        expect(() => ensureValidInput({ input, previousRounds: [] })).toThrow(
           /No standard input was provided to continue the conversation/
         );
       });
@@ -60,7 +60,9 @@ describe('preflight_checks', () => {
         });
         const input: ConverseInput = { message: 'next message' };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, previousRounds: conversation.rounds })
+        ).not.toThrow();
       });
 
       it('should not throw when action=regenerate (input comes from last round)', () => {
@@ -69,7 +71,9 @@ describe('preflight_checks', () => {
         });
         const input: ConverseInput = {};
 
-        expect(() => ensureValidInput({ input, conversation, action: 'regenerate' })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, previousRounds: conversation.rounds, action: 'regenerate' })
+        ).not.toThrow();
       });
     });
 
@@ -99,7 +103,9 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, previousRounds: conversation.rounds })
+        ).not.toThrow();
       });
 
       it('should not throw when all prompt responses are provided for multiple prompts', () => {
@@ -111,14 +117,16 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, previousRounds: conversation.rounds })
+        ).not.toThrow();
       });
 
       it('should throw when no prompt response is provided', () => {
         const conversation = createConversationAwaitingPrompt('prompt-123');
         const input: ConverseInput = {};
 
-        expect(() => ensureValidInput({ input, conversation })).toThrow(
+        expect(() => ensureValidInput({ input, previousRounds: conversation.rounds })).toThrow(
           /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
         );
       });
@@ -131,7 +139,7 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).toThrow(
+        expect(() => ensureValidInput({ input, previousRounds: conversation.rounds })).toThrow(
           /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
         );
       });
@@ -144,7 +152,7 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).toThrow(
+        expect(() => ensureValidInput({ input, previousRounds: conversation.rounds })).toThrow(
           /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
         );
       });
@@ -157,7 +165,9 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, previousRounds: conversation.rounds })
+        ).not.toThrow();
       });
     });
   });

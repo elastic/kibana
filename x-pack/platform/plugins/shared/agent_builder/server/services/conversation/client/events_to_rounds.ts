@@ -12,6 +12,7 @@ import type {
   ConversationRoundStep,
   ExecutionStepEvent,
   ExecutionTerminatedEvent,
+  PromptResponseEvent,
   RoundInput,
   TimelineEvent,
   UserMessageEvent,
@@ -22,7 +23,11 @@ import {
   TimelineEventType,
   isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
+import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
+import type { AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents/prompts';
+import { isAskUserQuestionPromptResponse } from '@kbn/agent-builder-common/agents/prompts';
 import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
+import { applyResumeResolution } from './merge_rounds';
 
 /** Rounds derived from events timeline with a fallback to rounds if no events are present. */
 export const roundsForContext = (conversation: Conversation): ConversationRound[] =>
@@ -32,13 +37,24 @@ export const roundsForContext = (conversation: Conversation): ConversationRound[
     ? eventsToRounds(conversation.events)
     : conversation.rounds;
 
+/** A single execution reconstructed into a partial round, awaiting the fold. */
+interface ExecutionPartial {
+  /** 0 for the first execution, k for the k-th resume. */
+  order: number;
+  round: ConversationRound;
+  /** ask_user_question answers carried by the prompt_response that triggered this execution. */
+  answers: Map<string, AskUserQuestionAnswer[]>;
+  /** This execution's persisted resume state, carried onto the folded round when terminal. */
+  state?: RoundState;
+}
+
 /**
  * Reconstructs rounds from a timeline.
  */
 export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => {
   const byId = new Map(events.map((event) => [event.id, event]));
 
-  // Lifecycle events grouped by execution, in first-seen (round) order.
+  // Lifecycle events grouped by execution, in first-seen order.
   const executions = new Map<string, TimelineEvent[]>();
   for (const event of events) {
     if (!event.execution_id) {
@@ -52,19 +68,22 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
     }
   }
 
-  const rounds: ConversationRound[] = [];
+  // Bucket executions by the round they belong to, preserving round (first-seen) order.
+  const buckets = new Map<string, ExecutionPartial[]>();
   for (const [executionId, group] of executions) {
     const triggerId = group.find((event) => event.trigger_event_id)?.trigger_event_id;
     const trigger = triggerId ? byId.get(triggerId) : undefined;
-    if (trigger?.type !== TimelineEventType.userMessage) {
+
+    // exec_0 is triggered by a user_message; a resume execution by a prompt_response.
+    const isInitial = trigger?.type === TimelineEventType.userMessage;
+    const isResume = trigger?.type === TimelineEventType.promptResponse;
+    if (!isInitial && !isResume) {
       continue;
     }
-    const userMessage = trigger as UserMessageEvent;
 
     const terminated = group.find(
       (event) => event.type === TimelineEventType.executionTerminated
     ) as ExecutionTerminatedEvent | undefined;
-
     if (!terminated) {
       continue;
     }
@@ -74,16 +93,70 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
     );
     const steps = stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated.data.steps ?? [];
 
-    rounds.push({
+    const userMessage = isInitial ? (trigger as UserMessageEvent) : undefined;
+    const round: ConversationRound = {
       id: roundIdFromExecutionId(executionId),
-      input: toRoundInput(userMessage),
-      started_at: userMessage.created_at,
-      ...authorAndOrigin(userMessage),
+      // A resume execution carries no user message; the fold keeps exec_0's input.
+      input: userMessage ? toRoundInput(userMessage) : { message: '' },
+      started_at: userMessage ? userMessage.created_at : terminated.created_at,
+      ...(userMessage ? authorAndOrigin(userMessage) : {}),
       ...terminatedRoundFields(terminated.data, steps),
-    });
+    };
+
+    const answers = isResume
+      ? answersFromPromptResponse(trigger as PromptResponseEvent)
+      : new Map<string, AskUserQuestionAnswer[]>();
+
+    const roundId = roundIdFromExecutionId(executionId);
+    const bucket = buckets.get(roundId);
+    const partial: ExecutionPartial = {
+      order: executionOrderFromId(executionId),
+      round,
+      answers,
+      state: terminated.data.state,
+    };
+    if (bucket) {
+      bucket.push(partial);
+    } else {
+      buckets.set(roundId, [partial]);
+    }
+  }
+
+  const rounds: ConversationRound[] = [];
+  for (const bucket of buckets.values()) {
+    bucket.sort((a, b) => a.order - b.order);
+    let round = bucket[0].round;
+    for (let i = 1; i < bucket.length; i++) {
+      round = applyResumeResolution(round, bucket[i].round, bucket[i].answers);
+    }
+    // `mergeRounds` nulls `state`; carry it from the terminal execution.
+    if (bucket.length > 1) {
+      const terminalState = bucket[bucket.length - 1].state;
+      round = terminalState ? { ...round, state: terminalState } : { ...round, state: undefined };
+    }
+    rounds.push(round);
   }
 
   return rounds;
+};
+
+/** ask_user_question answers carried by a prompt_response, keyed by prompt_id. */
+const answersFromPromptResponse = (
+  event: PromptResponseEvent
+): Map<string, AskUserQuestionAnswer[]> => {
+  const answers = new Map<string, AskUserQuestionAnswer[]>();
+  for (const [promptId, response] of Object.entries(event.data.responses)) {
+    if (isAskUserQuestionPromptResponse(response)) {
+      answers.set(promptId, response.answers);
+    }
+  }
+  return answers;
+};
+
+/** `${roundId}::execution` = 0; `${roundId}::execution::${k}` = k. */
+const executionOrderFromId = (executionId: string): number => {
+  const match = executionId.match(/::execution::(\d+)$/);
+  return match ? Number(match[1]) : 0;
 };
 
 const stepsFromEvents = (events: ExecutionStepEvent[]): ConversationRoundStep[] => {
@@ -97,13 +170,19 @@ const stepsFromEvents = (events: ExecutionStepEvent[]): ConversationRoundStep[] 
 };
 
 /**
- * `roundToEvents` encodes the round id as `${roundId}::execution`; recover it when present so the
- * conversion round-trips, otherwise fall back to the execution id.
+ * Recovers the round id from an execution id. The first execution is `${roundId}::execution`; a
+ * k-th resume execution is `${roundId}::execution::${k}`. Falls back to the execution id when
+ * neither shape matches (defensive; should not happen for round-derived ids).
  */
-const roundIdFromExecutionId = (executionId: string): string =>
-  executionId.endsWith(ROUND_DERIVED_EVENT_ID_SUFFIXES.execution)
+const roundIdFromExecutionId = (executionId: string): string => {
+  const resume = executionId.match(/^(.*)::execution::\d+$/);
+  if (resume) {
+    return resume[1];
+  }
+  return executionId.endsWith(ROUND_DERIVED_EVENT_ID_SUFFIXES.execution)
     ? executionId.slice(0, -ROUND_DERIVED_EVENT_ID_SUFFIXES.execution.length)
     : executionId;
+};
 
 const toRoundInput = (userMessage: UserMessageEvent): RoundInput => userMessage.data;
 

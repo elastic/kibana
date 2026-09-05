@@ -324,6 +324,13 @@ export interface RoundCompleteEventData {
   round: ConversationRound;
   /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
   resumed?: boolean;
+  /**
+   * Present only on a resumed round. Carries the resume execution (`exec_k`) as its own round so the
+   * persistence layer can append it to the timeline append-only, without rewriting the pause.
+   */
+  resume_execution?: {
+    follow_up_round: ConversationRound;
+  };
   /** if the prompt state was updated during the round, contains the up-to-date version */
   conversation_state?: ConversationInternalState;
   /**
