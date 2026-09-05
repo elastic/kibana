@@ -51,13 +51,15 @@ export type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
 } from './embeddable';
-export { discoverSessionApiResponseSchema, discoverSessionApiDataSchema } from './api/schema';
+export { discoverSessionApiResponseSchema } from './api/schema';
 export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiEsqlTab,
-  DiscoverSessionApiResponse,
   DiscoverSessionApiTab,
+} from '@kbn/as-code-discover-schema';
+export type {
+  DiscoverSessionApiResponse,
   DiscoverSessionApiData,
   DiscoverSessionApiDataInput,
   DiscoverSessionSanitizeResponse,

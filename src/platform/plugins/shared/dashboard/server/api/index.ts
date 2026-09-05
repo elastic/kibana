@@ -16,13 +16,18 @@ export type { DashboardSearchRequestParams, DashboardSearchResponseBody } from '
 export type { DashboardUpdateResponseBody } from './update';
 export type {
   DashboardState,
+  DashboardStateInput,
   DashboardPanel,
   DashboardPinnedPanelsState,
+  DashboardPinnedPanelsStateInput,
   DashboardPinnedPanel,
+  DashboardPinnedPanelInput,
   DashboardSection,
   DashboardOptions,
+  DashboardOptionsInput,
   GridData,
-} from './types';
+  GridDataInput,
+} from '@kbn/as-code-dashboard-schema';
 
 export { create } from './create/create';
 export { read } from './read/read';

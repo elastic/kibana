@@ -16,12 +16,12 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { get } from 'lodash';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import { toStoredTab } from '../../../common/embeddable/transform_utils';
 import type {
-  DiscoverSessionApiData,
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
-} from '../schema';
+} from '@kbn/as-code-discover-schema';
+import { toStoredTab } from '../../../common/embeddable/transform_utils';
+import type { DiscoverSessionApiData } from '../schema';
 import { transformControlPanelsIn } from './transform_control_panels';
 import { transformVisContextIn } from './transform_vis_context';
 

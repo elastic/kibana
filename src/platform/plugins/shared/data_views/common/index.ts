@@ -8,16 +8,21 @@
  */
 
 export {
-  RUNTIME_FIELD_TYPES,
-  PRIMITIVE_RUNTIME_FIELD_TYPES,
-  RUNTIME_FIELD_COMPOSITE_TYPE,
   DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
   MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
   HasEsDataFailureReason,
 } from './constants';
-export type { PrimitiveRuntimeFieldTypes, RuntimeFieldCompositeType } from './constants';
+export {
+  RUNTIME_FIELD_TYPES,
+  PRIMITIVE_RUNTIME_FIELD_TYPES,
+  RUNTIME_FIELD_COMPOSITE_TYPE,
+} from '@kbn/as-code-data-views-schema';
+export type {
+  PrimitiveRuntimeFieldTypes,
+  RuntimeFieldCompositeType,
+} from '@kbn/as-code-data-views-schema';
 
 export { LATEST_VERSION } from './content_management/v1/constants';
 

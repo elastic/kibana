@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import type { DiscoverSessionApiTab } from '../schema';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
+import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
 import { transformVisContextIn, transformVisContextOut } from './transform_vis_context';
 
 describe('vis context transforms', () => {

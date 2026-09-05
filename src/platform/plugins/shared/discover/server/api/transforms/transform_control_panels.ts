@@ -10,8 +10,11 @@
 import { isObject } from 'lodash';
 import { transformType } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
+import {
+  discoverSessionControlPanelSchema,
+  discoverSessionControlPanelsSchema,
+} from '@kbn/as-code-discover-schema';
 import type { DiscoverSessionControlPanels, DiscoverSessionWarning } from '../schema';
-import { discoverSessionControlPanelSchema, discoverSessionControlPanelsSchema } from '../schema';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   isObject(value) && !Array.isArray(value);
