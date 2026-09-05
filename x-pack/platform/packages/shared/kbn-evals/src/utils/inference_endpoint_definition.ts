@@ -44,10 +44,16 @@ export function loadInferenceEndpoints(): InferenceEndpointDefinition[] {
   }
 
   return Object.entries(parsed as Record<string, unknown>).map(([id, def]) => {
-    return {
-      id,
-      ...(def as Record<string, unknown>),
-      type: 'inference_endpoint',
-    } as InferenceEndpointDefinition;
+    const d = def as Record<string, unknown>;
+    if (typeof d.inferenceId !== 'string' || d.inferenceId.length === 0) {
+      throw new Error(`Inference endpoint "${id}" is missing required field "inferenceId"`);
+    }
+    if (typeof d.provider !== 'string' || d.provider.length === 0) {
+      throw new Error(`Inference endpoint "${id}" is missing required field "provider"`);
+    }
+    if (typeof d.taskType !== 'string' || d.taskType.length === 0) {
+      throw new Error(`Inference endpoint "${id}" is missing required field "taskType"`);
+    }
+    return { id, ...d, type: 'inference_endpoint' } as InferenceEndpointDefinition;
   });
 }

@@ -58,7 +58,7 @@ describe('buildModelFromConnector', () => {
 
     it('attributes a .inference connector from config.providerConfig.model_id', () => {
       expect(buildModelFromConnector(eisStackConnector)).toEqual({
-        family: ModelFamily.Claude,
+        family: ModelFamily.GPT,
         provider: ModelProvider.Elastic,
         id: 'gpt-4o',
       });
@@ -86,7 +86,7 @@ describe('buildModelFromConnector', () => {
   describe('inference endpoint definitions', () => {
     it('attributes an EIS endpoint from providerConfig.model_id', () => {
       expect(buildModelFromConnector(eisEndpoint)).toEqual({
-        family: ModelFamily.Claude,
+        family: ModelFamily.GPT,
         provider: ModelProvider.Elastic,
         id: 'gpt-4o',
       });

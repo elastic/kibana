@@ -15,13 +15,24 @@ import {
 } from '@kbn/inference-common';
 import { isInferenceEndpointDefinition, type EvalConnector } from './eval_connector';
 
-function providerStringToModel(provider: string): {
-  provider: ModelProvider;
-  family: ModelFamily;
-} {
+function providerStringToModel(
+  provider: string,
+  modelId?: string
+): { provider: ModelProvider; family: ModelFamily } {
   switch (provider) {
-    case 'elastic':
+    case 'elastic': {
+      // Derive family from model_id — EIS hosts multiple provider families.
+      if (modelId) {
+        const id = modelId.toLowerCase();
+        if (id.includes('gpt') || id.includes('openai') || id.includes('o1') || id.includes('o3')) {
+          return { provider: ModelProvider.Elastic, family: ModelFamily.GPT };
+        }
+        if (id.includes('gemini')) {
+          return { provider: ModelProvider.Elastic, family: ModelFamily.Gemini };
+        }
+      }
       return { provider: ModelProvider.Elastic, family: ModelFamily.Claude };
+    }
     case 'anthropic':
       return { provider: ModelProvider.Anthropic, family: ModelFamily.Claude };
     case 'google':
@@ -35,18 +46,22 @@ function providerStringToModel(provider: string): {
 /** Describes the model behind a test connector, for attributing task and evaluator scores. */
 export function buildModelFromConnector(connector: EvalConnector): Model {
   if (isInferenceEndpointDefinition(connector)) {
-    const { provider, family } = providerStringToModel(connector.provider);
-    const modelId = connector.providerConfig?.model_id;
-    return { provider, family, id: typeof modelId === 'string' ? modelId : connector.name };
+    const modelId =
+      typeof connector.providerConfig?.model_id === 'string'
+        ? connector.providerConfig.model_id
+        : undefined;
+    const { provider, family } = providerStringToModel(connector.provider, modelId);
+    return { provider, family, id: modelId ?? connector.name };
   }
 
   // `.inference` stack connectors carry the same fields nested under `config`.
   const configProvider = connector.config?.provider;
   if (connector.actionTypeId === '.inference' && typeof configProvider === 'string') {
-    const { provider, family } = providerStringToModel(configProvider);
     const providerConfig = connector.config?.providerConfig as Record<string, unknown> | undefined;
-    const modelId = providerConfig?.model_id;
-    return { provider, family, id: typeof modelId === 'string' ? modelId : connector.name };
+    const modelId =
+      typeof providerConfig?.model_id === 'string' ? providerConfig.model_id : undefined;
+    const { provider, family } = providerStringToModel(configProvider, modelId);
+    return { provider, family, id: modelId ?? connector.name };
   }
 
   // Stack connectors (.gen-ai, .bedrock, .gemini, etc.) — use the existing helpers.

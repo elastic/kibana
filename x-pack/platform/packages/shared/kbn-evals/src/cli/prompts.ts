@@ -90,9 +90,9 @@ export const parseConnectorsFromKibanaDevYml = (repoRoot: string): AvailableConn
 };
 
 /**
- * Returns all available connectors, merging from KIBANA_TESTING_AI_CONNECTORS
- * and kibana.dev.yml. Env connectors take precedence (listed first); duplicates
- * from kibana.dev.yml are excluded.
+ * Returns all available connectors, merging from KIBANA_TESTING_INFERENCE_ENDPOINTS,
+ * KIBANA_TESTING_AI_CONNECTORS, and kibana.dev.yml. Inference endpoints are listed first;
+ * duplicates from other sources are excluded.
  */
 export const getAllAvailableConnectors = (repoRoot: string): AvailableConnectorEntry[] => {
   const envConnectors = parseConnectorsFromEnv();
@@ -147,7 +147,7 @@ export const promptForConnector = async (
 
   if (connectors.length === 0) {
     throw new Error(
-      'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run `node scripts/evals init`.'
+      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS (inference endpoints) or KIBANA_TESTING_AI_CONNECTORS (stack connectors), or run `node scripts/evals init`.'
     );
   }
 
@@ -175,7 +175,7 @@ export const promptForProject = async (
 
   if (connectors.length === 0) {
     throw new Error(
-      'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run `node scripts/evals init`.'
+      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS (inference endpoints) or KIBANA_TESTING_AI_CONNECTORS (stack connectors), or run `node scripts/evals init`.'
     );
   }
 
