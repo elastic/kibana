@@ -7,6 +7,35 @@
 
 export {
   SERVICE_MAP_ATTACHMENT_TYPE,
+  SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE,
   serviceMapAttachmentDataSchema,
   type ServiceMapAttachmentData,
+  type ServiceNodeMetadata,
 } from './service_map';
+
+export {
+  SERVICE_MAP_CONTEXT_ATTACHMENT_TYPE,
+  serviceMapContextAttachmentDataSchema,
+  type ServiceMapContextAttachmentData,
+} from './service_map_context';
+
+export {
+  APM_METRICS_ATTACHMENT_TYPE,
+  apmMetricsAttachmentDataSchema,
+  type ApmMetricsAttachmentData,
+  type MetricSnapshot,
+} from './apm_metrics';
+
+export {
+  APM_TIMESERIES_ATTACHMENT_TYPE,
+  apmTimeseriesAttachmentDataSchema,
+  type ApmTimeseriesAttachmentData,
+  type ApmTimeseriesDataPoint,
+} from './apm_timeseries';
+
+export {
+  APM_RELATED_ALERTS_ATTACHMENT_TYPE,
+  apmRelatedAlertsAttachmentDataSchema,
+  type ApmRelatedAlertsAttachmentData,
+  type AlertItem,
+} from './apm_related_alerts';

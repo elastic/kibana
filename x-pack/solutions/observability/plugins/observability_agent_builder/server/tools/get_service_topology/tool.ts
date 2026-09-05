@@ -19,8 +19,23 @@ import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
+import type { ServiceNodeMetadataMap } from '../../data_registry/data_registry_types';
+import type { ServiceTopologyConnection } from './types';
 
 export const OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID = 'observability.get_service_topology';
+
+/** Collects unique service names from the source/target service nodes of a connection set. */
+function collectServiceNames(connections: ServiceTopologyConnection[]): string[] {
+  const names = new Set<string>();
+  for (const connection of connections) {
+    for (const node of [connection.source, connection.target]) {
+      if ('service.name' in node) {
+        names.add(node['service.name']);
+      }
+    }
+  }
+  return [...names];
+}
 
 const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
@@ -88,7 +103,9 @@ When NOT to use:
 
 After reviewing topology results, consider:
 - Use \`observability.get_trace_metrics\` with timeseries to check latency/error trends over time
-- Use \`observability.get_traces\` to find error patterns in failing dependencies`,
+- Use \`observability.get_traces\` to find error patterns in failing dependencies
+
+Also returns \`nodeMetadata\`: a map keyed by service name with per-service \`alertsCount\`, \`sloStatus\`, \`sloCount\`, and — when ML anomaly detection is available — \`anomalySeverity\`/\`anomalyScore\`. Pass both \`connections\` and \`nodeMetadata\` verbatim into an "observability.service-map" attachment to render alert/SLO/anomaly badges on the service nodes. When creating that attachment, also set \`serviceName\` to the focal service and \`timeRange\` to the \`start\`/\`end\` used for this call so the interactive map can scope its drill-down views.`,
     schema: getServiceTopologyToolSchema,
     tags: ['observability', 'apm', 'service-map', 'topology'],
     availability: {
@@ -115,12 +132,31 @@ After reviewing topology results, consider:
           end,
         });
 
+        // Enrich with per-service alert/SLO badge metadata. This is best-effort:
+        // if the lookup fails, still return the topology so the map can render.
+        let nodeMetadata: ServiceNodeMetadataMap = {};
+        const serviceNames = collectServiceNames(topology.connections);
+        if (serviceNames.length > 0) {
+          try {
+            nodeMetadata =
+              (await dataRegistry.getData('servicesAlertsAndSlo', {
+                request,
+                serviceNames,
+                start,
+                end,
+              })) ?? {};
+          } catch (badgeError) {
+            logger.debug(`Failed to fetch alert/SLO badges for topology: ${badgeError.message}`);
+          }
+        }
+
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
                 connections: topology.connections,
+                nodeMetadata,
               },
             },
           ],

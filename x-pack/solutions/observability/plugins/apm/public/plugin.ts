@@ -109,7 +109,14 @@ import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
 import { registerEmbeddables } from './embeddable/register_embeddables';
-import { registerServiceMapAttachment } from './agent_builder/attachment_types';
+import type { EmbeddableDeps } from './embeddable/types';
+import {
+  registerServiceMapAttachment,
+  registerServiceMapContextAttachment,
+  registerApmMetricsAttachment,
+  registerApmTimeseriesAttachment,
+  registerApmRelatedAlertsAttachment,
+} from './agent_builder/attachment_types';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { createServiceFlyoutRenderer } from './components/shared/service_flyout/service_flyout_feature';
 
@@ -239,6 +246,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private telemetry: TelemetryService;
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
+  /** Setup-time half of EmbeddableDeps, completed with core/plugins in start(). */
+  private embeddableDepsPartial?: Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>;
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
     this.telemetry = new TelemetryService();
@@ -512,14 +521,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       observabilityRuleTypeRegistry,
       telemetry,
     });
-    registerEmbeddables({
+    this.embeddableDepsPartial = {
       coreSetup: core,
       pluginsSetup: plugins,
       config,
       kibanaEnvironment,
       observabilityRuleTypeRegistry,
       telemetry,
-    });
+    };
+    registerEmbeddables(this.embeddableDepsPartial);
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
 
@@ -561,7 +571,17 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       setApmInternalServices(ApmInternalServices);
     }
     if (plugins.agentBuilder) {
-      registerServiceMapAttachment(plugins.agentBuilder!.attachments);
+      if (this.embeddableDepsPartial) {
+        registerServiceMapAttachment(plugins.agentBuilder.attachments, {
+          ...this.embeddableDepsPartial,
+          coreStart: core,
+          pluginsStart: plugins,
+        });
+      }
+      registerServiceMapContextAttachment(plugins.agentBuilder.attachments);
+      registerApmMetricsAttachment(plugins.agentBuilder.attachments);
+      registerApmTimeseriesAttachment(plugins.agentBuilder.attachments);
+      registerApmRelatedAlertsAttachment(plugins.agentBuilder.attachments);
     }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');

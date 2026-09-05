@@ -14,14 +14,18 @@ import {
   SERVICE_MAP_ATTACHMENT_TYPE,
   type ServiceMapAttachmentData,
 } from '../../../common/agent_builder/attachments';
-import { LazyAgentServiceMap } from './lazy_agent_service_map';
+import type { EmbeddableDeps } from '../../embeddable/types';
+import { LazyAgentContextualServiceMap } from './lazy_agent_contextual_service_map';
 
 type ServiceMapAttachment = Attachment<
   typeof SERVICE_MAP_ATTACHMENT_TYPE,
   ServiceMapAttachmentData
 >;
 
-export const registerServiceMapAttachment = (attachments: AttachmentServiceStartContract) => {
+export const registerServiceMapAttachment = (
+  attachments: AttachmentServiceStartContract,
+  deps: EmbeddableDeps
+) => {
   attachments.addAttachmentType<ServiceMapAttachment>(SERVICE_MAP_ATTACHMENT_TYPE, {
     getLabel: (attachment) =>
       attachment.data?.title ??
@@ -29,7 +33,7 @@ export const registerServiceMapAttachment = (attachments: AttachmentServiceStart
         defaultMessage: 'Service Map',
       }),
     getIcon: () => 'graphApp',
-    renderInlineContent: ({ attachment }) => {
+    renderInlineContent: ({ attachment, isSidebar }) => {
       return (
         <div
           css={css`
@@ -37,7 +41,7 @@ export const registerServiceMapAttachment = (attachments: AttachmentServiceStart
             height: 500px;
           `}
         >
-          <LazyAgentServiceMap connections={attachment.data.connections} />
+          <LazyAgentContextualServiceMap data={attachment.data} deps={deps} isSidebar={isSidebar} />
         </div>
       );
     },

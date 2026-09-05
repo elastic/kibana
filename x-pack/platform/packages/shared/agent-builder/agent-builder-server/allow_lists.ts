@@ -47,6 +47,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_runtime_metrics`,
   `${internalNamespaces.observability}.get_logs`,
   `${internalNamespaces.observability}.get_apm_correlations`,
+  `${internalNamespaces.observability}.get_apm_timeseries`,
+  `${internalNamespaces.observability}.get_apm_metrics`,
 
   // ML anomaly detection (Agent Builder skill tools)
   `${internalNamespaces.ml}.ad_get_job_info`,
@@ -243,6 +245,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
+  'observability.investigate-apm-alert',
+  'observability.investigate-apm-service',
+  'observability.investigate-service-map',
 
   // ML
   `${internalNamespaces.ml}.anomaly-detection`,
@@ -357,6 +362,10 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Observability – APM
   'observability.service-map',
+  'observability.service-map-context',
+  'observability.apm-metrics',
+  'observability.apm-timeseries',
+  'observability.apm-related-alerts',
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',

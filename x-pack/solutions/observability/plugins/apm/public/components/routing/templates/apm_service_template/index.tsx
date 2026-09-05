@@ -85,7 +85,8 @@ function TemplateWithContext({
   } = useApmParams('/services/{serviceName}/*');
   const history = useHistory();
   const location = useLocation();
-  const { agentBuilder } = useApmPluginContext();
+  const { agentBuilder, observabilityAgentBuilder } = useApmPluginContext();
+  const ServiceInvestigateButton = observabilityAgentBuilder?.getServiceInvestigateButton();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -132,12 +133,26 @@ function TemplateWithContext({
   }, [analyzeDataMenuItem]);
 
   const statusBadges = (
-    <ServiceHeaderBadges
-      start={start}
-      end={end}
-      onSloClick={onSloClick}
-      alertsTabHref={alertsTabHref}
-    />
+    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <ServiceHeaderBadges
+          start={start}
+          end={end}
+          onSloClick={onSloClick}
+          alertsTabHref={alertsTabHref}
+        />
+      </EuiFlexItem>
+      {ServiceInvestigateButton && (
+        <EuiFlexItem grow={false}>
+          <ServiceInvestigateButton
+            serviceName={serviceName}
+            environment={environment}
+            start={start}
+            end={end}
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 
   useBreadcrumb(
