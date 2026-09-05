@@ -1282,6 +1282,7 @@ export const Slack: ConnectorSpec = {
       // Orchestrated by callers that already hold the bytes (e.g. rendering a
       // chart to PNG); an agent has nothing to pass for `file`.
       isTool: false,
+      scope: 'write',
       description:
         'Upload a file to Slack and return its file ID. Pass base64-encoded content. Provide `channel` to share the file into a conversation, or omit it to upload without sharing — for example to reference the returned ID from a Block Kit `image` block via `slack_file`.',
       input: SlackUploadFileInputSchema,
