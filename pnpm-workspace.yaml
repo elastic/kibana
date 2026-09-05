@@ -157,6 +157,32 @@ overrides:
   'nwsapi': '2.2.2'
   'react-focus-lock': '2.9.5'
   'react-focus-on': '3.9.1'
+  # vega@6.2.0 depends on its subtree via `~` ranges (e.g. vega-functions ~6.1.0);
+  # vega-lite pulls newer copies, and pnpm fails to dedupe onto the shared line the
+  # way yarn does, leaving two parallel Vega runtimes. A split runtime breaks the
+  # custom kibana* expression functions (visTypeVega). Pin the whole subtree to
+  # yarn's resolved versions so there is one runtime (matches main).
+  'vega-crossfilter': '5.1.0'
+  'vega-dataflow': '6.1.0'
+  'vega-expression': '6.1.0'
+  'vega-force': '5.1.0'
+  'vega-format': '2.1.0'
+  'vega-functions': '6.1.1'
+  'vega-geo': '5.1.0'
+  'vega-hierarchy': '5.1.0'
+  'vega-label': '2.1.0'
+  'vega-loader': '5.1.0'
+  'vega-parser': '7.1.0'
+  'vega-projection': '2.1.0'
+  'vega-regression': '2.1.0'
+  'vega-runtime': '7.1.0'
+  'vega-scale': '8.1.0'
+  'vega-scenegraph': '5.1.0'
+  'vega-selections': '6.1.2'
+  'vega-time': '3.1.0'
+  'vega-view': '6.1.0'
+  'vega-voronoi': '5.1.0'
+  'vega-wordcloud': '5.1.0'
   'vega-util': '2.1.0'
   'vscode-languageserver-types': '3.17.5'
 minimumReleaseAgeExclude:
