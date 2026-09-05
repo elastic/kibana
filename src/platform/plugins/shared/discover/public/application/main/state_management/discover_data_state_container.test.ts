@@ -20,15 +20,17 @@ import {
   initializeDataStateInDiscoverStateMock,
 } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
+import { fetchEsql } from '../data_fetching/fetch_esql';
 import {
   DEFAULT_TAB_STATE,
   createTabItem,
+  type DiscoverAppState,
   internalStateActions,
   selectAllTabs,
   selectDataSourceProfileId,
   selectTabRuntimeState,
 } from './redux';
-import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
+import { APP_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
@@ -44,6 +46,7 @@ jest.mock('@kbn/ebt-tools', () => ({
 }));
 
 const mockFetchDocuments = jest.mocked(fetchDocuments);
+const mockFetchEsql = jest.mocked(fetchEsql);
 
 describe('test getDataStateContainer', () => {
   beforeEach(() => {
@@ -112,6 +115,89 @@ describe('test getDataStateContainer', () => {
     ).toHaveBeenCalled();
 
     unsubscribe();
+  });
+
+  test('adds required metadata to document ES|QL queries before fetching', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId,
+        appState: { query: { esql: 'FROM logs-*\n| WHERE level == "error"' } },
+      })
+    );
+
+    await toolkit.initializeSingleTab({ tabId });
+
+    const expectedQuery = {
+      esql: 'FROM logs-* METADATA _index, _id\n| WHERE level == "error"',
+    };
+    const persistedAppState =
+      toolkit.stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY);
+
+    expect(toolkit.getCurrentTab().appState.query).toEqual(expectedQuery);
+    expect(persistedAppState?.query).toEqual(expectedQuery);
+    expect(mockFetchEsql).toHaveBeenCalledTimes(1);
+    expect(mockFetchEsql.mock.calls[0][0].query).toEqual(expectedQuery);
+
+    mockFetchEsql.mockClear();
+    const setUrlStateSpy = jest.spyOn(toolkit.stateStorageContainer, 'set');
+    const dataStateContainer = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      tabId
+    ).dataStateContainer$.getValue();
+
+    dataStateContainer?.fetch();
+    await toolkit.waitForDataFetching({ tabId });
+
+    expect(toolkit.getCurrentTab().appState.query).toEqual(expectedQuery);
+    expect(mockFetchEsql).toHaveBeenCalledTimes(1);
+    expect(mockFetchEsql.mock.calls[0][0].query).toEqual(expectedQuery);
+    expect(setUrlStateSpy).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    ['TS metrics-*', 'TS metrics-* METADATA _index, _id'],
+    ['FROM logs-* METADATA _ignored, _id', 'FROM logs-* METADATA _ignored, _id, _index'],
+    ['FROM logs-* METADATA _id, _index', 'FROM logs-* METADATA _id, _index'],
+  ])('normalizes supported ES|QL query %s', async (esql, expectedEsql) => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId, appState: { query: { esql } } })
+    );
+
+    await toolkit.initializeSingleTab({ tabId });
+
+    expect(toolkit.getCurrentTab().appState.query).toEqual({ esql: expectedEsql });
+    expect(mockFetchEsql).toHaveBeenCalledTimes(1);
+    expect(mockFetchEsql.mock.calls[0][0].query).toEqual({ esql: expectedEsql });
+  });
+
+  test.each([
+    'FROM logs-* | STATS count = COUNT(*)',
+    'FROM logs-* | KEEP message',
+    'ROW value = 1',
+    'FROM',
+    'FROM logs-* | WHERE',
+  ])('leaves ineligible ES|QL query unchanged: %s', async (esql) => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId, appState: { query: { esql } } })
+    );
+
+    await toolkit.initializeSingleTab({ tabId });
+
+    expect(toolkit.getCurrentTab().appState.query).toEqual({ esql });
+    expect(mockFetchEsql).toHaveBeenCalledTimes(1);
+    expect(mockFetchEsql.mock.calls[0][0].query).toEqual({ esql });
   });
 
   test('refetch$ clears stale profile URL state when the resolved profile has no URL state', async () => {
