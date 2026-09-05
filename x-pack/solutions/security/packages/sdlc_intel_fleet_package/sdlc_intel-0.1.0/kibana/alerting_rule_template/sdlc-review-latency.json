@@ -1,0 +1,69 @@
+{
+  "id": "vp-review-latency",
+  "type": "alerting_rule_template",
+  "attributes": {
+    "name": "SDLC ingest stalled (schedule-aware)",
+    "tags": [
+      "SDLC Intelligence",
+      "pipeline",
+      "health",
+      "sync",
+      "freshness"
+    ],
+    "ruleTypeId": ".es-query",
+    "schedule": {
+      "interval": "1h"
+    },
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM github-intel-pull-requests | WHERE github.state == \"OPEN\" | EVAL age_days = DATE_DIFF(\"days\", github.updated_at, NOW()) | WHERE age_days > 5 | KEEP entity.number, repository.full_name, age_days | LIMIT 10"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 86400,
+      "timeWindowUnit": "s",
+      "size": 0,
+      "thresholdComparator": ">",
+      "threshold": [
+        0
+      ],
+      "excludeHitsFromPreviousRun": false,
+      "aggType": "count",
+      "groupBy": "all"
+    },
+    "alertDelay": {
+      "active": 1
+    },
+    "description": "Fires when a sync source has not written documents for longer than its own schedule allows. Thresholds are per-source (3h for 30m/1h workflows, 18h for 2h/6h, 30h for 12h/1d) at roughly 2.5x the interval, so one missed run is tolerated and two consecutive misses alert. A flat threshold cannot work here: the catalog workflows run every: 1d, so a 6h rule reported them stalled for 18 hours of every day and buried genuine stalls in permanent noise. Sources owned by workflows that ship disabled (Salesforce, Slack, Drive, SDH) are excluded: a source nobody enabled is not a stall, and alerting on it trains people to ignore the rule.",
+    "actions": [
+      {
+        "group": "query matched",
+        "params": {
+          "subaction": "sendMessage",
+          "subActionParams": {
+            "channel": "{{alert_slack_channel_id}}",
+            "text": ":rotating_light: SDLC-intel ingest stalled - {{context.message}} | value: {{context.value}} | {{context.date}} | rule: {{rule.name}}",
+            "message": ":hourglass: {{context.message}} \u2014 PRs awaiting review >5d: {{context.value}}. {{rule.name}}"
+          }
+        },
+        "frequency": {
+          "summary": false,
+          "notify_when": "onActiveAlert",
+          "throttle": null
+        },
+        "ref": "alert-slack-connector"
+      }
+    ]
+  },
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.1.0",
+  "references": [
+    {
+      "id": "{{alert_slack_connector_id}}",
+      "name": "alert-slack-connector",
+      "type": "action",
+      "required": false
+    }
+  ],
+  "name": "SDLC: PR review latency > 5 days"
+}
