@@ -34,7 +34,10 @@ export const MonitoringEngineDescriptor = lazySchema(() =>
         /**
          * Error message typically only present if the engine is in error state
          */
-        message: z.string().optional(),
+        message: z
+          .string()
+          .optional()
+          .describe('Error message typically only present if the engine is in error state'),
       })
       .optional(),
   })

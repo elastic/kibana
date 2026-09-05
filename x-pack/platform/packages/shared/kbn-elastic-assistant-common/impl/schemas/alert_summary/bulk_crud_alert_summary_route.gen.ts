@@ -41,11 +41,14 @@ export const AlertSummaryBulkActionSkipResult = lazySchema(() =>
     /**
      * The ID of the skipped alert summary.
      */
-    id: z.string(),
+    id: z.string().describe('The ID of the skipped alert summary.'),
     /**
      * The ID of the alert associated with the skipped summary.
      */
-    alertId: z.string().optional(),
+    alertId: z
+      .string()
+      .optional()
+      .describe('The ID of the alert associated with the skipped summary.'),
     skip_reason: AlertSummaryBulkActionSkipReason,
   })
 );
@@ -59,11 +62,14 @@ export const AlertSummaryDetailsInError = lazySchema(() =>
     /**
      * The ID of the alert associated with the errored summary.
      */
-    alertId: z.string().optional(),
+    alertId: z
+      .string()
+      .optional()
+      .describe('The ID of the alert associated with the errored summary.'),
     /**
      * The ID of the alert summary that encountered an error.
      */
-    id: z.string(),
+    id: z.string().describe('The ID of the alert summary that encountered an error.'),
   })
 );
 export type AlertSummaryDetailsInError = z.infer<typeof AlertSummaryDetailsInError>;
@@ -76,19 +82,21 @@ export const NormalizedAlertSummaryError = lazySchema(() =>
     /**
      * A human-readable description of the error.
      */
-    message: z.string(),
+    message: z.string().describe('A human-readable description of the error.'),
     /**
      * The HTTP status code associated with the error.
      */
-    status_code: z.number().int(),
+    status_code: z.number().int().describe('The HTTP status code associated with the error.'),
     /**
      * A machine-readable error code.
      */
-    err_code: z.string().optional(),
+    err_code: z.string().optional().describe('A machine-readable error code.'),
     /**
      * The alert summaries that encountered this error.
      */
-    alert_summaries: z.array(AlertSummaryDetailsInError),
+    alert_summaries: z
+      .array(AlertSummaryDetailsInError)
+      .describe('The alert summaries that encountered this error.'),
   })
 );
 export type NormalizedAlertSummaryError = z.infer<typeof NormalizedAlertSummaryError>;
@@ -104,36 +112,42 @@ export const AlertSummaryResponse = lazySchema(() =>
     /**
      * The AI-generated summary of the alert.
      */
-    summary: z.string(),
+    summary: z.string().describe('The AI-generated summary of the alert.'),
     /**
      * AI-generated recommended actions for responding to the alert.
      */
-    recommendedActions: z.string().optional(),
+    recommendedActions: z
+      .string()
+      .optional()
+      .describe('AI-generated recommended actions for responding to the alert.'),
     replacements: Replacements,
     /**
      * The timestamp when the alert summary was last updated.
      */
-    updatedAt: z.string().optional(),
+    updatedAt: z
+      .string()
+      .optional()
+      .describe('The timestamp when the alert summary was last updated.'),
     /**
      * The user who last updated the alert summary.
      */
-    updatedBy: z.string().optional(),
+    updatedBy: z.string().optional().describe('The user who last updated the alert summary.'),
     /**
      * The timestamp when the alert summary was created.
      */
-    createdAt: z.string().optional(),
+    createdAt: z.string().optional().describe('The timestamp when the alert summary was created.'),
     /**
      * The user who created the alert summary.
      */
-    createdBy: z.string().optional(),
+    createdBy: z.string().optional().describe('The user who created the alert summary.'),
     /**
      * The users associated with this alert summary.
      */
-    users: z.array(User).optional(),
+    users: z.array(User).optional().describe('The users associated with this alert summary.'),
     /**
      * Kibana space
      */
-    namespace: z.string().optional(),
+    namespace: z.string().optional().describe('Kibana space'),
   })
 );
 export type AlertSummaryResponse = z.infer<typeof AlertSummaryResponse>;
@@ -146,19 +160,25 @@ export const AlertSummaryBulkCrudActionResults = lazySchema(() =>
     /**
      * Alert summaries that were successfully updated.
      */
-    updated: z.array(AlertSummaryResponse),
+    updated: z
+      .array(AlertSummaryResponse)
+      .describe('Alert summaries that were successfully updated.'),
     /**
      * Alert summaries that were successfully created.
      */
-    created: z.array(AlertSummaryResponse),
+    created: z
+      .array(AlertSummaryResponse)
+      .describe('Alert summaries that were successfully created.'),
     /**
      * IDs of alert summaries that were successfully deleted.
      */
-    deleted: z.array(z.string()),
+    deleted: z.array(z.string()).describe('IDs of alert summaries that were successfully deleted.'),
     /**
      * Alert summaries that were skipped because no changes were needed.
      */
-    skipped: z.array(AlertSummaryBulkActionSkipResult),
+    skipped: z
+      .array(AlertSummaryBulkActionSkipResult)
+      .describe('Alert summaries that were skipped because no changes were needed.'),
   })
 );
 export type AlertSummaryBulkCrudActionResults = z.infer<typeof AlertSummaryBulkCrudActionResults>;

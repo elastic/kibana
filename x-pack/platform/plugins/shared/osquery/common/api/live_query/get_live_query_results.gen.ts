@@ -26,7 +26,7 @@ export const GetLiveQueryResultsResponse = lazySchema(() =>
         /**
          * The total number of result rows.
          */
-        total: z.number().int().optional(),
+        total: z.number().int().optional().describe('The total number of result rows.'),
         /**
          * The result rows from the query execution.
          */
@@ -37,10 +37,14 @@ export const GetLiveQueryResultsResponse = lazySchema(() =>
               /**
                * The Elasticsearch document source containing query results.
                */
-              _source: z.object({}).optional(),
+              _source: z
+                .object({})
+                .optional()
+                .describe('The Elasticsearch document source containing query results.'),
             })
           )
-          .optional(),
+          .optional()
+          .describe('The result rows from the query execution.'),
       })
       .optional(),
   })

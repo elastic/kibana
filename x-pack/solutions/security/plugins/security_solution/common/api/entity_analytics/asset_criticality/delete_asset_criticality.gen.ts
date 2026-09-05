@@ -23,15 +23,18 @@ export const DeleteAssetCriticalityRecordRequestQuery = lazySchema(() =>
     /**
      * The ID value of the asset.
      */
-    id_value: z.string(),
+    id_value: z.string().describe('The ID value of the asset.'),
     /**
      * The field representing the ID.
      */
-    id_field: IdField,
+    id_field: IdField.describe('The field representing the ID.'),
     /**
      * If 'wait_for' the request will wait for the index refresh.
      */
-    refresh: z.literal('wait_for').optional(),
+    refresh: z
+      .literal('wait_for')
+      .optional()
+      .describe("If 'wait_for' the request will wait for the index refresh."),
   })
 );
 export type DeleteAssetCriticalityRecordRequestQuery = z.infer<
@@ -46,11 +49,13 @@ export const DeleteAssetCriticalityRecordResponse = lazySchema(() =>
     /**
      * True if the record was deleted or false if the record did not exist.
      */
-    deleted: z.boolean(),
+    deleted: z
+      .boolean()
+      .describe('True if the record was deleted or false if the record did not exist.'),
     /**
      * The deleted record if it existed.
      */
-    record: AssetCriticalityRecord.optional(),
+    record: AssetCriticalityRecord.optional().describe('The deleted record if it existed.'),
   })
 );
 export type DeleteAssetCriticalityRecordResponse = z.infer<

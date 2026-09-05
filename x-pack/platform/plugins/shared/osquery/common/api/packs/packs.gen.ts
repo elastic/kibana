@@ -33,7 +33,7 @@ export const OsqueryCopyPacksRequestParams = lazySchema(() =>
     /**
      * The ID of the pack to copy.
      */
-    id: PackId,
+    id: PackId.describe('The ID of the pack to copy.'),
   })
 );
 export type OsqueryCopyPacksRequestParams = z.infer<typeof OsqueryCopyPacksRequestParams>;
@@ -54,7 +54,7 @@ export const OsqueryDeletePacksRequestParams = lazySchema(() =>
     /**
      * The pack ID.
      */
-    id: PackId,
+    id: PackId.describe('The pack ID.'),
   })
 );
 export type OsqueryDeletePacksRequestParams = z.infer<typeof OsqueryDeletePacksRequestParams>;
@@ -67,19 +67,19 @@ export const OsqueryFindPacksRequestQuery = lazySchema(() =>
     /**
      * The page number to return.
      */
-    page: PageOrUndefined.optional(),
+    page: PageOrUndefined.optional().describe('The page number to return.'),
     /**
      * The number of results to return per page.
      */
-    pageSize: PageSizeOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional().describe('The number of results to return per page.'),
     /**
      * The field to sort results by.
      */
-    sort: SortOrUndefined.optional(),
+    sort: SortOrUndefined.optional().describe('The field to sort results by.'),
     /**
      * The sort order.
      */
-    sortOrder: SortOrderOrUndefined.optional(),
+    sortOrder: SortOrderOrUndefined.optional().describe('The sort order.'),
   })
 );
 export type OsqueryFindPacksRequestQuery = z.infer<typeof OsqueryFindPacksRequestQuery>;
@@ -93,7 +93,7 @@ export const OsqueryGetPacksDetailsRequestParams = lazySchema(() =>
     /**
      * The pack ID.
      */
-    id: PackId,
+    id: PackId.describe('The pack ID.'),
   })
 );
 export type OsqueryGetPacksDetailsRequestParams = z.infer<
@@ -111,7 +111,7 @@ export const OsqueryUpdatePacksRequestParams = lazySchema(() =>
     /**
      * The pack ID.
      */
-    id: PackId,
+    id: PackId.describe('The pack ID.'),
   })
 );
 export type OsqueryUpdatePacksRequestParams = z.infer<typeof OsqueryUpdatePacksRequestParams>;

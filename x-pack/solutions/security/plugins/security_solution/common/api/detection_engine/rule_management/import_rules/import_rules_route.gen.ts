@@ -25,19 +25,31 @@ export const ImportRulesRequestQuery = lazySchema(() =>
     /**
      * Determines whether existing rules with the same `rule_id` are overwritten.
      */
-    overwrite: BooleanFromString.optional().default(false),
+    overwrite: BooleanFromString.optional()
+      .default(false)
+      .describe('Determines whether existing rules with the same `rule_id` are overwritten.'),
     /**
      * Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.
      */
-    overwrite_exceptions: BooleanFromString.optional().default(false),
+    overwrite_exceptions: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.'
+      ),
     /**
      * Determines whether existing actions with the same `kibana.alert.rule.actions.id` are overwritten.
      */
-    overwrite_action_connectors: BooleanFromString.optional().default(false),
+    overwrite_action_connectors: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Determines whether existing actions with the same `kibana.alert.rule.actions.id` are overwritten.'
+      ),
     /**
      * Generates a new list ID for each imported exception list.
      */
-    as_new_list: BooleanFromString.optional().default(false),
+    as_new_list: BooleanFromString.optional()
+      .default(false)
+      .describe('Generates a new list ID for each imported exception list.'),
   })
 );
 export type ImportRulesRequestQuery = z.infer<typeof ImportRulesRequestQuery>;

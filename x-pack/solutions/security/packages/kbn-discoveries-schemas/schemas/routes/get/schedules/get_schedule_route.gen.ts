@@ -14,23 +14,25 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../../common_attributes.gen';
 import { AttackDiscoverySchedule } from '../../../common/schedules/schedule_types.gen';
 
+export const GetAttackDiscoveryScheduleRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier of the schedule to retrieve
+     */
+    id: NonEmptyString.describe('The unique identifier of the schedule to retrieve'),
+  })
+);
 export type GetAttackDiscoveryScheduleRequestParams = z.infer<
   typeof GetAttackDiscoveryScheduleRequestParams
 >;
-export const GetAttackDiscoveryScheduleRequestParams = z.object({
-  /**
-   * The unique identifier of the schedule to retrieve
-   */
-  id: NonEmptyString,
-});
 export type GetAttackDiscoveryScheduleRequestParamsInput = z.input<
   typeof GetAttackDiscoveryScheduleRequestParams
 >;
 
+export const GetAttackDiscoveryScheduleResponse = lazySchema(() => AttackDiscoverySchedule);
 export type GetAttackDiscoveryScheduleResponse = z.infer<typeof GetAttackDiscoveryScheduleResponse>;
-export const GetAttackDiscoveryScheduleResponse = AttackDiscoverySchedule;

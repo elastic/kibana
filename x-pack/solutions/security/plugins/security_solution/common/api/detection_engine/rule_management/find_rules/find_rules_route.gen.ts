@@ -52,7 +52,11 @@ If omitted, the default field set is returned. Repeat the parameter to pass mult
 use comma-separated values when supported by your client.
 
       */
-    fields: ArrayFromString(z.string()).optional(),
+    fields: ArrayFromString(z.string())
+      .optional()
+      .describe(
+        'List of `alert.attributes` field names to return for each rule (for example `name`, `enabled`).\nIf omitted, the default field set is returned. Repeat the parameter to pass multiple field names, or\nuse comma-separated values when supported by your client.\n'
+      ),
     /**
       * Search query
 
@@ -67,39 +71,47 @@ Filters the returned results according to the value of the specified field, usin
 > Even though the JSON rule object uses created_by and updated_by fields, you must use createdBy and updatedBy fields in the filter.
 
       */
-    filter: z.string().optional(),
+    filter: z
+      .string()
+      .optional()
+      .describe(
+        'Search query\n\nFilters the returned results according to the value of the specified field, using the alert.attributes.<field name>:<field value> syntax, where <field name> can be:\n- name\n- enabled\n- tags\n- createdBy\n- interval\n- updatedBy\n> info\n> Even though the JSON rule object uses created_by and updated_by fields, you must use createdBy and updatedBy fields in the filter.\n'
+      ),
     /**
      * Field to sort by
      */
-    sort_field: FindRulesSortField.optional(),
+    sort_field: FindRulesSortField.optional().describe('Field to sort by'),
     /**
      * Sort order
      */
-    sort_order: SortOrder.optional(),
+    sort_order: SortOrder.optional().describe('Sort order'),
     /**
      * Page number
      */
-    page: z.coerce.number().int().min(1).optional().default(1),
+    page: z.coerce.number().int().min(1).optional().default(1).describe('Page number'),
     /**
      * Rules per page
      */
-    per_page: z.coerce.number().int().min(0).optional().default(20),
+    per_page: z.coerce.number().int().min(0).optional().default(20).describe('Rules per page'),
     /**
      * Gaps range start
      */
-    gaps_range_start: z.string().optional(),
+    gaps_range_start: z.string().optional().describe('Gaps range start'),
     /**
      * Gaps range end
      */
-    gaps_range_end: z.string().optional(),
+    gaps_range_end: z.string().optional().describe('Gaps range end'),
     /**
      * Gap fill statuses
      */
-    gap_fill_statuses: ArrayFromString(GapFillStatus).optional(),
+    gap_fill_statuses: ArrayFromString(GapFillStatus).optional().describe('Gap fill statuses'),
     /**
      * Gap auto fill scheduler ID used to determine gap fill status for rules
      */
-    gap_auto_fill_scheduler_id: z.string().optional(),
+    gap_auto_fill_scheduler_id: z
+      .string()
+      .optional()
+      .describe('Gap auto fill scheduler ID used to determine gap fill status for rules'),
   })
 );
 export type FindRulesRequestQuery = z.infer<typeof FindRulesRequestQuery>;

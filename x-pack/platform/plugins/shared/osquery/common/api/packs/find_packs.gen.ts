@@ -37,67 +37,75 @@ export const FindPacksResponse = lazySchema(() =>
     /**
      * The current page number.
      */
-    page: z.number().int(),
+    page: z.number().int().describe('The current page number.'),
     /**
      * The number of results per page.
      */
-    per_page: z.number().int(),
+    per_page: z.number().int().describe('The number of results per page.'),
     /**
      * The total number of packs.
      */
-    total: z.number().int(),
+    total: z.number().int().describe('The total number of packs.'),
     /**
      * An array of pack objects.
      */
-    data: z.array(
-      z.object({
-        /**
-         * The saved object ID of the pack.
-         */
-        saved_object_id: z.string(),
-        name: PackName,
-        description: PackDescriptionOrUndefined.optional(),
-        /**
-         * Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.
-         */
-        queries: z
-          .array(
-            z.object({
-              id: z.string().optional(),
-              query: z.string().optional(),
-              interval: z.number().int().optional(),
-              platform: z.string().optional(),
-              version: z.string().optional(),
-              snapshot: z.boolean().optional(),
-              removed: z.boolean().optional(),
-              timeout: z.number().int().optional(),
-              ecs_mapping: ECSMappingArrayOrUndefined.optional(),
-              schedule_type: ScheduleTypeOrUndefined.optional(),
-              rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
-            })
-          )
-          .optional(),
-        /**
-         * The pack version number.
-         */
-        version: z.number().int().optional(),
-        enabled: EnabledOrUndefined.optional(),
-        created_at: z.string().datetime().optional(),
-        created_by: z.string().nullable().optional(),
-        created_by_profile_uid: z.string().optional(),
-        updated_at: z.string().datetime().optional(),
-        updated_by: z.string().nullable().optional(),
-        updated_by_profile_uid: z.string().optional(),
-        policy_ids: PolicyIdsOrUndefined.optional(),
-        /**
-         * Whether the pack is read-only (true for prebuilt packs).
-         */
-        read_only: z.boolean().optional(),
-        schedule_type: ScheduleTypeOrUndefined.optional(),
-        interval: PackIntervalOrUndefined.optional(),
-        rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
-      })
-    ),
+    data: z
+      .array(
+        z.object({
+          /**
+           * The saved object ID of the pack.
+           */
+          saved_object_id: z.string().describe('The saved object ID of the pack.'),
+          name: PackName,
+          description: PackDescriptionOrUndefined.optional(),
+          /**
+           * Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.
+           */
+          queries: z
+            .array(
+              z.object({
+                id: z.string().optional(),
+                query: z.string().optional(),
+                interval: z.number().int().optional(),
+                platform: z.string().optional(),
+                version: z.string().optional(),
+                snapshot: z.boolean().optional(),
+                removed: z.boolean().optional(),
+                timeout: z.number().int().optional(),
+                ecs_mapping: ECSMappingArrayOrUndefined.optional(),
+                schedule_type: ScheduleTypeOrUndefined.optional(),
+                rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+              })
+            )
+            .optional()
+            .describe(
+              'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
+            ),
+          /**
+           * The pack version number.
+           */
+          version: z.number().int().optional().describe('The pack version number.'),
+          enabled: EnabledOrUndefined.optional(),
+          created_at: z.string().datetime().optional(),
+          created_by: z.string().nullable().optional(),
+          created_by_profile_uid: z.string().optional(),
+          updated_at: z.string().datetime().optional(),
+          updated_by: z.string().nullable().optional(),
+          updated_by_profile_uid: z.string().optional(),
+          policy_ids: PolicyIdsOrUndefined.optional(),
+          /**
+           * Whether the pack is read-only (true for prebuilt packs).
+           */
+          read_only: z
+            .boolean()
+            .optional()
+            .describe('Whether the pack is read-only (true for prebuilt packs).'),
+          schedule_type: ScheduleTypeOrUndefined.optional(),
+          interval: PackIntervalOrUndefined.optional(),
+          rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+        })
+      )
+      .describe('An array of pack objects.'),
   })
 );
 export type FindPacksResponse = z.infer<typeof FindPacksResponse>;
@@ -110,43 +118,48 @@ export const FindPackResponse = lazySchema(() =>
     /**
      * The pack details.
      */
-    data: z.object({
-      /**
-       * The saved object ID of the pack.
-       */
-      saved_object_id: z.string(),
-      name: PackName,
-      description: PackDescriptionOrUndefined.optional(),
-      queries: ObjectQueries.optional(),
-      /**
-       * The pack version number.
-       */
-      version: z.number().int().optional(),
-      enabled: EnabledOrUndefined.optional(),
-      created_at: z.string().datetime().optional(),
-      created_by: z.string().nullable().optional(),
-      created_by_profile_uid: z.string().optional(),
-      updated_at: z.string().datetime().optional(),
-      updated_by: z.string().nullable().optional(),
-      updated_by_profile_uid: z.string().optional(),
-      policy_ids: PolicyIdsOrUndefined.optional(),
-      shards: Shards.optional(),
-      /**
-       * Whether the pack is read-only (true for prebuilt packs).
-       */
-      read_only: z.boolean().optional(),
-      /**
-       * The saved object type.
-       */
-      type: z.string().optional(),
-      /**
-       * The namespaces the pack belongs to.
-       */
-      namespaces: z.array(z.string()).optional(),
-      schedule_type: ScheduleTypeOrUndefined.optional(),
-      interval: PackIntervalOrUndefined.optional(),
-      rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
-    }),
+    data: z
+      .object({
+        /**
+         * The saved object ID of the pack.
+         */
+        saved_object_id: z.string().describe('The saved object ID of the pack.'),
+        name: PackName,
+        description: PackDescriptionOrUndefined.optional(),
+        queries: ObjectQueries.optional(),
+        /**
+         * The pack version number.
+         */
+        version: z.number().int().optional().describe('The pack version number.'),
+        enabled: EnabledOrUndefined.optional(),
+        created_at: z.string().datetime().optional(),
+        created_by: z.string().nullable().optional(),
+        created_by_profile_uid: z.string().optional(),
+        updated_at: z.string().datetime().optional(),
+        updated_by: z.string().nullable().optional(),
+        updated_by_profile_uid: z.string().optional(),
+        policy_ids: PolicyIdsOrUndefined.optional(),
+        shards: Shards.optional(),
+        /**
+         * Whether the pack is read-only (true for prebuilt packs).
+         */
+        read_only: z
+          .boolean()
+          .optional()
+          .describe('Whether the pack is read-only (true for prebuilt packs).'),
+        /**
+         * The saved object type.
+         */
+        type: z.string().optional().describe('The saved object type.'),
+        /**
+         * The namespaces the pack belongs to.
+         */
+        namespaces: z.array(z.string()).optional().describe('The namespaces the pack belongs to.'),
+        schedule_type: ScheduleTypeOrUndefined.optional(),
+        interval: PackIntervalOrUndefined.optional(),
+        rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+      })
+      .describe('The pack details.'),
   })
 );
 export type FindPackResponse = z.infer<typeof FindPackResponse>;

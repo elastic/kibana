@@ -34,7 +34,9 @@ export const PostAttackDiscoveryGenerateResponse = lazySchema(() =>
     /**
      * The unique identifier for the attack discovery generation process. Use this UUID to track the generation progress and retrieve results via the find endpoint.
      */
-    execution_uuid: NonEmptyString,
+    execution_uuid: NonEmptyString.describe(
+      'The unique identifier for the attack discovery generation process. Use this UUID to track the generation progress and retrieve results via the find endpoint.'
+    ),
   })
 );
 export type PostAttackDiscoveryGenerateResponse = z.infer<

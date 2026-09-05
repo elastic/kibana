@@ -29,7 +29,7 @@ export const DefendInsightsPostRequestBody = lazySchema(() =>
     /**
      * LLM API configuration.
      */
-    apiConfig: ApiConfig,
+    apiConfig: ApiConfig.describe('LLM API configuration.'),
     langSmithProject: z.string().optional(),
     langSmithApiKey: z.string().optional(),
     model: z.string().optional(),

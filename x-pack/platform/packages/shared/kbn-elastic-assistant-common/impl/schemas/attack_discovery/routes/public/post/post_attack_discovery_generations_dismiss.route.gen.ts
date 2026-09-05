@@ -23,7 +23,9 @@ export const PostAttackDiscoveryGenerationsDismissRequestParams = lazySchema(() 
     /**
      * The unique identifier for the Attack Discovery generation execution. This UUID is returned when an Attack Discovery generation is created and can be found in generation responses.
      */
-    execution_uuid: NonEmptyString,
+    execution_uuid: NonEmptyString.describe(
+      'The unique identifier for the Attack Discovery generation execution. This UUID is returned when an Attack Discovery generation is created and can be found in generation responses.'
+    ),
   })
 );
 export type PostAttackDiscoveryGenerationsDismissRequestParams = z.infer<
@@ -38,11 +40,16 @@ export const PostAttackDiscoveryGenerationsDismissResponse = lazySchema(() =>
     /**
      * The number of alerts that were sent as context to the LLM for this generation.
      */
-    alerts_context_count: z.number().optional(),
+    alerts_context_count: z
+      .number()
+      .optional()
+      .describe('The number of alerts that were sent as context to the LLM for this generation.'),
     /**
      * The unique identifier of the connector used to generate the attack discoveries.
      */
-    connector_id: z.string(),
+    connector_id: z
+      .string()
+      .describe('The unique identifier of the connector used to generate the attack discoveries.'),
     /**
      * Statistical information about the connector's performance for this user, providing insights into usage patterns and success rates.
      */
@@ -51,41 +58,83 @@ export const PostAttackDiscoveryGenerationsDismissResponse = lazySchema(() =>
         /**
          * The average duration in nanoseconds for successful generations using this connector by the current user.
          */
-        average_successful_duration_nanoseconds: z.number().optional(),
+        average_successful_duration_nanoseconds: z
+          .number()
+          .optional()
+          .describe(
+            'The average duration in nanoseconds for successful generations using this connector by the current user.'
+          ),
         /**
          * The total number of Attack discoveries successfully created for this generation
          */
-        successful_generations: z.number().optional(),
+        successful_generations: z
+          .number()
+          .optional()
+          .describe(
+            'The total number of Attack discoveries successfully created for this generation'
+          ),
       })
-      .optional(),
+      .optional()
+      .describe(
+        "Statistical information about the connector's performance for this user, providing insights into usage patterns and success rates."
+      ),
     /**
      * The number of attack discoveries that were generated during this execution.
      */
-    discoveries: z.number(),
+    discoveries: z
+      .number()
+      .describe('The number of attack discoveries that were generated during this execution.'),
     /**
      * The timestamp when the generation process completed, in ISO 8601 format. This field may be absent for generations that haven't finished.
      */
-    end: z.string().optional(),
+    end: z
+      .string()
+      .optional()
+      .describe(
+        "The timestamp when the generation process completed, in ISO 8601 format. This field may be absent for generations that haven't finished."
+      ),
     /**
      * The unique identifier for this attack discovery generation execution. This UUID can be used to reference this specific generation in other API calls.
      */
-    execution_uuid: z.string(),
+    execution_uuid: z
+      .string()
+      .describe(
+        'The unique identifier for this attack discovery generation execution. This UUID can be used to reference this specific generation in other API calls.'
+      ),
     /**
      * A human-readable message describing the current state or progress of the generation process. Provides context about what the AI is analyzing.
      */
-    loading_message: z.string().optional(),
+    loading_message: z
+      .string()
+      .optional()
+      .describe(
+        'A human-readable message describing the current state or progress of the generation process. Provides context about what the AI is analyzing.'
+      ),
     /**
      * Additional context or reasoning provided when a generation fails or encounters issues. This field helps diagnose problems with the generation process.
      */
-    reason: z.string().optional(),
+    reason: z
+      .string()
+      .optional()
+      .describe(
+        'Additional context or reasoning provided when a generation fails or encounters issues. This field helps diagnose problems with the generation process.'
+      ),
     /**
      * The timestamp when the generation process began, in ISO 8601 format. This marks the beginning of the AI analysis.
      */
-    start: z.string(),
+    start: z
+      .string()
+      .describe(
+        'The timestamp when the generation process began, in ISO 8601 format. This marks the beginning of the AI analysis.'
+      ),
     /**
      * The current status of the attack discovery generation. After dismissing, this will be set to "dismissed".
      */
-    status: z.enum(['canceled', 'dismissed', 'failed', 'started', 'succeeded']),
+    status: z
+      .enum(['canceled', 'dismissed', 'failed', 'started', 'succeeded'])
+      .describe(
+        'The current status of the attack discovery generation. After dismissing, this will be set to "dismissed".'
+      ),
   })
 );
 export type PostAttackDiscoveryGenerationsDismissResponse = z.infer<

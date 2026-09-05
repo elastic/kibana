@@ -21,43 +21,57 @@ export const WatchlistObject = lazySchema(() =>
     /**
      * The unique ID of the watchlist
      */
-    id: z.string().optional(),
+    id: z.string().optional().describe('The unique ID of the watchlist'),
     /**
      * The name of the watchlist
      */
-    name: z.string(),
+    name: z.string().describe('The name of the watchlist'),
     /**
      * Description of the watchlist
      */
-    description: z.string().optional(),
+    description: z.string().optional().describe('Description of the watchlist'),
     /**
      * Indicates if the watchlist is managed by the system
      */
-    managed: z.boolean(),
+    managed: z.boolean().describe('Indicates if the watchlist is managed by the system'),
     /**
      * Risk score modifier associated with the watchlist
      */
-    riskModifier: z.number(),
+    riskModifier: z.number().describe('Risk score modifier associated with the watchlist'),
     /**
      * List of entity source IDs associated with the watchlist
      */
-    entitySourceIds: z.array(z.string()).optional(),
+    entitySourceIds: z
+      .array(z.string())
+      .optional()
+      .describe('List of entity source IDs associated with the watchlist'),
     /**
      * Number of entities in the watchlist
      */
-    entityCount: z.number().optional(),
+    entityCount: z.number().optional().describe('Number of entities in the watchlist'),
     /**
      * Indicates whether the watchlist contains manually assigned entities
      */
-    hasManualEntities: z.boolean().optional(),
+    hasManualEntities: z
+      .boolean()
+      .optional()
+      .describe('Indicates whether the watchlist contains manually assigned entities'),
     /**
      * Timestamp indicating when the watchlist was created
      */
-    createdAt: z.string().datetime().optional(),
+    createdAt: z
+      .string()
+      .datetime()
+      .optional()
+      .describe('Timestamp indicating when the watchlist was created'),
     /**
      * Timestamp indicating when the watchlist was last updated
      */
-    updatedAt: z.string().datetime().optional(),
+    updatedAt: z
+      .string()
+      .datetime()
+      .optional()
+      .describe('Timestamp indicating when the watchlist was last updated'),
   })
 );
 export type WatchlistObject = z.infer<typeof WatchlistObject>;

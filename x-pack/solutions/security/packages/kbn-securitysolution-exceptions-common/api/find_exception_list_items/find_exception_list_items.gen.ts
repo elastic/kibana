@@ -32,40 +32,67 @@ export const FindExceptionListItemsRequestQuery = lazySchema(() =>
     /**
      * The `list_id`s of the items to fetch.
      */
-    list_id: ArrayFromString(ExceptionListHumanId),
+    list_id: ArrayFromString(ExceptionListHumanId).describe(
+      'The `list_id`s of the items to fetch.'
+    ),
     /**
       * Filters the returned results according to the value of the specified field,
 using the `<field name>:<field value>` syntax.
 
       */
-    filter: ArrayFromString(FindExceptionListItemsFilter).optional().default([]),
+    filter: ArrayFromString(FindExceptionListItemsFilter)
+      .optional()
+      .default([])
+      .describe(
+        'Filters the returned results according to the value of the specified field,\nusing the `<field name>:<field value>` syntax.\n'
+      ),
     /**
       * Determines whether the returned containers are Kibana associated with a Kibana space
 or available in all spaces (`agnostic` or `single`)
 
       */
-    namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default(['single']),
+    namespace_type: ArrayFromString(ExceptionNamespaceType)
+      .optional()
+      .default(['single'])
+      .describe(
+        'Determines whether the returned containers are Kibana associated with a Kibana space\nor available in all spaces (`agnostic` or `single`)\n'
+      ),
     /**
       * Free-text search term applied to exception list item fields (for example a hostname or file path fragment).
 
       */
-    search: z.string().optional(),
+    search: z
+      .string()
+      .optional()
+      .describe(
+        'Free-text search term applied to exception list item fields (for example a hostname or file path fragment).\n'
+      ),
     /**
      * The page number to return
      */
-    page: z.coerce.number().int().min(0).optional(),
+    page: z.coerce.number().int().min(0).optional().describe('The page number to return'),
     /**
      * The number of exception list items to return per page
      */
-    per_page: z.coerce.number().int().min(0).optional(),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('The number of exception list items to return per page'),
     /**
      * Determines which field is used to sort the results.
      */
-    sort_field: NonEmptyString.optional(),
+    sort_field: NonEmptyString.optional().describe(
+      'Determines which field is used to sort the results.'
+    ),
     /**
      * Determines the sort order, which can be `desc` or `asc`.
      */
-    sort_order: z.enum(['desc', 'asc']).optional(),
+    sort_order: z
+      .enum(['desc', 'asc'])
+      .optional()
+      .describe('Determines the sort order, which can be `desc` or `asc`.'),
   })
 );
 export type FindExceptionListItemsRequestQuery = z.infer<typeof FindExceptionListItemsRequestQuery>;

@@ -31,11 +31,11 @@ export const RuleExecutionSummary = lazySchema(() =>
       /**
        * Date of the last execution
        */
-      date: z.string().datetime(),
+      date: z.string().datetime().describe('Date of the last execution'),
       /**
        * Status of the last execution
        */
-      status: RuleExecutionStatus,
+      status: RuleExecutionStatus.describe('Status of the last execution'),
       status_order: RuleExecutionStatusOrder,
       message: z.string(),
       metrics: RuleExecutionMetrics,

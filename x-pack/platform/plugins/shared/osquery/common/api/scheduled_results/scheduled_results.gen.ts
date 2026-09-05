@@ -32,7 +32,7 @@ export const OsqueryExportScheduledQueryResultsRequestQuery = lazySchema(() =>
     /**
      * The output format of the exported file.
      */
-    format: ExportFormat,
+    format: ExportFormat.describe('The output format of the exported file.'),
   })
 );
 export type OsqueryExportScheduledQueryResultsRequestQuery = z.infer<
@@ -47,11 +47,17 @@ export const OsqueryExportScheduledQueryResultsRequestParams = lazySchema(() =>
     /**
      * The schedule ID of the scheduled query.
      */
-    scheduleId: z.string(),
+    scheduleId: z.string().describe('The schedule ID of the scheduled query.'),
     /**
      * The execution counter for the scheduled query run whose results are exported. Must be a non-negative integer.
      */
-    executionCount: z.number().int().min(0),
+    executionCount: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'The execution counter for the scheduled query run whose results are exported. Must be a non-negative integer.'
+      ),
   })
 );
 export type OsqueryExportScheduledQueryResultsRequestParams = z.infer<
@@ -82,23 +88,25 @@ export const OsqueryGetScheduledActionResultsRequestQuery = lazySchema(() =>
     /**
      * The kuery to filter the results by.
      */
-    kuery: KueryOrUndefined.optional(),
+    kuery: KueryOrUndefined.optional().describe('The kuery to filter the results by.'),
     /**
      * The page number to return. The default is 1.
      */
-    page: PageOrUndefined.optional(),
+    page: PageOrUndefined.optional().describe('The page number to return. The default is 1.'),
     /**
      * The number of results to return per page. The default is 20.
      */
-    pageSize: PageSizeOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional().describe(
+      'The number of results to return per page. The default is 20.'
+    ),
     /**
      * The field that is used to sort the results.
      */
-    sort: SortOrUndefined.optional(),
+    sort: SortOrUndefined.optional().describe('The field that is used to sort the results.'),
     /**
      * Specifies the sort order.
      */
-    sortOrder: SortOrderOrUndefined.optional(),
+    sortOrder: SortOrderOrUndefined.optional().describe('Specifies the sort order.'),
   })
 );
 export type OsqueryGetScheduledActionResultsRequestQuery = z.infer<
@@ -113,11 +121,11 @@ export const OsqueryGetScheduledActionResultsRequestParams = lazySchema(() =>
     /**
      * The schedule ID of the scheduled query.
      */
-    scheduleId: z.string(),
+    scheduleId: z.string().describe('The schedule ID of the scheduled query.'),
     /**
      * The execution count for this scheduled query run.
      */
-    executionCount: z.number().int(),
+    executionCount: z.number().int().describe('The execution count for this scheduled query run.'),
   })
 );
 export type OsqueryGetScheduledActionResultsRequestParams = z.infer<
@@ -138,27 +146,32 @@ export const OsqueryGetScheduledQueryResultsRequestQuery = lazySchema(() =>
     /**
      * The kuery to filter the results by.
      */
-    kuery: KueryOrUndefined.optional(),
+    kuery: KueryOrUndefined.optional().describe('The kuery to filter the results by.'),
     /**
      * The page number to return. The default is 1.
      */
-    page: PageOrUndefined.optional(),
+    page: PageOrUndefined.optional().describe('The page number to return. The default is 1.'),
     /**
      * The number of results to return per page. The default is 20.
      */
-    pageSize: PageSizeOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional().describe(
+      'The number of results to return per page. The default is 20.'
+    ),
     /**
      * The field that is used to sort the results.
      */
-    sort: SortOrUndefined.optional(),
+    sort: SortOrUndefined.optional().describe('The field that is used to sort the results.'),
     /**
      * Specifies the sort order.
      */
-    sortOrder: SortOrderOrUndefined.optional(),
+    sortOrder: SortOrderOrUndefined.optional().describe('Specifies the sort order.'),
     /**
      * The start date filter (ISO 8601) to narrow down results.
      */
-    startDate: z.string().optional(),
+    startDate: z
+      .string()
+      .optional()
+      .describe('The start date filter (ISO 8601) to narrow down results.'),
   })
 );
 export type OsqueryGetScheduledQueryResultsRequestQuery = z.infer<
@@ -173,11 +186,11 @@ export const OsqueryGetScheduledQueryResultsRequestParams = lazySchema(() =>
     /**
      * The schedule ID of the scheduled query.
      */
-    scheduleId: z.string(),
+    scheduleId: z.string().describe('The schedule ID of the scheduled query.'),
     /**
      * The execution count for this scheduled query run.
      */
-    executionCount: z.number().int(),
+    executionCount: z.number().int().describe('The execution count for this scheduled query run.'),
   })
 );
 export type OsqueryGetScheduledQueryResultsRequestParams = z.infer<

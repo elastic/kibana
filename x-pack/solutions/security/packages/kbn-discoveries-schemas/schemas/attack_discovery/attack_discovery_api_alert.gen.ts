@@ -14,105 +14,169 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { Replacements, NonEmptyTimestamp, User } from '../common_attributes.gen';
 
 /**
  * An attack discovery that's also an alert
  */
+export const AttackDiscoveryApiAlert = lazySchema(() =>
+  z.object({
+    /**
+     * The alert IDs that the attack discovery is based on
+     */
+    alert_ids: z.array(z.string()).describe('The alert IDs that the attack discovery is based on'),
+    /**
+     * The optional kibana.alert.rule.uuid of the rule that generated this attack discovery (not applicable to ad hock runs)
+     */
+    alert_rule_uuid: z
+      .string()
+      .optional()
+      .describe(
+        'The optional kibana.alert.rule.uuid of the rule that generated this attack discovery (not applicable to ad hock runs)'
+      ),
+    /**
+     * The optional kibana.alert.workflow_status of this attack discovery
+     */
+    alert_workflow_status: z
+      .string()
+      .optional()
+      .describe('The optional kibana.alert.workflow_status of this attack discovery'),
+    /**
+     * The ID of the connector that generated the attack discovery
+     */
+    connector_id: z
+      .string()
+      .describe('The ID of the connector that generated the attack discovery'),
+    /**
+     * The (human readable) name of the connector that generated the attack discovery
+     */
+    connector_name: z
+      .string()
+      .describe('The (human readable) name of the connector that generated the attack discovery'),
+    /**
+     * The optional time the attack discovery alert was created
+     */
+    alert_start: z
+      .string()
+      .optional()
+      .describe('The optional time the attack discovery alert was created'),
+    /**
+     * The optional time the attack discovery alert was last updated
+     */
+    alert_updated_at: z
+      .string()
+      .optional()
+      .describe('The optional time the attack discovery alert was last updated'),
+    /**
+     * The optional id of the user who last updated the attack discovery alert
+     */
+    alert_updated_by_user_id: z
+      .string()
+      .optional()
+      .describe('The optional id of the user who last updated the attack discovery alert'),
+    /**
+     * The optional username of the user who updated the attack discovery alert
+     */
+    alert_updated_by_user_name: z
+      .string()
+      .optional()
+      .describe('The optional username of the user who updated the attack discovery alert'),
+    /**
+     * The optional time the attack discovery alert workflow status was last updated
+     */
+    alert_workflow_status_updated_at: z
+      .string()
+      .optional()
+      .describe('The optional time the attack discovery alert workflow status was last updated'),
+    /**
+     * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
+     */
+    details_markdown: z
+      .string()
+      .describe(
+        'Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.'
+      ),
+    /**
+     * An optional, short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
+     */
+    entity_summary_markdown: z
+      .string()
+      .optional()
+      .describe(
+        'An optional, short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax'
+      ),
+    /**
+     * The generation ID of the run that created the attack discovery
+     */
+    generation_uuid: z
+      .string()
+      .describe('The generation ID of the run that created the attack discovery'),
+    /**
+     * The unique ID of the attack discovery
+     */
+    id: z.string().describe('The unique ID of the attack discovery'),
+    /**
+     * An optional array of MITRE ATT&CK tactic for the attack discovery
+     */
+    mitre_attack_tactics: z
+      .array(z.string())
+      .optional()
+      .describe('An optional array of MITRE ATT&CK tactic for the attack discovery'),
+    /**
+     * Key-value pairs that are used to replace placeholders in the markdown fields
+     */
+    replacements: Replacements.optional().describe(
+      'Key-value pairs that are used to replace placeholders in the markdown fields'
+    ),
+    /**
+     * The optional, (but typically populated after generation) risk score of the alert
+     */
+    risk_score: z
+      .number()
+      .int()
+      .optional()
+      .describe('The optional, (but typically populated after generation) risk score of the alert'),
+    /**
+     * A markdown summary of attack discovery, using the same syntax
+     */
+    summary_markdown: z
+      .string()
+      .describe('A markdown summary of attack discovery, using the same syntax'),
+    /**
+     * The time the attack discovery was generated
+     */
+    timestamp: NonEmptyTimestamp.describe('The time the attack discovery was generated'),
+    /**
+     * A title for the attack discovery, in plain text
+     */
+    title: z.string().describe('A title for the attack discovery, in plain text'),
+    /**
+     * The optional id of the user who generated the attack discovery
+     */
+    user_id: z
+      .string()
+      .optional()
+      .describe('The optional id of the user who generated the attack discovery'),
+    /**
+     * The optional username of the user who generated the attack discovery, (not applicable to attack discoveries generated by rules)
+     */
+    user_name: z
+      .string()
+      .optional()
+      .describe(
+        'The optional username of the user who generated the attack discovery, (not applicable to attack discoveries generated by rules)'
+      ),
+    /**
+     * The optional array of users who may view the attack discovery. When empty, (or not present), all users may view the attack discovery.
+     */
+    users: z
+      .array(User)
+      .optional()
+      .describe(
+        'The optional array of users who may view the attack discovery. When empty, (or not present), all users may view the attack discovery.'
+      ),
+  })
+);
 export type AttackDiscoveryApiAlert = z.infer<typeof AttackDiscoveryApiAlert>;
-export const AttackDiscoveryApiAlert = z.object({
-  /**
-   * The alert IDs that the attack discovery is based on
-   */
-  alert_ids: z.array(z.string()),
-  /**
-   * The optional kibana.alert.rule.uuid of the rule that generated this attack discovery (not applicable to ad hock runs)
-   */
-  alert_rule_uuid: z.string().optional(),
-  /**
-   * The optional kibana.alert.workflow_status of this attack discovery
-   */
-  alert_workflow_status: z.string().optional(),
-  /**
-   * The ID of the connector that generated the attack discovery
-   */
-  connector_id: z.string(),
-  /**
-   * The (human readable) name of the connector that generated the attack discovery
-   */
-  connector_name: z.string(),
-  /**
-   * The optional time the attack discovery alert was created
-   */
-  alert_start: z.string().optional(),
-  /**
-   * The optional time the attack discovery alert was last updated
-   */
-  alert_updated_at: z.string().optional(),
-  /**
-   * The optional id of the user who last updated the attack discovery alert
-   */
-  alert_updated_by_user_id: z.string().optional(),
-  /**
-   * The optional username of the user who updated the attack discovery alert
-   */
-  alert_updated_by_user_name: z.string().optional(),
-  /**
-   * The optional time the attack discovery alert workflow status was last updated
-   */
-  alert_workflow_status_updated_at: z.string().optional(),
-  /**
-   * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
-   */
-  details_markdown: z.string(),
-  /**
-   * An optional, short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
-   */
-  entity_summary_markdown: z.string().optional(),
-  /**
-   * The generation ID of the run that created the attack discovery
-   */
-  generation_uuid: z.string(),
-  /**
-   * The unique ID of the attack discovery
-   */
-  id: z.string(),
-  /**
-   * An optional array of MITRE ATT&CK tactic for the attack discovery
-   */
-  mitre_attack_tactics: z.array(z.string()).optional(),
-  /**
-   * Key-value pairs that are used to replace placeholders in the markdown fields
-   */
-  replacements: Replacements.optional(),
-  /**
-   * The optional, (but typically populated after generation) risk score of the alert
-   */
-  risk_score: z.number().int().optional(),
-  /**
-   * A markdown summary of attack discovery, using the same syntax
-   */
-  summary_markdown: z.string(),
-  /**
-   * The time the attack discovery was generated
-   */
-  timestamp: NonEmptyTimestamp,
-  /**
-   * A title for the attack discovery, in plain text
-   */
-  title: z.string(),
-  /**
-   * The optional id of the user who generated the attack discovery
-   */
-  user_id: z.string().optional(),
-  /**
-   * The optional username of the user who generated the attack discovery, (not applicable to attack discoveries generated by rules)
-   */
-  user_name: z.string().optional(),
-  /**
-   * The optional array of users who may view the attack discovery. When empty, (or not present), all users may view the attack discovery.
-   */
-  users: z.array(User).optional(),
-});

@@ -24,15 +24,24 @@ export const FindSecurityAIPromptsRequestQuery = lazySchema(() =>
     /**
      * Connector id used for prompt lookup. When provided, connector-specific prompt overrides are applied.
      */
-    connector_id: z.string().optional(),
+    connector_id: z
+      .string()
+      .optional()
+      .describe(
+        'Connector id used for prompt lookup. When provided, connector-specific prompt overrides are applied.'
+      ),
     /**
      * The unique identifier for the prompt group to retrieve prompts from.
      */
-    prompt_group_id: z.string(),
+    prompt_group_id: z
+      .string()
+      .describe('The unique identifier for the prompt group to retrieve prompts from.'),
     /**
      * List of prompt IDs to retrieve within the specified prompt group.
      */
-    prompt_ids: ArrayFromString(z.string()),
+    prompt_ids: ArrayFromString(z.string()).describe(
+      'List of prompt IDs to retrieve within the specified prompt group.'
+    ),
   })
 );
 export type FindSecurityAIPromptsRequestQuery = z.infer<typeof FindSecurityAIPromptsRequestQuery>;

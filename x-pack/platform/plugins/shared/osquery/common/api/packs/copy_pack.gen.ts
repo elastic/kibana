@@ -36,7 +36,7 @@ export const CopyPacksResponse = lazySchema(() =>
       /**
        * The saved object ID of the copied pack.
        */
-      saved_object_id: z.string(),
+      saved_object_id: z.string().describe('The saved object ID of the copied pack.'),
       name: PackName,
       description: PackDescriptionOrUndefined.optional(),
       /**
@@ -58,11 +58,14 @@ export const CopyPacksResponse = lazySchema(() =>
             rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
           })
         )
-        .optional(),
+        .optional()
+        .describe(
+          'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
+        ),
       /**
        * The pack version number.
        */
-      version: z.number().int().optional(),
+      version: z.number().int().optional().describe('The pack version number.'),
       enabled: EnabledOrUndefined.optional(),
       created_at: z.string().datetime().optional(),
       created_by: z.string().nullable().optional(),
@@ -81,7 +84,8 @@ export const CopyPacksResponse = lazySchema(() =>
             value: z.number().optional(),
           })
         )
-        .optional(),
+        .optional()
+        .describe('Shard configuration as an array of key-value pairs.'),
       schedule_type: ScheduleTypeOrUndefined.optional(),
       interval: PackIntervalOrUndefined.optional(),
       rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),

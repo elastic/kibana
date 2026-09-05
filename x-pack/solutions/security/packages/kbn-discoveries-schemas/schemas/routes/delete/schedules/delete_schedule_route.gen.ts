@@ -14,29 +14,33 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../../common_attributes.gen';
 
+export const DeleteAttackDiscoveryScheduleRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier of the schedule to delete
+     */
+    id: NonEmptyString.describe('The unique identifier of the schedule to delete'),
+  })
+);
 export type DeleteAttackDiscoveryScheduleRequestParams = z.infer<
   typeof DeleteAttackDiscoveryScheduleRequestParams
 >;
-export const DeleteAttackDiscoveryScheduleRequestParams = z.object({
-  /**
-   * The unique identifier of the schedule to delete
-   */
-  id: NonEmptyString,
-});
 export type DeleteAttackDiscoveryScheduleRequestParamsInput = z.input<
   typeof DeleteAttackDiscoveryScheduleRequestParams
 >;
 
+export const DeleteAttackDiscoveryScheduleResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier of the deleted schedule
+     */
+    id: NonEmptyString.describe('The unique identifier of the deleted schedule'),
+  })
+);
 export type DeleteAttackDiscoveryScheduleResponse = z.infer<
   typeof DeleteAttackDiscoveryScheduleResponse
 >;
-export const DeleteAttackDiscoveryScheduleResponse = z.object({
-  /**
-   * The unique identifier of the deleted schedule
-   */
-  id: NonEmptyString,
-});

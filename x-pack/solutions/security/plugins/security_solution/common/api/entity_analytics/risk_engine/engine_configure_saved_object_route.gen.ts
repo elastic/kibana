@@ -49,7 +49,7 @@ export const ConfigureRiskEngineSavedObjectRequestBody = lazySchema(() =>
           /**
            * KQL filter string
            */
-          filter: z.string(),
+          filter: z.string().describe('KQL filter string'),
         })
       )
       .optional(),
@@ -57,7 +57,15 @@ export const ConfigureRiskEngineSavedObjectRequestBody = lazySchema(() =>
       * Number of entities to score per page. Higher values reduce total scoring time by reducing the number of alert-index scans, but cannot exceed the ES|QL result limit (10,000 by default).
 
       */
-    page_size: z.number().int().min(100).max(10000).optional(),
+    page_size: z
+      .number()
+      .int()
+      .min(100)
+      .max(10000)
+      .optional()
+      .describe(
+        'Number of entities to score per page. Higher values reduce total scoring time by reducing the number of alert-index scans, but cannot exceed the ES|QL result limit (10,000 by default).\n'
+      ),
   })
 );
 export type ConfigureRiskEngineSavedObjectRequestBody = z.infer<

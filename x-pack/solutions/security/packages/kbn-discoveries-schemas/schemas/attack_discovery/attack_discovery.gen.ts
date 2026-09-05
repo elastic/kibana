@@ -14,51 +14,67 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyTimestamp } from '../common_attributes.gen';
 
 /**
  * An attack discovery generated from one or more alerts
  */
+export const AttackDiscovery = lazySchema(() =>
+  z.object({
+    /**
+     * The alert IDs that the attack discovery is based on
+     */
+    alert_ids: z.array(z.string()).describe('The alert IDs that the attack discovery is based on'),
+    /**
+     * UUID of attack discovery
+     */
+    id: z.string().optional().describe('UUID of attack discovery'),
+    /**
+     * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
+     */
+    details_markdown: z
+      .string()
+      .describe(
+        'Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.'
+      ),
+    /**
+     * A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
+     */
+    entity_summary_markdown: z
+      .string()
+      .optional()
+      .describe(
+        'A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax'
+      ),
+    /**
+     * An array of MITRE ATT&CK tactic for the attack discovery
+     */
+    mitre_attack_tactics: z
+      .array(z.string())
+      .optional()
+      .describe('An array of MITRE ATT&CK tactic for the attack discovery'),
+    /**
+     * A markdown summary of attack discovery, using the same syntax
+     */
+    summary_markdown: z
+      .string()
+      .describe('A markdown summary of attack discovery, using the same syntax'),
+    /**
+     * A title for the attack discovery, in plain text
+     */
+    title: z.string().describe('A title for the attack discovery, in plain text'),
+    /**
+     * The time the attack discovery was generated
+     */
+    timestamp: NonEmptyTimestamp.optional().describe('The time the attack discovery was generated'),
+  })
+);
 export type AttackDiscovery = z.infer<typeof AttackDiscovery>;
-export const AttackDiscovery = z.object({
-  /**
-   * The alert IDs that the attack discovery is based on
-   */
-  alert_ids: z.array(z.string()),
-  /**
-   * UUID of attack discovery
-   */
-  id: z.string().optional(),
-  /**
-   * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
-   */
-  details_markdown: z.string(),
-  /**
-   * A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
-   */
-  entity_summary_markdown: z.string().optional(),
-  /**
-   * An array of MITRE ATT&CK tactic for the attack discovery
-   */
-  mitre_attack_tactics: z.array(z.string()).optional(),
-  /**
-   * A markdown summary of attack discovery, using the same syntax
-   */
-  summary_markdown: z.string(),
-  /**
-   * A title for the attack discovery, in plain text
-   */
-  title: z.string(),
-  /**
-   * The time the attack discovery was generated
-   */
-  timestamp: NonEmptyTimestamp.optional(),
-});
 
 /**
  * Array of attack discoveries
  */
+export const AttackDiscoveries = lazySchema(() => z.array(AttackDiscovery));
 export type AttackDiscoveries = z.infer<typeof AttackDiscoveries>;
-export const AttackDiscoveries = z.array(AttackDiscovery);

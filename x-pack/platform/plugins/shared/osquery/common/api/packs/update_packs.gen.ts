@@ -53,14 +53,14 @@ export const UpdatePacksResponse = lazySchema(() =>
         /**
          * The saved object ID of the pack.
          */
-        saved_object_id: z.string().optional(),
+        saved_object_id: z.string().optional().describe('The saved object ID of the pack.'),
         name: PackName.optional(),
         description: PackDescriptionOrUndefined.optional(),
         queries: ObjectQueries.optional(),
         /**
          * The pack version number.
          */
-        version: z.number().int().optional(),
+        version: z.number().int().optional().describe('The pack version number.'),
         enabled: EnabledOrUndefined.optional(),
         created_at: z.string().datetime().optional(),
         created_by: z.string().nullable().optional(),

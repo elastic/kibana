@@ -29,13 +29,23 @@ export const SuspendProcessRouteRequestBody = lazySchema(() =>
           /**
            * The process ID (PID) of the process to suspend.
            */
-          pid: z.number().int().min(1).optional(),
+          pid: z
+            .number()
+            .int()
+            .min(1)
+            .optional()
+            .describe('The process ID (PID) of the process to suspend.'),
         }),
         z.object({
           /**
            * The entity ID of the process to suspend.
            */
-          entity_id: z.string().min(1).max(256).optional(),
+          entity_id: z
+            .string()
+            .min(1)
+            .max(256)
+            .optional()
+            .describe('The entity ID of the process to suspend.'),
         }),
       ]),
     })

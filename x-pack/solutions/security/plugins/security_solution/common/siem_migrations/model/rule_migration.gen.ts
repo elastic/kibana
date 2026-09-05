@@ -46,7 +46,7 @@ export const OriginalRuleAnnotations = lazySchema(() =>
       /**
        * The original rule Mitre Attack IDs.
        */
-      mitre_attack: z.array(z.string()).optional(),
+      mitre_attack: z.array(z.string()).optional().describe('The original rule Mitre Attack IDs.'),
     })
     .catchall(z.unknown())
 );
@@ -60,39 +60,47 @@ export const OriginalRule = lazySchema(() =>
     /**
      * The original rule id.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe('The original rule id.'),
     /**
      * The original rule vendor identifier.
      */
-    vendor: OriginalRuleVendor,
+    vendor: OriginalRuleVendor.describe('The original rule vendor identifier.'),
     /**
      * The original rule name.
      */
-    title: NonEmptyString,
+    title: NonEmptyString.describe('The original rule name.'),
     /**
      * The original rule description.
      */
-    description: z.string(),
+    description: z.string().describe('The original rule description.'),
     /**
      * The original rule query.
      */
-    query: z.string().min(1),
+    query: z.string().min(1).describe('The original rule query.'),
     /**
      * The original rule query language.
      */
-    query_language: z.string(),
+    query_language: z.string().describe('The original rule query language.'),
     /**
      * The original rule annotations containing additional information.
      */
-    annotations: OriginalRuleAnnotations.optional(),
+    annotations: OriginalRuleAnnotations.optional().describe(
+      'The original rule annotations containing additional information.'
+    ),
     /**
      * The original rule's severity or some representation of it.
      */
-    severity: z.string().optional(),
+    severity: z
+      .string()
+      .optional()
+      .describe("The original rule's severity or some representation of it."),
     /**
      * The MITRE ATT&CK threat information for this rule.
      */
-    threat: z.array(Threat).optional(),
+    threat: z
+      .array(Threat)
+      .optional()
+      .describe('The MITRE ATT&CK threat information for this rule.'),
   })
 );
 export type OriginalRule = z.infer<typeof OriginalRule>;
@@ -105,43 +113,54 @@ export const ElasticRule = lazySchema(() =>
     /**
      * The migrated rule title.
      */
-    title: z.string(),
+    title: z.string().describe('The migrated rule title.'),
     /**
      * The migrated rule description.
      */
-    description: z.string().optional(),
+    description: z.string().optional().describe('The migrated rule description.'),
     /**
      * The migrated rule severity.
      */
-    severity: z.string().optional(),
+    severity: z.string().optional().describe('The migrated rule severity.'),
     /**
      * The migrated rule risk_score value, integer between 0 and 100.
      */
-    risk_score: z.number().optional(),
+    risk_score: z
+      .number()
+      .optional()
+      .describe('The migrated rule risk_score value, integer between 0 and 100.'),
     /**
      * The translated elastic query.
      */
-    query: z.string().optional(),
+    query: z.string().optional().describe('The translated elastic query.'),
     /**
      * The translated elastic query language.
      */
-    query_language: z.literal('esql').optional(),
+    query_language: z.literal('esql').optional().describe('The translated elastic query language.'),
     /**
      * The Elastic prebuilt rule id matched.
      */
-    prebuilt_rule_id: NonEmptyString.nullable().optional(),
+    prebuilt_rule_id: NonEmptyString.nullable()
+      .optional()
+      .describe('The Elastic prebuilt rule id matched.'),
     /**
      * The IDs of the Elastic integrations suggested to be installed for this rule.
      */
-    integration_ids: z.array(z.string()).optional(),
+    integration_ids: z
+      .array(z.string())
+      .optional()
+      .describe('The IDs of the Elastic integrations suggested to be installed for this rule.'),
     /**
      * The Elastic rule id installed as a result.
      */
-    id: NonEmptyString.optional(),
+    id: NonEmptyString.optional().describe('The Elastic rule id installed as a result.'),
     /**
      * The MITRE ATT&CK threat information for this rule.
      */
-    threat: z.array(Threat).optional(),
+    threat: z
+      .array(Threat)
+      .optional()
+      .describe('The MITRE ATT&CK threat information for this rule.'),
   })
 );
 export type ElasticRule = z.infer<typeof ElasticRule>;
@@ -160,11 +179,11 @@ export const PrebuiltRuleVersion = lazySchema(() =>
     /**
      * The latest available version of prebuilt rule.
      */
-    target: RuleResponse,
+    target: RuleResponse.describe('The latest available version of prebuilt rule.'),
     /**
      * The currently installed version of prebuilt rule.
      */
-    current: RuleResponse.optional(),
+    current: RuleResponse.optional().describe('The currently installed version of prebuilt rule.'),
   })
 );
 export type PrebuiltRuleVersion = z.infer<typeof PrebuiltRuleVersion>;
@@ -178,7 +197,10 @@ export const RuleMigrationLastExecution = lazySchema(() =>
       /**
        * Indicates if the last execution skipped matching prebuilt rules.
        */
-      skip_prebuilt_rules_matching: z.boolean().optional(),
+      skip_prebuilt_rules_matching: z
+        .boolean()
+        .optional()
+        .describe('Indicates if the last execution skipped matching prebuilt rules.'),
     })
   )
 );
@@ -192,15 +214,19 @@ export const RuleMigrationData = lazySchema(() =>
     /**
      * The user profile ID of the user who created the migration.
      */
-    created_by: NonEmptyString,
+    created_by: NonEmptyString.describe(
+      'The user profile ID of the user who created the migration.'
+    ),
     /**
      * The moment migration was created
      */
-    created_at: NonEmptyString,
+    created_at: NonEmptyString.describe('The moment migration was created'),
     /**
      * The last execution details of a rule migration task.
      */
-    last_execution: RuleMigrationLastExecution.optional(),
+    last_execution: RuleMigrationLastExecution.optional().describe(
+      'The last execution details of a rule migration task.'
+    ),
   })
 );
 export type RuleMigrationData = z.infer<typeof RuleMigrationData>;
@@ -214,11 +240,11 @@ export const RuleMigration = lazySchema(() =>
       /**
        * The rule migration id
        */
-      id: NonEmptyString,
+      id: NonEmptyString.describe('The rule migration id'),
       /**
        * The rule migration name
        */
-      name: NonEmptyString,
+      name: NonEmptyString.describe('The rule migration name'),
     })
     .merge(RuleMigrationData)
 );
@@ -232,43 +258,51 @@ export const RuleMigrationRuleData = lazySchema(() =>
     /**
      * The moment of creation
      */
-    '@timestamp': z.string(),
+    '@timestamp': z.string().describe('The moment of creation'),
     /**
      * The migration id.
      */
-    migration_id: NonEmptyString,
+    migration_id: NonEmptyString.describe('The migration id.'),
     /**
      * The user profile ID of the user who created the migration.
      */
-    created_by: NonEmptyString,
+    created_by: NonEmptyString.describe(
+      'The user profile ID of the user who created the migration.'
+    ),
     /**
      * The original rule to migrate.
      */
-    original_rule: OriginalRule,
+    original_rule: OriginalRule.describe('The original rule to migrate.'),
     /**
      * The migrated elastic rule.
      */
-    elastic_rule: ElasticRule.optional(),
+    elastic_rule: ElasticRule.optional().describe('The migrated elastic rule.'),
     /**
      * The rule translation result.
      */
-    translation_result: MigrationTranslationResult.optional(),
+    translation_result: MigrationTranslationResult.optional().describe(
+      'The rule translation result.'
+    ),
     /**
      * The status of the rule migration process.
      */
-    status: MigrationStatus.default('pending'),
+    status: MigrationStatus.default('pending').describe(
+      'The status of the rule migration process.'
+    ),
     /**
      * The comments for the migration including a summary from the LLM in markdown.
      */
-    comments: MigrationComments.optional(),
+    comments: MigrationComments.optional().describe(
+      'The comments for the migration including a summary from the LLM in markdown.'
+    ),
     /**
      * The moment of the last update
      */
-    updated_at: z.string().optional(),
+    updated_at: z.string().optional().describe('The moment of the last update'),
     /**
      * The user who last updated the migration
      */
-    updated_by: z.string().optional(),
+    updated_by: z.string().optional().describe('The user who last updated the migration'),
   })
 );
 export type RuleMigrationRuleData = z.infer<typeof RuleMigrationRuleData>;
@@ -282,7 +316,7 @@ export const RuleMigrationRule = lazySchema(() =>
       /**
        * The rule migration id
        */
-      id: NonEmptyString,
+      id: NonEmptyString.describe('The rule migration id'),
     })
     .merge(RuleMigrationRuleData)
 );
@@ -297,7 +331,9 @@ export const RuleMigrationTaskStats = lazySchema(() =>
       /**
        * The last execution of the rule migration task.
        */
-      last_execution: RuleMigrationLastExecution.optional(),
+      last_execution: RuleMigrationLastExecution.optional().describe(
+        'The last execution of the rule migration task.'
+      ),
     })
   )
 );
@@ -311,58 +347,91 @@ export const RuleMigrationTranslationStats = lazySchema(() =>
     /**
      * The migration id
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe('The migration id'),
     /**
      * The rules migration translation stats.
      */
-    rules: z.object({
-      /**
-       * The total number of rules in the migration.
-       */
-      total: z.number().int(),
-      /**
-       * The number of rules that have been successfully translated.
-       */
-      success: z.object({
+    rules: z
+      .object({
         /**
-         * The total number of rules that have been successfully translated.
+         * The total number of rules in the migration.
          */
-        total: z.number().int(),
+        total: z.number().int().describe('The total number of rules in the migration.'),
         /**
-         * The translation results
+         * The number of rules that have been successfully translated.
          */
-        result: z.object({
-          /**
-           * The number of rules that have been fully translated.
-           */
-          full: z.number().int(),
-          /**
-           * The number of rules that have been partially translated.
-           */
-          partial: z.number().int(),
-          /**
-           * The number of rules that could not be translated.
-           */
-          untranslatable: z.number().int(),
-        }),
+        success: z
+          .object({
+            /**
+             * The total number of rules that have been successfully translated.
+             */
+            total: z
+              .number()
+              .int()
+              .describe('The total number of rules that have been successfully translated.'),
+            /**
+             * The translation results
+             */
+            result: z
+              .object({
+                /**
+                 * The number of rules that have been fully translated.
+                 */
+                full: z
+                  .number()
+                  .int()
+                  .describe('The number of rules that have been fully translated.'),
+                /**
+                 * The number of rules that have been partially translated.
+                 */
+                partial: z
+                  .number()
+                  .int()
+                  .describe('The number of rules that have been partially translated.'),
+                /**
+                 * The number of rules that could not be translated.
+                 */
+                untranslatable: z
+                  .number()
+                  .int()
+                  .describe('The number of rules that could not be translated.'),
+              })
+              .describe('The translation results'),
+            /**
+             * The number of rules that have been successfully translated and can be installed.
+             */
+            installable: z
+              .number()
+              .int()
+              .describe(
+                'The number of rules that have been successfully translated and can be installed.'
+              ),
+            /**
+             * The number of rules that have been successfully translated and matched Elastic prebuilt rules.
+             */
+            prebuilt: z
+              .number()
+              .int()
+              .describe(
+                'The number of rules that have been successfully translated and matched Elastic prebuilt rules.'
+              ),
+            /**
+             * The number of rules that have the placeholder for the missing index pattern in the query.
+             */
+            missing_index: z
+              .number()
+              .int()
+              .describe(
+                'The number of rules that have the placeholder for the missing index pattern in the query.'
+              ),
+          })
+          .describe('The number of rules that have been successfully translated.'),
         /**
-         * The number of rules that have been successfully translated and can be installed.
+         * The number of rules that have failed translation.
          */
-        installable: z.number().int(),
-        /**
-         * The number of rules that have been successfully translated and matched Elastic prebuilt rules.
-         */
-        prebuilt: z.number().int(),
-        /**
-         * The number of rules that have the placeholder for the missing index pattern in the query.
-         */
-        missing_index: z.number().int(),
-      }),
-      /**
-       * The number of rules that have failed translation.
-       */
-      failed: z.number().int(),
-    }),
+        failed: z.number().int().describe('The number of rules that have failed translation.'),
+      })
+      .describe('The rules migration translation stats.'),
   })
 );
 export type RuleMigrationTranslationStats = z.infer<typeof RuleMigrationTranslationStats>;
@@ -375,15 +444,19 @@ export const UpdateRuleMigrationRule = lazySchema(() =>
     /**
      * The rule migration id
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe('The rule migration id'),
     /**
      * The migrated elastic rule attributes to update.
      */
-    elastic_rule: ElasticRulePartial.optional(),
+    elastic_rule: ElasticRulePartial.optional().describe(
+      'The migrated elastic rule attributes to update.'
+    ),
     /**
      * The comments for the migration including a summary from the LLM in markdown.
      */
-    comments: MigrationComments.optional(),
+    comments: MigrationComments.optional().describe(
+      'The comments for the migration including a summary from the LLM in markdown.'
+    ),
   })
 );
 export type UpdateRuleMigrationRule = z.infer<typeof UpdateRuleMigrationRule>;
@@ -406,11 +479,14 @@ export const RuleMigrationIntegrationStats = lazySchema(() =>
     /**
      * The integration id
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe('The integration id'),
     /**
      * The number of rules that are associated with the integration.
      */
-    total_rules: z.number().int(),
+    total_rules: z
+      .number()
+      .int()
+      .describe('The number of rules that are associated with the integration.'),
   })
 );
 export type RuleMigrationIntegrationStats = z.infer<typeof RuleMigrationIntegrationStats>;
@@ -431,11 +507,14 @@ export const RuleMigrationTaskExecutionSettings = lazySchema(() =>
     /**
      * The connector ID used for the last execution.
      */
-    connector_id: z.string(),
+    connector_id: z.string().describe('The connector ID used for the last execution.'),
     /**
      * Indicates if the current execution should skip matching prebuilt rules.
      */
-    skip_prebuilt_rules_matching: z.boolean().optional(),
+    skip_prebuilt_rules_matching: z
+      .boolean()
+      .optional()
+      .describe('Indicates if the current execution should skip matching prebuilt rules.'),
   })
 );
 export type RuleMigrationTaskExecutionSettings = z.infer<typeof RuleMigrationTaskExecutionSettings>;

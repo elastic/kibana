@@ -23,11 +23,14 @@ export const ResolveTimelineRequestQuery = lazySchema(() =>
     /**
      * The ID of the template timeline to resolve
      */
-    template_timeline_id: z.string().optional(),
+    template_timeline_id: z
+      .string()
+      .optional()
+      .describe('The ID of the template timeline to resolve'),
     /**
      * The ID of the timeline to resolve
      */
-    id: z.string().optional(),
+    id: z.string().optional().describe('The ID of the timeline to resolve'),
   })
 );
 export type ResolveTimelineRequestQuery = z.infer<typeof ResolveTimelineRequestQuery>;
