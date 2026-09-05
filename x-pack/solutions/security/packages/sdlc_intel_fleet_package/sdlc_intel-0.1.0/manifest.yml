@@ -105,6 +105,25 @@ vars:
     multi: true
     required: false
     show_user: true
+
+  - name: alert_slack_connector_id
+    type: text
+    title: Alerting Slack connector ID
+    description: >
+      Kibana connector ID for the Slack (.slack2) connector used by the SDLC ingest-stall alert
+      action. Leave blank to install the rule without a notification action.
+    multi: false
+    required: false
+    show_user: true
+  - name: alert_slack_channel_id
+    type: text
+    title: Alerting Slack channel ID
+    description: >
+      Slack channel or DM channel ID (for example C0123456789) where SDLC ingest-stall alerts are
+      posted. Required only when alert_slack_connector_id is set.
+    multi: false
+    required: false
+    show_user: true
   - name: ai_connector_id
     type: text
     title: AI inference connector ID
