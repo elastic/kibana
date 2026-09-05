@@ -85,6 +85,9 @@ export const useCanvasEvents = () => {
       selectTab: (flyoutTab: string) => {
         service.send({ type: 'flyout.tab', flyoutTab });
       },
+      clearFocus: () => {
+        service.send({ type: 'focus.clear' });
+      },
       updateNodePositions: (positions: Record<string, XYPosition>) => {
         service.send({ type: 'nodes.positions.change', positions });
       },

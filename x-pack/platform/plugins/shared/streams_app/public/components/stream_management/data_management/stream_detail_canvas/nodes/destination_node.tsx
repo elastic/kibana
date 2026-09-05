@@ -12,17 +12,18 @@ import { i18n } from '@kbn/i18n';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { DestinationNode as DestinationNodeType } from '../types';
 import { DESTINATION_NODE_WIDTH } from '../canvas_constants';
+import { CanvasNodeHighlight } from './canvas_node_highlight';
 import { getNodeCardStyles } from './node_card_styles';
 
 const processingLabel = i18n.translate('xpack.streams.canvas.destinationNode.processingLabel', {
   defaultMessage: 'Processing',
 });
 
-export function DestinationNode({ data, selected, dragging }: NodeProps<DestinationNodeType>) {
+export function DestinationNode({ id, data, selected, dragging }: NodeProps<DestinationNodeType>) {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <>
+    <CanvasNodeHighlight nodeId={id}>
       <Handle type="target" position={Position.Left} isConnectable={false} />
       <EuiPanel
         // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
@@ -68,6 +69,6 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
           )}
         </div>
       </EuiPanel>
-    </>
+    </CanvasNodeHighlight>
   );
 }

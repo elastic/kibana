@@ -17,6 +17,7 @@ import {
   MINIMAP_MASK_COLOR,
   MINIMAP_WIDTH,
 } from './canvas_constants';
+import { useCanvasHighlight } from './canvas_highlight_context';
 import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 import { MapFoldedIcon } from './map_folded_icon';
 
@@ -25,8 +26,11 @@ import { MapFoldedIcon } from './map_folded_icon';
  * a glance. Uses semantic EUI tokens so it adapts to light and dark themes.
  */
 const getNodeColor =
-  (euiTheme: UseEuiTheme['euiTheme']) =>
-  (node: { type?: string }): string => {
+  (euiTheme: UseEuiTheme['euiTheme'], highlightedIds: Set<string> | null) =>
+  (node: { id?: string; type?: string }): string => {
+    if (highlightedIds && node.id !== undefined && !highlightedIds.has(node.id)) {
+      return euiTheme.colors.lightShade;
+    }
     switch (node.type) {
       case SOURCE_NODE_TYPE:
         return euiTheme.colors.primary;
@@ -43,6 +47,7 @@ export function CanvasMinimap() {
   // Live zoom level, so clicking the minimap recenters without changing zoom
   const zoom = useStore((state) => state.transform[2]);
   const [collapsed, setCollapsed] = useState(false);
+  const highlight = useCanvasHighlight();
 
   const expand = useCallback(() => setCollapsed(false), []);
   const collapse = useCallback(() => setCollapsed(true), []);
@@ -123,7 +128,7 @@ export function CanvasMinimap() {
         ariaLabel={i18n.translate('xpack.streams.canvas.minimap.ariaLabel', {
           defaultMessage: 'Canvas minimap',
         })}
-        nodeColor={getNodeColor(euiTheme)}
+        nodeColor={getNodeColor(euiTheme, highlight?.nodeIds ?? null)}
         nodeStrokeWidth={2}
         nodeBorderRadius={3}
         maskColor={MINIMAP_MASK_COLOR}

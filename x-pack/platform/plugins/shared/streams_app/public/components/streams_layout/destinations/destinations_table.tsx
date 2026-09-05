@@ -28,14 +28,19 @@ import {
 import { css } from '@emotion/css';
 import { useDebounceFn } from '@kbn/react-hooks';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import type { EntityTablePageSize } from '../../../../common/url_schema';
 import { ENTITY_TABLE_PAGE_SIZES } from '../../../../common/url_schema';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { getFormattedError } from '../../../util/errors';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { FilterGroup } from '../../stream_list_view/filter_group';
+import { getDestinationNodeId } from '../../stream_management/data_management/stream_detail_canvas/build_destination';
+import { getCanvasDestinationNames } from '../../stream_management/data_management/stream_detail_canvas/build_graph';
+import { navigateToCanvasFocus } from '../../stream_management/data_management/stream_detail_canvas/canvas_focus';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import type { EntityTableSortDirection } from '../entity_table';
 import { buildDestinationRows, getEffectiveSortField } from './build_destination_rows';
 import {
@@ -154,7 +159,9 @@ export function DestinationsTable() {
 
 function DestinationsTableContent() {
   const router = useStreamsAppRouter();
+  const history = useHistory();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const destinations = useDestinationsTableSelector((state) => state.context.items);
   const urlState = useDestinationsTableSelector((state) => state.context.urlState);
@@ -235,6 +242,23 @@ function DestinationsTableContent() {
     [router, rangeFrom, rangeTo]
   );
 
+  const canvasDestinationNames = useMemo(
+    () =>
+      getCanvasDestinationNames(destinations.map((destination) => destination.streamDefinition)),
+    [destinations]
+  );
+
+  const handleShowOnCanvas = useCallback(
+    (destinationName: string) => {
+      navigateToCanvasFocus(
+        urlStateStorageContainer,
+        history,
+        getDestinationNodeId(destinationName)
+      );
+    },
+    [urlStateStorageContainer, history]
+  );
+
   const handleColumnResize = useCallback<EuiDataGridOnColumnResizeHandler>(
     ({ columnId, width }) => {
       setColumnWidths((previous) => ({ ...previous, [columnId]: width }));
@@ -298,7 +322,16 @@ function DestinationsTableContent() {
     ]
   );
 
-  const trailingControlColumns = useMemo(() => [createDestinationActionsColumn(rows)], [rows]);
+  const trailingControlColumns = useMemo(
+    () => [
+      createDestinationActionsColumn({
+        rows,
+        canvasDestinationNames,
+        onShowOnCanvas: handleShowOnCanvas,
+      }),
+    ],
+    [rows, canvasDestinationNames, handleShowOnCanvas]
+  );
 
   return (
     <EuiFlexGroup

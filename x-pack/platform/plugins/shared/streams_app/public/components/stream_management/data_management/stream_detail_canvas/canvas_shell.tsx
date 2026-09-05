@@ -16,6 +16,7 @@ import {
   SelectionMode,
   type CoordinateExtent,
   type Edge,
+  type EdgeMouseHandler,
   type EdgeTypes,
   type Node,
   type NodeMouseHandler,
@@ -112,6 +113,10 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   onEdgesChange?: OnEdgesChange<EdgeType>;
   onNodeClick?: NodeMouseHandler<NodeType>;
   onNodeContextMenu?: NodeMouseHandler<NodeType>;
+  onNodeMouseEnter?: NodeMouseHandler<NodeType>;
+  onNodeMouseLeave?: NodeMouseHandler<NodeType>;
+  onEdgeMouseEnter?: EdgeMouseHandler<EdgeType>;
+  onEdgeMouseLeave?: EdgeMouseHandler<EdgeType>;
   onNodeDragStart?: OnNodeDrag<NodeType>;
   onPaneContextMenu?: (event: MouseEvent | React.MouseEvent) => void;
   /**
@@ -149,6 +154,10 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   onEdgesChange,
   onNodeClick,
   onNodeContextMenu,
+  onNodeMouseEnter,
+  onNodeMouseLeave,
+  onEdgeMouseEnter,
+  onEdgeMouseLeave,
   onNodeDragStart,
   onPaneContextMenu,
   onSelectionContextMenu,
@@ -217,6 +226,10 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           onEdgeClick={noop}
           onNodeClick={onNodeClick}
           onNodeContextMenu={onNodeContextMenu}
+          onNodeMouseEnter={onNodeMouseEnter}
+          onNodeMouseLeave={onNodeMouseLeave}
+          onEdgeMouseEnter={onEdgeMouseEnter}
+          onEdgeMouseLeave={onEdgeMouseLeave}
           onNodeDragStart={onNodeDragStart}
           onPaneContextMenu={onPaneContextMenu}
           onSelectionContextMenu={onSelectionContextMenu}

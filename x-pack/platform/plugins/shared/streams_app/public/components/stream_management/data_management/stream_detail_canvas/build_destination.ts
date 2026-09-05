@@ -21,8 +21,7 @@ export const hasProcessing = (definition: Streams.ClassicStream.Definition): boo
   definition.ingest.processing.processors.length > 0;
 
 /** Stable React Flow node id for a stream's destination. */
-export const getDestinationNodeId = (definition: Streams.ClassicStream.Definition): string =>
-  `destination-${definition.name}`;
+export const getDestinationNodeId = (streamName: string): string => `destination-${streamName}`;
 
 export const inferDestination = (
   definition: Streams.ClassicStream.Definition
@@ -48,7 +47,7 @@ export const getDestinationAriaLabel = (definition: Streams.ClassicStream.Defini
 export const buildDestinationNode = (
   definition: Streams.ClassicStream.Definition
 ): DestinationNode => ({
-  id: getDestinationNodeId(definition),
+  id: getDestinationNodeId(definition.name),
   type: DESTINATION_NODE_TYPE,
   position: { x: 0, y: 0 },
   ariaLabel: getDestinationAriaLabel(definition),

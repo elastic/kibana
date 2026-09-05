@@ -32,6 +32,8 @@ import {
   type CanvasContextMenuTarget,
   type ContextMenuPosition,
 } from './canvas_context_menu';
+import { CanvasFocusController } from './canvas_focus_controller';
+import { CanvasHighlightProvider, useCanvasHighlightState } from './canvas_highlight_context';
 import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
 import { CanvasToolbar } from './canvas_toolbar';
 import { applyLayout } from './layout';
@@ -117,8 +119,9 @@ function StreamsCanvasInner() {
       },
     },
   } = useKibana();
-  const { flyoutName } = useCanvasUrlRef();
-  const { openFlyout, closeFlyout, selectTab, updateNodePositions, saveUnit } = useCanvasEvents();
+  const { flyoutName, focusNodeId } = useCanvasUrlRef();
+  const { openFlyout, closeFlyout, selectTab, clearFocus, updateNodePositions, saveUnit } =
+    useCanvasEvents();
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
   const isSaving = useCanvasIsSaving();
   const isInitializing = useCanvasIsInitializing();
@@ -383,6 +386,20 @@ function StreamsCanvasInner() {
 
   useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
 
+  const { activeFlow, onNodeMouseEnter, onNodeMouseLeave, onEdgeMouseEnter, onEdgeMouseLeave } =
+    useCanvasHighlightState({ nodes, edges });
+
+  const onSelectFocusedNode = useCallback(
+    (nodeId: string) => {
+      setNodes((current) =>
+        current.map((node) =>
+          node.selected === (node.id === nodeId) ? node : { ...node, selected: node.id === nodeId }
+        )
+      );
+    },
+    [setNodes]
+  );
+
   // Hold the spinner until classic streams, the unit, the source environment,
   // and the first unit.loaded sync have all settled. Otherwise the graph
   // remounts mid-interaction and undo history is wiped.
@@ -404,97 +421,110 @@ function StreamsCanvasInner() {
   }
 
   return (
-    <div
-      css={css`
-        display: flex;
-        flex: 1 1 auto;
-        min-height: 0;
-        width: 100%;
-        flex-direction: column;
-      `}
-    >
-      <EuiFlexGroup
-        responsive={false}
-        justifyContent="flexEnd"
+    <CanvasHighlightProvider value={activeFlow}>
+      <div
         css={css`
-          flex: 0 0 auto;
-          padding: ${euiTheme.size.m};
-          border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-          background: ${euiTheme.colors.backgroundBasePlain};
+          display: flex;
+          flex: 1 1 auto;
+          min-height: 0;
+          width: 100%;
+          flex-direction: column;
         `}
       >
-        <EuiButton
-          fill
-          onClick={saveUnit}
-          isDisabled={!hasUnsavedChanges || isSaving}
-          isLoading={isSaving}
-          data-test-subj="streamsCanvasSaveChanges"
+        <EuiFlexGroup
+          responsive={false}
+          justifyContent="flexEnd"
+          css={css`
+            flex: 0 0 auto;
+            padding: ${euiTheme.size.m};
+            border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+            background: ${euiTheme.colors.backgroundBasePlain};
+          `}
         >
-          {i18n.translate('xpack.streams.canvas.saveChangesButtonLabel', {
-            defaultMessage: 'Save changes',
+          <EuiButton
+            fill
+            onClick={saveUnit}
+            isDisabled={!hasUnsavedChanges || isSaving}
+            isLoading={isSaving}
+            data-test-subj="streamsCanvasSaveChanges"
+          >
+            {i18n.translate('xpack.streams.canvas.saveChangesButtonLabel', {
+              defaultMessage: 'Save changes',
+            })}
+          </EuiButton>
+        </EuiFlexGroup>
+        <CanvasShell<ClassicCanvasNode>
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onNodeClick={onNodeClick}
+          onNodeMouseEnter={onNodeMouseEnter}
+          onNodeMouseLeave={onNodeMouseLeave}
+          onEdgeMouseEnter={onEdgeMouseEnter}
+          onEdgeMouseLeave={onEdgeMouseLeave}
+          onNodeContextMenu={onNodeContextMenu}
+          onPaneContextMenu={onPaneContextMenu}
+          onSelectionContextMenu={onSelectionContextMenu}
+          ariaLabel={i18n.translate('xpack.streams.canvas.regionAriaLabel', {
+            defaultMessage: 'Streams canvas',
           })}
-        </EuiButton>
-      </EuiFlexGroup>
-      <CanvasShell<ClassicCanvasNode>
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onNodeClick={onNodeClick}
-        onNodeContextMenu={onNodeContextMenu}
-        onPaneContextMenu={onPaneContextMenu}
-        onSelectionContextMenu={onSelectionContextMenu}
-        ariaLabel={i18n.translate('xpack.streams.canvas.regionAriaLabel', {
-          defaultMessage: 'Streams canvas',
-        })}
-        ariaDescribedById={KEYBOARD_INSTRUCTIONS_ID}
-      >
-        {loading && (
-          <EuiProgress
-            size="xs"
-            color="primary"
-            position="absolute"
-            data-test-subj="streamsCanvasRefreshing"
-            aria-label={i18n.translate('xpack.streams.canvas.refreshingLabel', {
-              defaultMessage: 'Refreshing streams',
-            })}
+          ariaDescribedById={KEYBOARD_INSTRUCTIONS_ID}
+        >
+          <CanvasFocusController
+            focusNodeId={focusNodeId}
+            nodes={nodes}
+            edges={edges}
+            onSelectNode={onSelectFocusedNode}
+            onFocused={clearFocus}
           />
-        )}
-        {flyoutName && <StreamFlyout name={flyoutName} onClose={closeFlyout} />}
-        {selectedSource && (
-          <SourceDetailsFlyout
-            sources={sourcesController}
-            source={selectedSource}
-            onClose={closeSourceFlyout}
+          {loading && (
+            <EuiProgress
+              size="xs"
+              color="primary"
+              position="absolute"
+              data-test-subj="streamsCanvasRefreshing"
+              aria-label={i18n.translate('xpack.streams.canvas.refreshingLabel', {
+                defaultMessage: 'Refreshing streams',
+              })}
+            />
+          )}
+          {flyoutName && <StreamFlyout name={flyoutName} onClose={closeFlyout} />}
+          {selectedSource && (
+            <SourceDetailsFlyout
+              sources={sourcesController}
+              source={selectedSource}
+              onClose={closeSourceFlyout}
+            />
+          )}
+          {isCreateModalOpen && (
+            <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
+          )}
+          <EuiScreenReaderOnly>
+            <p id={KEYBOARD_INSTRUCTIONS_ID}>
+              {i18n.translate('xpack.streams.canvas.keyboardInstructions', {
+                defaultMessage:
+                  'Use Tab to move between nodes. Use the arrow keys to reposition the focused node. Press Control or Command plus Z to undo, add Shift to redo. Press Escape to close menus and clear the selection.',
+              })}
+            </p>
+          </EuiScreenReaderOnly>
+          <CanvasToolbar
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            onAddSource={openCreateModal}
+            canUndo={canUndo}
+            canRedo={canRedo}
           />
-        )}
-        {isCreateModalOpen && (
-          <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
-        )}
-        <EuiScreenReaderOnly>
-          <p id={KEYBOARD_INSTRUCTIONS_ID}>
-            {i18n.translate('xpack.streams.canvas.keyboardInstructions', {
-              defaultMessage:
-                'Use Tab to move between nodes. Use the arrow keys to reposition the focused node. Press Control or Command plus Z to undo, add Shift to redo. Press Escape to close menus and clear the selection.',
-            })}
-          </p>
-        </EuiScreenReaderOnly>
-        <CanvasToolbar
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          onAddSource={openCreateModal}
-          canUndo={canUndo}
-          canRedo={canRedo}
-        />
-        <CanvasContextMenu
-          position={contextMenu?.position ?? null}
-          target={contextMenu?.target ?? 'pane'}
-          onTidyUp={onTidyUp}
-          onReopen={reopenContextMenu}
-          onClose={closeContextMenu}
-        />
-      </CanvasShell>
-    </div>
+          <CanvasContextMenu
+            position={contextMenu?.position ?? null}
+            target={contextMenu?.target ?? 'pane'}
+            onTidyUp={onTidyUp}
+            onReopen={reopenContextMenu}
+            onClose={closeContextMenu}
+          />
+        </CanvasShell>
+      </div>
+    </CanvasHighlightProvider>
   );
 }
 

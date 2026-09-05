@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { BaseEdge, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
+import { EDGE_DIM_OPACITY, HIGHLIGHT_TRANSITION_MS } from '../canvas_constants';
+import { useHighlightRole } from '../canvas_highlight_context';
 
 const DASH = 4;
 const GAP = 8;
@@ -48,6 +50,7 @@ export function AnimatedEdge({
 }: EdgeProps) {
   const { euiTheme } = useEuiTheme();
   const [isHovered, setIsHovered] = useState(false);
+  const role = useHighlightRole(id, 'edge');
 
   const [edgePath] = getSmoothStepPath({
     sourceX,
@@ -59,11 +62,19 @@ export function AnimatedEdge({
     borderRadius: 12,
   });
 
-  const isActive = isHovered || Boolean(selected);
+  const isActive = role === 'in' || isHovered || (role === 'idle' && Boolean(selected));
   const strokeColor = isActive ? 'transparent' : euiTheme.colors.borderBaseProminent;
+  const opacity = role === 'out' && !isHovered ? EDGE_DIM_OPACITY : 1;
 
   return (
-    <g onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+    <g
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      css={css`
+        opacity: ${opacity};
+        transition: opacity ${HIGHLIGHT_TRANSITION_MS}ms ease;
+      `}
+    >
       <BaseEdge
         id={id}
         path={edgePath}

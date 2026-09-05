@@ -34,16 +34,18 @@ import {
   canvasUrlSchema,
   type CanvasUrlSchema,
 } from '../../../../../../common/url_schema';
-import type { CanvasStateServiceDeps, CanvasUrlInput, CanvasUrlEvent, CanvasState } from './types';
+import {
+  defaultCanvasUrlState,
+  toCanvasUrlInput,
+  type CanvasState,
+  type CanvasStateServiceDeps,
+  type CanvasUrlEvent,
+  type CanvasUrlInput,
+} from './types';
 
 export interface StoreUrlStateParams {
   urlState: CanvasUrlInput;
 }
-
-const defaultUrlState = {
-  flyoutName: null,
-  flyoutTab: null,
-};
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error('The unit definition request failed.');
@@ -67,6 +69,7 @@ export const canvasStateMachine = setup({
       urlState: params.urlState,
     })),
     syncUrlState: getPlaceholderFor(createUrlSyncAction),
+    syncUrlStateReplace: getPlaceholderFor(createUrlSyncReplaceAction),
     storeNodePositions: assign(({ context, event }) =>
       event.type === 'nodes.positions.change'
         ? {
@@ -270,6 +273,20 @@ export const canvasStateMachine = setup({
             raise({ type: 'url.sync' }),
           ],
         },
+        'focus.clear': {
+          actions: [
+            {
+              type: 'storeUrlState',
+              params: ({ context }) => ({
+                urlState: {
+                  ...context.urlState,
+                  focusNodeId: null,
+                },
+              }),
+            },
+            { type: 'syncUrlStateReplace' },
+          ],
+        },
       },
       states: {
         unit: {
@@ -423,7 +440,7 @@ export const canvasStateMachine = setup({
   context: ({ spawn, self }) => {
     const unitDefinition = createEmptyUnitDefinition();
     return {
-      urlState: defaultUrlState,
+      urlState: defaultCanvasUrlState,
       unit: unitDefinition,
       nextUnit: unitDefinition,
       savingUnit: undefined,
@@ -468,6 +485,7 @@ export function createCanvasMachineImplementations({
     },
     actions: {
       syncUrlState: createUrlSyncAction({ urlStateStorageContainer }),
+      syncUrlStateReplace: createUrlSyncReplaceAction({ urlStateStorageContainer }),
       notifyUnitFailure: createNotifyUnitFailureAction({ core }),
     },
   };
@@ -548,9 +566,22 @@ function createNotifyUnitFailureAction({ core }: Pick<CanvasStateServiceDeps, 'c
 function createUrlSyncAction({
   urlStateStorageContainer,
 }: Pick<CanvasStateServiceDeps, 'urlStateStorageContainer'>) {
+  return createUrlSync({ urlStateStorageContainer, replace: false });
+}
+
+function createUrlSyncReplaceAction({
+  urlStateStorageContainer,
+}: Pick<CanvasStateServiceDeps, 'urlStateStorageContainer'>) {
+  return createUrlSync({ urlStateStorageContainer, replace: true });
+}
+
+function createUrlSync({
+  urlStateStorageContainer,
+  replace,
+}: Pick<CanvasStateServiceDeps, 'urlStateStorageContainer'> & { replace: boolean }) {
   return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
     urlStateStorageContainer.set(CANVAS_URL_STATE_KEY, context.urlState, {
-      replace: false,
+      replace,
     });
   };
 }
@@ -565,18 +596,23 @@ function createUrlInitializerActor({
     if (!urlStateValues) {
       return sendBack({
         type: 'url.init',
-        urlState: defaultUrlState,
+        urlState: defaultCanvasUrlState,
       });
     }
 
     const urlState = canvasUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
-      urlState.data.flyoutTab =
-        urlState.data.flyoutName && !urlState.data.flyoutTab ? 'overview' : urlState.data.flyoutTab;
+      const nextUrlState = toCanvasUrlInput(urlState.data);
       sendBack({
         type: 'url.init',
-        urlState: urlState.data,
+        urlState: {
+          ...nextUrlState,
+          flyoutTab:
+            nextUrlState.flyoutName && !nextUrlState.flyoutTab
+              ? 'overview'
+              : nextUrlState.flyoutTab,
+        },
       });
     } else {
       withNotifyOnErrors(core.notifications.toasts).onGetError(
@@ -584,7 +620,7 @@ function createUrlInitializerActor({
       );
       sendBack({
         type: 'url.init',
-        urlState: defaultUrlState,
+        urlState: defaultCanvasUrlState,
       });
     }
   });

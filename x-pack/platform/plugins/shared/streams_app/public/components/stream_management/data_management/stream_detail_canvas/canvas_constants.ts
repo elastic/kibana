@@ -63,3 +63,20 @@ export const MINIMAP_WIDTH = 150;
 export const MINIMAP_HEIGHT = 90;
 
 export const MINIMAP_MASK_COLOR = 'rgba(105, 112, 125, 0.14)';
+
+/** Opacity applied to nodes / edges that are outside the spotlighted flow. */
+export const NODE_DIM_OPACITY = 0.18;
+export const EDGE_DIM_OPACITY = 0.12;
+
+/** Fade duration (ms) when a flow spotlight is applied or cleared. */
+export const HIGHLIGHT_TRANSITION_MS = 120;
+
+/**
+ * Delay (ms) before clearing hover so moving between a node and its edge does
+ * not flicker the spotlight off.
+ */
+export const HOVER_LEAVE_GRACE_MS = 80;
+
+/** Extra padding and zoom cap when framing a focused destination's flow. */
+export const FOCUS_FIT_PADDING = 0.35;
+export const FOCUS_FIT_MAX_ZOOM = 1.25;

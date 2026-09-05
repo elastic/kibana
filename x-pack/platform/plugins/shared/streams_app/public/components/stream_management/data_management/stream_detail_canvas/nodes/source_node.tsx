@@ -19,6 +19,7 @@ import {
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { SourceNode as SourceNodeType } from '../types';
 import { SOURCE_NODE_WIDTH } from '../canvas_constants';
+import { CanvasNodeHighlight } from './canvas_node_highlight';
 import { getNodeCardStyles } from './node_card_styles';
 
 // TODO: Replace with EuiIcon type="logIn" after Kibana picks up elastic/eui#9885.
@@ -38,12 +39,12 @@ const UnconfiguredSourceIcon = () => (
   </svg>
 );
 
-export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeType>) {
+export function SourceNode({ id, data, selected, dragging }: NodeProps<SourceNodeType>) {
   const { euiTheme } = useEuiTheme();
   const isUnconfigured = Boolean(data.unconfiguredNodeId);
 
   return (
-    <>
+    <CanvasNodeHighlight nodeId={id}>
       <EuiPanel
         // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
         // on the card, so Shift+click multi-select stays stable.
@@ -104,6 +105,6 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
         )}
       </EuiPanel>
       <Handle type="source" position={Position.Right} isConnectable={false} />
-    </>
+    </CanvasNodeHighlight>
   );
 }
