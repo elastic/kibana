@@ -24,6 +24,62 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(text).toContain('FROM logs-* | STATS count = COUNT(*) BY status');
   });
 
+  it('lists executed ES|QL columns as the only bindable names', () => {
+    const [system] = createAuthorVegaSpecPrompt({
+      nlQuery: 'a bar chart of counts by status',
+      esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY status',
+      columns: [
+        { name: 'count', type: 'long' },
+        { name: 'status', type: 'keyword' },
+      ],
+    });
+    const text = String((system as [string, string])[1]);
+
+    expect(text).toContain('<columns>');
+    expect(text).toContain('- "count" (long)');
+    expect(text).toContain('- "status" (keyword)');
+    expect(text).toContain('bind only the executed result columns listed below');
+    expect(text).not.toContain('No column information is available');
+    expect(text).not.toContain(
+      `its result columns are the only fields you may reference in encodings: ${JSON.stringify(
+        'FROM logs-* | STATS count = COUNT(*) BY status'
+      )}`
+    );
+  });
+
+  it('lists an empty columns block when execute returned no columns', () => {
+    const esqlQuery = 'FROM logs-* | STATS count = COUNT(*) BY status';
+    const [system] = createAuthorVegaSpecPrompt({
+      nlQuery: 'a bar chart of counts by status',
+      esqlQuery,
+      columns: [],
+    });
+    const text = String((system as [string, string])[1]);
+
+    expect(text).toContain('<columns>');
+    expect(text).toContain('bind only the executed result columns listed below');
+    expect(text).not.toContain('No column information is available');
+    expect(text).not.toContain(
+      `its result columns are the only fields you may reference in encodings: ${JSON.stringify(
+        esqlQuery
+      )}`
+    );
+  });
+
+  it('falls back to query-text inference when columns were never executed', () => {
+    const esqlQuery = 'FROM logs-* | STATS count = COUNT(*) BY status';
+    const [system] = createAuthorVegaSpecPrompt({
+      nlQuery: 'a bar chart of counts by status',
+      esqlQuery,
+    });
+    const text = String((system as [string, string])[1]);
+
+    expect(text).toContain(
+      `No column information is available; infer fields from the ES|QL query: ${esqlQuery}`
+    );
+    expect(text).not.toContain('<columns>');
+  });
+
   it('instructs Vega-Lite only (never raw Vega)', () => {
     const text = systemText('any chart');
     expect(text).toContain('Vega-Lite ONLY');

@@ -6,7 +6,9 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { formatColumnsBlock } from '../shared/format_columns';
 import { getChartTypeConfigPromptContent } from './chart_type_guidance';
 import { getColorPalettesPromptContent } from './color_palettes';
 import { titleRulesPromptContent, numberFormatRulesPromptContent } from './config_rules';
@@ -14,6 +16,7 @@ import { titleRulesPromptContent, numberFormatRulesPromptContent } from './confi
 export const createGenerateConfigPrompt = ({
   nlQuery,
   esqlQuery,
+  columns,
   chartType,
   schema,
   existingConfig,
@@ -21,13 +24,12 @@ export const createGenerateConfigPrompt = ({
 }: {
   nlQuery: string;
   esqlQuery: string;
+  columns?: EsqlEsqlColumnInfo[];
   chartType: SupportedChartType;
   schema: object;
   existingConfig?: string;
   additionalContext?: string;
 }): BaseMessageLike[] => {
-  const esqlQueryJson = JSON.stringify(esqlQuery);
-
   const segments = [
     `You are a Kibana Lens visualization configuration expert. Generate a valid configuration for a ${chartType} visualization based on the provided schema and ES|QL query.
 
@@ -43,9 +45,11 @@ ${existingConfig}
       : '',
     `DATA SOURCE RULES:
 1. The ES|QL query is owned and injected by the system automatically. DO NOT output a 'data_source' field, and do not restate, copy, or modify the query anywhere in the config.
-2. The configuration is built around this query; its result columns are the only columns available to bind: ${esqlQueryJson}
-3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and every bound column must be one produced by that query.
-4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.`,
+2. The configuration is built around this query; bind only the executed result columns listed below.
+3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and every bound column must be one of the executed result columns.
+4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.
+
+${formatColumnsBlock(columns, esqlQuery)}`,
     titleRulesPromptContent,
     numberFormatRulesPromptContent,
     getColorPalettesPromptContent(chartType),

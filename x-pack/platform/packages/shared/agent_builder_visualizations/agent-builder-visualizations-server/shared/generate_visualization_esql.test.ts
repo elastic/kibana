@@ -80,6 +80,7 @@ describe('generateVisualizationEsql', () => {
         index: 'logs-*',
         esClient: asCurrentUser,
         additionalInstructions: 'esql-instructions',
+        dropNullColumns: false,
         timeRange: { from: 'now-7d', to: 'now' },
       })
     );

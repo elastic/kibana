@@ -11,9 +11,12 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { executeEsql } from '@kbn/agent-builder-genai-utils';
-import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
+import {
+  DEFAULT_VALIDATION_TIME_RANGE,
+  executeForAuthoring,
+  tryExecuteForAuthoring,
+} from '../shared/execute_for_authoring';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { normalizeVegaSpec } from './normalize_spec';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
@@ -36,13 +39,6 @@ import {
 
 // Regex to extract JSON from markdown code blocks.
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
-
-/**
- * Default range used only to bind `?_tstart`/`?_tend` when executing a query
- * server-side to collect its result columns. The live dashboard range is applied
- * by Kibana at render time, so this default never reaches the stored spec.
- */
-const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
 /** Top-level keys that declare a renderable Vega-Lite view. */
 const RENDERABLE_VIEW_KEYS = [
@@ -142,8 +138,6 @@ export const createVegaGraph = async (
   // time-picker params (?_tstart/?_tend); bind a default range so it runs
   // server-side. Kibana binds the live range at render time.
   const generateESQLNode = async (state: VegaState) => {
-    const timeRangeParams = buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE);
-
     let action: GenerateEsqlAction;
 
     try {
@@ -156,20 +150,18 @@ export const createVegaGraph = async (
       // through to self-correcting generation rather than author a spec around a
       // query that can never render.
       if (query) {
-        try {
-          logger.debug('Validating provided ES|QL query for Vega visualization');
-          ({ columns } = await executeEsql({
-            query,
-            params: timeRangeParams,
-            esClient: esClient.asCurrentUser,
-          }));
-        } catch (providedError) {
-          const message =
-            providedError instanceof Error ? providedError.message : String(providedError);
+        logger.debug('Validating provided ES|QL query for Vega visualization');
+        const executed = await tryExecuteForAuthoring({
+          query,
+          esClient: esClient.asCurrentUser,
+        });
+        if (!executed.ok) {
           logger.warn(
-            `Provided ES|QL query failed to execute (${message}); regenerating a corrected query`
+            `Provided ES|QL query failed to execute (${executed.error}); regenerating a corrected query`
           );
           query = '';
+        } else {
+          columns = executed.columns;
         }
       }
 
@@ -212,9 +204,8 @@ export const createVegaGraph = async (
         // was validated without returning rows, since spec authoring needs them.
         columns = generated.columns;
         if (!columns) {
-          ({ columns } = await executeEsql({
+          ({ columns } = await executeForAuthoring({
             query,
-            params: timeRangeParams,
             esClient: esClient.asCurrentUser,
           }));
         }

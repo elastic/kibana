@@ -40,6 +40,16 @@ describe('executeEsql', () => {
     expect(result).toEqual(esqlResponse);
   });
 
+  it('forwards dropNullColumns: false as drop_null_columns: false', async () => {
+    await executeEsql({ query: 'FROM idx', dropNullColumns: false, esClient });
+
+    expect(lastRequest()).toEqual({
+      query: 'FROM idx',
+      drop_null_columns: false,
+      allow_partial_results: true,
+    });
+  });
+
   it('forwards the filter to Elasticsearch when one is provided', async () => {
     const filter = { term: { status: 'open' } };
 

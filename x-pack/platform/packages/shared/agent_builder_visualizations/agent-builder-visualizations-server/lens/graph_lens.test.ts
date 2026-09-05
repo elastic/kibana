@@ -6,7 +6,7 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -15,6 +15,7 @@ import type { VisualizationConfig } from './types';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
+  executeEsql: jest.fn(),
 }));
 
 jest.mock('./chart_type_registry', () => ({
@@ -34,6 +35,12 @@ jest.mock('./chart_type_registry', () => ({
 }));
 
 const mockedGenerateEsql = jest.mocked(generateEsql);
+const mockedExecuteEsql = jest.mocked(executeEsql);
+
+const EXECUTED_COLUMNS = [
+  { name: 'count', type: 'long' as const },
+  { name: 'status', type: 'keyword' as const },
+];
 
 const createMockLogger = (): Logger =>
   ({
@@ -74,15 +81,16 @@ describe('createVisualizationGraph', () => {
 
   beforeEach(() => {
     mockedGenerateEsql.mockReset();
+    mockedExecuteEsql.mockReset();
+    mockedExecuteEsql.mockResolvedValue({
+      columns: EXECUTED_COLUMNS,
+      values: [],
+    } as Awaited<ReturnType<typeof executeEsql>>);
   });
 
-  it('uses the provided esql query without generating a new one', async () => {
-    const graph = await createVisualizationGraph(
-      createMockModel() as never,
-      logger,
-      events,
-      esClient
-    );
+  it('executes a provided esql query and binds its columns without generating a new one', async () => {
+    const model = createMockModel();
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient);
     const esqlQuery = 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)';
 
     const finalState = await graph.invoke({
@@ -100,7 +108,80 @@ describe('createVisualizationGraph', () => {
     });
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(mockedExecuteEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: esqlQuery, dropNullColumns: false })
+    );
     expect(finalState.esqlQuery).toBe(esqlQuery);
+
+    const prompt = JSON.stringify(
+      (await model.getDefaultModel()).chatModel.invoke.mock.calls[0][0]
+    );
+    expect(prompt).toContain('- \\"count\\" (long)');
+    expect(prompt).toContain('- \\"status\\" (keyword)');
+    expect(prompt).not.toContain('No column information is available');
+  });
+
+  it('regenerates esql when the provided query fails to execute', async () => {
+    mockedExecuteEsql.mockRejectedValueOnce(new Error('verification_exception'));
+    mockedGenerateEsql.mockResolvedValue({
+      query: 'FROM logs-* | STATS count = COUNT(*)',
+      results: { columns: EXECUTED_COLUMNS, values: [] },
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    const graph = await createVisualizationGraph(
+      createMockModel() as never,
+      logger,
+      events,
+      esClient
+    );
+
+    const finalState = await graph.invoke({
+      nlQuery: 'Count logs',
+      index: 'logs-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: undefined,
+      parsedExistingConfig: null,
+      esqlQuery: 'FROM logs-* | STATS broken = COUNT(*) BY missing_field',
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(mockedGenerateEsql).toHaveBeenCalled();
+    expect(finalState.esqlQuery).toBe('FROM logs-* | STATS count = COUNT(*)');
+  });
+
+  it('binds generateEsql result columns into the config prompt', async () => {
+    mockedGenerateEsql.mockResolvedValue({
+      query: 'FROM logs-* | STATS count = COUNT(*) BY status',
+      results: { columns: EXECUTED_COLUMNS, values: [] },
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    const model = createMockModel();
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient);
+
+    await graph.invoke({
+      nlQuery: 'Count logs by status',
+      index: 'logs-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: undefined,
+      parsedExistingConfig: null,
+      esqlQuery: '',
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    const prompt = JSON.stringify(
+      (await model.getDefaultModel()).chatModel.invoke.mock.calls[0][0]
+    );
+    expect(prompt).toContain('- \\"count\\" (long)');
+    expect(prompt).toContain('- \\"status\\" (keyword)');
+    expect(prompt).toContain('bind only the executed result columns');
   });
 
   it('returns the authoring note without storing it in the validated config', async () => {

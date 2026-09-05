@@ -18,11 +18,7 @@ import { validateQueryTarget } from './validate_query_target';
 export interface GeneratedVisualizationEsql {
   /** The generated query. Absent when generation failed. */
   query?: string;
-  /**
-   * Result columns from the validation run, when `generateEsql` executed the
-   * query and returned rows. Callers that author around the result schema (Vega)
-   * can reuse these instead of executing the query again.
-   */
+  /** Result columns from the validation run, when `generateEsql` executed the query. */
   columns?: EsqlEsqlColumnInfo[];
   /** Populated when no usable query could be resolved. */
   error?: string;
@@ -131,6 +127,7 @@ export const generateVisualizationEsql = async ({
     additionalInstructions: extraInstructions
       ? `${instructions}\n${extraInstructions}`
       : instructions,
+    dropNullColumns: false,
     ...(timeRange ? { timeRange } : {}),
   };
 

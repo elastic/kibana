@@ -5,11 +5,13 @@
  * 2.0.
  */
 import { StateGraph, Annotation } from '@langchain/langgraph';
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
+import { executeForAuthoring, tryExecuteForAuthoring } from '../shared/execute_for_authoring';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
@@ -108,6 +110,7 @@ const VisualizationStateAnnotation = Annotation.Root({
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
   // internal
   esqlQuery: Annotation<string>(),
+  columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
   actions: Annotation<Action[]>({
     reducer: (a, b) => [...a, ...b],
@@ -129,39 +132,80 @@ export const createVisualizationGraph = async (
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
-  // Node: Generate ES|QL query
+  // Resolve the ES|QL query and its result columns. A query may reference
+  // time-picker params (?_tstart/?_tend); bind a default range so it runs
+  // server-side. Kibana binds the live range at render time.
   const generateESQLNode = async (state: VisualizationState) => {
-    logger.debug('Generating ES|QL query for visualization');
-
     let action: GenerateEsqlAction;
     try {
-      const generated = await generateVisualizationEsql({
-        nlQuery: state.nlQuery,
-        // On edit, seed generation with the existing per-layer queries so a
-        // query-changing edit can modify them instead of being stuck with the
-        // original columns.
-        existingQueries: getExistingEsqlQueries(state.parsedExistingConfig),
-        index: state.index,
-        modelProvider,
-        events,
-        logger,
-        esClient,
-      });
+      let query = state.esqlQuery;
+      let columns: EsqlEsqlColumnInfo[] | undefined;
 
-      if (!generated.query) {
-        action = {
-          type: 'generate_esql',
-          success: false,
-          error: generated.error ?? 'No queries generated',
-        };
-      } else {
-        logger.debug(`Generated ES|QL query: ${generated.query}`);
-        action = {
-          type: 'generate_esql',
-          success: true,
-          query: generated.query,
-        };
+      // A provided query is only trustworthy if it actually runs: the caller may
+      // pass an LLM-invented query whose error (e.g. a type mismatch) AST
+      // validation never catches. Execute it; if it throws, discard it and fall
+      // through to self-correcting generation rather than author a config around
+      // a query that can never render.
+      if (query) {
+        logger.debug('Validating provided ES|QL query for Lens visualization');
+        const executed = await tryExecuteForAuthoring({
+          query,
+          esClient: esClient.asCurrentUser,
+        });
+        if (!executed.ok) {
+          logger.warn(
+            `Provided ES|QL query failed to execute (${executed.error}); regenerating a corrected query`
+          );
+          query = '';
+        } else {
+          columns = executed.columns;
+        }
       }
+
+      if (!query) {
+        logger.debug('Generating ES|QL query for visualization');
+        const generated = await generateVisualizationEsql({
+          nlQuery: state.nlQuery,
+          // On edit, seed generation with the existing per-layer queries so a
+          // query-changing edit can modify them instead of being stuck with the
+          // original columns.
+          existingQueries: getExistingEsqlQueries(state.parsedExistingConfig),
+          index: state.index,
+          modelProvider,
+          events,
+          logger,
+          esClient,
+        });
+
+        if (!generated.query) {
+          action = {
+            type: 'generate_esql',
+            success: false,
+            error: generated.error ?? 'No queries generated',
+          };
+          return {
+            esqlQuery: state.esqlQuery,
+            actions: [action],
+          };
+        }
+
+        query = generated.query;
+        logger.debug(`Generated ES|QL query: ${query}`);
+        columns = generated.columns;
+        if (!columns) {
+          ({ columns } = await executeForAuthoring({
+            query,
+            esClient: esClient.asCurrentUser,
+          }));
+        }
+      }
+
+      action = {
+        type: 'generate_esql',
+        success: true,
+        query,
+        columns,
+      };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error(`Failed to generate ES|QL query: ${errorMessage}`);
@@ -173,6 +217,8 @@ export const createVisualizationGraph = async (
     }
 
     return {
+      esqlQuery: action.query ?? state.esqlQuery,
+      columns: action.columns,
       actions: [action],
     };
   };
@@ -190,6 +236,7 @@ export const createVisualizationGraph = async (
       .filter((action) => action.success && action.query)
       .pop();
     const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
+    const columns = lastGenerateEsqlAction?.columns ?? state.columns;
 
     // Build context from previous actions for retry attempts
     const previousActionContext = state.actions
@@ -217,6 +264,7 @@ export const createVisualizationGraph = async (
     const prompt = createGenerateConfigPrompt({
       nlQuery: state.nlQuery,
       esqlQuery,
+      columns,
       chartType: state.chartType,
       schema: state.schema,
       existingConfig: state.existingConfig,
@@ -386,19 +434,6 @@ export const createVisualizationGraph = async (
     return GENERATE_CONFIG_NODE;
   };
 
-  // Router: Use an explicit ES|QL query when provided, otherwise generate one.
-  // Existing config is still valuable because generateESQLNode includes the
-  // prior query as context when regenerating edits.
-  const shouldGenerateESQLRouter = (state: VisualizationState): string => {
-    if (state.esqlQuery) {
-      logger.debug('Using provided ES|QL query');
-      return GENERATE_CONFIG_NODE;
-    }
-
-    logger.debug('No ES|QL query provided, generating ES|QL query');
-    return GENERATE_ESQL_NODE;
-  };
-
   // Build and compile the graph
   const graph = new StateGraph(VisualizationStateAnnotation)
     // Add nodes
@@ -406,11 +441,7 @@ export const createVisualizationGraph = async (
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
     .addNode('finalize', finalizeNode)
-    // Add edges
-    .addConditionalEdges('__start__', shouldGenerateESQLRouter, {
-      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
-      [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,
-    })
+    .addEdge('__start__', GENERATE_ESQL_NODE)
     .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       finalize: 'finalize',
