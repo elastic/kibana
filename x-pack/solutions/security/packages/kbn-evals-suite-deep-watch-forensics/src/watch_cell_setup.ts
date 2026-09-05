@@ -41,7 +41,7 @@ const KILL_CHAIN_EVENTS = [
  */
 const attackDiscoveryDoc = (row: DeepWatchGoldenRow) => ({
   '@timestamp': new Date().toISOString(),
-  'kibana.alert.attack_discovery.alert_ids': ['seeded-alert-1'],
+  'kibana.alert.attack_discovery.alert_ids': [`${row.id}-detection`],
   // MUST be non-empty: the /api/attack_discovery/_find transformer silently drops docs
   // whose api_config is {} -- total counts them but data stays []. Found live 2026-09-03.
   'kibana.alert.attack_discovery.api_config': {
@@ -119,8 +119,24 @@ export const setupWatchCell = async ({
   for (const row of rows) {
     ops.push({ index: { _index: ATTACK_DISCOVERY_INDEX, _id: row.id } });
     ops.push(attackDiscoveryDoc(row));
+    // v19 Forensics Watch extracts host.name from the AD's CONSTITUENT
+    // detection alerts (extract_host_from_alerts ids-queries
+    // .alerts-security.alerts-<space> for alert_ids and aggs host.name) --
+    // not from the AD doc or the trigger event. Without one constituent
+    // alert per row the watch takes emit_no_host for every row.
+    ops.push({ index: { _index: '.alerts-security.alerts-default', _id: `${row.id}-detection` } });
+    ops.push({
+      '@timestamp': new Date().toISOString(),
+      host: { name: row.host, hostname: row.host.toLowerCase() },
+      'event.kind': 'signal',
+      'event.dataset': 'endpoint forensics watch eval seed',
+      'kibana.alert.uuid': `${row.id}-detection`,
+      'kibana.alert.rule.name': `Detection (eval seed ${row.id})`,
+      'kibana.alert.status': 'active',
+      'kibana.alert.workflow_status': 'open',
+    });
   }
-  log.info(`Seeding ${KILL_CHAIN_EVENTS.length} kill-chain events + ${rows.length} AD alerts`);
+  log.info(`Seeding ${KILL_CHAIN_EVENTS.length} kill-chain events + ${rows.length} AD + detection alerts`);
   const bulkResp = (await esClient.bulk({ body: ops, refresh: 'wait_for' })) as {
     errors?: boolean;
     items?: Array<{ [op: string]: { error?: unknown } }>;
@@ -183,5 +199,8 @@ export const teardownWatchCell = async ({
     .catch(() => undefined);
   for (const row of rows) {
     await esClient.delete({ index: ATTACK_DISCOVERY_INDEX, id: row.id }).catch(() => undefined);
+    await esClient
+      .delete({ index: '.alerts-security.alerts-default', id: `${row.id}-detection` })
+      .catch(() => undefined);
   }
 };
