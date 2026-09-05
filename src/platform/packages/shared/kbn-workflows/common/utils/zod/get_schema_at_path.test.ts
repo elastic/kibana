@@ -135,6 +135,14 @@ describe('getSchemaAtPath', () => {
     expect(result.scopedToPath).toBe('a');
     expectZodSchemaEqual(result.schema as z.ZodType, z.unknown());
   });
+
+  it('treats a Liquid dynamic subscript as one map key', () => {
+    const schema = z.object({
+      rules: z.record(z.string(), z.object({ name: z.string() })),
+    });
+    expect(getSchemaAtPath(schema, 'rules[ep.rule_id].name').schema).not.toBeNull();
+    expect(getSchemaAtPath(schema, 'rules[ep.rule_id].nmae').schema).toBeNull();
+  });
 });
 
 describe('getSchemaAtPath: real life examples', () => {

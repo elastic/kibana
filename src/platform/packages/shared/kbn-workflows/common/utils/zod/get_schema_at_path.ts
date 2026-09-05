@@ -10,10 +10,37 @@
 import { z } from '@kbn/zod/v4';
 import { unwrapSchema } from './unwrap_schema';
 
+/**
+ * Stand-in segment for a Liquid dynamic subscript (`[ep.rule_id]`, `[item]`).
+ * Must not collide with a real object key.
+ */
+export const LIQUID_DYNAMIC_KEY_SEGMENT = '__liquid_dynamic_key__';
+
+const isQuotedBracket = (inner: string): string | null => {
+  const doubleQuoted = inner.match(/^"((?:[^"\\]|\\.)*)"$/);
+  if (doubleQuoted) {
+    return doubleQuoted[1];
+  }
+  const singleQuoted = inner.match(/^'((?:[^'\\]|\\.)*)'$/);
+  if (singleQuoted) {
+    return singleQuoted[1];
+  }
+  return null;
+};
+
 export function parsePath(path: string) {
-  const segments = path
-    .replace(/\[(['"]?)([^\]]+)\1\]/g, '.$2') // Convert [key] to .key
-    .split('.');
+  const normalized = path.replace(/\[([^\]]+)\]/g, (_, raw: string) => {
+    const inner = raw.trim();
+    const quoted = isQuotedBracket(inner);
+    if (quoted !== null) {
+      return `.${quoted}`;
+    }
+    if (/^-?\d+$/.test(inner)) {
+      return `.${inner}`;
+    }
+    return `.${LIQUID_DYNAMIC_KEY_SEGMENT}`;
+  });
+  const segments = normalized.split('.');
   return segments.some((s) => s === '') ? null : segments;
 }
 
@@ -45,11 +72,12 @@ export function getSchemaAtPath(
 
     for (const [index, segment] of segments.entries()) {
       current = unwrapSchema(current);
+      const isDynamicKey = segment === LIQUID_DYNAMIC_KEY_SEGMENT;
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
         // `in` walks the prototype chain, so `__proto__` / `constructor` / `toString`
         // would resolve to an Object.prototype member instead of a zod schema.
-        if (!Object.hasOwn(shape, segment)) {
+        if (isDynamicKey || !Object.hasOwn(shape, segment)) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
             : { schema: null, scopedToPath: null };
@@ -102,6 +130,10 @@ export function getSchemaAtPath(
         }
         current = branchResult.schema;
       } else if (current instanceof z.ZodArray) {
+        if (isDynamicKey) {
+          current = current.element as z.ZodType;
+          continue;
+        }
         if (!/^\d+$/.test(segment)) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
