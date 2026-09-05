@@ -7,25 +7,29 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useRef } from 'react';
-import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSection, useEuiTheme } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { AppHeader } from '@kbn/app-header';
+import { css } from '@emotion/react';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { WithMetricsExplorerOptionsUrlState } from '../../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { useMetricsExplorerViews } from '../../../hooks/use_metrics_explorer_views';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
+import { ExplorerOnboardingPage } from './components/explorer_onboarding_page';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
+import { useExplorerHasData } from './hooks/use_explorer_has_data';
 import { metricsExplorerTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { MetricsExplorerOptionsContainer } from './hooks/use_metrics_explorer_options';
 import { MetricsInDiscoverCallout } from './components/metrics_in_discover_callout';
+import { useMetricsAppHeaderMenu } from '../header/use_metrics_app_header_menu';
 
-export const MetricsExplorerPage = () => {
+export const MetricsExplorerPage = (): React.ReactElement => {
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
 
@@ -38,15 +42,51 @@ export const MetricsExplorerPage = () => {
     { parent: 'app' }
   );
 
+  const { menu, flyouts } = useMetricsAppHeaderMenu();
+  const { hasData, loading } = useExplorerHasData();
+  const showOnboarding = !loading && !hasData;
+
+  // Template noDataConfig ignores children; Explorer renders onboarding as body instead.
   return (
-    <MetricsExplorerOptionsContainer>
-      <WithMetricsExplorerOptionsUrlState />
-      <MetricsExplorerContent />
-    </MetricsExplorerOptionsContainer>
+    <div className={APP_WRAPPER_CLASS}>
+      <InfraPageTemplate
+        hasDataOverride={!showOnboarding}
+        header={
+          <>
+            <AppHeader title={metricsExplorerTitle} menu={menu} spacing="standard" />
+            {flyouts}
+          </>
+        }
+        pageSectionProps={{
+          paddingSize: 'none',
+          contentProps: {
+            css: css`
+              display: flex;
+              flex-direction: column;
+              flex: 1 1 auto;
+              min-height: 0;
+              height: 100%;
+              width: 100%;
+              padding-bottom: 0;
+            `,
+          },
+        }}
+      >
+        {showOnboarding ? (
+          <ExplorerOnboardingPage />
+        ) : (
+          <MetricsExplorerOptionsContainer>
+            <WithMetricsExplorerOptionsUrlState />
+            <MetricsExplorerContent />
+          </MetricsExplorerOptionsContainer>
+        )}
+      </InfraPageTemplate>
+    </div>
   );
 };
 
 const MetricsExplorerContent = () => {
+  const { euiTheme } = useEuiTheme();
   const [enabled, setEnabled] = useState(false);
   const {
     isLoading,
@@ -70,9 +110,6 @@ const MetricsExplorerContent = () => {
   const prevDataRef = useRef(data);
   const { onPageReady } = usePerformanceContext();
 
-  useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
-  useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
-
   useEffect(() => {
     if (currentView) {
       onViewStateChange(currentView);
@@ -85,15 +122,6 @@ const MetricsExplorerContent = () => {
       setEnabled(true);
     }
   }, [currentView]);
-
-  useMetricsBreadcrumbs(
-    [
-      {
-        text: metricsExplorerTitle,
-      },
-    ],
-    { parent: 'app' }
-  );
 
   const viewState = {
     options,
@@ -119,20 +147,39 @@ const MetricsExplorerContent = () => {
   };
 
   return (
-    <InfraPageTemplate
-      onboardingFlow={OnboardingFlow.Infra}
-      pageHeader={{
-        pageTitle: (
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>{metricsExplorerTitle}</EuiFlexItem>
+    <EuiPageSection
+      paddingSize="m"
+      grow
+      restrictWidth={false}
+      contentProps={{
+        css: css`
+          display: flex;
+          flex-direction: column;
+          flex: 1 1 auto;
+          min-height: 0;
+          height: 100%;
+          width: 100%;
+          padding-top: ${euiTheme.size.base};
+          padding-bottom: 0;
+        `,
+      }}
+    >
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        css={css`
+          flex: 1;
+          min-height: 0;
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
             <EuiFlexItem grow={false}>
               <SavedViews viewState={viewState} />
             </EuiFlexItem>
           </EuiFlexGroup>
-        ),
-        rightSideItems: [],
-        color: 'subdued' as unknown as EuiPageHeaderProps['color'],
-        children: (
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <MetricsExplorerToolbar
             timeRange={timeRange}
             options={options}
@@ -145,33 +192,39 @@ const MetricsExplorerContent = () => {
             onAggregationChange={handleAggregationChange}
             onChartOptionsChange={setChartOptions}
           />
-        ),
-      }}
-    >
-      <MetricsInDiscoverCallout timeRange={timeRange} />
-      {error ? (
-        <NoData
-          titleText="Whoops!"
-          bodyText={i18n.translate('xpack.infra.metricsExplorer.errorMessage', {
-            defaultMessage: 'It looks like the request failed with "{message}"',
-            values: { message: error.message },
-          })}
-          onRefetch={refresh}
-          refetchText="Try Again"
-        />
-      ) : (
-        <MetricsExplorerCharts
-          timeRange={timeRange}
-          isLoading={isLoading}
-          data={data}
-          options={options}
-          chartOptions={chartOptions}
-          onLoadMore={handleLoadMore}
-          onFilter={onFilter}
-          onRefetch={refresh}
-          onTimeChange={handleTimeChange}
-        />
-      )}
-    </InfraPageTemplate>
+        </EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            min-height: 0;
+            overflow-y: auto;
+          `}
+        >
+          <MetricsInDiscoverCallout timeRange={timeRange} />
+          {error ? (
+            <NoData
+              titleText="Whoops!"
+              bodyText={i18n.translate('xpack.infra.metricsExplorer.errorMessage', {
+                defaultMessage: 'It looks like the request failed with "{message}"',
+                values: { message: error.message },
+              })}
+              onRefetch={refresh}
+              refetchText="Try Again"
+            />
+          ) : (
+            <MetricsExplorerCharts
+              timeRange={timeRange}
+              isLoading={isLoading}
+              data={data}
+              options={options}
+              chartOptions={chartOptions}
+              onLoadMore={handleLoadMore}
+              onFilter={onFilter}
+              onRefetch={refresh}
+              onTimeChange={handleTimeChange}
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageSection>
   );
 };
