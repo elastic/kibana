@@ -101,6 +101,8 @@ describe('regex patterns', () => {
         "data['key']",
         'user.contacts[0].email',
         'response.data["user-info"].name',
+        'user[abc]',
+        'inputs.payload.rules[ep.rule_id].name',
       ];
 
       validPaths.forEach((path) => {
@@ -125,7 +127,7 @@ describe('regex patterns', () => {
         '123invalid', // starts with number
         '.user', // starts with dot
         'user..name', // double dots
-        'user[abc]', // unquoted string in brackets
+        'user[abc-def]', // hyphenated unquoted key (must be quoted)
         'user]invalid[', // wrong bracket order
       ];
 
@@ -146,6 +148,8 @@ describe('regex patterns', () => {
         "data['key']",
         'user.contacts[0].email',
         'response.data["user-info"].name',
+        'user[abc]',
+        'inputs.payload.rules[ep.rule_id].name',
       ];
 
       validPaths.forEach((path) => {
@@ -166,7 +170,7 @@ describe('regex patterns', () => {
         '123invalid', // starts with number
         '.user', // starts with dot
         'user..name', // double dots
-        'user[abc]', // unquoted string in brackets
+        'user[abc-def]', // hyphenated unquoted key (must be quoted)
       ];
 
       invalidPaths.forEach((path) => {
