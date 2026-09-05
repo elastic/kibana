@@ -28,7 +28,7 @@ const specWithHref = {
   title: 'Open cases',
   body: [
     {
-      type: 'itemList',
+      type: 'entityList',
       label: 'Cases',
       items: [{ title: 'Triage me', action: { label: 'Open', href: '/app/security/cases/1' } }],
     },
