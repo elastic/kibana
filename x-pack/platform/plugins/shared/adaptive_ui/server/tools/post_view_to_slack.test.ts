@@ -31,7 +31,7 @@ const casesSpec = {
   subtitle: '3 cases · updated 4m ago',
   body: [
     {
-      type: 'itemList',
+      type: 'entityList',
       label: 'Cases',
       items: [
         {
