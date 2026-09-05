@@ -14,7 +14,7 @@ import {
   RUNTIME_FIELD_COMPOSITE_TYPE,
   scriptSchema,
 } from './common';
-import { fieldSettingsWithPopularitySchema } from '../schema_field_settings';
+import { fieldSettingsWithPopularitySchema } from '../field_settings/schema_field_settings';
 
 export const savedRuntimeFieldBaseSchema = fieldSettingsWithPopularitySchema
   .extend({

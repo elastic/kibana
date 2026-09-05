@@ -12,7 +12,7 @@ import {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
 } from '../runtime_fields/schema_embedded_runtime_field';
-import { fieldSettingsBaseSchema } from '../schema_field_settings';
+import { fieldSettingsBaseSchema } from '../field_settings/schema_field_settings';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE, AS_CODE_DATA_VIEW_SPEC_TYPE } from './constants';
 import {
   allowHiddenIndicesSchema,

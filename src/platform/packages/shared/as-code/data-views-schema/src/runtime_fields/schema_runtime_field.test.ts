@@ -307,7 +307,7 @@ describe.each([
         it('should be valid', () => {
           // Given
           const runtimeField = buildWithFields({
-            format: { type: 'number', params: { decimals: 2 } },
+            format: { type: 'number', params: { pattern: '0.00' } },
           });
 
           // When/Then

@@ -101545,15 +101545,698 @@ components:
       title: Field filters
       type: array
     Kibana_HTTP_APIs_kbn-field-format:
-      additionalProperties: false
+      anyOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-boolean'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-bytes'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-color'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-currency'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-date_nanos'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-date'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-duration'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-geo_point'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-histogram'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-ip'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-number'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-percent'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-relative_date'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-static_lookup'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-string'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-truncate'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-url'
+        - additionalProperties: false
+          description: Fallback for custom formatter IDs only. Known formatter IDs must match their dedicated schema and are validated at runtime.
+          properties:
+            params: {}
+            type:
+              type: string
+          required:
+            - type
+          title: Extensible format
+          type: object
       description: Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.
+      title: Format
+    Kibana_HTTP_APIs_kbn-field-format-boolean:
+      additionalProperties: false
+      description: Formats a field into a true/false value.
       properties:
-        params: {}
         type:
+          enum:
+            - boolean
           type: string
       required:
         - type
-      title: Format
+      title: Boolean field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-bytes:
+      additionalProperties: false
+      description: Formats a field into a bytes value following the numeral.js format pattern. The default pattern is defined by the format:bytes:defaultPattern advanced setting.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            pattern:
+              description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
+              title: Numeral pattern
+              type: string
+        type:
+          enum:
+            - bytes
+          type: string
+      required:
+        - type
+      title: Bytes field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-color:
+      additionalProperties: false
+      description: Formats a field into a color value.
+      properties:
+        params:
+          discriminator:
+            propertyName: field_type
+          oneOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                colors:
+                  items:
+                    type: object
+                    properties:
+                      background:
+                        description: The background color to use for the field.
+                        title: Background color
+                        type: string
+                      regex:
+                        description: When the field type is a string, this regex is used to determine the color.
+                        title: Regex
+                        type: string
+                      text:
+                        description: The text color to use for the field.
+                        title: Text color
+                        type: string
+                    required:
+                      - text
+                      - background
+                      - regex
+                  type: array
+                field_type:
+                  enum:
+                    - string
+                  type: string
+              required:
+                - field_type
+                - colors
+            - additionalProperties: false
+              type: object
+              properties:
+                colors:
+                  items:
+                    type: object
+                    properties:
+                      background:
+                        description: The background color to use for the field.
+                        title: Background color
+                        type: string
+                      range:
+                        description: When the field type is a number, this range is used to determine the color.
+                        title: Range
+                        type: string
+                      text:
+                        description: The text color to use for the field.
+                        title: Text color
+                        type: string
+                    required:
+                      - text
+                      - background
+                      - range
+                  type: array
+                field_type:
+                  enum:
+                    - number
+                  type: string
+              required:
+                - field_type
+                - colors
+            - additionalProperties: false
+              type: object
+              properties:
+                colors:
+                  items:
+                    type: object
+                    properties:
+                      background:
+                        description: The background color to use for the field.
+                        title: Background color
+                        type: string
+                      boolean:
+                        description: When the field type is a boolean, this boolean is used to determine the color.
+                        title: Boolean
+                        type: boolean
+                      text:
+                        description: The text color to use for the field.
+                        title: Text color
+                        type: string
+                    required:
+                      - text
+                      - background
+                      - boolean
+                  type: array
+                field_type:
+                  enum:
+                    - boolean
+                  type: string
+              required:
+                - field_type
+                - colors
+        type:
+          enum:
+            - color
+          type: string
+      required:
+        - type
+        - params
+      title: Color field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-currency:
+      additionalProperties: false
+      description: Formats a field into a currency value. The format is determined by the pattern of the format:currency:defaultPattern advanced setting.
+      properties:
+        type:
+          enum:
+            - currency
+          type: string
+      required:
+        - type
+      title: Currency field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-date:
+      additionalProperties: false
+      description: Formats a field into a date value following the defined pattern.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            pattern:
+              default: MMM D, YYYY @ HH:mm:ss.SSS
+              description: Moment.js format pattern. See https://momentjs.com/ to learn more.
+              title: Moment.js pattern
+              type: string
+        type:
+          enum:
+            - date
+          type: string
+      required:
+        - type
+      title: Date field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-date_nanos:
+      additionalProperties: false
+      description: Formats a field into a date nanos value following the defined pattern.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            pattern:
+              default: MMM D, YYYY @ HH:mm:ss.SSSSSSSSS
+              description: Moment.js format pattern. See https://momentjs.com/ to learn more.
+              title: Moment.js pattern
+              type: string
+        type:
+          enum:
+            - date_nanos
+          type: string
+      required:
+        - type
+      title: Date nanos field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-duration:
+      additionalProperties: false
+      description: Formats a field into a duration value.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            include_space_with_suffix:
+              default: true
+              description: When true or not provided, the formatted duration includes a space between the value and suffix. When false, no space is included.
+              title: Include space with suffix
+              type: boolean
+            input_format:
+              anyOf:
+                - enum:
+                    - picoseconds
+                  title: Picoseconds
+                  type: string
+                - enum:
+                    - nanoseconds
+                  title: Nanoseconds
+                  type: string
+                - enum:
+                    - microseconds
+                  title: Microseconds
+                  type: string
+                - enum:
+                    - milliseconds
+                  title: Milliseconds
+                  type: string
+                - enum:
+                    - seconds
+                  title: Seconds
+                  type: string
+                - enum:
+                    - minutes
+                  title: Minutes
+                  type: string
+                - enum:
+                    - hours
+                  title: Hours
+                  type: string
+                - enum:
+                    - days
+                  title: Days
+                  type: string
+                - enum:
+                    - weeks
+                  title: Weeks
+                  type: string
+                - enum:
+                    - months
+                  title: Months
+                  type: string
+                - enum:
+                    - years
+                  title: Years
+                  type: string
+              description: The unit of the field value before formatting.
+              title: Input format
+            output_format:
+              anyOf:
+                - description: 'Displays the duration in the largest whole unit that applies, rounded. For example: "2 hours" or "a day".'
+                  enum:
+                    - humanize
+                  title: Human-readable (approximate)
+                  type: string
+                - description: 'Displays the duration in the largest whole unit that applies, with decimal precision. For example: "2.35 hours".'
+                  enum:
+                    - humanize_precise
+                  title: Human-readable (precise)
+                  type: string
+                - enum:
+                    - as_milliseconds
+                  title: Milliseconds
+                  type: string
+                - enum:
+                    - as_seconds
+                  title: Seconds
+                  type: string
+                - enum:
+                    - as_minutes
+                  title: Minutes
+                  type: string
+                - enum:
+                    - as_hours
+                  title: Hours
+                  type: string
+                - enum:
+                    - as_days
+                  title: Days
+                  type: string
+                - enum:
+                    - as_weeks
+                  title: Weeks
+                  type: string
+                - enum:
+                    - as_months
+                  title: Months
+                  type: string
+                - enum:
+                    - as_years
+                  title: Years
+                  type: string
+              description: The unit to convert the field value into for display.
+              title: Output format
+            output_precision:
+              default: 2
+              description: The number of decimal places to display in the duration value.
+              title: Output precision
+              type: number
+            show_suffix:
+              description: When true, the formatted duration includes a suffix (such as "seconds", "milliseconds", or "years"). When false or not provided, no suffix is shown.
+              title: Show suffix
+              type: boolean
+            use_short_suffix:
+              default: false
+              description: When true, the formatted duration uses short suffixes (such as "s", "ms", or "h"). When false or not provided, full suffixes are used.
+              title: Use short suffix
+              type: boolean
+          required:
+            - input_format
+            - output_format
+        type:
+          enum:
+            - duration
+          type: string
+      required:
+        - type
+        - params
+      title: Duration field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-geo_point:
+      additionalProperties: false
+      description: Formats a field into a geo point value.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            transform:
+              anyOf:
+                - description: Transforms the geo point into a string in the format "latitude,longitude". For example "40.7128,-74.0060".
+                  enum:
+                    - lat_lon_string
+                  title: Lat lon string
+                  type: string
+                - description: Transforms the geo point into a Well-Known Text (WKT) string. For example "POINT (123.456 78.901)".
+                  enum:
+                    - wkt
+                  title: WKT
+                  type: string
+                - description: Transforms the geo point into a string in the format "latitude,longitude (degrees, minutes, seconds)". For example "40°42′50.2″N 73°59′45.6″W".
+                  enum:
+                    - dms
+                  title: DMS
+                  type: string
+                - description: Transforms the geo point into a string in the format "latitude,longitude (Military Grid Reference System)". For example "18SUJ1234567890".
+                  enum:
+                    - mgrs
+                  title: MGRS
+                  type: string
+                - description: 'Transforms the geo point to all the previous formats. For example: "Lat Long: 40.7128,-74.0060, WKT: POINT (123.456 78.901), DMS: 40°42′50.2″N 73°59′45.6″W, MGRS: 18SUJ1234567890".'
+                  enum:
+                    - multi
+                  title: Multi
+                  type: string
+              description: The transform to apply to the geo point value.
+              title: Transform
+          required:
+            - transform
+        type:
+          enum:
+            - geo_point
+          type: string
+      required:
+        - type
+      title: Geo point field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-histogram:
+      additionalProperties: false
+      description: Formats a histogram field into a numeric value following the defined pattern. The default pattern is defined by format:bytes:defaultPattern, format:percent:defaultPattern or format:number:defaultPattern advanced settings depending on the selected format.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            format:
+              anyOf:
+                - enum:
+                    - bytes
+                  type: string
+                - enum:
+                    - percent
+                  type: string
+                - enum:
+                    - number
+                  type: string
+            pattern:
+              description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
+              title: Numeral pattern
+              type: string
+          required:
+            - format
+        type:
+          enum:
+            - histogram
+          type: string
+      required:
+        - type
+        - params
+      title: Histogram field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-ip:
+      additionalProperties: false
+      description: Formats a field into an IP address.
+      properties:
+        type:
+          enum:
+            - ip
+          type: string
+      required:
+        - type
+      title: IP field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-number:
+      additionalProperties: false
+      description: Formats a field into a numeric value following the defined pattern. The default pattern is defined by format:number:defaultPattern advanced setting.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            pattern:
+              description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
+              title: Numeral pattern
+              type: string
+        type:
+          enum:
+            - number
+          type: string
+      required:
+        - type
+      title: Number field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-percent:
+      additionalProperties: false
+      description: Formats a field into a percentage value following the defined pattern. The default pattern is defined by format:percent:defaultPattern advanced setting.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            pattern:
+              description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
+              title: Numeral pattern
+              type: string
+        type:
+          enum:
+            - percent
+          type: string
+      required:
+        - type
+      title: Percent field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-relative_date:
+      additionalProperties: false
+      description: 'Formats a field into a relative date value. For example: "1 day ago".'
+      properties:
+        type:
+          enum:
+            - relative_date
+          type: string
+      required:
+        - type
+      title: Relative date field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-static_lookup:
+      additionalProperties: false
+      description: Formats a field into a static value based on the lookup entries or the unknown key value.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            lookup_entries:
+              description: The lookup entries to use for the static lookup. The key refers to the field value, and the value refers to the new value to display.
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+                required:
+                  - key
+                  - value
+              title: Lookup entries
+              type: array
+            unknown_key_value:
+              description: The value to display for unknown key values. If not provided, the field value will be displayed.
+              title: Unknown key value
+              type: string
+          required:
+            - lookup_entries
+        type:
+          enum:
+            - static_lookup
+          type: string
+      required:
+        - type
+        - params
+      title: Static lookup field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-string:
+      additionalProperties: false
+      description: Formats a field into a string value.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            transform:
+              anyOf:
+                - description: 'Converts the field value to lowercase. For example: "Some Text" -> "some text".'
+                  enum:
+                    - lower
+                  title: Lower case
+                  type: string
+                - description: 'Converts the field value to uppercase. For example: "Some Text" -> "SOME TEXT".'
+                  enum:
+                    - upper
+                  title: Upper case
+                  type: string
+                - description: 'Converts the field value to title case. For example: "some text" -> "Some Text".'
+                  enum:
+                    - title
+                  title: Title
+                  type: string
+                - description: 'Shortens each dot-separated segment of the field value to its first character, except for the last segment. For example: "dot.notated.string" -> "d.n.string".'
+                  enum:
+                    - short
+                  title: Short dots
+                  type: string
+                - description: 'Decodes the field value from base64. For example: "U29tZSBUZXh0" -> "Some Text".'
+                  enum:
+                    - base64
+                  title: Base64 decode
+                  type: string
+                - description: 'Decodes the field value from URL parameter. For example: "Some%20Text" -> "Some Text".'
+                  enum:
+                    - urlparam
+                  title: URL parameter decode
+                  type: string
+        type:
+          enum:
+            - string
+          type: string
+      required:
+        - type
+      title: String field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-truncate:
+      additionalProperties: false
+      description: Truncates the field value to the specified length. If the field value is longer than the specified length, it will be truncated and the remaining text will be replaced with "...".
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            field_length:
+              type: number
+        type:
+          enum:
+            - truncate
+          type: string
+      required:
+        - type
+      title: Truncate field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-url:
+      additionalProperties: false
+      description: Formats a field into a link, image or audio.
+      properties:
+        params:
+          discriminator:
+            propertyName: type
+          oneOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                label_template:
+                  description: 'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".'
+                  title: Label template
+                  type: string
+                open_link_in_current_tab:
+                  description: When true, the URL opens in the current tab. When false or not provided, the URL opens in a new tab.
+                  title: Open link in current tab
+                  type: boolean
+                type:
+                  description: Displays the field value as a hyperlink.
+                  enum:
+                    - a
+                  title: Link
+                  type: string
+                url_template:
+                  description: 'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:''{{risonValue}}''). For example: "https://example.com/{{value}}".'
+                  title: URL template
+                  type: string
+              required:
+                - type
+            - additionalProperties: false
+              type: object
+              properties:
+                height:
+                  description: The height of the image. If not provided, the image will be displayed at the original height.
+                  title: Height
+                  type: number
+                label_template:
+                  description: 'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".'
+                  title: Label template
+                  type: string
+                type:
+                  description: Displays the field value as an image.
+                  enum:
+                    - img
+                  title: Image
+                  type: string
+                url_template:
+                  description: 'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:''{{risonValue}}''). For example: "https://example.com/{{value}}".'
+                  title: URL template
+                  type: string
+                width:
+                  description: The width of the image. If not provided, the image will be displayed at the original width.
+                  title: Width
+                  type: number
+              required:
+                - type
+            - additionalProperties: false
+              type: object
+              properties:
+                label_template:
+                  description: 'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".'
+                  title: Label template
+                  type: string
+                type:
+                  description: Displays the field value as an audio player.
+                  enum:
+                    - audio
+                  title: Audio
+                  type: string
+                url_template:
+                  description: 'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:''{{risonValue}}''). For example: "https://example.com/{{value}}".'
+                  title: URL template
+                  type: string
+              required:
+                - type
+        type:
+          enum:
+            - url
+          type: string
+      required:
+        - type
+        - params
+      title: URL field format
       type: object
     Kibana_HTTP_APIs_kbn-field-settings-entry:
       anyOf:

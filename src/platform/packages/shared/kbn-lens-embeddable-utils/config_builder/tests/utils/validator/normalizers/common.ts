@@ -47,7 +47,10 @@ import { getValues, type NormalizerConfig } from './normalize';
 import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
 import { stripUndefined } from '../../../../transforms/charts/utils';
 import { generateAdHocDataViewId, getAdHocDataViewSpec } from '../../../../transforms/utils';
-import { toApiFieldSettings } from '../../../../transforms/columns/field_settings';
+import {
+  toApiFieldSettings,
+  fromApiFieldSettings,
+} from '../../../../transforms/columns/field_settings';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -327,6 +330,10 @@ function normalizeAdHocDataViewSpec(dv: DataViewSpec) {
   if (Object.keys(dv.fieldAttrs ?? {}).length === 0) {
     delete dv.fieldAttrs;
   }
+
+  // Roundtrip the data view field formats so they are normalized to the typed formats
+  const { fieldFormats: normalizedFieldFormats } = fromApiFieldSettings(toApiFieldSettings(dv));
+  dv.fieldFormats = normalizedFieldFormats;
   if (Object.keys(dv.fieldFormats ?? {}).length === 0) {
     delete dv.fieldFormats;
   }

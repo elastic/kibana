@@ -8,22 +8,11 @@
  */
 
 import { z } from '@kbn/zod';
+import { formatSchema } from './formats/format_schema';
 
 export const fieldSettingsBaseSchema = z
   .object({
-    format: z
-      .object({
-        type: z.string(),
-        params: z.any().optional(),
-      })
-      .strict()
-      .optional()
-      .meta({
-        id: 'kbn-field-format',
-        title: 'Format',
-        description:
-          'Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.',
-      }),
+    format: formatSchema.optional(),
     custom_label: z.string().min(1).optional().meta({
       id: 'kbn-field-custom-label',
       title: 'Custom label',

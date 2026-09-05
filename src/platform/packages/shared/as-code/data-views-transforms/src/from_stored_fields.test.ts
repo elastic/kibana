@@ -13,7 +13,7 @@ import type {
   AsCodeRuntimeField,
 } from '@kbn/as-code-data-views-schema';
 import { fromStoredFields } from './from_stored_fields';
-import { isCompositeRuntimeField, isRuntimeField } from './to_stored_fields';
+import { isCompositeRuntimeField, isRuntimeField, toStoredFieldFormats } from './to_stored_fields';
 
 function assertPrimitiveRuntimeEntry(
   entry: AsCodeFieldSettings | undefined
@@ -110,27 +110,6 @@ describe('fromStoredFields.field_settings (runtime inline)', () => {
         const myField = fs?.my_field;
         assertPrimitiveRuntimeEntry(myField);
         expect(myField.format).toBeUndefined();
-      });
-
-      it('passes format.params through as-is', () => {
-        const params = { pattern: 'YYYY', timezone: 'UTC' };
-        const fs = fromStoredFields(
-          { my_field: { type: 'date' } },
-          { my_field: { id: 'date', params } }
-        );
-        const myField = fs?.my_field;
-        assertPrimitiveRuntimeEntry(myField);
-        expect(myField.format?.params).toBe(params);
-      });
-
-      it('passes undefined params through when params is not set', () => {
-        const fs = fromStoredFields(
-          { my_field: { type: 'keyword' } },
-          { my_field: { id: 'string' } }
-        );
-        const myField = fs?.my_field;
-        assertPrimitiveRuntimeEntry(myField);
-        expect(myField.format).toEqual({ type: 'string', params: undefined });
       });
     });
 
@@ -364,7 +343,7 @@ describe('fromStoredFields.field_settings (runtime inline)', () => {
       assertPrimitiveRuntimeEntry(fieldB);
       expect(fieldA.script).toBe('emit("a")');
       expect(fieldA.format).toBeUndefined();
-      expect(fieldB.format).toEqual({ type: 'number', params: undefined });
+      expect(fieldB.format).toEqual({ type: 'number', params: {} });
     });
   });
 });
@@ -380,7 +359,7 @@ describe('fromStoredFields.field_settings (indexed)', () => {
     expect(result).toEqual({
       rt: { type: 'keyword' },
       mapped: {
-        format: { type: 'bytes', params: undefined },
+        format: { type: 'bytes', params: {} },
         custom_label: 'Mapped',
       },
     });
@@ -399,7 +378,7 @@ describe('fromStoredFields.field_settings (indexed)', () => {
     expect(result).toEqual({
       rt: {
         type: 'keyword',
-        format: { type: 'string', params: undefined },
+        format: { type: 'string', params: {} },
         custom_label: 'runtime',
       },
       parent: {
@@ -407,13 +386,57 @@ describe('fromStoredFields.field_settings (indexed)', () => {
         fields: {
           child: {
             type: 'keyword',
-            format: { type: 'number', params: undefined },
+            format: { type: 'number', params: {} },
             custom_label: 'sub',
           },
         },
       },
       mapped: {
-        format: { type: 'bytes', params: undefined },
+        format: { type: 'bytes', params: {} },
+      },
+    });
+  });
+
+  it('round-trips url link params with open_link_in_current_tab', () => {
+    const asCodeFieldSettings = {
+      my_field: {
+        format: {
+          type: 'url',
+          params: {
+            type: 'a',
+            url_template: 'https://example.com/{{value}}',
+            label_template: 'View {{value}}',
+            open_link_in_current_tab: true,
+          },
+        },
+      },
+    };
+
+    const storedFieldFormats = toStoredFieldFormats(asCodeFieldSettings);
+    expect(storedFieldFormats).toEqual({
+      my_field: {
+        id: 'url',
+        params: {
+          type: 'a',
+          urlTemplate: 'https://example.com/{{value}}',
+          labelTemplate: 'View {{value}}',
+          openLinkInCurrentTab: true,
+        },
+      },
+    });
+
+    const roundTrippedFieldSettings = fromStoredFields({}, storedFieldFormats);
+    expect(roundTrippedFieldSettings).toEqual({
+      my_field: {
+        format: {
+          type: 'url',
+          params: {
+            type: 'a',
+            url_template: 'https://example.com/{{value}}',
+            label_template: 'View {{value}}',
+            open_link_in_current_tab: true,
+          },
+        },
       },
     });
   });

@@ -107,7 +107,7 @@ describe('fromStoredDataView', () => {
       time_field: '@timestamp',
       field_settings: {
         bytes_field: {
-          format: { type: 'bytes', params: undefined },
+          format: { type: 'bytes', params: {} },
         },
         host_name: {
           custom_label: 'Host',
@@ -155,11 +155,11 @@ describe('fromStoredDataView', () => {
       field_settings: {
         rt: {
           type: 'keyword',
-          format: { type: 'string', params: undefined },
+          format: { type: 'string', params: {} },
           custom_label: 'Runtime',
         },
         mapped: {
-          format: { type: 'bytes', params: undefined },
+          format: { type: 'bytes', params: {} },
           custom_label: 'Mapped',
         },
       },
@@ -186,13 +186,13 @@ describe('fromStoredDataView', () => {
           fields: {
             child: {
               type: 'keyword',
-              format: { type: 'string', params: undefined },
+              format: { type: 'string', params: {} },
               custom_label: 'Runtime subfield',
             },
           },
         },
         mapped: {
-          format: { type: 'bytes', params: undefined },
+          format: { type: 'bytes', params: {} },
         },
       },
     });
