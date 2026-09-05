@@ -12,6 +12,7 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiIcon,
+  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -27,7 +28,12 @@ import {
 } from '@kbn/user-profile-components';
 import { ConversationAccessModeSelect } from './conversation_access_mode_select';
 import { ConversationParticipantsList } from './conversation_participants_list';
-import { currentMembersLabel, searchUsersLabel } from './conversation_share_i18n';
+import {
+  agentAccessHelpAriaLabel,
+  agentAccessHelpLabel,
+  currentMembersLabel,
+  searchUsersLabel,
+} from './conversation_share_i18n';
 
 const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
 
@@ -99,12 +105,14 @@ interface ConversationShareEditableContentProps {
   access: ConversationShareAccessProps;
   members: ConversationShareMembersProps;
   userSearch: ConversationShareUserSearchProps;
+  agentName?: string;
 }
 
 export const ConversationShareEditableContent: React.FC<ConversationShareEditableContentProps> = ({
   access,
   members,
   userSearch,
+  agentName,
 }) => {
   const isPublic = access.mode === ConversationAccessControlMode.Public;
   const excludedIds = new Set([userSearch.ownerId, ...userSearch.memberIds].filter(Boolean));
@@ -145,7 +153,23 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
       {editableHeader}
 
       <EuiSpacer size="l" />
-      <EuiFormRow label={currentMembersLabel} fullWidth css={currentMembersLabelStyle}>
+      <EuiFormRow
+        label={
+          <>
+            {currentMembersLabel}{' '}
+            {agentName ? (
+              <EuiIconTip
+                type="question"
+                color="subdued"
+                aria-label={agentAccessHelpAriaLabel}
+                content={agentAccessHelpLabel(agentName)}
+              />
+            ) : null}
+          </>
+        }
+        fullWidth
+        css={currentMembersLabelStyle}
+      >
         <EuiComboBox<string>
           compressed
           fullWidth
