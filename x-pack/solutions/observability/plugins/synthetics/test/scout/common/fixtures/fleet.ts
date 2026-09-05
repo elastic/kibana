@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { Client } from '@elastic/elasticsearch';
+import { v4 as uuidV4 } from 'uuid';
+import { AGENTS_INDEX, type FleetServerAgent, type PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { tryForTime } from './retry';
@@ -269,4 +271,126 @@ export async function deleteAllSyntheticsPackagePolicies(
     }
   );
   expect(res).toHaveStatusCode(200);
+}
+
+// `.fleet-agents` is an ES *restricted* index: even the `elastic` superuser
+// is denied `indices:admin/auto_create`/write on it (verified directly
+// against a bare 9.6.0 cluster), and the `x-elastic-product-origin` header
+// that bypasses other Kibana/restricted-index checks does *not* apply here --
+// nor does an API key's `role_descriptors`, even granting `all`. The one
+// thing that does work is a **native-realm** role with an explicit, named
+// grant and `allow_restricted_indices: true`, used by a real user.
+//
+// Created once and never torn down within a run: deleting and immediately
+// recreating a same-named role/user across sequential specs in one worker
+// hit ES's authorization cache and produced spurious 403s on the *new* grant
+// (observed directly). The role/user live only on the ephemeral Scout test
+// cluster, which is destroyed at the end of the run, so leaving them in
+// place is harmless.
+const FLEET_AGENTS_WRITER_ROLE = 'scout_fleet_agents_writer';
+const FLEET_AGENTS_WRITER_USER = 'scout_fleet_agents_writer';
+const FLEET_AGENTS_WRITER_PASSWORD = 'ScoutFleetAgentsWriter!1';
+
+let fleetAgentWriterClient: Client | undefined;
+
+const getFleetAgentWriterClient = async (esClient: Client): Promise<Client> => {
+  if (fleetAgentWriterClient) {
+    return fleetAgentWriterClient;
+  }
+  await esClient.security.putRole({
+    name: FLEET_AGENTS_WRITER_ROLE,
+    // `deleteByQuery`'s bulk-delete sub-action authorizes against the
+    // *concrete* backing index (e.g. `.fleet-agents-7`), not the
+    // `.fleet-agents` alias `AGENTS_INDEX` names -- a literal, non-wildcard
+    // grant for the alias doesn't cover it (observed directly: index/update
+    // through the alias succeeded, deleteByQuery didn't). Widen to a
+    // wildcard so both the alias and its backing index match.
+    indices: [{ names: [`${AGENTS_INDEX}*`], privileges: ['all'], allow_restricted_indices: true }],
+  });
+  await esClient.security.putUser({
+    username: FLEET_AGENTS_WRITER_USER,
+    password: FLEET_AGENTS_WRITER_PASSWORD,
+    roles: [FLEET_AGENTS_WRITER_ROLE],
+  });
+  // `child({ auth })` silently keeps the parent's Authorization header when
+  // one is already present (`prepareHeaders` in `@elastic/transport` only
+  // fills in `headers.authorization` when it's unset) -- since the parent
+  // `esClient` already carries the `elastic` superuser's Basic auth header,
+  // passing `auth` here is a no-op. Set the header directly instead, which
+  // `child()` uses to fully replace (not merge into) the parent's headers.
+  const basicAuth = Buffer.from(
+    `${FLEET_AGENTS_WRITER_USER}:${FLEET_AGENTS_WRITER_PASSWORD}`
+  ).toString('base64');
+  fleetAgentWriterClient = esClient.child({
+    headers: { authorization: `Basic ${basicAuth}` },
+  });
+  return fleetAgentWriterClient;
+};
+
+/**
+ * Indexes a fake enrolled Fleet agent directly into `.fleet-agents`, mirroring
+ * the FTR `createFleetAgent` helper (`fleet_api_integration/apis/space_awareness/helpers.ts`)
+ * -- a real enrolled agent isn't needed to exercise placement/rebalance, only a
+ * document `agentService.listAgents` will return for the policy. `memoryMib`
+ * (converted to `local_metadata.host.memory` bytes, the field
+ * `get_agent_info.ts` reads) drives capacity-weighted placement.
+ */
+export async function indexFakeFleetAgent(
+  esClient: Client,
+  agentPolicyId: string,
+  opts: { memoryMib?: number; lastCheckin?: string; hostname?: string } = {}
+): Promise<string> {
+  const { memoryMib, lastCheckin, hostname } = opts;
+  const BYTES_PER_MIB = 1024 * 1024;
+  const writerClient = await getFleetAgentWriterClient(esClient);
+  const response = await writerClient.index<FleetServerAgent>({
+    index: AGENTS_INDEX,
+    refresh: 'wait_for',
+    document: {
+      active: true,
+      policy_id: agentPolicyId,
+      policy_revision_idx: 1,
+      last_checkin_status: 'online',
+      last_checkin: lastCheckin ?? new Date().toISOString(),
+      enrolled_at: new Date().toISOString(),
+      type: 'PERMANENT',
+      local_metadata: {
+        host: {
+          hostname: hostname ?? `fake-agent-${uuidV4()}`,
+          ...(memoryMib ? { memory: memoryMib * BYTES_PER_MIB } : {}),
+        },
+        elastic: { agent: { version: '9.6.0' } },
+      },
+    } as FleetServerAgent,
+  });
+  return response._id;
+}
+
+/** Rewrites a fake agent's `last_checkin` -- used to simulate it going stale/offline. */
+export async function setFleetAgentLastCheckin(
+  esClient: Client,
+  agentId: string,
+  lastCheckinIso: string
+): Promise<void> {
+  const writerClient = await getFleetAgentWriterClient(esClient);
+  await writerClient.update({
+    index: AGENTS_INDEX,
+    id: agentId,
+    refresh: 'wait_for',
+    doc: { last_checkin: lastCheckinIso },
+  });
+}
+
+/** Force-removes fake agent documents indexed by {@link indexFakeFleetAgent}. */
+export async function deleteFleetAgents(esClient: Client, agentIds: string[]): Promise<void> {
+  if (agentIds.length === 0) {
+    return;
+  }
+  const writerClient = await getFleetAgentWriterClient(esClient);
+  await writerClient.deleteByQuery({
+    index: AGENTS_INDEX,
+    query: { terms: { _id: agentIds } },
+    refresh: true,
+    ignore_unavailable: true,
+  });
 }
