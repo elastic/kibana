@@ -93,9 +93,6 @@ overrides:
   'chokidar': '3.5.3'
   'd3-scale>d3-color': 'npm:@elastic/kibana-d3-color@2.0.1'
   'esbuild': '0.27.2'
-  # eslint-plugin-import@2.28.0 needs eslint-module-utils@2.8.x; pnpm floats the
-  # ^2.8.0 range to 2.14.0, which crashes the import/namespace rule (matches yarn).
-  'eslint-module-utils': '2.8.0'
   'fast-xml-parser': '5.5.7'
   'flatted': '3.4.2'
   'globby>fast-glob': '3.3.3'
@@ -149,6 +146,9 @@ overrides:
   'concaveman': '1.2.0'
   'd3-format@3': '3.1.0'
   'dom-accessibility-api@^0.5.9': '0.5.13'
+  # eslint-plugin-import@2.28.0 needs eslint-module-utils@2.8.x; pnpm floats the
+  # ^2.8.0 range to 2.14.0, which crashes the import/namespace rule (matches yarn).
+  'eslint-module-utils': '2.8.0'
   'focus-lock': '0.11.6'
   'gaxios>node-fetch': '2.7.0'
   'glob-stream': '8.0.0'
