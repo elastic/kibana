@@ -48,7 +48,15 @@ export class InMemoryExecutionPersistence
     if (this.execution.id !== workflowExecutionId || this.execution.spaceId !== spaceId) {
       return null;
     }
-    return { ...this.execution };
+    try {
+      return structuredClone(this.execution);
+    } catch (err) {
+      throw new Error(
+        `Failed to clone workflow execution ${workflowExecutionId}: execution state contains a non-serializable value. Root cause: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
   }
 
   public async updateWorkflowExecution(
@@ -74,7 +82,16 @@ export class InMemoryExecutionPersistence
           `Step execution ${id} was read before its required fields were initialized`
         );
       }
-      const copy: Record<string, unknown> = { ...execution };
+      let copy: Record<string, unknown>;
+      try {
+        copy = structuredClone(execution) as Record<string, unknown>;
+      } catch (err) {
+        throw new Error(
+          `Failed to clone step execution ${id}: step execution state contains a non-serializable value. Root cause: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
       if (sourceIncludes?.length) {
         for (const key of Object.keys(copy)) {
           if (!sourceIncludes.includes(key as StepExecutionField)) {

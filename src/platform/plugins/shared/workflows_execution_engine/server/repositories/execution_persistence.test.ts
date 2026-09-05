@@ -60,6 +60,31 @@ describe('InMemoryExecutionPersistence', () => {
     ).resolves.toEqual(expect.objectContaining({ status: ExecutionStatus.PENDING }));
   });
 
+  it('deep-isolates nested fields returned from getWorkflowExecutionById', async () => {
+    const persistence = new InMemoryExecutionPersistence({
+      ...execution,
+      context: { key: 'original' },
+      scopeStack: [{ stepId: 'root', nestedScopes: [] }],
+    });
+    const result = await persistence.getWorkflowExecutionById(execution.id, execution.spaceId);
+    (result!.context as Record<string, unknown>).key = 'mutated';
+    result!.scopeStack.push({ stepId: 'injected', nestedScopes: [] });
+
+    const fresh = await persistence.getWorkflowExecutionById(execution.id, execution.spaceId);
+    expect(fresh!.context).toEqual({ key: 'original' });
+    expect(fresh!.scopeStack).toHaveLength(1);
+  });
+
+  it('throws a descriptive error when workflow execution state contains a non-cloneable value', async () => {
+    const persistence = new InMemoryExecutionPersistence({
+      ...execution,
+      context: { fn: () => {} } as any,
+    });
+    await expect(
+      persistence.getWorkflowExecutionById(execution.id, execution.spaceId)
+    ).rejects.toThrow(/Failed to clone workflow execution execution-1.*non-serializable/);
+  });
+
   it('does not overwrite identity fields via updateWorkflowExecution', async () => {
     const persistence = new InMemoryExecutionPersistence(execution);
     await persistence.updateWorkflowExecution({
@@ -89,6 +114,53 @@ describe('InMemoryExecutionPersistence', () => {
     await expect(
       second.getWorkflowExecutionById(secondExecution.id, secondExecution.spaceId)
     ).resolves.toEqual(expect.objectContaining({ status: ExecutionStatus.PENDING }));
+  });
+
+  it('deep-isolates nested fields returned from getStepExecutionsByIds', async () => {
+    const persistence = new InMemoryExecutionPersistence(execution);
+    await persistence.bulkUpsert([
+      {
+        id: 'step-deep',
+        spaceId: 'space-1',
+        stepId: 'step-deep',
+        scopeStack: [{ stepId: 'root', nestedScopes: [] }],
+        workflowRunId: execution.id,
+        workflowId: execution.workflowId,
+        status: ExecutionStatus.RUNNING,
+        startedAt: '2026-07-21T00:00:00.000Z',
+        topologicalIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+      },
+    ]);
+    const [result] = await persistence.getStepExecutionsByIds(['step-deep']);
+    result.scopeStack.push({ stepId: 'injected', nestedScopes: [] });
+
+    const [fresh] = await persistence.getStepExecutionsByIds(['step-deep']);
+    expect(fresh.scopeStack).toHaveLength(1);
+  });
+
+  it('throws a descriptive error when step execution state contains a non-cloneable value', async () => {
+    const persistence = new InMemoryExecutionPersistence(execution);
+    await persistence.bulkUpsert([
+      {
+        id: 'step-err',
+        spaceId: 'space-1',
+        stepId: 'step-err',
+        scopeStack: [],
+        workflowRunId: execution.id,
+        workflowId: execution.workflowId,
+
+        status: (() => {}) as any,
+        startedAt: '2026-07-21T00:00:00.000Z',
+        topologicalIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+      },
+    ]);
+    await expect(persistence.getStepExecutionsByIds(['step-err'])).rejects.toThrow(
+      /Failed to clone step execution step-err.*non-serializable/
+    );
   });
 
   it('returns a defensive copy from getStepExecutionsByIds', async () => {
