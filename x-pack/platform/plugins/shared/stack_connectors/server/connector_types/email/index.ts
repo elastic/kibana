@@ -28,6 +28,7 @@ import {
   ConfigSchema,
   SecretsSchema,
   ParamsSchema,
+  TEST_MESSAGE,
 } from '@kbn/connector-schemas/email';
 import {
   AlertingConnectorFeatureId,
@@ -354,6 +355,7 @@ async function executor(
     services,
     logger,
     connectorUsageCollector,
+    source,
   } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
   const awsSesConfig = configurationUtilities.getAwsSesConfig();
@@ -445,8 +447,21 @@ async function executor(
     transport.service = config.service;
   }
 
+  // use the test message for HTTP sourced, except when the service is JSON (for testing)
+  const isSourceHttp = source?.type === ActionExecutionSourceType.HTTP_REQUEST;
+  const isJSONService = config.service === JSON_TRANSPORT_SERVICE;
+  const useTestMessage = isSourceHttp && !isJSONService;
+
   let actualMessage: string | null | undefined = params.message;
   let actualHTMLMessage: string | null | undefined = params.messageHTML;
+
+  // use HTTP sourced, except when the service is JSON (for testing)
+  if (useTestMessage) {
+    actualMessage = TEST_MESSAGE;
+    if (actualHTMLMessage != null) {
+      actualHTMLMessage = TEST_MESSAGE;
+    }
+  }
 
   actualMessage = trimMessageIfRequired(
     actionId,
@@ -472,13 +487,15 @@ async function executor(
     actualMessage = `${actualMessage}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
   }
 
+  const baseSubject = useTestMessage ? TEST_MESSAGE : params.subject;
+
   // Trial deployments (ECH and Serverless) route through the shared Elastic SMTP relay
   // (the `elastic_cloud` service), so their subjects are prefixed to identify trial traffic.
   // `&&` short-circuits, so the trial lookup only runs for the `elastic_cloud` service.
   const subject =
     config.service === AdditionalEmailServices.ELASTIC_CLOUD && (await isElasticCloudTrial?.())
-      ? prefixTrialSubject(params.subject)
-      : params.subject;
+      ? prefixTrialSubject(baseSubject)
+      : baseSubject;
 
   const sendEmailOptions: SendEmailOptions = {
     connectorId: actionId,
