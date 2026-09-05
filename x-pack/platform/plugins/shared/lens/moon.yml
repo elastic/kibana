@@ -150,6 +150,7 @@ dependsOn:
   - '@kbn/field-formats-common'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-telemetry'
+  - '@kbn/as-code-shared-transforms'
   - '@kbn/core-http-browser'
   - '@kbn/use-observable'
   - '@kbn/zod'

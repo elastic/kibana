@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
+import { lensResponseItemSchema, lensApiConfigLibItemSchemaNoESQL } from './common';
 
-import { lensResponseItemSchema } from './common';
-
-export const lensCreateRequestBodySchema = lensApiConfigSchemaNoESQL;
+export const lensCreateRequestBodySchema = lensApiConfigLibItemSchemaNoESQL;
 
 export const lensCreateResponseBodySchema = lensResponseItemSchema;
