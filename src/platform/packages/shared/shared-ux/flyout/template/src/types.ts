@@ -10,6 +10,12 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 import type { EuiBadgeProps, EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
+import type {
+  FlyoutSectionAction,
+  FlyoutSectionProps,
+  FlyoutSubsectionProps,
+  FlyoutAccordionProps,
+} from '@kbn/flyout-sections';
 
 /** Props for a single tab entry in the root `tabs` array. */
 export interface FlyoutTabProps {
@@ -98,10 +104,25 @@ export interface FlyoutHeaderInfoBlockProps {
   'data-test-subj'?: string;
 }
 
+/** Action link rendered right-aligned on a section or accordion title row. */
+export type FlyoutBodySectionAction = FlyoutSectionAction;
+
+/** Props for the declarative `FlyoutTemplate.Body.Section` part. `borderOnChildren` is derived from the children, not authored. */
+export type FlyoutBodySectionProps = Omit<FlyoutSectionProps, 'borderOnChildren'>;
+
+/** Props for the declarative body subsection part. `hasBorder` is inherited from the parent, not authored. */
+export type FlyoutBodySubsectionProps = Omit<FlyoutSubsectionProps, 'hasBorder'>;
+
+/** Props for the declarative `FlyoutTemplate.Body.Accordion` part. */
+export type FlyoutBodyAccordionProps = Omit<FlyoutAccordionProps, 'hasBorder'>;
+
 /** Props for the declarative `FlyoutTemplate.Body` zone. */
 export interface FlyoutBodyProps {
   'data-test-subj'?: string;
-  /** `Body.TabPanel` parts, and/or arbitrary content rendered as-is in source order. */
+  /**
+   * `Body.Section`, `Body.Accordion`, or `Body.TabPanel` parts, and/or arbitrary
+   * content (callouts, search bars, data grids) rendered as-is in source order.
+   */
   children?: ReactNode;
 }
 
