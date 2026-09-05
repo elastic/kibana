@@ -2957,6 +2957,9 @@
       // resolution can't find the types; redirect to the real .d.ts. Drop
       // these once each package ships proper exports.types.
       "piscina": ["./node_modules/piscina/dist/src/index.d.ts"],
+      "mongodb-connection-string-url": [
+        "./node_modules/mongodb-connection-string-url/lib/index.d.ts"
+      ],
       "canvg": ["./typings/canvg"],
       "@typescript-eslint/parser": ["./typings/@typescript-eslint/parser"],
       "@a2a-js/sdk/server": ["./typings/@a2a-js-sdk/server"],

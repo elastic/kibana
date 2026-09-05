@@ -2219,6 +2219,15 @@
       "enabled": true
     },
     {
+      "groupName": "mongodb",
+      "matchDepNames": ["mongodb", "mongodb-connection-string-url"],
+      "reviewers": ["team:response-ops", "team:workchat-eng"],
+      "addLabels": ["Team:ResponseOps"],
+      "matchBaseBranches": ["main"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "antlr4",
       "matchDepNames": ["antlr4"],
       "reviewers": ["team:appex-sharedux", "team:kibana-esql"],

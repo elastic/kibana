@@ -67,10 +67,12 @@ describe('generateExecutorFunction', () => {
     mockNetwork = {
       ensureUriAllowed: jest.fn(),
       ensureHostnameAllowed: jest.fn(),
+      resolveSrvHosts: jest.fn(),
       getSslSettings: jest.fn(),
       getProxySettings: jest.fn(),
       getCustomHostSettings: jest.fn(),
       getResponseSettings: jest.fn(),
+      getTlsOptions: jest.fn(),
     };
   });
 

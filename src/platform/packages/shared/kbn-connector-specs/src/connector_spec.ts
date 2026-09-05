@@ -289,8 +289,8 @@ export interface ActionContext {
    * and only the client types a handler actually asks for are ever built.
    *
    * Lifetime is governed by the actions plugin's client lease pool, not by the action
-   * stack frame. No client types are registered yet, so `ClientTypeId` currently
-   * resolves to `never`.
+   * stack frame. `ClientTypeId` resolves to a union of every id registered in
+   * `ClientRegistry` (see lib/clients/index.ts) — `never` only if none are registered.
    */
   getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
