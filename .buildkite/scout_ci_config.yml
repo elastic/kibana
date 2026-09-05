@@ -30,6 +30,7 @@ plugins:
     - dataset_quality
     - dev_tools
     - discover
+    - discoverCustomizationExamples
     - discover_enhanced
     - discoveries
     - embeddable_alerts_table
@@ -124,6 +125,7 @@ packages:
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
   - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
+  - x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel.playwright.config.ts
   - x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/playwright.config.ts
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts

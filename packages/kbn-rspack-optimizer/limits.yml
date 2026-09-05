@@ -127,6 +127,7 @@ pageLoadAssetSize:
   maps: 1201
   mapsEms: 3256
   metricsDataAccess: 1947
+  mitreAttack: 2022
   ml: 950
   mockIdpPlugin: 3990
   monitoring: 22416
@@ -184,7 +185,7 @@ pageLoadAssetSize:
   serverlessObservability: 14136
   serverlessSearch: 18103
   serverlessVectordb: 9436
-  serverlessWorkplaceAI: 3338
+  serverlessWorkplaceAI: 3723
   sessionView: 647
   share: 379
   shared-core: 311749

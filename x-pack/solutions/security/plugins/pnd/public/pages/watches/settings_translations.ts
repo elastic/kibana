@@ -41,7 +41,7 @@ export const AUTONOMY_SECTION_TITLE = i18n.translate(
 
 export const AUTONOMY_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.autonomy.sectionSubtitle',
-  { defaultMessage: 'applies to this watch only' }
+  { defaultMessage: 'applies to this worker only' }
 );
 
 export const TRIGGERS_SECTION_TITLE = i18n.translate(
@@ -70,7 +70,17 @@ export const WORKERS_SECTION_TITLE = i18n.translate(
 
 export const WORKERS_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.workers.sectionSubtitle',
-  { defaultMessage: 'Workers attached to this Watch' }
+  { defaultMessage: 'Workers tagged as this Watch' }
+);
+
+export const WORKER_SECTION_SUBTITLE = i18n.translate(
+  'xpack.pnd.watches.settings.worker.sectionSubtitle',
+  { defaultMessage: 'applies to this worker only' }
+);
+
+export const WORKER_SETTINGS_UNAVAILABLE = i18n.translate(
+  'xpack.pnd.watches.settings.worker.unavailable',
+  { defaultMessage: 'Settings could not be read; reload and try again' }
 );
 
 export const SKILLS_SECTION_TITLE = i18n.translate(
@@ -80,7 +90,7 @@ export const SKILLS_SECTION_TITLE = i18n.translate(
 
 export const SKILLS_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.skills.sectionSubtitle',
-  { defaultMessage: "what this Watch's Workers can use" }
+  { defaultMessage: 'what this Worker can use' }
 );
 
 export const SKILLS_VIEW_ALL = i18n.translate('xpack.pnd.watches.settings.skills.viewAll', {
@@ -125,7 +135,7 @@ export const AUTONOMY_LEVEL_NAMES: Record<string, string> = {
 export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   manual: i18n.translate('xpack.pnd.watches.settings.autonomy.manual.description', {
     defaultMessage:
-      'Nothing runs on its own. The Watch drafts proposals and every one of them waits for your review.',
+      'Nothing runs on its own. This Worker drafts proposals and every one of them waits for your review.',
   }),
   assisted: i18n.translate('xpack.pnd.watches.settings.autonomy.assisted.description', {
     defaultMessage:
@@ -133,7 +143,7 @@ export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   }),
   supervised: i18n.translate('xpack.pnd.watches.settings.autonomy.supervised.description', {
     defaultMessage:
-      'The Watch acts within its allow-list and tells you afterwards. Consequential actions still gate.',
+      'This Worker acts within its allow-list and tells you afterwards. Consequential actions still gate.',
   }),
 };
 
@@ -544,25 +554,25 @@ export const RUN_OUTCOME_LABELS: Record<string, string> = {
 const WATCH_INTROS: Record<string, string> = {
   [SYSTEM_SECURITY_WATCH_FLOOR_ID]: i18n.translate('xpack.pnd.watches.settings.intro.floor', {
     defaultMessage:
-      'Coordinates Workers that reduce alert volume and route what matters. One Orchestrator, one or more Workers. Everything below configures this one Watch — Agents are managed in Workflows & Agent Builder.',
+      'Groups the Workers that reduce alert volume and route what still needs a person. Settings below belong to each Worker, not to this Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_OFFICER_ID]: i18n.translate('xpack.pnd.watches.settings.intro.officer', {
     defaultMessage:
-      'Takes what the Floor hands over and decides who needs to know. Assembles cases, escalates criticals, and stages response proposals for approval. Everything below configures this one Watch.',
+      'Watch grouping for investigation hand-off. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_DARK_ID]: i18n.translate('xpack.pnd.watches.settings.intro.dark', {
     defaultMessage:
-      'Hunts continuously for threats and coverage gaps nobody has reported yet, and sweeps overnight. Findings arrive as reviewable evidence rather than alerts. Everything below configures this one Watch.',
+      'Groups the Continuous Threat Hunt Worker. Findings arrive as reviewable evidence. Settings below belong to that Worker, not to this Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_DEEP_ID]: i18n.translate('xpack.pnd.watches.settings.intro.deep', {
     defaultMessage:
-      'Specialist depth on demand — forensics, timelines, and hunts that need more than triage. Draws draft-only conclusions for a human to confirm. Everything below configures this one Watch.',
+      'Watch grouping for specialist analysis. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_DETECTION_ID]: i18n.translate(
     'xpack.pnd.watches.settings.intro.detection',
     {
       defaultMessage:
-        'Turns false-positive noise and coverage gaps into reviewable rule proposals — tuning, new rules, and prebuilt onboarding. Nothing ships without a detection engineer. Everything below configures this one Watch.',
+        'Groups the Rule Tuning and Rule Creation Workers. Settings below belong to each Worker, not to this Watch.',
     }
   ),
 };
