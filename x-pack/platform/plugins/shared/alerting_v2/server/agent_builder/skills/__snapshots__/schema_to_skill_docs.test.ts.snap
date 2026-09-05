@@ -363,6 +363,15 @@ Use \`set_query\` to define the ES|QL condition that should fire the rule. Optio
 | \`recovery_strategy\` | \\"no_breach\\" \\\\| \\"query\\" \\\\| \\"none\\" | optional |  |
 | \`no_data_strategy\` | \\"last_known_status\\" \\\\| \\"emit\\" \\\\| \\"recover\\" \\\\| \\"none\\" | optional |  |
 
+#### \`operation: \\"set_time_field\\"\`
+
+Use \`set_time_field\` to explicitly set the date field for the lookback window. Use after \`set_query\` fails to auto-detect a time field, or when the index has multiple date fields and the wrong one was chosen.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_time_field\\" | required |  |
+| \`time_field\` | string | required | The date field used for the lookback window range filter. Auto-detected from the index during \`set_query\` when not set; use this operation to override when auto-detection fails or picks the wrong field. (min length: 1, max length: 128) |
+
 #### \`operation: \\"set_grouping\\"\`
 
 Use \`set_grouping\` to split alerts by entity (host, service, etc.) so each group has its own episode instead of one combined alert.

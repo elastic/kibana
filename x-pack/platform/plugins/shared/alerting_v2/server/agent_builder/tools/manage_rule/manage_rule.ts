@@ -73,13 +73,13 @@ ${generateRuleOperationsUsageList()}`,
         currentAttachment?.versions.at(-1)?.data ?? {};
       ruleId = currentAttachment?.origin;
 
-      const { data: updatedData, queryColumns } = await executeRuleOperations(
-        currentData,
-        operations,
-        esClient,
-        savedObjectsClient,
-        { isNew }
-      );
+      const {
+        data: updatedData,
+        queryColumns,
+        warnings,
+      } = await executeRuleOperations(currentData, operations, esClient, savedObjectsClient, {
+        isNew,
+      });
 
       // Pre-assign a stable rule ID so that action policies can reference it
       // via `rule.id` before the rule is persisted. The UI will use this ID
@@ -142,6 +142,7 @@ ${generateRuleOperationsUsageList()}`,
                 ...(runbookAttached ? { runbookAttached: true } : {}),
               },
               ...(queryColumns ? { queryColumns } : {}),
+              ...(warnings && warnings.length > 0 ? { warnings } : {}),
             },
           },
         ],
