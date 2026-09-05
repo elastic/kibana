@@ -6,8 +6,9 @@
  */
 
 import { v5 } from 'uuid';
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { InferenceEndpointDefinition } from './inference_endpoint_definition';
+import type { StackConnectorDefinition } from './eval_connector';
 import { createConnectorFixture } from './create_connector_fixture';
 
 describe('createConnectorFixture', () => {
@@ -34,7 +35,8 @@ describe('createConnectorFixture', () => {
 
   describe('delegation to createStackConnectorFixture', () => {
     it('delegates non-.inference connectors to the stack connector path', async () => {
-      const emailConnector: AvailableConnectorWithId = {
+      const emailConnector: StackConnectorDefinition = {
+        type: 'stack_connector',
         id: 'my-email',
         name: 'Email',
         actionTypeId: '.email',
@@ -58,20 +60,21 @@ describe('createConnectorFixture', () => {
       expect(mockUse).toHaveBeenCalledWith({ ...emailConnector, id: uuid });
     });
 
-    it('delegates .inference connectors without inferenceId to the stack connector path', async () => {
-      const inferenceWithoutEndpoint: AvailableConnectorWithId = {
+    it('delegates AvailableConnectorWithId (.inference) without inferenceId to stack path', async () => {
+      const stackInference: StackConnectorDefinition = {
+        type: 'stack_connector',
         id: 'local-inference',
         name: 'Local Inference',
         actionTypeId: '.inference',
         config: { provider: 'openai', taskType: 'chat_completion' },
         secrets: {},
       };
-      const uuid = v5(inferenceWithoutEndpoint.id, v5.DNS);
+      const uuid = v5(stackInference.id, v5.DNS);
 
       mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockResolvedValueOnce(undefined);
 
       await createConnectorFixture({
-        predefinedConnector: inferenceWithoutEndpoint,
+        predefinedConnector: stackInference,
         fetch: mockFetch,
         log: mockLog,
         use: mockUse,
@@ -81,34 +84,32 @@ describe('createConnectorFixture', () => {
         path: `/api/actions/connector/${uuid}`,
         method: 'POST',
         body: JSON.stringify({
-          config: inferenceWithoutEndpoint.config,
-          connector_type_id: inferenceWithoutEndpoint.actionTypeId,
-          name: inferenceWithoutEndpoint.name,
-          secrets: inferenceWithoutEndpoint.secrets,
+          config: stackInference.config,
+          connector_type_id: stackInference.actionTypeId,
+          name: stackInference.name,
+          secrets: stackInference.secrets,
         }),
       });
-      expect(mockUse).toHaveBeenCalledWith({ ...inferenceWithoutEndpoint, id: uuid });
+      expect(mockUse).toHaveBeenCalledWith({ ...stackInference, id: uuid });
     });
   });
 
-  describe('with an EIS connector (.inference with config.inferenceId)', () => {
-    const eisConnector: AvailableConnectorWithId = {
+  describe('with an EIS InferenceEndpointDefinition', () => {
+    const eisEndpoint: InferenceEndpointDefinition = {
+      type: 'inference_endpoint',
       id: 'eis-gpt-4o',
       name: 'EIS GPT-4o',
-      actionTypeId: '.inference',
-      config: {
-        provider: 'elastic',
-        inferenceId: '.openai-gpt-4o-chat_completion',
-        taskType: 'chat_completion',
-      },
-      secrets: {},
+      inferenceId: '.openai-gpt-4o-chat_completion',
+      provider: 'elastic',
+      taskType: 'chat_completion',
+      providerConfig: { model_id: 'openai-gpt-4o' },
     };
 
     it('binds to the inference endpoint without creating a stack connector', async () => {
       mockFetch.mockResolvedValueOnce({ isEndpointExists: true });
 
       await createConnectorFixture({
-        predefinedConnector: eisConnector,
+        predefinedConnector: eisEndpoint,
         fetch: mockFetch,
         log: mockLog,
         use: mockUse,
@@ -129,24 +130,12 @@ describe('createConnectorFixture', () => {
       );
       expect(actionsCalls).toHaveLength(0);
 
+      // Bound as the endpoint definition itself, with `id` resolved to the inference ID —
+      // no synthetic stack connector is fabricated.
       expect(mockUse).toHaveBeenCalledWith({
-        ...eisConnector,
+        ...eisEndpoint,
         id: '.openai-gpt-4o-chat_completion',
       });
-    });
-
-    it('URI-encodes the inference endpoint id in the exists path', async () => {
-      mockFetch.mockResolvedValueOnce({ isEndpointExists: true });
-
-      await createConnectorFixture({
-        predefinedConnector: eisConnector,
-        fetch: mockFetch,
-        log: mockLog,
-        use: mockUse,
-      });
-
-      const [{ path }] = mockFetch.mock.calls[0];
-      expect(path).toBe('/internal/_inference/_exists/.openai-gpt-4o-chat_completion');
     });
 
     it('throws a clear error when the endpoint does not exist, without falling back to Actions', async () => {
@@ -154,7 +143,7 @@ describe('createConnectorFixture', () => {
 
       await expect(
         createConnectorFixture({
-          predefinedConnector: eisConnector,
+          predefinedConnector: eisEndpoint,
           fetch: mockFetch,
           log: mockLog,
           use: mockUse,
@@ -170,68 +159,53 @@ describe('createConnectorFixture', () => {
       expect(mockUse).not.toHaveBeenCalled();
     });
 
-    it('throws a clear error when the exists check fails, without falling back to Actions', async () => {
-      const serverError = Object.assign(new Error('Internal Server Error'), { status: 500 });
-      mockFetch.mockRejectedValueOnce(serverError);
+    it('aborts immediately on 403 from the exists check (permanent auth error)', async () => {
+      const authError = Object.assign(new Error('Forbidden'), { status: 403 });
+      mockFetch.mockRejectedValueOnce(authError);
 
       await expect(
         createConnectorFixture({
-          predefinedConnector: eisConnector,
+          predefinedConnector: eisEndpoint,
           fetch: mockFetch,
           log: mockLog,
           use: mockUse,
         })
-      ).rejects.toThrow(/is not available.*Internal Server Error/s);
+      ).rejects.toThrow(/is not available/);
 
-      const actionsCalls = mockFetch.mock.calls.filter(([arg]: [{ path: string }]) =>
-        arg.path.startsWith('/api/actions')
-      );
-      expect(actionsCalls).toHaveLength(0);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockUse).not.toHaveBeenCalled();
     });
 
-    it('is bypassed by KBN_EVALS_SKIP_CONNECTOR_SETUP (yields the connector as-is)', async () => {
+    it('is bypassed by KBN_EVALS_SKIP_CONNECTOR_SETUP (yields an AvailableConnectorWithId)', async () => {
       process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
 
       await createConnectorFixture({
-        predefinedConnector: eisConnector,
+        predefinedConnector: eisEndpoint,
         fetch: mockFetch,
         log: mockLog,
         use: mockUse,
       });
 
       expect(mockFetch).not.toHaveBeenCalled();
-      expect(mockUse).toHaveBeenCalledWith(eisConnector);
+      expect(mockUse).toHaveBeenCalledWith({ ...eisEndpoint, id: eisEndpoint.inferenceId });
     });
   });
 
-  describe('with an endpoint-shaped .inference connector (OpenRouter from the CI generator)', () => {
-    const openRouterEndpointConnector: AvailableConnectorWithId = {
+  describe('with an OpenRouter InferenceEndpointDefinition', () => {
+    const openRouterEndpoint: InferenceEndpointDefinition = {
+      type: 'inference_endpoint',
       id: 'openrouter-anthropic-claude-sonnet-4-6',
       name: 'OpenRouter anthropic/claude-sonnet-4.6',
-      actionTypeId: '.inference',
-      config: {
-        provider: 'openai',
-        taskType: 'chat_completion',
-        inferenceId: 'openrouter-anthropic-claude-sonnet-4-6',
-        providerConfig: {
-          model_id: 'anthropic/claude-sonnet-4.6',
-          url: 'https://openrouter.ai/api/v1/chat/completions',
-        },
+      inferenceId: 'openrouter-anthropic-claude-sonnet-4-6',
+      provider: 'openai',
+      taskType: 'chat_completion',
+      providerConfig: {
+        model_id: 'anthropic/claude-sonnet-4.6',
+        url: 'https://openrouter.ai/api/v1/chat/completions',
       },
       secrets: {
         providerSecrets: { api_key: 'openrouter-key' },
       },
-    };
-
-    const expectedAddCall = {
-      path: '/internal/_inference/_add',
-      method: 'POST',
-      headers: { 'elastic-api-version': '1' },
-      body: JSON.stringify({
-        config: openRouterEndpointConnector.config,
-        secrets: openRouterEndpointConnector.secrets,
-      }),
     };
 
     const expectNoActionsCalls = () => {
@@ -245,7 +219,7 @@ describe('createConnectorFixture', () => {
       mockFetch.mockResolvedValueOnce({ isEndpointExists: true });
 
       await createConnectorFixture({
-        predefinedConnector: openRouterEndpointConnector,
+        predefinedConnector: openRouterEndpoint,
         fetch: mockFetch,
         log: mockLog,
         use: mockUse,
@@ -253,15 +227,15 @@ describe('createConnectorFixture', () => {
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenCalledWith({
-        path: `/internal/_inference/_exists/${encodeURIComponent(openRouterEndpointConnector.id)}`,
+        path: `/internal/_inference/_exists/${encodeURIComponent(openRouterEndpoint.inferenceId)}`,
         method: 'GET',
         headers: { 'elastic-api-version': '1' },
       });
 
       expectNoActionsCalls();
       expect(mockUse).toHaveBeenCalledWith({
-        ...openRouterEndpointConnector,
-        id: openRouterEndpointConnector.id,
+        ...openRouterEndpoint,
+        id: openRouterEndpoint.inferenceId,
       });
     });
 
@@ -269,19 +243,67 @@ describe('createConnectorFixture', () => {
       mockFetch.mockResolvedValueOnce({ isEndpointExists: false }).mockResolvedValueOnce(undefined);
 
       await createConnectorFixture({
-        predefinedConnector: openRouterEndpointConnector,
+        predefinedConnector: openRouterEndpoint,
         fetch: mockFetch,
         log: mockLog,
         use: mockUse,
       });
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockFetch).toHaveBeenNthCalledWith(2, expectedAddCall);
+      expect(mockFetch).toHaveBeenNthCalledWith(2, {
+        path: '/internal/_inference/_add',
+        method: 'POST',
+        headers: { 'elastic-api-version': '1' },
+        body: JSON.stringify({
+          config: {
+            inferenceId: openRouterEndpoint.inferenceId,
+            provider: openRouterEndpoint.provider,
+            taskType: openRouterEndpoint.taskType,
+            providerConfig: openRouterEndpoint.providerConfig,
+          },
+          secrets: openRouterEndpoint.secrets,
+        }),
+      });
 
       expectNoActionsCalls();
       expect(mockUse).toHaveBeenCalledWith({
-        ...openRouterEndpointConnector,
-        id: openRouterEndpointConnector.id,
+        ...openRouterEndpoint,
+        id: openRouterEndpoint.inferenceId,
+      });
+    });
+
+    it('sends the required _add fields even when the definition omits providerConfig and secrets', async () => {
+      const minimalEndpoint: InferenceEndpointDefinition = {
+        type: 'inference_endpoint',
+        id: 'openrouter-minimal',
+        name: 'OpenRouter minimal',
+        inferenceId: 'openrouter-minimal',
+        provider: 'openai',
+        taskType: 'chat_completion',
+      };
+
+      mockFetch.mockResolvedValueOnce({ isEndpointExists: false }).mockResolvedValueOnce(undefined);
+
+      await createConnectorFixture({
+        predefinedConnector: minimalEndpoint,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).toHaveBeenNthCalledWith(2, {
+        path: '/internal/_inference/_add',
+        method: 'POST',
+        headers: { 'elastic-api-version': '1' },
+        body: JSON.stringify({
+          config: {
+            inferenceId: minimalEndpoint.inferenceId,
+            provider: minimalEndpoint.provider,
+            taskType: minimalEndpoint.taskType,
+            providerConfig: {},
+          },
+          secrets: { providerSecrets: {} },
+        }),
       });
     });
 
@@ -292,7 +314,7 @@ describe('createConnectorFixture', () => {
           data: {
             statusCode: 400,
             error: 'Bad Request',
-            message: `Inference endpoint [${openRouterEndpointConnector.id}] already exists`,
+            message: `Inference endpoint [${openRouterEndpoint.inferenceId}] already exists`,
           },
         },
       });
@@ -302,7 +324,7 @@ describe('createConnectorFixture', () => {
         .mockRejectedValueOnce(existsError);
 
       await createConnectorFixture({
-        predefinedConnector: openRouterEndpointConnector,
+        predefinedConnector: openRouterEndpoint,
         fetch: mockFetch,
         log: mockLog,
         use: mockUse,
@@ -310,8 +332,8 @@ describe('createConnectorFixture', () => {
 
       expectNoActionsCalls();
       expect(mockUse).toHaveBeenCalledWith({
-        ...openRouterEndpointConnector,
-        id: openRouterEndpointConnector.id,
+        ...openRouterEndpoint,
+        id: openRouterEndpoint.inferenceId,
       });
     });
 
@@ -324,7 +346,7 @@ describe('createConnectorFixture', () => {
 
       await expect(
         createConnectorFixture({
-          predefinedConnector: openRouterEndpointConnector,
+          predefinedConnector: openRouterEndpoint,
           fetch: mockFetch,
           log: mockLog,
           use: mockUse,
@@ -335,23 +357,27 @@ describe('createConnectorFixture', () => {
       expect(mockUse).not.toHaveBeenCalled();
     });
 
-    it('is bypassed by KBN_EVALS_SKIP_CONNECTOR_SETUP (yields the connector as-is)', async () => {
+    it('is bypassed by KBN_EVALS_SKIP_CONNECTOR_SETUP (yields an AvailableConnectorWithId)', async () => {
       process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
 
       await createConnectorFixture({
-        predefinedConnector: openRouterEndpointConnector,
+        predefinedConnector: openRouterEndpoint,
         fetch: mockFetch,
         log: mockLog,
         use: mockUse,
       });
 
       expect(mockFetch).not.toHaveBeenCalled();
-      expect(mockUse).toHaveBeenCalledWith(openRouterEndpointConnector);
+      expect(mockUse).toHaveBeenCalledWith({
+        ...openRouterEndpoint,
+        id: openRouterEndpoint.inferenceId,
+      });
     });
   });
 
   describe('when KBN_EVALS_SKIP_CONNECTOR_SETUP is set', () => {
-    const predefinedConnector: AvailableConnectorWithId = {
+    const predefinedConnector: StackConnectorDefinition = {
+      type: 'stack_connector',
       id: 'my-test-connector',
       name: 'Test Connector',
       actionTypeId: '.email',

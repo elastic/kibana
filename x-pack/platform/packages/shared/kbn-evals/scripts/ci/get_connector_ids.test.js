@@ -15,25 +15,23 @@ function run(connectors, evalModelGroups) {
     encoding: 'utf8',
     env: {
       ...process.env,
-      KIBANA_TESTING_AI_CONNECTORS: JSON.stringify(connectors),
+      KIBANA_TESTING_INFERENCE_ENDPOINTS: JSON.stringify(connectors),
       EVAL_MODEL_GROUPS: evalModelGroups,
     },
   }).trim();
 }
 
-// Endpoint-shaped OpenRouter def, as emitted by generate_openrouter_connectors.js.
 const OPENROUTER_GPT = {
   'openrouter-openai-gpt-5-4': {
-    config: {
-      provider: 'openai',
-      providerConfig: { model_id: 'openai/gpt-5.4' },
-    },
+    provider: 'openai',
+    providerConfig: { model_id: 'openai/gpt-5.4' },
   },
 };
 
 const EIS_GPT = {
   'eis-openai-gpt-5-4': {
-    config: { provider: 'elastic', providerConfig: { model_id: 'openai-gpt-5.4' } },
+    provider: 'elastic',
+    providerConfig: { model_id: 'openai-gpt-5.4' },
   },
 };
 

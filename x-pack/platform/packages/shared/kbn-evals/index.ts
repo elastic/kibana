@@ -180,6 +180,17 @@ export {
 export { createSimilarityEvaluator } from './src/evaluators/similarity';
 
 export { getConnectorIdAsUuid } from './src/utils/create_stack_connector_fixture';
+export {
+  loadInferenceEndpoints,
+  type InferenceEndpointDefinition,
+} from './src/utils/inference_endpoint_definition';
+export {
+  isInferenceEndpointDefinition,
+  toStackConnectorDefinition,
+  type EvalConnector,
+  type StackConnectorDefinition,
+} from './src/utils/eval_connector';
+export { buildModelFromConnector } from './src/utils/build_model_from_connector';
 
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

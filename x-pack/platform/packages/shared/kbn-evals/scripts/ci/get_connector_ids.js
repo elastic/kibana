@@ -6,13 +6,13 @@
  * 2.0.
  */
 
-// Reads KIBANA_TESTING_AI_CONNECTORS (base64 or raw JSON) and EVAL_MODEL_GROUPS
+// Reads KIBANA_TESTING_INFERENCE_ENDPOINTS (base64 or raw JSON) and EVAL_MODEL_GROUPS
 // from the environment, then writes matching connector IDs (newline-separated) to stdout.
 
 const { parseMaybeBase64Json } = require('./ai_connectors');
 const { slugifyId } = require('./slugify_id');
 
-const cfg = parseMaybeBase64Json(process.env.KIBANA_TESTING_AI_CONNECTORS || '');
+const cfg = parseMaybeBase64Json(process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS || '');
 
 const requestedRaw = process.env.EVAL_MODEL_GROUPS || '';
 const requested = requestedRaw
@@ -28,8 +28,8 @@ const connectorIds =
     ? connectorEntries.map(([id]) => id)
     : connectorEntries
         .filter(([id, connector]) => {
-          const modelId = connector?.config?.providerConfig?.model_id;
-          const isEis = connector?.config?.provider === 'elastic';
+          const modelId = connector?.providerConfig?.model_id;
+          const isEis = connector?.provider === 'elastic';
 
           const matchesRequested = (requestedValue) => {
             if (requestedValue === id) return true;
@@ -56,9 +56,9 @@ const connectorIds =
 if (requested.length > 0 && !requested.includes('all') && connectorIds.length === 0) {
   const availableModels = connectorEntries.flatMap(([, connector]) => {
     const out = [];
-    const modelId = connector?.config?.providerConfig?.model_id;
+    const modelId = connector?.providerConfig?.model_id;
     if (typeof modelId === 'string') {
-      out.push(connector?.config?.provider === 'elastic' ? `eis/${modelId}` : modelId);
+      out.push(connector?.provider === 'elastic' ? `eis/${modelId}` : modelId);
     }
     return out;
   });

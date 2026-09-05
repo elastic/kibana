@@ -8,9 +8,9 @@
 import { v5 } from 'uuid';
 import pRetry from 'p-retry';
 import type { HttpHandler } from '@kbn/core/public';
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getStatusCode } from './retry_utils';
+import type { EvalConnector, StackConnectorDefinition } from './eval_connector';
 
 export function getConnectorIdAsUuid(connectorId: string): string {
   return v5(connectorId, v5.DNS);
@@ -28,10 +28,10 @@ export async function createStackConnectorFixture({
   log,
   use,
 }: {
-  predefinedConnector: AvailableConnectorWithId;
+  predefinedConnector: StackConnectorDefinition;
   fetch: HttpHandler;
   log: ToolingLog;
-  use: (connector: AvailableConnectorWithId) => Promise<void>;
+  use: (connector: EvalConnector) => Promise<void>;
 }): Promise<void> {
   interface ConnectorGetResponse {
     is_preconfigured?: boolean;

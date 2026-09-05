@@ -24,10 +24,12 @@
 
 import { tags } from '@kbn/scout';
 import {
+  isInferenceEndpointDefinition,
   selectEvaluators,
   type EvaluationDataset,
   type EvalsExecutorClient,
   type Example,
+  type StackConnectorDefinition,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
@@ -90,7 +92,7 @@ function createEvaluateEaseSummary({
   log,
 }: {
   fetch: HttpHandler;
-  connector: { id: string; actionTypeId: string };
+  connector: StackConnectorDefinition;
   executorClient: EvalsExecutorClient;
   log: ToolingLog;
 }) {
@@ -132,6 +134,12 @@ type EvaluateEaseSummary = ReturnType<typeof createEvaluateEaseSummary>;
 const evaluate = base.extend<{ evaluateEaseSummary: EvaluateEaseSummary }, {}>({
   evaluateEaseSummary: [
     ({ fetch, connector, executorClient, log }, use) => {
+      if (isInferenceEndpointDefinition(connector)) {
+        throw new Error(
+          `The EASE alert summary eval calls the actions/connector execute route, which requires a ` +
+            `stack connector. [${connector.id}] is an inference endpoint; select a stack connector instead.`
+        );
+      }
       use(createEvaluateEaseSummary({ fetch, connector, executorClient, log }));
     },
     { scope: 'test' },

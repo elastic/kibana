@@ -6,8 +6,8 @@
  */
 
 import { v5 } from 'uuid';
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { StackConnectorDefinition } from './eval_connector';
 import { KbnClientRequesterError } from '@kbn/kbn-client';
 import {
   createStackConnectorFixture,
@@ -57,7 +57,8 @@ describe('resolveConnectorId', () => {
 
 describe('createStackConnectorFixture', () => {
   // Non-LLM connector (e.g. the mock email/Slack connectors used by evals_workflows).
-  const predefinedConnector: AvailableConnectorWithId = {
+  const predefinedConnector: StackConnectorDefinition = {
+    type: 'stack_connector',
     id: 'my-test-connector',
     name: 'Test Connector',
     actionTypeId: '.email',
@@ -362,7 +363,8 @@ describe('createStackConnectorFixture', () => {
   describe('with a .gen-ai connector', () => {
     // `.gen-ai` defs are no longer recognized as LLM defs: like any other stack connector
     // (e.g. `.email`), they flow through the generic Actions path.
-    const genAiConnector: AvailableConnectorWithId = {
+    const genAiConnector: StackConnectorDefinition = {
+      type: 'stack_connector',
       id: 'openrouter-anthropic-claude-sonnet-4-6',
       name: 'OpenRouter anthropic/claude-sonnet-4.6',
       actionTypeId: '.gen-ai',

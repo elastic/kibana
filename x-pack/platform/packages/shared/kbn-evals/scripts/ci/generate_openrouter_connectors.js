@@ -7,7 +7,7 @@
  */
 
 /**
- * Generate `KIBANA_TESTING_AI_CONNECTORS` payload for @kbn/evals from OpenRouter.
+ * Generate `KIBANA_TESTING_INFERENCE_ENDPOINTS` payload for @kbn/evals from OpenRouter.
  *
  * This script:
  * - fetches models available to this API key via GET {baseUrl}/models/user
@@ -231,15 +231,12 @@ async function generateOpenrouterConnectors({
     const connectorId = `openrouter-${slugifyId(modelId)}`;
     connectors[connectorId] = {
       name: `OpenRouter ${modelId}`,
-      actionTypeId: '.inference',
-      config: {
-        provider: 'openai',
-        taskType: 'chat_completion',
-        inferenceId: connectorId,
-        providerConfig: {
-          model_id: modelId,
-          url: chatUrl,
-        },
+      inferenceId: connectorId,
+      provider: 'openai',
+      taskType: 'chat_completion',
+      providerConfig: {
+        model_id: modelId,
+        url: chatUrl,
       },
       secrets: {
         providerSecrets: {

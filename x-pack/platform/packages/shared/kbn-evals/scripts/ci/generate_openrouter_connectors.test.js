@@ -23,7 +23,7 @@ function httpJsonFor(models) {
 
 const TOOLS = ['tools', 'tool_choice', 'temperature'];
 
-const modelIdOf = (connector) => connector.config.providerConfig.model_id;
+const modelIdOf = (connector) => connector.providerConfig.model_id;
 
 describe('generateOpenrouterConnectors', () => {
   it('generates every tool-calling model available to this API key when no --models are given', async () => {
@@ -48,7 +48,7 @@ describe('generateOpenrouterConnectors', () => {
     );
   });
 
-  it('emits chat_completion inference endpoint definitions, not .gen-ai connectors', async () => {
+  it('emits flat InferenceEndpointDefinition entries (not stack-connector shapes)', async () => {
     const connectors = await generateOpenrouterConnectors({
       baseUrl: BASE_URL,
       apiKey: API_KEY,
@@ -58,15 +58,12 @@ describe('generateOpenrouterConnectors', () => {
 
     expect(connectors['openrouter-openai-gpt-5-4']).toEqual({
       name: 'OpenRouter openai/gpt-5.4',
-      actionTypeId: '.inference',
-      config: {
-        provider: 'openai',
-        taskType: 'chat_completion',
-        inferenceId: 'openrouter-openai-gpt-5-4',
-        providerConfig: {
-          model_id: 'openai/gpt-5.4',
-          url: `${BASE_URL}/chat/completions`,
-        },
+      inferenceId: 'openrouter-openai-gpt-5-4',
+      provider: 'openai',
+      taskType: 'chat_completion',
+      providerConfig: {
+        model_id: 'openai/gpt-5.4',
+        url: `${BASE_URL}/chat/completions`,
       },
       secrets: {
         providerSecrets: {

@@ -158,6 +158,7 @@ export {
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
+  INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
   InferenceEndpointProvider,
   elasticModelIds,
   type EisInferenceEndpointMetadata,
@@ -165,10 +166,24 @@ export {
 } from './src/inference_endpoints';
 
 export {
+  inferenceEndpointSchema,
+  type InferenceEndpointRequestBody,
+} from './src/inference_endpoint_schema';
+
+export {
   INFERENCE_CONNECTORS_INTERNAL_API_PATH,
   type ApiInferenceConnector,
   type InferenceConnectorsApiResponseBody,
 } from './src/inference_connectors_api';
+
+export {
+  FieldType,
+  SERVICE_SETTINGS,
+  TASK_SETTINGS,
+  type ConfigProperties,
+  type FieldsConfiguration,
+  type InferenceProvider,
+} from './src/inference_services_api';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 
