@@ -8,12 +8,12 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { getSchemaAtPath } from '../../common/utils/zod/get_schema_at_path';
 import {
   buildFieldsZodValidator,
   convertJsonSchemaToZod,
   convertJsonSchemaToZodWithRefs,
 } from './build_fields_zod_validator';
+import { getSchemaAtPath } from '../../common/utils/zod/get_schema_at_path';
 import { mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema } from '../builtin_workflow_input_definitions';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 
