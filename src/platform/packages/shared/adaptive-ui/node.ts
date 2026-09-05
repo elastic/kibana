@@ -19,16 +19,9 @@ export {
   renderSVG,
 } from './vendor/adaptive-ui-host-kibana/node';
 
-// The rasterizer `renderPNG` defaults to. Exported so a caller can wrap it — `width`
-// drives satori's layout frame as well as the raster, so changing pixel density is only
-// possible from behind this seam.
-export { resvgRasterizer } from './vendor/adaptive-ui-rasterize-resvg';
-
 export type {
   PNGRenderOptions,
   PNGRenderResult,
   SVGRenderOptions,
   SVGRenderResult,
 } from './vendor/adaptive-ui-host-kibana/node';
-
-export type { RasterizeOptions, SvgRasterizer } from './vendor/adaptive-ui-render-svg';
