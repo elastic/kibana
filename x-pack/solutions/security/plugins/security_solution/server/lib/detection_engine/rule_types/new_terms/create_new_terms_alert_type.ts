@@ -14,6 +14,11 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { NewTermsRuleParams } from '../../rule_schema';
 import type { SecurityAlertType } from '../types';
+import {
+  accumulateNewTermsFieldCardinality,
+  createNewTermsFieldCardinalityAccumulator,
+  sendNewTermsFieldCardinalityTelemetryEvent,
+} from '../utils/telemetry/send_new_terms_field_cardinality_telemetry_event';
 import { singleSearchAfter } from '../utils/single_search_after';
 import { buildEventsSearchQuery } from '../utils/build_events_query';
 import { getFilter } from '../utils/get_filter';
@@ -104,6 +109,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       const {
         ruleExecutionLogger,
         completeRule,
+        analytics,
         tuple,
         inputIndex,
         runtimeMappings,
@@ -159,6 +165,9 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       }
       let pageNumber = 0;
       let alertsCandidateCount: number | undefined;
+      // Telemetry: size how many distinct grouping-key combinations real New Terms rules produce, and
+      // how long the grouped values are, over the rule run window. No field names or values captured.
+      const newTermsCardinality = createNewTermsFieldCardinalityAccumulator();
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -219,9 +228,11 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         // If the aggregation returns no after_key it signals that we've paged through all results
         // and the current page is empty so we can immediately break.
         if (searchResult.aggregations.new_terms.after_key == null) {
+          newTermsCardinality.completedFullScan = true;
           break;
         }
         const bucketsForField = searchResult.aggregations.new_terms.buckets;
+        accumulateNewTermsFieldCardinality(newTermsCardinality, bucketsForField, logger);
 
         const createAlertsHook: CreateAlertsHook = async (aggResult) => {
           const eventsAndTerms: EventsAndTerms[] = (
@@ -434,6 +445,20 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         }
 
         afterKey = searchResult.aggregations.new_terms.after_key;
+      }
+
+      // analytics is undefined during rule preview, so preview runs report nothing.
+      if (analytics) {
+        try {
+          sendNewTermsFieldCardinalityTelemetryEvent({
+            analytics,
+            ruleParams: params,
+            accumulator: newTermsCardinality,
+          });
+        } catch (error) {
+          // Never let a telemetry failure fail the rule run.
+          logger.info(`Failed to send New Terms field cardinality telemetry event: ${error}`);
+        }
       }
 
       scheduleNotificationResponseActionsService({
