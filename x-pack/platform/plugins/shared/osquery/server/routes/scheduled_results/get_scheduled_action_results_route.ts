@@ -82,6 +82,7 @@ export const getScheduledActionResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           const { scheduleId, executionCount } = request.params;
           const page = request.query.page ?? 0;
           const pageSize = request.query.pageSize ?? 20;
@@ -121,7 +122,7 @@ export const getScheduledActionResultsRoute = (
           const search = await getScopedSearch(
             context,
             request,
-            osqueryContext.cpsEnabled,
+            cpsActive,
             osqueryContext.getStartServices
           );
           const res = await lastValueFrom(
@@ -140,7 +141,7 @@ export const getScheduledActionResultsRoute = (
                   field: request.query.sort ?? '@timestamp',
                 },
                 integrationNamespaces: namespacesOrUndefined,
-                ...(osqueryContext.cpsEnabled ? { matchMissingSpaceId: false } : {}),
+                ...(cpsActive ? { matchMissingSpaceId: false } : {}),
               },
               { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )

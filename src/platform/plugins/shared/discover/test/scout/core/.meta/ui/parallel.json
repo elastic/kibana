@@ -1,5 +1,5 @@
 {
-  "sha1": "918ec2df2f54f37dde3f55e77104a4041f46f6ac",
+  "sha1": "d7dbc13a05a18d29228c41eeddc2c3ca3b316ce0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -706,6 +706,138 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/query_and_session.spec.ts",
         "line": 106,
         "column": 44
+      }
+    },
+    {
+      "id": "8490c24d67f20b4-241ad83f0fd1a44",
+      "title": "Discover session panel CSV export exports a classic Discover session panel with the dashboard global time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting_embeddable.spec.ts",
+        "line": 91,
+        "column": 20
+      }
+    },
+    {
+      "id": "8490c24d67f20b4-4acbbb036eaf6b7",
+      "title": "Discover session panel CSV export exports a classic Discover session panel with a custom time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting_embeddable.spec.ts",
+        "line": 95,
+        "column": 62
+      }
+    },
+    {
+      "id": "8490c24d67f20b4-b1980709d89b10e",
+      "title": "Discover session panel CSV export exports a ES|QL Discover session panel with the dashboard global time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting_embeddable.spec.ts",
+        "line": 91,
+        "column": 20
+      }
+    },
+    {
+      "id": "8490c24d67f20b4-5ffc7606d68d410",
+      "title": "Discover session panel CSV export exports a ES|QL Discover session panel with a custom time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting_embeddable.spec.ts",
+        "line": 95,
+        "column": 62
+      }
+    },
+    {
+      "id": "8f1297d9b373f25-4924e54ac2170bf",
+      "title": "Discover CSV export exports a newly saved classic session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting.spec.ts",
+        "line": 25,
+        "column": 23
+      }
+    },
+    {
+      "id": "8f1297d9b373f25-be2cf1be62751ee",
+      "title": "Discover CSV export exports an ES|QL session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting.spec.ts",
+        "line": 29,
+        "column": 56
+      }
+    },
+    {
+      "id": "8f1297d9b373f25-b08e63367768777",
+      "title": "Discover CSV export exports a saved Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting.spec.ts",
+        "line": 36,
+        "column": 28
+      }
+    },
+    {
+      "id": "8f1297d9b373f25-a8b026509fa02cd",
+      "title": "Discover CSV export exports a filtered saved Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting.spec.ts",
+        "line": 43,
+        "column": 68
       }
     },
     {
