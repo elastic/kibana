@@ -22,8 +22,6 @@ export enum AgentExecutionErrorCode {
   connectorError = 'connector_error',
   /** agent did not produce a final answer within its cycle budget */
   cycleLimitExceeded = 'cycle_limit_exceeded',
-  /** agent response violated the configured output schema */
-  schemaViolation = 'schema_violation',
 }
 
 export interface ToolNotFoundErrorMeta {
@@ -55,7 +53,6 @@ interface ExecutionErrorMetaMap {
   [AgentExecutionErrorCode.emptyResponse]: {};
   [AgentExecutionErrorCode.connectorError]: ConnectorErrorMeta;
   [AgentExecutionErrorCode.cycleLimitExceeded]: {};
-  [AgentExecutionErrorCode.schemaViolation]: {};
 }
 
 export type ExecutionErrorMetaOf<ErrCode extends AgentExecutionErrorCode> =

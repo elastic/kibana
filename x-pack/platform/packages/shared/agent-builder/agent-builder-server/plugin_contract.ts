@@ -236,16 +236,6 @@ export interface TopSnippetsConfig {
 }
 
 /**
- * Internal management API for package-owned persisted agents (e.g. Fleet install step).
- */
-export interface AgentBuilderManagementSetup {
-  createOrUpdateAgent(params: AgentCreateRequest, request: KibanaRequest): Promise<unknown>;
-  deleteAgent(agentId: string, request: KibanaRequest): Promise<boolean>;
-  deletePackageManagedAgent(agentId: string, spaceId: string): Promise<boolean>;
-  getAgent(agentId: string, request: KibanaRequest): Promise<unknown | null>;
-}
-
-/**
  * Setup contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginSetup {
@@ -281,11 +271,6 @@ export interface AgentBuilderPluginSetup {
    * Plugins setup contract, which can be used to register built-in plugins.
    */
   plugins: PluginsSetup;
-  /**
-   * Management contract for creating, updating, and deleting persisted agents
-   * programmatically (not via HTTP routes). Used by Fleet to install package-managed agents.
-   */
-  management: AgentBuilderManagementSetup;
   /**
    * TOP_SNIPPETS configuration (numSnippets, numWords) from `xpack.agentBuilder.topSnippets`.
    * Exposed so that dependent plugins can pass these values to search utilities.
