@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getInputsFromDefinition, resolveRef } from './field_conversion';
 import { parseJsPropertyAccess } from '../../common/utils/parse_js_property_access/parse_js_property_access';
 import type { WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import type { JsonSchema } from '../schema/common/json_model_shape_schema';
-import { getInputsFromDefinition, resolveRef } from './field_conversion';
 
 const INPUTS_PREFIX = 'inputs';
 

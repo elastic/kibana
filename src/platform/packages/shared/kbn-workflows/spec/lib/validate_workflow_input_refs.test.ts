@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isJsonSchemaPathValid, validateWorkflowInputRefs } from './validate_workflow_input_refs';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   builtinWorkflowInputDefinitions,
@@ -14,7 +15,6 @@ import {
 } from '../builtin_workflow_input_definitions';
 import type { WorkflowYaml } from '../schema';
 import type { JsonSchema } from '../schema/common/json_model_shape_schema';
-import { isJsonSchemaPathValid, validateWorkflowInputRefs } from './validate_workflow_input_refs';
 
 const NOTIFICATION_GROUP_REF = `${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}`;
 
