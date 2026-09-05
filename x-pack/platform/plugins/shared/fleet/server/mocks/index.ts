@@ -19,7 +19,6 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { ManagedWorkflowUpdateForbiddenError } from '@kbn/workflows-management-plugin/server/api/managed_workflow_errors';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -105,67 +104,6 @@ export const createSavedObjectClientMock = () => {
 
   return soClientMock;
 };
-
-export const createWorkflowsManagementSetupMock =
-  (): DeeplyMockedKeys<WorkflowsServerPluginSetup> => {
-    const management = {
-      isWorkflowsAvailable: true,
-      setSmlIndexAttachment: jest.fn(),
-      getWorkflow: jest.fn().mockResolvedValue(null),
-      getWorkflows: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, size: 20 }),
-      getWorkflowsSubscribedToTrigger: jest.fn().mockResolvedValue([]),
-      getHistoryForWorkflow: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-      getWorkflowsByIds: jest.fn().mockResolvedValue([]),
-      findExistingWorkflowIds: jest.fn().mockResolvedValue([]),
-      getWorkflowsSourceByIds: jest.fn().mockResolvedValue([]),
-      createWorkflow: jest.fn().mockResolvedValue({ id: 'workflow-id' }),
-      bulkCreateWorkflows: jest.fn().mockResolvedValue({ created: [], failed: [] }),
-      cloneWorkflow: jest.fn().mockResolvedValue({ id: 'workflow-id' }),
-      updateWorkflow: jest
-        .fn()
-        .mockImplementation(async (id, workflow, spaceId, request, options) => {
-          const existing = await management.getWorkflow(id, spaceId);
-          const fields = Object.keys(workflow);
-          const isEnablementOnly = fields.length === 1 && fields[0] === 'enabled';
-          if (
-            existing?.managed === true &&
-            !isEnablementOnly &&
-            options?.allowManagedWorkflowMutation !== true
-          ) {
-            throw new ManagedWorkflowUpdateForbiddenError();
-          }
-          return { id };
-        }),
-      restoreWorkflowVersion: jest.fn().mockResolvedValue({ id: 'workflow-id' }),
-      deleteWorkflows: jest.fn().mockResolvedValue({ successfulIds: [], failed: [] }),
-      disableAllWorkflows: jest.fn().mockResolvedValue(undefined),
-      runWorkflow: jest.fn().mockResolvedValue({ id: 'execution-id' }),
-      executeWorkflow: jest.fn().mockResolvedValue({ id: 'execution-id' }),
-      scheduleWorkflow: jest.fn().mockResolvedValue(undefined),
-      bulkScheduleWorkflow: jest.fn().mockResolvedValue(undefined),
-      testWorkflow: jest.fn().mockResolvedValue({ id: 'execution-id' }),
-      testStep: jest.fn().mockResolvedValue({ id: 'execution-id' }),
-      getWorkflowExecutions: jest.fn().mockResolvedValue([]),
-      searchExecutionsView: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-      getWorkflowExecution: jest.fn().mockResolvedValue({ id: 'execution-id' }),
-      getChildWorkflowExecutions: jest.fn().mockResolvedValue([]),
-      getWorkflowExecutionLogs: jest.fn().mockResolvedValue([]),
-      getStepExecution: jest.fn().mockResolvedValue({ id: 'execution-id' }),
-      searchStepExecutions: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-      cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-      cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
-      resumeWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-      listWaitingForInputSteps: jest.fn().mockResolvedValue([]),
-      resumeWorkflowExecutionExternallyViaGet: jest.fn().mockResolvedValue(undefined),
-      resumeWorkflowExecutionExternallyWithInput: jest.fn().mockResolvedValue(undefined),
-      getExternalResumeFormPage: jest.fn().mockResolvedValue({}),
-      listProcessedWaitForInputSteps: jest.fn().mockResolvedValue([]),
-      listProcessedWaitForInputFacets: jest.fn().mockResolvedValue([]),
-      markStepAsResponded: jest.fn().mockResolvedValue(undefined),
-    } as unknown as DeeplyMockedKeys<WorkflowsServerPluginSetup>['management'];
-
-    return { management } as unknown as DeeplyMockedKeys<WorkflowsServerPluginSetup>;
-  };
 
 export interface MockedFleetAppContext extends FleetAppContext {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
@@ -489,4 +427,25 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
   };
 
   return startContract;
+};
+
+/**
+ * Mock of the workflows_management plugin setup contract, as consumed by Fleet
+ * via `appContextService.setWorkflowsManagementSetup()`. Only the management
+ * methods exercised by the package workflow-asset install steps are stubbed.
+ */
+export const createWorkflowsManagementSetupMock = () => {
+  return {
+    management: {
+      createWorkflow: jest.fn(),
+      updateWorkflow: jest.fn(),
+      getWorkflow: jest.fn().mockResolvedValue(null),
+    },
+  } as unknown as WorkflowsServerPluginSetup & {
+    management: {
+      createWorkflow: jest.Mock;
+      updateWorkflow: jest.Mock;
+      getWorkflow: jest.Mock;
+    };
+  };
 };
