@@ -8,6 +8,7 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
+import { getSchemaAtPath } from '../../common/utils/zod/get_schema_at_path';
 import {
   buildFieldsZodValidator,
   convertJsonSchemaToZod,
@@ -441,6 +442,20 @@ describe('buildFieldsZodValidator', () => {
     expect(valid.success).toBe(true);
   });
 
+  it('walks typed additionalProperties on a built-in $ref (rules[id].name)', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        payload: {
+          $ref: '#/kibana/definitions/alertingV2NotificationGroup',
+        },
+      },
+    };
+
+    const validator = buildFieldsZodValidator(inputs);
+    expect(getSchemaAtPath(validator, 'payload.rules.rule-1.name').schema).not.toBeNull();
+    expect(getSchemaAtPath(validator, 'payload.rules.rule-1.nmae').schema).toBeNull();
+  });
+
   it('should return empty object schema when schema has no properties', () => {
     const validator = buildFieldsZodValidator(null);
     expect(validator.parse({})).toEqual({});
@@ -475,6 +490,26 @@ describe('buildFieldsZodValidator', () => {
     const result = validator.parse({}) as { name: string; count: number };
     expect(result.name).toBe('unknown');
     expect(result.count).toBe(0);
+  });
+
+  it('rejects unknown fields on a typed additionalProperties map', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        rules: {
+          type: 'object',
+          additionalProperties: {
+            type: 'object',
+            properties: { name: { type: 'string' } },
+            required: ['name'],
+            additionalProperties: false,
+          },
+        },
+      },
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
+    expect(validator.safeParse({ rules: { r1: { name: 'CPU spike' } } }).success).toBe(true);
+    expect(validator.safeParse({ rules: { r1: { nmae: 'CPU spike' } } }).success).toBe(false);
   });
 
   it('should reject extra properties when additionalProperties is false', () => {
