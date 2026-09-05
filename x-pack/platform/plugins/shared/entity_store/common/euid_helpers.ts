@@ -42,6 +42,16 @@ export const euid = {
   getEuidSourceFields: euidModule.getEuidSourceFields,
 
   /**
+   * Returns the namespace source fields for an entity type, split by match kind.
+   * `exactMatchFields` are matched with a term query (e.g. `event.module`).
+   * `prefixMatchFields` are matched with a prefix query because the entity store splits on a
+   * delimiter (e.g. `data_stream.dataset` → prefix `gcp` matches `gcp.audit`, `gcp.firewall`).
+   * Use this when translating EUID DSL to Kibana filter operators: replace prefix clauses on
+   * `prefixMatchFields` with exact phrase filters built from the raw observed field values.
+   */
+  getEuidNamespaceSourceFields: euidModule.getEuidNamespaceSourceFields,
+
+  /**
    * Painless-backed EUID helpers for runtime fields and scripts (same semantics as `getEuidFromObject`).
    */
   painless: {

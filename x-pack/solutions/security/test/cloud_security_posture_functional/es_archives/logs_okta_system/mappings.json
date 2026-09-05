@@ -1,0 +1,270 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-okta.system-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "managed_by": "fleet",
+        "package": {
+          "name": "okta"
+        }
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-okta.system-*"
+      ],
+      "name": "logs-okta.system",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "_meta": {
+            "managed": true,
+            "managed_by": "fleet",
+            "package": {
+              "name": "okta"
+            }
+          },
+          "date_detection": false,
+          "dynamic": true,
+          "properties": {
+            "@timestamp": {
+              "ignore_malformed": false,
+              "type": "date"
+            },
+            "cloud": {
+              "properties": {
+                "provider": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "type": "constant_keyword"
+                },
+                "namespace": {
+                  "type": "constant_keyword"
+                },
+                "type": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "ecs": {
+              "properties": {
+                "version": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "entity": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "target": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "event": {
+              "properties": {
+                "action": {
+                  "type": "keyword"
+                },
+                "agent_id_status": {
+                  "type": "keyword"
+                },
+                "category": {
+                  "type": "keyword"
+                },
+                "dataset": {
+                  "type": "constant_keyword"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "ingested": {
+                  "type": "date"
+                },
+                "kind": {
+                  "type": "keyword"
+                },
+                "outcome": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "target": {
+                  "properties": {
+                    "entity": {
+                      "properties": {
+                        "id": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "okta": {
+              "properties": {
+                "actor": {
+                  "properties": {
+                    "alternate_id": {
+                      "type": "keyword"
+                    },
+                    "display_name": {
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "outcome": {
+                  "properties": {
+                    "result": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "target": {
+                  "properties": {
+                    "alternate_id": {
+                      "type": "keyword"
+                    },
+                    "display_name": {
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "uuid": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "related": {
+              "properties": {
+                "entity": {
+                  "type": "keyword"
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "user": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "source": {
+              "properties": {
+                "ip": {
+                  "type": "ip"
+                }
+              }
+            },
+            "user": {
+              "properties": {
+                "domain": {
+                  "type": "keyword"
+                },
+                "email": {
+                  "type": "keyword"
+                },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "target": {
+                  "properties": {
+                    "domain": {
+                      "type": "keyword"
+                    },
+                    "email": {
+                      "type": "keyword"
+                    },
+                    "entity": {
+                      "properties": {
+                        "id": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "settings": {
+          "index": {
+            "mapping": {
+              "total_fields": {
+                "limit": "10000"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

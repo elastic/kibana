@@ -165,6 +165,25 @@ export const GRAPH_TARGET_ENTITY_FIELDS = [
   'entity.target.id',
 ] as const;
 /**
+ * Fields read by the `entity.namespace` field evaluation rather than by EUID composition.
+ * They are namespace-agnostic (never rewritten to a `.target.` form) and are carried in the
+ * `all` bucket so `euid.kql.getEuidFilterBasedOnDocument` can reproduce the entity's namespace
+ * clause: without them a filter for `user:alice@example.com@gcp` also matches the `@okta` and
+ * `@entra_id` entities with the same email, which are distinct entities.
+ *
+ * `event.module` / `data_stream.dataset` drive the `sourceMatchesAny` lists; `event.kind` and
+ * `cloud.provider` drive the condition-based branches (local namespace, asset-discovery
+ * provider mapping) — see `entity_store/common/domain/definitions/user.ts`.
+ */
+const ENTITY_NAMESPACE_SOURCE_FIELDS = [
+  'event.dataset',
+  'event.module',
+  'data_stream.dataset',
+  'event.kind',
+  'cloud.provider',
+];
+
+/**
  * Raw source fields used to compute actor EUIDs in entity store v2.
  * These mirror the identity fields from Entity Store definitions.
  * Server-side code derives these dynamically via euid.getEuidSourceFields().
@@ -175,7 +194,7 @@ export const getGraphActorEuidSourceFields = (euid: EntityStoreEuid) => {
     host: [...euid.getEuidSourceFields('host').identitySourceFields],
     service: [...euid.getEuidSourceFields('service').identitySourceFields],
     generic: [...euid.getEuidSourceFields('generic').identitySourceFields],
-    all: ['event.dataset', 'event.module', 'data_stream.dataset'],
+    all: [...ENTITY_NAMESPACE_SOURCE_FIELDS],
   };
 };
 
@@ -193,7 +212,9 @@ export const getGraphTargetEuidSourceFields = (euid: EntityStoreEuid) => {
     host: [...euid.getEuidSourceFields('host').identitySourceFields.map(toTargetField)],
     service: [...euid.getEuidSourceFields('service').identitySourceFields.map(toTargetField)],
     generic: [...euid.getEuidSourceFields('generic').identitySourceFields.map(toTargetField)],
-    all: ['event.dataset', 'event.module', 'data_stream.dataset'],
+    // Namespace sources describe the event, not the actor/target side, so they are not
+    // rewritten to the `.target.` namespace.
+    all: [...ENTITY_NAMESPACE_SOURCE_FIELDS],
   };
 };
 

@@ -7,7 +7,14 @@
 
 import { BehaviorSubject, Subject, type Subscription, filter as rxFilter } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
-import { addFilter, removeFilter, containsFilter } from './search_filters';
+import {
+  addFilter,
+  removeFilter,
+  containsFilter,
+  addEntityFilter,
+  removeEntityFilter,
+  containsEntityFilter,
+} from './search_filters';
 
 // =============================================================================
 // Filter Toggle Event Bus
@@ -35,6 +42,26 @@ export interface IsOneOfFilterToggleEvent {
 }
 
 /**
+ * Event emitted when a KQL entity filter toggle is requested.
+ * Entity filters are boolean expressions produced by the Entity Store's EUID logic, so they are
+ * keyed on the entity id rather than a field/value pair.
+ */
+export interface EntityFilterToggleEvent {
+  type: 'entityDsl';
+  scopeId: string;
+  entityId: string;
+  /** ES DSL produced by the Entity Store EUID logic; translated to Kibana filters on apply. */
+  dsl: object;
+  /**
+   * Raw namespace source field values from the document's sourceFields (e.g.
+   * `{ 'data_stream.dataset': 'gcp.audit' }`). Used to replace prefix clauses in the DSL with
+   * exact phrase filters so every filter uses a standard UI operator.
+   */
+  namespaceSourceValues?: Record<string, string | string[]>;
+  action: 'show' | 'hide';
+}
+
+/**
  * Event emitted when an entity relationship toggle action is requested.
  * Components emit these events to expand/collapse entity relationships in the graph.
  * FilterStore instances subscribe and handle events for their scopeId.
@@ -46,7 +73,9 @@ export interface EntityRelationshipEvent {
 }
 
 // Global event bus for filter toggle actions
-const filterToggleEvents$ = new Subject<FilterToggleEvent | IsOneOfFilterToggleEvent>();
+const filterToggleEvents$ = new Subject<
+  FilterToggleEvent | IsOneOfFilterToggleEvent | EntityFilterToggleEvent
+>();
 
 // Global event bus for entity relationship toggle actions
 const entityRelationshipEvents$ = new Subject<EntityRelationshipEvent>();
@@ -105,6 +134,33 @@ export const emitIsOneOfFilterToggle = (
   action: 'show' | 'hide'
 ): void => {
   const event: IsOneOfFilterToggleEvent = { type: 'isOneOf', scopeId, field, values, action };
+  filterToggleEvents$.next(event);
+};
+
+/**
+ * Emit an entity filter toggle event. Any FilterStore listening for this scopeId will
+ * add/remove the entity's filter.
+ *
+ * @param scopeId - Unique identifier for the graph instance
+ * @param entityId - The entity EUID the filter belongs to (used as the filter key)
+ * @param dsl - ES DSL produced by the Entity Store EUID logic
+ * @param action - 'show' to add the filter, 'hide' to remove it
+ */
+export const emitEntityFilterToggle = (
+  scopeId: string,
+  entityId: string,
+  dsl: object,
+  action: 'show' | 'hide',
+  namespaceSourceValues?: Record<string, string | string[]>
+): void => {
+  const event: EntityFilterToggleEvent = {
+    type: 'entityDsl',
+    scopeId,
+    entityId,
+    dsl,
+    namespaceSourceValues,
+    action,
+  };
   filterToggleEvents$.next(event);
 };
 
@@ -197,6 +253,14 @@ export const isFilterActiveForScope = (
   return store?.isFilterActive(field, value) ?? false;
 };
 
+/**
+ * Check whether the entity filter for this entity id is active in a scope.
+ */
+export const isEntityFilterActiveForScope = (scopeId: string, entityId: string): boolean => {
+  const store = stores.get(scopeId);
+  return store?.isEntityFilterActive(entityId) ?? false;
+};
+
 // =============================================================================
 // FilterStore Class
 // =============================================================================
@@ -230,6 +294,15 @@ export class FilterStore {
     this.filterEventSubscription = filterToggleEvents$
       .pipe(rxFilter((event) => event.scopeId === this.scopeId))
       .subscribe((event) => {
+        if (event.type === 'entityDsl') {
+          this.toggleEntityFilter(
+            event.entityId,
+            event.dsl,
+            event.action,
+            event.namespaceSourceValues
+          );
+          return;
+        }
         const value = event.type === 'isOneOf' ? event.values : event.value;
         this.toggleFilter(event.field, value, event.action);
       });
@@ -303,10 +376,38 @@ export class FilterStore {
   }
 
   /**
+   * Toggle the KQL entity filter for an entity id.
+   * Adding replaces any existing graph-owned KQL filter for the same entity.
+   */
+  toggleEntityFilter(
+    entityId: string,
+    dsl: object,
+    action: 'show' | 'hide',
+    namespaceSourceValues?: Record<string, string | string[]>
+  ): void {
+    const next =
+      action === 'show'
+        ? addEntityFilter(
+            this.dataViewId ?? '',
+            this.filters$.value,
+            entityId,
+            dsl,
+            namespaceSourceValues
+          )
+        : removeEntityFilter(this.filters$.value, entityId);
+    this.filters$.next(next);
+  }
+
+  /**
    * Check if a filter with the given field and value(s) is currently active.
    */
   isFilterActive(field: string, value: string | string[]): boolean {
     return containsFilter(this.filters$.value, field, value);
+  }
+
+  /** Check if the entity filter for this entity id is currently active. */
+  isEntityFilterActive(entityId: string): boolean {
+    return containsEntityFilter(this.filters$.value, entityId);
   }
 
   // ===========================================================================
