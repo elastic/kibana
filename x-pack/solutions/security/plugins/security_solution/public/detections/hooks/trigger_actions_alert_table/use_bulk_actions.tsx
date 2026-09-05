@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingRuntimeFields,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
@@ -67,7 +70,8 @@ function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] 
 export const useBulkActionsByTableType = (
   tableId: TableId,
   query: AlertsTableProps['query'],
-  refresh: () => void
+  refresh: () => void,
+  runtimeMappings?: MappingRuntimeFields
 ): BulkActionsPanelConfig[] => {
   const { from, to } = useGlobalTime();
   const filters = useMemo(() => {
@@ -107,8 +111,9 @@ export const useBulkActionsByTableType = (
       to,
       tableId,
       refetch,
+      runtimeMappings,
     };
-  }, [from, to, filters, refetch, tableId]);
+  }, [from, to, filters, refetch, tableId, runtimeMappings]);
 
   const bulkAlertTagParams = useMemo(() => {
     return {

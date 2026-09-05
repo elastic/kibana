@@ -99,12 +99,12 @@ export const setSignalsStatusRoute = (
 
             return response.ok({ body });
           } else {
-            const { conflicts, query } = request.body;
+            const { conflicts, query, runtime_fields: runtimeFields } = request.body;
 
             const body = await updateSignalsStatusByQuery(
               status,
               query,
-              { conflicts: conflicts ?? 'abort' },
+              { conflicts: conflicts ?? 'abort', runtimeFields },
               spaceId,
               esClient,
               user
@@ -153,12 +153,18 @@ const updateSignalsStatusByIds = async (
 const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
   query: object | undefined,
-  options: { conflicts: 'abort' | 'proceed' },
+  options: { conflicts: 'abort' | 'proceed'; runtimeFields?: Record<string, string> },
   spaceId: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null
-) =>
-  esClient.updateByQuery({
+) => {
+  const runtimeMappings = options.runtimeFields
+    ? Object.fromEntries(
+        Object.entries(options.runtimeFields).map(([name, type]) => [name, { type }])
+      )
+    : undefined;
+
+  return esClient.updateByQuery({
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     conflicts: options.conflicts,
     refresh: true,
@@ -169,9 +175,11 @@ const updateSignalsStatusByQuery = async (
           filter: query,
         },
       },
+      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
     },
     ignore_unavailable: true,
   });
+};
 
 const getUpdateSignalStatusScript = (
   status: SetAlertsStatusRequestBody['status'],

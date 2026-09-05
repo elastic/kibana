@@ -22,6 +22,7 @@ interface UpdatedAlertsProps {
   query?: object;
   signalIds?: string[];
   signal?: AbortSignal;
+  runtimeFields?: Record<string, string>;
 }
 
 /**
@@ -42,6 +43,7 @@ export const updateAlertStatus = ({
   query,
   signalIds,
   signal,
+  runtimeFields,
 }: UpdatedAlertsProps): Promise<UpdatedAlertsResponse> => {
   if (signalIds && signalIds.length > 0) {
     return updateAlertStatusByIds({ status, signalIds, signal }).then(({ updated }) => ({
@@ -49,7 +51,7 @@ export const updateAlertStatus = ({
       version_conflicts: 0,
     }));
   } else if (query) {
-    return updateAlertStatusByQuery({ status, query, signal }).then(
+    return updateAlertStatusByQuery({ status, query, signal, runtimeFields }).then(
       ({ updated, version_conflicts: conflicts }) => ({
         updated: updated ?? 0,
         version_conflicts: conflicts,
