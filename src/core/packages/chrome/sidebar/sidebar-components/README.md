@@ -10,5 +10,5 @@ const myApp = useSidebarApp('mySidebarApp');
 myApp.actions.openWithData(data);
 myApp.open(); // Opens with default state
 
-// myApp.status is reactive: 'available', 'pending', or 'unavailable'
+// myApp.isOpen and myApp.status are reactive
 ```

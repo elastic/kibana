@@ -16,10 +16,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 import { AgentBuilderNavControl } from './agent_builder_nav_control';
 
-const mockCurrentAppId$ = new BehaviorSubject<string | null>(null);
+const mockIsOpen$ = new BehaviorSubject(false);
 const mockChrome = {
   sidebar: {
-    getCurrentAppId$: () => mockCurrentAppId$,
+    getApp: () => ({ isOpen$: () => mockIsOpen$ }),
   },
 };
 
@@ -37,6 +37,7 @@ const mockUseUiPrivileges = useUiPrivileges as jest.MockedFunction<typeof useUiP
 describe('AgentBuilderNavControl', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsOpen$.next(false);
   });
 
   it('toggles the sidebar when the nav button is clicked', () => {

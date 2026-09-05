@@ -58,6 +58,8 @@ export interface UseSidebarAppApi<TState = undefined, TActions = undefined> {
   actions: TActions;
   /** Current app status (reactive) */
   status: SidebarAppStatus;
+  /** Whether this app is currently active in the sidebar */
+  isOpen: boolean;
   /** Open sidebar to this app */
   open: () => void;
   /** Close sidebar */
@@ -73,6 +75,7 @@ export function useSidebarApp<TState = undefined, TActions = undefined>(
 
   const state = useObservable(appApi.getState$(), appApi.getState());
   const status = useObservable(appApi.getStatus$(), appApi.getStatus());
+  const isOpen = useObservable(appApi.isOpen$(), appApi.isOpen());
 
   const open = useCallback(() => appApi.open(), [appApi]);
   const close = useCallback(() => appApi.close(), [appApi]);
@@ -82,9 +85,10 @@ export function useSidebarApp<TState = undefined, TActions = undefined>(
       state,
       actions: appApi.actions,
       status,
+      isOpen,
       open,
       close,
     }),
-    [state, appApi.actions, status, open, close]
+    [state, appApi.actions, status, isOpen, open, close]
   );
 }
