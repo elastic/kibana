@@ -513,6 +513,8 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
   /** `get_rule` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_GET_RULE_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_FAILED',
+  /** `get_episode_transitions` failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_GET_TRANSITIONS_FAILED: 'AGENT_BUILDER_EPISODE_GET_TRANSITIONS_FAILED',
   /** Episode attachment resolve failed; returns undefined. */
   AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
   /** Episode attachment isStale check failed; returns false. */
