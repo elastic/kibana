@@ -74,6 +74,12 @@ const attackDiscoveryDoc = (row: DeepWatchGoldenRow) => ({
   'kibana.alert.rule.uuid': crypto.randomUUID(),
   'kibana.alert.rule.revision': 0,
   'kibana.space_ids': ['default'],
+  // host.name on the AD alert doc: the v19 Forensics Watch gates on a
+  // deterministic host lookup (extract_host_from_alerts → resolve_host) and
+  // emits isIncident:false with no forensics when it finds none. Without this
+  // field every row takes the emit_no_host path regardless of narrative.
+  'host.name': row.host,
+  'host.hostname': row.host.toLowerCase(),
   'kibana.alert.rule.parameters': {},
   'event.action': 'open',
   'event.kind': 'signal',
