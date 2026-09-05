@@ -36,7 +36,11 @@ import {
   getEsqlDataView,
 } from '@kbn/discover-utils';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
-import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import {
+  getESQLStatsQueryMeta,
+  hasTransformationalCommand,
+  upsertESQLMetadataFields,
+} from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -52,6 +56,25 @@ import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import { createSearchSource } from './utils/create_search_source';
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import type { ProfileStateMap } from '../../../../common/context_awareness';
+
+const REQUIRED_ESQL_METADATA_FIELDS = ['_index', '_id'] as const;
+
+const addRequiredMetadataToDocumentQuery = (query: AggregateQuery | Query | undefined) => {
+  if (!isOfAggregateQueryType(query)) {
+    return query;
+  }
+
+  try {
+    if (hasTransformationalCommand(query.esql)) {
+      return query;
+    }
+
+    const esql = upsertESQLMetadataFields(query.esql, REQUIRED_ESQL_METADATA_FIELDS);
+    return esql === query.esql ? query : { esql };
+  } catch {
+    return query;
+  }
+};
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -470,6 +493,20 @@ export function getDataStateContainer({
               internalState.dispatch(
                 injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
                   appState: preFetchStateUpdate,
+                })
+              )
+            );
+          }
+
+          const queryWithRequiredMetadata = addRequiredMetadataToDocumentQuery(
+            getCurrentTab().appState.query
+          );
+
+          if (queryWithRequiredMetadata !== getCurrentTab().appState.query) {
+            await withSkipNextFetch(() =>
+              internalState.dispatch(
+                injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                  appState: { query: queryWithRequiredMetadata },
                 })
               )
             );
