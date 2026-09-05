@@ -11,10 +11,10 @@ import { renderPNG } from '@kbn/adaptive-ui/node';
 /**
  * Rasterizes one chart node for Slack, which has no native chart block.
  *
- * `@kbn/adaptive-ui/node` pulls in `satori` and native `@resvg/resvg-js`, so
- * import this module lazily — a Kibana that never posts a chart to Slack should
- * never load the rasterizer. Height is estimated from the content; the pack
- * always draws its view chrome around the node.
+ * `@kbn/adaptive-ui/node` pulls in native `@takumi-rs/core`, so import this
+ * module lazily — a Kibana that never posts a chart to Slack should never load
+ * the renderer. Height is estimated from the content; the pack always draws its
+ * view chrome around the node.
  */
 export const renderNodePng = async (node: PrimitiveNode): Promise<Buffer> => {
   const { png } = await renderPNG({ type: 'view', body: [node] });
