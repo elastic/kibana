@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { InfraPageTemplate } from './infra_page_template';
@@ -22,6 +23,26 @@ const mockFetcherState: { hasData: boolean; status: MockFetchStatus } = {
   status: 'success',
 };
 
+const mockSourceState: {
+  source:
+    | {
+        status: { remoteClustersExist: boolean };
+        configuration: { metricAlias: string };
+      }
+    | undefined;
+  error: string | undefined;
+  isLoading: boolean;
+  loadSource: () => void;
+} = {
+  source: {
+    status: { remoteClustersExist: true },
+    configuration: { metricAlias: 'metrics-*' },
+  },
+  error: undefined,
+  isLoading: false,
+  loadSource: jest.fn(),
+};
+
 const mockGetRedirectUrl = jest.fn().mockReturnValue(HOSTS_ONBOARDING_HREF);
 
 let mockLastPageTemplateProps: {
@@ -30,15 +51,7 @@ let mockLastPageTemplateProps: {
 } = {};
 
 jest.mock('../../../containers/metrics_source', () => ({
-  useSourceContext: () => ({
-    source: {
-      status: { remoteClustersExist: true },
-      configuration: { metricAlias: 'metrics-*' },
-    },
-    error: undefined,
-    isLoading: false,
-    loadSource: jest.fn(),
-  }),
+  useSourceContext: () => mockSourceState,
   useMetricsDataViewContext: () => ({ error: undefined, refetch: jest.fn() }),
 }));
 
@@ -82,9 +95,38 @@ jest.mock('../../../hooks/use_fetcher', () => ({
   }),
 }));
 
-const renderTemplate = () =>
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  useLinkProps: () => ({ href: '/app/metrics/settings' }),
+}));
+
+const resetSharedMocks = () => {
+  jest.clearAllMocks();
+  mockGetRedirectUrl.mockReturnValue(HOSTS_ONBOARDING_HREF);
+  mockFetcherState.hasData = true;
+  mockFetcherState.status = 'success';
+  mockLastPageTemplateProps = {};
+  mockSourceState.source = {
+    status: { remoteClustersExist: true },
+    configuration: { metricAlias: 'metrics-*' },
+  };
+  mockSourceState.error = undefined;
+  mockSourceState.isLoading = false;
+};
+
+const renderWithProviders = (ui: React.ReactElement) =>
   render(
     <I18nProvider>
+      <EuiProvider>{ui}</EuiProvider>
+    </I18nProvider>
+  );
+
+describe('InfraPageTemplate', () => {
+  beforeEach(() => {
+    resetSharedMocks();
+  });
+
+  const renderHostsTemplate = () =>
+    renderWithProviders(
       <InfraPageTemplate
         data-test-subj={PAGE_TEST_SUBJ}
         dataSourceAvailability="host"
@@ -92,20 +134,10 @@ const renderTemplate = () =>
       >
         <div data-test-subj="hostsPageBody">body</div>
       </InfraPageTemplate>
-    </I18nProvider>
-  );
-
-describe('InfraPageTemplate', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockGetRedirectUrl.mockReturnValue(HOSTS_ONBOARDING_HREF);
-    mockFetcherState.hasData = true;
-    mockFetcherState.status = 'success';
-    mockLastPageTemplateProps = {};
-  });
+    );
 
   it('keeps the original test subject and omits no-data config when there is data', () => {
-    renderTemplate();
+    renderHostsTemplate();
 
     expect(mockLastPageTemplateProps['data-test-subj']).toBe(PAGE_TEST_SUBJ);
     expect(mockLastPageTemplateProps.noDataConfig).toBeUndefined();
@@ -114,7 +146,7 @@ describe('InfraPageTemplate', () => {
   it('renders the hosts onboarding card when there is no data', () => {
     mockFetcherState.hasData = false;
 
-    renderTemplate();
+    renderHostsTemplate();
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({ category: OnboardingFlow.Hosts });
     expect(mockLastPageTemplateProps['data-test-subj']).toBe('noDataPage');
@@ -133,8 +165,51 @@ describe('InfraPageTemplate', () => {
     mockFetcherState.hasData = false;
     mockFetcherState.status = 'loading';
 
-    renderTemplate();
+    renderHostsTemplate();
 
     expect(mockLastPageTemplateProps.noDataConfig).toBeUndefined();
+  });
+});
+
+describe('InfraPageTemplate header', () => {
+  beforeEach(() => {
+    resetSharedMocks();
+  });
+
+  const renderHeaderTemplate = (header?: React.ReactNode) =>
+    renderWithProviders(
+      <InfraPageTemplate header={header} hasDataOverride={true}>
+        <div data-test-subj="pageBody">body</div>
+      </InfraPageTemplate>
+    );
+
+  it('keeps header and body when the source loads', () => {
+    renderHeaderTemplate(<div data-test-subj="pageHeader">header</div>);
+
+    expect(screen.getByTestId('pageHeader')).toBeInTheDocument();
+    expect(screen.getByTestId('pageBody')).toBeInTheDocument();
+  });
+
+  it('keeps header on source-error and does not render page body', () => {
+    mockSourceState.error = 'source failed';
+
+    renderHeaderTemplate(<div data-test-subj="pageHeader">header</div>);
+
+    expect(screen.getByTestId('pageHeader')).toBeInTheDocument();
+    expect(screen.getByTestId('infraErrorPageTryAgainButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('pageBody')).not.toBeInTheDocument();
+  });
+
+  it('keeps header when remote clusters are missing and does not render page body', () => {
+    mockSourceState.source = {
+      status: { remoteClustersExist: false },
+      configuration: { metricAlias: 'missing:metrics-*' },
+    };
+
+    renderHeaderTemplate(<div data-test-subj="pageHeader">header</div>);
+
+    expect(screen.getByTestId('pageHeader')).toBeInTheDocument();
+    expect(screen.getByTestId('infraHostsNoRemoteCluster')).toBeInTheDocument();
+    expect(screen.queryByTestId('pageBody')).not.toBeInTheDocument();
   });
 });
