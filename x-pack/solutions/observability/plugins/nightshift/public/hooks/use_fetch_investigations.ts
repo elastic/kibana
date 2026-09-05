@@ -6,7 +6,10 @@
  */
 
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
-import type { ListInvestigationsResponse } from '@kbn/nightshift-investigations-plugin/common';
+import type {
+  ListInvestigationsResponse,
+  Severity,
+} from '@kbn/nightshift-investigations-plugin/common';
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from './use_kibana';
 
@@ -14,15 +17,23 @@ export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations']
 
 const ACTIVE_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
 
-export const useFetchInvestigations = ({
-  size,
-}: {
+export interface FetchInvestigationsParams {
+  page?: number;
   size: number;
-}): UseQueryResult<ListInvestigationsResponse, Error> => {
+  query?: string;
+  severities?: Severity[];
+}
+
+export const useFetchInvestigations = ({
+  page = 1,
+  size,
+  query,
+  severities,
+}: FetchInvestigationsParams): UseQueryResult<ListInvestigationsResponse, Error> => {
   const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
 
   return useQuery<ListInvestigationsResponse, Error>({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, size],
+    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, page, size, query, severities],
     // investigationsClient is undefined when the plugin is unavailable (optional dep)
     enabled: investigationsClient != null,
     queryFn: async ({ signal }) => {
@@ -31,7 +42,16 @@ export const useFetchInvestigations = ({
         throw new Error('Nightshift investigations plugin is unavailable');
       }
       return investigationsClient.fetch('GET /internal/nightshift/investigations', {
-        params: { query: { sort_field: 'created_at', sort_order: 'desc', page: 1, size } },
+        params: {
+          query: {
+            sort_field: 'created_at',
+            sort_order: 'desc',
+            page,
+            size,
+            ...(query ? { query } : {}),
+            ...(severities?.length ? { severities } : {}),
+          },
+        },
         signal: signal ?? null,
       });
     },

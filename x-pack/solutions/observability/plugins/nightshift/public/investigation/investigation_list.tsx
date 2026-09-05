@@ -23,23 +23,13 @@ import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugi
 
 import { InvestigationListItem } from './investigation_list_item';
 
-export const INVESTIGATION_LIST_PAGE_SIZES = [20, 50, 100] as const;
-export type InvestigationListPageSize = (typeof INVESTIGATION_LIST_PAGE_SIZES)[number];
-
-const getNextPageSize = (
-  current: InvestigationListPageSize
-): InvestigationListPageSize | undefined => {
-  const index = INVESTIGATION_LIST_PAGE_SIZES.indexOf(current);
-  const next = INVESTIGATION_LIST_PAGE_SIZES[index + 1];
-  // next is InvestigationListPageSize | undefined depending on whether index+1 is in range
-  return next;
-};
+export const INVESTIGATION_LIST_PAGE_SIZE = 20;
 
 export interface InvestigationListProps {
   investigations: ListInvestigationItem[];
   total: number;
-  size: InvestigationListPageSize;
-  onSizeChange: (size: InvestigationListPageSize) => void;
+  page: number;
+  onPageChange: (page: number) => void;
   selectedInvestigationId?: string;
   onInvestigationClick?: (investigation: ListInvestigationItem) => void;
 }
@@ -47,8 +37,8 @@ export interface InvestigationListProps {
 export function InvestigationList({
   investigations,
   total,
-  size,
-  onSizeChange,
+  page,
+  onPageChange,
   selectedInvestigationId,
   onInvestigationClick,
 }: InvestigationListProps): React.ReactElement {
@@ -59,6 +49,10 @@ export function InvestigationList({
     overflow: hidden;
     border-radius: ${euiTheme.size.s};
   `;
+
+  const shown = (page - 1) * INVESTIGATION_LIST_PAGE_SIZE + investigations.length;
+  const hasMore = shown < total;
+  const hasPrev = page > 1;
 
   const heading = (
     <>
@@ -102,9 +96,6 @@ export function InvestigationList({
     );
   }
 
-  const nextPageSize = getNextPageSize(size);
-  const hasMore = investigations.length < total;
-
   return (
     <>
       {heading}
@@ -137,29 +128,52 @@ export function InvestigationList({
         </ol>
       </EuiPanel>
 
-      {hasMore && nextPageSize !== undefined && (
+      {(hasMore || hasPrev) && (
         <>
           <EuiSpacer size="s" />
-          <EuiFlexGroup alignItems="center" direction="column" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="nightshiftInvestigationsShowMoreButton"
-                size="s"
-                onClick={() => onSizeChange(nextPageSize)}
-              >
-                {i18n.translate('xpack.nightshift.investigations.showMoreButton', {
-                  defaultMessage: 'Show more',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            gutterSize="s"
+            responsive={false}
+          >
+            {hasPrev && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="nightshiftInvestigationsPrevPageButton"
+                  iconType="arrowLeft"
+                  size="s"
+                  onClick={() => onPageChange(page - 1)}
+                >
+                  {i18n.translate('xpack.nightshift.investigations.prevPageButton', {
+                    defaultMessage: 'Previous',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs">
                 {i18n.translate('xpack.nightshift.investigations.showingCount', {
                   defaultMessage: 'Showing {shown} of {total}',
-                  values: { shown: investigations.length, total },
+                  values: { shown, total },
                 })}
               </EuiText>
             </EuiFlexItem>
+            {hasMore && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="nightshiftInvestigationsNextPageButton"
+                  iconType="arrowRight"
+                  iconSide="right"
+                  size="s"
+                  onClick={() => onPageChange(page + 1)}
+                >
+                  {i18n.translate('xpack.nightshift.investigations.nextPageButton', {
+                    defaultMessage: 'Next',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </>
       )}
