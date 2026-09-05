@@ -1,5 +1,5 @@
 {
-  "sha1": "931db3fd3b67105de22259faf9f3aaab76b711b6",
+  "sha1": "82a3d6fce25e7e3da64f434f93a615702a55acfa",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -93,6 +93,102 @@
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
         "line": 419,
         "column": 25
+      }
+    },
+    {
+      "id": "7998edec061cd06-a13b0f9a554b008",
+      "title": "Significant Events run quota authorization allows a Streams reader to inspect the deployment-wide snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/run_quotas/authorization.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "7998edec061cd06-3b7d4b7c8c80cdb",
+      "title": "Significant Events run quota authorization denies a manager whose Streams privilege is limited to one space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/run_quotas/authorization.spec.ts",
+        "line": 58,
+        "column": 38
+      }
+    },
+    {
+      "id": "7998edec061cd06-5fed36fa861660c",
+      "title": "Significant Events run quota authorization allows an all-spaces Streams manager to update and restore settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/run_quotas/authorization.spec.ts",
+        "line": 82,
+        "column": 48
+      }
+    },
+    {
+      "id": "ecbf3d1a454ed9a-b35fb312b482350",
+      "title": "Significant Events run quota API records admissions while enforcement is disabled and the limit is unlimited",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/run_quotas/gates.spec.ts",
+        "line": 111,
+        "column": 48
+      }
+    },
+    {
+      "id": "ecbf3d1a454ed9a-062b47897c70dec",
+      "title": "Significant Events run quota API denies a non-critical admission at a finite limit without incrementing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/run_quotas/gates.spec.ts",
+        "line": 128,
+        "column": 74
+      }
+    },
+    {
+      "id": "ecbf3d1a454ed9a-689b83733437b03",
+      "title": "Significant Events run quota API allows and counts a critical investigation beyond its finite limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/run_quotas/gates.spec.ts",
+        "line": 154,
+        "column": 48
       }
     },
     {
