@@ -71,6 +71,18 @@ export const ESQL_SHARD_FAILURE_MESSAGE = (shardFailuresMessage: string) =>
     },
   });
 
+export const NEW_TERMS_MSEARCH_SHARD_FAILURE_MESSAGE = (
+  affectedCombinations: number,
+  shardFailuresMessage: string
+) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.newTermsRuleType.msearchShardFailures', {
+    defaultMessage: `New terms document fetch hit shard failures for {affectedCombinations} term {affectedCombinations, plural, one {combination} other {combinations}}; the earliest matching document may be missing, which can result in missed or inaccurate alerts. Shard failures: {shardFailures}`,
+    values: {
+      affectedCombinations,
+      shardFailures: shardFailuresMessage,
+    },
+  });
+
 export const FIND_THRESHOLD_BUCKETS_DESCRIPTION = (afterBucket?: string) =>
   afterBucket
     ? i18n.translate(
