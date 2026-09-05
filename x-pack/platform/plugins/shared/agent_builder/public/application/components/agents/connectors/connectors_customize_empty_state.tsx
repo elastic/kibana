@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiIllustration } from '@elastic/eui';
+import { handshake } from '@elastic/eui-illustrations';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { CustomizeLandingEmptyState } from '../common/customize_landing_empty_state';
-import connectorsIllustration from '../overview/assets/handshake.svg';
 
 export interface ConnectorsCustomizeEmptyStateProps {
   canEditAgent: boolean;
@@ -29,7 +29,7 @@ export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptySta
   return (
     <CustomizeLandingEmptyState
       dataTestSubj="agentConnectorsCustomizeEmptyState"
-      illustrationSrc={connectorsIllustration}
+      illustration={<EuiIllustration type={handshake} alt="" />}
       title={labels.agentConnectors.emptyStateTitle}
       description={labels.agentConnectors.emptyStateDescription}
       learnMoreHref={docLinksService.agentBuilderConnectors}
