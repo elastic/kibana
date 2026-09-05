@@ -66,8 +66,10 @@ forgive_skipped_on_main() {
   echo "[skipped-on-main] all failures in $context are skipped on $GITHUB_PR_TARGET_BRANCH since the merge base — treating as passed"
   echo "$forgiven"
 
-  buildkite-agent annotate --style warning --context "skipped-on-main-${BUILDKITE_STEP_ID}${context//[^a-zA-Z0-9]/-}" --append <<EOF
-**${context}** — failures ignored because these tests are skipped on \`${GITHUB_PR_TARGET_BRANCH}\` (\`${SKIPPED_ON_MAIN_TARGET_SHA:0:12}\`) but not at the PR merge base (\`${GITHUB_PR_MERGE_BASE:0:12}\`):
+  # One build-wide annotation; each forgiven config appends a section. The context must stay
+  # short (Buildkite rejects long contexts), so never derive it from paths.
+  buildkite-agent annotate --style warning --context skipped-on-main --append <<EOF || echo "[skipped-on-main] failed to annotate build (non-fatal)"
+**${context}** ([job](#${BUILDKITE_JOB_ID:-})) — failures ignored because these tests are skipped on \`${GITHUB_PR_TARGET_BRANCH}\` (\`${SKIPPED_ON_MAIN_TARGET_SHA:0:12}\`) but not at the PR merge base (\`${GITHUB_PR_MERGE_BASE:0:12}\`):
 
 ${forgiven}
 
