@@ -221,9 +221,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       maxRetries: this.maxRetries,
       metadata: {
         ...(this.telemetryMetadata ? { connectorTelemetry: this.telemetryMetadata } : {}),
-        ...(this.sessionId || this.agentId
-          ? { workflowAnonymization: { sessionId: this.sessionId, agentId: this.agentId } }
-          : {}),
+        ...(this.agentId ? { agentId: this.agentId } : {}),
       },
       timeout: options.timeout ?? this.timeout,
       maxContentLength: this.maxContentLength,
