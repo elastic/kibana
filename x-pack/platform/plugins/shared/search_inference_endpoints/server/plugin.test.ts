@@ -10,6 +10,10 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import { SearchInferenceEndpointsPlugin } from './plugin';
 import {
   ELASTIC_INFERENCE_SERVICE_APP_ID,
@@ -134,6 +138,88 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
       expect(requestsUsed).toContain(requestA);
       expect(requestsUsed).toContain(requestB);
+    });
+
+    describe('getForFeature with onlyReturnConfigured', () => {
+      it('returns empty list when no SO entry and no recommended endpoints', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const result = await startContract.endpoints.getForFeature('any_feature', request, {
+          onlyReturnConfigured: true,
+        });
+        expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+      });
+
+      it('enforces defaultConnectorOnly policy: returns only the admin default connector', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const defaultConnector = {
+          connectorId: 'admin-default',
+          name: 'admin-default',
+          type: '.gen-ai',
+          config: {},
+          capabilities: {},
+          isPreconfigured: false,
+          isInferenceEndpoint: false,
+        };
+
+        // Configure uiSettings to indicate defaultConnectorOnly is enabled
+        const uiSettingsScoped = {
+          get: jest.fn().mockImplementation((key: string) => {
+            if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return true;
+            if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'admin-default';
+            return undefined;
+          }),
+        };
+        coreStart.uiSettings.asScopedToClient.mockReturnValue(uiSettingsScoped as any);
+
+        const inference = inferenceMock.createStartContract();
+        inference.getConnectorList.mockResolvedValue([]);
+        inference.getConnectorById.mockResolvedValue(defaultConnector as any);
+
+        const contractWithDefaultOnly = plugin.start(coreStart, {
+          actions: actionsMock.createStart(),
+          inference,
+        });
+
+        const result = await contractWithDefaultOnly.endpoints.getForFeature(
+          'any_feature',
+          request,
+          { onlyReturnConfigured: true }
+        );
+        expect(result).toEqual({
+          endpoints: [defaultConnector],
+          warnings: [],
+          soEntryFound: false,
+        });
+      });
+
+      it('returns empty list when defaultConnectorOnly is set but no default connector is configured', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        const uiSettingsScoped = {
+          get: jest.fn().mockImplementation((key: string) => {
+            if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return true;
+            if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'NO_DEFAULT_CONNECTOR';
+            return undefined;
+          }),
+        };
+        coreStart.uiSettings.asScopedToClient.mockReturnValue(uiSettingsScoped as any);
+
+        const inference = inferenceMock.createStartContract();
+        inference.getConnectorList.mockResolvedValue([]);
+        inference.getConnectorById.mockRejectedValue(new Error('not found'));
+
+        const contractWithDefaultOnly = plugin.start(coreStart, {
+          actions: actionsMock.createStart(),
+          inference,
+        });
+
+        const result = await contractWithDefaultOnly.endpoints.getForFeature(
+          'any_feature',
+          request,
+          { onlyReturnConfigured: true }
+        );
+        expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+      });
     });
   });
 });

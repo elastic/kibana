@@ -119,12 +119,12 @@ export const createModelProvider = ({
   const getFastModelConnectorId = memoizeAsync(async () => {
     const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
       AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
-      request
+      request,
+      { onlyReturnConfigured: true }
     );
 
-    const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
-    if (recommendedEndpoint.length > 0) {
-      return recommendedEndpoint[0].connectorId;
+    if (endpoints.length > 0) {
+      return endpoints[0].connectorId;
     }
 
     const fallbackId = await getDefaultConnectorId();
@@ -215,8 +215,9 @@ export const createModelProvider = ({
       getFastModelConnectorId(),
       getDefaultConnectorId(),
     ]);
-    // getFastModelConnectorId falls back to the default connector when no recommended fast endpoint
-    // is configured, so a distinct id means a genuinely dedicated (cheaper) fast model exists.
+    // getFastModelConnectorId falls back to the default connector when no fast endpoint is
+    // configured (no SO override, no EIS recommended endpoint), so a distinct id means a
+    // genuinely dedicated (cheaper/faster) fast model exists.
     return fastConnectorId !== resolvedDefaultConnectorId;
   });
 

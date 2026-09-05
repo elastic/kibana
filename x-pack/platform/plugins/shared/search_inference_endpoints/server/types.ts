@@ -59,10 +59,26 @@ export interface ResolvedInferenceApiEndpoints {
   soEntryFound: boolean;
 }
 
+export interface GetForFeatureOptions {
+  /**
+   * When true, bypasses the global-default-prepend logic in `resolveModelsForFeature` and
+   * skips the `KIBANA_DEFAULT_CHAT_COMPLETION` ultimate fallback.
+   *
+   * - SO overrides and `recommendedEndpoints` are still returned normally.
+   * - An empty list signals "nothing explicitly configured for this feature".
+   *
+   * Use this when the caller wants a clean "nothing configured" signal and
+   * handles the fallback itself (e.g. Agent Builder falling back to the
+   * user's current execution model).
+   */
+  onlyReturnConfigured?: boolean;
+}
+
 export interface InferenceEndpointsContract {
   getForFeature: (
     featureId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    opts?: GetForFeatureOptions
   ) => Promise<ResolvedInferenceApiEndpoints>;
 }
 
