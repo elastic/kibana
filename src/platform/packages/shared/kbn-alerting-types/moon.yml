@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/utility-types'
   - '@kbn/licensing-types'
+  - '@kbn/change-history'
 tags:
   - shared-common
   - package

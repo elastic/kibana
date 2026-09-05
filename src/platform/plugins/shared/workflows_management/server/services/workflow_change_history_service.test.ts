@@ -17,6 +17,7 @@ import {
   WORKFLOW_CHANGE_HISTORY_MODULE,
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
+  WorkflowChangeHistoryAction,
 } from '../../common/lib/workflow_change_history/constants';
 
 jest.mock('@kbn/change-history', () => {
@@ -158,7 +159,7 @@ describe('WorkflowChangeHistoryService', () => {
           snapshot: { name: 'A' },
         },
       ],
-      { action: 'workflow_update', spaceId: 'default' }
+      { action: WorkflowChangeHistoryAction.workflowUpdate, spaceId: 'default' }
     );
 
     expect(clientMock.logBulk).toHaveBeenCalledWith(
@@ -170,7 +171,7 @@ describe('WorkflowChangeHistoryService', () => {
         },
       ],
       {
-        action: 'workflow_update',
+        action: WorkflowChangeHistoryAction.workflowUpdate,
         spaceId: 'default',
         username: 'alice',
         userProfileId: 'profile-1',
@@ -190,13 +191,13 @@ describe('WorkflowChangeHistoryService', () => {
           snapshot: { name: 'A' },
         },
       ],
-      { action: 'install', spaceId: 'default' }
+      { action: WorkflowChangeHistoryAction.workflowInstall, spaceId: 'default' }
     );
 
     expect(clientMock.logBulk).toHaveBeenCalledWith(
       expect.any(Array),
       expect.objectContaining({
-        action: 'install',
+        action: WorkflowChangeHistoryAction.workflowInstall,
         spaceId: 'default',
         username: WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
       })
