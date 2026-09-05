@@ -55219,7 +55219,6 @@
     "xpack.streams.schemaEditor.fieldFormatSelector.customOptionText": "添加{searchValue}作为自定义格式",
     "xpack.streams.schemaEditor.fieldFormatSelector.placeholderText": "选择或输入字段格式……",
     "xpack.streams.schemaEditor.refreshDataButtonLabel": "刷新",
-    "xpack.streams.schemaEditor.rootStreamReadOnlyMode": "根数据流是选择性不可变的，其模式不可修改。要修改模式或添加处理步骤，请先划分一个新的子数据流。",
     "xpack.streams.schemaEditor.submitChangesButtonLabel": "提交更改",
     "xpack.streams.schemaEditor.viewCodeButtonText": "查看 API 请求",
     "xpack.streams.schemaEditorFlyout.closeButtonLabel": "取消",

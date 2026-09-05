@@ -147,7 +147,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
 
   const isRootStream = isRootStreamDefinition(definition.stream);
   const isReplicated = definition.replicated === true;
-  const canEditSchema = !isRootStream && !isReplicated && definition.privileges.manage;
+  const canEditSchema = !isReplicated && definition.privileges.manage;
   const handleAddField = canEditSchema ? addField : undefined;
 
   return (
@@ -156,9 +156,9 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
         <>
           <EuiCallOut
             iconType="info"
-            title={i18n.translate('xpack.streams.schemaEditor.rootStreamReadOnlyMode', {
+            title={i18n.translate('xpack.streams.schemaEditor.rootStreamAdditiveMappings', {
               defaultMessage:
-                'Root streams are selectively immutable and their schema cannot be modified. To modify the schema or to add processing steps, partition a new child stream first.',
+                'Custom field mappings on this root stream are inherited by all child streams. Built-in default mappings cannot be removed or overridden.',
             })}
             announceOnMount={false}
             size="s"

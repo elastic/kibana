@@ -258,6 +258,53 @@ describe('buildSchemaSavePayload', () => {
     // Should not include trace_id since description matches inherited
     expect('wired' in payload.ingest && payload.ingest.wired.fields).toEqual({});
   });
+
+  it('preserves system fields from the current wired stream definition', () => {
+    const mockDefinition = buildWiredDefinition({
+      stream: {
+        ...buildWiredDefinition().stream,
+        ingest: {
+          ...buildWiredDefinition().stream.ingest,
+          wired: {
+            fields: {
+              'stream.name': { type: 'system' },
+              '@timestamp': { type: 'date' },
+            },
+            routing: [],
+          },
+        },
+      },
+    });
+
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'stream.name',
+        parent: 'logs',
+        status: 'mapped',
+        type: 'system',
+      },
+      {
+        name: '@timestamp',
+        parent: 'logs',
+        status: 'mapped',
+        type: 'date',
+      },
+      {
+        name: 'attributes.organization_id',
+        parent: 'logs',
+        status: 'mapped',
+        type: 'keyword',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    expect('wired' in payload.ingest && payload.ingest.wired.fields).toEqual({
+      'stream.name': { type: 'system' },
+      '@timestamp': { type: 'date' },
+      'attributes.organization_id': { type: 'keyword' },
+    });
+  });
 });
 
 describe('convertToFieldDefinitionConfig', () => {

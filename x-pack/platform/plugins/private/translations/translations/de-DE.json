@@ -55037,7 +55037,6 @@
     "xpack.streams.schemaEditor.fieldFormatSelector.customOptionText": "Fügen Sie {searchValue} als benutzerdefiniertes Format hinzu",
     "xpack.streams.schemaEditor.fieldFormatSelector.placeholderText": "Feldformat auswählen oder eingeben...",
     "xpack.streams.schemaEditor.refreshDataButtonLabel": "Aktualisieren",
-    "xpack.streams.schemaEditor.rootStreamReadOnlyMode": "Root-Streams sind selektiv unveränderlich und ihr Schema kann nicht modifiziert werden. Um das Schema zu ändern oder Verarbeitungsschritte hinzuzufügen, partitionieren Sie zuerst einen neuen untergeordneten Stream.",
     "xpack.streams.schemaEditor.submitChangesButtonLabel": "Änderungen einreichen",
     "xpack.streams.schemaEditor.viewCodeButtonText": "API-Anfrage anzeigen",
     "xpack.streams.schemaEditorFlyout.closeButtonLabel": "Abbrechen",

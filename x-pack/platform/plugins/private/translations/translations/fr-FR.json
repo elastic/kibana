@@ -54797,7 +54797,6 @@
     "xpack.streams.schemaEditor.fieldFormatSelector.customOptionText": "Ajouter {searchValue} comme format personnalisé",
     "xpack.streams.schemaEditor.fieldFormatSelector.placeholderText": "Sélectionnez ou tapez le format du champ...",
     "xpack.streams.schemaEditor.refreshDataButtonLabel": "Actualiser",
-    "xpack.streams.schemaEditor.rootStreamReadOnlyMode": "Les flux racines sont sélectivement immuables et leur schéma ne peut pas être modifié. Pour modifier le schéma ou ajouter des étapes de traitement, partitionnez d’abord un nouveau flux enfant.",
     "xpack.streams.schemaEditor.submitChangesButtonLabel": "Soumettre les modifications",
     "xpack.streams.schemaEditor.viewCodeButtonText": "Voir la requête API",
     "xpack.streams.schemaEditorFlyout.closeButtonLabel": "Annuler",

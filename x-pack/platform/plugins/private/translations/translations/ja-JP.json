@@ -55215,7 +55215,6 @@
     "xpack.streams.schemaEditor.fieldFormatSelector.customOptionText": "{searchValue}をカスタム形式として追加",
     "xpack.streams.schemaEditor.fieldFormatSelector.placeholderText": "フィールド形式を選択または入力します...",
     "xpack.streams.schemaEditor.refreshDataButtonLabel": "更新",
-    "xpack.streams.schemaEditor.rootStreamReadOnlyMode": "ルートストリームは選択的に不変であり、そのスキーマは変更できません。スキーマを変更したり、処理手順を追加したりするには、まず新しい子ストリームをパーティション分割します。",
     "xpack.streams.schemaEditor.submitChangesButtonLabel": "変更を送信",
     "xpack.streams.schemaEditor.viewCodeButtonText": "API リクエストを表示",
     "xpack.streams.schemaEditorFlyout.closeButtonLabel": "キャンセル",
