@@ -20,7 +20,7 @@ export const toCaseAdapterData = (data: CaseAttachmentData): CaseData => ({
   total_observables: data.total_observables ?? undefined,
   tags: data.tags,
   owner: data.owner,
-  assignees: data.assignees?.map((assignee) => assignee.uid),
+  assignees: data.assignees,
   category: data.category,
   connector_name: data.connector_name ?? undefined,
   created_at: data.created_at,
