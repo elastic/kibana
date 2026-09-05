@@ -130794,17 +130794,20 @@ components:
         - in-progress
       type: string
     Security_Detections_API_AlertSuppression:
-      description: Defines alert suppression configuration.
+      description: |
+        Defines alert suppression configuration. At least one of `group_by` or `group_by_v2`
+        must be provided with at least one field when suppression is enabled (enforced by
+        request validation, not by this object schema alone).
       type: object
       properties:
         duration:
           $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionDuration'
         group_by:
           $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionGroupBy'
+        group_by_v2:
+          $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionGroupByV2'
         missing_fields_strategy:
           $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionMissingFieldsStrategy'
-      required:
-        - group_by
     Security_Detections_API_AlertSuppressionDuration:
       type: object
       properties:
@@ -130826,6 +130829,26 @@ components:
     Security_Detections_API_AlertSuppressionGroupBy:
       items:
         type: string
+      maxItems: 3
+      minItems: 1
+      type: array
+    Security_Detections_API_AlertSuppressionGroupByFieldV2:
+      description: Per-field suppression options. Reserved for field-specific duration windows and sequence event targeting; executors may not honor all properties until follow-up work lands.
+      type: object
+      properties:
+        duration:
+          $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionDuration'
+        field:
+          type: string
+        sequence_index:
+          description: When using EQL sequence rules, identifies which sequence event this field applies to.
+          minimum: 0
+          type: integer
+      required:
+        - field
+    Security_Detections_API_AlertSuppressionGroupByV2:
+      items:
+        $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionGroupByFieldV2'
       maxItems: 3
       minItems: 1
       type: array

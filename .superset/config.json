@@ -1,0 +1,7 @@
+{
+  "setup": [
+    "nvm use && start-bootstrap"
+  ],
+  "teardown": [],
+  "run": []
+}

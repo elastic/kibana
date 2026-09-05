@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { isThresholdRule } from '../../../../../common/detection_engine/utils';
+import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import type { FormHook } from '../../../../shared_imports';
 import { useFormData } from '../../../../shared_imports';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
@@ -17,6 +17,7 @@ import {
   ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { AlertSuppressionDurationType, type DefineStepRule } from '../../../common/types';
@@ -33,6 +34,7 @@ export function usePersistentAlertSuppressionState({
       ruleType,
       [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: thresholdAlertSuppressionEnabled,
       [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: suppressionFields,
+      [ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME]: suppressionGroupByV2,
       [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: suppressionDurationType,
       [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: suppressionDuration,
       [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: suppressionMissingFieldsStrategy,
@@ -43,6 +45,7 @@ export function usePersistentAlertSuppressionState({
       'ruleType',
       THRESHOLD_ALERT_SUPPRESSION_ENABLED,
       ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+      ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
       ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
       `${ALERT_SUPPRESSION_DURATION_FIELD_NAME}.${ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME}`,
       `${ALERT_SUPPRESSION_DURATION_FIELD_NAME}.${ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME}`,
@@ -59,6 +62,7 @@ export function usePersistentAlertSuppressionState({
     form.updateFieldValues({
       [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: thresholdAlertSuppressionEnabled,
       [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: suppressionFields,
+      [ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME]: isEqlRule(ruleType) ? suppressionGroupByV2 : [],
       ...(isThresholdRule(ruleType)
         ? {
             [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]:
@@ -74,6 +78,7 @@ export function usePersistentAlertSuppressionState({
     previousRuleType,
     thresholdAlertSuppressionEnabled,
     suppressionFields,
+    suppressionGroupByV2,
     suppressionDurationType,
     suppressionDuration,
     suppressionMissingFieldsStrategy,

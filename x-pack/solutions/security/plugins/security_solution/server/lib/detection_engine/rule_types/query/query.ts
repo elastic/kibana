@@ -17,6 +17,7 @@ import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import { getEffectiveSuppressionGroupByFields } from '../utils/effective_alert_suppression_fields';
 
 export const queryExecutor = async ({
   sharedParams,
@@ -54,16 +55,18 @@ export const queryExecutor = async ({
     const license = await firstValueFrom(licensing.license$);
     const hasPlatinumLicense = license.hasAtLeast('platinum');
 
+    const suppressionFields = getEffectiveSuppressionGroupByFields(ruleParams.alertSuppression);
+
     const result =
       // TODO: replace this with getIsAlertSuppressionActive function
-      ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
+      suppressionFields.length > 0 && hasPlatinumLicense
         ? await groupAndBulkCreate({
             sharedParams,
             services,
             filter: esFilter,
             buildReasonMessage: buildReasonMessageForQueryAlert,
             bucketHistory,
-            groupByFields: ruleParams.alertSuppression.groupBy,
+            groupByFields: suppressionFields,
             eventsTelemetry,
             isLoggedRequestsEnabled,
           })

@@ -691,7 +691,7 @@ async function inputAlertSuppression(
     return;
   }
 
-  for (const fieldName of value.group_by) {
+  for (const fieldName of value.group_by ?? []) {
     await selectEuiComboBoxOption({
       comboBoxToggleButton: within(fieldFinalSide).getByTestId('comboBoxToggleListButton'),
       optionText: fieldName,

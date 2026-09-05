@@ -25,6 +25,7 @@ import type { EventsAndTerms } from './types';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import { wrapSuppressedNewTermsAlerts } from './wrap_suppressed_new_terms_alerts';
 import type { NewTermsRuleParams } from '../../rule_schema';
+import { getEffectiveSuppressionGroupByFields } from '../utils/effective_alert_suppression_fields';
 
 export interface BulkCreateSuppressedAlertsParams {
   services: SecurityRuleServices;
@@ -56,7 +57,7 @@ export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
       eventsAndTerms,
-      alertSuppression.groupBy || [],
+      getEffectiveSuppressionGroupByFields(alertSuppression),
       ['event', 'fields']
     );
 

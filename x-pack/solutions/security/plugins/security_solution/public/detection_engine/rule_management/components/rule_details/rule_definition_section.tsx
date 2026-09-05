@@ -882,7 +882,7 @@ const prepareDefinitionSectionListItems = ({
             />
           </span>
         ),
-        description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
+        description: <SuppressAlertsByField fields={rule.alert_suppression.group_by ?? []} />,
       });
     }
 
