@@ -16,32 +16,65 @@ import { unwrapSchema } from './unwrap_schema';
  */
 export const LIQUID_DYNAMIC_KEY_SEGMENT = '__liquid_dynamic_key__';
 
-const isQuotedBracket = (inner: string): string | null => {
-  const doubleQuoted = inner.match(/^"((?:[^"\\]|\\.)*)"$/);
-  if (doubleQuoted) {
-    return doubleQuoted[1];
+const unquoteBracketKey = (inner: string): string | null => {
+  if (inner.length < 2) {
+    return null;
   }
-  const singleQuoted = inner.match(/^'((?:[^'\\]|\\.)*)'$/);
-  if (singleQuoted) {
-    return singleQuoted[1];
+  const quote = inner[0];
+  if ((quote !== '"' && quote !== "'") || inner[inner.length - 1] !== quote) {
+    return null;
   }
-  return null;
+  return inner.slice(1, -1);
 };
 
-export function parsePath(path: string) {
-  const normalized = path.replace(/\[([^\]]+)\]/g, (_, raw: string) => {
-    const inner = raw.trim();
-    const quoted = isQuotedBracket(inner);
-    if (quoted !== null) {
-      return `.${quoted}`;
+export function parsePath(path: string): string[] | null {
+  const segments: string[] = [];
+  let current = '';
+  let i = 0;
+  while (i < path.length) {
+    const ch = path[i];
+    if (ch === '.') {
+      if (i === path.length - 1) {
+        return null;
+      }
+      if (current !== '') {
+        segments.push(current);
+        current = '';
+      } else if (segments.length === 0 || path[i - 1] !== ']') {
+        return null;
+      }
+    } else if (ch === '[') {
+      if (current !== '') {
+        segments.push(current);
+        current = '';
+      } else if (segments.length === 0) {
+        return null;
+      }
+      const close = path.indexOf(']', i + 1);
+      if (close === -1) {
+        return null;
+      }
+      const inner = path.slice(i + 1, close).trim();
+      const quoted = unquoteBracketKey(inner);
+      if (quoted !== null) {
+        segments.push(quoted);
+      } else if (/^-?\d+$/.test(inner)) {
+        segments.push(inner);
+      } else if (inner.length === 0) {
+        return null;
+      } else {
+        segments.push(LIQUID_DYNAMIC_KEY_SEGMENT);
+      }
+      i = close;
+    } else {
+      current += ch;
     }
-    if (/^-?\d+$/.test(inner)) {
-      return `.${inner}`;
-    }
-    return `.${LIQUID_DYNAMIC_KEY_SEGMENT}`;
-  });
-  const segments = normalized.split('.');
-  return segments.some((s) => s === '') ? null : segments;
+    i += 1;
+  }
+  if (current !== '') {
+    segments.push(current);
+  }
+  return segments.length === 0 || segments.some((segment) => segment === '') ? null : segments;
 }
 
 interface GetSchemaAtPathResult {
@@ -132,49 +165,48 @@ export function getSchemaAtPath(
       } else if (current instanceof z.ZodArray) {
         if (isDynamicKey) {
           current = current.element as z.ZodType;
-          continue;
-        }
-        if (!/^\d+$/.test(segment)) {
+        } else if (!/^\d+$/.test(segment)) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
             : { schema: null, scopedToPath: null };
-        }
-        const arrayIndex = parseInt(segment, 10);
+        } else {
+          const arrayIndex = parseInt(segment, 10);
 
-        // Reject negative indices
-        if (arrayIndex < 0) {
-          return partial
-            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
-            : { schema: null, scopedToPath: null };
-        }
+          // Reject negative indices
+          if (arrayIndex < 0) {
+            return partial
+              ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+              : { schema: null, scopedToPath: null };
+          }
 
-        // Check for array length constraints in Zod v4
-        // Array constraints are stored in the checks array
-        let maxLength: number | undefined;
+          // Check for array length constraints in Zod v4
+          // Array constraints are stored in the checks array
+          let maxLength: number | undefined;
 
-        if (current.def.checks) {
-          for (const check of current.def.checks) {
-            if (check._zod?.def) {
-              const checkDef = check._zod.def;
-              if (checkDef.check === 'max_length') {
-                maxLength = (checkDef as z.core.$ZodCheckMaxLengthDef).maximum;
-              } else if (checkDef.check === 'length_equals') {
-                maxLength = (checkDef as z.core.$ZodCheckLengthEqualsDef).length;
+          if (current.def.checks) {
+            for (const check of current.def.checks) {
+              if (check._zod?.def) {
+                const checkDef = check._zod.def;
+                if (checkDef.check === 'max_length') {
+                  maxLength = (checkDef as z.core.$ZodCheckMaxLengthDef).maximum;
+                } else if (checkDef.check === 'length_equals') {
+                  maxLength = (checkDef as z.core.$ZodCheckLengthEqualsDef).length;
+                }
               }
             }
           }
-        }
 
-        // Only enforce bounds checking for arrays with explicit length constraints
-        if (maxLength !== undefined && arrayIndex >= maxLength) {
-          return partial
-            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
-            : { schema: null, scopedToPath: null };
-        }
+          // Only enforce bounds checking for arrays with explicit length constraints
+          if (maxLength !== undefined && arrayIndex >= maxLength) {
+            return partial
+              ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+              : { schema: null, scopedToPath: null };
+          }
 
-        // For unconstrained arrays, we allow any non-negative index for schema introspection
-        // This is because we're validating schema paths, not runtime data
-        current = current.element as z.ZodType;
+          // For unconstrained arrays, we allow any non-negative index for schema introspection
+          // This is because we're validating schema paths, not runtime data
+          current = current.element as z.ZodType;
+        }
       } else if (current instanceof z.ZodAny) {
         // pass through any to preserve the description
         return { schema: current, scopedToPath: segments.slice(0, index).join('.') };

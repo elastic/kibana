@@ -143,6 +143,14 @@ describe('getSchemaAtPath', () => {
     expect(getSchemaAtPath(schema, 'rules[ep.rule_id].name').schema).not.toBeNull();
     expect(getSchemaAtPath(schema, 'rules[ep.rule_id].nmae').schema).toBeNull();
   });
+
+  it('treats a Liquid dynamic subscript as one array element', () => {
+    const schema = z.object({
+      data: z.array(z.object({ name: z.string() })),
+    });
+    expect(getSchemaAtPath(schema, 'data[item].name').schema).not.toBeNull();
+    expect(getSchemaAtPath(schema, 'data[item].nmae').schema).toBeNull();
+  });
 });
 
 describe('getSchemaAtPath: real life examples', () => {
