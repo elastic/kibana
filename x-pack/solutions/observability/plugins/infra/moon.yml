@@ -124,6 +124,8 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-chrome-browser'
+  - '@kbn/app-header'
+  - '@kbn/app-menu'
   - '@kbn/object-utils'
   - '@kbn/coloring'
   - '@kbn/saved-search-component'
