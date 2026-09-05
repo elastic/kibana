@@ -22,10 +22,12 @@ import {
 
 apiTest.describe('lens visualizations - update', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let testTagId: string;
 
   apiTest.beforeAll(async ({ lensHelper, requestAuth }) => {
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     await lensHelper.loadLensExampleDocs();
+    testTagId = await lensHelper.createTag('lens-update-test-tag');
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -46,6 +48,20 @@ apiTest.describe('lens visualizations - update', { tag: tags.deploymentAgnostic 
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.data.title).toBe(title);
+  });
+
+  apiTest('should persist tags through the update response', async ({ apiClient }) => {
+    const response = await apiClient.put(`${LENS_API_PATH}/${KNOWN_LENS_ID}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: getExampleLensBody(undefined, undefined, [testTagId]),
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.data.tags).toStrictEqual([testTagId]);
   });
 
   apiTest('should upsert when no visualization exists for the id', async ({ apiClient }) => {

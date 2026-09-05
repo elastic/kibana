@@ -28,6 +28,8 @@ export interface LensHelper {
    * fixture Lens visualizations from `LENS_EXAMPLE_DOCS_ARCHIVE`.
    */
   loadLensExampleDocs: () => Promise<void>;
+  /** Creates a tag saved object and returns its ID. */
+  createTag: (name: string) => Promise<string>;
 }
 
 interface LensApiWorkerFixtures extends ScoutWorkerFixtures {
@@ -54,7 +56,15 @@ export const apiTest = baseApiTest.extend<ScoutTestFixtures, LensApiWorkerFixtur
         await kbnClient.importExport.load(LENS_EXAMPLE_DOCS_ARCHIVE);
       };
 
-      await use({ createSampleDataView, loadLensExampleDocs });
+      const createTag: LensHelper['createTag'] = async (name) => {
+        const so = await kbnClient.savedObjects.create({
+          type: 'tag',
+          attributes: { name, description: '', color: '#FFFFFF' },
+        });
+        return so.id;
+      };
+
+      await use({ createSampleDataView, loadLensExampleDocs, createTag });
     },
     { scope: 'worker' },
   ],

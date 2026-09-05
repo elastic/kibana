@@ -42,7 +42,8 @@ export const LENS_EXAMPLE_DOCS_ARCHIVE =
  */
 export const getExampleLensBody = (
   title = `Lens vis - ${Date.now()} - ${Math.random()}`,
-  description = ''
+  description = '',
+  tags: string[] = []
 ): LensCreateRequestBody => ({
   type: 'metric',
   title,
@@ -64,5 +65,5 @@ export const getExampleLensBody = (
       value: { alignment: LENS_METRIC_STATE_DEFAULTS.primaryAlign, sizing: 'auto' },
     },
   },
-  tags: [],
+  tags,
 });
