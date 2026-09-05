@@ -11,6 +11,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import {
   ExpandedDocLinkability,
+  getEsqlMissingMetadataExample,
   getExpandedDocLinkDisabledReason,
   getExpandedDocLinkability,
   getExpandedDocRef,
@@ -114,7 +115,31 @@ describe('getExpandedDocLinkDisabledReason', () => {
 
   it('explains how to include the required metadata in a FROM query', () => {
     expect(getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlMissingMetadata)).toBe(
-      'Add "METADATA _id, _index" to your query to link to individual results.'
+      'Add "METADATA _id, _index" on the FROM or TS line to share this result.'
     );
+  });
+});
+
+describe('getEsqlMissingMetadataExample', () => {
+  it('uses the current FROM source in the example', () => {
+    expect(getEsqlMissingMetadataExample('FROM logs-* | WHERE host.name == "web-01"')).toBe(
+      'FROM logs-* METADATA _id, _index'
+    );
+  });
+
+  it('uses the current TS source in the example', () => {
+    expect(getEsqlMissingMetadataExample('TS metrics-* | LIMIT 100')).toBe(
+      'TS metrics-* METADATA _id, _index'
+    );
+  });
+
+  it('keeps comma-separated sources in the example', () => {
+    expect(getEsqlMissingMetadataExample('FROM logs-*, events-*')).toBe(
+      'FROM logs-*,events-* METADATA _id, _index'
+    );
+  });
+
+  it('falls back to a generic FROM example when the source cannot be parsed', () => {
+    expect(getEsqlMissingMetadataExample('')).toBe('FROM index METADATA _id, _index');
   });
 });

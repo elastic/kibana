@@ -10,7 +10,12 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
-import { getAnySourceCommandFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import {
+  getAnySourceCommandFromESQLQuery,
+  getIndexPatternFromESQLQuery,
+  getSourceCommandFromESQLQuery,
+  hasTransformationalCommand,
+} from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -56,6 +61,17 @@ export const isEsqlSourceCommandLinkable = (esql: string): boolean => {
 };
 
 /**
+ * Builds a source-line example showing where to place `METADATA _id, _index`.
+ * Uses the current query's command and index pattern when they can be parsed.
+ */
+export const getEsqlMissingMetadataExample = (esql: string): string => {
+  const sourceCommand = getSourceCommandFromESQLQuery(esql) || 'FROM';
+  const indexPattern = getIndexPatternFromESQLQuery(esql) || 'index';
+
+  return `${sourceCommand} ${indexPattern} METADATA _id, _index`;
+};
+
+/**
  * Determines whether a document is deep linkable. Transformational ES|QL rows cannot be reliably refetched,
  * and metadata is checked directly on the document instance because query edits do not change open rows.
  */
@@ -91,7 +107,7 @@ export const getExpandedDocLinkDisabledReason = (
       });
     case ExpandedDocLinkability.EsqlMissingMetadata:
       return i18n.translate('discover.expandedDoc.esqlMissingMetadataDescription', {
-        defaultMessage: 'Add "METADATA _id, _index" to your query to link to individual results.',
+        defaultMessage: 'Add "METADATA _id, _index" on the FROM or TS line to share this result.',
       });
     case ExpandedDocLinkability.EsqlTransformational:
       return i18n.translate('discover.expandedDoc.esqlTransformationalDescription', {
