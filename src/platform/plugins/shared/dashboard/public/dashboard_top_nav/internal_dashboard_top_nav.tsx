@@ -179,6 +179,8 @@ export function InternalDashboardTopNav({
     unpublishedTimeslice,
     publishedEsqlVariables,
     unpublishedEsqlVariables,
+    dataLoading,
+    canCancel,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
     dashboardApi.fullScreenMode$,
@@ -193,7 +195,9 @@ export function InternalDashboardTopNav({
     dashboardApi.publishedTimeslice$,
     dashboardApi.unpublishedTimeslice$,
     dashboardInternalApi.publishedEsqlVariables$,
-    dashboardInternalApi.unpublishedEsqlVariables$
+    dashboardInternalApi.unpublishedEsqlVariables$,
+    dashboardApi.dataLoading$,
+    dashboardApi.canCancel$
   );
 
   const hasUnpublishedFilters = useMemo(() => {
@@ -393,6 +397,10 @@ export function InternalDashboardTopNav({
     [redirectTo]
   );
 
+  const handleCancel = useCallback(() => {
+    dashboardApi.cancelAllRequests();
+  }, [dashboardApi]);
+
   const shareAction = useDashboardShareAction({ maybeRedirect });
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
@@ -531,6 +539,8 @@ export function InternalDashboardTopNav({
           hasDirtyState={
             hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
           }
+          isLoading={dataLoading ?? false}
+          onCancel={canCancel ? handleCancel : undefined}
           useBackgroundSearchButton={
             dataService.search.isBackgroundSearchEnabled &&
             getDashboardCapabilities().storeSearchSession
