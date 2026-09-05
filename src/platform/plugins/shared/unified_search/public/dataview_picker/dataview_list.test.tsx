@@ -12,7 +12,15 @@ import type { DataViewListItemEnhanced, DataViewsListProps } from './dataview_li
 import { DataViewsList } from './dataview_list';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { copyToClipboard } from '@elastic/eui';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  copyToClipboard: jest.fn(),
+}));
 
 // Mock DOM measurement functions to prevent EUI truncation width errors
 Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
@@ -103,6 +111,27 @@ describe('DataView list component', () => {
       expect(screen.getByRole('option', { name: /^dataview-1 / })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: /^dataview-2 / })).toBeInTheDocument();
     });
+  });
+
+  it('copies the data view name and shows a toast without changing the selected data view', async () => {
+    const user = userEvent.setup();
+    const notifications = notificationServiceMock.createStartContract();
+
+    renderWithContainer(
+      <KibanaContextProvider services={{ notifications }}>
+        <DataViewsList {...props} />
+      </KibanaContextProvider>
+    );
+
+    const copyButton = await screen.findByTestId('dataViewCopyName-dataview-2');
+    await user.click(copyButton);
+
+    expect(copyToClipboard).toHaveBeenCalledWith('dataview-2');
+    expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'dataview-2' })
+    );
+    // clicking copy must not select the row
+    expect(changeDataViewSpy).not.toHaveBeenCalled();
   });
 
   describe('ad hoc data views', () => {
