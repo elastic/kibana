@@ -392,12 +392,11 @@ describe('InferenceChatModel', () => {
       });
     });
 
-    it('includes sessionId and agentId as anonymization in the chatComplete call metadata', async () => {
+    it('includes agentId flat on chatComplete metadata when set', async () => {
       const chatModel = new InferenceChatModel({
         chatComplete,
         connector,
         telemetryMetadata,
-        sessionId: 'sess-1',
         agentId: 'agent-a',
       });
 
@@ -410,13 +409,13 @@ describe('InferenceChatModel', () => {
         expect.objectContaining({
           metadata: {
             connectorTelemetry: telemetryMetadata,
-            workflowAnonymization: { sessionId: 'sess-1', agentId: 'agent-a' },
+            agentId: 'agent-a',
           },
         })
       );
     });
 
-    it('omits workflowAnonymization from chatComplete metadata when neither sessionId nor agentId is set', async () => {
+    it('omits agentId from chatComplete metadata when not set', async () => {
       const chatModel = new InferenceChatModel({ chatComplete, connector, telemetryMetadata });
 
       const response = createResponse({ content: 'dummy' });

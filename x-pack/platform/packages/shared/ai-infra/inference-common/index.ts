@@ -64,7 +64,6 @@ export {
   type ConnectorTelemetryMetadata,
   type ChatCompleteAnonymizationMetadata,
   type ChatCompleteAnonymizationTarget,
-  type WorkflowAnonymizationContext,
   type AnonymizationRule,
   type RegexAnonymizationRule,
   type NamedEntityRecognitionRule,
