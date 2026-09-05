@@ -8,6 +8,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
+import { expect } from '@kbn/scout/ui';
 import type { KbnClient, EsClient, ApiServicesFixture, ScoutLogger } from '@kbn/scout';
 
 const ROOT_STREAMS = ['logs.ecs', 'logs.otel'];
@@ -77,6 +78,22 @@ export const createQueryStream = async (
     },
     body: { query: { esql: query } },
   });
+
+  // The list view fetches `GET /internal/streams` once with no polling, so wait until the stream is listable before the page loads.
+  await expect
+    .poll(
+      async () => {
+        const response = await kbnClient.request<{
+          streams: Array<{ stream: { name: string } }>;
+        }>({
+          method: 'GET',
+          path: `/internal/streams`,
+        });
+        return response.data.streams.some(({ stream }) => stream.name === queryStreamName);
+      },
+      { timeout: 30_000 }
+    )
+    .toBe(true);
 };
 
 export const deleteQueryStream = async (
