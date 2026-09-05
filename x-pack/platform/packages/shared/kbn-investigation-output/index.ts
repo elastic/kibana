@@ -6,6 +6,8 @@
  */
 
 export { InvestigationOutput } from './src/investigation_output';
+export { HypothesisRow } from './src/hypothesis_row';
+export { FinalResults } from './src/final_results';
 export {
   useInvestigationState,
   type UseInvestigationStateResult,
