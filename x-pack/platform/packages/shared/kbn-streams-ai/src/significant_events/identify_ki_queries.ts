@@ -6,20 +6,7 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import type { QueryType } from '@kbn/significant-events-schema';
-import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
-import {
-  deriveQueryType,
-  extractReferencedColumns,
-  findOverBroadMatchPredicates,
-  renderOverBroadMatchError,
-  getSourcesForStream,
-  getStatsQueryHints,
-  normalizeEsqlSafe,
-  replaceFromSources,
-} from '@kbn/streams-schema';
-import type { ESQLSearchResponse } from '@kbn/es-types';
-import { getMappingConflicts } from '@kbn/ai-tools';
+import type { Feature } from '@kbn/significant-events-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ChatCompletionTokenCount,
@@ -33,7 +20,6 @@ import {
 } from '@kbn/inference-prompt-utils';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
-import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
 import {
@@ -47,154 +33,29 @@ import {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './tools/tool_usage';
+import {
+  createQueryValidationContext,
+  DEFAULT_QUERY_VALIDATION_TIMEOUT_MS,
+  validateKIQueries,
+  type CandidateKIQuery,
+  type ExistingQuerySummary,
+  type QueryAttempt,
+  type ValidatedKIQuery,
+} from './validate_ki_queries';
+
+export {
+  computeValidationLookback,
+  DEFAULT_QUERY_VALIDATION_TIMEOUT_MS,
+  type ExistingQuerySummary,
+  type QueryAttempt,
+  type QueryAttemptFailureReason,
+  type QueryAttemptStatus,
+} from './validate_ki_queries';
 
 export const DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
 
-export const DEFAULT_QUERY_VALIDATION_TIMEOUT_MS = 10_000;
-
-/**
- * Window the volume probe measures over, and the floor for the derived
- * validation lookback. Kept short so the probe itself is cheap.
- */
-const PROBE_WINDOW_MINUTES = 10;
-
-/**
- * Approximate document budget validation should touch. The lookback is
- * sized so that, at the rate observed by the probe, roughly this many
- * documents fall inside the window regardless of how dense or sparse the
- * stream is - dense streams get a narrow (fast) window, sparse streams get a
- * wider one so validation still runs against real data.
- */
-const TARGET_VALIDATION_DOCS = 100_000;
-
-/**
- * Upper bound on how far the lookback can widen for a stream with little to
- * no data in the probe window, so a near-empty stream doesn't push
- * validation queries against unbounded history.
- */
-const MAX_LOOKBACK_MINUTES = 10_080; // 7 days
-
-/**
- * Timeout for the volume probe itself, kept short and independent of
- * `queryValidationTimeoutMs` (which is tunable down to 1s). If the probe
- * shared that budget, a generally slow cluster would make the probe the
- * first thing to time out, silently regressing every call back to the
- * fallback window and defeating the point of probing at all.
- */
-const PROBE_TIMEOUT_MS = 5_000;
-
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-/**
- * Sizes the `@timestamp` lookback used to validate candidate KI queries.
- *
- * `sources` may be an ES|QL view (query streams resolve to a `$.`-prefixed
- * view with no backing index - see `getSourcesForStream`), so volume is
- * probed via ES|QL rather than the `_count` API, which cannot resolve views.
- *
- * @internal Exported for testing purposes only
- */
-export async function computeValidationLookback({
-  esClient,
-  sources,
-  signal,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  sources: string[];
-  signal: AbortSignal;
-  logger: Logger;
-}): Promise<string> {
-  const probeWindow = `now-${PROBE_WINDOW_MINUTES}m`;
-  try {
-    const response = (await esClient.esql.query(
-      {
-        query: `FROM ${sources.join(', ')} | STATS total = COUNT(*)`,
-        filter: {
-          range: {
-            '@timestamp': {
-              gte: probeWindow,
-              lte: 'now',
-            },
-          },
-        },
-      },
-      { signal, requestTimeout: PROBE_TIMEOUT_MS }
-    )) as unknown as ESQLSearchResponse;
-
-    const total = Number(response.values[0]?.[0] ?? 0);
-    if (total <= 0) {
-      return `now-${MAX_LOOKBACK_MINUTES}m`;
-    }
-
-    const ratePerMinute = total / PROBE_WINDOW_MINUTES;
-    const lookbackMinutes = Math.min(
-      MAX_LOOKBACK_MINUTES,
-      Math.max(PROBE_WINDOW_MINUTES, Math.round(TARGET_VALIDATION_DOCS / ratePerMinute))
-    );
-    return `now-${lookbackMinutes}m`;
-  } catch (error) {
-    // Unlike a confirmed total of 0 (real evidence the stream is quiet, so
-    // widening is justified), an error tells us nothing about density -
-    // there's no basis to guess wide, only to not regress from the fixed
-    // window this probe replaces.
-    logger.debug(
-      () =>
-        `Failed to probe validation volume for [${sources.join(
-          ', '
-        )}]; falling back to ${probeWindow}: ${getErrorMessage(error)}`
-    );
-    return probeWindow;
-  }
-}
-
-export interface ExistingQuerySummary {
-  id: string;
-  title: string;
-  type: string;
-  severity_score?: number;
-  description: string;
-  esql: string;
-}
-
-/**
- * Intermediate representation of a query as produced by the LLM tool output.
- * Uses a flat `esql` string (vs the wrapped `EsqlQuery` in the wire type)
- * and carries the `category` from the tool schema.
- */
-interface ParsedToolQuery {
-  type: QueryType;
-  esql: string;
-  title: string;
-  description: string;
-  category: SignificantEventType;
-  severity_score: number;
-  evidence?: string[];
-  replaces?: string;
-  expects_matches?: boolean;
-  features: QueryFeature[];
-}
-
-export type QueryAttemptStatus = 'Added' | 'Duplicate' | 'Failed to add';
-
-export type QueryAttemptFailureReason = 'missing_intent' | 'unknown_features' | 'validation_error';
-
-// Eval-only: one record per query across all add_queries calls, incl. rejected ones.
-export interface QueryAttempt {
-  title: string;
-  esql: string;
-  /** First-failure-wins, mirrors what the model is told. Not a duplicate-detection signal. */
-  status: QueryAttemptStatus;
-  replaces?: string;
-  /**
-   * Whether the query duplicates a seeded/existing one, determined independently of
-   * `status` so an earlier validation gate cannot hide it.
-   */
-  exactDuplicate?: boolean;
-  /** Why the attempt was rejected, when `status` is 'Failed to add'. */
-  failureReason?: QueryAttemptFailureReason;
 }
 
 /**
@@ -248,7 +109,7 @@ export async function identifyKIQueries({
   /** Eval-only: return a record of every attempted query, incl. rejected ones. */
   collectQueryAttempts?: boolean;
 }): Promise<{
-  queries: ParsedToolQuery[];
+  queries: ValidatedKIQuery[];
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
   reasoningDiagnostics: ReasoningPromptDiagnostics;
@@ -263,46 +124,15 @@ export async function identifyKIQueries({
     additionalTools,
     requireQueryIntent,
   });
-  const targetSources = getSourcesForStream(stream);
-
-  const [validationLookback, mappingConflicts] = await Promise.all([
-    computeValidationLookback({
-      esClient,
-      sources: targetSources,
-      signal,
-      logger,
-    }),
-    // Best-effort source-wide probe; drives full-source validation below and must not fail generation.
-    getMappingConflicts({
-      esClient,
-      index: targetSources,
-      signal: AbortSignal.any([signal, AbortSignal.timeout(15_000)]),
-    }).catch((error) => {
-      logger.debug(
-        () =>
-          `Failed to probe mapping conflicts for [${targetSources.join(', ')}]: ${getErrorMessage(
-            error
-          )}`
-      );
-      return [];
-    }),
-  ]);
-
-  const conflictingFields = new Set(mappingConflicts.map(({ field }) => field));
-
-  // Relax the lookback filter only for candidates that actually reference a union field;
-  // a global toggle would force every validation to scan full history.
-  const validateOverFullSource = (esql: string): boolean =>
-    conflictingFields.size > 0 &&
-    extractReferencedColumns(esql).some((name) => conflictingFields.has(name));
 
   const existingQueriesList = existingQueries ?? [];
-
-  // Candidates are compared after their FROM is rewritten, so seeds must be rewritten too or
-  // nothing ever matches. Idempotent for stored queries, which already carry rewritten sources.
-  const normalizedStoredEsqls = new Set(
-    existingQueriesList.map((q) => normalizeEsqlSafe(replaceFromSources(q.esql, targetSources)))
-  );
+  const validationContext = await createQueryValidationContext({
+    stream,
+    esClient,
+    existingQueries: existingQueriesList,
+    signal,
+    logger,
+  });
 
   const contextLimit = Math.max(0, Math.floor(maxExistingQueriesForContext));
 
@@ -314,8 +144,8 @@ export async function identifyKIQueries({
       )
     : '';
 
-  const returnedFeatureMap = new Map<string, string | undefined>();
-  const validatedQueries: ParsedToolQuery[] = [];
+  let returnedFeatureCount = 0;
+  const validatedQueries: ValidatedKIQuery[] = [];
   const queryAttempts: QueryAttempt[] | undefined = collectQueryAttempts ? [] : undefined;
   const resolvedMaxSteps = maxSteps ?? (additionalToolCallbacks ? 6 : 4);
 
@@ -353,10 +183,7 @@ export async function identifyKIQueries({
               })
             );
             const llmFeatures = features.map(toFeatureForLlmContext);
-
-            for (const feature of features) {
-              returnedFeatureMap.set(feature.id, feature.run_id);
-            }
+            returnedFeatureCount = llmFeatures.length;
 
             return {
               response: {
@@ -393,186 +220,29 @@ export async function identifyKIQueries({
               },
             };
           }
-          // Tracked separately: a missing-intent rejection can only happen when the eval turns
-          // `requireQueryIntent` on, so counting it in `add_queries.failures` would charge the model
-          // for a rule that does not exist in production and make tool-usage scores incomparable.
-          // The omission rate stays visible through `queryAttempts` (`failureReason`).
-          let hasNonIntentFailures = false;
-          let hasIntentFailures = false;
+          // Reload authoritative features because Agent Builder tool calls cannot share closure state.
+          const features = await getFeatures();
+          const {
+            results: queryValidationResults,
+            acceptedQueries,
+            attempts,
+            hasNonIntentFailures,
+            hasIntentFailures,
+          } = await validateKIQueries({
+            queries: queries as CandidateKIQuery[],
+            features,
+            context: validationContext,
+            esClient,
+            signal,
+            logger,
+            queryValidationTimeoutMs,
+            requireQueryIntent,
+            collectQueryAttempts,
+          });
 
-          const queryValidationResults = await Promise.all(
-            queries.map(async (query) => {
-              // `status` is first-failure-wins, so a duplicate that also trips an earlier gate
-              // would never be reported as one. Decide it up front, independently.
-              const exactDuplicate = collectQueryAttempts
-                ? normalizedStoredEsqls.has(
-                    normalizeEsqlSafe(replaceFromSources(query.esql, targetSources))
-                  )
-                : undefined;
-
-              if (requireQueryIntent && typeof query.expects_matches !== 'boolean') {
-                hasIntentFailures = true;
-                return {
-                  query,
-                  valid: false,
-                  status: 'Failed to add' as const,
-                  failureReason: 'missing_intent' as const,
-                  exactDuplicate,
-                  error:
-                    'Missing intent: set "expects_matches" to true when the query is grounded in evidence currently present and should match rows in the evaluation window, or to false when it deliberately watches for a plausible future condition not present in the current evidence.',
-                };
-              }
-
-              try {
-                const derivedType: QueryType = deriveQueryType(query.esql);
-                const warnings: string[] = [];
-
-                if (query.type && query.type !== derivedType) {
-                  warnings.push(
-                    `Type mismatch: declared "${query.type}" but ES|QL content is "${derivedType}". Using derived type.`
-                  );
-                }
-
-                const rawFeatureIds: string[] = query.feature_ids ?? [];
-                const validFeatureIds: string[] = [];
-                const invalidFeatureIds: string[] = [];
-                for (const id of rawFeatureIds) {
-                  (returnedFeatureMap.has(id) ? validFeatureIds : invalidFeatureIds).push(id);
-                }
-
-                if (validFeatureIds.length === 0) {
-                  hasNonIntentFailures = true;
-                  return {
-                    query,
-                    valid: false,
-                    status: 'Failed to add' as const,
-                    failureReason: 'unknown_features' as const,
-                    exactDuplicate,
-                    error: `feature_ids must reference at least one feature returned by get_stream_features. Unknown IDs: [${rawFeatureIds.join(
-                      ', '
-                    )}]`,
-                  };
-                }
-
-                if (invalidFeatureIds.length > 0) {
-                  warnings.push(`Stripped unknown feature_ids: [${invalidFeatureIds.join(', ')}]`);
-                }
-
-                const queryFeatures: QueryFeature[] = validFeatureIds.map((id) => ({
-                  id,
-                  run_id: returnedFeatureMap.get(id),
-                }));
-
-                const rewritten = replaceFromSources(query.esql, targetSources);
-
-                if (normalizedStoredEsqls.has(normalizeEsqlSafe(rewritten))) {
-                  return {
-                    query: {
-                      ...query,
-                      type: derivedType,
-                      esql: rewritten,
-                    },
-                    valid: false,
-                    status: 'Duplicate' as const,
-                    exactDuplicate,
-                    error: 'This query already exists for this stream.',
-                    hints: undefined,
-                  };
-                }
-
-                // Static over-match - reject before the data probe.
-                const overBroadPredicates = findOverBroadMatchPredicates(rewritten);
-                if (overBroadPredicates.length > 0) {
-                  hasNonIntentFailures = true;
-                  return {
-                    query,
-                    valid: false,
-                    status: 'Failed to add' as const,
-                    failureReason: 'validation_error' as const,
-                    exactDuplicate,
-                    error: renderOverBroadMatchError(overBroadPredicates),
-                  };
-                }
-
-                const hints = getStatsQueryHints(rewritten);
-
-                await esClient.esql.query(
-                  {
-                    query: `${rewritten}\n| LIMIT 0`,
-                    // The lookback filter prunes older indices via can_match, hiding a
-                    // union field's conflicting type so a bare reference passes here yet
-                    // breaks when run unbounded.
-                    ...(validateOverFullSource(rewritten)
-                      ? {}
-                      : {
-                          filter: {
-                            range: {
-                              '@timestamp': {
-                                gte: validationLookback,
-                                lte: 'now',
-                              },
-                            },
-                          },
-                        }),
-                    format: 'json',
-                  },
-                  { signal, requestTimeout: queryValidationTimeoutMs }
-                );
-
-                validatedQueries.push({
-                  type: derivedType,
-                  esql: rewritten,
-                  title: query.title,
-                  description: query.description,
-                  category: query.category,
-                  severity_score: query.severity_score,
-                  evidence: query.evidence,
-                  replaces: query.replaces,
-                  expects_matches: query.expects_matches,
-                  features: queryFeatures,
-                });
-
-                const allHints = [...warnings, ...hints];
-                return {
-                  query: {
-                    ...query,
-                    type: derivedType,
-                    esql: rewritten,
-                  },
-                  valid: true,
-                  status: 'Added' as const,
-                  exactDuplicate,
-                  error: undefined,
-                  hints: allHints.length > 0 ? allHints : undefined,
-                };
-              } catch (error) {
-                hasNonIntentFailures = true;
-                logger.debug(
-                  () =>
-                    `ES|QL validation for query "${query.title}" failed: ${getErrorMessage(error)}`
-                );
-                return {
-                  query,
-                  valid: false,
-                  status: 'Failed to add' as const,
-                  failureReason: 'validation_error' as const,
-                  exactDuplicate,
-                  error: getErrorMessage(error),
-                };
-              }
-            })
-          );
-          if (collectQueryAttempts && queryAttempts) {
-            for (const result of queryValidationResults) {
-              queryAttempts.push({
-                title: result.query.title,
-                esql: result.query.esql,
-                status: result.status,
-                replaces: result.query.replaces,
-                exactDuplicate: result.exactDuplicate,
-                ...('failureReason' in result ? { failureReason: result.failureReason } : {}),
-              });
-            }
+          validatedQueries.push(...acceptedQueries);
+          if (attempts && queryAttempts) {
+            queryAttempts.push(...attempts);
           }
           if (hasNonIntentFailures) {
             toolUsage.add_queries.failures += 1;
@@ -604,13 +274,13 @@ export async function identifyKIQueries({
         ? 'get_stream_features_failed'
         : toolUsage.add_queries.calls > 0
         ? 'add_queries_called_no_accepted_queries'
-        : returnedFeatureMap.size === 0
+        : returnedFeatureCount === 0
         ? 'no_features_returned'
         : 'no_add_queries_calls';
     const message =
       `Generated 0 Significant Event KI queries: ` +
       `observed=${observed}, max_steps=${resolvedMaxSteps}, ` +
-      `features_returned=${returnedFeatureMap.size}, ` +
+      `features_returned=${returnedFeatureCount}, ` +
       `get_stream_features_calls=${toolUsage.get_stream_features.calls}, ` +
       `get_stream_features_failures=${toolUsage.get_stream_features.failures}, ` +
       `add_queries_calls=${toolUsage.add_queries.calls}, ` +

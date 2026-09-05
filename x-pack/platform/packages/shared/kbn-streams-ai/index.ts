@@ -34,10 +34,20 @@ export {
   type QueryAttemptFailureReason,
 } from './src/significant_events/identify_ki_queries';
 export {
+  createQueryValidationContext,
+  validateKIQueries,
+  type CandidateKIQuery,
+  type QueryValidationResult,
+  type ValidatedKIQuery,
+} from './src/significant_events/validate_ki_queries';
+export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './src/significant_events/tools/tool_usage';
-export { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from './src/significant_events/tools/features_tool';
+export {
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+  toFeatureForLlmContext,
+} from './src/significant_events/tools/features_tool';
 export { EMPTY_TOKENS, sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,

@@ -75,6 +75,8 @@ export const platformSignificantEventsTools = {
   searchSimilarFeatures: `${internalNamespaces.platformSignificantEvents}.ki_feature_similarity_search`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_feature_create`,
   createQueryKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_query_create`,
+  getStreamFeatures: `${internalNamespaces.platformSignificantEvents}.ki_stream_features_get`,
+  validateQueries: `${internalNamespaces.platformSignificantEvents}.ki_queries_validate`,
   searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,

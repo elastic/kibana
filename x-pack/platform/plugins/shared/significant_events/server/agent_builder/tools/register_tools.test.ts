@@ -14,6 +14,8 @@ import {
   SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
   SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
+  SIGNIFICANT_EVENTS_GET_STREAM_FEATURES_TOOL_ID,
+  SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
 } from './register_tools';
 import { createMockGetScopedClients } from '../utils/test_helpers';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -48,6 +50,8 @@ describe('registerAgentBuilderTools', () => {
 
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID);
+    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_GET_STREAM_FEATURES_TOOL_ID);
+    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID);
