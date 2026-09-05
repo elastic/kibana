@@ -17,3 +17,4 @@ export {
 } from './status_check_helpers';
 export { getContinuityDataFlowHealth } from './get_pipeline_data_flow_health';
 export type { PipelineDataFlowHealth } from './get_pipeline_data_flow_health';
+export { buildContinuitySummary, CONTINUITY_NO_DATA_SUMMARY } from './build_continuity_summary';

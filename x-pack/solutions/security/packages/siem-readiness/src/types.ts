@@ -98,7 +98,12 @@ export interface PipelineStats {
   failedDocsCount: number;
   /** False when the server cannot provide ingestion stats (e.g. serverless mode). */
   statsAvailable: boolean;
-  categories?: string[];
+  /**
+   * Full union of SIEM main categories this pipeline serves.
+   * Multi-valued because an index can carry multiple event.category values —
+   * never collapse to a single last-writer-wins label.
+   */
+  categories?: MainCategories[];
   // Volume / silence health — null means "insufficient history or no events ever"
   lastEventMs?: number | null;
   silenceMs?: number | null;
@@ -128,6 +133,12 @@ export interface RetentionInfo {
   retentionDays: number | null;
   policyName: string | null;
   status: RetentionStatus;
+  /**
+   * Full union of SIEM main categories this data stream/index belongs to.
+   * Populated by the retention tool so UI and agent group items by the same
+   * categories — never collapse to a single last-writer-wins label.
+   */
+  categories?: MainCategories[];
 }
 
 export interface RetentionResponse {
@@ -171,7 +182,11 @@ export interface RecommendedAction {
 }
 
 export interface ActionableFinding {
-  category?: MainCategories;
+  /**
+   * Full set of SIEM main categories this finding belongs to.
+   * Multi-valued so UI panels and the agent agree when a resource spans categories.
+   */
+  categories?: MainCategories[];
   severity: FindingSeverity;
   message: string;
   resource: string;

@@ -8,7 +8,7 @@
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { QualityPayload, CategoriesResponse } from '@kbn/siem-readiness';
-import { getIndexCategoryMap } from '@kbn/siem-readiness';
+import { getIndexCategoriesMap } from '@kbn/siem-readiness';
 import {
   createToolTestMocks,
   createToolHandlerContext,
@@ -160,7 +160,7 @@ describe('getQualityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       const data = (result.results[0] as OtherResult<QualityPayload>).data;
-      expect(data.actionableFindings![0].category).toBe('Cloud');
+      expect(data.actionableFindings![0].categories).toEqual(['Cloud']);
     });
 
     it('filters out findings whose resource is not in any category', async () => {
@@ -263,7 +263,7 @@ describe('getQualityTool', () => {
     });
   });
 
-  describe('parity — agent tool matches getIndexCategoryMap filter (shared predicate)', () => {
+  describe('parity — agent tool matches getIndexCategoriesMap filter (shared predicate)', () => {
     it('agent data.items contains exactly the items that match the category map', async () => {
       const allItems = [
         makeQualityResult(IDENTITY_INDEX, 0),
@@ -280,7 +280,7 @@ describe('getQualityTool', () => {
       const agentItemNames = (result.results[0] as OtherResult<QualityPayload>).data.items.map(
         (i) => i.indexName
       );
-      const categoryMap = getIndexCategoryMap(mockCategories);
+      const categoryMap = getIndexCategoriesMap(mockCategories);
       const sharedFilteredNames = allItems
         .filter((item) => categoryMap.has(item.indexName))
         .map((item) => item.indexName);

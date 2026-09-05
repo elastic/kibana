@@ -6,6 +6,7 @@
  */
 
 import type { ActionableFinding, RecommendedAction } from './types';
+import { pickPrimaryCategory } from './get_index_categories_map';
 
 type FindingType = `${string}:${string}`;
 
@@ -78,7 +79,8 @@ export const buildRecommendedActions = (
       return getVolumeDropActions(finding);
     }
   }
-  const findingType: FindingType = `${dimension}:${finding.category ?? 'general'}`;
+  const primaryCategory = pickPrimaryCategory(finding.categories) ?? 'general';
+  const findingType: FindingType = `${dimension}:${primaryCategory}`;
   const customBuilder = recommendedActionsRegistry.get(findingType);
 
   if (customBuilder) {

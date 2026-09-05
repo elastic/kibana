@@ -42,7 +42,7 @@ const qualityData = {
   ],
   actionableFindings: [
     {
-      category: 'Endpoint',
+      categories: ['Endpoint'],
       severity: 'WARNING' as const,
       message: '3 incompatible fields',
       resource: 'logs-endpoint-default',
@@ -61,11 +61,12 @@ const continuityData = {
       docsCount: 100,
       failedDocsCount: 5,
       statsAvailable: true,
+      categories: ['Endpoint'],
     },
   ],
   actionableFindings: [
     {
-      category: 'Endpoint',
+      categories: ['Endpoint'],
       severity: 'CRITICAL' as const,
       message: '5 failed docs',
       resource: 'endpoint-pipeline',
@@ -86,11 +87,12 @@ const retentionData = {
       retentionDays: 30,
       policyName: 'my-policy',
       status: 'non-compliant' as const,
+      categories: ['Cloud'],
     },
   ],
   actionableFindings: [
     {
-      category: 'Cloud',
+      categories: ['Cloud'],
       severity: 'WARNING' as const,
       message: 'Retention below 365d',
       resource: 'logs-cloud-default',
@@ -199,6 +201,40 @@ describe('createSiemReadinessAttachmentType', () => {
       const textRep = rep as TextAttachmentRepresentation | undefined;
       expect(textRep?.value).toContain('Actions Required'); // not 'actionsRequired'
       expect(textRep?.value).toContain('logs-cloud-default');
+    });
+
+    it('lists a multi-category continuity pipeline under each of its categories', async () => {
+      const multiCategoryContinuity = {
+        ...continuityData,
+        items: [
+          {
+            name: 'multi-pipeline',
+            indices: ['logs-multi-000001'],
+            docsCount: 100,
+            failedDocsCount: 10,
+            statsAvailable: true,
+            categories: ['Endpoint', 'Network'],
+          },
+        ],
+        actionableFindings: [
+          {
+            categories: ['Endpoint', 'Network'],
+            severity: 'CRITICAL' as const,
+            message: '10 failed docs',
+            resource: 'multi-pipeline',
+          },
+        ],
+      };
+
+      const formatted = await Promise.resolve(
+        attachmentType.format(makeAttachment(multiCategoryContinuity), mockFormatContext)
+      );
+      const rep = await Promise.resolve(formatted.getRepresentation?.());
+      expect(rep?.value).toContain('  Endpoint:');
+      expect(rep?.value).toContain('  Network:');
+      // The same pipeline must appear under both category groups (once each).
+      const occurrences = (rep?.value ?? '').split('multi-pipeline').length - 1;
+      expect(occurrences).toBeGreaterThanOrEqual(2);
     });
 
     it('throws when data does not match any dimension schema', () => {

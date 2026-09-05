@@ -36,7 +36,7 @@ export const getCoverage = async ({
 
   if (!hasDetectionRules) {
     actionableFindings.push({
-      category: 'Endpoint',
+      categories: ['Endpoint'],
       severity: 'WARNING',
       message: 'No enabled detection rules found. Enable rules to improve SIEM coverage.',
       resource: 'detection_rules',
@@ -48,7 +48,7 @@ export const getCoverage = async ({
     const totalDocs = categoryData?.indices.reduce((sum, idx) => sum + idx.docs, 0) ?? 0;
     if (totalDocs === 0) {
       actionableFindings.push({
-        category: category as MainCategories,
+        categories: [category as MainCategories],
         severity: 'WARNING',
         message: `No data ingested for the ${category} category.`,
         resource: category,
