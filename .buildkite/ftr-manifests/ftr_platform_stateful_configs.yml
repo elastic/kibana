@@ -79,7 +79,6 @@ enabled:
   - src/platform/test/functional/apps/dashboard/group6/config.ts
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
-  - src/platform/test/functional/apps/discover/embeddable/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts

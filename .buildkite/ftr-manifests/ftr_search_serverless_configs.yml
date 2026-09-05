@@ -20,7 +20,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group9.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group11.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group12.ts
-  - x-pack/platform/test/serverless/functional/configs/search/config.group15.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group18.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group19.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.feature_flags.ts

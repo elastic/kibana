@@ -114,6 +114,24 @@ export class DataGrid {
     await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
   }
 
+  async filterCell({
+    rowIndex,
+    columnId,
+    mode,
+  }: {
+    rowIndex: number;
+    columnId: string;
+    mode: 'for' | 'out';
+  }): Promise<void> {
+    const actionTestSubj = mode === 'for' ? 'filterForButton' : 'filterOutButton';
+    const expansionPopover = this.page.testSubj.locator('euiDataGridExpansionPopover');
+
+    await this.expandCell({ rowIndex, columnId });
+    await expansionPopover.locator(`[data-test-subj="${actionTestSubj}"]`).click();
+    await expansionPopover.waitFor({ state: 'hidden' });
+    await this.waitForLoad();
+  }
+
   async expandMetaFieldsSection() {
     const metaFieldsSection = this.page.testSubj.locator('fieldListGroupedMetaFields');
     const metaFieldsButton = metaFieldsSection.getByRole('button', { name: /Meta fields/ });

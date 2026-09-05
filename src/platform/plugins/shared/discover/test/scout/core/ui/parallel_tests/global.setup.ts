@@ -28,6 +28,14 @@ globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) =>
   log.debug('[setup:logstash] logstash_functional ES data ready');
 
   log.debug(
+    '[setup:kibana_sample_data_flights] loading kibana_sample_data_flights ES data (only if it does not exist)...'
+  );
+  await esArchiver.loadIfNeeded(
+    'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+  );
+  log.debug('[setup:kibana_sample_data_flights] kibana_sample_data_flights ES data ready');
+
+  log.debug(
     '[setup:long_window_logstash] loading long_window_logstash ES data (only if it does not exist)...'
   );
   await esArchiver.loadIfNeeded(LONG_WINDOW_LOGSTASH_ES_ARCHIVE);
