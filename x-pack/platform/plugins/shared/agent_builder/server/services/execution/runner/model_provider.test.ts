@@ -140,7 +140,10 @@ describe('createModelProvider', () => {
       expect(deps.inference.getClient).toHaveBeenCalledWith(
         expect.objectContaining({
           request: deps.request,
-          bindTo: { connectorId: 'default-connector' },
+          bindTo: {
+            connectorId: 'default-connector',
+            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+          },
         })
       );
       expect(model.chatModel).toBe(chatModel);
@@ -211,7 +214,12 @@ describe('createModelProvider', () => {
         expect.objectContaining({ connectorId: 'specific-connector' })
       );
       expect(deps.inference.getClient).toHaveBeenCalledWith(
-        expect.objectContaining({ bindTo: { connectorId: 'specific-connector' } })
+        expect.objectContaining({
+          bindTo: {
+            connectorId: 'specific-connector',
+            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+          },
+        })
       );
     });
   });

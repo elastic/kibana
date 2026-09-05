@@ -217,7 +217,7 @@ export const createModelProvider = ({
       request,
       bindTo: {
         connectorId,
-        ...(telemetryMetadata ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
+        metadata: { connectorTelemetry: resolvedTelemetryMetadata },
       },
       callbacks: {
         complete: [completionCallback],
