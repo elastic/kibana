@@ -11,10 +11,15 @@ import {
   PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
-import { clearEntityStoreIndices, ingestDoc } from '../../../common/fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  ingestDoc,
+  QUERY_TRANSLATION_TEST_INDEX,
+  setupQueryTranslationTestDataStream,
+  teardownQueryTranslationTestDataStream,
+} from '../../../common/fixtures/helpers';
 import {
   getEuidDslFilterBasedOnDocument,
   getEuidDslDocumentsContainsIdFilter,
@@ -47,7 +52,7 @@ async function searchWithFilter(
   size = 100
 ) {
   return esClient.search({
-    index: UPDATES_INDEX,
+    index: QUERY_TRANSLATION_TEST_INDEX,
     query: query ? { ...query } : {},
     size,
   }) as Promise<{
@@ -76,7 +81,7 @@ function hasDocWith(
 apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, esClient, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -94,8 +99,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     });
     expect(response.statusCode).toBe(201);
 
+    await setupQueryTranslationTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/query_translation_source'
     );
   });
 
@@ -107,6 +113,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     });
     expect(response.statusCode).toBe(200);
     await clearEntityStoreIndices(esClient);
+    await teardownQueryTranslationTestDataStream(esClient);
   });
 
   apiTest(
@@ -216,7 +223,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     apiTest(
       `user.ts DSL (ingested asset + cloud.provider): single hit for scenario "${scenario.id}"`,
       async ({ esClient }) => {
-        await ingestDoc(esClient, scenario.ingestSource!);
+        await ingestDoc(esClient, scenario.ingestSource!, QUERY_TRANSLATION_TEST_INDEX);
         const dsl = getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource);
         expect(dsl).toBeDefined();
 
@@ -236,7 +243,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         });
 
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: QUERY_TRANSLATION_TEST_INDEX,
           refresh: true,
           query: scenario.query as object,
         });

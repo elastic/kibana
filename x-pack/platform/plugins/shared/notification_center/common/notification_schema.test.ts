@@ -224,24 +224,24 @@ describe('NotificationDocument typing', () => {
   });
 });
 
-describe('notificationQueryParamsSchema severity', () => {
-  it('normalizes a single value to an array', () => {
-    expect(notificationQueryParamsSchema.parse({ severity: 'critical' }).severity).toEqual([
-      'critical',
-    ]);
-  });
-
-  it('accepts an array of values', () => {
+describe('notificationQueryParamsSchema', () => {
+  it('accepts the document-level filters', () => {
     expect(
-      notificationQueryParamsSchema.parse({ severity: ['warning', 'error'] }).severity
-    ).toEqual(['warning', 'error']);
+      notificationQueryParamsSchema.parse({
+        namespace: 'inference',
+        type: 'modelStatus',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-20T00:00:00.000Z',
+      })
+    ).toEqual({
+      namespace: 'inference',
+      type: 'modelStatus',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-20T00:00:00.000Z',
+    });
   });
 
-  it('leaves severity undefined when omitted', () => {
-    expect(notificationQueryParamsSchema.parse({}).severity).toBeUndefined();
-  });
-
-  it('rejects an unknown severity tier', () => {
-    expect(() => notificationQueryParamsSchema.parse({ severity: 'nope' })).toThrow();
+  it('rejects unknown params (strict)', () => {
+    expect(() => notificationQueryParamsSchema.parse({ nope: 'value' })).toThrow();
   });
 });

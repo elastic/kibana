@@ -8,6 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -55,6 +56,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
           'triggersActionsConnectors',
         ],
       },
+      aiIndex: { read: [CONNECTOR_KI_TYPE] },
       savedObject: {
         all: [
           ACTION_SAVED_OBJECT_TYPE,
@@ -78,6 +80,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
           'triggersActionsConnectors',
         ],
       },
+      aiIndex: { read: [CONNECTOR_KI_TYPE] },
       savedObject: {
         // action execution requires 'read' over `actions`, but 'all' over `action_task_params`
         all: [

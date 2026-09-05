@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { Lifecycle, WatchRunAction } from './watch.gen';
+import { Lifecycle, WatchRunAction, WatchCallableRef } from './watch.gen';
 
 /**
  * Autonomy dial levels per programme decision D15 (2026-07-28). Manual is the MVP default. There is deliberately no mapping from the legacy 1–5 AutonomyLevel scale — see https://github.com/elastic/security-team/issues/18718.
@@ -78,17 +78,21 @@ export const WatchSkill = lazySchema(() =>
      */
     id: z.string(),
     /**
+     * Display name resolved from the Agent Builder registry at projection time.
+     */
+    name: z.string().optional(),
+    /**
      * Watches whose workers may call this skill
      */
     watchIds: z.array(z.string()),
     /**
+     * Summary of the skill's purpose
+     */
+    summary: z.string().optional(),
+    /**
      * ISO 8601 timestamp of last invocation, or null when never invoked
      */
     lastRun: z.string().nullable(),
-    /**
-     * Global flag. Effective enablement is this AND the per-watch attachment flag.
-     */
-    enabled: z.boolean(),
     /**
      * Omitted for generally available skills; badge shown otherwise
      */
@@ -118,20 +122,6 @@ export const WatchSkillAttachment = lazySchema(() =>
   })
 );
 export type WatchSkillAttachment = z.infer<typeof WatchSkillAttachment>;
-
-export const WatchGeneralSettings = lazySchema(() =>
-  z.object({
-    /**
-     * Service account each run executes as, e.g. svc-watch-floor
-     */
-    runAsIdentity: z.string(),
-    /**
-     * Renders the MVP-scope callout about autonomy inheritance being undecided
-     */
-    showMvpScopeWarning: z.boolean(),
-  })
-);
-export type WatchGeneralSettings = z.infer<typeof WatchGeneralSettings>;
 
 /**
  * A single-choice setting. Both ids resolve to copy in the UI.
@@ -231,22 +221,49 @@ export const WatchLedgerEntry = lazySchema(() =>
 export type WatchLedgerEntry = z.infer<typeof WatchLedgerEntry>;
 
 /**
- * Per-watch settings. Optional sections are absent when a watch does not offer them, which is what lets each watch legitimately render a different set of sections.
+ * Legacy per-watch settings projection. Watches are grouping-only; durable settings live on WorkerSettings. Kept so unused mock fixtures continue to parse.
  */
 export const WatchSettings = lazySchema(() =>
   z.object({
     watchId: z.string(),
-    /**
-     * The selected level. The scale itself is shared across every watch, so it is not repeated per watch — see WATCH_AUTONOMY_LEVELS.
-     */
     autonomy: WatchAutonomyLevel,
-    general: WatchGeneralSettings.optional(),
-    triggers: WatchTriggersSettings.optional(),
-    scopeRouting: WatchScopeRoutingSettings.optional(),
-    workers: z.array(WatchWorkerAttachment).optional(),
-    skills: z.array(WatchSkillAttachment).optional(),
-    approvalGates: z.array(WatchApprovalGate).optional(),
-    runsLedger: z.array(WatchLedgerEntry).optional(),
   })
 );
 export type WatchSettings = z.infer<typeof WatchSettings>;
+
+/**
+ * Durable per-Worker settings stored as managed template values.
+ */
+export const WorkerSettings = lazySchema(() =>
+  z.object({
+    workerId: z.string(),
+    autonomy: WatchAutonomyLevel,
+  })
+);
+export type WorkerSettings = z.infer<typeof WorkerSettings>;
+
+/**
+ * A live registered Worker with Watch membership and durable settings.
+ */
+export const Worker = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    /**
+     * Catalog Watch ids this Worker belongs to, derived from YAML tags
+     */
+    watchIds: z.array(z.string()),
+    enabled: z.boolean(),
+    lastRun: z.string().nullable(),
+    state: WorkerRunState,
+    stateReason: z.string().optional(),
+    lifecycle: Lifecycle.optional(),
+    settings: WorkerSettings,
+    /**
+     * Logical workflow version for best-effort stale settings detection. Null when the per-space managed Worker has not been installed yet.
+     */
+    settingsRevision: z.number().int().min(0).nullable(),
+    skills: z.array(WatchCallableRef).optional(),
+  })
+);
+export type Worker = z.infer<typeof Worker>;

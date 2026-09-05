@@ -6,6 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import type { AlertEpisodeStatus } from './alert_action_schema';
 import type { alertEventSeveritySchema } from './create_alert_event_data_schema';
 
 export interface MatcherContextRule {
@@ -18,7 +19,7 @@ export interface MatcherContext {
   last_event_timestamp: string;
   group_hash: string;
   episode_id: string;
-  episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
+  episode_status: AlertEpisodeStatus;
   severity?: z.infer<typeof alertEventSeveritySchema>;
   rule?: MatcherContextRule;
   data?: Record<string, unknown>;
@@ -27,16 +28,35 @@ export interface MatcherContext {
 export interface MatcherContextFieldDescriptor {
   path: string;
   type: 'string' | 'boolean' | 'string[]' | 'object';
+  /** Agent/UI-facing description of the matcher context field. */
+  description: string;
 }
 
+/**
+ * Canonical list of KQL matcher context fields. Source of truth for autocomplete
+ * and for Agent Builder skill docs (`generateMatcherContextDoc`).
+ */
 export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
-  { path: 'episode_id', type: 'string' },
-  { path: 'episode_status', type: 'string' },
-  { path: 'group_hash', type: 'string' },
-  { path: 'last_event_timestamp', type: 'string' },
-  { path: 'severity', type: 'string' },
-  { path: 'rule.id', type: 'string' },
-  { path: 'rule.name', type: 'string' },
-  { path: 'rule.tags', type: 'string[]' },
-  { path: 'data', type: 'object' },
+  { path: 'episode_id', type: 'string', description: 'The episode UUID' },
+  {
+    path: 'episode_status',
+    type: 'string',
+    description: 'Episode lifecycle status',
+  },
+  { path: 'group_hash', type: 'string', description: 'Hash of the grouping fields' },
+  {
+    path: 'last_event_timestamp',
+    type: 'string',
+    description: 'Timestamp of the most recent event',
+  },
+  { path: 'severity', type: 'string', description: 'Episode severity when present' },
+  { path: 'rule.id', type: 'string', description: "The rule's saved object ID" },
+  { path: 'rule.name', type: 'string', description: "The rule's display name" },
+  { path: 'rule.tags', type: 'string[]', description: "The rule's tags array" },
+  {
+    path: 'data',
+    type: 'object',
+    description:
+      'Rule-specific ES|QL output columns (query as `data.*`, e.g. `data.host.name`, `data.error_count`)',
+  },
 ];

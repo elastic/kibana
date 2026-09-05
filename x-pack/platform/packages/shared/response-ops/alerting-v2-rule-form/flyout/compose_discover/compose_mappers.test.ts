@@ -289,6 +289,24 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.no_data_strategy).toBeNull();
   });
 
+  it('nullifies tags when empty (clear all tags on a partial update)', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, tags: [] },
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.metadata?.tags).toBeNull();
+  });
+
+  it('preserves tags when present', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, tags: ['prod', 'infra'] },
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.metadata?.tags).toEqual(['prod', 'infra']);
+  });
+
   it('preserves grouping when present', () => {
     const values: FormValues = {
       ...baseFormValues,
@@ -386,6 +404,25 @@ describe('mapRuleToComposeFormValues', () => {
       expect(result.query.base).toBe(BASE);
       expect(result.query.breach.segment).toBe(ALERT_SEGMENT);
     }
+  });
+
+  it('round-trips an omitted composed breach through the form as an empty segment', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      query: { format: 'composed', base: BASE },
+    };
+
+    const formValues = mapRuleToComposeFormValues(rule);
+
+    expect(formValues.query).toEqual({
+      format: 'composed',
+      base: BASE,
+      breach: { segment: '' },
+    });
+    expect(composeFormToCreateRequest(formValues).query).toEqual({
+      format: 'composed',
+      base: BASE,
+    });
   });
 
   it('maps recovery segment from composed query when recovery_strategy: query', () => {

@@ -7,7 +7,6 @@
 
 import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
 
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { DeploySettingsStepState, ServiceChipState } from '../../onboarding_flow_context';
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
@@ -47,7 +46,8 @@ export interface GroupDeployOutcome {
  */
 export function buildDeployGroups(
   instances: ServiceInstance[],
-  selectedServiceIds: string[]
+  selectedServiceIds: string[],
+  servicesMap: Map<string, AwsServiceMatrixEntry>
 ): DeployGroup[] {
   // Reconcile persisted instances against the current selectedServiceIds — the same logic
   // use_service_settings applies in-memory. Without this, a user who goes back to step 1 and
@@ -59,7 +59,7 @@ export function buildDeployGroups(
   const added: ServiceInstance[] = [];
   for (const id of selectedServiceIds) {
     if (!coveredServiceIds.has(id)) {
-      const service = AWS_SERVICES_MAP.get(id);
+      const service = servicesMap.get(id);
       if (service?.showInUI) {
         added.push({ instanceId: id, serviceId: id, name: service.name, isDuplicate: false });
       }
@@ -71,11 +71,13 @@ export function buildDeployGroups(
   const duplicates: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];
 
   for (const inst of resolved) {
-    const service = AWS_SERVICES_MAP.get(inst.serviceId);
+    const service = servicesMap.get(inst.serviceId);
     if (!service) continue;
-    // TODO(follow-up): non-agentless duplicates are silently dropped here.
-    // ECF and agent-based duplicate deploy support are tracked in separate follow-up issues.
-    if (!service.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)) {
+    // TODO(agent-based): agent-based duplicate deploy support tracked in #9079.
+    // ECF duplicates are no longer possible — Duplicate action is hidden for ECF-only services.
+    if (
+      !service.deploymentMethods.some((dm) => dm.method === 'managed_integration' && dm.preferred)
+    ) {
       continue;
     }
     if (inst.isDuplicate) {
@@ -162,7 +164,10 @@ export async function deployGroup(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of group.members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? { trigger: null, vars: {} };
+      storedServiceVars[instance.serviceId] ?? {
+        enabledDataStreams: service.dataStreams,
+        varsByDataStream: {},
+      };
   }
 
   const services = group.members.map(({ service }) => service);
@@ -170,10 +175,16 @@ export async function deployGroup(
 
   // Explicitly disable all package inputs not in our selection to avoid Fleet defaulting
   // enabled inputs that would cause "not allowed for agentless" errors.
-  const pkgTemplates: Array<{ name?: string; type?: string; inputs?: Array<{ type: string }> }> =
-    (pkgInfo as any).policy_templates ?? [];
+  const pkgTemplates: Array<{
+    name?: string;
+    type?: string;
+    input?: string;
+    inputs?: Array<{ type: string }>;
+  }> = (pkgInfo as any).policy_templates ?? [];
   for (const template of pkgTemplates) {
-    const templateInputs = template.inputs ?? (template.type ? [{ type: template.type }] : []);
+    // Input-only templates have `input` (singular, the collector type e.g. 'otelcol') and
+    // `type` (signal type e.g. 'metrics'). Use `input` for the key — `type` is wrong here.
+    const templateInputs = template.inputs ?? (template.input ? [{ type: template.input }] : []);
     for (const input of templateInputs) {
       const key = template.name ? `${template.name}-${input.type}` : input.type;
       if (!inputs[key]) {

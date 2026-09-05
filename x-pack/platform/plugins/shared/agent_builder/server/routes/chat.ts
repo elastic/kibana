@@ -13,22 +13,12 @@ import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
-  AgentExecutionMode,
   ConversationAccessControlMode,
   ConversationOriginType,
 } from '@kbn/agent-builder-common';
-import type {
-  AgentExecutionService,
-  ExecutionConversationOrigin,
-} from '@kbn/agent-builder-server/execution';
-import {
-  ConnectorOrInferenceIdConflictError,
-  resolveConnectorOrInferenceId,
-} from '../../common/resolve_connector_or_inference_id';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import type {
   ChatCallbackAcceptedResponse,
@@ -36,21 +26,12 @@ import type {
 } from '../../common/http_api/chat_callback';
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
-import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
-import { validateSkillIds } from '../services/agents/persisted/client/utils/skills';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
-
-interface ResolvedExecutionOptions {
-  useTaskManager: boolean | undefined;
-  origin: ExecutionConversationOrigin | undefined;
-  callback: { url: string } | undefined;
-  executionId: string | undefined;
-  metadata: Record<string, string> | undefined;
-}
+import { getConverseHelpers, type ResolvedExecutionOptions } from './converse_helpers';
 
 export const promptResponseEntrySchema = schema.oneOf([
   schema.object({ allow: schema.boolean() }),
@@ -239,26 +220,6 @@ export const conversePayloadSchema = schema.object({
       },
     })
   ),
-  capabilities: schema.maybe(
-    schema.object(
-      {
-        visualizations: schema.maybe(
-          schema.boolean({
-            meta: {
-              description:
-                'When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.',
-            },
-          })
-        ),
-      },
-      {
-        meta: {
-          description:
-            'Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.',
-        },
-      }
-    )
-  ),
   browser_api_tools: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -386,57 +347,9 @@ export function registerChatRoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const validateAction = (payload: ChatRequestBodyPayload) => {
-    if (payload.action === 'regenerate' && !payload.conversation_id) {
-      throw createBadRequestError('conversation_id is required when action is regenerate');
-    }
-  };
-
-  const resolveConnectorIdFromPayload = (payload: ChatRequestBodyPayload): string | undefined => {
-    try {
-      return resolveConnectorOrInferenceId({
-        connectorId: payload.connector_id,
-        inferenceId: payload.inference_id,
-      });
-    } catch (e) {
-      if (e instanceof ConnectorOrInferenceIdConflictError) {
-        throw createBadRequestError(e.message);
-      }
-      throw e;
-    }
-  };
-
-  const validateConfigurationOverrides = async ({
-    payload,
-    request,
-  }: {
-    payload: ChatRequestBodyPayload;
-    request: KibanaRequest;
-  }) => {
-    if (payload.configuration_overrides?.tools) {
-      const { tools: toolsService } = getInternalServices();
-      const toolRegistry = await toolsService.getRegistry({ request });
-      const errors = await validateToolSelection({
-        toolRegistry,
-        request,
-        toolSelection: payload.configuration_overrides.tools,
-      });
-      if (errors.length > 0) {
-        throw createBadRequestError(`Invalid tool override: ${errors.join(', ')}`);
-      }
-    }
-    if (payload.configuration_overrides?.skill_ids) {
-      const { skills: skillsService } = getInternalServices();
-      const skillRegistry = await skillsService.getRegistry({ request });
-      const errors = await validateSkillIds(
-        skillRegistry,
-        payload.configuration_overrides.skill_ids
-      );
-      if (errors.length > 0) {
-        throw createBadRequestError(`Invalid skill override: ${errors.join(', ')}`);
-      }
-    }
-  };
+  const { validateAction, validateConfigurationOverrides, executeAgent } = getConverseHelpers({
+    getInternalServices,
+  });
 
   /**
    * Derives execution options for callback converse requests, which always use
@@ -469,78 +382,6 @@ export function registerChatRoutes({
       executionId,
       metadata: { execution_idempotency_key: executionIdempotencyKey },
     };
-  };
-
-  const defaultExecutionOptions = (payload: ChatRequestBodyPayload): ResolvedExecutionOptions => {
-    const { _execution_mode: executionMode, execution_id: executionId } = payload;
-
-    return {
-      useTaskManager:
-        executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
-      origin: undefined,
-      callback: undefined,
-      executionId,
-      metadata: undefined,
-    };
-  };
-
-  const executeAgent = async ({
-    payload,
-    request,
-    executionService,
-    executionOptions,
-  }: {
-    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload;
-    request: KibanaRequest;
-    executionService: AgentExecutionService;
-    executionOptions?: ResolvedExecutionOptions;
-  }) => {
-    const {
-      agent_id: agentId,
-      conversation_id: conversationId,
-      input,
-      prompts,
-      attachments,
-      access_control: accessControl,
-      read_only: readOnly,
-      capabilities,
-      browser_api_tools: browserApiTools,
-      configuration_overrides: configurationOverrides,
-      action,
-      project_routing: projectRouting,
-    } = payload;
-
-    const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, origin, callback, executionId, metadata } =
-      executionOptions ?? defaultExecutionOptions(payload);
-
-    return executionService.executeAgent({
-      mode: AgentExecutionMode.conversation,
-      request,
-      executionId,
-      metadata,
-      useTaskManager,
-      params: {
-        agentId,
-        connectorId,
-        conversationId,
-        autoCreateConversationWithId: true,
-        accessControl,
-        readOnly,
-        origin,
-        callback,
-        capabilities,
-        browserApiTools,
-        configurationOverrides,
-        action,
-        projectRouting,
-        nextInput: {
-          message: input,
-          prompts,
-          attachments,
-        },
-      },
-    });
   };
 
   router.versioned

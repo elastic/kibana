@@ -68,34 +68,32 @@ describe('taskTypeDictionary', () => {
       const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
       const result = sanitizeTaskDefinitions(taskDefinitions);
 
-      expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_0",
+      expect(result).toEqual([
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_0',
         },
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_1",
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_1',
         },
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_2",
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_2',
         },
-      ]
-    `);
+      ]);
     });
 
     it('throws a validation exception for invalid task definition', () => {
@@ -205,7 +203,7 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid priority \\"23\\". Priority must be one of Low => 1,NormalLongRunning => 40,Normal => 50"`
+        `"Invalid priority \\"23\\". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100"`
       );
     });
   });
@@ -227,7 +225,7 @@ describe('taskTypeDictionary', () => {
         foo: {
           title: 'foo',
           maxConcurrency: 2,
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
           createTaskRunner: jest.fn(),
         },
       });
@@ -253,7 +251,7 @@ describe('taskTypeDictionary', () => {
         },
       });
       expect(logger.error).toHaveBeenCalledWith(
-        `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Low => 1,NormalLongRunning => 40,Normal => 50`
+        `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100`
       );
       expect(definitions.get('foo')).toEqual(undefined);
     });

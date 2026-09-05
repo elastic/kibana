@@ -117,7 +117,7 @@ describe('control group renderer', () => {
       })
     );
 
-    expect(applySpy).toBeCalledWith({
+    expect(applySpy).toHaveBeenCalledWith({
       type: 'test_control',
       selection: 'test selection',
     });

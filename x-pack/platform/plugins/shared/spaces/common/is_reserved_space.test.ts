@@ -5,28 +5,14 @@
  * 2.0.
  */
 
-import type { Space } from '.';
 import { isReservedSpace } from './is_reserved_space';
 
 test('it returns true for reserved spaces', () => {
-  const space: Space = {
-    id: '',
-    name: '',
-    disabledFeatures: [],
-    _reserved: true,
-  };
-
-  expect(isReservedSpace(space)).toEqual(true);
+  expect(isReservedSpace({ _reserved: true })).toEqual(true);
 });
 
 test('it returns false for non-reserved spaces', () => {
-  const space: Space = {
-    id: '',
-    name: '',
-    disabledFeatures: [],
-  };
-
-  expect(isReservedSpace(space)).toEqual(false);
+  expect(isReservedSpace({})).toEqual(false);
 });
 
 test('it handles empty input', () => {

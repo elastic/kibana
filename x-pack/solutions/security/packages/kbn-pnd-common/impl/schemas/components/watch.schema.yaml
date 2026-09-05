@@ -96,8 +96,6 @@ components:
         - name
         - kind
         - summary
-        - gated
-        - enabled
         - lastRun
       properties:
         id:
@@ -109,10 +107,6 @@ components:
           enum: [skill, workflow]
         summary:
           type: string
-        gated:
-          type: boolean
-        enabled:
-          type: boolean
         lastRun:
           type: string
           nullable: true
@@ -161,21 +155,8 @@ components:
     WatchMetrics:
       type: object
       required:
-        - runs7d
-        - acceptedPct
-        - timeSaved
         - lastRun
       properties:
-        runs7d:
-          type: integer
-          nullable: true
-        acceptedPct:
-          type: number
-          nullable: true
-          description: Acceptance rate as a percentage from 0 to 100
-        timeSaved:
-          type: string
-          nullable: true
         lastRun:
           type: string
           nullable: true
@@ -199,7 +180,6 @@ components:
         - name
         - tags
         - color
-        - icon
         - enabled
         - draft
         - managed
@@ -211,7 +191,7 @@ components:
         - coverage
         - scopeSummary
         - scopes
-        - callables
+        - skills
         - metrics
         - recentRuns
       properties:
@@ -227,9 +207,6 @@ components:
         color:
           type: string
           description: Accent color for coverage strip and cards (hex or CSS var)
-        icon:
-          type: string
-          description: Icon key for UI (EUI icon name)
         enabled:
           type: boolean
         draft:
@@ -269,7 +246,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WatchScope'
-        callables:
+        skills:
           type: array
           items:
             $ref: '#/components/schemas/WatchCallableRef'

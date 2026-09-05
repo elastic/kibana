@@ -46,7 +46,8 @@ export const internalStateActions = {
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
     'setProfileState',
-    'syncProfileAppStateSnapshot'
+    'syncProfileAppStateSnapshot',
+    'setExpandedDoc'
   ),
   ...actions,
   syncLocallyPersistedTabState,
@@ -94,6 +95,8 @@ export {
   selectCurrentProfileStateDefinition,
   selectCurrentProfileUrlState,
   selectCurrentProfileLocatorState,
+  selectCurrentTabType,
+  selectTabTypeForPersistence,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,

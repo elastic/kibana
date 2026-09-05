@@ -12,13 +12,14 @@ Prefer inline rendering when the page owns its header placement. Use Chrome-owne
 Chrome must own the top-bar slot, including apps with sticky or shared top-nav constraints such as
 Discover, Dashboard, and Lens.
 
+Presentation (shell, title, tabs, badges, menu rendering, stories) lives in private
+`@kbn/ui-app-header`. This package is the stable plugin facade: it keeps registration semantics,
+Chrome-connected adapters, and the public `@kbn/app-header` imports.
+
 ## Folder layout
 
-Region components (back button, badges, tabs, description, metadata, app menu, title actions, etc.)
-live as flat files directly in `src/app_header/`, with shared data resolution in
-`src/app_header/hooks/`. A region graduates to its own folder only when it gains real complexity of
-its own — an internal component split, dedicated stories, or a README. Today only `title_area/` meets
-that bar. Keep new regions flat until they earn a folder; don't pre-folder simple slots.
+Connected adapters and Chrome hooks live in `src/app_header/`. Presentation components live in
+`@kbn/ui-app-header`. Do not import the UI package from plugins.
 
 ## Which API should I use?
 
@@ -48,15 +49,32 @@ steps, examples, and tracking.
 
 ## Back navigation
 
-Pass the destination as `back`. Kibana handles same-origin `href` values as SPA navigation, so an
-`onClick` that navigates to the same URL is unnecessary:
+The header chevron is "up", not history. It points at the page's single IA parent — the same
+destination for a given route, regardless of how the user arrived. Browser Back remains the only
+history control. Do not use `history.back()`, and do not infer origin from history or
+`document.referrer`.
+
+The one exception is a satellite page: the route was opened to act on a foreign object or flow and
+received an explicit origin (state or param such as `referrer` or an embeddable transfer). That
+origin replaces the IA parent. Without it, the page uses its normal parent, or no back.
+
+Pass one target with a `label` that names the destination — the parent page ("Component templates")
+or the satellite origin ("Dashboard"):
 
 ```tsx
-<AppHeader back="/app/my-app" title="Details" />
+<AppHeader back={{ href: '/app/my-app', label: 'My app' }} title="Details" />
 ```
 
-Use the object form when the back button needs a destination label or click behavior that differs
-from following `href`. If the handler replaces navigation, call `event.preventDefault()`.
+Kibana handles same-origin `href` values as SPA navigation, so an `onClick` that navigates to the
+same URL is unnecessary. If the handler replaces navigation, call `event.preventDefault()`.
+
+Omit `back` on top-level pages that are already side-nav destinations. Do not copy the classic
+breadcrumb trail into `back` (categories, current page, selected tabs). Do not point at the current
+URL or a sibling tab — tabs live on `AppHeader.tabs`. Do not pass a cross-space or cross-deployment
+href. Do not pass an array of targets; the popover exists only for the breadcrumb-derived fallback.
+
+Use `onClick` when returning to a satellite origin needs more than navigation (for example
+`transferBackToEditor`). Keep a real `href` as the fallback.
 
 As a temporary compatibility fix, if an unmigrated page already owns an in-page back (for example
 `EuiPageHeader` breadcrumbs or a custom back control) and would also get a Chrome Next compatibility
@@ -115,7 +133,7 @@ The menu uses the same responsive collapsed / minimal / expanded layouts as `App
 
 ```tsx
 <AppHeaderLoading menu={{ buttonCount: 2, hasPrimary: false }} />
-<AppHeaderLoading back="/app/my-app" />
+<AppHeaderLoading back={{ href: '/app/my-app', label: 'My app' }} />
 ```
 
 ## Editable titles
@@ -303,20 +321,16 @@ await openAppMenuOverflow();
 expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
 ```
 
-## Chrome Next flag and runtime checks
+## Runtime checks
 
-Chrome layout code should use `isNextChrome(featureFlags)` from `@kbn/core-chrome-feature-flags` to
-decide which layout slots are active.
-
-App-facing React code usually should not read the flag directly. `ChromeAppHeaderRegistration`
-registers only when Chrome Next is enabled and the active chrome style is project:
+`ChromeAppHeaderRegistration` registers only when the active chrome style is project:
 
 ```ts
-chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
+chrome.getChromeStyle() === 'project';
 ```
 
-When this condition is false, registration is a no-op and the existing classic/project Chrome paths
-continue to own the header area.
+When this condition is false, registration is a no-op and classic Chrome continues to own the header
+area.
 
 ## Migration guidance
 
@@ -339,9 +353,11 @@ Chrome can still render a minimal app header as a fallback by deriving:
 - Badges from legacy badge state.
 
 This is a compatibility fallback, not a migration target. If breadcrumbs are missing, stale, or point
-to the wrong parent, the fallback back button inherits the same problem. Move routes in this bucket
-to `AppHeader`. Existing apps with approved Chrome-owned placement should provide explicit
-`ChromeAppHeaderRegistration` configuration instead of relying on fallback state.
+to the wrong parent, the fallback back button inherits the same problem. The fallback may emit an
+array of ancestors and render a popover; that array form is deprecated for explicit `back` — pass
+one `{ href, label }` instead. Move routes in this bucket to `AppHeader`. Existing apps with
+approved Chrome-owned placement should provide explicit `ChromeAppHeaderRegistration` configuration
+instead of relying on fallback state.
 
 The legacy menu, badge, and breadcrumb-extension setters that feed this fallback are deprecated. Keep
 existing calls until their route migrates, but do not add new consumers.

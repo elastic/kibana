@@ -18,9 +18,10 @@ import type {
   SmlIngestionMethod,
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
-  SmlPermissions,
+  SmlPermissionsInput,
   SmlTypeDefinition,
 } from './types';
+
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
@@ -45,9 +46,9 @@ export interface SmlIndexer {
    * **`getPermissions` failures fail-closed.** When the registered type's
    * `getPermissions` hook throws, the call is aborted *before* any
    * mutation (the existing entry remains intact) and the throw is propagated
-   * to the caller. Stamping empty permissions instead would be fail-open:
-   * the read-path filter treats `kbnPrivs.length === 0` as publicly
-   * readable. See `resolvePermissionsForOrigin` for the full rationale.
+   * to the caller. Stamping an empty action list instead would be fail-open:
+   * the read path treats a `count: 0` element as requiring nothing, i.e. public
+   * within its spaces. See `resolvePermissionsForOrigin` for the full rationale.
    *
    * For `action: 'delete'`, only an entry with `ingestion_method: 'crawled'` is
    * removed — a manual entry for the same `origin_id` is preserved. This keeps
@@ -186,7 +187,7 @@ class SmlIndexerImpl implements SmlIndexer {
     // leave the origin in a wiped state. `getPermissions(originId, ctx)`
     // is a per-origin computation (it doesn't take an entry), so one call
     // is correct.
-    let resolvedPermissions: SmlPermissions;
+    let resolvedPermissions: SmlPermissionsInput;
     try {
       resolvedPermissions = await this.resolvePermissionsForOrigin({
         definition,
@@ -207,6 +208,16 @@ class SmlIndexerImpl implements SmlIndexer {
       throw error;
     }
 
+    // An entry with no spaces produces zero nested privilege elements, which the read path
+    // treats as public — so it must not be indexed. Bail out *before* the delete below, so a
+    // producer that reports zero spaces skips the origin instead of wiping its existing entry.
+    if (spaces.length === 0) {
+      this.logger.warn(
+        `SML indexer: origin '${originId}' (type='${attachmentType}') has no spaces — skipping (fail closed), existing entry left intact`
+      );
+      return;
+    }
+
     await this.deleteEntry({ originUri, esClient });
 
     const indexOp = this.buildIndexOp({
@@ -218,6 +229,10 @@ class SmlIndexerImpl implements SmlIndexer {
       resolvedPermissions,
     });
 
+    if (!indexOp) {
+      return;
+    }
+
     await this.executeIndexOp({ indexOp, esClient, originId });
   }
 
@@ -226,18 +241,13 @@ class SmlIndexerImpl implements SmlIndexer {
     const scope: SmlDeleteScope = params.ingestionMethod ?? 'crawled';
 
     this.logger.info(
-      `SML indexer: deleteAttachment called — originId='${originId}', type='${attachmentType}', scope='${scope}', spaces=[${spaces.join(
-        ', '
-      )}]`
+      `SML indexer: deleteAttachment called — originId='${originId}', type='${attachmentType}', scope='${scope}'`
     );
 
-    // `'all'` translates to "no ingestion_method filter" on the underlying
-    // helper — that's the way `SmlIndexer.deleteEntry` distinguishes "wipe
-    // everything for this origin" from "wipe a single method".
     await this.deleteEntry({
       originUri: `${attachmentType}://${originId}`,
       esClient,
-      spaces,
+      ...(spaces && spaces.length > 0 ? { spaces } : {}),
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
     });
   }
@@ -247,7 +257,9 @@ class SmlIndexerImpl implements SmlIndexer {
    * origin. Called **once per origin** before any ES mutation.
    *
    * - If the type's `getPermissions` hook is present, its result is used.
-   * - Otherwise, permissions are left empty.
+   * - Otherwise the action list is empty, which `buildIndexOp` stamps as a
+   *   `count: 0` element per space — the type opts out of privilege gating and
+   *   its entries are public within those spaces.
    */
   private async resolvePermissionsForOrigin({
     definition,
@@ -257,17 +269,17 @@ class SmlIndexerImpl implements SmlIndexer {
     definition: SmlTypeDefinition;
     originId: string;
     context: SmlContext;
-  }): Promise<SmlPermissions> {
+  }): Promise<SmlPermissionsInput> {
     if (definition.getPermissions) {
       // Intentionally NOT wrapped in try/catch — see fail-closed note in
       // the JSDoc. Logging here is the caller's job.
       const result = await definition.getPermissions(originId, context);
       return {
-        kibana: { privileges: result.kibana?.privileges ?? [] },
+        kibana: { privileges: { name: result.kibana?.privileges?.name ?? [] } },
       };
     }
 
-    return { kibana: { privileges: [] } };
+    return { kibana: { privileges: { name: [] } } };
   }
 
   private buildIndexOp({
@@ -284,9 +296,27 @@ class SmlIndexerImpl implements SmlIndexer {
     originId: string;
     spaces: string[];
     ingestionMethod: SmlIngestionMethod;
-    resolvedPermissions: SmlPermissions;
+    resolvedPermissions: SmlPermissionsInput;
     createdAt?: string;
   }) {
+    const actions = [...new Set(resolvedPermissions.kibana?.privileges?.name ?? [])].sort();
+
+    const normalizedSpaces = spaces.includes('*') ? ['*'] : [...new Set(spaces)];
+    if (normalizedSpaces.length === 0) {
+      this.logger.warn(`SML indexer: entry '${entryId}' has no spaces — skipping (fail closed)`);
+      return undefined;
+    }
+
+    // One nested element per space. `count` is per-space: "how many actions THIS space requires".
+    // The ES-side DLS query evaluates each element independently, so a caller must satisfy a whole
+    // element to see the document — matches cannot accumulate across spaces. `count: 0` (a type
+    // with no `getPermissions` hook) means "requires nothing here" and the read filter admits it
+    // on space scoping alone.
+    const privileges = normalizedSpaces
+      .slice()
+      .sort()
+      .map((space) => ({ space, name: actions, count: actions.length }));
+
     const now = new Date().toISOString();
     const document: SmlDocument = {
       id: entryId,
@@ -296,10 +326,7 @@ class SmlIndexerImpl implements SmlIndexer {
       content: entry.content,
       created_at: createdAt || now,
       updated_at: now,
-      spaces,
-      permissions: {
-        kibana: { privileges: resolvedPermissions.kibana?.privileges ?? [] },
-      },
+      permissions: { kibana: { privileges } },
       ingestion_method: ingestionMethod,
     };
     if (entry.description !== undefined) {
@@ -335,7 +362,7 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient,
     originId,
   }: {
-    indexOp: ReturnType<SmlIndexerImpl['buildIndexOp']>;
+    indexOp: NonNullable<ReturnType<SmlIndexerImpl['buildIndexOp']>>;
     esClient: ElasticsearchClient;
     originId: string;
   }): Promise<void> {
@@ -438,11 +465,15 @@ class SmlIndexerImpl implements SmlIndexer {
       filter.push({ term: { ingestion_method: ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
-      // Scope the delete to entries visible in at least one of the provided
-      // spaces. Mirrors `isVisibleInSpace`: an entry is visible when its
-      // `spaces` array contains the space id OR the wildcard `'*'` (global
-      // entries).
-      filter.push({ terms: { spaces: [...spaces, '*'] } });
+      // Space scoping is a direct term match on the nested `.space` field
+      filter.push({
+        nested: {
+          path: 'permissions.kibana.privileges',
+          query: {
+            terms: { 'permissions.kibana.privileges.space': [...spaces, '*'] },
+          },
+        },
+      });
     }
     const label = ingestionMethod ? `${ingestionMethod} entry` : 'entry';
 

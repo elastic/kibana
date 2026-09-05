@@ -92,7 +92,7 @@ describe('Execution Routes', () => {
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
     mockApi = {
       getWorkflow: jest.fn(),
-      runWorkflow: jest.fn(),
+      runWorkflowWithAlertPreprocessing: jest.fn(),
       testWorkflow: jest.fn(),
       testStep: jest.fn(),
       getWorkflowExecutions: jest.fn(),
@@ -173,7 +173,10 @@ describe('Execution Routes', () => {
 
     it('should call api methods with correct arguments when workflow is valid', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.runWorkflow.mockResolvedValue('exec-1');
+      mockApi.runWorkflowWithAlertPreprocessing.mockResolvedValue({
+        workflowExecutionId: 'exec-1',
+        inputs: { k: 'v' },
+      });
       const h = handler('POST', path)!;
       const request = {
         params: { id: 'wf-1' },
@@ -183,20 +186,20 @@ describe('Execution Routes', () => {
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
-      expect(mockApi.runWorkflow).toHaveBeenCalledWith(
-        {
+      expect(mockApi.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
+        workflow: {
           id: 'wf-1',
           name: 'Test',
           enabled: true,
           definition: mockWorkflow.definition,
           yaml: mockWorkflow.yaml,
         },
-        'default',
-        { k: 'v' },
+        spaceId: 'default',
+        inputs: { k: 'v' },
         request,
-        undefined,
-        { src: 'ui' }
-      );
+        preprocessingContext: mockContext,
+        metadata: { src: 'ui' },
+      });
       expect(result).toEqual({ type: 'ok', body: { workflowExecutionId: 'exec-1' } });
     });
 
@@ -209,7 +212,7 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
-      expect(mockApi.runWorkflow).not.toHaveBeenCalled();
+      expect(mockApi.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
     it('should return bad request when workflow is not valid', async () => {
@@ -249,9 +252,9 @@ describe('Execution Routes', () => {
       });
     });
 
-    it('should return custom error when api.runWorkflow throws', async () => {
+    it('should return custom error when api.runWorkflowWithAlertPreprocessing throws', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.runWorkflow.mockRejectedValue(new Error('engine failed'));
+      mockApi.runWorkflowWithAlertPreprocessing.mockRejectedValue(new Error('engine failed'));
       const h = handler('POST', path)!;
       const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
 
@@ -658,7 +661,9 @@ describe('Execution Routes', () => {
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', request);
+      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', request, {
+        channel: 'kibana_execution_view',
+      });
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
@@ -691,7 +696,8 @@ describe('Execution Routes', () => {
       expect(mockApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
         'wf-1',
         'default',
-        expect.anything()
+        expect.anything(),
+        { channel: 'kibana_execution_view' }
       );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
@@ -915,6 +921,7 @@ describe('Execution Routes', () => {
           token: 'resume-token',
           approved: 'true',
         },
+        request: expect.any(Object),
       });
       expect(result).toMatchObject({
         type: 'ok',
@@ -1019,6 +1026,7 @@ describe('Execution Routes', () => {
         stepId: 'step-exec-1',
         spaceId: 'default',
         input: { severity: 'high' },
+        request: expect.any(Object),
       });
       expect(result).toMatchObject({
         type: 'ok',

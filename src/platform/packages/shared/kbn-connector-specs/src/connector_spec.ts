@@ -140,6 +140,13 @@ export interface AuthTypeDefinition {
 export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
   getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
+  /**
+   * Specs using this auth type reach the third party through the Elastic-hosted Relay rather than
+   * authenticating the axios client. Defaults to false.
+   */
+  usesRelayTransport?: boolean;
+  /** Kibana manages these credentials: the UI hides the auth type and create/update rejects it, but connectors Kibana already provisioned keep executing. */
+  isKibanaManaged?: boolean;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -217,6 +224,18 @@ export interface ConnectorPolicies {
 // ACTIONS
 // ============================================================================
 
+/**
+ * Scope of a connector action's side effects. Advisory signal for the LLM and
+ * any orchestration layer — does not enforce access control at runtime.
+ *
+ * - `read`    The action only reads data; no external state is modified.
+ * - `write`   The action creates or appends data but does not overwrite or delete
+ *             existing state (e.g. send a message, create a resource).
+ * - `destroy` The action may overwrite, update, or delete existing data
+ *             (e.g. resolve an issue, delete a resource, patch a record).
+ */
+export type ActionScope = 'read' | 'write' | 'destroy';
+
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
   input: z.ZodSchema<TInput>;
@@ -232,6 +251,33 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
    * response-size limit is exceeded. Defaults to `content-length`.
    */
   responseSizeHeader?: string;
+  /** Advisory scope hint for the LLM/orchestration layer. See {@link ActionScope}. */
+  scope: ActionScope;
+}
+
+/**
+ * The slice of the Actions plugin's Relay client that action handlers use. Declared structurally so
+ * this package does not depend on x-pack; the concrete `RelayClient` satisfies it by shape.
+ */
+export interface RelayActionClient {
+  trigger(input: {
+    tenantKey: string;
+    channel: string;
+    message: string;
+    threadTs?: string;
+  }): Promise<{ ref: string; tenantKey: string }>;
+  /** One page of the channels this deployment has connected; follow `nextCursor` for the rest. */
+  listBindings(
+    tenantKey: string,
+    options?: { cursor?: string; limit?: number }
+  ): Promise<{
+    bindings: Array<{
+      scope_id?: string;
+      display_name?: string;
+      visibility?: 'public' | 'private';
+    }>;
+    nextCursor?: string;
+  }>;
 }
 
 export interface ActionContext {
@@ -251,6 +297,12 @@ export interface ActionContext {
   connectorUsageCollector?: unknown;
   log: Logger;
   secrets?: Record<string, unknown>;
+  /**
+   * Reaches the third party through the Elastic-hosted Relay, for specs whose auth type routes that
+   * way. Undefined when the auth type does not use Relay transport or the deployment has no Relay
+   * configured.
+   */
+  relay?: RelayActionClient;
 }
 
 // ============================================================================
@@ -292,7 +344,7 @@ export interface ConnectorTest {
    */
   handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
-  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler */
+  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler. Events-only specs must keep this false; Test is outbound HTTP. */
   enabled: boolean;
 }
 

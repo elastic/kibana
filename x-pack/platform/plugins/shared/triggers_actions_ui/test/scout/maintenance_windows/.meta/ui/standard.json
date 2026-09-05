@@ -1,8 +1,7 @@
 {
-  "sha1": "747ba1dbc41f4d48a6a488d185b1e29ab4fac226",
+  "sha1": "2218cf7cb31fc5ef8df72828efb5d8b2267befee",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -85,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 117,
+        "line": 114,
         "column": 60
       }
     },
@@ -99,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 131,
+        "line": 128,
         "column": 13
       }
     },
@@ -113,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 156,
+        "line": 153,
         "column": 11
       }
     },
@@ -127,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 184,
+        "line": 181,
         "column": 14
       }
     },
@@ -141,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 213,
+        "line": 210,
         "column": 12
       }
     },
@@ -155,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 255,
+        "line": 252,
         "column": 16
       }
     },
@@ -169,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 307,
+        "line": 304,
         "column": 14
       }
     },
@@ -183,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 330,
+        "line": 327,
         "column": 24
       }
     }

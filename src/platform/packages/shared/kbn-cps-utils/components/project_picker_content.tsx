@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React, { useMemo, useRef, useCallback } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
@@ -24,7 +25,8 @@ import type { ProjectsData } from '../types';
 import { useFetchProjects } from './use_fetch_projects';
 
 interface ProjectPickerContentBaseProps
-  extends Pick<ProjectPickerStateProviderProps, 'projectRoutingStrategy'> {
+  extends Pick<ProjectPickerStateProviderProps, 'projectRoutingStrategy'>,
+    Pick<ComponentProps<typeof ProjectPickerFrame>, 'showHeader'> {
   projectRouting?: ProjectRouting;
   /**
    * Fetches projects matching a filter-only routing expression.
@@ -32,6 +34,8 @@ interface ProjectPickerContentBaseProps
   fetchProjectsByRouting: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
   maxListHeight?: number;
   customHeaderText?: React.ReactNode;
+  /** Whether to show each project's custom tag count badge. Defaults to true. */
+  showProjectTags?: boolean;
 }
 
 interface ProjectPickerContentEnabledProps extends ProjectPickerContentBaseProps {
@@ -61,6 +65,8 @@ export const ProjectPickerContent = ({
   controlsState = 'enabled',
   customHeaderText,
   projectRoutingStrategy,
+  showHeader,
+  showProjectTags = true,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
   const initialProjectRouting = useRef(projectRouting);
@@ -97,8 +103,12 @@ export const ProjectPickerContent = ({
             controlsState={controlsState}
             projectRoutingStrategy={projectRoutingStrategy}
           >
-            <ProjectPickerFrame maxBodyHeight={maxListHeight} customHeaderText={customHeaderText}>
-              <ProjectPickerList />
+            <ProjectPickerFrame
+              maxBodyHeight={maxListHeight}
+              customHeaderText={customHeaderText}
+              showHeader={showHeader}
+            >
+              <ProjectPickerList showProjectTags={showProjectTags} />
             </ProjectPickerFrame>
           </ProjectPickerStateProvider>
         )}

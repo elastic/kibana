@@ -1,5 +1,8 @@
 {
-  "sha1": "f3ab25b20c9d50b76184606165a6967ac635ba7a",
+  "sha1": "2705670615455f991f2ed1018b242124fc04785a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "12438030416ccc4-0ca770f7b4f667b",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 31,
-        "column": 7
+        "line": 21,
+        "column": 27
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 26,
+        "column": 42
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 55,
-        "column": 7
+        "line": 34,
+        "column": 9
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 69,
-        "column": 7
+        "line": 43,
+        "column": 8
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 84,
-        "column": 7
+        "line": 51,
+        "column": 23
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 94,
-        "column": 7
+        "line": 57,
+        "column": 5
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
-        "line": 63,
-        "column": 9
+        "line": 48,
+        "column": 13
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
-        "line": 85,
-        "column": 22
+        "line": 63,
+        "column": 9
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/inspect.spec.ts",
-        "line": 30,
-        "column": 7
+        "line": 21,
+        "column": 8
       }
     },
     {
@@ -137,7 +140,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/spaces_integration.spec.ts",
-        "line": 39,
+        "line": 31,
         "column": 9
       }
     }

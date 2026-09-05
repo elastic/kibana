@@ -15,6 +15,7 @@ project:
   channel: ''
   sourceRoot: x-pack/platform/test
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/change-history'
   - '@kbn/test-suites-src'
   - '@kbn/telemetry-collection-manager-plugin'
@@ -119,7 +120,6 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/server-route-repository'
   - '@kbn/ml-string-hash'
-  - '@kbn/data-visualizer-plugin'
   - '@kbn/cloud-integration-saml-provider-plugin'
   - '@kbn/ci-stats-reporter'
   - '@kbn/gen-ai-functional-testing'

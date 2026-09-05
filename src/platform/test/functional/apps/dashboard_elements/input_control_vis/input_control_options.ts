@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const browser = getService('browser');
   const FIELD_NAME = 'machine.os.raw';
 
   /**
@@ -46,10 +47,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('filter bar', () => {
+      // Close the Add filter popover in a hook so it can't overlay the next suite's editor tabs.
+      afterEach(async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.missingOrFail('addFilterPopover');
+      });
+
       it('should show the default index pattern when clicking "Add filter"', async () => {
         await testSubjects.click('addFilter');
         const fields = await filterBar.getFilterEditorFields();
-        await filterBar.ensureFieldEditorModalIsClosed();
         expect(fields.length).to.be.greaterThan(0);
       });
     });

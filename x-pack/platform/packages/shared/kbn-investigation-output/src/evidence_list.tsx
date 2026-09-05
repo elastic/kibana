@@ -124,7 +124,7 @@ export const EvidenceList: React.FC<EvidenceListProps> = ({ evidence, getQueryHr
                       <EuiToolTip content={formatCodeReferenceDetail(code)}>
                         <EuiBadge
                           color="hollow"
-                          iconType="editorCodeBlock"
+                          iconType="code"
                           href={codeHref}
                           target="_blank"
                           data-test-subj="investigationEvidenceCodeLink"

@@ -15,7 +15,6 @@ import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/u
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/workflow_id_schema';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
 import { emitWorkflowDiff, extractConversationId } from './utils/workflow_attachments';
 
@@ -146,7 +145,11 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
       }
 
       try {
-        const { workflow, response: generationComment } = await generateWorkflow({
+        const {
+          workflow,
+          yaml: afterYaml,
+          response: generationComment,
+        } = await generateWorkflow({
           nlQuery: query,
           workflow: workflowDef,
           additionalContext: workflowContext,
@@ -159,7 +162,6 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
         });
 
         const beforeYaml = sourceData?.yaml ?? '';
-        const afterYaml = stringifyWorkflowDefinition(workflow);
         const proposalId = v4();
 
         const {

@@ -127,6 +127,7 @@ Any assertion over a list has to tolerate entries your test didn't create:
 - **Narrow the query to your test data.** Filter by a term only your test data matches, then assert on the filtered results. This also keeps result caps and pagination from quietly dropping your rows once the deployment holds more data than your local stack.
 - **Address objects by identity, not position.** Use an ID or a name, never a row index or whichever row happens to render first.
 - **Assert containment, not totality.** `toContainText('my-fixture')` passes even when the deployment has other data; `toHaveCount(4)` does not.
+- **Never assert that data is absent.** "No data" behavior — empty prompts, onboarding redirects, zero-count states — requires that *nothing on the whole deployment* matches the underlying check. No amount of cleanup can guarantee that in a shared environment: the matching document may belong to another suite, or arrive mid-test. These tests fail rarely, unpredictably, and only in CI. Cover empty-state branches with a unit test that mocks the data check, and keep the Scout test for the data-present path.
 
 :::::{dropdown} Examples
 ❌ **Don't:** assume the only dashboards on the deployment are yours. This passes locally and fails on Cloud, where integration dashboards push your test data past global search's cap of 40 results per provider:
@@ -143,14 +144,77 @@ await pageObjects.globalSearch.searchFor('type:dashboard my-fixture');
 await expect(pageObjects.globalSearch.resultLabels).toContainText('my-fixture-1');
 ```
 
+❌ **Don't:** assert behavior that requires the whole deployment to hold no matching data. Cleaning your own fixtures doesn't make this precondition true — any other suite's documents break it:
+
+```ts
+await logsSynthtraceEsClient.clean(); // only removes *this suite's* data
+await pageObjects.landing.goto();
+// passes only if *no* log data exists anywhere on the deployment
+await expect(page).toHaveURL(/\/app\/observabilityOnboarding/);
+```
+
+✔️ **Do:** cover the empty-state branch in a Jest unit test where the data check is mocked and the precondition is guaranteed, and keep the Scout test for the data-present path:
+
+```ts
+// landing.test.tsx — deterministic: the "no data" state is mocked, not assumed
+mockLogsDataService.getStatus.mockResolvedValue({ hasData: false });
+render(<LandingPage />);
+expect(mockNavigateToApp).toHaveBeenCalledWith('observabilityOnboarding');
+```
+
+:::::
+
+## Don't leak state into the next suite [dont-leak-state-into-the-next-suite]
+
+Scout configs share servers. Anything your suite creates or changes can affect the suites that run after it.
+
+- **Namespace what you create.** Fixed names (`my-test-index`) are shared with other specs and parallel workers. Generate resource names from a unique value such as a UUID, per run — or per worker for parallel suites.
+- **Own your time window.** Fixed timestamps are shared state too. If two suites ingest into the same date range, each suite's time-bounded queries see the other's documents. Pick a suite-unique range.
+- **Delete the resource, not just the record of it.** Deleting a saved object that points at an API key, task, execution, or pipeline doesn't release the underlying resource. Tear down through the API that owns it.
+- **Revert behavior-changing state.** Undo settings, feature flags, and index/component templates in teardown. They change how the cluster behaves for whatever runs next.
+
+Clean up in the right place:
+
+- **Per-test data**: clean up in `afterEach`/`afterAll`.
+- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers have finished running the config's tests.
+
+:::::{dropdown} Examples
+❌ **Don't:** use a fixed literal resource name. Every spec, parallel worker, and leftover from an earlier suite shares it — one teardown deletes everyone's data:
+
+```ts
+const indexName = 'my-plugin-test-index';
+await esClient.indices.create({ index: indexName });
+```
+
+✔️ **Do:** make the name unique per run (or per worker, in parallel suites), and derive cleanup from the same value:
+
+```ts
+// random suffix (simple and strong uniqueness)
+const indexName = `my-plugin-test-index-${randomUUID()}`;
+
+await esClient.indices.create({ index: indexName });
+// afterAll
+await esClient.indices.delete({ index: indexName });
+```
+
+❌ **Don't:** clean up by deleting the pointer. Wiping the saved objects removes the *record* of the rule, but the API key it owns stays alive:
+
+```ts
+// afterAll — the rule documents are gone, but their API keys are now orphaned
+await kbnClient.savedObjects.clean({ types: ['alert'] });
+```
+
+✔️ **Do:** tear down through the API that owns the resource, so its own deletion logic releases everything it created:
+
+```ts
+// afterAll — deleting the rule also queues its API key for invalidation
+await apiServices.alerting.rules.delete(ruleId);
+```
+
 :::::
 
 :::::{tip}
-The same logic applies in reverse: whatever your suite creates or changes, clean it up so the next config on the same lane doesn't inherit it. Saved objects, indices, and feature flags all persist across suites.
-
-- **Per-test data**: clean up in `afterEach`/`afterAll`.
-- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook).
-
+If your suite passes locally and alone but fails in CI, suspect this whole class first: check what state the failing assertion actually depends on, and which other suite could have created or deleted it.
 :::::
 
 ## Keep tests close to the code they test [keep-tests-close-to-source-code]

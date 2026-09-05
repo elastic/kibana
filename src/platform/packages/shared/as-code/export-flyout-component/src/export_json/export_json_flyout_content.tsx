@@ -109,7 +109,7 @@ export const ExportJsonFlyoutContent = <
               id="asCodeExport.exportJson.flyoutTitle"
               defaultMessage="Export {objectType} as {type}"
               values={{
-                objectType: objectType.toLocaleLowerCase(),
+                objectType,
                 type: i18n.translate('asCodeExport.exportJson.label', {
                   defaultMessage: 'JSON',
                 }),

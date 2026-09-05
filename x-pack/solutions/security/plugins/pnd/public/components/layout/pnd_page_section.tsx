@@ -12,10 +12,7 @@ import { EuiPageSection, useEuiTheme } from '@elastic/eui';
 export type PndPageSectionProps = Omit<EuiPageSectionProps, 'paddingSize'>;
 
 const getContentPaddingCss = (euiTheme: EuiThemeComputed) => ({
-  paddingTop: euiTheme.size.l,
-  paddingRight: euiTheme.size.l,
-  paddingBottom: euiTheme.size.l,
-  paddingLeft: euiTheme.size.l,
+  padding: `${euiTheme.size.l} 0`,
 });
 
 /**

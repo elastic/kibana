@@ -8,12 +8,10 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   getLeadsIndexName,
-  type LeadGenerationMode,
+  getLegacyLeadsIndexNames,
 } from '../../../../../common/entity_analytics/lead_generation';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { generateLeadIndexMappings } from './mappings';
-
-const LEAD_INDEX_MODES: readonly LeadGenerationMode[] = ['adhoc', 'scheduled'] as const;
 
 export interface LeadIndexServiceDeps {
   esClient: ElasticsearchClient;
@@ -21,33 +19,25 @@ export interface LeadIndexServiceDeps {
   spaceId: string;
 }
 
-/**
- * Manages the lifecycle of lead generation ES indices (one adhoc + one scheduled per space).
- */
+/** Manages the lifecycle of the lead generation ES index per space. */
 export const createLeadIndexService = ({ esClient, logger, spaceId }: LeadIndexServiceDeps) => {
-  const getIndices = () =>
-    LEAD_INDEX_MODES.map((mode) => ({ name: getLeadsIndexName(spaceId, mode), mode }));
+  const indexName = getLeadsIndexName(spaceId);
 
-  /** Idempotent: creates or updates mappings for both indices. */
-  const createIndices = async (): Promise<void> => {
+  const createIndex = async (): Promise<void> => {
     const mappings = generateLeadIndexMappings();
-
-    for (const { name, mode } of getIndices()) {
-      logger.info(`Creating or updating lead generation index: ${name} (mode: ${mode})`);
-      await createOrUpdateIndex({
-        esClient,
-        logger,
-        options: {
-          index: name,
-          mappings,
-          settings: { hidden: true, auto_expand_replicas: '0-1' },
-        },
-      });
-    }
+    logger.info(`Creating or updating lead generation index: ${indexName}`);
+    await createOrUpdateIndex({
+      esClient,
+      logger,
+      options: {
+        index: indexName,
+        mappings,
+        settings: { hidden: true, auto_expand_replicas: '0-1' },
+      },
+    });
   };
 
-  const doesIndexExist = async (mode: LeadGenerationMode = 'adhoc'): Promise<boolean> => {
-    const indexName = getLeadsIndexName(spaceId, mode);
+  const doesIndexExist = async (): Promise<boolean> => {
     try {
       return await esClient.indices.exists({ index: indexName });
     } catch (e) {
@@ -56,9 +46,10 @@ export const createLeadIndexService = ({ esClient, logger, spaceId }: LeadIndexS
     }
   };
 
-  /** Deletes both indices. Used during cleanup / feature disable. */
-  const deleteIndices = async (): Promise<void> => {
-    for (const { name } of getIndices()) {
+  /** Deletes the current index and any legacy adhoc/scheduled indices left from before the single-index migration. */
+  const deleteIndex = async (): Promise<void> => {
+    const toDelete = [indexName, ...getLegacyLeadsIndexNames(spaceId)];
+    for (const name of toDelete) {
       try {
         const exists = await esClient.indices.exists({ index: name });
         if (exists) {
@@ -71,7 +62,7 @@ export const createLeadIndexService = ({ esClient, logger, spaceId }: LeadIndexS
     }
   };
 
-  return { createIndices, doesIndexExist, deleteIndices };
+  return { createIndex, doesIndexExist, deleteIndex };
 };
 
 export type LeadIndexService = ReturnType<typeof createLeadIndexService>;

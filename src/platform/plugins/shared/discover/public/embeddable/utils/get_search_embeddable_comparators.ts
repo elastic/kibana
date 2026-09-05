@@ -10,46 +10,9 @@
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { isEqual, isUndefined, omit, omitBy } from 'lodash';
 import type {
-  EditableSavedSearchAttributes,
-  SearchEmbeddableBaseState,
-  SearchEmbeddableByReferenceState,
-  SearchEmbeddableByValueState,
-} from '../../../common/embeddable/types';
-import type {
   DiscoverSessionEmbeddableByReferenceProps,
   DiscoverSessionEmbeddableByValueProps,
 } from '../../../server';
-
-type SearchEmbeddableStateAttrs = EditableSavedSearchAttributes &
-  (
-    | Omit<SearchEmbeddableByValueState, keyof SearchEmbeddableBaseState>
-    | Omit<SearchEmbeddableByReferenceState, keyof SearchEmbeddableBaseState>
-  );
-
-export function getSearchEmbeddableComparators(
-  isByValue: boolean,
-  shouldSkipTabComparators: boolean
-): StateComparators<SearchEmbeddableStateAttrs> {
-  return {
-    sort: 'deepEquality',
-    columns: 'deepEquality',
-    rowHeight: 'referenceEquality',
-    sampleSize: 'referenceEquality',
-    rowsPerPage: 'referenceEquality',
-    headerRowHeight: 'referenceEquality',
-    density: 'referenceEquality',
-    grid: 'deepEquality',
-    ...(isByValue
-      ? { attributes: 'skip' }
-      : {
-          // While the selected tab is missing or inline editing is in progress,
-          // skip tab-dependent comparators so unsaved-changes badges don't appear
-          // until the user explicitly applies a tab change.
-          selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
-          savedObjectId: 'skip',
-        }),
-  };
-}
 
 export function getDiscoverSessionEmbeddableComparators(
   isByValue: boolean,

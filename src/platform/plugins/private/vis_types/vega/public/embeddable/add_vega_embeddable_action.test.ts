@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VEGA_EMBEDDABLE_TYPE } from '../constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { getDefaultSpec } from '../default_spec';
 import { getAddVegaEmbeddableAction } from './add_vega_embeddable_action';
 
@@ -24,7 +24,7 @@ describe('getAddVegaEmbeddableAction', () => {
 
     expect(addNewPanel).toHaveBeenCalledWith({
       panelType: VEGA_EMBEDDABLE_TYPE,
-      serializedState: { spec: getDefaultSpec() },
+      serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
     });
     // `returnFocus` is forwarded so closing the editor puts focus back on the Add panel menu.
     expect(onEdit).toHaveBeenCalledWith({ isNewPanel: true, returnFocus });

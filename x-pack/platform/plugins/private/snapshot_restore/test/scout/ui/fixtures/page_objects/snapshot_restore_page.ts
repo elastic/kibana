@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '@kbn/scout';
 
 export class SnapshotRestorePage {
@@ -32,7 +33,7 @@ export class SnapshotRestorePage {
   }
 
   async appTitleText(): Promise<string> {
-    return this.page.testSubj.locator('appTitle').innerText();
+    return this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title).innerText();
   }
 
   async navToRepositories() {

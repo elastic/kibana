@@ -8,15 +8,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
-import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
+import type { WorkflowExecutionsDataClient } from './data_access_layer';
 
 /**
  * An execution document is written by several independent writers while the run is in flight:
@@ -30,9 +28,7 @@ import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
 const UPDATE_RETRY_ON_CONFLICT = 3;
 
 export class WorkflowExecutionRepository {
-  private indexName = WORKFLOWS_EXECUTIONS_INDEX;
-
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(private workflowExecutionsDataClient: WorkflowExecutionsDataClient) {}
 
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
@@ -48,33 +44,16 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
-    try {
-      const response = await retryTransientEsErrors(
-        () =>
-          this.esClient.get<EsWorkflowExecution>({
-            index: this.indexName,
-            id: workflowExecutionId,
-          }),
-        { logger: this.logger }
-      );
+    const { items } = await this.workflowExecutionsDataClient.getByIds([workflowExecutionId]);
+    const doc = items[0]?.document;
 
-      const doc = response._source;
-      // Verify spaceId matches for security/multi-tenancy
-      if (!doc || doc.spaceId !== spaceId) {
-        return null;
-      }
-      return doc;
-    } catch (error: unknown) {
+    // Verify spaceId matches for security/multi-tenancy
+    if (!doc || doc.spaceId !== spaceId) {
       // Handle 404 - document not found
-      if (
-        error instanceof Error &&
-        'meta' in error &&
-        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
-      ) {
-        return null;
-      }
-      throw error;
+      return null;
     }
+
+    return doc;
   }
 
   /**
@@ -95,16 +74,27 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for creation');
     }
 
-    await retryTransientEsErrors(
-      () =>
-        this.esClient.index({
-          index: this.indexName,
-          id: workflowExecution.id,
-          refresh: options.refresh ?? false,
-          document: workflowExecution,
-        }),
-      { logger: this.logger }
-    );
+    const response = await this.workflowExecutionsDataClient.bulk({
+      items: [
+        {
+          operation: 'create',
+          document: workflowExecution as Partial<EsWorkflowExecution> & { id: string },
+        },
+      ],
+      refresh: options.refresh ?? false,
+    });
+
+    // bulk() treats item-level errors as partial failures and never throws.
+    // For a single-document create, any error must propagate so callers don't
+    // silently proceed after a failed write (e.g. version conflict on duplicate ID).
+    const itemError = response.items[0]?.error;
+    if (itemError) {
+      throw new Error(
+        `Failed to create workflow execution ${workflowExecution.id}: ${
+          itemError.reason ?? JSON.stringify(itemError)
+        }`
+      );
+    }
   }
 
   /**
@@ -130,24 +120,18 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    const bulkResponse = await retryTransientEsErrors(
-      () =>
-        this.esClient.bulk({
-          refresh: options.refresh ?? false,
-          index: this.indexName,
-          operations: executions.flatMap((execution) => [
-            { create: { _id: execution.id } },
-            execution,
-          ]),
-        }),
-      { logger: this.logger }
-    );
+    const bulkResponse = await this.workflowExecutionsDataClient.bulk({
+      items: executions.map((execution) => ({
+        operation: 'create',
+        document: execution as Partial<EsWorkflowExecution> & { id: string },
+      })),
+      refresh: options.refresh,
+    });
 
-    return bulkResponse.items.map((item, idx) => {
-      const op = item.create ?? item.index;
+    return bulkResponse.items.map((item, idx: number) => {
       const id = executions[idx].id as string;
-      if (op?.error) {
-        return { id, error: op.error.reason ?? JSON.stringify(op.error) };
+      if (item.error) {
+        return { id, error: item.error.reason ?? JSON.stringify(item.error) };
       }
       return { id };
     });
@@ -173,18 +157,28 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for update');
     }
 
-    const { id } = workflowExecution;
-    await retryTransientEsErrors(
-      () =>
-        this.esClient.update<Partial<EsWorkflowExecution>>({
-          index: this.indexName,
-          id,
-          refresh: options.refresh ?? false,
-          retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
-          doc: workflowExecution,
-        }),
-      { logger: this.logger }
-    );
+    const response = await this.workflowExecutionsDataClient.bulk({
+      items: [
+        {
+          operation: 'update',
+          document: workflowExecution as Partial<EsWorkflowExecution> & { id: string },
+          retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+        },
+      ],
+      refresh: options.refresh ?? false,
+    });
+
+    // bulk() treats item-level errors as partial failures and never throws.
+    // For a single-document update, any error must propagate so callers don't
+    // silently proceed after a failed write (e.g. doc-not-found, version conflict).
+    const itemError = response.items[0]?.error;
+    if (itemError) {
+      throw new Error(
+        `Failed to update workflow execution ${workflowExecution.id}: ${
+          itemError.reason ?? JSON.stringify(itemError)
+        }`
+      );
+    }
   }
 
   /**
@@ -208,32 +202,18 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    const bulkResponse = await retryTransientEsErrors(
-      () =>
-        this.esClient.bulk({
-          refresh: true,
-          index: this.indexName,
-          body: updates.flatMap((update) => [
-            { update: { _id: update.id, retry_on_conflict: UPDATE_RETRY_ON_CONFLICT } },
-            { doc: update },
-          ]),
-        }),
-      { logger: this.logger }
-    );
-
-    if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
-        .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
-        }));
-
+    const response = await this.workflowExecutionsDataClient.bulk({
+      items: updates.map((update) => ({
+        operation: 'update',
+        document: update as Partial<EsWorkflowExecution> & { id: string },
+        retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+      })),
+      refresh: true,
+    });
+    if (response.errors) {
+      const errorCount = response.items.filter((item) => item.error).length;
       throw new Error(
-        `Failed to update ${erroredDocuments.length} workflow executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
+        `Bulk update failed for ${errorCount} of ${updates.length} workflow executions`
       );
     }
   }
@@ -246,15 +226,10 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves to the list of search hits.
    */
   public async searchWorkflowExecutions(query: Record<string, unknown>, size: number = 10) {
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.search<EsWorkflowExecution>({
-          index: this.indexName,
-          query,
-          size,
-        }),
-      { logger: this.logger }
-    );
+    const response = await this.workflowExecutionsDataClient.search({
+      query: query as estypes.QueryDslQueryContainer,
+      size,
+    });
 
     return response.hits.hits;
   }
@@ -294,22 +269,17 @@ export class WorkflowExecutionRepository {
       filterClauses.push({ term: { triggeredBy } });
     }
 
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.search<EsWorkflowExecution>({
-          index: this.indexName,
-          size: 0, // Don't need the document, just checking existence
-          terminate_after: 1, // Stop after finding 1 match
-          track_total_hits: true,
-          _source: false, // Don't fetch document content, only check existence
-          query: {
-            bool: {
-              filter: filterClauses, // Filter context = no scoring = faster
-            },
-          },
-        }),
-      { logger: this.logger }
-    );
+    const response = await this.workflowExecutionsDataClient.search({
+      size: 0, // Don't need the document, just checking existence
+      terminate_after: 1, // Stop after finding 1 match
+      track_total_hits: true,
+      _source: false, // Don't fetch document content, only check existence
+      query: {
+        bool: {
+          filter: filterClauses, // Filter context = no scoring = faster
+        },
+      },
+    });
 
     const total = response.hits.total;
     if (total === undefined) {
@@ -348,20 +318,15 @@ export class WorkflowExecutionRepository {
       filterClauses.push({ term: { triggeredBy } });
     }
 
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.search<EsWorkflowExecution>({
-          index: this.indexName,
-          size: 1,
-          terminate_after: 1, // Stop after finding 1 match
-          query: {
-            bool: {
-              filter: filterClauses, // Filter context = no scoring = faster
-            },
-          },
-        }),
-      { logger: this.logger }
-    );
+    const response = await this.workflowExecutionsDataClient.search({
+      size: 1,
+      terminate_after: 1, // Stop after finding 1 match
+      query: {
+        bool: {
+          filter: filterClauses, // Filter context = no scoring = faster
+        },
+      },
+    });
 
     return response.hits.hits;
   }
@@ -408,27 +373,22 @@ export class WorkflowExecutionRepository {
       });
     }
 
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
-          index: this.indexName,
-          query: {
-            bool: {
-              filter: filterClauses, // Filter context = no scoring = faster
-            },
-          },
-          _source: ['id'], // Only fetch ID field for efficiency
-          sort: [
-            { createdAt: { order: 'asc' } },
-            { id: { order: 'asc' } }, // Tie-break for determinism when createdAt collides; not chronological order
-          ],
-          size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
-        }),
-      { logger: this.logger }
-    );
+    const response = await this.workflowExecutionsDataClient.search({
+      query: {
+        bool: {
+          filter: filterClauses, // Filter context = no scoring = faster
+        },
+      },
+      _source: ['id'], // Only fetch ID field for efficiency
+      sort: [
+        { createdAt: { order: 'asc' } },
+        { id: { order: 'asc' } }, // Tie-break for determinism when createdAt collides; not chronological order
+      ],
+      size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
+    });
 
     return response.hits.hits
-      .map((hit) => hit._source?.id ?? hit._id)
+      .map((hit) => (hit._source as Pick<EsWorkflowExecution, 'id'> | undefined)?.id ?? hit._id)
       .filter((id): id is string => id !== undefined);
   }
 
@@ -453,18 +413,14 @@ export class WorkflowExecutionRepository {
         },
       });
     }
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.count({
-          index: this.indexName,
-          query: {
-            bool: {
-              filter: filterClauses,
-            },
-          },
-        }),
-      { logger: this.logger }
-    );
+
+    const response = await this.workflowExecutionsDataClient.count({
+      query: {
+        bool: {
+          filter: filterClauses,
+        },
+      },
+    });
 
     return response.count;
   }
@@ -476,64 +432,52 @@ export class WorkflowExecutionRepository {
     concurrencyGroupKey: string,
     spaceId: string
   ): Promise<string | null> {
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
-          index: this.indexName,
-          size: 1,
-          query: {
-            bool: {
-              filter: [
-                { term: { concurrencyGroupKey } },
-                { term: { spaceId } },
-                { term: { status: ExecutionStatus.QUEUED } },
-              ],
-            },
-          },
-          _source: ['id'],
-          sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
-        }),
-      { logger: this.logger }
-    );
+    const response = await this.workflowExecutionsDataClient.search({
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            { term: { concurrencyGroupKey } },
+            { term: { spaceId } },
+            { term: { status: ExecutionStatus.QUEUED } },
+          ],
+        },
+      },
+      _source: ['id'],
+      sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+    });
     const hit = response.hits.hits[0];
-    const id = hit?._source?.id ?? hit?._id;
+    const id = (hit?._source as Pick<EsWorkflowExecution, 'id'> | undefined)?.id ?? hit?._id;
     return typeof id === 'string' ? id : null;
   }
 
   /**
-   * CAS: promoted `queued` → `pending` only when the document still carries `queued` status.
+   * CAS: promotes `queued` → `pending` only when the document still carries `queued` status.
+   * Uses an atomic Painless script update so concurrent drain iterations cannot both promote
+   * the same execution (which would allow a concurrency group to exceed maxConcurrency).
    */
   public async tryCasPromoteQueuedWorkflowExecutionToPending(params: {
     workflowExecutionId: string;
     spaceId: string;
   }): Promise<boolean> {
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.update({
-          index: this.indexName,
-          id: params.workflowExecutionId,
-          // Near-real-time search must see this doc as PENDING before the next
-          // drain loop iteration counts slot occupancy; otherwise max:1 can double-promote.
-          refresh: 'wait_for',
-          script: {
-            lang: 'painless',
-            source: `
-              if (ctx._source.status == params.queuedStatus && ctx._source.spaceId == params.spaceId) {
-                ctx._source.status = params.pendingStatus;
-              } else {
-                ctx.op = 'noop';
-              }
-            `,
-            params: {
-              queuedStatus: ExecutionStatus.QUEUED,
-              pendingStatus: ExecutionStatus.PENDING,
-              spaceId: params.spaceId,
-            },
-          },
-        }),
-      { logger: this.logger }
-    );
-    return response.result === 'updated';
+    const { result } = await this.workflowExecutionsDataClient.scriptUpdate({
+      id: params.workflowExecutionId,
+      script:
+        'if (ctx._source.status == params.queuedStatus && ctx._source.spaceId == params.spaceId) {' +
+        '  ctx._source.status = params.pendingStatus;' +
+        '} else {' +
+        "  ctx.op = 'noop';" +
+        '}',
+      params: {
+        queuedStatus: ExecutionStatus.QUEUED,
+        pendingStatus: ExecutionStatus.PENDING,
+        spaceId: params.spaceId,
+      },
+      // Near-real-time search must see this doc as PENDING before the next
+      // drain loop iteration counts slot occupancy; otherwise max:1 can double-promote.
+      refresh: 'wait_for',
+    });
+    return result === 'updated';
   }
 
   /**
@@ -569,27 +513,22 @@ export class WorkflowExecutionRepository {
 
     const pageSize = Math.min(size, 10000); // Cap at ES default max_result_window
 
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
-          index: this.indexName,
-          query: {
-            bool: {
-              filter: filterClauses,
-            },
-          },
-          _source: ['id'],
-          sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
-          size: pageSize,
-          track_total_hits: true,
-          ...(searchAfter?.length ? { search_after: searchAfter } : {}),
-        }),
-      { logger: this.logger }
-    );
+    const response = await this.workflowExecutionsDataClient.search({
+      query: {
+        bool: {
+          filter: filterClauses,
+        },
+      },
+      _source: ['id'],
+      sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+      size: pageSize,
+      track_total_hits: true,
+      ...(searchAfter?.length ? { search_after: searchAfter } : {}),
+    });
 
     const hits = response.hits.hits;
     const results = hits
-      .map((hit) => hit._source?.id ?? hit._id)
+      .map((hit) => (hit._source as Pick<EsWorkflowExecution, 'id'> | undefined)?.id ?? hit._id)
       .filter((id): id is string => id !== undefined);
 
     const rawTotal = response.hits.total;

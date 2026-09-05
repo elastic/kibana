@@ -117,7 +117,14 @@ export interface EventIdsAggsResult {
   };
 }
 
-export type AlertsAttachedToCaseArgs = AttachedToCaseArgs;
+export type AlertsAttachedToCaseArgs = AttachedToCaseArgs & {
+  owner: string;
+  /**
+   * Excludes alerts whose index belongs to a linked project
+   * default to true
+   */
+  originOnly?: boolean;
+};
 
 export interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
   attachmentType: AttachmentType;

@@ -7,8 +7,8 @@
 
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { READ_ALL_BEFORE_DEFAULT } from '../storage/user_storage';
 import { queryNotifications, NOTIFICATION_QUERY_RESULT_LIMIT } from './query_notifications';
-import { severityTTLBoundary } from './severity_ttl_query';
 
 const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) => ({
   '@timestamp': ts,
@@ -48,59 +48,12 @@ describe('queryNotifications', () => {
     );
   });
 
-  it('applies one severity-TTL horizon window per tier plus a forward-compat window', async () => {
-    const { deps, search } = setup();
-
-    await queryNotifications(deps);
-
-    const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter[0]).toEqual({
-      bool: {
-        should: [
-          {
-            bool: {
-              filter: [
-                { terms: { severity: ['info'] } },
-                { range: { '@timestamp': { gte: severityTTLBoundary(30) } } },
-              ],
-            },
-          },
-          {
-            bool: {
-              filter: [
-                { terms: { severity: ['warning'] } },
-                { range: { '@timestamp': { gte: severityTTLBoundary(60) } } },
-              ],
-            },
-          },
-          {
-            bool: {
-              filter: [
-                { terms: { severity: ['error', 'critical'] } },
-                { range: { '@timestamp': { gte: severityTTLBoundary(180) } } },
-              ],
-            },
-          },
-          // Unknown/future severity tiers stay visible for the longest window instead of dropping.
-          {
-            bool: {
-              must_not: { terms: { severity: ['info', 'warning', 'error', 'critical'] } },
-              filter: [{ range: { '@timestamp': { gte: severityTTLBoundary(180) } } }],
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    });
-  });
-
-  it('composes namespace, type, severity, and time-range filters', async () => {
+  it('composes namespace, type, and time-range filters', async () => {
     const { deps, search } = setup();
 
     await queryNotifications(deps, {
       namespace: 'inference',
       type: 'modelStatus',
-      severity: ['warning', 'error'],
       from: '2026-07-01T00:00:00.000Z',
       to: '2026-07-20T00:00:00.000Z',
     });
@@ -110,7 +63,6 @@ describe('queryNotifications', () => {
       expect.arrayContaining([
         { term: { namespace: 'inference' } },
         { term: { type: 'modelStatus' } },
-        { terms: { severity: ['warning', 'error'] } },
         {
           range: {
             '@timestamp': { gte: '2026-07-01T00:00:00.000Z', lte: '2026-07-20T00:00:00.000Z' },
@@ -126,7 +78,7 @@ describe('queryNotifications', () => {
     await queryNotifications(deps);
 
     const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter).toHaveLength(1);
+    expect(query.bool.filter).toEqual([]);
   });
 
   it('returns the full collapsed set for the client to paginate', async () => {
@@ -190,5 +142,130 @@ describe('queryNotifications', () => {
     const result = await queryNotifications(deps);
 
     expect(result.items[0].severity).toBe('info');
+  });
+  describe('read-state annotation', () => {
+    const readOverride = (markedAt: string) => ({ read: true, markedAt });
+
+    it('marks an id read from its own override', async () => {
+      const { deps } = setup([
+        doc('a', '2026-07-15T00:00:00.000Z'),
+        doc('b', '2026-07-14T00:00:00.000Z'),
+      ]);
+
+      const result = await queryNotifications(
+        deps,
+        {},
+        {
+          overrides: { a: readOverride('2026-07-16T00:00:00.000Z') },
+          readAllBefore: READ_ALL_BEFORE_DEFAULT,
+        }
+      );
+
+      expect(result.items.map(({ notification_id: id, isRead }) => [id, isRead])).toEqual([
+        ['a', true],
+        ['b', false],
+      ]);
+    });
+
+    it('resurfaces a re-push after readAllBefore as unread', async () => {
+      // The annotation anchors on the representative (the newest copy), so a copy pushed
+      // after a mark-all-read is new activity and comes back unread.
+      const { deps } = setup([
+        doc('re-pushed', '2026-07-20T00:00:00.000Z'),
+        doc('quiet', '2026-07-10T00:00:00.000Z'),
+      ]);
+
+      const result = await queryNotifications(
+        deps,
+        {},
+        { overrides: {}, readAllBefore: '2026-07-15T00:00:00.000Z' }
+      );
+
+      expect(result.items.map(({ notification_id: id, isRead }) => [id, isRead])).toEqual([
+        ['re-pushed', false],
+        ['quiet', true],
+      ]);
+    });
+
+    it('resurfaces a re-push after an individual mark-read as unread', async () => {
+      // A read override is a timestamped acknowledgement of the copy in hand, not a mute:
+      // a newer copy escapes it the same way it escapes the bulk marker.
+      const { deps } = setup([doc('acknowledged', '2026-07-20T00:00:00.000Z')]);
+
+      const result = await queryNotifications(
+        deps,
+        {},
+        {
+          overrides: { acknowledged: readOverride('2026-07-18T00:00:00.000Z') },
+          readAllBefore: '2026-07-19T00:00:00.000Z',
+        }
+      );
+
+      // The override wins over the later marker, so the marker cannot mask the re-push
+      expect(result.items[0].isRead).toBe(false);
+    });
+
+    it('orders by recency regardless of read state', async () => {
+      // The server reports `isRead` but never orders by it, so the sequence is identical
+      // for every caller and a client tracking read state locally has nothing to reconcile.
+      const { deps } = setup([
+        doc('read-new', '2026-07-20T00:00:00.000Z'),
+        doc('unread-new', '2026-07-15T00:00:00.000Z'),
+        doc('read-old', '2026-07-10T00:00:00.000Z'),
+        doc('unread-old', '2026-07-05T00:00:00.000Z'),
+      ]);
+
+      const result = await queryNotifications(
+        deps,
+        {},
+        {
+          overrides: {
+            'read-new': readOverride('2026-07-21T00:00:00.000Z'),
+            'read-old': readOverride('2026-07-11T00:00:00.000Z'),
+          },
+          readAllBefore: READ_ALL_BEFORE_DEFAULT,
+        }
+      );
+
+      expect(result.items.map(({ notification_id: id }) => id)).toEqual([
+        'read-new',
+        'unread-new',
+        'read-old',
+        'unread-old',
+      ]);
+    });
+
+    it('accepts read state as a promise resolved alongside the search', async () => {
+      const { deps } = setup([doc('a', '2026-07-15T00:00:00.000Z')]);
+
+      const result = await queryNotifications(
+        deps,
+        {},
+        Promise.resolve({
+          overrides: { a: readOverride('2026-07-16T00:00:00.000Z') },
+          readAllBefore: READ_ALL_BEFORE_DEFAULT,
+        })
+      );
+
+      expect(result.items[0].isRead).toBe(true);
+    });
+
+    it('returns an unannotated list when the read-state promise resolves to undefined', async () => {
+      const { deps } = setup([doc('a', '2026-07-15T00:00:00.000Z')]);
+
+      const result = await queryNotifications(deps, {}, Promise.resolve(undefined));
+
+      expect(result.items[0]).not.toHaveProperty('isRead');
+    });
+
+    // Locked decision on search-team#14979: listing stays open to API-key/headless
+    // callers, which have no profile — they get the list without read state, not a 403.
+    it('omits isRead entirely when no read state is provided', async () => {
+      const { deps } = setup([doc('a', '2026-07-15T00:00:00.000Z')]);
+
+      const result = await queryNotifications(deps);
+
+      expect(result.items[0]).not.toHaveProperty('isRead');
+    });
   });
 });

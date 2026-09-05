@@ -10,50 +10,33 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
-  customContentStateSchema,
+  customContentUpdateSchema,
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
 
 /** Create schema: no template — the server generates it server-side during the tool call. */
-export const customContentPanelConfigSchema = customContentStateSchema
-  .omit({ template: true })
-  .extend({
-    prompt: z
-      .string()
-      .min(1)
-      .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-      .describe(
-        'Natural language description of what to display. A visually consistent HTML template is generated server-side from this prompt — do not supply a template yourself.'
-      ),
-    esqlQuery: z
-      .string()
-      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-      .optional()
-      .describe(
-        'ES|QL query whose results are passed to the generated template as row objects. Omit for static content.'
-      ),
-  });
-
-/** Edit schema: prompt and esqlQuery only — template is generated server-side. */
-const customContentEditConfigSchema = z.object({
+export const customContentPanelConfigSchema = z.object({
   prompt: z
     .string()
     .min(1)
     .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-    .optional()
     .describe(
-      'Updated natural language description of what to display. Omit to keep the existing prompt.'
+      'Natural language description of what to display. A visually consistent HTML template is generated server-side from this prompt — do not supply a template yourself.'
     ),
   esqlQuery: z
     .string()
     .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-    .nullable()
     .optional()
     .describe(
-      'Updated ES|QL query. Omit to keep the existing query. Pass null to remove the query entirely.'
+      'ES|QL query whose results are passed to the generated template as row objects. Omit for static content. Build it with the generate_esql tool rather than writing it yourself — the server runs the query to sample its schema and fails the panel if Elasticsearch refuses it.'
     ),
 });
+
+export type CustomContentPanelConfig = z.output<typeof customContentPanelConfigSchema>;
+
+/** Edit schema: prompt and esqlQuery only — template is generated server-side. */
+const customContentEditConfigSchema = customContentUpdateSchema;
 
 /**
  * The custom_content variant of a `config`-source panel input, discriminated by

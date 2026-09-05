@@ -11,10 +11,45 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { SeedContext, SeededQuery } from '../types';
 import { deterministicId } from '../types';
 
-function toClosedMinuteEpochMs(timestamp: string | number | Date): number {
+export interface MetricSeriesPoint {
+  bucket: number;
+  metricValue: number;
+}
+
+export interface SeededAlertSeries {
+  ruleId: string;
+  title: string;
+  points: MetricSeriesPoint[];
+}
+
+export function toClosedMinuteEpochMs(timestamp: string | number | Date): number {
   const date = new Date(timestamp);
   date.setUTCSeconds(0, 0);
   return date.getTime();
+}
+
+export function buildMetricSeries(
+  rows: Array<Record<string, unknown>>,
+  seriesStartMs: number,
+  seriesEndMs: number
+): MetricSeriesPoint[] {
+  const countsByBucket = new Map<number, number>();
+  for (const row of rows) {
+    const timestamp = row['@timestamp'];
+    if (typeof timestamp !== 'string' && typeof timestamp !== 'number') {
+      continue;
+    }
+    const bucket = toClosedMinuteEpochMs(timestamp);
+    countsByBucket.set(bucket, (countsByBucket.get(bucket) ?? 0) + 1);
+  }
+
+  const points: MetricSeriesPoint[] = [];
+  const firstBucket = toClosedMinuteEpochMs(seriesStartMs);
+  const lastBucket = toClosedMinuteEpochMs(seriesEndMs);
+  for (let bucket = firstBucket; bucket <= lastBucket; bucket += 60_000) {
+    points.push({ bucket, metricValue: countsByBucket.get(bucket) ?? 0 });
+  }
+  return points;
 }
 
 /**
@@ -26,21 +61,22 @@ function toClosedMinuteEpochMs(timestamp: string | number | Date): number {
 export async function seedAlerts(
   ctx: SeedContext,
   seededQueries: SeededQuery[],
-  failureStartMs: number,
-  failureEndMs: number,
+  seriesStartMs: number,
+  seriesEndMs: number,
   esClient: Client,
   log: ToolingLog
-): Promise<void> {
+): Promise<SeededAlertSeries[]> {
   const timeFilter = {
     range: {
       '@timestamp': {
-        gte: new Date(failureStartMs).toISOString(),
-        lte: new Date(failureEndMs).toISOString(),
+        gte: new Date(seriesStartMs).toISOString(),
+        lte: new Date(seriesEndMs).toISOString(),
       },
     },
   };
 
   const bulkOps: Array<BulkOperationContainer | Record<string, unknown>> = [];
+  const seededSeries: SeededAlertSeries[] = [];
 
   // Single refresh before the loop — ensures all seedLogs documents are visible.
   // Use wildcard to cover all backing data stream indices, not just the write alias.
@@ -58,35 +94,27 @@ export async function seedAlerts(
       Object.fromEntries(esqlResult.columns.map((col, i) => [col.name, row[i]]))
     );
 
-    if (rows.length === 0) {
-      log.warning(
-        `seedAlerts: "${seededQuery.title}" matched 0 rows in failure window — skipping alert generation for this query. ` +
-          `Possible causes: log template drift, time range mismatch, or refresh timing.`
-      );
-      continue;
-    }
-
-    const countsByBucket = new Map<number, number>();
-    for (const row of rows) {
-      const timestamp = row['@timestamp'] || new Date(failureStartMs).toISOString();
-      const bucket = toClosedMinuteEpochMs(timestamp as string);
-      countsByBucket.set(bucket, (countsByBucket.get(bucket) ?? 0) + 1);
-    }
+    const points = buildMetricSeries(rows, seriesStartMs, seriesEndMs);
+    seededSeries.push({ ruleId: seededQuery.ruleId, title: seededQuery.title, points });
 
     log.info(
-      `seedAlerts: "${seededQuery.title}" matched ${rows.length} log row(s) → ${countsByBucket.size} minute bucket(s) (rule ${seededQuery.ruleId})`
+      `seedAlerts: "${seededQuery.title}" matched ${rows.length} log row(s) → ${
+        points.length
+      } minute bucket(s), ${
+        points.filter(({ metricValue }) => metricValue > 0).length
+      } non-zero (rule ${seededQuery.ruleId})`
     );
 
     let busiestBucket: number | undefined;
     let busiestCount = -1;
-    for (const [bucket, count] of countsByBucket) {
-      if (count > busiestCount) {
+    for (const { bucket, metricValue } of points) {
+      if (metricValue > busiestCount) {
         busiestBucket = bucket;
-        busiestCount = count;
+        busiestCount = metricValue;
       }
     }
 
-    for (const [bucket, metricValue] of countsByBucket) {
+    for (const { bucket, metricValue } of points) {
       const writeTime = new Date(bucket).toISOString();
       const alertDocId = deterministicId(String(bucket), seededQuery.ruleId, ctx.space);
       const doc = {
@@ -108,7 +136,7 @@ export async function seedAlerts(
       };
 
       bulkOps.push({
-        index: {
+        create: {
           _index: '.rule-events',
           _id: alertDocId,
         },
@@ -116,11 +144,11 @@ export async function seedAlerts(
       bulkOps.push(doc);
 
       // Overlapping revision: later write-time, higher count (MAX should win).
-      if (bucket === busiestBucket) {
+      if (bucket === busiestBucket && metricValue > 0) {
         const revisionWriteTime = new Date(bucket + 30_000).toISOString();
         const revisionId = deterministicId(String(bucket), seededQuery.ruleId, ctx.space, 'rev');
         bulkOps.push({
-          index: {
+          create: {
             _index: '.rule-events',
             _id: revisionId,
           },
@@ -139,16 +167,17 @@ export async function seedAlerts(
   }
 
   if (bulkOps.length === 0) {
-    log.warning('seedAlerts: no alert documents were produced — all queries matched zero rows');
-    return;
+    log.warning('seedAlerts: no alert documents were produced — scenario has no queries');
+    return seededSeries;
   }
 
   const res = await esClient.bulk({ operations: bulkOps, refresh: 'wait_for' });
   if (res.errors) {
-    const failedItems = res.items.filter((item) => item.index?.error).slice(0, 5);
-    const reasons = failedItems.map((item) => JSON.stringify(item.index?.error)).join('; ');
+    const failedItems = res.items.filter((item) => item.create?.error).slice(0, 5);
+    const reasons = failedItems.map((item) => JSON.stringify(item.create?.error)).join('; ');
     throw new Error(`Alert bulk indexing failed (${failedItems.length} item(s)): ${reasons}`);
   }
 
   log.info(`seedAlerts: indexed ${bulkOps.length / 2} metric-series event(s) into .rule-events`);
+  return seededSeries;
 }

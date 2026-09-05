@@ -1,5 +1,8 @@
 {
   "sha1": "7f8c79e0eac9b9dd989b2d6182dfbc5d045e70e6",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "b9848f1d3e746fc-69e42704f821faa",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/stack_connectors/test/scout/ui/parallel_tests/http_connector_query_params_bugs.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 34,
+        "column": 23
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/stack_connectors/test/scout/ui/parallel_tests/http_connector_query_params_bugs.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 49,
+        "column": 13
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/stack_connectors/test/scout/ui/parallel_tests/http_connector_query_params_bugs.spec.ts",
-        "line": 88,
-        "column": 7
+        "line": 70,
+        "column": 22
       }
     }
   ]

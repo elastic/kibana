@@ -11,6 +11,7 @@ import type { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesRendered {
   rendered$: PublishingSubject<boolean>;
+  renderCount$?: PublishingSubject<number>;
 }
 
 export const apiPublishesRendered = (

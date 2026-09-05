@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getMemoryDumpHelpUsage } from './get_memory_dump_help_usage';
 import { MemoryDumpActionResult } from '../command_render_components/memory_dump_action';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -321,22 +320,22 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        ...commandCommentArgument(),
         entityId: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.killProcess.args.entityId.about,
           validate: emptyArgumentValidator,
         },
         pid: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.killProcess.args.pid.about,
           validate: pidValidator,
         },
         ...killDescendantsArg,
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -357,21 +356,21 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        ...commandCommentArgument(),
         entityId: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.suspendProcess.args.entityId.about,
           validate: emptyArgumentValidator,
         },
         pid: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
           validate: pidValidator,
         },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -837,7 +836,7 @@ export const getEndpointConsoleCommands = ({
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'memoryDumpType',
           validate: () => {
             if (!endpointSupportsProcessDump) {
               return getMemoryDumpTypeNotSupportedMessage('process');
@@ -853,7 +852,7 @@ export const getEndpointConsoleCommands = ({
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'memoryDumpType',
           validate: () => {
             if (!endpointSupportsKernelDump) {
               return getMemoryDumpTypeNotSupportedMessage('kernel');
@@ -871,18 +870,22 @@ export const getEndpointConsoleCommands = ({
                 required: false,
                 allowMultiples: false,
                 mustHaveValue: false,
-                exclusiveOr: true,
+                exclusiveOrGroupId: 'memoryDumpType',
               },
             }
           : {}),
         entityId: {
           required: false,
+          conditionallyRequired: ['process'],
+          exclusiveOrGroupId: 'processIdentifier',
           allowMultiples: false,
           mustHaveValue: 'non-empty-string',
           about: CONSOLE_COMMANDS.memoryDump.entityIdArgAbout,
         },
         pid: {
           required: false,
+          conditionallyRequired: ['process'],
+          exclusiveOrGroupId: 'processIdentifier',
           allowMultiples: false,
           mustHaveValue: 'number-greater-than-zero',
           about: CONSOLE_COMMANDS.memoryDump.pidArgAbout,
@@ -894,9 +897,6 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('memory-dump'),
       helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
-      helpUsage: getMemoryDumpHelpUsage(
-        agentType === 'endpoint' && responseActionsEndpointMemoryDumpRaw && endpointSupportsRawDump
-      ),
     });
   }
 
@@ -1138,14 +1138,14 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.raw.about,
               mustHaveValue: 'non-empty-string',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
             },
             CloudFile: {
               required: false,
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
               SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
@@ -1160,7 +1160,7 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.hostPath.about,
               mustHaveValue: 'non-empty-string',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
             },
             Timeout: {
               required: false,

@@ -50,6 +50,8 @@ export interface CreateRuleFormProps {
   initialValues?: Partial<RuleFormData>;
   initialMetadata?: RuleTypeMetaData;
   focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
+  /** The id of the rule template this rule is being created from, when known. Telemetry only. */
+  templateId?: string;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -69,6 +71,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     onChangeMetaData,
     initialMetadata,
     initialValues = {},
+    templateId,
   } = props;
 
   const { http, docLinks, notifications, ruleTypeRegistry, fieldsMetadata, ...deps } = plugins;
@@ -135,10 +138,11 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
           artifacts: newFormData.artifacts,
+          templateId,
         },
       });
     },
-    [mutate]
+    [mutate, templateId]
   );
 
   if (isInitialLoading) {

@@ -7,12 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, internalTools, createBadRequestError } from '@kbn/agent-builder-common';
-import type { ConversationTemplate, SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type { ConversationTemplate, MetadataFieldValue } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import { validateMetadataUpdate } from '../../conversation/templates/validation';
-import { serializeMetadataValue } from '../../conversation/templates/serialize';
 
 // Bound string and array sizes to prevent unbounded-input DoS.
 const MAX_STRING_VALUE = 10_000;
@@ -59,7 +57,7 @@ export const createSetConversationMetadataTool = ({
   updateConversationMetadata,
   template,
 }: {
-  updateConversationMetadata: (updates: Record<string, SerializedMetadataValue>) => Promise<void>;
+  updateConversationMetadata: (updates: Record<string, MetadataFieldValue>) => Promise<unknown>;
   template: ConversationTemplate;
 }): BuiltinToolDefinition<typeof setConversationMetadataSchema> => ({
   id: internalTools.setConversationMetadata,
@@ -67,26 +65,16 @@ export const createSetConversationMetadataTool = ({
   description: toolDescription,
   schema: setConversationMetadataSchema,
   tags: ['internal'],
+  excludeFromMcp: true,
   handler: async ({ metadata }) => {
-    // Reject unknown keys first.
+    // Reject unknown keys before delegating to patchMetadata.
     for (const key of Object.keys(metadata)) {
       if (!template.fields[key]) {
         throw createBadRequestError(`Template "${template.id}" has no field "${key}"`);
       }
     }
 
-    // Validate all values in one pass — throws with accumulated per-field errors.
-    validateMetadataUpdate(template.id, template.fields, metadata);
-
-    // Serialize each value to the storage representation.
-    const serialized = Object.fromEntries(
-      Object.entries(metadata).map(([k, v]) => {
-        const def = template.fields[k];
-        return [k, serializeMetadataValue(v, def.input_type)];
-      })
-    );
-
-    await updateConversationMetadata(serialized);
+    await updateConversationMetadata(metadata);
 
     return {
       results: [

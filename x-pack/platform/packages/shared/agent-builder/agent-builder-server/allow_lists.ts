@@ -12,6 +12,8 @@ import {
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import type { SkillDefinition } from './skills/type_definition';
+import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -84,6 +86,16 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_readiness.get_quality`,
   `${internalNamespaces.security}.siem_readiness.get_continuity`,
   `${internalNamespaces.security}.siem_readiness.get_retention`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.start_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.get_all_rule_migration_stats`,
+  `${internalNamespaces.security}.siem_migration.get_migration_rules`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration_stats`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration_translation_stats`,
+  `${internalNamespaces.security}.siem_migration.get_missing_rule_migration_resources`,
+  `${internalNamespaces.security}.siem_migration.stop_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.update_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
   `${internalNamespaces.security}.alert-triage`,
 
   // Streams
@@ -139,6 +151,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
+  `${internalNamespaces.security}.alertzero-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -214,6 +227,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'endpoint-forensic-analysis',
   'investigate-rule',
   'siem-readiness',
+  'automatic-migration-rules-start-migration',
+  'automatic-migration-rules-summarize',
+  'automatic-migration-rules-stop-migration',
+  'automatic-migration-rules-update-migration',
+  'automatic-migration-rules-delete-migration',
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
@@ -244,6 +262,12 @@ export const isAllowedBuiltinSkill = (skillId: string): skillId is AgentBuilderB
   return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
 };
 
+export const isAllowedSkillRegistration = (
+  skill: Pick<SkillDefinition, 'id' | 'basePath'>
+): boolean => {
+  return isAllowedBuiltinSkill(skill.id) || skill.basePath === ELASTIC_SKILLS_BASE_PATH;
+};
+
 /**
  * This is a manually maintained list of all built-in plugins registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new plugin.
@@ -269,6 +293,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'connector',
   'connector_setup',
   'skill',
+  'image',
 
   // Platform – Visualizations
   'visualization',

@@ -43,7 +43,7 @@ describe('InboxPublicPlugin', () => {
         expect.objectContaining({
           id: PLUGIN_ID,
           appRoute: APP_PATH,
-          euiIconType: 'email',
+          euiIconType: 'mail',
           mount: expect.any(Function),
         })
       );

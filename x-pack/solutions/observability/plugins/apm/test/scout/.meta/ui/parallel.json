@@ -1,26 +1,9 @@
 {
-  "sha1": "2ed99ae2a8b0bc577473025ae4304af8882c7f86",
+  "sha1": "abbda397a9007ec1bcd3e5a18a1c762027c76157",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "b24d1ecdbd533dc-9b4248bf82e44c0",
-      "title": "Clean up APM data after UI parallel tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 6,
-        "column": 1
-      }
-    },
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -3635,6 +3618,22 @@
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transactions_overview/transactions_overview.spec.ts",
         "line": 32,
         "column": 24
+      }
+    },
+    {
+      "id": "b24d1ecdbd533dc-9b4248bf82e44c0",
+      "title": "Clean up APM data after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 6,
+        "column": 1
       }
     }
   ]

@@ -9,6 +9,7 @@ export * from './use_absolute_date';
 export * from './use_url_params';
 export * from './use_breadcrumbs';
 export * from './use_enablement';
+export * from './use_license';
 export * from './use_locations';
 export * from './use_location_name';
 export * from './use_status_by_location';

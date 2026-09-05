@@ -8,17 +8,18 @@
 import React, { useEffect } from 'react';
 import { Redirect, useHistory, useParams } from 'react-router-dom';
 
-import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
 
 import { useLastAgentId } from '../../hooks/use_last_agent_id';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { appPaths } from '../../utils/app_paths';
+import { RedirectLoading } from './redirect_loading';
 
 export const LegacyConversationRedirect: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const history = useHistory();
-  const lastAgentId = useLastAgentId();
+  const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
+
   const { conversationsService } = useAgentBuilderServices();
 
   const isNewConversation = !conversationId || conversationId === 'new';
@@ -51,14 +52,8 @@ export const LegacyConversationRedirect: React.FC = () => {
     return <Redirect to={appPaths.agent.root({ agentId: lastAgentId })} />;
   }
 
-  if (isLoading) {
-    return (
-      <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+  if (isLoading || !isLastAgentIdReady) {
+    return <RedirectLoading />;
   }
 
   return null;

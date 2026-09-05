@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiTabs,
   EuiText,
   EuiToolTip,
@@ -28,6 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
+import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
@@ -41,7 +41,7 @@ import type { QueryTab } from './types';
 import { CpsPicker } from './cps_picker';
 import { useResolveTimeField } from './use_resolve_time_field';
 import { extractFromSourceQuery } from './extract_from_source_query';
-import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT } from './constants';
+import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT, ESQL_CODE_EDITOR_OPTIONS } from './constants';
 import { useQuerySandboxStyles } from './query_sandbox.styles';
 import { useEditorHeightResize } from './use_editor_height_resize';
 
@@ -163,6 +163,13 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   const isReadOnly = !onQueryChange;
   const hasTabs = Boolean(tabProps?.tabs?.length);
   const skipTimeFieldResolution = timeFieldOptionsProp !== undefined;
+
+  const handleDateRangeChange = useCallback(
+    ({ from, to }: { from: string; to: string }) => {
+      onDateRangeChange({ dateStart: from, dateEnd: to });
+    },
+    [onDateRangeChange]
+  );
 
   const splitTabs = useMemo(() => {
     if (!tabProps?.tabs?.length) return [];
@@ -309,10 +316,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         onChange={(v) => onQueryChange?.(v)}
         height="100%"
         options={{
-          minimap: { enabled: false },
-          automaticLayout: true,
-          scrollBeyondLastLine: false,
-          fontSize: 13,
+          ...ESQL_CODE_EDITOR_OPTIONS,
           readOnly: isReadOnly,
           domReadOnly: isReadOnly,
         }}
@@ -375,6 +379,16 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AlertingDateRangePicker
+              from={dateRange.dateStart}
+              to={dateRange.dateEnd}
+              onChange={handleDateRangeChange}
+              services={services}
+              width="auto"
+              data-test-subj="querySandboxDatePicker"
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false} css={timeFieldSelectCss}>
             <EuiSelect
               options={timeFieldOptions}
@@ -395,19 +409,11 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               data-test-subj="querySandboxTimeField"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              start={dateRange.dateStart}
-              end={dateRange.dateEnd}
-              onTimeChange={({ start, end }) => {
-                onDateRangeChange({ dateStart: start, dateEnd: end });
-              }}
-              showUpdateButton={false}
-              compressed
-              width="auto"
-            />
-          </EuiFlexItem>
-          {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
+          {headerActions && (
+            <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
+              {headerActions}
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div css={editorBodyCss} style={{ height: editorHeight }}>

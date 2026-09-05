@@ -10,6 +10,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/data-plugin",
     "@kbn/management-plugin",
     "@kbn/url-forwarding-plugin",
@@ -34,7 +35,6 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser",
-    "@kbn/react-kibana-context-render",
     "@kbn/field-utils",
     "@kbn/no-data-page-plugin",
     "@kbn/core-application-browser",

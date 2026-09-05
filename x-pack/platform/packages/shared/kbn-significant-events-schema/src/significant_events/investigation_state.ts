@@ -9,10 +9,12 @@ import { z } from '@kbn/zod/v4';
 import { severitySchema } from './common_schemas';
 import { significantEventStatusSchema } from './events';
 import {
+  MAX_ID_LENGTH,
   MAX_MEDIUM_STRING_LENGTH,
   MAX_SHORT_STRING_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TIMESTAMP_LENGTH,
+  MAX_TITLE_LENGTH,
 } from './constants';
 
 /**
@@ -29,6 +31,8 @@ export const INVESTIGATION_PROGRESS_UI_EVENT = 'investigation_progress' as const
  * the step execution with this `stepId` — keep it in sync with the step name in the YAML.
  */
 export const INVESTIGATE_STEP_ID = 'investigate' as const;
+
+export type InvestigationRunStatus = 'pending' | 'complete' | 'failed' | 'unavailable';
 
 /**
  * A source file the agent read, recorded as parts rather than a URL so that consumers — not the
@@ -91,12 +95,37 @@ const investigationEvidenceSchema = z.object({
 });
 export type InvestigationEvidence = z.infer<typeof investigationEvidenceSchema>;
 
+/** Max entity entries in the impact block. Keep in sync with the YAML maxItems. */
+export const MAX_IMPACT_ENTITIES = 10;
+
+export const investigationImpactEntitySchema = z.object({
+  /** Human-readable name — service name, host, or component. Prefer service names. */
+  name: z.string().max(MAX_TITLE_LENGTH),
+  /** Entity category. Prefer "service"; use "host", "database", etc. only when no service applies. */
+  type: z.string().max(MAX_ID_LENGTH).optional(),
+  /** KI feature_id when this entity is backed by a Knowledge Indicator. */
+  feature_id: z.string().max(MAX_ID_LENGTH).optional(),
+  stream_name: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * One evidence artifact linking this entity to the investigation — the query that shows
+   * the failure signal. Same shape as hypothesis evidence; prefer esql_query + time_range
+   * so the UI can render a chart.
+   */
+  evidence: investigationEvidenceSchema.optional(),
+});
+export type InvestigationImpactEntity = z.infer<typeof investigationImpactEntitySchema>;
+
+export const investigationImpactSchema = z.object({
+  entities: z.array(investigationImpactEntitySchema).max(MAX_IMPACT_ENTITIES),
+});
+export type InvestigationImpact = z.infer<typeof investigationImpactSchema>;
+
 /** Max evidence entries per hypothesis. Keep in sync with the YAML maxItems. */
 export const MAX_HYPOTHESIS_EVIDENCE = 3;
 
 const investigationHypothesisStatusSchema = z.enum(['investigating', 'dismissed', 'confirmed']);
 
-const investigationHypothesisSchema = z.object({
+export const investigationHypothesisSchema = z.object({
   /** The candidate cause under consideration. */
   candidate: z.string().max(MAX_TEXT_LENGTH),
   /** Current confidence in this specific hypothesis. */
@@ -111,11 +140,46 @@ const investigationHypothesisSchema = z.object({
 });
 export type InvestigationHypothesis = z.infer<typeof investigationHypothesisSchema>;
 
-/** Max evidence entries per event-update proposal. Keep in sync with the YAML maxItems. */
-export const MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE = 10;
+/** Max recommendation entries an investigation can emit. Keep in sync with the YAML maxItems. */
+export const MAX_RECOMMENDATIONS = 5;
 
-/** Max number of field-change proposals an investigation can emit. Keep in sync with the YAML. */
-export const MAX_SIGNIFICANT_EVENT_UPDATES = 3;
+/**
+ * One concrete, actionable step to resolve or mitigate the issue — a command, config change, or
+ * code fix, rather than general advice like "investigate further". Structured so consumers can
+ * render a "Try next" list without parsing prose for headings and bullets.
+ */
+export const investigationRecommendationSchema = z.object({
+  /** The action itself, stated concretely (e.g. "Revert the pool-size config change"). */
+  title: z.string().max(MAX_MEDIUM_STRING_LENGTH),
+  /** Why this step helps, or detail needed to carry it out, when the title alone isn't enough. */
+  description: z.string().max(MAX_TEXT_LENGTH).optional(),
+  /** A command, config snippet, or code change backing this step, when one applies. Raw source,
+   * not a fenced markdown block — consumers decide how to render it. */
+  code: z.string().max(MAX_TEXT_LENGTH).optional(),
+});
+export type InvestigationRecommendation = z.infer<typeof investigationRecommendationSchema>;
+
+/** Max blind spot entries an investigation can emit. Keep in sync with the YAML maxItems. */
+export const MAX_BLIND_SPOTS = 10;
+
+/**
+ * A signal the agent wanted but could not access (e.g. missing instrumentation) — an actionable
+ * knowledge gap, not an incident-specific fact. Structured so consumers don't have to split a
+ * "title · description" sentence themselves.
+ */
+export const investigationBlindSpotSchema = z.object({
+  /** The missing data source or access, named concisely (e.g. "No traces for the cart service"). */
+  title: z.string().max(MAX_MEDIUM_STRING_LENGTH),
+  /** Why this gap mattered to the investigation. */
+  description: z.string().max(MAX_TEXT_LENGTH),
+});
+export type InvestigationBlindSpot = z.infer<typeof investigationBlindSpotSchema>;
+
+/** Max evidence entries per trigger-feedback proposal. Keep in sync with the YAML maxItems. */
+export const MAX_TRIGGER_FEEDBACK_EVIDENCE = 10;
+
+/** Max number of field-change proposals an investigation can emit as trigger feedback. */
+export const MAX_TRIGGER_FEEDBACK = 3;
 
 /**
  * Shared base fields for every event-update branch. Spread directly into each `z.object` call
@@ -125,23 +189,22 @@ export const MAX_SIGNIFICANT_EVENT_UPDATES = 3;
 const significantEventUpdateBase = {
   /** Why this field should change, referencing the confirmed findings (1–2 sentences). */
   reason: z.string().max(MAX_TEXT_LENGTH),
-  evidence: z.array(investigationEvidenceSchema).min(1).max(MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE),
+  evidence: z.array(investigationEvidenceSchema).min(1).max(MAX_TRIGGER_FEEDBACK_EVIDENCE),
 };
 
 /**
- * One proposed change to a significant event field, produced by the investigation agent.
- * The `field` discriminator identifies which event attribute is being changed; `from`/`to` are
- * typed per field (enum for severity/status, free text for summary).
+ * One proposed change to a trigger's field, produced by the investigation agent.
+ * The `field` discriminator identifies which significant-event attribute is being proposed;
+ * `from`/`to` are typed per field (enum for severity/status, free text for summary).
  *
  * Each entry is self-contained: `from` records what the value was before this investigation ran
  * (populated from `inputs.context`), so the UI never needs to thread prior state from elsewhere.
  *
- * Applied deterministically by the `attach_to_significant_event` step in `investigation_workflow.yaml`
- * (in the same append-only version that records the completed investigation); `reason`/`evidence`
- * persist only here (the workflow execution's structured output), never on the event document — the
- * event version records only the changed field values plus the workflow execution id.
+ * Returned as feedback to the trigger owner. The investigation workflow records the completed
+ * investigation but does not apply these proposals directly; `reason`/`evidence` persist only here
+ * in the workflow execution's structured output.
  */
-export const significantEventUpdateSchema = z.discriminatedUnion('field', [
+export const triggerFeedbackSchema = z.discriminatedUnion('field', [
   z.object({
     field: z.literal('severity'),
     from: severitySchema,
@@ -161,7 +224,10 @@ export const significantEventUpdateSchema = z.discriminatedUnion('field', [
     ...significantEventUpdateBase,
   }),
 ]);
-export type SignificantEventUpdate = z.infer<typeof significantEventUpdateSchema>;
+export type TriggerFeedback = z.infer<typeof triggerFeedbackSchema>;
+
+/** Max hypotheses an investigation can track. Keep in sync with the YAML maxItems. */
+export const MAX_HYPOTHESES = 50;
 
 /**
  * Full state of an investigation at a point in time. This is the ONE schema shared by:
@@ -176,25 +242,57 @@ export type SignificantEventUpdate = z.infer<typeof significantEventUpdateSchema
 export const investigationStateSchema = z.object({
   /** Current ("what's happening now") or final narrative summary of the investigation. */
   summary: z.string().max(MAX_TEXT_LENGTH),
-  hypotheses: z.array(investigationHypothesisSchema).max(50),
+  hypotheses: z.array(investigationHypothesisSchema).max(MAX_HYPOTHESES),
   /**
-   * The final answer — the mechanism/root-cause narrative. Populated once a hypothesis is
-   * `confirmed`; absent while still investigating.
+   * The final answer — the mechanism/root-cause narrative, as plain prose (no markdown headings
+   * or bullet lists). Populated once a hypothesis is `confirmed`; absent while still
+   * investigating. Actionable steps belong in `recommendations`, not here.
    */
   conclusion: z.string().max(MAX_TEXT_LENGTH).optional(),
-  /** Signals the agent wanted but could not access (e.g. missing instrumentation). */
-  gaps_found: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
   /**
-   * Optional list of field-change proposals produced by the investigation. Each entry names
-   * the event field being changed (`severity`, `summary`, or `status`) along with the old and
-   * new values, a one-or-two-sentence reason tied to the confirmed findings, and the evidence
-   * backing the change. Omit the array (or omit a field's entry) when no change is warranted
-   * for that field. Applied automatically by the `attach_to_significant_event` step, in the same
-   * event version that records the completed investigation.
+   * How severe the investigated situation turned out to be, on the shared severity tier scale
+   * (see {@link severitySchema}). Set for every investigation whatever triggered it — an alert, a
+   * significant event, or a free-form issue — and rated from what the run confirmed, never copied
+   * from a severity the trigger already carried.
+   *
+   * Distinct from a `trigger_feedback` entry with `field: 'severity'`, which exists only
+   * for significant-event runs and rates that one event rather than the whole situation.
+   *
+   * Optional for the same reason `conclusion` is: the agent settles it at the end, so the live
+   * progress reports that share this schema carry it only once they reach that point, and
+   * investigations persisted before this field existed still parse. The instructions require the
+   * final output to set it, so an absent severity in a completed result means unrated, not low.
    */
-  significant_event_updates: z
-    .array(significantEventUpdateSchema)
-    .max(MAX_SIGNIFICANT_EVENT_UPDATES)
+  severity: severitySchema
+    .describe(
+      'How severe the investigated situation is, rated on the tier ladder in the investigator instructions from what the investigation confirmed.'
+    )
     .optional(),
+  /** Concrete, actionable steps to resolve or mitigate the issue. */
+  recommendations: z.array(investigationRecommendationSchema).max(MAX_RECOMMENDATIONS).optional(),
+  /**
+   * Actionable knowledge gaps discovered during the investigation. Replaces the free-text
+   * `gaps_found` string array. Investigations persisted before this field existed still carry
+   * `gaps_found`, which this schema strips as a key it no longer declares — so recovering them
+   * means rewriting the raw payload before it reaches this schema, as
+   * `normalizeLegacyInvestigationState` in `@kbn/investigation-output` does. Those gaps are also
+   * folded into the memory `_gaps/overview` page by the workflow's `merge_investigation_gaps`
+   * step, so they survive outside this payload either way.
+   */
+  blind_spots: z.array(investigationBlindSpotSchema).max(MAX_BLIND_SPOTS).optional(),
+  /**
+   * Optional list of field-change proposals returned as feedback to the trigger. Each entry names
+   * the significant-event field being proposed (`severity`, `summary`, or `status`) along with the
+   * old and new values, a one-or-two-sentence reason tied to the confirmed findings, and the
+   * evidence backing the proposal. Omit the array (or omit a field's entry) when no change is
+   * warranted for that field. The workflow does not apply these proposals directly.
+   */
+  trigger_feedback: z.array(triggerFeedbackSchema).max(MAX_TRIGGER_FEEDBACK).optional(),
+  /**
+   * Structured account of which services or components were impacted. Optional so existing
+   * persisted investigations remain valid. Seeded from alert grouping or sig event causal
+   * features; finalized after hypotheses settle. At most 10 entries; service-level preferred.
+   */
+  impact: investigationImpactSchema.optional(),
 });
 export type InvestigationState = z.infer<typeof investigationStateSchema>;

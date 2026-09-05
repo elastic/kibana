@@ -128,12 +128,7 @@ export const changeDataView: InternalStateThunkActionCreator<
         })
       );
 
-      const currentTab = selectTab(currentState, tabId);
-      if (currentTab.expandedDoc) {
-        dispatch(
-          internalStateActions.setExpandedDoc({ tabId: currentTab.id, expandedDoc: undefined })
-        );
-      }
+      dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
     dispatch(internalStateActions.setIsDataViewLoading({ tabId, isDataViewLoading: false }));

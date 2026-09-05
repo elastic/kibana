@@ -7,6 +7,7 @@
 
 import type { PromptRequest, PromptResponse } from '../agents/prompts';
 import type { SerializedExecutionError } from '../agents/execution_status';
+import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type {
   AssistantResponse,
   ConversationRoundStep,
@@ -14,15 +15,20 @@ import type {
   RoundInput,
   RoundModelUsageStats,
 } from './conversation';
+import type { RoundState } from './round_state';
 
 /**
- * The current schema version for an events-native conversation document.
- *
- * A conversation document carries this value in its `schema_version` field when it is
- * stored as an event timeline (as opposed to the legacy `conversation_rounds` shape).
- * Readers use it to tell the two formats apart.
+ * The projection format that new writes are stamped at.
  */
 export const CONVERSATION_SCHEMA_VERSION = 1;
+
+/**
+ * The floor for "this document carries a stored events projection".
+ */
+export const MIN_EVENTS_NATIVE_SCHEMA_VERSION = 1;
+
+export const isEventsNativeVersion = (version: number | undefined): version is number =>
+  typeof version === 'number' && version >= MIN_EVENTS_NATIVE_SCHEMA_VERSION;
 
 /** The kind of participant that produced a timeline event. */
 export enum EventActorType {
@@ -80,20 +86,14 @@ export enum TimelineEventType {
   promptResponse = 'prompt_response',
   // Execution lifecycle
   executionStarted = 'execution_started',
-  promptRequested = 'prompt_requested',
-  executionCompleted = 'execution_completed',
+  executionStep = 'execution_step',
+  executionTerminated = 'execution_terminated',
   executionFailed = 'execution_failed',
   executionAborted = 'execution_aborted',
 }
 
 /**
  * The fields a producer supplies for a timeline event.
- *
- * `id`, `created_at`, and `actor` are optional here: the server assigns them when a producer
- * omits them (id and timestamp are generated; the actor defaults to the scoped user).
- *
- * `execution_id` links an event to the agent run that produced it. `trigger_event_id` links a
- * run to the content event that started it.
  */
 export interface BaseTimelineEventInput<TType extends TimelineEventType, TData> {
   /** The event type discriminator. */
@@ -126,7 +126,7 @@ export type BaseTimelineEvent<TType extends TimelineEventType, TData> = BaseTime
 };
 
 /** A message from a user, stored the moment it arrives, apart from any run. */
-export type UserMessageEventData = Pick<RoundInput, 'message' | 'attachment_refs'>;
+export type UserMessageEventData = RoundInput;
 export type UserMessageEvent = BaseTimelineEvent<
   TimelineEventType.userMessage,
   UserMessageEventData
@@ -154,27 +154,22 @@ export type ExecutionStartedEvent = BaseTimelineEvent<
   ExecutionStartedEventData
 >;
 
-/**
- * The agent paused to ask a human. Terminal for the paused run, the same as
- * `execution_completed`.
- */
-export interface PromptRequestedEventData {
-  /** The open questions the run is waiting on. */
-  prompts: PromptRequest[];
+/** A single completed step of an agent run. */
+export interface ExecutionStepEventData {
+  step: ConversationRoundStep;
+  sequence: number;
 }
-export type PromptRequestedEvent = BaseTimelineEvent<
-  TimelineEventType.promptRequested,
-  PromptRequestedEventData
+export type ExecutionStepEvent = BaseTimelineEvent<
+  TimelineEventType.executionStep,
+  ExecutionStepEventData
 >;
 
 /**
- * The terminal event of a successful run and the source of truth for it.
+ * The run summary: everything describing the execution itself, independent of how it ended.
  */
-export interface ExecutionCompletedEventData {
-  /** The final assistant response. */
-  response: AssistantResponse;
+export interface ExecutionRunSummary {
   /** The intermediate steps (tool calls, reasoning, etc.). */
-  steps: ConversationRoundStep[];
+  steps?: ConversationRoundStep[];
   /** Model usage statistics for the run. */
   model_usage: RoundModelUsageStats;
   /** Time to first token, in ms. */
@@ -183,10 +178,29 @@ export interface ExecutionCompletedEventData {
   time_to_last_token: number;
   /** When tracing is enabled, the trace id(s) for the run. */
   trace_id?: string | string[];
+  /** Round-level persisted resume state, when present. Carried so rounds round-trip losslessly. */
+  state?: RoundState;
+  /** Runtime configuration overrides applied to the run, when present. */
+  configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
-export type ExecutionCompletedEvent = BaseTimelineEvent<
-  TimelineEventType.executionCompleted,
-  ExecutionCompletedEventData
+
+/** How an execution ended: a final response, or a pause to ask the human (HITL). */
+export type ExecutionOutcome =
+  | { type: 'responded'; response: AssistantResponse }
+  | { type: 'prompt_requested'; prompts: PromptRequest[] };
+
+/**
+ * The terminal event of a run and the source of truth for it: the run summary plus the outcome.
+ * Unifies what were previously `execution_completed` (responded) and `prompt_requested` (paused) —
+ * both are emitted at the end of an execution and carry the same run data, so they differ only in
+ * the outcome.
+ */
+export interface ExecutionTerminatedEventData extends ExecutionRunSummary {
+  outcome: ExecutionOutcome;
+}
+export type ExecutionTerminatedEvent = BaseTimelineEvent<
+  TimelineEventType.executionTerminated,
+  ExecutionTerminatedEventData
 >;
 
 /** A run that ended in an error. */
@@ -214,8 +228,8 @@ export type TimelineEvent =
   | UserMessageEvent
   | PromptResponseEvent
   | ExecutionStartedEvent
-  | PromptRequestedEvent
-  | ExecutionCompletedEvent
+  | ExecutionStepEvent
+  | ExecutionTerminatedEvent
   | ExecutionFailedEvent
   | ExecutionAbortedEvent;
 
@@ -224,8 +238,8 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.userMessage, UserMessageEventData>
   | BaseTimelineEventInput<TimelineEventType.promptResponse, PromptResponseEventData>
   | BaseTimelineEventInput<TimelineEventType.executionStarted, ExecutionStartedEventData>
-  | BaseTimelineEventInput<TimelineEventType.promptRequested, PromptRequestedEventData>
-  | BaseTimelineEventInput<TimelineEventType.executionCompleted, ExecutionCompletedEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionStep, ExecutionStepEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionTerminated, ExecutionTerminatedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>;
 

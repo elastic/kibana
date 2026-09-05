@@ -12,15 +12,18 @@ import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { apiCanAddNewPanel, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ADD_VEGA_EMBEDDABLE_ACTION_ID, VEGA_EMBEDDABLE_TYPE } from '../constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import type { VegaByValueState } from '../../server';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from '../constants';
 import { getDefaultSpec } from '../default_spec';
-import type { VegaByValueState, VegaEmbeddableApi } from './vega_embeddable';
+import { VegaPanelIcon } from '../vega_icon';
+import type { VegaEmbeddableApi } from './vega_embeddable';
 
 export const getAddVegaEmbeddableAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_VEGA_EMBEDDABLE_ACTION_ID,
   grouping: [ADD_PANEL_VISUALIZATION_GROUP],
   order: 0,
-  getIconType: () => 'visVega',
+  getIconType: () => VegaPanelIcon,
   getDisplayName: () => 'Vega',
   getDisplayNameTooltip: () =>
     i18n.translate('visTypeVega.dashboard.addPanelActionDescription', {
@@ -32,7 +35,7 @@ export const getAddVegaEmbeddableAction = (): ActionDefinition<EmbeddableApiCont
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const vegaEmbeddable = await embeddable.addNewPanel<VegaByValueState, VegaEmbeddableApi>({
       panelType: VEGA_EMBEDDABLE_TYPE,
-      serializedState: { spec: getDefaultSpec() },
+      serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
     });
     vegaEmbeddable?.onEdit({ isNewPanel: true, returnFocus });
   },

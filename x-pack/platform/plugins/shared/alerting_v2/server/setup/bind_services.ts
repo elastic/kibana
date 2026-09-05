@@ -16,6 +16,7 @@ import {
 } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { EpisodesClient } from '../lib/episodes_client';
@@ -34,6 +35,7 @@ import {
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
+import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import {
   RuleTemplatesClient,
   RuleTemplateSavedObjectsClientToken,
@@ -113,12 +115,14 @@ import {
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import type { PluginConfig } from '../config';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -306,7 +310,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
-      return new QueryService(esClient, loggerService);
+      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
+        PluginInitializer('config')
+      );
+      return new QueryService(esClient, loggerService, pluginConfigAccessor);
     })
     .inRequestScope();
 
@@ -315,7 +322,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       // Rule-execution queries run against user data and must respect the space project routing.
       const esClient = get(EsServiceScopedSpaceRoutingToken);
-      return new QueryService(esClient, loggerService);
+      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
+        PluginInitializer('config')
+      );
+      return new QueryService(esClient, loggerService, pluginConfigAccessor);
     })
     .inRequestScope();
 
@@ -323,7 +333,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
-      return new QueryService(esClient, loggerService);
+      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
+        PluginInitializer('config')
+      );
+      return new QueryService(esClient, loggerService, pluginConfigAccessor);
     })
     .inSingletonScope();
 

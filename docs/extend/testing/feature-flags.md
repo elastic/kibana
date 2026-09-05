@@ -93,13 +93,21 @@ When using `feature_flags.overrides`, the keys must match the feature flag IDs r
 
 ## Custom server configs [scout-feature-flags-custom-servers]
 
-Some settings — such as those used during the plugin `setup` lifecycle (e.g., HTTP route registration) — cannot be changed at runtime and must be present when Kibana starts. For these cases Scout supports **custom server configuration sets** that manage a local Kibana process.
+Some settings cannot be changed at runtime and must be present when Kibana starts: plugin `enabled` flags, or anything read during the plugin `setup` lifecycle (e.g., HTTP route registration). For these cases Scout supports **custom server configuration sets** that manage a local Kibana process.
 
 ::::::{warning}
 ⚠️ Each custom config set requires its own dedicated local server instance, which adds CI cost. **Reach out to the Apps DX team before creating one** to make sure it is the right approach for your use case. If the flag you need can be toggled at runtime, prefer the [runtime approach](#scout-feature-flags-runtime) instead — it works everywhere, including Cloud.
 ::::::
 
-Before creating a set, check the existing sets under `config_sets/` first: if one already boots with a similar purpose (overlapping `serverArgs`), reuse it, or ask its owners whether it can be extended with a small adjustment when no existing consumer is negatively impacted. A set that duplicates another's purpose multiplies CI cost for no benefit.
+The `default` config set mirrors a real Elastic Cloud deployment as closely as possible (a [Cloud-first approach](./scout-best-practices.md#design-tests-with-a-cloud-first-mindset)). Keeping it representative of the default customer experience is what lets UI and API suites from different solutions share one set of servers and run the same way locally and on Cloud, so avoid enabling a feature flag there unless it is also enabled by default on Cloud. Put non-default behavior behind a [runtime flag](#scout-feature-flags-runtime) where the flag allows it, and reach for a custom config set only when Kibana needs the setting at boot.
+
+::::::{tip}
+Before creating a set, check the existing sets under `config_sets/` first: if one already boots with a similar purpose (overlapping `serverArgs`), reuse it, or ask its owners whether it can be extended with a small adjustment when no existing consumer is negatively impacted. A set that duplicates another's purpose multiplies CI cost for no benefit. If you do add one, keep it minimal: import the closest existing config (usually `default`) and override only the `serverArgs` you need.
+::::::
+
+::::::{note}
+A custom config set is meant to be temporary. Once the setting it enables ships on by default, delete the set and move its suites back to the `default` config set.
+::::::
 
 ### How custom configs work [scout-feature-flags-custom-configs-how]
 

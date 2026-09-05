@@ -11,6 +11,17 @@ export const internalApiPath = '/internal/context_engine';
 export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
 export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
+export const aiIndexFeedbackAnalysisPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_analysis`;
+export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
+export const aiIndexKiByIdPath = `${aiIndexKiListPath}/{kiId}`;
+
+/** Default and maximum page size when listing Knowledge Indicators for an AI index. */
+export const DEFAULT_KI_PAGE_SIZE = 25;
+export const MAX_KI_PAGE_SIZE = 100;
+/** Page size for summary-only KI list requests, no rows. */
+export const KI_SUMMARY_PAGE_SIZE = 0;
+
+export const MAX_KI_TYPE_FILTER_LENGTH = 256;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
 export const signalGroupsPath = `${internalApiPath}/signals/groups`;
@@ -25,6 +36,17 @@ export const MAX_SIGNAL_GROUPS = 100;
 /** Default and maximum page size when fetching the individual signals in a group. */
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
+
+/** Default and maximum page size when listing improvements (one entry per improvement lineage). */
+export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
+export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
+
+/**
+ * Cap on the improvement history handed to an analysis run's briefing. The runner needs to see
+ * what was already rejected so it does not re-propose it, but the briefing shares the run's
+ * context window.
+ */
+export const MAX_IMPROVEMENTS_HISTORY_SIZE = 200;
 
 /**
  * Version of the public AI index API, shared between the server route
@@ -60,6 +82,21 @@ export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;
 export const MAX_AI_INDEX_SOURCES = 100;
+
+export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
+export const MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH = 64;
+export const MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH = 4096;
+
+/**
+ * Floor on the feedback-analysis schedule interval. Every run is an LLM
+ * analysis over a window of signals, so the interval is a cost control rather
+ * than only a scheduling detail.
+ */
+export const MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES = 15;
+
+/** Applied when a feedback-analysis block omits the corresponding field. */
+export const DEFAULT_FEEDBACK_ANALYSIS_INTERVAL = '24h';
+export const DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM = 'now-30d';
 
 /** Advanced setting that gates the Context Engine feedback loop. */
 export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';

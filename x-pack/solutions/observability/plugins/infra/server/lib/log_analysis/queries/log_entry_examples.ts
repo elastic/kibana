@@ -20,9 +20,11 @@ export const createLogEntryExamplesQuery = (
   endTime: number,
   dataset: string,
   exampleCount: number,
-  categoryQuery?: string
+  categoryQuery?: string,
+  projectRouting?: string
 ): estypes.SearchRequest => ({
   ...defaultRequestParameters,
+  ...(projectRouting ? { project_routing: projectRouting } : {}),
   size: exampleCount,
   query: {
     bool: {

@@ -81,10 +81,9 @@ exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed
 exports[`schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy Workflow Dispatch Payload
 
-Access pattern: \`{{ inputs.payload.<field> }}\` (e.g. \`{{ inputs.payload.policyId }}\`,
-\`{{ inputs.payload.episodes }}\`). For episode fields use
-\`{% for ep in inputs.payload.episodes %}{{ ep.<field> }}{% endfor %}\`.
-Rule names: \`{{ inputs.payload.rules[ep.rule_id].name }}\`.
+Catalog of fields the dispatcher passes as \`inputs.payload\`. In Liquid:
+\`{{ inputs.payload.<field> }}\`, and inside
+\`{% for ep in inputs.payload.episodes %}\` use \`{{ ep.<field> }}\`.
 
 ## Top-Level Fields (\`inputs.payload\`)
 
@@ -108,7 +107,62 @@ Rule names: \`{{ inputs.payload.rules[ep.rule_id].name }}\`.
 | \`episode_id\` | string | required | Unique identifier of the alert episode |
 | \`episode_status\` | \\"inactive\\" \\\\| \\"pending\\" \\\\| \\"active\\" \\\\| \\"recovering\\" | required | Current lifecycle status of the alert episode (enum: inactive \\\\| pending \\\\| active \\\\| recovering) |
 | \`severity\` | \\"info\\" \\\\| \\"low\\" \\\\| \\"medium\\" \\\\| \\"high\\" \\\\| \\"critical\\" | optional | Severity of the alert episode (enum: info \\\\| low \\\\| medium \\\\| high \\\\| critical) |
-| \`data\` | object | optional | Data of the alert episode |"
+| \`data\` | object | optional | Data of the alert episode |
+
+### \`data\`
+
+\`data\` is the rule's ES|QL result row (each query row is written as \`data: rowDoc\`
+on the alert event). Columns depend on the rule query, so they are not listed above.
+
+- Nested dotted names: \`ep.data.host.name\`, not \`ep.data[\\"host.name\\"]\`.
+- Discover columns with \`| LIMIT 0\` if they are unclear.
+- Guard empty \`data\` on recovering/inactive: \`| default\` or \`{% if ep.data %}\`.
+
+## Example
+
+For \`FROM logs-* | STATS error_count = COUNT(*) BY host.name | WHERE error_count >= 5\`:
+
+\`\`\`yaml
+version: '1'
+name: \\"Notify: <rule-name>\\"
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: send_email
+    type: email
+    connector-id: <connector-id>
+    with:
+      to:
+        - <user-provided-email>
+      subject: \\"Alert: {{ inputs.payload.episodes | size }} episode(s)\\"
+      message: >
+        {% for ep in inputs.payload.episodes %}
+        - Rule: {{ inputs.payload.rules[ep.rule_id].name | default: \\"unknown\\" }}
+          Host: {{ ep.data.host.name | default: \\"unknown\\" }}
+          Errors: {{ ep.data.error_count | default: \\"n/a\\" }}
+          Status: {{ ep.episode_status }}
+        {% endfor %}
+
+        View execution: {{ execution.url }}
+\`\`\`"
+`;
+
+exports[`schema_to_skill_docs generateDispatchFlowDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Dispatch Flow
+
+The end-to-end notification path:
+
+1. **Rule** (\`kind: alert\`) evaluates its ES|QL query and writes alert episodes to \`.rule-events\`.
+2. **Dispatcher** (runs on its own Task Manager schedule) reads episodes from \`.rule-events\`.
+3. Dispatcher loads **enabled action policies** for the relevant space.
+4. **Matcher evaluation**: each policy's KQL matcher is tested against each episode's context.
+5. **Grouping**: matched episodes are grouped according to the policy's \`groupingMode\` / \`groupBy\`.
+6. **Throttling**: groups are filtered based on the policy's throttle strategy and notification history.
+7. **Dispatch**: eligible groups are sent to the policy's **workflow destinations** via \`scheduleWorkflow\`.
+8. **Workflow execution**: workflow steps run, using connectors to deliver notifications (email, Slack, etc.).
+
+Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events."
 `;
 
 exports[`schema_to_skill_docs generateEpisodeLifecycleDoc matches the reviewed skill-doc snapshot 1`] = `
@@ -127,10 +181,73 @@ Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw si
 `;
 
 exports[`schema_to_skill_docs generateGroupingModesDoc matches the reviewed skill-doc snapshot 1`] = `
-"### Grouping Modes
+"# Grouping Modes
+
 - \`per_episode\`: one notification per alert episode lifecycle (default).
 - \`all\`: a single notification for all matching episodes.
-- \`per_field\`: group by specified \`groupBy\` fields."
+- \`per_field\`: group by specified \`groupBy\` fields.
+
+Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
+`;
+
+exports[`schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Matcher Context Fields
+
+When the dispatcher evaluates a policy's KQL matcher, these fields are available:
+
+| Field | Type | Description |
+|---|---|---|
+| \`episode_id\` | string | The episode UUID |
+| \`episode_status\` | \`inactive\`, \`pending\`, \`active\`, \`recovering\` | Episode lifecycle status |
+| \`group_hash\` | string | Hash of the grouping fields |
+| \`last_event_timestamp\` | string | Timestamp of the most recent event |
+| \`severity\` | \`info\`, \`low\`, \`medium\`, \`high\`, \`critical\` | Episode severity when present |
+| \`rule.id\` | string | The rule's saved object ID |
+| \`rule.name\` | string | The rule's display name |
+| \`rule.tags\` | string[] | The rule's tags array |
+| \`data\` | \`data.*\` object | Rule-specific ES\\\\|QL output columns (query as \`data.*\`, e.g. \`data.host.name\`, \`data.error_count\`) |
+
+An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use \`rule.id: \\"<ruleId>\\"\`."
+`;
+
+exports[`schema_to_skill_docs generateMultiRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Multi-rule Action Policies
+
+Use this path when the user wants **one policy across several rules**, a space-wide
+catch-all, or routing by tag/severity — not a policy tied to a single \`rule.id\`.
+
+Create the policy with \`set_metadata\` (name by intent, not by one rule),
+\`set_destinations\` (same \`workflowId\` rule as the single-rule path), a matcher from
+the options below, then \`set_grouping\` / \`set_throttle\`.
+
+A policy matches **episodes**, not a rule object. Policies are space-scoped and are
+not bound to a single rule. The matcher is optional KQL over
+[matcher context fields](./action-policy-matchers.md).
+
+- **Catch-all**: omit \`set_matcher\` or set matcher to empty/\`null\`. Confirm with the
+  user first — this notifies on every \`kind: alert\` episode in the space, including
+  rules created later.
+- **Several specific rules**: \`rule.id: \\"<id1>\\" or rule.id: \\"<id2>\\"\`. Collect each
+  \`ruleId\` from \`manage_rule\` / \`sml_search\` (pre-assigned IDs work for unsaved drafts).
+- **A family of rules**: \`rule.tags: \\"production\\"\` or \`rule.name: \\"CPU*\\"\`. Prefer tags
+  when the set will grow.
+- **Route by severity across rules**: \`severity: \\"critical\\"\` (or combine with tags).
+  Useful for a PagerDuty policy vs an email policy.
+- **Reuse destinations**: one workflow can serve many rules. Keep Liquid generic —
+  \`inputs.payload.rules[ep.rule_id].name\`, \`ep.episode_status\`, and guarded
+  \`ep.data.*\` — because query columns often differ across rules. If two rules need
+  different message shapes, use two policies (or two workflows) rather than one
+  brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).
+- **Search first**: run \`platform.core.sml_search\` for existing policies before adding
+  another catch-all or overlapping tag matcher.
+- **Grouping**: \`per_episode\` is still a safe default. \`all\` batches mixed-rule
+  episodes into a single notification; only use it when the user wants one combined
+  message.
+
+Name shared policies by intent (\`\\"Notify production alerts\\"\`, \`\\"Page on critical\\"\`),
+not by a single rule name.
+
+For the default one-rule path, see [single-rule action policies](./action-policy-single-rule.md)."
 `;
 
 exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
@@ -267,6 +384,24 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 | \`recovering_timeframe\` | string | optional | Time window for recovering evaluation, e.g. 5m, 15m. |
 | \`operation\` | \\"set_state_transition\\" | required |  |
 
+#### \`operation: \\"set_dashboards\\"\`
+
+Use \`set_dashboards\` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a \`dashboard\` artifact (\`{ id, type: \\"dashboard\\", data: { dashboardId } }\`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_dashboards\\" | required |  |
+| \`dashboard_ids\` | string[] | required | Dashboard saved-object IDs to link as investigation artifacts on the rule. Each ID must be an existing dashboard the current user can read. Replaces previously linked dashboards. Pass an empty array to unlink all dashboards. (max items: 100) |
+
+#### \`operation: \\"set_runbook\\"\`
+
+Use \`set_runbook\` to attach investigation markdown to the rule. Stored as a \`runbook\` artifact (\`{ id, type: \\"runbook\\", data: { content } }\`), matching the create/update API. Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Content longer than 50000 characters is rejected.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_runbook\\" | required |  |
+| \`content\` | string \\\\| null | required | Markdown investigation steps. Stored as a \`runbook\` artifact (\`{ id, type: \\"runbook\\", data: { content } }\`). Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Max 50000 characters. |
+
 #### \`operation: \\"validate\\"\`
 
 Use \`validate\` as the last operation to confirm the rule is complete and ready to save.
@@ -292,7 +427,7 @@ exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 | \`no_data_strategy\` | \\"last_known_status\\" \\\\| \\"emit\\" \\\\| \\"recover\\" \\\\| \\"none\\" | optional | How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query. |
 | \`state_transition\` | object \\\\| null | optional |  |
 | \`grouping\` | object | optional | Grouping configuration. |
-| \`artifacts\` | object[] | optional | Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` carries type-specific fields: a \`runbook\` artifact requires \`data.content\` holding markdown, and a \`dashboard\` artifact requires \`data.dashboardId\` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in \`data\`. (max items: 100) |
+| \`artifacts\` | object[] | optional | Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` is a type-specific object (for example a \`runbook\` may carry \`content\`, a \`dashboard\` may carry \`dashboardId\`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only. (max items: 100) |
 
 ## Query Formats
 
@@ -304,7 +439,7 @@ Composed query: a shared base with appendable breach and recovery segments.
 |---|---|---|---|
 | \`format\` | \\"composed\\" | required |  |
 | \`base\` | string | required | Base ES\\\\|QL query. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |
-| \`breach\` | object | required | Breach detection configuration (required). |
+| \`breach\` | object | optional | Breach detection configuration. Omit to treat every base row as a breach. |
 | \`recovery\` | object | optional | Recovery query segment. Required when recovery_strategy is \\"query\\". |
 
 #### \`format: \\"standalone\\"\`
@@ -339,19 +474,69 @@ Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`
   \`| EVAL severity = CASE(cpu > 0.95, \\"critical\\", cpu > 0.8, \\"high\\", \\"medium\\")\`"
 `;
 
-exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `
-"### Throttle / Grouping Compatibility
+exports[`schema_to_skill_docs generateSingleRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Single-rule Action Policies
 
-The throttle strategy must be compatible with the grouping mode:
-- For \`per_episode\`: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
-- For \`all\` / \`per_field\`: \`time_interval\`, \`every_time\`.
-- \`per_status_interval\`, \`time_interval\` require an \`interval\` (e.g. \`\\"5m\\"\`, \`\\"1h\\"\`)."
+Use this path when the user wants notifications for **one specific rule**.
+
+Action policies only process alert episodes. If the rule is \`kind: signal\`, do not
+proceed: ask the user (or the rule-management skill) to convert or recreate the
+rule as \`kind: alert\` first.
+
+Create the policy with these operations in order:
+
+1. \`set_metadata\`: name = \`\\"Notify on <rule-name>\\"\`, description = \`\\"Default notification for <rule-name>\\"\`
+2. \`set_destinations\`: \`[{ type: \\"workflow\\", id: \\"<workflowId>\\" }]\`
+   - Use the \`workflowId\` passed to \`generate_workflow\`, **not** the workflow \`attachmentId\`.
+3. \`set_matcher\`: \`rule.id: \\"<ruleId>\\"\`
+   - \`ruleId\` comes from the \`manage_rule\` tool result. It is pre-assigned when the
+     rule attachment is created and becomes the saved-object ID when the user clicks
+     \\"Create rule\\".
+   - It is available even for unsaved/proposed rules — do not ask the user to save
+     the rule first.
+4. \`set_grouping\`: \`per_episode\`
+5. \`set_throttle\`: \`{ strategy: \\"on_status_change\\" }\`
+
+If the user explicitly requests a cross-rule or shared policy, consult the
+[multi-rule action policies reference](./action-policy-multi-rule.md)."
+`;
+
+exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Throttle / Grouping Compatibility
+
+- \`per_episode\`: one notification per alert episode lifecycle (default).
+- \`all\`: a single notification for all matching episodes.
+- \`per_field\`: group by specified \`groupBy\` fields.
+
+Caveats:
+- Only valid with \`per_episode\`: \`on_status_change\`, \`per_status_interval\`.
+- Not valid with \`per_episode\`: \`time_interval\`.
+- Require an \`interval\` (e.g. \`\\"5m\\"\`, \`\\"1h\\"\`): \`per_status_interval\`, \`time_interval\`.
+
+If you set both in one request, put \`set_grouping\` before \`set_throttle\`. The tool
+validates compatibility after all operations run.
+
+Related: [action-policy-grouping-modes](./action-policy-grouping-modes.md), [action-policy-throttle-strategies](./action-policy-throttle-strategies.md)."
 `;
 
 exports[`schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed skill-doc snapshot 1`] = `
-"### Throttle Strategies
+"# Throttle Strategies
+
 - \`on_status_change\`: notify only on episode status transitions (default for \`per_episode\`).
 - \`per_status_interval\`: notify on transitions and at regular intervals.
 - \`time_interval\`: notify at regular intervals regardless of status (default for \`all\`/\`per_field\`).
-- \`every_time\`: notify on every evaluation cycle (high volume)."
+- \`every_time\`: notify on every evaluation cycle (high volume).
+
+Compatibility with grouping modes — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
+`;
+
+exports[`schema_to_skill_docs generateWorkflowDestinationsDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Workflows
+
+A workflow is a **concrete automation defined in YAML** that executes when dispatched by an action policy.
+
+- Workflow steps can use Kibana **connectors** (email, Slack, PagerDuty, etc.) via the \`connector-id\` field on each step.
+- Action policy destinations reference **workflow IDs**, never connector IDs directly.
+- Destination workflows must use **exactly one** \`triggers: - type: manual\` trigger — never \`alert\`.
+- For deeper connector knowledge (types, \`connector-id\` usage, discovery tools), load the \`workflow-authoring\` skill."
 `;

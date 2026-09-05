@@ -9,8 +9,9 @@ import type { Client } from '@elastic/elasticsearch';
 import { ALERT_COUNTS, ALERT_TABLE_DATE_RANGE } from './constants';
 
 /**
- * Observability alerts-as-data write alias that Kibana provisions at boot. We
- * index generated alert documents straight into the alias rather than restoring
+ * Observability alerts-as-data write target that Kibana provisions at boot — an
+ * alias over a concrete index on stateful, a data stream on serverless. We
+ * index generated alert documents straight into it rather than restoring
  * the legacy `observability/alerts` es_archive: Scout only exposes
  * `esArchiver.loadIfNeeded`, which skips indices that already exist — and these
  * indices are always created by Kibana on startup, so the archive would never be
@@ -108,10 +109,20 @@ export async function generateObservabilityAlerts(esClient: Client): Promise<voi
     })),
   ].flatMap((opts) => {
     const doc = buildAlertDoc(opts);
-    return [{ index: { _index: OBSERVABILITY_ALERTS_INDEX, _id: doc['kibana.alert.uuid'] } }, doc];
+    // `create` rather than `index`: on serverless the alerts-as-data target is a
+    // data stream, which only accepts write ops with an op_type of `create`.
+    // On stateful (alias over a concrete index) `create` works the same, since
+    // the deleteByQuery above already removed any previous doc with the same id.
+    return [{ create: { _index: OBSERVABILITY_ALERTS_INDEX, _id: doc['kibana.alert.uuid'] } }, doc];
   });
 
-  await esClient.bulk({ operations, refresh: 'wait_for' });
+  const bulkResponse = await esClient.bulk({ operations, refresh: 'wait_for' });
+  if (bulkResponse.errors) {
+    const failures = bulkResponse.items
+      .filter((item) => item.create?.error)
+      .map((item) => `${item.create!._id}: ${item.create!.error!.reason}`);
+    throw new Error(`Failed to ingest observability alert documents: ${failures.join('; ')}`);
+  }
 }
 
 export { ALERT_TABLE_DATE_RANGE };

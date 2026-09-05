@@ -183,7 +183,7 @@ describe('buildStateSubscribe', () => {
 
     await getSubscribeFn()(getNextState({ appState: { dataSource: newDataSource } }));
 
-    expect(dataState.reset).toBeCalledTimes(1);
+    expect(dataState.reset).toHaveBeenCalledTimes(1);
 
     toolkit.internalState.dispatch(
       toolkit.injectCurrentTab(internalStateActions.initializeTabState)({
@@ -195,6 +195,6 @@ describe('buildStateSubscribe', () => {
     );
 
     await getSubscribeFn()(getNextState({ appState: { dataSource: newDataSource } }));
-    expect(dataState.reset).toBeCalledTimes(1);
+    expect(dataState.reset).toHaveBeenCalledTimes(1);
   });
 });

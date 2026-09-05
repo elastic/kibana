@@ -70,8 +70,11 @@ describe('createAiIndexAttachmentType', () => {
       type: 'text',
       value: expect.stringContaining('AI index: my-ai-index'),
     });
-    expect(representation?.value).toContain('Destination: data_stream "ai-index-ds-my-ai-index"');
-    expect(representation?.value).toContain('Sources: esql:FROM tickets');
-    expect(representation?.value).toContain('Existing automations (workflow ids): wf-1');
+    if (representation?.type !== 'text') {
+      throw new Error('expected a text representation');
+    }
+    expect(representation.value).toContain('Destination: data_stream "ai-index-ds-my-ai-index"');
+    expect(representation.value).toContain('Sources: esql:FROM tickets');
+    expect(representation.value).toContain('Existing automations (workflow ids): wf-1');
   });
 });

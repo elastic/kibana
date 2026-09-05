@@ -6,8 +6,8 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
@@ -17,9 +17,19 @@ import type { ToolCallResultTransformer } from '../utils/tool_summarization';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 import type { RelevantSkillSelection } from '../utils/relevant_skills/select_relevant_skills';
 
+/** Never call from the tool-result path — image bytes must not enter tool results. */
+export type PromptImageResolver = (ref: {
+  attachmentId: string;
+  version?: number;
+}) => Promise<{ base64: string; mimeType: string } | undefined>;
+
 export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
-  capabilities: ResolvedAgentCapabilities;
+  /**
+   * Kibana space the conversation runs in. It never changes mid-conversation, so naming it in the
+   * system prompt does not break prompt caching.
+   */
+  spaceId: string;
   processedConversation: ProcessedConversation;
   skills: InternalSkillDefinition[];
   /**
@@ -43,6 +53,8 @@ export interface PromptFactoryParams {
    */
   relevantSkillsEnabled: boolean;
   relevantSkills?: RelevantSkillSelection;
+  imageResolver?: PromptImageResolver;
+  conversationTemplates: ConversationTemplatesService;
 }
 
 export interface ResearchAgentPromptRuntimeParams {

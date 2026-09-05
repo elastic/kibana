@@ -19,6 +19,17 @@ components:
         Commas are not allowed because tag filters are comma-separated.
         Tags describe what a dataset is about; they never affect who can see it.
 
+    Direction:
+      type: string
+      enum:
+        - maximize
+        - minimize
+        - neutral
+      description: >-
+        Metric polarity. `maximize` means a higher score is better (e.g. faithfulness,
+        accuracy). `minimize` means a lower score is better (e.g. latency, token count).
+        `neutral` means the metric is informational only and has no improvement direction.
+
     DatasetMaturity:
       type: string
       enum:
@@ -221,6 +232,13 @@ components:
         name:
           type: string
           maxLength: 256
+        version:
+          type: string
+          maxLength: 64
+          description: >-
+            The evaluator version that produced the score, so a run stays
+            reproducible after the definition moves on. Absent on documents
+            written before the version was recorded.
         score:
           type: number
           nullable: true
@@ -240,6 +258,8 @@ components:
           type: string
           maxLength: 256
           nullable: true
+        direction:
+          $ref: '#/components/schemas/Direction'
         model:
           $ref: '#/components/schemas/Model'
       required:
@@ -320,6 +340,181 @@ components:
         - dataset_name
         - evaluator_name
         - stats
+
+    EvaluatorName:
+      type: string
+      minLength: 2
+      maxLength: 128
+      pattern: '^[a-z0-9][a-z0-9_-]*[a-z0-9]$'
+      description: >-
+        Identifies the evaluator. Lowercase so a lookup cannot miss on case, and
+        never opening with an underscore so a name cannot be read as an action
+        path. Cannot be the name of a built-in evaluator.
+
+    EvaluatorOrigin:
+      type: string
+      enum:
+        - built_in
+        - user_defined
+      description: >-
+        Whether the evaluator ships with Kibana or was defined by a user.
+        Built-in evaluators are read-only.
+
+    JudgeEvidence:
+      type: array
+      minItems: 1
+      maxItems: 3
+      items:
+        type: string
+        enum:
+          - input
+          - response
+          - steps
+      description: >-
+        Which parts of the normalized trace the judge is shown, and therefore
+        requires: the user query (`input`), the agent response (`response`), and
+        the tool calls (`steps`). Rendered into the prompt as `user_query`,
+        `agent_response`, and `tool_calls`. A trace missing any of them is
+        reported as unmet rather than judged.
+
+    JudgeScore:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 127
+          description: >-
+            Score name. Limited so `evaluator.score` fits the score document's
+            evaluator-name field even when the evaluator name is at its limit.
+        type:
+          type: string
+          enum:
+            - number
+            - categorical
+          description: >-
+            `number` asks the judge for a value between 0 and 1. `categorical`
+            asks it to pick one of `labels`, which carry the numeric value each
+            label is worth.
+        labels:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                minLength: 1
+                maxLength: 256
+              score:
+                type: number
+                minimum: 0
+                maximum: 1
+            required:
+              - value
+              - score
+        description:
+          type: string
+          maxLength: 2048
+      required:
+        - name
+        - type
+
+    LlmJudgeConfig:
+      type: object
+      description: >-
+        What a user-defined judge is given and what it must report back. The
+        prompt is a Mustache template and may only reference the evidence and
+        reference data keys the config declares.
+      properties:
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 32768
+          description: >-
+            Mustache template for the evaluation request. Use unescaped
+            interpolation (`{{{variable}}}` or `{{& variable}}`) for evidence
+            and reference data so their contents are not HTML-escaped.
+        system_prompt:
+          type: string
+          minLength: 1
+          maxLength: 32768
+          description: >-
+            System instructions for the judge. Required so every immutable
+            evaluator version contains its complete prompt configuration. Use
+            unescaped Mustache interpolation (`{{{variable}}}` or
+            `{{& variable}}`) when inserting evidence or reference data.
+        evidence:
+          $ref: '#/components/schemas/JudgeEvidence'
+        reference_data_keys:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 256
+            pattern: '^[a-zA-Z_][a-zA-Z0-9_-]*$'
+          description: >-
+            Keys the example's reference data must supply, each exposed to the
+            prompt under its own name. An example missing one is refused before
+            a model is called.
+        output:
+          type: object
+          properties:
+            scores:
+              type: array
+              minItems: 1
+              maxItems: 10
+              items:
+                $ref: '#/components/schemas/JudgeScore'
+          required:
+            - scores
+      required:
+        - prompt
+        - system_prompt
+        - evidence
+        - output
+
+    PersistedEvaluator:
+      type: object
+      description: A persisted evaluator definition.
+      properties:
+        name:
+          $ref: '#/components/schemas/EvaluatorName'
+        version:
+          type: string
+          maxLength: 64
+        kind:
+          type: string
+          enum:
+            - llm
+        origin:
+          $ref: '#/components/schemas/EvaluatorOrigin'
+        description:
+          type: string
+          maxLength: 2048
+        judge:
+          $ref: '#/components/schemas/LlmJudgeConfig'
+        created_at:
+          type: string
+          maxLength: 64
+        updated_at:
+          type: string
+          maxLength: 64
+        created_by:
+          type: string
+          maxLength: 256
+          description: User who created this immutable version.
+      required:
+        - name
+        - version
+        - kind
+        - origin
+        - description
+        - judge
+        - created_at
+        - updated_at
 
     TraceSpan:
       type: object

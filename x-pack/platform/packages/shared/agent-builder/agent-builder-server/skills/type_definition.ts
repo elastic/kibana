@@ -7,6 +7,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { AvailabilityConfig } from '../availability';
 import type { SkillBoundedTool } from './tools';
 import type {
   Directory,
@@ -57,9 +58,12 @@ export type SkillsDirectoryStructure = Directory<{
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
       siem_readiness: FileDirectory<{}>;
+      siem_migrations: FileDirectory<{}>;
       entity_analytics_leads: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
+    // Universal skills from `elastic/agent-skills`
+    'elastic-skills': FileDirectory;
   }>;
 }>;
 
@@ -67,6 +71,12 @@ export type SkillsDirectoryStructure = Directory<{
  * Base paths where files can be placed (exact paths from the structure)
  */
 export type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
+
+/**
+ * Base path shared by every universal skill maintained in `elastic/agent-skills`
+ * and copied into Kibana by that repository's sync job.
+ */
+export const ELASTIC_SKILLS_BASE_PATH = 'skills/elastic-skills' satisfies DirectoryPath;
 
 /**
  * Server-side definition of a skill type.
@@ -123,6 +133,12 @@ export interface SkillDefinition<
    */
   excludeFromElasticCapabilities?: boolean;
   /**
+   * Optional dynamic availability configuration.
+   * When provided, the framework evaluates the handler per-request to decide
+   * whether the skill should be visible. See {@link AvailabilityConfig}.
+   */
+  availability?: AvailabilityConfig;
+  /**
    * Content of the skill.
    */
   content: string;
@@ -150,7 +166,7 @@ export interface SkillDefinition<
 export interface ReferencedContent {
   /**
    * Name of the content. Also used as the file name `<reference-name>.md`.
-   * Must contain only lowercase letters, numbers, and hyphens. Max 64 characters.
+   * Must contain only letters, numbers, underscores, and hyphens. Max 64 characters.
    * [basePath]/[name]/[relativePath]/[reference-name] must be unique.
    */
   name: string;
@@ -161,7 +177,7 @@ export interface ReferencedContent {
    * - "." - stores reference content in the same directory as the skill
    * - "./[directory]" - stores reference content in the "[directory]" directory
    * - "./[directory]/[subdirectory]" - nested subdirectories are supported; each segment must
-   *   contain only lowercase letters, numbers, underscores, and hyphens. Parent traversal ("../") is not allowed.
+   *   contain only letters, numbers, underscores, and hyphens. Parent traversal ("../") is not allowed.
    *
    * Examples:
    * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/[name].md" file
@@ -182,15 +198,15 @@ export const referencedContentSchema = z.array(
       .min(1, 'Name must be non-empty')
       .max(64, 'Name must be at most 64 characters')
       .regex(
-        /^[a-z0-9-_]+$/,
-        'Reference name must contain only lowercase letters, numbers, underscores, and hyphens'
+        /^[a-zA-Z0-9-_]+$/,
+        'Reference name must contain only letters, numbers, underscores, and hyphens'
       ),
     relativePath: z
       .string()
       .min(1, 'Relative path must be non-empty')
       .regex(
-        /^\.(?:\/[a-z0-9-_]+)*$/,
-        'Relative path must start with a dot and may contain "/"-separated segments of lowercase letters, numbers, underscores, and hyphens (no "../")'
+        /^\.(?:\/[a-zA-Z0-9-_]+)*$/,
+        'Relative path must start with a dot and may contain "/"-separated segments of letters, numbers, underscores, and hyphens (no "../")'
       ),
     content: z.string().min(1, 'Content must be non-empty'),
   })

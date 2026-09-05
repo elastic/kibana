@@ -27,19 +27,17 @@ export const useStyles = () => {
     `,
 
     embeddableConsole: css`
-      background: ${variables.background};
       color: ${variables.text};
       display: flex;
       flex-direction: column;
-      // This large box shadow helps prevent a flicker of dark
-      // background when the content is shown and hidden
-      box-shadow: inset 0 ${variables.initialHeight} 0 ${variables.background},
-        inset 0 600rem 0 ${euiTheme.colors.body};
       bottom: ${layoutVar('application.content.bottom', '0px')};
       right: ${layoutVar('application.content.right', '0px')};
       transform: translateY(0);
       height: ${variables.initialHeight};
       max-height: ${variables.maxHeight};
+      border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
+      border-top: ${euiTheme.border.thin};
+      background: ${variables.background};
 
       ${useEuiBreakpoint(['xs', 's'])} {
         display: none;
@@ -75,6 +73,7 @@ export const useStyles = () => {
 
     embeddableConsoleChromeClassic: css`
       left: calc(var(--kbnSolutionNavOffset, 0) + ${layoutVar('application.content.left', '0px')});
+      border-radius: 0;
     `,
 
     embeddableConsoleChromeDefault: css`
@@ -94,7 +93,8 @@ export const useStyles = () => {
       align-items: center;
       overflow-y: hidden; // Ensures the movement of buttons in :focus don't cause scrollbars
       overflow-x: auto;
-      padding-right: ${euiTheme.size.s};
+      padding-right: ${euiTheme.size.xs};
+      padding-left: ${euiTheme.size.xs};
     `,
 
     embeddableConsoleControlsButton: css`

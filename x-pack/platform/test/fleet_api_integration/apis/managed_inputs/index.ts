@@ -10,5 +10,6 @@ import type { FtrProviderContext } from '../../../api_integration/ftr_provider_c
 export default function loadTests({ loadTestFile }: FtrProviderContext) {
   describe('Managed Inputs', () => {
     loadTestFile(require.resolve('./managed_bulk_output'));
+    loadTestFile(require.resolve('./managed_otlp_output'));
   });
 }

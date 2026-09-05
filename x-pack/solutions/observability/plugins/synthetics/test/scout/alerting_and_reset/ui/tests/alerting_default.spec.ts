@@ -9,66 +9,70 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('AlertingDefaults', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ syntheticsServices }) => {
-    // Enable synthetics so the Settings page renders — otherwise it redirects to the
-    // "enable monitor management" onboarding and createConnectorButton never appears.
-    // Sibling synthetics specs enable it in their own setup; this one relied on ordering.
-    await syntheticsServices.enable();
-    await syntheticsServices.deleteSettingsAndConnectors();
-  });
-
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.syntheticsApp.navigateToSettings();
-  });
-
-  test.afterEach(async ({ syntheticsServices }) => {
-    await syntheticsServices.deleteSettingsAndConnectors();
-  });
-
-  test('configures alerting defaults: add Slack connector', async ({ pageObjects, page }) => {
-    await pageObjects.syntheticsApp.openCreateConnectorFlyout();
-    await pageObjects.syntheticsApp.selectConnectorType('slack');
-    await page.testSubj.fill('nameInput', 'Test slack');
-    await page.testSubj.fill('slackWebhookUrlInput', 'https://www.slack.com');
-    await pageObjects.syntheticsApp.saveConnectorInFlyout();
-
-    const defaultConnectors = pageObjects.syntheticsApp.getDefaultConnectorsComboBox();
-    await defaultConnectors.setSelectedOptions(['Test slack']);
-    expect(await defaultConnectors.getSelectedOptions()).toStrictEqual(['Test slack']);
-    await defaultConnectors.clear();
-  });
-
-  test('configures alerting defaults: add Email connector', async ({
-    pageObjects,
-    page,
-    browserAuth,
-  }) => {
-    await test.step('add connector', async () => {
-      await pageObjects.syntheticsApp.openCreateConnectorFlyout();
-      await pageObjects.syntheticsApp.selectConnectorType('email');
-      await page.testSubj.fill('nameInput', 'Test email');
-      await page.testSubj.fill('emailFromInput', 'test@gmail.com');
-      await page.testSubj.locator('emailServiceSelectInput').selectOption('gmail');
-      await page.testSubj.click('emailHasAuthSwitch');
-      await pageObjects.syntheticsApp.saveConnectorInFlyout();
+test.describe(
+  'AlertingDefaults',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeAll(async ({ syntheticsServices }) => {
+      // Enable synthetics so the Settings page renders — otherwise it redirects to the
+      // "enable monitor management" onboarding and createConnectorButton never appears.
+      // Sibling synthetics specs enable it in their own setup; this one relied on ordering.
+      await syntheticsServices.enable();
+      await syntheticsServices.deleteSettingsAndConnectors();
     });
 
-    await test.step('configure email recipients', async () => {
-      const defaultConnectors = pageObjects.syntheticsApp.getDefaultConnectorsComboBox();
-      await defaultConnectors.setSelectedOptions(['Test email']);
-      expect(await defaultConnectors.getSelectedOptions()).toStrictEqual(['Test email']);
-
-      await page.testSubj.locator('toEmailAddressInput').locator('input').fill('test@gmail.com');
-      await page.keyboard.press('Enter');
-    });
-
-    await test.step('verify viewer restrictions', async () => {
-      await browserAuth.loginAsViewer();
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.syntheticsApp.navigateToSettings();
-      await pageObjects.syntheticsApp.navigateToSettingsTab('Alerting');
-      await expect(page.locator('button:has-text("Add connector")')).toBeDisabled();
     });
-  });
-});
+
+    test.afterEach(async ({ syntheticsServices }) => {
+      await syntheticsServices.deleteSettingsAndConnectors();
+    });
+
+    test('configures alerting defaults: add Slack connector', async ({ pageObjects, page }) => {
+      await pageObjects.syntheticsApp.openCreateConnectorFlyout();
+      await pageObjects.syntheticsApp.selectConnectorType('slack');
+      await page.testSubj.fill('nameInput', 'Test slack');
+      await page.testSubj.fill('slackWebhookUrlInput', 'https://www.slack.com');
+      await pageObjects.syntheticsApp.saveConnectorInFlyout();
+
+      const defaultConnectors = pageObjects.syntheticsApp.getDefaultConnectorsComboBox();
+      await defaultConnectors.setSelectedOptions(['Test slack']);
+      expect(await defaultConnectors.getSelectedOptions()).toStrictEqual(['Test slack']);
+      await defaultConnectors.clear();
+    });
+
+    test('configures alerting defaults: add Email connector', async ({
+      pageObjects,
+      page,
+      browserAuth,
+    }) => {
+      await test.step('add connector', async () => {
+        await pageObjects.syntheticsApp.openCreateConnectorFlyout();
+        await pageObjects.syntheticsApp.selectConnectorType('email');
+        await page.testSubj.fill('nameInput', 'Test email');
+        await page.testSubj.fill('emailFromInput', 'test@gmail.com');
+        await page.testSubj.locator('emailServiceSelectInput').selectOption('gmail');
+        await page.testSubj.click('emailHasAuthSwitch');
+        await pageObjects.syntheticsApp.saveConnectorInFlyout();
+      });
+
+      await test.step('configure email recipients', async () => {
+        const defaultConnectors = pageObjects.syntheticsApp.getDefaultConnectorsComboBox();
+        await defaultConnectors.setSelectedOptions(['Test email']);
+        expect(await defaultConnectors.getSelectedOptions()).toStrictEqual(['Test email']);
+
+        await page.testSubj.locator('toEmailAddressInput').locator('input').fill('test@gmail.com');
+        await page.keyboard.press('Enter');
+      });
+
+      await test.step('verify viewer restrictions', async () => {
+        await browserAuth.loginAsViewer();
+        await pageObjects.syntheticsApp.navigateToSettings();
+        await pageObjects.syntheticsApp.navigateToSettingsTab('Alerting');
+        await expect(page.locator('button:has-text("Add connector")')).toBeDisabled();
+      });
+    });
+  }
+);

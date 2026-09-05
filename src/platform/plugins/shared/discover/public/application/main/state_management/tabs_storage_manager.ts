@@ -16,7 +16,10 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { ProfileStateType, type ProfileStateRegistry } from '../../../../common/context_awareness';
+import {
+  LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
+  type ProfileStateRegistry,
+} from '../../../../common/context_awareness';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
 import {
   createTabItem,
@@ -31,8 +34,6 @@ import type { TabsUrlState } from '../../../../common/types';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
-
-const LOCALLY_PERSISTED_PROFILE_STATE_TYPES = [ProfileStateType.Persistent, ProfileStateType.Url];
 
 export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   internalState: TabState['initialInternalState'] | undefined;
@@ -440,7 +441,7 @@ export const createTabsStorageManager = ({
     sessionInfo.spaceId = spaceId;
 
     const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
-      fromSavedObjectTabToTabState({ tab })
+      fromSavedObjectTabToTabState({ tab, profileStateRegistry })
     );
     const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
       toTabState(tab, defaultTabState)

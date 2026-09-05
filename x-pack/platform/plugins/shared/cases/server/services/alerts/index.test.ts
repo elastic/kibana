@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  httpServerMock,
+} from '@kbn/core/server/mocks';
 import { alertsClientMock } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client.mock';
 import { CaseStatuses } from '../../../common/types/domain';
 import { AlertService } from '.';
+import { CasesEventBus } from '../../events/event_bus';
 
 describe('updateAlertsStatus', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -111,7 +116,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(1);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -172,7 +177,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(1);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -235,7 +240,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(2);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
       // id1 should be closed
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -353,7 +358,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(2);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
       // id1 should be closed in index 1
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -472,6 +477,45 @@ describe('updateAlertsStatus', () => {
     });
   });
 
+  describe('executeAggregations', () => {
+    const aggregationBuilders = [
+      {
+        getName: () => 'hosts',
+        build: () => ({ hosts_total: { cardinality: { field: 'host.id' } } }),
+        formatResponse: () => ({}),
+      },
+    ];
+
+    it('searches unique alert ids and indices with ignore_unavailable', async () => {
+      const aggregations = { hosts_total: { value: 2 } };
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+        aggregations,
+      });
+
+      const res = await alertService.executeAggregations({
+        aggregationBuilders,
+        alerts: [
+          { id: 'alert-1', index: '.alerts-security.alerts-default' },
+          { id: 'alert-2', index: '.alerts-security.alerts-default' },
+          { id: 'alert-3', index: '.alerts-observability.alerts-default' },
+        ],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: ['.alerts-security.alerts-default', '.alerts-observability.alerts-default'],
+        ignore_unavailable: true,
+        query: { ids: { values: ['alert-1', 'alert-2', 'alert-3'] } },
+        size: 0,
+        aggregations: { hosts_total: { cardinality: { field: 'host.id' } } },
+      });
+      expect(res).toEqual(aggregations);
+    });
+  });
+
   describe('getAlerts', () => {
     const docs = [
       {
@@ -546,7 +590,7 @@ describe('updateAlertsStatus', () => {
     it('update case info', async () => {
       await alertService.bulkUpdateCases({ alerts, caseIds });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('filters out alerts with empty id', async () => {
@@ -555,7 +599,7 @@ describe('updateAlertsStatus', () => {
         caseIds,
       });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('filters out alerts with empty index', async () => {
@@ -564,7 +608,7 @@ describe('updateAlertsStatus', () => {
         caseIds,
       });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('does not call the alerts client with no alerts', async () => {
@@ -589,7 +633,7 @@ describe('updateAlertsStatus', () => {
     it('update case info', async () => {
       await alertService.removeCaseIdFromAlerts({ alerts, caseId });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('filters out alerts with empty id', async () => {
@@ -598,7 +642,7 @@ describe('updateAlertsStatus', () => {
         caseId,
       });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('filters out alerts with empty index', async () => {
@@ -607,7 +651,7 @@ describe('updateAlertsStatus', () => {
         caseId,
       });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('does not call the alerts client with no alerts', async () => {
@@ -622,9 +666,7 @@ describe('updateAlertsStatus', () => {
     it('should not throw an error and log it', async () => {
       alertsClient.removeCaseIdFromAlerts.mockRejectedValueOnce('An error');
 
-      await expect(
-        alertService.removeCaseIdFromAlerts({ alerts, caseId })
-      ).resolves.not.toThrowError();
+      await expect(alertService.removeCaseIdFromAlerts({ alerts, caseId })).resolves.not.toThrow();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing case test-case from alerts: An error'
@@ -638,7 +680,7 @@ describe('updateAlertsStatus', () => {
     it('remove all case ids from alerts', async () => {
       await alertService.removeCaseIdsFromAllAlerts({ caseIds });
 
-      expect(alertsClient.removeCaseIdsFromAllAlerts).toBeCalledWith({ caseIds });
+      expect(alertsClient.removeCaseIdsFromAllAlerts).toHaveBeenCalledWith({ caseIds });
     });
 
     it('does not call the alerts client with no case ids', async () => {
@@ -652,13 +694,596 @@ describe('updateAlertsStatus', () => {
     it('should not throw an error and log it', async () => {
       alertsClient.removeCaseIdsFromAllAlerts.mockRejectedValueOnce('An error');
 
-      await expect(
-        alertService.removeCaseIdsFromAllAlerts({ caseIds })
-      ).resolves.not.toThrowError();
+      await expect(alertService.removeCaseIdsFromAllAlerts({ caseIds })).resolves.not.toThrow();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing cases test-case-1,test-case-2 for all alerts: An error'
       );
     });
+  });
+
+  describe('ensureAlertsAuthorized', () => {
+    const alerts = [
+      {
+        id: 'alert-1',
+        index: '.alerts-security.alerts-default',
+      },
+    ];
+
+    it('authorizes local alerts', async () => {
+      alertsClient.ensureAllAlertsAuthorizedRead.mockResolvedValueOnce(undefined);
+
+      await expect(alertService.ensureAlertsAuthorized({ alerts })).resolves.not.toThrow();
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({ alerts });
+    });
+
+    it('throws without calling ensureAllAlertsAuthorizedRead when the index belongs to a linked project (CPS)', async () => {
+      await expect(
+        alertService.ensureAlertsAuthorized({
+          alerts: [{ id: 'alert-1', index: 'my-linked-project:.alerts-security.alerts-default' }],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws without calling ensureAllAlertsAuthorizedRead when the index is a remote-cluster (CCS) reference', async () => {
+      await expect(
+        alertService.ensureAlertsAuthorized({
+          alerts: [{ id: 'alert-1', index: 'my-remote-cluster:.alerts-security.alerts-default' }],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('does not call ensureAllAlertsAuthorizedRead when there are no non-empty alerts', async () => {
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts: [{ id: '', index: '' }] })
+      ).resolves.not.toThrow();
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('wraps and rethrows authorization errors', async () => {
+      alertsClient.ensureAllAlertsAuthorizedRead.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(alertService.ensureAlertsAuthorized({ alerts })).rejects.toThrow(
+        /Failed to authorize alerts/
+      );
+    });
+  });
+
+  describe('ensureDocumentsExist', () => {
+    const alerts = [
+      {
+        id: 'event-1',
+        index: '.ds-logs-endpoint.events.process-default',
+      },
+    ];
+
+    it('does not throw when the document exists', async () => {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            _index: '.ds-logs-endpoint.events.process-default',
+            _id: 'event-1',
+            found: true,
+            _source: {},
+          },
+        ],
+      });
+
+      await expect(alertService.ensureDocumentsExist({ alerts })).resolves.not.toThrow();
+    });
+
+    it('throws when the document is not found', async () => {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            _index: '.ds-logs-endpoint.events.process-default',
+            _id: 'event-1',
+            found: false,
+          },
+        ],
+      });
+
+      await expect(alertService.ensureDocumentsExist({ alerts })).rejects.toThrow(
+        /Referenced event\(s\) not found: event-1/
+      );
+    });
+
+    it('throws without calling mget when the index belongs to a linked project (CPS)', async () => {
+      await expect(
+        alertService.ensureDocumentsExist({
+          alerts: [
+            { id: 'event-1', index: 'my-linked-project:.ds-logs-endpoint.events.process-default' },
+          ],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('throws without calling mget when the index is a remote-cluster (CCS) reference', async () => {
+      await expect(
+        alertService.ensureDocumentsExist({
+          alerts: [
+            { id: 'event-1', index: 'my-remote-cluster:.ds-logs-endpoint.events.process-default' },
+          ],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('does not call mget when there are no non-empty alerts', async () => {
+      await expect(
+        alertService.ensureDocumentsExist({ alerts: [{ id: '', index: '' }] })
+      ).resolves.not.toThrow();
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('wraps and rethrows mget errors', async () => {
+      esClient.mget.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(alertService.ensureDocumentsExist({ alerts })).rejects.toThrow(
+        /Failed to verify referenced events exist/
+      );
+    });
+  });
+});
+
+describe('updateAlertsStatus — event bus', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const logger = loggingSystemMock.create().get('case');
+  const alertsClient = alertsClientMock.create();
+  const request = httpServerMock.createKibanaRequest();
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2022-02-21T17:35:00Z'));
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  it('emits alertStatusChanged after updating statuses', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['a1']);
+    expect(payload.status).toBe('closed');
+    expect(payload.previousStatuses).toEqual([{ id: 'a1', previousStatus: 'open' }]);
+    expect(payload.alertIdToIndex).toEqual({ a1: '.siem-signals' });
+    expect(payload.indices).toEqual(['.siem-signals']);
+
+    bus.removeAllListeners();
+  });
+
+  it('emits one event per distinct target status', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    // a1 has previous status 'acknowledged' → target 'closed': actual change
+    // a2 has previous status 'closed' → target 'open': actual change
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'acknowledged' },
+        },
+        {
+          found: true,
+          _id: 'a2',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'closed' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      { id: 'a2', index: '.siem-signals', status: CaseStatuses.open },
+    ]);
+
+    // 'closed' maps to 'closed', 'open' maps to 'open' — two distinct target statuses
+    expect(listener).toHaveBeenCalledTimes(2);
+
+    bus.removeAllListeners();
+  });
+
+  it('does not emit when all alerts already have the target status', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    // Both alerts already at 'closed' (the target)
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'closed' },
+        },
+        {
+          found: true,
+          _id: 'a2',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'closed' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      { id: 'a2', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).not.toHaveBeenCalled();
+    bus.removeAllListeners();
+  });
+
+  it('does not emit for alerts not found by the prefetch', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    // Neither alert found by mget
+    esClient.mget.mockResolvedValueOnce({ docs: [] } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).not.toHaveBeenCalled();
+    bus.removeAllListeners();
+  });
+
+  it('logs warn and still completes update when mget prefetch fails', async () => {
+    const bus = new CasesEventBus();
+    // Listener must be registered so prefetch is attempted (hasAlertStatusChangedListeners() === true).
+    bus.onAlertStatusChanged(jest.fn());
+    esClient.mget.mockRejectedValue(new Error('mget failure'));
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    const updatePromise = alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+    // pRetry schedules timer-based delays between retries; advance them all.
+    await jest.runAllTimersAsync();
+    await expect(updatePromise).resolves.not.toThrow();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to prefetch previous alert statuses')
+    );
+  });
+
+  it('omits previousStatus entry for docs not found in prefetch (no fabricated open)', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    // a1 is found with status 'acknowledged', a2 is not found
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'acknowledged' },
+        },
+        { found: false, _id: 'a2' },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      { id: 'a2', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.previousStatuses).toEqual([{ id: 'a1', previousStatus: 'acknowledged' }]);
+    // a2 is absent — not fabricated as 'open'
+    expect(payload.previousStatuses.find((s: { id: string }) => s.id === 'a2')).toBeUndefined();
+
+    bus.removeAllListeners();
+  });
+
+  it('emits with the affected ID but no previousStatuses row when the alert has an unrecognised previous status value', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'triaged' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    // The mutation succeeds; the event schema does not require a previousStatuses row per ID.
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['a1']);
+    expect(payload.previousStatuses).toEqual([]);
+
+    bus.removeAllListeners();
+  });
+
+  it('does not emit for an alert with no workflow status field at all', async () => {
+    // getUpdateAlertsStatusScript sets ctx.op = 'noop' when both kibana.alert.workflow_status
+    // and signal.status are null/missing, so Elasticsearch performs no mutation. Emitting here
+    // would start an external workflow for a status change that never happened.
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'some.other.field': 'value' },
+        },
+        {
+          found: true,
+          _id: 'a2',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      { id: 'a2', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['a2']);
+
+    bus.removeAllListeners();
+  });
+
+  it('does not emit at all when every alert is status-less', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [{ found: true, _id: 'a1', _index: '.siem-signals', _source: {} }],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).not.toHaveBeenCalled();
+
+    bus.removeAllListeners();
+  });
+
+  it('emits for an alert whose only status field is a non-null signal.status', async () => {
+    // The legacy branch of the script mutates signal.status, so this doc does transition.
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { signal: { status: 'open' } },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['a1']);
+    expect(payload.previousStatuses).toEqual([{ id: 'a1', previousStatus: 'open' }]);
+
+    bus.removeAllListeners();
+  });
+
+  it('emits with the affected ID when unrecognized modern status coexists with a valid signal.status', async () => {
+    // parseWorkflowStatus must not fall back to signal.status when the modern field is non-null.
+    // Without the guard, signal.status 'closed' would equal the target and suppress the event,
+    // even though the update script will mutate the non-null modern field from 'triaged' to 'closed'.
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'triaged', signal: { status: 'closed' } },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['a1']);
+    expect(payload.previousStatuses).toEqual([]);
+
+    bus.removeAllListeners();
+  });
+
+  it('treats same id with different indices as independent entries (composite key)', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    // 'a1' appears in two indices: security has it 'open' (change), observability has it 'closed' (no-op).
+    // Without composite key, observability's 'closed' would overwrite security's 'open' in the map,
+    // causing the security alert to be incorrectly treated as a no-op and suppressed.
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.alerts-security.alerts-default',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        },
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.alerts-observability.apm.alerts-default',
+          _source: { 'kibana.alert.workflow_status': 'closed' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.alerts-security.alerts-default', status: CaseStatuses.closed },
+      { id: 'a1', index: '.alerts-observability.apm.alerts-default', status: CaseStatuses.closed },
+    ]);
+
+    // The security entry (open → closed) is an actual change and must emit.
+    // The observability entry (closed → closed) is a no-op and must not.
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.previousStatuses).toEqual([{ id: 'a1', previousStatus: 'open' }]);
+
+    bus.removeAllListeners();
+  });
+
+  it('still resolves successfully when a listener throws (listener isolation)', async () => {
+    const bus = new CasesEventBus();
+    bus.onAlertStatusChanged(() => {
+      throw new Error('listener boom');
+    });
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await expect(
+      alertService.updateAlertsStatus([
+        { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      ])
+    ).resolves.not.toThrow();
+
+    bus.removeAllListeners();
+  });
+
+  it('does not call mget when no event bus is provided', async () => {
+    const alertService = new AlertService(esClient, logger, alertsClient);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(esClient.mget).not.toHaveBeenCalled();
+  });
+
+  it('does not call mget when event bus has no alertStatusChanged listeners', async () => {
+    const bus = new CasesEventBus(); // no listener registered
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(esClient.mget).not.toHaveBeenCalled();
+    bus.removeAllListeners();
+  });
+
+  it('still resolves successfully when an async listener rejects (async listener isolation)', async () => {
+    const bus = new CasesEventBus();
+    bus.onAlertStatusChanged(async () => {
+      throw new Error('async listener boom');
+    });
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await expect(
+      alertService.updateAlertsStatus([
+        { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      ])
+    ).resolves.not.toThrow();
+    // The rejection is swallowed in the onAlertStatusChanged wrapper (.catch(() => {})).
+    // No setTimeout drain needed — the .catch is attached synchronously on the returned Promise.
+
+    bus.removeAllListeners();
   });
 });

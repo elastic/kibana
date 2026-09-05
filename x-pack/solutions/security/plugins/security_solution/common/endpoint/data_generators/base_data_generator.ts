@@ -154,6 +154,22 @@ const FILE_SYSTEM_PATH_NAMES = [
   'x-pack',
 ];
 
+const EXECUTABLE_FILE_EXTENSIONS = Object.freeze([
+  '.exe',
+  '.bat',
+  '.cmd',
+  '.com',
+  '.msi',
+  '.msix',
+  '.ps1',
+  '.apk',
+  '.vbs',
+  '.app',
+  '.run',
+  '.bin',
+  '.sh',
+]);
+
 const toEsSearchHit = <T extends object = object>(
   hitSource: T,
   index: string = 'some-index'
@@ -313,7 +329,10 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
    * @param paths number of path segments to generate
    */
   protected randomFileSystemPath(paths: number = 3): string {
-    return this.randomArray(paths, () => this.randomChoice(FILE_SYSTEM_PATH_NAMES)).join('/');
+    return (
+      this.randomArray(paths, () => this.randomChoice(FILE_SYSTEM_PATH_NAMES)).join('/') +
+      this.randomChoice(EXECUTABLE_FILE_EXTENSIONS)
+    );
   }
 
   /**

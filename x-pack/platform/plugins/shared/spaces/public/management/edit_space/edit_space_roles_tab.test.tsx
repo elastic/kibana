@@ -16,6 +16,7 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -41,7 +42,7 @@ const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
 
 const space = {
-  id: 'space-a',
+  id: asSpaceId('space-a'),
   name: 'Space A',
   disabledFeatures: [],
   _reserved: false,

@@ -14,7 +14,6 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
-  hasWorkflowExecutionReadPrivilege,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
@@ -57,9 +56,6 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          if (!hasWorkflowExecutionReadPrivilege(request)) {
-            return response.forbidden();
-          }
           const { executionId } = request.params;
           const { includeInput, includeOutput } = request.query;
           const spaceId = spaces.getSpaceId(request);

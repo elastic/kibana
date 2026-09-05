@@ -85,7 +85,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
           });
         } catch (err) {
           const error = transformError(err);
-          cspContext.logger.error(`Failed to fetch benchmarks ${err}`);
+          cspContext.logger.error(`Failed to fetch benchmarks: ${error.message}`);
           return response.customError({
             body: { message: error.message },
             statusCode: error.statusCode,

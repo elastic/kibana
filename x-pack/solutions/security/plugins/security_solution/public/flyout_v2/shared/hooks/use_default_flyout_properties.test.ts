@@ -17,6 +17,7 @@ describe('useDefaultToolsFlyoutProperties', () => {
     }));
 
     expect(result.current.properties).toEqual({
+      flyoutMenuDisplayMode: 'always',
       minWidth: result.current.theme.base * 24,
       ownFocus: false,
       paddingSize: 'm',

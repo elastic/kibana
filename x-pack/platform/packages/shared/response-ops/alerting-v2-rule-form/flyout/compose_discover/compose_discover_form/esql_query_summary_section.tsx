@@ -179,8 +179,8 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
     ? i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.editQueryButtonLabel', {
         defaultMessage: 'Edit query',
       })
-    : i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.openEditorButtonLabel', {
-        defaultMessage: 'Open query editor',
+    : i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.addQueryButtonLabel', {
+        defaultMessage: 'Add query',
       });
 
   return (
@@ -222,8 +222,8 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       <EuiSpacer size="s" />
       <EuiButton
         size="s"
-        color={isEditCta ? 'text' : undefined}
-        iconType={isEditCta ? 'chevronLimitLeft' : 'code'}
+        color="text"
+        iconType={isEditCta ? 'pencil' : 'plusCircle'}
         isDisabled={isEditorOpen}
         onClick={onOpenEditor}
         data-test-subj="esqlSummaryOpenEditor"

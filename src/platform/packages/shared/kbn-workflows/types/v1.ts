@@ -22,6 +22,7 @@ import type {
   WorkflowYaml,
 } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
+import type { WorkflowValidationRuleId } from '../validation/rules';
 
 export type { WorkflowYaml } from '../spec/schema';
 
@@ -887,6 +888,12 @@ export interface WorkflowDiagnostic {
   message: string;
   source: string;
   path?: (string | number)[];
+  /**
+   * Stable identity of the check that produced this diagnostic. Prefer this over
+   * matching on `message`, which is translated and reworded freely.
+   * See WORKFLOW_VALIDATION_RULES.
+   */
+  ruleId: WorkflowValidationRuleId;
 }
 export interface ValidateWorkflowResponseDto {
   valid: boolean;

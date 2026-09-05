@@ -9,9 +9,6 @@
 
 import { Minimatch } from 'minimatch';
 
-// Don't annotate the return type as `Minimatch[]`: the installed
-// @types/minimatch exports `Minimatch` as a value (not a type), and ts-node
-// will reject it. Inference + `ReturnType` keeps the file ts-node-clean.
 const compileMatchers = (patterns: readonly string[]) =>
   patterns.map((p) => new Minimatch(p, { dot: true }));
 
@@ -28,6 +25,15 @@ export function filterIgnoredFiles(files: string[], patterns: string[]): string[
   }
   const matchers = compileMatchers(patterns);
   return files.filter((file) => !matchesAny(file, matchers));
+}
+
+/**
+ * Returns a predicate telling whether a file matches any of the given glob
+ * patterns, compiling the patterns once.
+ */
+export function createScopeMatcher(patterns: readonly string[]): (file: string) => boolean {
+  const matchers = compileMatchers(patterns);
+  return (file: string) => matchesAny(file, matchers);
 }
 
 /**

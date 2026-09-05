@@ -7,7 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
-import { AgentExecutionMode, ToolType } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, isApiAutoApproved, ToolType } from '@kbn/agent-builder-common';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
@@ -16,8 +17,9 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { HttpSelfService } from '@kbn/core-http-server';
 import { capitalize } from 'lodash';
 import { dispatchApiRequest, getFailureDetails, prepareApiRequest, targetSchema } from '../../api';
-import type { ApiTarget } from '../../api';
 import { apiFailureToErrorResult } from './errors';
+
+export type ApiExecuteApproval = 'pre_approved' | 'user_confirmed';
 
 export interface ApiExecuteResultData {
   target: ApiTarget;
@@ -25,6 +27,7 @@ export interface ApiExecuteResultData {
   method: string;
   path: string;
   response: unknown;
+  approval?: ApiExecuteApproval;
 }
 
 const executeSchema = z.object({
@@ -66,7 +69,7 @@ The response is the raw API response body.`,
     schema: executeSchema,
     handler: async (
       { target, api, params = {} },
-      { esClient, request, spaceId, logger, prompts, callContext, executionMode }
+      { esClient, request, spaceId, logger, prompts, callContext, executionMode, interactivity }
     ) => {
       const preparedApiRequest = await prepareApiRequest({ target, api, params, spaceId });
       if (preparedApiRequest.status !== 'prepared') {
@@ -85,14 +88,18 @@ The response is the raw API response body.`,
       const { request: apiRequest, destructive } = preparedApiRequest;
       const { method, path } = apiRequest;
 
-      if (destructive) {
-        if (executionMode === AgentExecutionMode.standalone) {
+      const preApproved = destructive && isApiAutoApproved({ interactivity, target, api });
+      let approval: ApiExecuteApproval | undefined = preApproved ? 'pre_approved' : undefined;
+
+      if (destructive && !preApproved) {
+        if (executionMode === AgentExecutionMode.standalone || !interactivity.enabled) {
           return {
             results: [
               createErrorResult({
                 message:
                   `API "${api}" is destructive and needs the user to confirm it, which is not possible ` +
-                  `in a non-interactive execution. Use a non-destructive API, or tell the user to run this from a conversation.`,
+                  `in a non-interactive execution. Use a non-destructive API, or tell the user to run this from a conversation. ` +
+                  `The caller that started this execution can also pre-approve "${api}" on the ${target} target for the whole run.`,
                 metadata: { target, api, method, path },
               }),
             ],
@@ -135,9 +142,14 @@ The response is the raw API response body.`,
             ),
           });
         }
+
+        approval = 'user_confirmed';
       }
 
-      logger.debug(`${internalTools.executeApi}: ${method} ${path} (target=${target}, api=${api})`);
+      logger.debug(
+        `${internalTools.executeApi}: ${method} ${path} (target=${target}, api=${api}` +
+          `${approval ? `, approval=${approval}` : ''})`
+      );
 
       try {
         const response = await dispatchApiRequest({
@@ -148,7 +160,14 @@ The response is the raw API response body.`,
           request,
         });
 
-        const data: ApiExecuteResultData = { target, api, method, path, response };
+        const data: ApiExecuteResultData = {
+          target,
+          api,
+          method,
+          path,
+          response,
+          ...(approval ? { approval } : {}),
+        };
 
         return {
           results: [
@@ -167,7 +186,14 @@ The response is the raw API response body.`,
           results: [
             createErrorResult({
               message: `API request failed: ${message}`,
-              metadata: { target, api, method, path, ...getFailureDetails(err) },
+              metadata: {
+                target,
+                api,
+                method,
+                path,
+                ...(approval ? { approval } : {}),
+                ...getFailureDetails(err),
+              },
             }),
           ],
         };

@@ -36,7 +36,7 @@ describe('registerCaseAttachments', () => {
   } as ExperimentalFeatures;
 
   const buildFramework = () => ({
-    registerUnified: jest.fn(),
+    registerAttachment: jest.fn(),
   });
 
   it('registers the unified security.endpoint attachment with the zod payload schema', () => {
@@ -44,7 +44,7 @@ describe('registerCaseAttachments', () => {
 
     registerCaseAttachments(framework, experimentalFeatures);
 
-    expect(framework.registerUnified).toHaveBeenCalledWith({
+    expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
       schema: EndpointAttachmentPayloadSchema,
     });
@@ -55,7 +55,7 @@ describe('registerCaseAttachments', () => {
 
     registerCaseAttachments(framework, experimentalFeatures);
 
-    expect(framework.registerUnified).toHaveBeenCalledWith({
+    expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_EVENT_ATTACHMENT_TYPE,
       schema: SecurityEventAttachmentPayloadSchema,
     });
@@ -66,7 +66,7 @@ describe('registerCaseAttachments', () => {
 
     registerCaseAttachments(framework, experimentalFeatures);
 
-    expect(framework.registerUnified).toHaveBeenCalledWith(
+    expect(framework.registerAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
         id: INDICATOR_ATTACHMENT_TYPE,
         schema: expect.anything(),
@@ -79,7 +79,7 @@ describe('registerCaseAttachments', () => {
 
     registerCaseAttachments(framework, experimentalFeatures);
 
-    expect(framework.registerUnified).toHaveBeenCalledWith({
+    expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_TIMELINE_ATTACHMENT_TYPE,
       schema: TimelineAttachmentPayloadSchema,
     });
@@ -93,7 +93,7 @@ describe('registerCaseAttachments', () => {
       entityAttachmentsEnabled: true,
     } as ExperimentalFeatures);
 
-    expect(framework.registerUnified).toHaveBeenCalledWith({
+    expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ENTITY_ATTACHMENT_TYPE,
       schema: EntityAttachmentPayloadSchema,
     });
@@ -104,7 +104,7 @@ describe('registerCaseAttachments', () => {
 
     registerCaseAttachments(framework, experimentalFeatures);
 
-    expect(framework.registerUnified).not.toHaveBeenCalledWith(
+    expect(framework.registerAttachment).not.toHaveBeenCalledWith(
       expect.objectContaining({
         id: SECURITY_ENTITY_ATTACHMENT_TYPE,
       })

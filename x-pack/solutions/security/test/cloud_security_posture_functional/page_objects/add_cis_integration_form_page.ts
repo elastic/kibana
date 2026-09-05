@@ -590,6 +590,12 @@ export function AddCisIntegrationFormPageProvider({
     await clickOptionButton(GCP_PROVIDER_TEST_SUBJ);
     await clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_SUBJ);
     await selectSetupTechnology('agentless');
+    // When GCP Cloud Connectors are enabled (package >= 3.3.0-preview03), the form defaults
+    // to cloud_connectors. Switch to credentials-json so the JSON field is visible.
+    if (await isGcpCredentialSelectorVisible()) {
+      await selectGcpCredentials('credentials-json');
+    }
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await fillInTextField(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID, projectId);
     await fillInTextField(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON, credentialJson);
   };
@@ -629,6 +635,17 @@ export function AddCisIntegrationFormPageProvider({
 
     await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
+
+    // Secret fields (e.g. GCP credentials JSON) hide the saved value and show a Replace
+    // button on edit. Click it first so the input is available to type into.
+    const replaceButtonId = testSubjectId.replace(
+      /^(textAreaInput|passwordInput)-/,
+      'button-replace-'
+    );
+    if (replaceButtonId !== testSubjectId && (await testSubjects.exists(replaceButtonId))) {
+      await testSubjects.click(replaceButtonId);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
 
     // Fill out form to edit an agentless integration
     await fillInTextField(testSubjectId, value);

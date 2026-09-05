@@ -25,7 +25,8 @@ export const ruleEnabledTriggerCommonDefinition: CommonTriggerDefinition<
   }),
   documentation: {
     details: i18n.translate('xpack.alertingV2.workflowTriggers.ruleEnabled.documentation.details', {
-      defaultMessage: 'Emitted when a rule transitions to enabled.',
+      defaultMessage:
+        'Emitted when a rule transitions to enabled. The payload includes event.rule with ruleId, spaceId, and tags.',
     }),
     examples: [
       i18n.translate('xpack.alertingV2.workflowTriggers.ruleEnabled.documentation.example', {
@@ -38,7 +39,20 @@ triggers:
 \`\`\``,
         values: { triggerId: RuleEnabledTriggerId },
       }),
+      i18n.translate(
+        'xpack.alertingV2.workflowTriggers.ruleEnabled.documentation.tagConditionExample',
+        {
+          defaultMessage: `## Run for rules with a tag
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.rule.tags: "critical"'
+\`\`\``,
+          values: { triggerId: RuleEnabledTriggerId },
+        }
+      ),
     ],
   },
-  snippets: { condition: 'event.rule.ruleId: "my-rule-id"' },
+  snippets: { condition: 'event.rule.tags: "my-tag"' },
 };

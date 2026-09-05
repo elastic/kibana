@@ -122,7 +122,7 @@ export const chunkInClauseLiterals = (literals: readonly string[]): string[][] =
 // in the row set so LAST() still picks them as the latest snooze intent. Dropping them before
 // LAST() would resurrect an older snooze (e.g. an indefinite one) for the same series.
 export const getAlertEpisodeSuppressionsQueries = (
-  alertEpisodes: AlertEpisode[]
+  alertEpisodes: readonly AlertEpisode[]
 ): EsqlRequest[] => {
   const minLastEventTimestamp =
     alertEpisodes.reduce<string | undefined>((min, ep) => {

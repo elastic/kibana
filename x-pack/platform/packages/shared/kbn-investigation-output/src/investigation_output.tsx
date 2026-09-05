@@ -21,9 +21,10 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationOutputProps } from './types';
+import { FinalResults } from './final_results';
 import { HypothesisRow } from './hypothesis_row';
-import { SignificantEventUpdates } from './significant_event_updates';
-import { buildHeader, buildFinalResultsMarkdown } from './utils';
+import { TriggerFeedback } from './trigger_feedback';
+import { buildHeader } from './utils';
 
 /**
  * Renders the summary and output of an investigation (a root-cause-analysis run by an AI
@@ -39,13 +40,6 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
   getQueryHref,
 }) => {
   const hypotheses = state?.hypotheses ?? [];
-  /**
-   * Only shown once the investigation has actually finished — a mid-run `conclusion` is
-   * still a draft (and occasionally arrives with markdown mangled by the model over-escaping
-   * newlines in its tool-call JSON), so it's never rendered before `status` is `complete`.
-   */
-  const finalResultsMarkdown =
-    status === 'complete' && state ? buildFinalResultsMarkdown(state) : undefined;
   const header = buildHeader(status, state);
   const { euiTheme } = useEuiTheme();
 
@@ -143,23 +137,15 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
         </EuiPanel>
       )}
 
-      {finalResultsMarkdown && (
-        <EuiMarkdownFormat
-          textSize="s"
-          data-test-subj="investigationOutputFinalResults"
-          css={css`
-            padding: ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.base};
-          `}
-        >
-          {finalResultsMarkdown}
-        </EuiMarkdownFormat>
-      )}
+      {/*
+       * Only shown once the investigation has actually finished — a mid-run `conclusion` is
+       * still a draft (and occasionally arrives with markdown mangled by the model over-escaping
+       * newlines in its tool-call JSON), so it's never rendered before `status` is `complete`.
+       */}
+      {status === 'complete' && state && <FinalResults state={state} />}
 
-      {status === 'complete' && state?.significant_event_updates?.length ? (
-        <SignificantEventUpdates
-          updates={state.significant_event_updates}
-          getQueryHref={getQueryHref}
-        />
+      {status === 'complete' && state?.trigger_feedback?.length ? (
+        <TriggerFeedback updates={state.trigger_feedback} getQueryHref={getQueryHref} />
       ) : null}
     </EuiPanel>
   );

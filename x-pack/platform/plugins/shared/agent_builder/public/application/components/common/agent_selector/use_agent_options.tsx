@@ -19,6 +19,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { AgentAvatar } from '../agent_avatar';
 import { OptionText } from '../../conversations/conversation_input/input_actions/option_text';
+import { useEffectiveSpaceDefaultAgent } from '../../../hooks/use_space_default_agent';
 
 const agentOptionNameCellStyles = css`
   ${logicalCSS('min-width', '0')}
@@ -90,8 +91,12 @@ export const useAgentOptions = ({
   agents: AgentDefinition[];
   selectedAgentId?: string;
 }) => {
+  const { effectiveDefaultAgentId, isRestricted } = useEffectiveSpaceDefaultAgent();
   const agentOptions = useMemo(() => {
-    const sorted = [...agents].sort((a, b) => {
+    const visibleAgents = isRestricted
+      ? agents.filter((agent) => agent.id === effectiveDefaultAgentId)
+      : agents;
+    const sorted = [...visibleAgents].sort((a, b) => {
       if (a.id === selectedAgentId) return -1;
       if (b.id === selectedAgentId) return 1;
       return 0;
@@ -112,7 +117,7 @@ export const useAgentOptions = ({
       };
       return option;
     });
-  }, [agents, selectedAgentId]);
+  }, [agents, selectedAgentId, isRestricted, effectiveDefaultAgentId]);
   return {
     agentOptions,
     renderAgentOption: (props: AgentOptionProps) => <AgentOption {...props} />,

@@ -8,9 +8,13 @@
 import { randomUUID } from 'crypto';
 import type { Client } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
+import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy } from '@kbn/ftr-llm-proxy';
-import type { SmlSearchHttpResponse } from '@kbn/agent-builder-sml-plugin/common/http_api/sml';
+import type {
+  SmlAutocompleteHttpResponse,
+  SmlSearchHttpResponse,
+} from '@kbn/agent-builder-sml-plugin/common/http_api/sml';
 import { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 import type { SmlAttachHttpResponse } from '../../../../common/http_api/sml';
 import {
@@ -39,6 +43,15 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   const searchOriginId = `sml-origin-${searchRunId}`;
   const searchIndexedTitle = `sml autocomplete pacific bluefin ${searchRunId}`;
 
+  const longTitleEntryId = `sml-multitoken-long-${searchRunId}`;
+  const shortTitleEntryId = `sml-multitoken-short-${searchRunId}`;
+
+  // "sales" is not a registered SML type, so the slash here is part of the title.
+  const slashTitleEntryId = `sml-slash-title-${searchRunId}`;
+  const slashTitle = `sales/marketing overview ${searchRunId}`;
+
+  const capitalizedTypeEntryId = `sml-capitalized-type-${searchRunId}`;
+
   apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminInteractiveCookieHeader = cookieHeader;
@@ -52,30 +65,94 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     }
 
     const now = '2024-06-01T12:00:00.000Z';
+    const baseDocument = {
+      created_at: now,
+      updated_at: now,
+      permissions: { kibana: { privileges: [] } },
+      ingestion_method: 'crawled',
+    };
+
     await sysEsClient.index({
       index: smlIndexName,
       id: searchEntryId,
-      refresh: 'wait_for',
       document: {
+        ...baseDocument,
         id: searchEntryId,
         type: 'visualization',
         title: searchIndexedTitle,
         origin: { uri: `visualization://${searchOriginId}` },
         content: 'pacific bluefin tuna content for sml scout',
-        created_at: now,
-        updated_at: now,
-        spaces: ['default'],
-        permissions: { kibana: { privileges: [] } },
-        ingestion_method: 'crawled',
       },
     });
+
+    await sysEsClient.index({
+      index: smlIndexName,
+      id: slashTitleEntryId,
+      document: {
+        ...baseDocument,
+        id: slashTitleEntryId,
+        type: 'dashboard',
+        title: slashTitle,
+        origin: { uri: `dashboard://${slashTitleEntryId}` },
+        content: 'sales and marketing overview for sml scout',
+      },
+    });
+
+    await sysEsClient.index({
+      index: smlIndexName,
+      id: longTitleEntryId,
+      document: {
+        ...baseDocument,
+        id: longTitleEntryId,
+        type: 'visualization',
+        title: `yellowfin tuna migration patterns across the pacific ${searchRunId}`,
+        origin: { uri: `visualization://${longTitleEntryId}` },
+        content: 'yellowfin long title for sml scout ranking',
+      },
+    });
+
+    await sysEsClient.index({
+      index: smlIndexName,
+      id: shortTitleEntryId,
+      document: {
+        ...baseDocument,
+        id: shortTitleEntryId,
+        type: 'visualization',
+        title: `yellowfin ${searchRunId}`,
+        origin: { uri: `visualization://${shortTitleEntryId}` },
+        content: 'yellowfin short title for sml scout ranking',
+      },
+    });
+
+    await sysEsClient.index({
+      index: smlIndexName,
+      id: capitalizedTypeEntryId,
+      document: {
+        ...baseDocument,
+        id: capitalizedTypeEntryId,
+        type: 'Workflow',
+        title: `capitalized type entry ${searchRunId}`,
+        origin: { uri: `workflow://${capitalizedTypeEntryId}` },
+        content: 'capitalized type for sml scout',
+      },
+    });
+
+    await sysEsClient.indices.refresh({ index: smlIndexName });
   });
 
   apiTest.afterAll(async () => {
-    try {
-      await sysEsClient.delete({ index: smlIndexName, id: searchEntryId, refresh: true });
-    } catch {
-      // ignore — already cleaned up
+    for (const id of [
+      searchEntryId,
+      longTitleEntryId,
+      shortTitleEntryId,
+      slashTitleEntryId,
+      capitalizedTypeEntryId,
+    ]) {
+      try {
+        await sysEsClient.delete({ index: smlIndexName, id, refresh: true });
+      } catch {
+        // ignore — already cleaned up
+      }
     }
   });
 
@@ -131,6 +208,84 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     }
   );
 
+  const autocomplete = async (apiClient: ApiClientFixture, query: string) => {
+    const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER_SML}/sml/_autocomplete`, {
+      headers: ih(),
+      body: { query, size: 20 },
+      responseType: 'json',
+    });
+    expect(response).toHaveStatusCode(200);
+    return (response.body as SmlAutocompleteHttpResponse).results;
+  };
+
+  apiTest(
+    'POST /internal/agent_builder_sml/sml/_autocomplete prefix-matches a title',
+    async ({ apiClient }) => {
+      const results = await autocomplete(apiClient, 'pacif');
+      const match = results.find((r) => r.id === searchEntryId);
+      expect(match).toBeDefined();
+      expect(match?.type).toBe('visualization');
+      expect(match?.origin?.uri).toBe(`visualization://${searchOriginId}`);
+    }
+  );
+
+  apiTest(
+    'POST /internal/agent_builder_sml/sml/_autocomplete prefix-matches a bare type',
+    async ({ apiClient }) => {
+      const results = await autocomplete(apiClient, 'visualiz');
+      expect(results.some((r) => r.id === searchEntryId)).toBe(true);
+    }
+  );
+
+  apiTest(
+    'POST /internal/agent_builder_sml/sml/_autocomplete matches each half of a "type/title" query',
+    async ({ apiClient }) => {
+      const results = await autocomplete(apiClient, 'visualization/pacif');
+      expect(results.some((r) => r.id === searchEntryId)).toBe(true);
+
+      // The type half must actually constrain: no type starts with "connect"
+      // other than connector, so the visualization entry must drop out.
+      const wrongType = await autocomplete(apiClient, 'connector/pacif');
+      expect(wrongType.some((r) => r.id === searchEntryId)).toBe(false);
+    }
+  );
+
+  apiTest(
+    'POST /internal/agent_builder_sml/sml/_autocomplete matches a type stored as "Workflow"',
+    async ({ apiClient }) => {
+      const results = await autocomplete(apiClient, 'workflo');
+      expect(results.some((r) => r.id === capitalizedTypeEntryId)).toBe(true);
+    }
+  );
+
+  apiTest(
+    'POST /internal/agent_builder_sml/sml/_autocomplete finds a title that contains a slash',
+    async ({ apiClient }) => {
+      // "sales" names no registered type, so this must be matched against the
+      // title rather than filtered to a type that cannot exist.
+      const results = await autocomplete(apiClient, 'sales/mark');
+      expect(results.some((r) => r.id === slashTitleEntryId)).toBe(true);
+    }
+  );
+
+  apiTest(
+    'POST /internal/agent_builder_sml/sml/_autocomplete requires every token of a multi-token prefix',
+    async ({ apiClient }) => {
+      // Both titles start with "yellowfin", so a single token matches both.
+      const oneToken = await autocomplete(apiClient, 'yellowf');
+      const oneTokenIds = oneToken.map((r) => r.id);
+      expect(oneTokenIds).toContain(shortTitleEntryId);
+      expect(oneTokenIds).toContain(longTitleEntryId);
+
+      // Adding a second token narrows to the only title containing it, with the
+      // trailing token still matched as a prefix ("migr" -> "migration").
+      const twoTokens = await autocomplete(apiClient, 'yellowfin migr');
+      const twoTokenIds = twoTokens.map((r) => r.id);
+      expect(twoTokenIds).toContain(longTitleEntryId);
+      expect(twoTokenIds).not.toContain(shortTitleEntryId);
+    }
+  );
+
   apiTest(
     'POST /internal/agent_builder/sml/_attach returns 404 when conversation missing',
     async ({ apiClient }) => {
@@ -173,7 +328,6 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
           content: `attach content for ${runId}`,
           created_at: now,
           updated_at: now,
-          spaces: ['default'],
           permissions: { kibana: { privileges: [] } },
           ingestion_method: 'crawled',
         },

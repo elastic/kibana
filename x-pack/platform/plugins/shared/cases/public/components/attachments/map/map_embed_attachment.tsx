@@ -53,7 +53,7 @@ const mapContainerStyle = {
  * `React.lazy` boundary so the cost is deferred until a map attachment is
  * actually rendered.
  *
- * Caller (`getMapAttachmentViewObject`) only mounts this when `data` is
+ * Caller (`getMapCreationActivity`) only mounts this when `data` is
  * present; with the schema-level requirement `data.attributes` is then
  * guaranteed, so we destructure directly without a narrowing helper.
  */

@@ -6,10 +6,27 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
+
+const mockCreateIndex = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('./indices/lead_index_service', () => ({
+  createLeadIndexService: () => ({
+    createIndex: mockCreateIndex,
+    doesIndexExist: jest.fn().mockResolvedValue(true),
+    deleteIndex: jest.fn(),
+  }),
+}));
+
 import { createLeadDataClient } from './lead_data_client';
 import type { LeadDataClient } from './lead_data_client';
 import { getLeadsIndexName } from '../../../../common/entity_analytics/lead_generation/constants';
-import type { Lead } from '../../../../common/entity_analytics/lead_generation/types';
+import type { LeadSignal } from './lead_matching';
+import { encodeCursor } from './change_cursor';
+import type { Lead as SynthesizedLead } from './types';
+
+const toObservationSource = (signals: readonly LeadSignal[]) =>
+  signals.map((s) => ({ module_id: s.moduleId, type: s.type, severity: s.severity }));
 
 const makeEsSecurityException = () => ({
   statusCode: 403,
@@ -17,40 +34,44 @@ const makeEsSecurityException = () => ({
   meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
 });
 
-const makeTestLead = (overrides: Partial<Lead> = {}): Lead => ({
-  id: 'lead-1',
-  title: 'Test Lead',
-  byline: 'Entity X has suspicious activity',
-  description: 'Detailed investigation guide',
-  entities: [{ type: 'user', name: 'admin' }],
-  tags: ['brute_force'],
-  priority: 8,
-  chatRecommendations: ['What alerts exist?', 'Check risk score history'],
-  timestamp: new Date().toISOString(),
-  staleness: 'fresh',
-  status: 'active',
-  observations: [
+const makeTestLead = (overrides: Partial<SynthesizedLead> = {}): SynthesizedLead => {
+  const entity = overrides.entity ?? { type: 'user', name: 'admin', id: 'user:admin' };
+  const observations = overrides.observations ?? [
     {
       entityId: 'user:admin',
       moduleId: 'risk_analysis',
       type: 'high_risk_score',
       score: 85,
-      severity: 'high',
+      severity: 'high' as const,
       confidence: 0.9,
       description: 'Risk score is 85',
       metadata: { scoreNorm: 85 },
     },
-  ],
-  executionUuid: '550e8400-e29b-41d4-a716-446655440000',
-  sourceType: 'adhoc',
-  ...overrides,
-});
+  ];
+  const timestamp = overrides.timestamp ?? new Date().toISOString();
+
+  return {
+    id: 'lead-1',
+    title: 'Test Lead',
+    byline: 'Entity X has suspicious activity',
+    description: 'Detailed investigation guide',
+    tags: ['brute_force'],
+    priority: 8,
+    chatRecommendations: ['What alerts exist?', 'Check risk score history'],
+    staleness: 'fresh',
+    topRelatedEntities: [],
+    relatedEntityCounts: {},
+    origin: 'observations',
+    ...overrides,
+    entity: { ...entity, record: {} },
+    observations,
+    timestamp,
+  };
+};
 
 describe('LeadDataClient', () => {
   const spaceId = 'default';
-  const adhocIndex = getLeadsIndexName(spaceId, 'adhoc');
-  const scheduledIndex = getLeadsIndexName(spaceId, 'scheduled');
-  const allIndices = `${adhocIndex},${scheduledIndex}`;
+  const indexName = getLeadsIndexName(spaceId);
 
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -63,147 +84,325 @@ describe('LeadDataClient', () => {
     client = createLeadDataClient({ esClient, logger, spaceId });
   });
 
-  describe('createLeads', () => {
-    it('bulk indexes leads with snake_case fields and cleans up stale docs', async () => {
-      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
-      esClient.deleteByQuery.mockResolvedValueOnce({
-        deleted: 0,
-        failures: [],
-        timed_out: false,
-        took: 1,
-        total: 0,
-      });
+  const toCandidate = (lead: SynthesizedLead) => ({
+    lead,
+    leadId: hashEuid(lead.entity.id),
+    observations: lead.observations,
+  });
 
-      const lead = makeTestLead();
-      await client.createLeads({
-        leads: [lead],
-        executionId: 'exec-1',
-        sourceType: 'adhoc',
-      });
+  const mockExistingLead = (
+    entityKey: string,
+    existing?: { observations: readonly LeadSignal[]; status: string }
+  ) => {
+    if (!existing) {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [{ _id: entityKey, found: false }],
+      } as never);
+      return;
+    }
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          _id: entityKey,
+          found: true,
+          _source: {
+            observations: toObservationSource(existing.observations),
+            version: 1,
+            status: existing.status,
+          },
+        },
+      ],
+    } as never);
+  };
 
-      expect(esClient.bulk).toHaveBeenCalledTimes(1);
-      const [bulkCall] = esClient.bulk.mock.calls;
-      const body = bulkCall[0].body as unknown[];
+  describe('classifyLeadCandidates', () => {
+    it('returns create when no lead exists for the entity', async () => {
+      const candidate = toCandidate(makeTestLead());
+      mockExistingLead(candidate.leadId);
 
-      // Verify the index action targets the adhoc index
-      expect(body[0]).toEqual({ index: { _index: adhocIndex, _id: lead.id } });
+      const [result] = await client.classifyLeadCandidates([candidate]);
 
-      // Verify snake_case fields in the document
-      const doc = body[1] as Record<string, unknown>;
-      expect(doc.chat_recommendations).toEqual(lead.chatRecommendations);
-      expect(doc.execution_uuid).toBe('exec-1');
-      expect(doc.source_type).toBe('adhoc');
-      expect(doc.observations).toEqual([
-        expect.objectContaining({
-          entity_id: 'user:admin',
-          module_id: 'risk_analysis',
-        }),
-      ]);
-
-      // camelCase fields should NOT be present
-      expect(doc).not.toHaveProperty('chatRecommendations');
-      expect(doc).not.toHaveProperty('executionUuid');
-      expect(doc).not.toHaveProperty('sourceType');
-
-      // Verify stale cleanup uses snake_case execution_uuid
-      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: adhocIndex,
-          query: { bool: { must_not: [{ term: { execution_uuid: 'exec-1' } }] } },
-        })
-      );
+      expect(result.decision).toEqual({ type: 'create' });
     });
 
-    it('preserves the entity EUID (`entities[].id`) when persisting, so the correct entity flyout can be opened by id', async () => {
-      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
-      esClient.deleteByQuery.mockResolvedValueOnce({
-        deleted: 0,
-        failures: [],
-        timed_out: false,
-        took: 1,
-        total: 0,
+    it('returns "refresh" when an active lead has equal evidence', async () => {
+      const candidate = toCandidate(makeTestLead());
+      mockExistingLead(candidate.leadId, {
+        observations: candidate.observations,
+        status: 'active',
       });
 
-      const lead = makeTestLead({
-        entities: [
+      const [result] = await client.classifyLeadCandidates([candidate]);
+
+      expect(result.decision).toEqual({
+        type: 'refresh',
+        existingId: candidate.leadId,
+      });
+    });
+
+    it('classifies as "update" when an active lead escalates', async () => {
+      const base = makeTestLead();
+      const candidate = toCandidate({
+        ...base,
+        observations: [
+          ...base.observations,
           {
-            type: 'host',
-            name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-            id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+            entityId: 'user:admin',
+            moduleId: 'alert_analysis',
+            type: 'alert_spike',
+            score: 70,
+            severity: 'medium',
+            confidence: 0.8,
+            description: 'Alert volume spike',
+            metadata: {},
           },
         ],
       });
-      await client.createLeads({
-        leads: [lead],
-        executionId: 'exec-euid',
-        sourceType: 'adhoc',
+      mockExistingLead(candidate.leadId, {
+        observations: [candidate.observations[0]],
+        status: 'active',
       });
 
-      const [bulkCall] = esClient.bulk.mock.calls;
-      const body = bulkCall[0].body as unknown[];
-      const doc = body[1] as Record<string, unknown>;
-      expect(doc.entities).toEqual([
-        {
-          type: 'host',
-          name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-          id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-        },
-      ]);
+      const [result] = await client.classifyLeadCandidates([candidate]);
+
+      expect(result.decision).toEqual({
+        type: 'update',
+        existingId: candidate.leadId,
+        allowReopen: false,
+      });
     });
 
-    it('uses the scheduled index when sourceType is scheduled', async () => {
+    it('classifies as "skip" when a dismissed lead has equal evidence', async () => {
+      const candidate = toCandidate(makeTestLead());
+      mockExistingLead(candidate.leadId, {
+        observations: candidate.observations,
+        status: 'dismissed',
+      });
+
+      const [result] = await client.classifyLeadCandidates([candidate]);
+
+      expect(result.decision).toEqual({ type: 'skip' });
+    });
+
+    it('classifies as "update" when a dismissed lead escalates', async () => {
+      const base = makeTestLead();
+      const candidate = toCandidate({
+        ...base,
+        observations: [
+          ...base.observations,
+          {
+            entityId: 'user:admin',
+            moduleId: 'alert_analysis',
+            type: 'alert_spike',
+            score: 70,
+            severity: 'medium',
+            confidence: 0.8,
+            description: 'Alert volume spike',
+            metadata: {},
+          },
+        ],
+      });
+      mockExistingLead(candidate.leadId, {
+        observations: [candidate.observations[0]],
+        status: 'dismissed',
+      });
+
+      const [result] = await client.classifyLeadCandidates([candidate]);
+
+      expect(result.decision).toEqual({
+        type: 'update',
+        existingId: candidate.leadId,
+        allowReopen: true,
+      });
+    });
+
+    it('classifies as "skip" when a dismissed lead has decayed evidence', async () => {
+      const candidate = toCandidate(makeTestLead());
+      mockExistingLead(candidate.leadId, {
+        observations: [
+          ...candidate.observations,
+          { moduleId: 'anomaly_detection', type: 'ml_anomaly', severity: 'high' },
+        ],
+        status: 'dismissed',
+      });
+
+      const [result] = await client.classifyLeadCandidates([candidate]);
+
+      expect(result.decision).toEqual({ type: 'skip' });
+    });
+
+    it('returns no decisions for an empty candidate list', async () => {
+      await expect(client.classifyLeadCandidates([])).resolves.toEqual([]);
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('re-throws when the lookup returns security_exception', async () => {
+      const securityException = makeEsSecurityException();
+      esClient.mget.mockRejectedValueOnce(securityException);
+
+      await expect(client.classifyLeadCandidates([toCandidate(makeTestLead())])).rejects.toBe(
+        securityException
+      );
+    });
+  });
+
+  describe('persistLeads', () => {
+    it('does not write when there are no actions', async () => {
+      const result = await client.persistLeads({
+        executionId: 'exec-empty',
+        sourceType: 'adhoc',
+        timestamp: new Date().toISOString(),
+        refreshes: [],
+        creates: [],
+        updates: [],
+      });
+
+      expect(result).toBe(0);
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('reconciles the index mapping even when the index already exists', async () => {
+      const lead = makeTestLead();
       esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
-      esClient.deleteByQuery.mockResolvedValueOnce({
-        deleted: 0,
-        failures: [],
-        timed_out: false,
-        took: 1,
-        total: 0,
+
+      await client.persistLeads({
+        executionId: 'exec-mapping',
+        sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        refreshes: [],
+        creates: [lead],
+        updates: [],
       });
 
-      await client.createLeads({
-        leads: [makeTestLead()],
-        executionId: 'exec-2',
-        sourceType: 'scheduled',
+      expect(mockCreateIndex).toHaveBeenCalled();
+    });
+
+    it('handles leads creation successfully', async () => {
+      const lead = makeTestLead();
+      const entityKey = hashEuid(lead.entity.id);
+      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
+
+      const result = await client.persistLeads({
+        executionId: 'exec-1',
+        sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        refreshes: [],
+        creates: [lead],
+        updates: [],
       });
 
-      const [bulkCall] = esClient.bulk.mock.calls;
-      const body = bulkCall[0].body as unknown[];
-      expect((body[0] as Record<string, unknown>).index).toEqual(
-        expect.objectContaining({ _index: scheduledIndex })
+      expect(result).toBe(0);
+      const body = esClient.bulk.mock.calls[0][0].body as unknown[];
+      expect(body[0]).toEqual(
+        expect.objectContaining({
+          update: expect.objectContaining({ _index: indexName, _id: entityKey }),
+        })
       );
     });
 
-    it('skips bulk indexing when leads array is empty but still cleans up stale docs', async () => {
-      esClient.deleteByQuery.mockResolvedValueOnce({
-        deleted: 2,
-        failures: [],
-        timed_out: false,
-        took: 1,
-        total: 2,
+    it('converts topRelatedEntities to snake_case script params on create', async () => {
+      const lead = makeTestLead({
+        topRelatedEntities: [
+          {
+            id: 'host:web-01',
+            type: 'host',
+            name: 'web-01',
+            kinds: ['administers'],
+            riskLevel: 'High',
+            criticality: 'extreme_impact',
+            interactedWithAtLeast: 4,
+          },
+        ],
+        relatedEntityCounts: { administers: 1 },
       });
+      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
 
-      await client.createLeads({
-        leads: [],
-        executionId: 'exec-3',
+      await client.persistLeads({
+        executionId: 'exec-related',
         sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        refreshes: [],
+        creates: [lead],
+        updates: [],
       });
 
-      expect(esClient.bulk).not.toHaveBeenCalled();
-      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      const body = esClient.bulk.mock.calls[0][0].body as Array<Record<string, unknown>>;
+      const script = body[1].script as { params: Record<string, unknown> };
+      expect(script.params.top_related_entities).toEqual([
+        {
+          id: 'host:web-01',
+          type: 'host',
+          name: 'web-01',
+          kinds: ['administers'],
+          risk_level: 'High',
+          criticality: 'extreme_impact',
+          interacted_with_at_least: 4,
+        },
+      ]);
+      expect(script.params.related_entity_counts).toEqual([{ kind: 'administers', count: 1 }]);
     });
 
-    it('logs a warning and does not throw on persistence failure', async () => {
+    it('returns the failed item count when bulk has errors', async () => {
+      const leadOk = makeTestLead({
+        entity: { type: 'user', name: 'a', id: 'user:a', record: {} },
+      });
+      const leadFail = makeTestLead({
+        entity: { type: 'user', name: 'b', id: 'user:b', record: {} },
+      });
+      const okKey = hashEuid(leadOk.entity.id);
+      const failKey = hashEuid(leadFail.entity.id);
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: true,
+        took: 1,
+        items: [
+          {
+            update: {
+              _id: okKey,
+              _index: indexName,
+              status: 200,
+            },
+          },
+          {
+            update: {
+              _id: failKey,
+              _index: indexName,
+              status: 500,
+              error: { type: 'illegal_argument_exception', reason: 'boom' },
+            },
+          },
+        ],
+      });
+
+      const result = await client.persistLeads({
+        executionId: 'exec-partial',
+        sourceType: 'adhoc',
+        timestamp: leadOk.timestamp,
+        refreshes: [],
+        creates: [leadOk, leadFail],
+        updates: [],
+      });
+
+      expect(result).toBe(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Bulk update had 1/2 failures')
+      );
+    });
+
+    it('returns the action count and does not throw when bulk fails', async () => {
       esClient.bulk.mockRejectedValueOnce(new Error('ES unavailable'));
 
-      await expect(
-        client.createLeads({
-          leads: [makeTestLead()],
-          executionId: 'exec-4',
-          sourceType: 'adhoc',
-        })
-      ).resolves.toBeUndefined();
+      const lead = makeTestLead();
+      const result = await client.persistLeads({
+        executionId: 'exec-throw',
+        sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        refreshes: [],
+        creates: [lead],
+        updates: [],
+      });
 
+      expect(result).toBe(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to persist leads'));
     });
 
@@ -212,10 +411,13 @@ describe('LeadDataClient', () => {
       esClient.bulk.mockRejectedValueOnce(securityException);
 
       await expect(
-        client.createLeads({
-          leads: [makeTestLead()],
-          executionId: 'exec-5',
+        client.persistLeads({
+          executionId: 'exec-403',
           sourceType: 'adhoc',
+          timestamp: new Date().toISOString(),
+          refreshes: [],
+          creates: [makeTestLead()],
+          updates: [],
         })
       ).rejects.toBe(securityException);
 
@@ -224,13 +426,13 @@ describe('LeadDataClient', () => {
   });
 
   describe('findLeads', () => {
-    it('queries both indices with pagination and transforms response to camelCase', async () => {
+    it('queries the index with pagination and transforms response to camelCase', async () => {
       const esDoc = {
         id: 'lead-1',
         title: 'Test Lead',
         byline: 'Entity X',
         description: 'Details',
-        entities: [{ type: 'user', name: 'admin' }],
+        entity: { type: 'user', name: 'admin', id: 'user:admin' },
         tags: ['brute_force'],
         priority: 8,
         chat_recommendations: ['Question 1'],
@@ -251,12 +453,16 @@ describe('LeadDataClient', () => {
         ],
         execution_uuid: 'exec-uuid',
         source_type: 'adhoc',
+        created_at: '2026-03-10T00:00:00.000Z',
+        changed_at: '2026-03-10T00:00:00.000Z',
+        version: 1,
+        content_hash: 'abc123',
       };
 
       esClient.search.mockResolvedValueOnce({
         hits: {
           total: { value: 1, relation: 'eq' },
-          hits: [{ _source: esDoc, _id: 'lead-1', _index: adhocIndex }],
+          hits: [{ _source: esDoc, _id: 'lead-1', _index: indexName }],
         },
       } as never);
 
@@ -264,7 +470,7 @@ describe('LeadDataClient', () => {
 
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: allIndices,
+          index: indexName,
           size: 10,
           from: 0,
           track_total_hits: true,
@@ -272,32 +478,28 @@ describe('LeadDataClient', () => {
       );
 
       expect(result.total).toBe(1);
-      expect(result.page).toBe(1);
-      expect(result.perPage).toBe(10);
       expect(result.leads).toHaveLength(1);
 
-      // Verify camelCase transformation
       const lead = result.leads[0];
       expect(lead.chatRecommendations).toEqual(['Question 1']);
       expect(lead.executionUuid).toBe('exec-uuid');
       expect(lead.sourceType).toBe('adhoc');
       expect(lead.observations[0].entityId).toBe('user:admin');
-      expect(lead.observations[0].moduleId).toBe('risk_analysis');
+      expect(lead.version).toBe(1);
+      expect(lead.changedAt).toBe('2026-03-10T00:00:00.000Z');
     });
 
-    it('reads the entity EUID (`entities[].id`) back from the stored document', async () => {
+    it('reads the entity EUID (`entity.id`) back from the stored document', async () => {
       const esDoc = {
         id: 'lead-euid',
         title: 'Test Lead',
         byline: 'Entity X',
         description: 'Details',
-        entities: [
-          {
-            type: 'host',
-            name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-            id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-          },
-        ],
+        entity: {
+          type: 'host',
+          name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+          id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+        },
         tags: [],
         priority: 8,
         chat_recommendations: [],
@@ -307,24 +509,118 @@ describe('LeadDataClient', () => {
         observations: [],
         execution_uuid: 'exec-uuid',
         source_type: 'adhoc',
+        created_at: '2026-03-10T00:00:00.000Z',
+        changed_at: '2026-03-10T00:00:00.000Z',
+        version: 1,
+        content_hash: 'hash',
       };
 
       esClient.search.mockResolvedValueOnce({
         hits: {
           total: { value: 1, relation: 'eq' },
-          hits: [{ _source: esDoc, _id: 'lead-euid', _index: adhocIndex }],
+          hits: [{ _source: esDoc, _id: 'lead-euid', _index: indexName }],
         },
       } as never);
 
       const result = await client.findLeads({ page: 1, perPage: 10 });
 
-      expect(result.leads[0].entities).toEqual([
+      expect(result.leads[0].entity).toEqual({
+        type: 'host',
+        name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+        id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+      });
+    });
+
+    it('converts top_related_entities back to camelCase', async () => {
+      const esDoc = {
+        id: 'lead-related',
+        title: 'Test Lead',
+        byline: 'Entity X',
+        description: 'Details',
+        entity: { type: 'user', name: 'admin', id: 'user:admin' },
+        tags: [],
+        priority: 8,
+        chat_recommendations: [],
+        timestamp: new Date().toISOString(),
+        staleness: 'fresh',
+        status: 'active',
+        observations: [],
+        top_related_entities: [
+          {
+            id: 'host:web-01',
+            type: 'host',
+            name: 'web-01',
+            kinds: ['administers'],
+            risk_level: 'High',
+            criticality: 'extreme_impact',
+            interacted_with_at_least: 4,
+          },
+        ],
+        related_entity_counts: [{ kind: 'administers', count: 1 }],
+        execution_uuid: 'exec-uuid',
+        source_type: 'adhoc',
+        created_at: '2026-03-10T00:00:00.000Z',
+        changed_at: '2026-03-10T00:00:00.000Z',
+        version: 1,
+        content_hash: 'hash-related',
+      };
+
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _source: esDoc, _id: 'lead-related', _index: indexName }],
+        },
+      } as never);
+
+      const result = await client.findLeads({ page: 1, perPage: 10 });
+
+      expect(result.leads[0].topRelatedEntities).toEqual([
         {
+          id: 'host:web-01',
           type: 'host',
-          name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-          id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+          name: 'web-01',
+          kinds: ['administers'],
+          riskLevel: 'High',
+          criticality: 'extreme_impact',
+          interactedWithAtLeast: 4,
         },
       ]);
+      expect(result.leads[0].relatedEntityCounts).toEqual({ administers: 1 });
+    });
+
+    it('defaults topRelatedEntities to [] for leads persisted before the field existed', async () => {
+      const esDoc = {
+        id: 'lead-legacy',
+        title: 'Test Lead',
+        byline: 'Entity X',
+        description: 'Details',
+        entity: { type: 'user', name: 'admin', id: 'user:admin' },
+        tags: [],
+        priority: 8,
+        chat_recommendations: [],
+        timestamp: new Date().toISOString(),
+        staleness: 'fresh',
+        status: 'active',
+        observations: [],
+        execution_uuid: 'exec-uuid',
+        source_type: 'adhoc',
+        created_at: '2026-03-10T00:00:00.000Z',
+        changed_at: '2026-03-10T00:00:00.000Z',
+        version: 1,
+        content_hash: 'hash-legacy',
+      };
+
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _source: esDoc, _id: 'lead-legacy', _index: indexName }],
+        },
+      } as never);
+
+      const result = await client.findLeads({ page: 1, perPage: 10 });
+
+      expect(result.leads[0].topRelatedEntities).toEqual([]);
+      expect(result.leads[0].relatedEntityCounts).toEqual({});
     });
 
     it('applies status filter when provided', async () => {
@@ -335,7 +631,6 @@ describe('LeadDataClient', () => {
       await client.findLeads({ status: 'dismissed' });
 
       const searchCall = esClient.search.mock.calls[0];
-      expect(searchCall).toBeDefined();
       expect((searchCall[0] as Record<string, unknown>).query).toEqual({
         bool: { filter: [{ term: { status: 'dismissed' } }] },
       });
@@ -368,6 +663,57 @@ describe('LeadDataClient', () => {
     });
   });
 
+  describe('findLeadChanges', () => {
+    it('queries and sorts by changed_at', async () => {
+      esClient.search.mockResolvedValueOnce({
+        hits: { hits: [] },
+      } as never);
+
+      await client.findLeadChanges({});
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ changed_at: { order: 'asc' } }, { id: { order: 'asc' } }],
+          query: { range: { changed_at: expect.any(Object) } },
+        })
+      );
+    });
+
+    it('returns a null cursor when the page is empty and no cursor was provided', async () => {
+      esClient.search.mockResolvedValueOnce({
+        hits: { hits: [] },
+      } as never);
+
+      const result = await client.findLeadChanges({});
+
+      expect(result).toEqual({ changed: [], cursor: null, hasMore: false });
+    });
+
+    it('echoes the incoming cursor when the page is empty', async () => {
+      const incoming = encodeCursor(1_700_000_000_000, 'lead-last');
+      esClient.search.mockResolvedValueOnce({
+        hits: { hits: [] },
+      } as never);
+
+      const result = await client.findLeadChanges({ cursor: incoming });
+
+      expect(result).toEqual({ changed: [], cursor: incoming, hasMore: false });
+    });
+
+    it('echoes the incoming cursor when the index does not exist', async () => {
+      const incoming = encodeCursor(1_700_000_000_000, 'lead-last');
+      esClient.search.mockRejectedValueOnce({
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception', reason: 'no such index' } },
+        meta: { body: { error: { type: 'index_not_found_exception', reason: 'no such index' } } },
+      });
+
+      const result = await client.findLeadChanges({ cursor: incoming });
+
+      expect(result).toEqual({ changed: [], cursor: incoming, hasMore: false });
+    });
+  });
+
   describe('dismissLead', () => {
     it('sets status to dismissed via updateByQuery', async () => {
       esClient.updateByQuery.mockResolvedValueOnce({
@@ -383,8 +729,11 @@ describe('LeadDataClient', () => {
 
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: allIndices,
+          index: indexName,
           query: { ids: { values: ['lead-1'] } },
+          script: expect.objectContaining({
+            params: { status: 'dismissed' },
+          }),
         })
       );
     });
@@ -448,7 +797,7 @@ describe('LeadDataClient', () => {
           hits: [
             {
               _id: 'lead-1',
-              _index: adhocIndex,
+              _index: indexName,
               _source: { timestamp: '2026-03-10T00:00:00.000Z' },
             },
           ],
@@ -497,7 +846,7 @@ describe('LeadDataClient', () => {
   });
 
   describe('deleteAllLeads', () => {
-    it('deletes all docs from both indices', async () => {
+    it('deletes all docs from the index', async () => {
       esClient.deleteByQuery.mockResolvedValueOnce({
         deleted: 10,
         failures: [],
@@ -510,7 +859,7 @@ describe('LeadDataClient', () => {
 
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: allIndices,
+          index: indexName,
           query: { match_all: {} },
         })
       );

@@ -7,24 +7,37 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ContentList, ContentListProvider } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
 import { TAG_FILTER_ID } from '@kbn/content-list-provider';
+import {
+  ActionPolicyCreateOptionsPanel,
+  getCreateActionPolicyWithAgentTooltipText,
+  type ActionPolicyCreateOption,
+} from '../../../components/action_policy/create_options/action_policy_create_options_panel';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
-import { paths } from '../../../constants';
+import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT, paths } from '../../../constants';
 import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
 import { useDeleteActionPolicy } from '../../../hooks/use_delete_action_policy';
 import { useDisableActionPolicy } from '../../../hooks/use_disable_action_policy';
 import { useEnableActionPolicy } from '../../../hooks/use_enable_action_policy';
+import {
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../../hooks/use_are_agent_builder_skills_available';
+import { useNavigateToAgentBuilder } from '../../../hooks/use_navigate_to_agent_builder';
 import { useSnoozeActionPolicy } from '../../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_policy';
 import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_policy_api_key';
 import { UserCapabilities } from '../../../services/user_capabilities';
-import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_modal';
 import { ENABLED_FILTER_ID, useActionPoliciesDataSource } from '../action_policies_data_source';
+import { ActionPoliciesListHeader } from '../action_policies_list_header';
+import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_modal';
 import {
   ActionPoliciesTableContent,
   ENABLED_FILTER_OPTIONS,
@@ -51,6 +64,23 @@ const tagFieldDefinition: FieldDefinition = {
 
 const FEATURES_FIELDS: FieldDefinition[] = [enabledFieldDefinition, tagFieldDefinition];
 
+const CREATE_POLICY_OPTION_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createPolicyTitle',
+  { defaultMessage: 'Create policy' }
+);
+const CREATE_POLICY_OPTION_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createPolicyDescription',
+  { defaultMessage: 'Match alert episodes and send them to destinations.' }
+);
+const CREATE_WITH_AGENT_OPTION_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createWithAiAgentTitle',
+  { defaultMessage: 'Create with AI Agent' }
+);
+const CREATE_WITH_AGENT_OPTION_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createWithAiAgentDescription',
+  { defaultMessage: 'Set up an action policy with the help of the AI Agent.' }
+);
+
 export const ActionPoliciesTable = () => {
   const refetchRef = useRef<() => void>(() => {});
   const onRefetchReady = useCallback((refetchFn: () => void) => {
@@ -63,6 +93,16 @@ export const ActionPoliciesTable = () => {
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
+  const navigateToAgentBuilder = useNavigateToAgentBuilder(
+    CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT
+  );
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const abSkillRequirements = useAgentBuilderSkillsRequirements();
+  const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
+
+  const navigateToCreate = useCallback(() => {
+    navigateToUrl(basePath.prepend(paths.actionPolicyCreate));
+  }, [navigateToUrl, basePath]);
 
   const { mutate: createActionPolicy } = useCreateActionPolicy();
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
@@ -145,6 +185,60 @@ export const ActionPoliciesTable = () => {
 
   const itemConfig = useMemo(() => ({}), []);
 
+  const createOptions = useMemo<ActionPolicyCreateOption[]>(
+    () => [
+      {
+        id: 'create-policy',
+        iconType: 'workflow',
+        title: CREATE_POLICY_OPTION_TITLE,
+        description: CREATE_POLICY_OPTION_DESCRIPTION,
+        onClick: navigateToCreate,
+        'data-test-subj': 'createActionPolicyCard',
+      },
+      {
+        id: 'create-with-agent',
+        iconType: 'productAgent',
+        title: CREATE_WITH_AGENT_OPTION_TITLE,
+        description: CREATE_WITH_AGENT_OPTION_DESCRIPTION,
+        onClick: navigateToAgentBuilder,
+        disabled: !areAgentBuilderSkillsAvailable,
+        tooltipText: createWithAgentTooltipText,
+        'data-test-subj': 'createActionPolicyWithAgentCard',
+      },
+    ],
+    [
+      navigateToCreate,
+      navigateToAgentBuilder,
+      areAgentBuilderSkillsAvailable,
+      createWithAgentTooltipText,
+    ]
+  );
+
+  const emptyState = canWrite ? (
+    <ActionPolicyCreateOptionsPanel options={createOptions} />
+  ) : (
+    <EuiEmptyPrompt
+      iconType="documents"
+      data-test-subj="actionPoliciesListReadOnlyEmpty"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.alertingV2.actionPoliciesList.readOnlyEmptyTitle"
+            defaultMessage="No action policies"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.alertingV2.actionPoliciesList.readOnlyEmptyBody"
+            defaultMessage="There are no action policies to display."
+          />
+        </p>
+      }
+    />
+  );
+
   return (
     <>
       <ContentListProvider
@@ -183,7 +277,14 @@ export const ActionPoliciesTable = () => {
           fields: FEATURES_FIELDS,
         }}
       >
-        <ContentList>
+        <ActionPoliciesListHeader
+          canWrite={canWrite}
+          onCreatePolicy={navigateToCreate}
+          onCreateWithAgent={navigateToAgentBuilder}
+          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
+          createWithAgentTooltipText={createWithAgentTooltipText}
+        />
+        <ContentList emptyState={emptyState}>
           <ActionPoliciesTableContent
             canWrite={canWrite}
             isEnabling={isEnabling}

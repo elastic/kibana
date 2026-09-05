@@ -10,5 +10,6 @@ export * from './use_update_kuery_string';
 export * from './use_monitor';
 export * from './use_search_text';
 export * from './use_cert_status';
+export * from './use_date_format';
 export * from './use_url_params';
 export { useUptimeDataView } from '../contexts/uptime_data_view_context';

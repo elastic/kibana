@@ -12,6 +12,7 @@
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     // required plugins
     "@kbn/licensing-plugin",

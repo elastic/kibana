@@ -541,6 +541,24 @@ describe('transformAdHocRunToAdHocRunData', () => {
     );
   });
 
+  test('should carry over the UIAM externality verdict when present', () => {
+    const attributes = getMockAdHocRunAttributes();
+    attributes.uiamApiKey = 'essu_user_created_key';
+    attributes.uiamApiKeyExternal = true;
+
+    expect(
+      transformAdHocRunToAdHocRunData({
+        adHocRunSO: getBulkCreateResponse('abc', '1', attributes),
+        isSystemAction,
+      })
+    ).toEqual(
+      expect.objectContaining({
+        uiamApiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+      })
+    );
+  });
+
   test('should transform bulk create response with actions and include api key', () => {
     expect(
       transformAdHocRunToAdHocRunData({

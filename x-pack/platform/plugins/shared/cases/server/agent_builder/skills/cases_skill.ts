@@ -8,23 +8,74 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools, platformCoreCasesTools } from '@kbn/agent-builder-common';
 
-export const casesSkill = defineSkillType({
-  id: 'cases-management',
-  name: 'cases-management',
-  basePath: 'skills/platform/cases',
-  description:
-    'Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs).',
+const SKILL_DESCRIPTION =
+  'Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs).';
 
-  content: `# Cases Management
+const EXTENDED_FIELDS_SECTION = `
+## Extended fields (template fields)
+
+When the Cases templates feature is enabled, cases may have **extended fields** — structured fields defined by a global field library or per-template configuration. These are separate from and should not be confused with legacy custom fields.
+
+**Use \`set_extended_fields\` mode** (not \`set_custom_field\`) to write extended field values.
+
+Required inputs:
+- \`case_id\` — the case to update
+- \`fields\` — a \`Record<string, string>\` mapping each storage key to its new value
+
+Storage keys follow the \`<name>_as_<type>\` convention (e.g. \`priority_as_keyword\`, \`due_date_as_date\`). To discover the exact keys a case accepts, call \`GET /api/cases/{case_id}/fields\` — the response lists every applicable field with its key, label, and type.
+
+Value encoding:
+- Single-value fields (text, select, toggle, date): pass the value as a plain string (e.g. \`"high"\`, \`"2025-01-01"\`, \`"true"\`).
+- Multi-value fields (checkbox_group, user_picker): pass a JSON-encoded array string (e.g. \`"[\\"alice\\",\\"bob\\"]"\`).
+- To clear a field: pass an empty string \`""\`.
+
+Provided keys are merged into the case's existing extended fields — unlisted keys are left unchanged.
+
+Example:
+\`\`\`json
+{
+  "mode": "set_extended_fields",
+  "case_id": "abc-123",
+  "fields": {
+    "priority_as_keyword": "high",
+    "due_date_as_date": "2025-06-01"
+  }
+}
+\`\`\`
+`;
+
+const buildManageModesCell = (isTemplatesEnabled: boolean) => {
+  const base =
+    '`create`, `create_from_template`, `update`, `update_bulk`, `delete`, `assign`, `unassign`, `add_tags`, `set_custom_field`';
+  return isTemplatesEnabled ? `${base}, \`set_extended_fields\`` : base;
+};
+
+export const buildCasesSkill = (isTemplatesEnabled: boolean) =>
+  defineSkillType({
+    id: 'cases-management',
+    name: 'cases-management',
+    basePath: 'skills/platform/cases',
+    description: SKILL_DESCRIPTION,
+
+    content: `# Cases Management
 
 You have full read **and write** access to Elastic cases across Security, Observability, and Stack Management. If a user asks for any operation below, you can do it — never claim read-only access.
 
 | Tool | Operations |
 |------|------------|
-| \`${platformCoreTools.cases}\` | get by ID, bulk get, search/filter, find similar, find by alert ID |
-| \`${platformCoreCasesTools.manage}\` | \`create\`, \`create_from_template\`, \`update\`, \`update_bulk\`, \`delete\`, \`assign\`, \`unassign\`, \`add_tags\`, \`set_custom_field\` |
-| \`${platformCoreCasesTools.attachments}\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\`, \`get_all\` |
-| \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |
+| \`${
+      platformCoreTools.cases
+    }\` | get by ID, bulk get, search/filter, find similar, find by alert ID |
+| \`${platformCoreCasesTools.manage}\` | ${buildManageModesCell(isTemplatesEnabled)} |
+| \`${
+      platformCoreCasesTools.getAttachments
+    }\` | Retrieves all comments, alerts, and events for a case |
+| \`${
+      platformCoreCasesTools.manageAttachments
+    }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\` |
+| \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |${
+      isTemplatesEnabled ? EXTENDED_FIELDS_SECTION : ''
+    }
 
 ## Solution context — highest-priority rule
 
@@ -68,7 +119,9 @@ Domain note: \`assignees\` are user profile UIDs, not usernames. \`status\` flow
 
 ## Pagination
 
-\`${platformCoreTools.cases}\` search/filter: default \`perPage\` **10**, max **50**. \`similar\` mode: default **20**. Bulk-get \`case_ids\`: keep ≤ **10**. Use \`page\` (1-indexed) for more. Don't preemptively page through every result.
+\`${
+      platformCoreTools.cases
+    }\` search/filter: default \`perPage\` **10**, max **50**. \`similar\` mode: default **20**. Bulk-get \`case_ids\`: keep ≤ **10**. Use \`page\` (1-indexed) for more. Don't preemptively page through every result.
 
 ## Output: render attachments inline
 
@@ -91,25 +144,32 @@ When in doubt, render — a missing render loses information, a redundant one is
 
 ### Tools that don't emit a case attachment (no tag to emit)
 
-- \`${platformCoreCasesTools.attachments}\` mode \`get_all\` — returns the discriminated attachments array; summarize them.
+- \`${
+      platformCoreCasesTools.getAttachments
+    }\` — returns the discriminated attachments array; summarize them.
 - \`${platformCoreCasesTools.manage}\` mode \`delete\` — case is gone.
 - \`${platformCoreCasesTools.observables}\` mode \`delete\` — only IDs returned.
 
 ## Comments and discussion
 
-Cases tools return metadata only — comments and attachments are never included. To analyze discussion, call \`${platformCoreCasesTools.attachments}\` with \`mode: "get_all"\` and the case ID; filter to \`type === "user"\` for comments.
+Cases tools return metadata only — comments and attachments are never included. To analyze discussion, call \`${
+      platformCoreCasesTools.getAttachments
+    }\` with the case ID; filter to \`type === "user"\` for comments.
 
 Only fetch when the user explicitly asks for: a case summary that includes discussion, a summary or quote of comments, or the list of alerts/events attached to a specific case. Never preemptively fetch for cases in a list.
 
 ## Adding attachments
 
-Prefer the typed modes — \`add_comment\`, \`add_alerts\`, \`add_events\` — for those specific attachment types. Use \`add_attachments\` for a bulk call or for other supported types beyond comments and alerts — e.g. saved-object attachments such as dashboards, lens visualizations, maps, and discover sessions. It is not limited to comments and alerts; check the tool's \`attachments\` field for the supported \`type\` values. Each item is discriminated by \`type\` and \`owner\` is derived from the case.
+Use \`${
+      platformCoreCasesTools.manageAttachments
+    }\` for all write operations on attachments. Prefer the typed modes — \`add_comment\`, \`add_alerts\`, \`add_events\` — for those specific attachment types. Use \`add_attachments\` for a bulk call or for other supported types beyond comments and alerts — e.g. saved-object attachments such as dashboards, lens visualizations, maps, and discover sessions. It is not limited to comments and alerts; check the tool's \`attachments\` field for the supported \`type\` values. Each item is discriminated by \`type\` and \`owner\` is derived from the case.
 `,
 
-  getRegistryTools: () => [
-    platformCoreTools.cases,
-    platformCoreCasesTools.manage,
-    platformCoreCasesTools.attachments,
-    platformCoreCasesTools.observables,
-  ],
-});
+    getRegistryTools: () => [
+      platformCoreTools.cases,
+      platformCoreCasesTools.manage,
+      platformCoreCasesTools.getAttachments,
+      platformCoreCasesTools.manageAttachments,
+      platformCoreCasesTools.observables,
+    ],
+  });

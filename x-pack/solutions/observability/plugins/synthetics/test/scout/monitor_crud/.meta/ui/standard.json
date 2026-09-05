@@ -1,8 +1,7 @@
 {
-  "sha1": "dfe23b271442b1de5d1e45cee349bde7287b001b",
+  "sha1": "e440fd61058c3b4a5243ad4ea57f45908799f866",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -11,7 +10,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/global.setup.ts",
@@ -109,12 +110,14 @@
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/filter_monitors.spec.ts",
-        "line": 19,
-        "column": 5
+        "line": 24,
+        "column": 10
       }
     },
     {
@@ -137,12 +140,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/management_list.spec.ts",
-        "line": 31,
-        "column": 7
+        "line": 37,
+        "column": 28
       }
     },
     {
@@ -151,12 +156,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/monitor_form_validation.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 27,
+        "column": 28
       }
     },
     {
@@ -165,12 +172,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/monitor_selector.spec.ts",
-        "line": 22,
-        "column": 11
+        "line": 28,
+        "column": 28
       }
     },
     {
@@ -179,12 +188,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/overview_compact_view.spec.ts",
-        "line": 14,
-        "column": 11
+        "line": 20,
+        "column": 28
       }
     },
     {
@@ -207,26 +218,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/overview_sorting.spec.ts",
-        "line": 22,
-        "column": 11
-      }
-    },
-    {
-      "id": "41a5e8b53c1a295-ec9bfa8647930ac",
-      "title": "StepDetailsPage displays step detail metrics",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/step_details.spec.ts",
         "line": 28,
-        "column": 6
+        "column": 7
       }
     }
   ]

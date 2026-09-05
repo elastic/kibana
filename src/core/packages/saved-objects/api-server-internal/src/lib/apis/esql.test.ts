@@ -90,7 +90,7 @@ describe('esql', () => {
   });
 
   it('should throw if options.namespaces is an empty array', async () => {
-    await expect(repository.esql({ ...options, namespaces: [] })).rejects.toThrowError(
+    await expect(repository.esql({ ...options, namespaces: [] })).rejects.toThrow(
       'options.namespaces cannot be an empty array'
     );
     expect(client.esql.query).not.toHaveBeenCalled();
@@ -139,13 +139,13 @@ describe('esql', () => {
   it('should throw if pipeline contains a source command', async () => {
     await expect(
       repository.esql({ ...options, pipeline: esql`FROM .kibana | LIMIT 10` })
-    ).rejects.toThrowError('options.pipeline must not contain source command "FROM"');
+    ).rejects.toThrow('options.pipeline must not contain source command "FROM"');
 
-    await expect(repository.esql({ ...options, pipeline: esql`ROW x = 1` })).rejects.toThrowError(
+    await expect(repository.esql({ ...options, pipeline: esql`ROW x = 1` })).rejects.toThrow(
       'options.pipeline must not contain source command "ROW"'
     );
 
-    await expect(repository.esql({ ...options, pipeline: esql`SHOW INFO` })).rejects.toThrowError(
+    await expect(repository.esql({ ...options, pipeline: esql`SHOW INFO` })).rejects.toThrow(
       'options.pipeline must not contain source command "SHOW"'
     );
 

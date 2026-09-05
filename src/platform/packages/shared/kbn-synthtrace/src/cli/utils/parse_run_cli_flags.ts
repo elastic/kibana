@@ -37,6 +37,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
     'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_service_multi_env_otel_migration.ts',
   apm_service_overlapping_otel_metrics:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_service_overlapping_otel_metrics.ts',
+  apm_view_in_app_truncation:
+    'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_view_in_app_truncation.ts',
   aws_lambda: 'x-pack/solutions/observability/plugins/apm/test/scenarios/aws_lambda.ts',
   azure_functions: 'x-pack/solutions/observability/plugins/apm/test/scenarios/azure_functions.ts',
   cloud_services_icons:
@@ -70,6 +72,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
   infra_k8s_containers:
     'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_k8s_containers.ts',
   infra_k8s_pods: 'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_k8s_pods.ts',
+  infra_metrics_explorer_negative_domain:
+    'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_metrics_explorer_negative_domain.ts',
   kafka_topics: 'x-pack/solutions/observability/plugins/apm/test/scenarios/kafka_topics.ts',
   kubernetes_logs: 'x-pack/platform/plugins/shared/streams/test/scenarios/kubernetes_logs.ts',
   low_throughput: 'x-pack/solutions/observability/plugins/apm/test/scenarios/low_throughput.ts',

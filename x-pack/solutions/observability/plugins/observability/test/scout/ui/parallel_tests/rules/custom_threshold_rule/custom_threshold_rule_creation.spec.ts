@@ -10,9 +10,10 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
 import { deleteRuleByName } from '../../../fixtures/helpers';
 
+// Excluding MKI runs due to consistent failures. See https://github.com/elastic/kibana/issues/273845
 test.describe(
   'Custom Threshold Rule - Full creation flow',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
   () => {
     const AD_HOC_DATA_VIEW_PATTERN = '.alerts-*';
     let testRuleName: string;

@@ -13,8 +13,8 @@ import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/ui-app-header';
 import { useBasePath, useCanAccessIntegrations } from './chrome';
-import { APP_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   label: i18n.translate('core.chrome.appHeader.addIntegrationsMenuItemLabel', {

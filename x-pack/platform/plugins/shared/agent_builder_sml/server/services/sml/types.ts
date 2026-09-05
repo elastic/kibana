@@ -16,36 +16,41 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { SmlSearchFilters, SmlSearchConstraints } from '../../../common/http_api/sml';
 
 /**
- * One entry in {@link SmlEntry.discovery_labels}. `value` is what the autocomplete
- * matches against; `kind` describes how the UI should render the matched label.
+ * Returned by SmlTypeDefinition.getPermissions hooks: RAW Kibana action strings.
  *
- * `kind` is open (free-form keyword at the ES level). The indexer auto-prepends
- * entries with `kind: 'title'` and `kind: 'type'` derived from the entry's title
- * and type fields. Producers can add additional entries with any kind (e.g.
- * 'tagline', 'nickname', 'category', 'synonym') — the UI decides how to render
- * each kind.
+ * A list, not a single action: a type may require several, in which case the caller must hold
+ * ALL of them within one space. Deliberately NOT shaped like {@link SmlPermissions} — that one is
+ * an array of per-space groups, and keeping the two structurally distinct is what stops "list of
+ * actions" being mistaken for "list of spaces". The indexer converts between them.
  */
-interface DiscoveryLabel {
-  value: string;
-  kind: string;
+export interface SmlPermissionsInput {
+  kibana: { privileges: { name: string[] } };
 }
 
 /**
- * A single Kibana feature privilege required to access an entry
- * (e.g., `saved_object:lens/get`, `action:execute`).
+ * One space's slice of an SML document's access requirements.
+ *
+ * `name` holds bare Kibana action strings; `space` is the single space this group
+ * applies to; `count` is how many actions THIS space requires, used as the
+ * `minimum_should_match_field` of the ES-side `terms_set` clause.
  */
-interface SmlKibanaPrivilege {
-  name: string;
+export interface SmlKibanaPrivilegeGroup {
+  space: string;
+  name: string[];
+  count: number;
 }
 
 /**
- * Permissions required to access an entry.
+ * Permissions required to access an entry, grouped by space.
  *
- * The `kibana` sub-object is always present (with a possibly-empty array)
- * on stored documents to keep the schema rigid and predictable.
+ * Semantics are OR across spaces, AND across actions within a space. Grouping is what makes that
+ * expressible — a caller must satisfy one whole group to see the document, and matches cannot
+ * accumulate across groups.
+ *
+ * Mirrors the Elasticsearch-side contract in `AiIndexImplicitPrivilegesProvider`.
  */
 export interface SmlPermissions {
-  kibana: { privileges: SmlKibanaPrivilege[] };
+  kibana: { privileges: SmlKibanaPrivilegeGroup[] };
 }
 
 /**
@@ -64,11 +69,6 @@ export interface SmlEntry {
   description?: string;
   /** Free-form labels for filtering and discovery */
   tags?: string[];
-  /**
-   * Categorical / nickname terms that make this record discoverable beyond `type`
-   * and `title`. Each label carries a `kind` so the UI can render it appropriately.
-   */
-  discovery_labels?: DiscoveryLabel[];
   /**
    * Type-specific structured data. Stored as `flattened` so leaves are
    * keyword-searchable for sub-path filtering. SML treats this opaquely;
@@ -144,29 +144,30 @@ export interface SmlTypeDefinition {
   ) => Promise<AttachmentInput<string, unknown> | undefined>;
 
   /**
-   * Compute the {@link SmlPermissions} that gate access to the entry for the
-   * given `originId`. Called by the indexer for every entry it stamps.
+   * Compute the raw Kibana actions ({@link SmlPermissionsInput}) that gate access to the entry
+   * for the given `originId`. Called by the indexer for every entry it stamps.
    *
-   * Authoritative when defined. `SmlEntry` does not carry a `permissions`
-   * field. Types that need permission shapes the built-in helpers do not
-   * cover should still implement this directly (returning a fully-shaped
-   * {@link SmlPermissions}).
+   * Returns actions only — the indexer owns the stored shape, grouping them per space into
+   * {@link SmlPermissions}. Implementations never construct that shape themselves.
+   *
+   * Authoritative when defined. `SmlEntry` does not carry a `permissions` field.
    *
    * Omit when the type wraps a resource that is intentionally public within
    * the space (e.g. taxonomy entries, public schema docs). The indexer then
-   * stamps an empty `SmlPermissions`, which the read-path security filter
-   * treats as "no privileges required". A type that wraps a sensitive
-   * resource MUST implement this hook — there is no other way to attach an
-   * access-control gate to its entry.
+   * stamps one `count: 0` privilege element per space, which the read-path
+   * security filter treats as "no actions required" — the entry stays space
+   * scoped but is visible to every caller in those spaces. A type that wraps a
+   * sensitive resource MUST implement this hook.
    *
-   * For Kibana saved-object-backed types, prefer the
-   * `kibanaSavedObjectPermissions` helper over hand-writing the privilege
-   * string.
+   * Prefer the `kibanaPermissions` helper over hand-writing the action string. Its `kiType` MUST
+   * match the KI type the owning feature declares in `aiIndex: { read: [...] }` — which is the
+   * SML type id (KI type id). A mismatch produces an action no feature privilege ever grants,
+   * silently hiding every entry of the type from every user.
    */
   getPermissions?: (
     originId: string,
     context: SmlContext
-  ) => Promise<SmlPermissions> | SmlPermissions;
+  ) => Promise<SmlPermissionsInput> | SmlPermissionsInput;
 
   /**
    * Optional: custom crawl interval for the crawler.
@@ -212,12 +213,6 @@ export interface SmlDocument {
   description?: string;
   /** Free-form labels */
   tags?: string[];
-  /**
-   * Categorical / nickname terms beyond `type` and `title`.
-   * Nested entries `{ value, kind }`; `value.autocomplete` is the SAYT subfield
-   * that powers the @ menu, and `kind` drives UI badge rendering.
-   */
-  discovery_labels?: DiscoveryLabel[];
   /** Type-specific structured data (`flattened` mapping) */
   extended_attrs?: Record<string, unknown>;
   /** Owner or last-modifier user id */
@@ -228,11 +223,8 @@ export interface SmlDocument {
   created_at: string;
   /** Timestamp when last updated */
   updated_at: string;
-  /** Space IDs this item belongs to */
-  spaces: string[];
   /**
-   * Permissions required to access the underlying element. Always present
-   * on stored documents; the inner privileges array may be empty.
+   * Permissions required to access this entry. See {@link SmlPermissions} for the per-space group shape.
    */
   permissions: SmlPermissions;
   /** How this entry was produced. */
@@ -249,8 +241,8 @@ export interface SmlDocument {
  * in their response shape.
  *
  * Optional fields (`content`, `description`, `tags`, `references`) are omitted
- * when the caller passes a `fields` array that excludes them. `spaces` and
- * `permissions` are internal pipeline details — not present in results.
+ * when the caller passes a `fields` array that excludes them. `permissions` is
+ * an internal pipeline detail — not present in results.
  */
 export interface SmlSearchResult {
   id: string;
@@ -261,46 +253,18 @@ export interface SmlSearchResult {
   description?: string;
   references?: Array<{ uri: string }>;
   tags?: string[];
-  spaces?: string[];
-  permissions?: SmlPermissions;
-}
-
-/**
- * One `discovery_labels` nested entry that matched an autocomplete prefix query.
- * Surfaced via `inner_hits`.
- */
-export interface MatchedDiscoveryLabel {
-  value: string;
-  kind: string;
-  /**
-   * The matched span within `value`, wrapped in `<em>...</em>` tags. Present
-   * when ES returned a highlight snippet for this inner hit; absent if not.
-   * Example: typed prefix `"git"` against value `"github"` produces `"<em>git</em>hub"`.
-   */
-  highlighted?: string;
 }
 
 /**
  * An SML autocomplete result — narrower than {@link SmlSearchResult}, tuned for
  * @ menu / typeahead rendering. Drops bulk content (`content`, `description`,
- * `extended_attrs`, etc.) and surfaces per-row provenance.
+ * `extended_attrs`, etc.).
  */
 export interface SmlAutocompleteResult {
   id: string;
   type: string;
   title: string;
   origin: { uri: string };
-  /** Used server-side for permission filtering; not exposed in the HTTP response. */
-  permissions: SmlPermissions;
-  /** Used server-side for space filtering; not exposed in the HTTP response. */
-  spaces: string[];
-  /**
-   * The specific `discovery_labels` entries that matched the typed prefix.
-   * `kind` lets the UI render each label appropriately — e.g. for a hit on the
-   * record's title vs. on a producer-supplied tagline, the UI can decide whether
-   * (and how) to surface the matched span.
-   */
-  matched_discovery_labels?: MatchedDiscoveryLabel[];
 }
 
 /**
@@ -422,12 +386,16 @@ export interface SmlIndexerDeleteAttachmentParams {
   originId: string;
   attachmentType: string;
   /**
-   * Space-isolation guard. `deleteEntry` filters by
-   * `{ terms: { spaces: [...spaces, '*'] } }` so only an entry whose stored
-   * `spaces` array contains one of the provided IDs (or the global wildcard
-   * `'*'`) is removed. See type-level `@remarks` for the full contract.
+   * Space-isolation guard. `deleteEntry` filters by a nested query on
+   * `permissions.kibana.privileges.space` so only an entry whose privileges
+   * contain one of the provided space IDs (or the global wildcard `'*'`) is
+   * removed. NOTE: this is a whole-doc guard — a multi-space doc is fully
+   * deleted if it matches any provided space.
+   *
+   * Omit (or pass an empty array) for global deletes (e.g. crawler origin-mode
+   * rewrites where the caller controls all spaces).
    */
-  spaces: string[];
+  spaces?: string[];
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
   logger: Logger;
@@ -461,7 +429,7 @@ export interface SmlService {
     /**
      * Optional fields to include beyond the baseline (`id`, `type`, `title`,
      * `description`). Valid opt-in values: `'content'`, `'tags'`,
-     * `'references'`, `'spaces'`, `'permissions'`.
+     * `'references'`.
      */
     fields?: string[];
     /** Runtime-imposed per-type id-allowlist constraints. See {@link SmlSearchConstraints}. */
@@ -471,13 +439,13 @@ export interface SmlService {
   }) => Promise<{ results: SmlSearchResult[] }>;
 
   /**
-   * Autocomplete / typeahead against the SML index. A single nested
-   * `multi_match bool_prefix operator: and` against `discovery_labels.value`
-   * (search_as_you_type) and its `_2gram` / `_3gram` subfields. Returns per-row
-   * provenance for UI badges. Filters by space and permissions the same way
-   * as `search`, and accepts the same per-type `constraints` and caller-supplied
-   * `filters` so a specialized UI picker (e.g. connectors-only or dashboards-only
-   * @ menu) can restrict results without any LLM involvement.
+   * Autocomplete / typeahead against the SML index. A `match_bool_prefix
+   * operator: and` against `title`, combined with a `prefix` clause on `type`
+   * so a "type/title" query matches each half against its own field. Filters by
+   * space and permissions the same way as `search`, and accepts the same
+   * per-type `constraints` and caller-supplied `filters` so a specialized UI
+   * picker (e.g. connectors-only or dashboards-only @ menu) can restrict
+   * results without any LLM involvement.
    */
   autocomplete: (params: {
     query: string;

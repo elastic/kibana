@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/282287
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-12
-- product: kibana
-title: Fix unclear errors when using organization-level API keys for rules
-description: "Creating or enabling an alerting rule with an organization-level API key now returns a clear 400 error explaining that organization-level API keys are not supported for rule operations, instead of a generic parse failure."

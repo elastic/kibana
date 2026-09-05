@@ -12,6 +12,13 @@ import type {
   SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 
+export type ConversationTemplateResolver = (templateId: string) => ConversationTemplate | undefined;
+
+interface ConversationWithMaybeMetadata {
+  template_id?: string;
+  metadata?: unknown;
+}
+
 /** Converts a domain metadata value to its ES `flattened` storage form. TEXT_ARRAY → string[]; everything else → String(value). */
 export const serializeMetadataValue = (
   value: MetadataFieldValue,
@@ -57,3 +64,36 @@ export const deserializeMetadata = (
   }
   return result;
 };
+
+/** Applies `deserializeMetadata` when a matching template can be resolved. */
+export const withDeserializedMetadata = <T extends object>(
+  conversation: T & ConversationWithMaybeMetadata,
+  resolveTemplate: ConversationTemplateResolver
+): T => {
+  if (!conversation.template_id || !conversation.metadata) return conversation;
+
+  const template = resolveTemplate(conversation.template_id);
+  if (!template) return conversation;
+
+  return {
+    ...conversation,
+    metadata: deserializeMetadata(
+      conversation.metadata as Record<string, SerializedMetadataValue>,
+      template
+    ),
+  } as T;
+};
+
+/** Builds serialized metadata defaults from a template definition. */
+export const buildMetadataFromTemplate = (
+  template: ConversationTemplate
+): Record<string, SerializedMetadataValue> =>
+  Object.entries(template.fields).reduce<Record<string, SerializedMetadataValue>>(
+    (acc, [fieldName, def]) => {
+      if (def.default_value !== undefined) {
+        acc[fieldName] = serializeMetadataValue(def.default_value, def.input_type);
+      }
+      return acc;
+    },
+    {}
+  );

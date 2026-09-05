@@ -10,6 +10,7 @@
     "public/**/*",
     "server/**/*",
     "test/scout/**/*",
+    "test/scout_synthetics_agent_e2e/**/*",
     "test/scenarios/**/*",
     "../../../../../typings/**/*"
   ],
@@ -133,7 +134,11 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/zod-helpers",
     "@kbn/core-spaces-common",
-    "@kbn/expect"
+    "@kbn/expect",
+    "@kbn/cps",
+    "@kbn/cps-utils",
+    "@kbn/cps-server-utils",
+    "@kbn/observability-utils-server"
   ],
   "exclude": ["target/**/*"]
 }

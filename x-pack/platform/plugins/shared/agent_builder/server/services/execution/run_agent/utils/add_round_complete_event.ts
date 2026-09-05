@@ -16,14 +16,9 @@ import type {
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
-  ReasoningStep,
-  ToolCallStep,
-  ToolProgressEvent,
-  ToolResultEvent,
   RuntimeAgentConfigurationOverrides,
-  CompactionStep,
   BackgroundAgentCompleteEvent,
-  BackgroundAgentCompleteStep,
+  SubagentRosterUpdatedEvent,
   TodosStep,
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
@@ -46,6 +41,8 @@ import {
   isReasoningEvent,
   isToolCallStep,
   isBackgroundAgentCompleteEvent,
+  isSubagentRosterUpdatedEvent,
+  createSubagentRosterUpdatedStep,
   isToolUiEvent,
   carriedOverTodos,
   TODOS_UPDATED_UI_EVENT,
@@ -54,7 +51,6 @@ import {
   isUserQuestionAnsweredEvent,
   isAskUserQuestionStep,
   createAskUserQuestionStep,
-  createRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -72,6 +68,12 @@ import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
 import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
 import { formatAttachmentsMetadata } from './attachment_presentation';
+import {
+  createPreExecutionSteps,
+  createBackgroundAgentStep,
+  createReasoningStep,
+  createToolCallStep,
+} from './round_steps';
 
 type SourceEvents = ConvertedEvents;
 
@@ -79,6 +81,7 @@ type StepEvents =
   | ReasoningEvent
   | ToolCallEvent
   | BackgroundAgentCompleteEvent
+  | SubagentRosterUpdatedEvent
   | UserQuestionAskedEvent;
 
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
@@ -86,6 +89,7 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
     isReasoningEvent(event) ||
     isToolCallEvent(event) ||
     isBackgroundAgentCompleteEvent(event) ||
+    isSubagentRosterUpdatedEvent(event) ||
     isUserQuestionAskedEvent(event)
   );
 };
@@ -421,6 +425,9 @@ const createRound = ({
     if (isBackgroundAgentCompleteEvent(event)) {
       return [createBackgroundAgentStep(event)];
     }
+    if (isSubagentRosterUpdatedEvent(event)) {
+      return [createSubagentRosterUpdatedStep({ roster: event.data.roster })];
+    }
     if (isUserQuestionAskedEvent(event)) {
       return [
         createAskUserQuestionStep({
@@ -445,25 +452,10 @@ const createRound = ({
     ? thinkingCompleteEvent.data.time_to_first_token
     : timeToLastToken;
 
-  const steps: ConversationRoundStep[] = [];
-
-  if (compactionResult?.compactionTriggered && compactionResult.summary) {
-    const compactionStep: CompactionStep = {
-      type: ConversationRoundStepType.compaction,
-      token_count_before: compactionResult.tokensBefore ?? 0,
-      token_count_after: compactionResult.tokensAfter ?? 0,
-      summarized_round_count: compactionResult.summary.summarized_round_count,
-    };
-    steps.push(compactionStep);
-  }
-
-  // Relevant-skills step is placed before the event-derived steps so, on replay, its notification
-  // renders right after the round's user input and before the round's tool calls.
-  if (relevantSkillsSelection && relevantSkillsSelection.skills.length > 0) {
-    steps.push(
-      createRelevantSkillsStep({ skills: relevantSkillsSelection.skills, source: 'implicit' })
-    );
-  }
+  const steps: ConversationRoundStep[] = createPreExecutionSteps({
+    compactionResult,
+    relevantSkillsSelection,
+  });
 
   steps.push(...stepEvents.flatMap(eventToStep));
 
@@ -508,49 +500,6 @@ const createRound = ({
   };
 
   return round;
-};
-
-const createReasoningStep = (event: ReasoningEvent): ReasoningStep => {
-  return {
-    type: ConversationRoundStepType.reasoning,
-    reasoning: event.data.reasoning,
-    tool_call_id: event.data.tool_call_id,
-    tool_call_group_id: event.data.tool_call_group_id,
-  };
-};
-
-const createBackgroundAgentStep = (
-  event: BackgroundAgentCompleteEvent
-): BackgroundAgentCompleteStep => {
-  return {
-    type: ConversationRoundStepType.backgroundAgentComplete,
-    ...event.data.execution,
-  };
-};
-
-const createToolCallStep = ({
-  toolCall,
-  toolResult,
-  toolProgress,
-}: {
-  toolCall: ToolCallEvent;
-  toolProgress: ToolProgressEvent[];
-  toolResult?: ToolResultEvent;
-}): ToolCallStep => {
-  return {
-    type: ConversationRoundStepType.toolCall,
-    tool_id: toolCall.data.tool_id,
-    params: toolCall.data.params,
-    tool_call_id: toolCall.data.tool_call_id,
-    progression: toolProgress.map(({ data: { message, metadata } }) => ({
-      message,
-      metadata,
-    })),
-    results: toolResult?.data.results ?? [],
-    tool_call_group_id: toolCall.data.tool_call_group_id,
-    tool_origin: toolCall.data.tool_origin,
-    tool_type: toolCall.data.tool_type,
-  };
 };
 
 const getModelUsage = (

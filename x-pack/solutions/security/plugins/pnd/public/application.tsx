@@ -30,7 +30,7 @@ const rootStyle: React.CSSProperties = {
   minHeight: 0,
 };
 
-export const renderApp = ({ coreStart, startDeps, params, config: _config }: RenderAppParams) => {
+export const renderApp = ({ coreStart, startDeps, params, config }: RenderAppParams) => {
   coreStart.chrome.docTitle.change(PND_PLUGIN_NAME);
 
   const queryClient = new QueryClient({
@@ -48,7 +48,7 @@ export const renderApp = ({ coreStart, startDeps, params, config: _config }: Ren
    * for `services.http` and `services.notifications`.
    */
   const App = () => (
-    <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+    <KibanaContextProvider services={{ ...coreStart, ...startDeps, pndConfig: config }}>
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <div style={rootStyle}>

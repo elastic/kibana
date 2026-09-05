@@ -105,25 +105,44 @@ export const getEcfServiceConfigs = (
     if (!entry?.ecfLogType) continue;
 
     const entryVars = serviceVars[instanceId];
-    const vars = entryVars?.vars ?? {};
-    const trigger = entryVars?.trigger;
 
-    // Gate each ARN on the selected trigger so stale values from a previous transport
+    // ECF services are single-DS. Read ARNs from the first DS's varsByInput.
+    // Prefer ecfDataStream (set on OTel twins where the DS path differs from the entry id),
+    // then the first runtime dataStream (populated once the manifest is fetched), then the
+    // entry.id as a last resort. AWS_SERVICES_MAP always has dataStreams:[] at module load.
+    const dsId = entry.ecfDataStream ?? entry.dataStreams?.[0] ?? entry.id;
+    const dsVars = entryVars?.varsByDataStream?.[dsId];
+    const enabledInputs = dsVars?.enabledInputs ?? [];
+
+    // Gate each ARN on the enabled inputs so stale values from a previous transport
     // selection don't end up in the launch URL and misconfigure the ECF stack.
-    const bucketArn = trigger === 'aws-s3' ? vars.bucket_arn?.trim() || undefined : undefined;
-    const logGroupArn =
-      trigger === 'aws-cloudwatch' ? vars.log_group_arn?.trim() || undefined : undefined;
+    // Both vars are multi-value; split the comma-joined draft string into individual ARNs
+    // so each can be normalised independently (e.g. log-group `:*` suffix per ARN).
+    const splitArns = (raw: string | undefined): string[] =>
+      raw
+        ? raw
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
+    const bucketArns = enabledInputs.includes('aws-s3')
+      ? splitArns(dsVars?.varsByInput?.['aws-s3']?.bucket_arn)
+      : [];
+    const logGroupArns = enabledInputs.includes('aws-cloudwatch')
+      ? splitArns(dsVars?.varsByInput?.['aws-cloudwatch']?.log_group_arn)
+      : [];
 
     const existing = configsByServiceId.get(serviceId);
     if (existing) {
-      if (bucketArn) existing.bucketArns.push(bucketArn);
-      if (logGroupArn) existing.logGroupArns.push(logGroupArn);
+      existing.bucketArns.push(...bucketArns);
+      existing.logGroupArns.push(...logGroupArns);
     } else {
       configsByServiceId.set(serviceId, {
         serviceId,
         ecfLogType: entry.ecfLogType,
-        bucketArns: bucketArn ? [bucketArn] : [],
-        logGroupArns: logGroupArn ? [logGroupArn] : [],
+        bucketArns,
+        logGroupArns,
       });
     }
   }

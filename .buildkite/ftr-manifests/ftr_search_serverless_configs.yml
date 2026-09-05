@@ -9,7 +9,6 @@ enabled:
   - x-pack/solutions/search/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.screenshots.ts
   - x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts
-  - x-pack/platform/test/serverless/functional/configs/search/config.examples.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.saved_objects_management.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.config_compat_mode.ts
@@ -17,7 +16,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group2.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group5.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group6.ts
-  - x-pack/platform/test/serverless/functional/configs/search/config.reporting.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group8.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group9.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group11.ts

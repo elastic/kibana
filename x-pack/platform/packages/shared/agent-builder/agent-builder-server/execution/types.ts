@@ -7,7 +7,6 @@
 
 import type { Observable } from 'rxjs';
 import type {
-  AgentCapabilities,
   AgentExecutionMode,
   ChatEvent,
   ConverseInput,
@@ -19,6 +18,8 @@ import type {
   ConversationOrigin,
   ConversationRoundAuthor,
   ExecutionStatus,
+  InteractivityConfig,
+  InteractivityConfigInput,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -32,8 +33,6 @@ export interface BaseExecutionParams {
   agentId?: string;
   /** Id of the genAI connector to use. */
   connectorId?: string;
-  /** Capabilities to use for this execution. */
-  capabilities?: AgentCapabilities;
   /** The input for this execution. */
   nextInput: ConverseInput;
   /** Whether to use structured output mode. */
@@ -93,6 +92,15 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   browserApiTools?: BrowserApiToolMetadata[];
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
   action?: ConversationAction;
+  /**
+   * Used to establish the parent linkage and add subagent-specific metadata
+   * to the newly-created child conversation.
+   */
+  subagentCreation?: {
+    parentConversationId: string;
+    subagentName: string;
+    subagentPurpose?: string;
+  };
 }
 
 /**
@@ -131,6 +139,10 @@ interface BaseAgentExecution {
   metadata?: Record<string, string>;
   /** The ID of the parent execution that spawned this standalone execution. */
   parentExecutionId?: string;
+  /**
+   * Canonical interactivity config for this execution, snapshotted at creation.
+   */
+  interactivity?: InteractivityConfig;
 }
 
 /**
@@ -188,6 +200,10 @@ interface ExecuteAgentBaseParams {
    * - `undefined` (default): auto-decide based on context.
    */
   useTaskManager?: boolean;
+  /**
+   * Interactivity configuration for this execution.
+   */
+  interactive?: InteractivityConfigInput;
 }
 
 export interface ExecuteConversationAgentParams extends ExecuteAgentBaseParams {

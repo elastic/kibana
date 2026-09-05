@@ -22,7 +22,6 @@ export interface AgentAuthzArgs {
   accessControl?: AgentAccessControl;
   owner?: UserIdAndName;
   currentUser?: CurrentUser | null;
-  isAdmin: boolean;
 }
 
 /**
@@ -110,9 +109,8 @@ export const getEffectiveAgentRole = ({
   accessControl,
   owner,
   currentUser,
-  isAdmin,
 }: AgentAuthzArgs): EffectiveAgentRole | undefined => {
-  if (isAdmin) {
+  if (currentUser?.isAdmin) {
     return 'admin';
   }
   if (isAgentOwner({ owner, currentUser })) {

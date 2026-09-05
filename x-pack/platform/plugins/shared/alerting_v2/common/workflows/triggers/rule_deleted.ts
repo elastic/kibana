@@ -26,7 +26,7 @@ export const ruleDeletedTriggerCommonDefinition: CommonTriggerDefinition<
   documentation: {
     details: i18n.translate('xpack.alertingV2.workflowTriggers.ruleDeleted.documentation.details', {
       defaultMessage:
-        'Emitted after rule deletion. The payload includes event.rule with ruleId and spaceId. Bulk deletes emit one event per successfully deleted rule.',
+        'Emitted after rule deletion. The payload includes event.rule with ruleId, spaceId, and tags. Bulk deletes emit one event per successfully deleted rule.',
     }),
     examples: [
       i18n.translate('xpack.alertingV2.workflowTriggers.ruleDeleted.documentation.example', {
@@ -39,7 +39,20 @@ triggers:
 \`\`\``,
         values: { triggerId: RuleDeletedTriggerId },
       }),
+      i18n.translate(
+        'xpack.alertingV2.workflowTriggers.ruleDeleted.documentation.tagConditionExample',
+        {
+          defaultMessage: `## Run for rules with a tag
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.rule.tags: "critical"'
+\`\`\``,
+          values: { triggerId: RuleDeletedTriggerId },
+        }
+      ),
     ],
   },
-  snippets: { condition: 'event.rule.ruleId: "my-rule-id"' },
+  snippets: { condition: 'event.rule.tags: "my-tag"' },
 };

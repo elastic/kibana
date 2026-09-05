@@ -372,6 +372,24 @@ apiTest.describe(
       );
     };
 
+    const setConversationPinnedAs = async (
+      apiClient: any,
+      user: { username: string; password: string },
+      conversationId: string,
+      pinned: boolean
+    ) => {
+      return apiClient.post(
+        `${accessControlInternalBase}/conversations/${encodeURIComponent(
+          conversationId
+        )}/_set_pinned`,
+        {
+          headers: headersFor(user),
+          body: { pinned },
+          responseType: 'json',
+        }
+      );
+    };
+
     const renameConversationAs = async (
       apiClient: any,
       user: { username: string; password: string },
@@ -572,19 +590,103 @@ apiTest.describe(
           }
         );
 
-        await apiTest.step('Bob can mark a public conversation read', async () => {
-          const markReadResponse = await markConversationReadAs(
-            apiClient,
-            bob,
-            publicConversation.conversation_id,
-            true
-          );
-          expect(markReadResponse).toHaveStatusCode(200);
-          expect(markReadResponse.body).toMatchObject({
-            id: publicConversation.conversation_id,
-            read: true,
-          });
-        });
+        await apiTest.step(
+          'read status is tracked per user, not shared across readers',
+          async () => {
+            const getReadAs = async (user: { username: string; password: string }) => {
+              const response = await getConversationAs(
+                apiClient,
+                user,
+                publicConversation.conversation_id
+              );
+              expect(response).toHaveStatusCode(200);
+              return (response.body as Conversation).read;
+            };
+
+            const markReadResponse = await markConversationReadAs(
+              apiClient,
+              bob,
+              publicConversation.conversation_id,
+              true
+            );
+            expect(markReadResponse).toHaveStatusCode(200);
+            expect(markReadResponse.body).toMatchObject({
+              id: publicConversation.conversation_id,
+              read: true,
+            });
+
+            expect(await getReadAs(alice)).toBe(false);
+            expect(await getReadAs(bob)).toBe(true);
+
+            const markAliceReadResponse = await markConversationReadAs(
+              apiClient,
+              alice,
+              publicConversation.conversation_id,
+              true
+            );
+            expect(markAliceReadResponse).toHaveStatusCode(200);
+            expect(await getReadAs(alice)).toBe(true);
+
+            const markBobUnreadResponse = await markConversationReadAs(
+              apiClient,
+              bob,
+              publicConversation.conversation_id,
+              false
+            );
+            expect(markBobUnreadResponse).toHaveStatusCode(200);
+            expect(await getReadAs(bob)).toBe(false);
+            expect(await getReadAs(alice)).toBe(true);
+          }
+        );
+
+        await apiTest.step(
+          'pinned state is tracked per user, not shared across readers',
+          async () => {
+            const getPinnedAs = async (user: { username: string; password: string }) => {
+              const response = await getConversationAs(
+                apiClient,
+                user,
+                publicConversation.conversation_id
+              );
+              expect(response).toHaveStatusCode(200);
+              return (response.body as Conversation).pinned;
+            };
+
+            const pinAsBobResponse = await setConversationPinnedAs(
+              apiClient,
+              bob,
+              publicConversation.conversation_id,
+              true
+            );
+            expect(pinAsBobResponse).toHaveStatusCode(200);
+            expect(pinAsBobResponse.body).toMatchObject({
+              id: publicConversation.conversation_id,
+              pinned: true,
+            });
+
+            expect(await getPinnedAs(alice)).toBe(false);
+            expect(await getPinnedAs(bob)).toBe(true);
+
+            const pinAsAliceResponse = await setConversationPinnedAs(
+              apiClient,
+              alice,
+              publicConversation.conversation_id,
+              true
+            );
+            expect(pinAsAliceResponse).toHaveStatusCode(200);
+            expect(await getPinnedAs(alice)).toBe(true);
+
+            const unpinAsAliceResponse = await setConversationPinnedAs(
+              apiClient,
+              alice,
+              publicConversation.conversation_id,
+              false
+            );
+            expect(unpinAsAliceResponse).toHaveStatusCode(200);
+            expect(await getPinnedAs(alice)).toBe(false);
+            expect(await getPinnedAs(bob)).toBe(true);
+          }
+        );
 
         await apiTest.step(
           'permissions reflect what rename and delete allow, on both GET routes',

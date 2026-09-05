@@ -111,13 +111,7 @@ describe('kibana cli', function () {
         it('should download a file from a valid http url', function () {
           const filePath = join(__dirname, '__fixtures__/replies/banana.jpg');
 
-          nock('http://example.com')
-            .defaultReplyHeaders({
-              'content-length': '341965',
-              'content-type': 'application/zip',
-            })
-            .get('/plugin.zip')
-            .replyWithFile(200, filePath);
+          nock('http://example.com').get('/plugin.zip').replyWithFile(200, filePath);
 
           const sourceUrl = 'http://example.com/plugin.zip';
 
@@ -192,9 +186,6 @@ describe('kibana cli', function () {
         ];
 
         nock('http://example.com')
-          .defaultReplyHeaders({
-            'content-length': '10',
-          })
           .get('/badfile1.tar.gz')
           .reply(404)
           .get('/badfile2.tar.gz')
@@ -221,9 +212,6 @@ describe('kibana cli', function () {
         ];
 
         nock('http://example.com')
-          .defaultReplyHeaders({
-            'content-length': '10',
-          })
           .get('/badfile1.tar.gz')
           .reply(404)
           .get('/badfile2.tar.gz')
@@ -328,28 +316,39 @@ describe('kibana cli', function () {
         delete process.env.no_proxy;
       });
 
-      it('should use http_proxy env variable', function () {
+      it('should use http_proxy env variable', async function () {
+        nock.restore();
         process.env.http_proxy = proxyUrl;
         settings.urls = ['http://example.com/plugin.zip'];
 
-        return download(settings, logger).then(expectProxyHit);
+        try {
+          await download(settings, logger);
+          expectProxyHit();
+        } finally {
+          nock.activate();
+        }
       });
 
-      it('should use https_proxy for secure URLs', function () {
+      it('should use https_proxy for secure URLs', async function () {
+        nock.restore();
         process.env.https_proxy = proxyUrl;
         settings.urls = ['https://example.com/plugin.zip'];
 
-        return download(settings, logger).then(
-          () => {
-            // If the proxy is hit, the request should fail, since our test proxy
-            // doesn't actually forward HTTPS requests.
-            expect().fail('Should not succeed a HTTPS proxy request.');
-          },
-          () => {
-            // Check if the proxy was actually hit before the failure.
-            expect(proxyConnectHit).toBe(true);
-          }
-        );
+        try {
+          await download(settings, logger).then(
+            () => {
+              // If the proxy is hit, the request should fail, since our test proxy
+              // doesn't actually forward HTTPS requests.
+              expect().fail('Should not succeed a HTTPS proxy request.');
+            },
+            () => {
+              // Check if the proxy was actually hit before the failure.
+              expect(proxyConnectHit).toBe(true);
+            }
+          );
+        } finally {
+          nock.activate();
+        }
       });
 
       it('should not use http_proxy for HTTPS urls', function () {

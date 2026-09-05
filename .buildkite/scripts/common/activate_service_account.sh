@@ -60,9 +60,6 @@ fi
 
 if [[ -z "$EMAIL" ]]; then
   case "$BUCKET_NAME" in
-    "elastic-kibana-coverage-live")
-      EMAIL="kibana-ci-access-coverage@$GCLOUD_EMAIL_POSTFIX"
-      ;;
     "kibana-ci-es-snapshots-daily")
       EMAIL="kibana-ci-access-es-daily@$GCLOUD_EMAIL_POSTFIX"
       ;;

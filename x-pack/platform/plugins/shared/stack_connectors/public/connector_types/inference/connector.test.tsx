@@ -882,7 +882,7 @@ describe('ConnectorFields renders', () => {
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalled();
       });
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {
           config: {
             ...openAiConnector.config,

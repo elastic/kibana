@@ -18,7 +18,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
-  EuiCallOut,
   EuiLoadingSpinner,
   EuiPageSection,
   EuiPanel,
@@ -31,15 +30,18 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type { PairedTTestResult } from '@kbn/evals-common';
+import type { Direction, PairedTTestResult } from '@kbn/evals-common';
 import {
   useCompareExperiments,
   useEvalsTraceFetcher,
   useEvaluationExperiment,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
+import { computeCompareDiff, isImproved } from './compare_diff';
+import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
@@ -63,10 +65,10 @@ interface ExampleScorePair {
   exampleIndex: number | null;
   evaluatorName: string;
   repetitionIndex: number;
-  scoreA: number | null | undefined;
-  scoreB: number | null | undefined;
-  traceIdA: string | null;
-  traceIdB: string | null;
+  scoreBaseline: number | null | undefined;
+  scoreTarget: number | null | undefined;
+  traceIdBaseline: string | null;
+  traceIdTarget: string | null;
 }
 
 const formatScore = (value: number | null | undefined): string => {
@@ -86,42 +88,45 @@ const formatDiff = (value: number): string => {
   return `${prefix}${value.toFixed(3)}`;
 };
 
-const LOWER_IS_BETTER_PATTERN = /\b(tokens?|latency|costs?|duration|time|errors?)\b/i;
-
-const isLowerBetter = (evaluatorName: string): boolean =>
-  LOWER_IS_BETTER_PATTERN.test(evaluatorName);
-
-const isImproved = (diff: number, evaluatorName: string): boolean =>
-  isLowerBetter(evaluatorName) ? diff < 0 : diff > 0;
-
 const SignificanceBadge: React.FC<{
   pValue: number | null;
   diff: number;
-  evaluatorName: string;
-}> = ({ pValue, diff, evaluatorName }) => {
+  direction: Direction;
+}> = ({ pValue, diff, direction }) => {
   if (pValue === null || !Number.isFinite(pValue)) {
     return <EuiBadge color="hollow">{i18n.BADGE_INSUFFICIENT_DATA}</EuiBadge>;
   }
   if (pValue >= SIGNIFICANCE_THRESHOLD) {
     return <EuiBadge color="hollow">{i18n.BADGE_NOT_SIGNIFICANT}</EuiBadge>;
   }
-  const color = isImproved(diff, evaluatorName) ? 'success' : 'danger';
+  const color =
+    direction === 'neutral' ? 'hollow' : isImproved(diff, direction) ? 'success' : 'danger';
   return <EuiBadge color={color}>{i18n.BADGE_SIGNIFICANT}</EuiBadge>;
 };
 
-const DiffValue: React.FC<{ diff: number; evaluatorName: string }> = ({ diff, evaluatorName }) => {
+const DIRECTION_HINTS: Record<Direction, string> = {
+  maximize: i18n.DIFF_HIGHER_IS_BETTER,
+  minimize: i18n.DIFF_LOWER_IS_BETTER,
+  neutral: i18n.DIFF_NEUTRAL_DIRECTION,
+};
+
+const DiffValue: React.FC<{ diff: number; direction: Direction }> = ({ diff, direction }) => {
   const { euiTheme } = useEuiTheme();
   if (!Number.isFinite(diff)) return <span>-</span>;
 
-  const lowerBetter = isLowerBetter(evaluatorName);
-  const improved = isImproved(diff, evaluatorName);
+  const improved = isImproved(diff, direction);
   let color: string | undefined;
-  if (diff !== 0) {
+  if (diff !== 0 && direction !== 'neutral') {
     color = improved ? euiTheme.colors.textSuccess : euiTheme.colors.textDanger;
   }
 
-  const directionHint = lowerBetter ? i18n.DIFF_LOWER_IS_BETTER : i18n.DIFF_HIGHER_IS_BETTER;
-  const verdictHint = diff === 0 ? null : improved ? i18n.DIFF_IMPROVED : i18n.DIFF_REGRESSED;
+  const directionHint = DIRECTION_HINTS[direction];
+  const verdictHint =
+    diff === 0 || direction === 'neutral'
+      ? null
+      : improved
+      ? i18n.DIFF_IMPROVED
+      : i18n.DIFF_REGRESSED;
   const tooltip = verdictHint ? `${verdictHint} · ${directionHint}` : directionHint;
 
   return (
@@ -145,8 +150,10 @@ const ExperimentHeader: React.FC<{
   const branch = experimentData?.git_branch;
   const timestamp = experimentData?.timestamp;
   const taskModel = experimentData?.task_model?.id;
-  const evaluatorModel = experimentData?.evaluator_model?.id;
-  const displayName = experimentData?.experiment_name || experimentId;
+  const evaluatorModels = experimentData?.evaluator_models ?? [];
+  const suiteId =
+    experimentData?.suite_id !== 'unknown-suite' ? experimentData?.suite_id : undefined;
+  const displayName = suiteId ?? experimentData?.experiment_name ?? experimentId;
   const detailLocation = {
     pathname: `/experiments/${encodeURIComponent(experimentId)}`,
     search: executionId ? `?execution_id=${encodeURIComponent(executionId)}` : '',
@@ -237,18 +244,17 @@ const ExperimentHeader: React.FC<{
               </EuiFlexItem>
             </>
           )}
-          {evaluatorModel && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="accent">{evaluatorModel}</EuiBadge>
-              </EuiFlexItem>
-            </>
-          )}
+          {/* Always shown, unlike the task model above: an experiment scored only by code
+              evaluators has no judge, and the badge says so rather than leaving the reader to
+              guess whether the field is missing or empty. */}
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EvaluatorModelsBadge models={evaluatorModels} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
     </EuiPanel>
@@ -256,22 +262,24 @@ const ExperimentHeader: React.FC<{
 };
 
 const ExampleDrilldownFlyout: React.FC<{
-  experimentIdA: string;
-  experimentIdB: string;
+  baselineExperimentId: string;
+  targetExperimentId: string;
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
-  executionIdA?: string;
-  executionIdB?: string;
+  direction: Direction;
+  baselineExecutionId?: string;
+  targetExecutionId?: string;
   onClose: () => void;
 }> = ({
-  experimentIdA,
-  experimentIdB,
+  baselineExperimentId,
+  targetExperimentId,
   datasetId,
   datasetName,
   evaluatorName,
-  executionIdA,
-  executionIdB,
+  direction,
+  baselineExecutionId,
+  targetExecutionId,
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -283,27 +291,27 @@ const ExampleDrilldownFlyout: React.FC<{
     isLoading: traceLoading,
     error: traceError,
   } = useTraceSpans(selectedTraceId, { fetchTrace });
-  const { data: examplesA, isLoading: loadingA } = useExperimentDatasetExamples(
-    experimentIdA,
+  const { data: baselineExamples, isLoading: loadingBaseline } = useExperimentDatasetExamples(
+    baselineExperimentId,
     datasetId,
-    executionIdA
+    baselineExecutionId
   );
-  const { data: examplesB, isLoading: loadingB } = useExperimentDatasetExamples(
-    experimentIdB,
+  const { data: targetExamples, isLoading: loadingTarget } = useExperimentDatasetExamples(
+    targetExperimentId,
     datasetId,
-    executionIdB
+    targetExecutionId
   );
 
   const pairs: ExampleScorePair[] = useMemo(() => {
-    if (!examplesA?.examples || !examplesB?.examples) return [];
+    if (!baselineExamples?.examples || !targetExamples?.examples) return [];
 
-    interface BScoreEntry {
+    interface TargetScoreEntry {
       score: number | null | undefined;
       traceId: string | null;
     }
-    const mapB = new Map<string, Map<string, BScoreEntry>>();
-    for (const ex of examplesB.examples) {
-      const scoresByKey = new Map<string, BScoreEntry>();
+    const targetScoresByExample = new Map<string, Map<string, TargetScoreEntry>>();
+    for (const ex of targetExamples.examples) {
+      const scoresByKey = new Map<string, TargetScoreEntry>();
       for (const score of ex.scores) {
         const key = `${score.evaluator.name}|${score.task.repetition_index}`;
         scoresByKey.set(key, {
@@ -311,34 +319,34 @@ const ExampleDrilldownFlyout: React.FC<{
           traceId: score.task.trace_id ?? null,
         });
       }
-      mapB.set(ex.example_id, scoresByKey);
+      targetScoresByExample.set(ex.example_id, scoresByKey);
     }
 
     const result: ExampleScorePair[] = [];
-    const coveredBExamples = new Set<string>();
+    const coveredTargetExamples = new Set<string>();
 
-    for (const ex of examplesA.examples) {
-      const bScores = mapB.get(ex.example_id);
+    for (const ex of baselineExamples.examples) {
+      const targetScores = targetScoresByExample.get(ex.example_id);
       for (const score of ex.scores) {
         if (score.evaluator.name !== evaluatorName) continue;
-        coveredBExamples.add(ex.example_id);
+        coveredTargetExamples.add(ex.example_id);
         const key = `${score.evaluator.name}|${score.task.repetition_index}`;
-        const bEntry = bScores?.get(key);
+        const targetEntry = targetScores?.get(key);
         result.push({
           exampleId: ex.example_id,
           exampleIndex: ex.example_index,
           evaluatorName: score.evaluator.name,
           repetitionIndex: score.task.repetition_index,
-          scoreA: score.evaluator.score,
-          scoreB: bEntry?.score ?? null,
-          traceIdA: score.task.trace_id ?? null,
-          traceIdB: bEntry?.traceId ?? null,
+          scoreBaseline: score.evaluator.score,
+          scoreTarget: targetEntry?.score ?? null,
+          traceIdBaseline: score.task.trace_id ?? null,
+          traceIdTarget: targetEntry?.traceId ?? null,
         });
       }
     }
 
-    for (const ex of examplesB.examples) {
-      if (coveredBExamples.has(ex.example_id)) continue;
+    for (const ex of targetExamples.examples) {
+      if (coveredTargetExamples.has(ex.example_id)) continue;
       for (const score of ex.scores) {
         if (score.evaluator.name !== evaluatorName) continue;
         result.push({
@@ -346,10 +354,10 @@ const ExampleDrilldownFlyout: React.FC<{
           exampleIndex: ex.example_index,
           evaluatorName: score.evaluator.name,
           repetitionIndex: score.task.repetition_index,
-          scoreA: null,
-          scoreB: score.evaluator.score,
-          traceIdA: null,
-          traceIdB: score.task.trace_id ?? null,
+          scoreBaseline: null,
+          scoreTarget: score.evaluator.score,
+          traceIdBaseline: null,
+          traceIdTarget: score.task.trace_id ?? null,
         });
       }
     }
@@ -359,9 +367,9 @@ const ExampleDrilldownFlyout: React.FC<{
       if (indexDiff !== 0) return indexDiff;
       return a.repetitionIndex - b.repetitionIndex;
     });
-  }, [examplesA, examplesB, evaluatorName]);
+  }, [baselineExamples, targetExamples, evaluatorName]);
 
-  const isLoading = loadingA || loadingB;
+  const isLoading = loadingBaseline || loadingTarget;
   const hasRepetitions = useMemo(() => pairs.some((p) => p.repetitionIndex > 0), [pairs]);
 
   const flyoutColumns: Array<EuiBasicTableColumn<ExampleScorePair>> = useMemo(
@@ -376,10 +384,10 @@ const ExampleDrilldownFlyout: React.FC<{
             ? `${baseLabel} (rep ${item.repetitionIndex + 1})`
             : baseLabel;
           const isPaired =
-            item.scoreA != null &&
-            item.scoreB != null &&
-            Number.isFinite(item.scoreA) &&
-            Number.isFinite(item.scoreB);
+            item.scoreBaseline != null &&
+            item.scoreTarget != null &&
+            Number.isFinite(item.scoreBaseline) &&
+            Number.isFinite(item.scoreTarget);
           if (!isPaired) {
             return (
               <EuiToolTip content={i18n.FLYOUT_UNPAIRED_HINT}>
@@ -391,14 +399,14 @@ const ExampleDrilldownFlyout: React.FC<{
         },
       },
       {
-        field: 'scoreA',
-        name: i18n.FLYOUT_COLUMN_SCORE_A,
+        field: 'scoreBaseline',
+        name: i18n.FLYOUT_COLUMN_SCORE_BASELINE,
         align: 'right' as const,
         render: (val: number | null | undefined) => formatScore(val),
       },
       {
-        field: 'scoreB',
-        name: i18n.FLYOUT_COLUMN_SCORE_B,
+        field: 'scoreTarget',
+        name: i18n.FLYOUT_COLUMN_SCORE_TARGET,
         align: 'right' as const,
         render: (val: number | null | undefined) => formatScore(val),
       },
@@ -407,15 +415,15 @@ const ExampleDrilldownFlyout: React.FC<{
         align: 'right' as const,
         render: (item: ExampleScorePair) => {
           if (
-            item.scoreA === null ||
-            item.scoreA === undefined ||
-            item.scoreB === null ||
-            item.scoreB === undefined
+            item.scoreBaseline === null ||
+            item.scoreBaseline === undefined ||
+            item.scoreTarget === null ||
+            item.scoreTarget === undefined
           ) {
             return '-';
           }
-          const diff = item.scoreA - item.scoreB;
-          return <DiffValue diff={diff} evaluatorName={item.evaluatorName} />;
+          const diff = computeCompareDiff(item.scoreTarget, item.scoreBaseline);
+          return <DiffValue diff={diff} direction={direction} />;
         },
       },
       {
@@ -424,28 +432,28 @@ const ExampleDrilldownFlyout: React.FC<{
         align: 'center' as const,
         render: (item: ExampleScorePair) => (
           <EuiFlexGroup gutterSize="xs" responsive={false} justifyContent="center">
-            {item.traceIdA && (
+            {item.traceIdBaseline && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.FLYOUT_TRACE_A} disableScreenReaderOutput>
+                <EuiToolTip content={i18n.FLYOUT_TRACE_BASELINE} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
                     iconType="chartWaterfall"
                     color="primary"
-                    aria-label={i18n.FLYOUT_TRACE_A}
-                    onClick={() => setSelectedTraceId(item.traceIdA)}
+                    aria-label={i18n.FLYOUT_TRACE_BASELINE}
+                    onClick={() => setSelectedTraceId(item.traceIdBaseline)}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
             )}
-            {item.traceIdB && (
+            {item.traceIdTarget && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.FLYOUT_TRACE_B} disableScreenReaderOutput>
+                <EuiToolTip content={i18n.FLYOUT_TRACE_TARGET} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
                     iconType="chartWaterfall"
                     color="accent"
-                    aria-label={i18n.FLYOUT_TRACE_B}
-                    onClick={() => setSelectedTraceId(item.traceIdB)}
+                    aria-label={i18n.FLYOUT_TRACE_TARGET}
+                    onClick={() => setSelectedTraceId(item.traceIdTarget)}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -454,7 +462,7 @@ const ExampleDrilldownFlyout: React.FC<{
         ),
       },
     ],
-    [hasRepetitions]
+    [hasRepetitions, direction]
   );
 
   return (
@@ -490,18 +498,18 @@ const ExampleDrilldownFlyout: React.FC<{
               tableLayout="auto"
               rowProps={(item) => {
                 const isPaired =
-                  item.scoreA != null &&
-                  item.scoreB != null &&
-                  Number.isFinite(item.scoreA) &&
-                  Number.isFinite(item.scoreB);
+                  item.scoreBaseline != null &&
+                  item.scoreTarget != null &&
+                  Number.isFinite(item.scoreBaseline) &&
+                  Number.isFinite(item.scoreTarget);
 
                 if (!isPaired) {
                   return { style: { opacity: 0.55 } };
                 }
 
-                const diff = item.scoreA! - item.scoreB!;
-                if (diff === 0) return {};
-                if (isImproved(diff, item.evaluatorName)) {
+                const diff = computeCompareDiff(item.scoreTarget!, item.scoreBaseline!);
+                if (diff === 0 || direction === 'neutral') return {};
+                if (isImproved(diff, direction)) {
                   return {
                     style: {
                       backgroundColor: hexToRgba(
@@ -575,23 +583,24 @@ export const CompareExperimentsPage: React.FC = () => {
     baselineId,
     targetId
   );
-  const executionIdForDetail = isExecutionCompare ? baselineId : undefined;
-  const executionIdForDetailB = isExecutionCompare ? targetId : undefined;
-  const { data: experimentDataA } = useEvaluationExperiment(baselineId, executionIdForDetail);
-  const { data: experimentDataB } = useEvaluationExperiment(targetId, executionIdForDetailB);
+  const baselineExecutionId = isExecutionCompare ? baselineId : undefined;
+  const targetExecutionId = isExecutionCompare ? targetId : undefined;
+  const { data: baselineExperimentData } = useEvaluationExperiment(baselineId, baselineExecutionId);
+  const { data: targetExperimentData } = useEvaluationExperiment(targetId, targetExecutionId);
 
-  const isNewerA = useMemo(() => {
-    if (!experimentDataA?.timestamp || !experimentDataB?.timestamp) return undefined;
-    const tsA = new Date(experimentDataA.timestamp).getTime();
-    const tsB = new Date(experimentDataB.timestamp).getTime();
-    if (tsA === tsB) return undefined;
-    return tsA > tsB;
-  }, [experimentDataA?.timestamp, experimentDataB?.timestamp]);
+  const isBaselineNewer = useMemo(() => {
+    if (!baselineExperimentData?.timestamp || !targetExperimentData?.timestamp) return undefined;
+    const baselineTs = new Date(baselineExperimentData.timestamp).getTime();
+    const targetTs = new Date(targetExperimentData.timestamp).getTime();
+    if (baselineTs === targetTs) return undefined;
+    return baselineTs > targetTs;
+  }, [baselineExperimentData?.timestamp, targetExperimentData?.timestamp]);
 
   const [flyoutState, setFlyoutState] = useState<{
     datasetId: string;
     datasetName: string;
     evaluatorName: string;
+    direction: Direction;
   } | null>(null);
 
   const [sortField, setSortField] = useState<keyof PairedTTestResult>('datasetName');
@@ -602,6 +611,7 @@ export const CompareExperimentsPage: React.FC = () => {
       datasetId: result.datasetId,
       datasetName: result.datasetName,
       evaluatorName: result.evaluatorName,
+      direction: result.direction,
     });
   }, []);
 
@@ -651,23 +661,33 @@ export const CompareExperimentsPage: React.FC = () => {
       'Dataset',
       'Evaluator',
       'N',
-      'Mean A',
-      'Mean B',
+      'Mean baseline',
+      'Mean target',
       'Diff',
+      'Direction',
       'p-value',
       'Significant',
+      'Outcome',
     ];
     const rows = sortedResults.map((r) => {
-      const diff = r.meanA - r.meanB;
+      const diff = computeCompareDiff(r.meanTarget, r.meanBaseline);
+      const significant =
+        r.pValue !== null && Number.isFinite(r.pValue) && r.pValue < SIGNIFICANCE_THRESHOLD;
+      let outcome = '';
+      if (significant && r.direction !== 'neutral') {
+        outcome = isImproved(diff, r.direction) ? 'Improvement' : 'Regression';
+      }
       return [
         `"${r.datasetName.replace(/"/g, '""')}"`,
         `"${r.evaluatorName.replace(/"/g, '""')}"`,
         r.sampleSize,
-        r.meanA.toFixed(4),
-        r.meanB.toFixed(4),
+        r.meanBaseline.toFixed(4),
+        r.meanTarget.toFixed(4),
         diff.toFixed(4),
-        r.pValue?.toFixed(6) ?? '',
-        r.pValue !== null && r.pValue < SIGNIFICANCE_THRESHOLD ? 'Yes' : 'No',
+        r.direction,
+        r.pValue !== null && Number.isFinite(r.pValue) ? r.pValue.toFixed(6) : '',
+        significant ? 'Yes' : 'No',
+        outcome,
       ];
     });
     const csv = [header.join(','), ...rows.map((row) => row.join(','))].join('\n');
@@ -721,15 +741,15 @@ export const CompareExperimentsPage: React.FC = () => {
         align: 'right' as const,
       },
       {
-        field: 'meanA',
-        name: i18n.COLUMN_MEAN_A,
+        field: 'meanBaseline',
+        name: i18n.COLUMN_MEAN_BASELINE,
         sortable: true,
         render: (val: number) => formatScore(val),
         align: 'right' as const,
       },
       {
-        field: 'meanB',
-        name: i18n.COLUMN_MEAN_B,
+        field: 'meanTarget',
+        name: i18n.COLUMN_MEAN_TARGET,
         sortable: true,
         render: (val: number) => formatScore(val),
         align: 'right' as const,
@@ -737,7 +757,10 @@ export const CompareExperimentsPage: React.FC = () => {
       {
         name: i18n.COLUMN_DIFF,
         render: (item: PairedTTestResult) => (
-          <DiffValue diff={item.meanA - item.meanB} evaluatorName={item.evaluatorName} />
+          <DiffValue
+            diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
+            direction={item.direction}
+          />
         ),
         align: 'right' as const,
       },
@@ -753,8 +776,8 @@ export const CompareExperimentsPage: React.FC = () => {
         render: (item: PairedTTestResult) => (
           <SignificanceBadge
             pValue={item.pValue}
-            diff={item.meanA - item.meanB}
-            evaluatorName={item.evaluatorName}
+            diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
+            direction={item.direction}
           />
         ),
       },
@@ -816,8 +839,8 @@ export const CompareExperimentsPage: React.FC = () => {
           <ExperimentHeader
             label={i18n.BASELINE_LABEL}
             experimentId={baselineId}
-            executionId={executionIdForDetail}
-            isNewer={isNewerA}
+            executionId={baselineExecutionId}
+            isNewer={isBaselineNewer}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -840,8 +863,8 @@ export const CompareExperimentsPage: React.FC = () => {
           <ExperimentHeader
             label={i18n.TARGET_LABEL}
             experimentId={targetId}
-            executionId={executionIdForDetailB}
-            isNewer={isNewerA !== undefined ? !isNewerA : undefined}
+            executionId={targetExecutionId}
+            isNewer={isBaselineNewer !== undefined ? !isBaselineNewer : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -866,17 +889,14 @@ export const CompareExperimentsPage: React.FC = () => {
 
       {data && !isLoading && (
         <>
-          {(data.pairing.truncatedA || data.pairing.truncatedB) && (
+          {(data.pairing.truncatedBaseline || data.pairing.truncatedTarget) && (
             <>
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount
                 title={i18n.TRUNCATION_WARNING_TITLE}
-                color="warning"
-                iconType="warning"
+                text={i18n.TRUNCATION_WARNING_BODY}
                 size="s"
-              >
-                <p>{i18n.TRUNCATION_WARNING_BODY}</p>
-              </EuiCallOut>
+              />
               <EuiSpacer size="m" />
             </>
           )}
@@ -962,13 +982,14 @@ export const CompareExperimentsPage: React.FC = () => {
 
       {flyoutState && (
         <ExampleDrilldownFlyout
-          experimentIdA={baselineId}
-          experimentIdB={targetId}
+          baselineExperimentId={baselineId}
+          targetExperimentId={targetId}
           datasetId={flyoutState.datasetId}
           datasetName={flyoutState.datasetName}
           evaluatorName={flyoutState.evaluatorName}
-          executionIdA={executionIdForDetail}
-          executionIdB={executionIdForDetailB}
+          direction={flyoutState.direction}
+          baselineExecutionId={baselineExecutionId}
+          targetExecutionId={targetExecutionId}
           onClose={() => setFlyoutState(null)}
         />
       )}

@@ -6,10 +6,11 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { PLUGIN_ID, PLUGIN_NAME, EVALS_UI_PRIVILEGES } from '../common';
+import { PLUGIN_ID, APP_PATH, EVALS_UI_PRIVILEGES } from '../common';
 import type {
   AddToDatasetAction,
   AddToDatasetActionConfig,
@@ -20,8 +21,9 @@ import type {
   EvalsStartDependencies,
 } from './types';
 import { registerEvalsPublicWorkflowSteps } from './workflows';
+import { APP_TITLE } from './translations';
 
-const MANAGEMENT_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
+const EVALS_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
 
 const DEFAULT_ADD_TO_DATASET_LABEL = i18n.translate('xpack.evals.addToDatasetAction.label', {
   defaultMessage: 'Add to dataset',
@@ -50,14 +52,27 @@ export class EvalsPublicPlugin
       registerEvalsPublicWorkflowSteps(workflowsExtensions);
     }
 
+    coreSetup.application.register({
+      id: PLUGIN_ID,
+      title: APP_TITLE,
+      appRoute: APP_PATH,
+      euiIconType: 'flask',
+      category: DEFAULT_APP_CATEGORIES.kibana,
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
+      keywords: [...EVALS_KEYWORDS],
+      async mount({ element, history }) {
+        const { mountStandaloneApp } = await import('./standalone_app/mount_app');
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        return mountStandaloneApp({ coreStart, startDeps, element, history });
+      },
+    });
+
     if (management) {
       management.sections.section.ai.registerApp({
         id: PLUGIN_ID,
-        title: i18n.translate('xpack.evals.stackManagement.aiNavTitle', {
-          defaultMessage: PLUGIN_NAME,
-        }),
+        title: APP_TITLE,
         order: 2,
-        keywords: [...MANAGEMENT_KEYWORDS],
+        keywords: [...EVALS_KEYWORDS],
         capabilitiesId: PLUGIN_ID,
         mount: async (mountParams) => {
           const { mountManagementSection } = await import('./management_section/mount_section');

@@ -48,6 +48,7 @@ const REDIRECT_TYPE_CONFIG: Record<
     description: string;
     urlsLabel: string;
     helpText: string;
+    helpTextPlacement: 'above' | 'below';
     addButtonLabel: string;
     placeholder?: string;
     testSubjPrefix: string;
@@ -58,6 +59,7 @@ const REDIRECT_TYPE_CONFIG: Record<
     description: labels.tools.mcpClients.form.redirectLocalDescription,
     urlsLabel: labels.tools.mcpClients.form.localUrlsLabel,
     helpText: labels.tools.mcpClients.form.localUrlsHelpText,
+    helpTextPlacement: 'above',
     addButtonLabel: labels.tools.mcpClients.form.addLocalUrl,
     placeholder: 'http://localhost/callback',
     testSubjPrefix: 'mcpClientLocalUri',
@@ -67,6 +69,7 @@ const REDIRECT_TYPE_CONFIG: Record<
     description: labels.tools.mcpClients.form.redirectRemoteDescription,
     urlsLabel: labels.tools.mcpClients.form.remoteUrlsLabel,
     helpText: labels.tools.mcpClients.form.remoteUrlsHelpText,
+    helpTextPlacement: 'below',
     addButtonLabel: labels.tools.mcpClients.form.addRemoteUrl,
     placeholder: 'https://your-domain.com/callback',
     testSubjPrefix: 'mcpClientRemoteUri',
@@ -107,17 +110,12 @@ export const RedirectUriSection = () => {
       onTypeChange(id);
 
       const restored = redirectUrisByTypeRef.current[id];
-      if (id === RedirectUriType.REMOTE) {
-        replace(restored[0] ? [restored[0]] : [{ value: '' }]);
-      } else {
-        replace(restored.length > 0 ? restored : [{ value: '' }]);
-      }
+      replace(restored.length > 0 ? restored : [{ value: '' }]);
     },
     [getValues, replace]
   );
 
-  const isRemote = redirectUriType === RedirectUriType.REMOTE;
-  const { urlsLabel, helpText, addButtonLabel, placeholder, testSubjPrefix } =
+  const { urlsLabel, helpText, helpTextPlacement, addButtonLabel, placeholder, testSubjPrefix } =
     REDIRECT_TYPE_CONFIG[redirectUriType];
 
   return (
@@ -157,7 +155,7 @@ export const RedirectUriSection = () => {
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormFieldset legend={{ children: urlsLabel }}>
-        {!isRemote && (
+        {helpTextPlacement === 'above' && (
           <>
             <EuiText size="xs" color="subdued">
               {helpText}
@@ -179,7 +177,7 @@ export const RedirectUriSection = () => {
                   placeholder={placeholder}
                   data-test-subj={`${testSubjPrefix}-${index}`}
                   append={
-                    !isRemote && fields.length > 1 ? (
+                    fields.length > 1 ? (
                       <EuiToolTip
                         content={labels.tools.mcpClients.form.removeUriAriaLabel}
                         disableScreenReaderOutput
@@ -199,7 +197,7 @@ export const RedirectUriSection = () => {
             )}
           />
         ))}
-        {isRemote && (
+        {helpTextPlacement === 'below' && (
           <>
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="subdued">
@@ -208,19 +206,15 @@ export const RedirectUriSection = () => {
           </>
         )}
       </EuiFormFieldset>
-      {!isRemote && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiButtonEmpty
-            size="s"
-            iconType="plusCircle"
-            onClick={handleAddUri}
-            data-test-subj="mcpClientAddUri"
-          >
-            {addButtonLabel}
-          </EuiButtonEmpty>
-        </>
-      )}
+      <EuiSpacer size="m" />
+      <EuiButtonEmpty
+        size="s"
+        iconType="plusCircle"
+        onClick={handleAddUri}
+        data-test-subj="mcpClientAddUri"
+      >
+        {addButtonLabel}
+      </EuiButtonEmpty>
     </>
   );
 };

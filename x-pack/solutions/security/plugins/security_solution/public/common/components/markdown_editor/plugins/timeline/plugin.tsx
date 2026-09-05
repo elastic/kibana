@@ -7,7 +7,14 @@
 
 import React, { memo, useCallback, useEffect } from 'react';
 import type { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
-import { EuiCodeBlock, EuiModalBody, EuiModalHeader } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import {
   CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
   SECURITY_SOLUTION_OWNER,
@@ -28,7 +35,8 @@ interface TimelineEditorProps {
 
 const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover, onInsert }) => {
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
-  const { analytics } = useKibana().services;
+  const { analytics, cases } = useKibana().services;
+  const attachmentsEnabled = cases?.config?.attachmentsEnabled ?? false;
 
   // Reports when the Timeline plugin is opened via the markdown toolbar. The timeline markdown
   // plugin is injected exclusively by Security Solution, so the owner is always securitySolution.
@@ -54,8 +62,18 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
 
   return (
     <>
-      <EuiModalHeader />
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{i18n.SELECT_TIMELINE_MODAL_TITLE}</EuiModalHeaderTitle>
+      </EuiModalHeader>
       <EuiModalBody>
+        {attachmentsEnabled && (
+          <>
+            <EuiText size="s" color="subdued">
+              {i18n.INSERT_TIMELINE_ATTACH_HINT}
+            </EuiText>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <SelectTimelineModalBody onTimelineChange={handleTimelineChange} onClose={onClosePopover} />
       </EuiModalBody>
     </>

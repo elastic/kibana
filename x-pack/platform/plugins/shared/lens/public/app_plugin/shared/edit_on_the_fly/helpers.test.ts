@@ -339,7 +339,6 @@ describe('Lens inline editing helpers', () => {
             },
           },
           filters: [],
-          query: { esql: 'FROM index1 | STATS COUNT(*)' },
         },
       };
 
@@ -564,7 +563,7 @@ describe('Lens inline editing helpers', () => {
         const visualization = result?.state.visualization as Partial<MetricVisualizationState>;
 
         expect(trendlineLayer.query?.esql).toBe(
-          'FROM index1 | KEEP bytes | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+          'FROM index1 | KEEP bytes, @timestamp | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
         );
         expect(
           trendlineLayer.columns.some((column) => column.columnId === trendlineBreakdownAccessor)

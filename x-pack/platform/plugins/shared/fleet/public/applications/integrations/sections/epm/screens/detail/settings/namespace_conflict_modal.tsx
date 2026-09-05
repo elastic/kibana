@@ -8,9 +8,10 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiCode, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiCode, EuiConfirmModal, EuiLink, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { NamespaceConflictWarning } from '../../../../../../../../common/types/rest_spec/epm';
+import { useStartServices } from '../../../../../hooks';
 
 interface Props {
   conflicts: NamespaceConflictWarning[];
@@ -20,6 +21,7 @@ interface Props {
 
 export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, onCancel }) => {
   const modalTitleId = useGeneratedHtmlId();
+  const { docLinks } = useStartServices();
 
   return (
     <EuiConfirmModal
@@ -92,7 +94,21 @@ export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, 
       <EuiSpacer size="s" />
       <FormattedMessage
         id="xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.resolution"
-        defaultMessage="To ensure dedicated namespace index templates work as expected, remove the overlapping index templates or set their priority lower than 250 before enabling."
+        defaultMessage="To ensure dedicated namespace index templates work as expected, remove the overlapping index templates or set their priority lower than 250 before enabling. {learnMore}"
+        values={{
+          learnMore: (
+            <EuiLink
+              href={docLinks.links.fleet.datastreamsTemplateConflicts}
+              target="_blank"
+              external
+            >
+              {i18n.translate(
+                'xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.learnMore',
+                { defaultMessage: 'Learn more' }
+              )}
+            </EuiLink>
+          ),
+        }}
       />
     </EuiConfirmModal>
   );

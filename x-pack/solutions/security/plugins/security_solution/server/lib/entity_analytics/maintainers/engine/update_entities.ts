@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, BulkObject } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
-import { getLatestEntityIndexPattern } from '@kbn/entity-store/common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common/domain/entity_index';
 
 import type { EntityRelationshipRecord } from './types';
 import { entityTypeFromEuid } from './types';
@@ -64,9 +64,10 @@ function mergeRecords(records: ValidRecord[]): Map<string, MergedRelationships> 
  * EUIDs derived from `host.name` values that have never been indexed as
  * entities, producing dangling IDs in `entity.relationships.*.ids`.
  *
- * Uses `getLatestEntityIndexPattern` (wildcard) so it tolerates version
- * rollovers on the concrete index — same pattern the raw_identifiers query
- * itself uses in Step 2.
+ * Uses the `entities-latest-{namespace}` alias: it survives mapping-version rollovers
+ * and, unlike the neutral wildcard pattern, still matches legacy `security_{namespace}`
+ * indices before the shared-index migration runs — same name the raw_identifiers
+ * query itself uses in Step 2.
  */
 export const matchExistingTargetIds = async (
   esClient: ElasticsearchClient,
@@ -75,7 +76,7 @@ export const matchExistingTargetIds = async (
 ): Promise<Set<string>> => {
   if (candidateIds.size === 0) return new Set();
 
-  const index = getLatestEntityIndexPattern(namespace);
+  const index = getEntitiesAlias(ENTITY_LATEST, namespace);
   const result = await esClient.search({
     index,
     size: candidateIds.size,
@@ -105,7 +106,7 @@ export const matchExistingTargetIds = async (
  *   so we surface the count.
  * - `errors`: non-404 failures (5xx, 4xx other than 404) — these always
  *   warrant an investigation.
- * - `droppedTargets`: target EUIDs removed because they had no matching entity
+ * - `targetIdsNotInStore`: target EUIDs removed because they had no matching entity
  *   document in the store at write time (dangling-ID prevention).
  */
 /** Accumulated metrics from a writeEntityIds call — safe to sum across pages. */
@@ -114,7 +115,7 @@ export interface WriteEntityIdsResult {
   notFound: number;
   errors: number;
   /** Count of target EUIDs filtered out because they don't exist in the entity store. */
-  droppedTargets: number;
+  targetIdsNotInStore: number;
   /**
    * Applied writes per relationship type, keyed by rel-type string
    * (e.g. `{ accesses_frequently: 40, accesses_infrequently: 25 }`).
@@ -173,7 +174,7 @@ const EMPTY_RESULT: WriteEntityIdsResult & WriteEntityIdsPageState = {
   updated: 0,
   notFound: 0,
   errors: 0,
-  droppedTargets: 0,
+  targetIdsNotInStore: 0,
   relationshipTypeApplied: {},
   succeededEntityIds: new Set(),
 };
@@ -199,7 +200,7 @@ export const writeEntityIds = async (
   // raw_identifiers-based maintainers whose targets are derived from free-text
   // fields — log-based maintainers derive targets from real ECS identity fields
   // that extraction already indexed, so the round-trip is unnecessary there.
-  let droppedTargets = 0;
+  let targetIdsNotInStore = 0;
   let validTargetIds: Set<string> | undefined;
   if (validateTargetIds) {
     const allCandidateIds = new Set<string>();
@@ -212,10 +213,10 @@ export const writeEntityIds = async (
     }
 
     validTargetIds = await matchExistingTargetIds(esClient, namespace, allCandidateIds);
-    droppedTargets = pruneNonExistingTargets(merged, validTargetIds);
-    if (droppedTargets > 0) {
+    targetIdsNotInStore = pruneNonExistingTargets(merged, validTargetIds);
+    if (targetIdsNotInStore > 0) {
       logger.info(
-        `Dropped ${droppedTargets} target EUIDs that have no entity document in the store`
+        `Dropped ${targetIdsNotInStore} target EUIDs that have no entity document in the store`
       );
     }
   }
@@ -246,7 +247,7 @@ export const writeEntityIds = async (
       updated: 0,
       notFound: 0,
       errors: 0,
-      droppedTargets,
+      targetIdsNotInStore,
       relationshipTypeApplied: {},
       validTargetIds,
       succeededEntityIds: new Set<string>(),
@@ -294,7 +295,7 @@ export const writeEntityIds = async (
     updated,
     notFound: missingErrors.length,
     errors: realErrors.length,
-    droppedTargets,
+    targetIdsNotInStore,
     relationshipTypeApplied,
     validTargetIds,
     succeededEntityIds,

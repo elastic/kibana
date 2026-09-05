@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -14,6 +17,9 @@ export interface ServerlessVectordbPluginSetup {}
 export interface ServerlessVectordbPluginStart {}
 
 export interface SetupDependencies {
+  agentBuilder: AgentBuilderPluginSetup;
+  cloud?: CloudSetup;
+  features: FeaturesPluginSetup;
   serverless: ServerlessPluginSetup;
 }
 

@@ -154,7 +154,7 @@ export const loadRuleAlerts = (ruleName: string) => {
 // Pack results page header renders `AddToCaseButton` as a direct `EuiButtonEmpty`
 // with `aria-label="Add to Case"` — used for single-query results.
 const ADD_TO_CASE_HEADER_BUTTON = '[aria-label="Add to Case"]';
-// Per-row kebab menu (queryHistoryRework pack_queries_status_table and history details flyout)
+// Per-row kebab menu (pack_queries_status_table and history details flyout)
 // renders `AddToCaseButton` as an `EuiContextMenuItem` inside a popover opened by the kebab.
 const ADD_TO_CASE_ROW_KEBAB = '[data-test-subj^="packQueriesTableKebab-"]';
 

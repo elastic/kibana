@@ -175,9 +175,13 @@ describe('MCP route — registerTool arguments', () => {
       annotations: mockAnnotations,
     });
     const unannotatedTool = createMockTool('platform.core.search');
+    const excludedTool = createMockTool('platform.core.execute_connector_sub_action', {
+      annotations: mockAnnotations,
+      excludeFromMcp: true,
+    });
 
     const mockRegistry = {
-      list: jest.fn().mockResolvedValue([annotatedTool, unannotatedTool]),
+      list: jest.fn().mockResolvedValue([annotatedTool, unannotatedTool, excludedTool]),
       execute: jest.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
     };
     const getInternalServices = jest.fn().mockReturnValue({
@@ -244,6 +248,16 @@ describe('MCP route — registerTool arguments', () => {
     const [, config, callback] = unannotatedCall!;
     expect(config.annotations).toBeUndefined();
     expect(typeof callback).toBe('function');
+  });
+
+  it('excludes tools with excludeFromMcp: true', async () => {
+    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+
+    const excludedCall = mockRegisterTool.mock.calls.find(
+      (call: any[]) => call[0] === 'platform_core_execute_connector_sub_action'
+    );
+    expect(excludedCall).toBeUndefined();
+    expect(mockRegisterTool).toHaveBeenCalledTimes(2);
   });
 });
 

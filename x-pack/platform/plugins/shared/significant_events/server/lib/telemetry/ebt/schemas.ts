@@ -71,6 +71,13 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
         description: 'The name of the Stream',
       },
     },
+    external_content_tool_continuations: {
+      type: 'long',
+      _meta: {
+        description:
+          'Reasoning turns that contained external content and pending task tools and were correctly continued',
+      },
+    },
     tool_usage: {
       properties: {
         get_stream_features: {
@@ -163,18 +170,6 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
       type: 'long',
       _meta: {
         description: 'Features remapped to a previously known id in this iteration',
-      },
-    },
-    semantic_verify_calls: {
-      type: 'long',
-      _meta: {
-        description: 'Calls to semantic duplicate verification in this iteration',
-      },
-    },
-    semantic_verify_reuses: {
-      type: 'long',
-      _meta: {
-        description: 'Semantic verifications that reused a known feature id',
       },
     },
     input_tokens_used: {

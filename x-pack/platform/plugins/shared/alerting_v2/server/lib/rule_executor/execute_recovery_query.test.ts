@@ -70,7 +70,7 @@ describe('executeRecoveryQuery', () => {
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM logs-* | WHERE recovered = true' }),
-      expect.any(Object)
+      expect.objectContaining({ signal: input.executionContext.signal })
     );
     expect(events).toHaveLength(1);
     expect(events[0].status).toBe('recovered');

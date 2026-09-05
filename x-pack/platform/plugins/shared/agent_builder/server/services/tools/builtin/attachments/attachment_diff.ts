@@ -32,6 +32,7 @@ export const createAttachmentDiffTool = ({
     'Compare two versions of an attachment to see what changed. Use this to understand the history of modifications.',
   schema: attachmentDiffSchema,
   tags: ['attachment'],
+  excludeFromMcp: true,
   handler: async ({
     attachment_id: attachmentId,
     from_version: fromVersion,

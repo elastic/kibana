@@ -27,7 +27,7 @@ Array [
       "showMoveRight": true,
     },
     "cellActions": Array [],
-    "display": <Memo(UnifiedDataTableSummaryColumnHeader)
+    "display": <Memo(UnifiedDataTableSourceColumnHeader)
       columnDisplayName="Summary"
       headerRowHeight={5}
     />,

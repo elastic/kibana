@@ -344,7 +344,60 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
-    it('defaults reasoning effort to none when native tools are present', () => {
+    it('defaults reasoning effort to none when native tools are present and the model requires it', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of({ choices: [], usage: null }), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'openai-gpt-5.4',
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            tools: expect.any(Array),
+            reasoning: { effort: 'none' },
+          }),
+        })
+      );
+    });
+
+    it('omits the reasoning default when the model does not tolerate disabled reasoning', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of({ choices: [], usage: null }), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'google-gemini-2.5-pro',
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            reasoning: expect.anything(),
+          }),
+        })
+      );
+    });
+
+    it('omits the reasoning default when the model is unknown', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of({ choices: [], usage: null }), logger)
       );
@@ -362,9 +415,8 @@ describe('inferenceEndpointAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            tools: expect.any(Array),
-            reasoning: { effort: 'none' },
+          body: expect.not.objectContaining({
+            reasoning: expect.anything(),
           }),
         })
       );

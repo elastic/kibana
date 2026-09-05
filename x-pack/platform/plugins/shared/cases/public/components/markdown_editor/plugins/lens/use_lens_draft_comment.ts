@@ -8,6 +8,7 @@
 import type { EuiMarkdownAstNodePosition } from '@elastic/eui';
 import { useCallback, useEffect, useState } from 'react';
 import { first } from 'rxjs';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 import { VISUALIZATION } from './translations';
@@ -50,10 +51,12 @@ export const useLensDraftComment = () => {
 
       const incomingEmbeddablePackage = embeddable
         ?.getStateTransfer()
-        .getIncomingEmbeddablePackage(currentAppId);
+        .getIncomingEmbeddablePackage(currentAppId, false);
       const storageDraftComment = storage.get(DRAFT_COMMENT_STORAGE_ID);
 
-      setHasIncomingLensState(!!incomingEmbeddablePackage);
+      setHasIncomingLensState(
+        incomingEmbeddablePackage?.some((pkg) => pkg.type === LENS_EMBEDDABLE_TYPE) ?? false
+      );
 
       if (storageDraftComment) {
         setDraftComment(storageDraftComment);

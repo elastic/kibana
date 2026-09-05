@@ -1,6 +1,22 @@
 {
-  "sha1": "391a31963c5966b043edf6383045240e9166bd8f",
+  "sha1": "9dd461fb95829a00f0b171cc146877377bd57470",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "5d0d5fb99025df3-3053911fdf65397",
+      "title": "CPS brownout — alerts page degraded state alerts page shows a warning callout (not a hard error) when a linked project is unresponsive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/detection_engine/cps/alerts_page_brownout.spec.ts",
+        "line": 31,
+        "column": 1
+      }
+    },
     {
       "id": "96992190a6b747c-923a699644bffc2",
       "title": "CPS field dropdown scoping - threat match mapping fields origin-only space: threat field dropdown shows origin fields but not linked fields",
@@ -11,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/detection_engine/cps/field_dropdown_scoping.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 26,
+        "column": 1
       }
     },
     {
@@ -25,8 +41,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/detection_engine/cps/field_dropdown_scoping.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 46,
+        "column": 14
       }
     },
     {
@@ -39,8 +55,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/graph_visualization/cps/project_routing.spec.ts",
-        "line": 199,
-        "column": 7
+        "line": 183,
+        "column": 14
       }
     },
     {
@@ -53,8 +69,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/graph_visualization/cps/project_routing.spec.ts",
-        "line": 239,
-        "column": 7
+        "line": 205,
+        "column": 14
       }
     }
   ]

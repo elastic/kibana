@@ -155,6 +155,7 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/alerting-v2-utils'
   - '@kbn/deeplinks-workflows'
+  - '@kbn/deeplinks-evals'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/kql'
   - '@kbn/shared-ux-utility'
@@ -168,6 +169,8 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/global-search-plugin'
+  - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
@@ -180,7 +183,7 @@ fileGroups:
     - public/**/*
     - public/**/*.json
     - server/**/*
-    - test/scout/**/*
+    - test/scout*/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

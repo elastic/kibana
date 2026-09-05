@@ -183,7 +183,7 @@ export const DatasetDetailPage: React.FC = () => {
     data: exampleScoresData,
     isLoading: isExampleScoresLoading,
     error: exampleScoresError,
-  } = useExampleScores(selectedExample?.id ?? '');
+  } = useExampleScores(selectedExample?.id ?? '', datasetId);
 
   const openMetadataModal = () => {
     setMetadataDescription(dataset?.description ?? '');

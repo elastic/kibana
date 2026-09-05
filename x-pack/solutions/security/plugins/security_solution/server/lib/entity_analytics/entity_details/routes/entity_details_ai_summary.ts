@@ -27,6 +27,7 @@ import {
   MAX_SUMMARY_ANOMALY_JOB_ID_LENGTH,
   MAX_SUMMARY_VARIANT_ID_LENGTH,
 } from '@kbn/entity-store/common/entity_summary';
+import { formatBulkDropSummary } from '@kbn/entity-store/server';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -180,9 +181,13 @@ export const entityDetailsAiSummaryRoute = ({
 
           // A dropped doc resolves (not throws) as `failed > 0`; treat it as a hard failure so
           // we don't report success for a summary that was never written.
-          const { failed } = await metadataClient.bulkAppendMetadata([doc]);
+          const { failed, dropsByType } = await metadataClient.bulkAppendMetadata([doc]);
           if (failed > 0) {
-            throw new Error('AI summary document was dropped from the metadata bulk write');
+            throw new Error(
+              `AI summary document was dropped from the metadata bulk write: ${formatBulkDropSummary(
+                dropsByType
+              )}`
+            );
           }
 
           // Emit the model's raw (pre-cap) output sizes so we can measure how often and by how

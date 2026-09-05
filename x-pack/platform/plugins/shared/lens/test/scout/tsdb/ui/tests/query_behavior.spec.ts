@@ -8,26 +8,28 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
+  ES_ARCHIVE_PATHS,
+  KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX,
+  TSDB_IN_RANGE_DATES,
+} from '../../../common/fixtures/constants';
+import {
   ROLLED_UP_MEDIAN_WARNING,
   TSDB_DATA_VIEW_ID,
   TSDB_DOWNSAMPLED_DATA_VIEW_ID,
-  TSDB_ES_ARCHIVE,
-  TSDB_INDEX,
-  TSDB_TIME_RANGE,
   test,
 } from '../fixtures';
 
 test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnostic }, () => {
   let downsampledTargetIndex = '';
-  const downsampledDataViewTitle = `${TSDB_INDEX},${TSDB_INDEX}_downsampled`;
+  const downsampledDataViewTitle = `${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX},${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX}_downsampled`;
   const createdDataViewIds: string[] = [];
 
   test.beforeAll(async ({ apiServices, esArchiver, tsdbHelper, uiSettings }) => {
-    await esArchiver.loadIfNeeded(TSDB_ES_ARCHIVE);
+    await esArchiver.loadIfNeeded(ES_ARCHIVE_PATHS.KIBANA_SAMPLE_DATA_LOGS_TSDB);
 
     const { data: tsdbDataView } = await apiServices.dataViews.create({
       id: TSDB_DATA_VIEW_ID,
-      title: TSDB_INDEX,
+      title: KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX,
       timeFieldName: '@timestamp',
       override: true,
     });
@@ -35,12 +37,13 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
 
     await uiSettings.set({
       'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': JSON.stringify(TSDB_TIME_RANGE),
+      'timepicker:timeDefaults': JSON.stringify(TSDB_IN_RANGE_DATES),
     });
 
-    downsampledTargetIndex = await tsdbHelper.downsampleTSDBIndex(TSDB_INDEX, {
-      isStream: false,
-    });
+    downsampledTargetIndex = await tsdbHelper.downsampleTSDBIndex(
+      KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX,
+      { isStream: false }
+    );
     const { data: downsampleDataView } = await apiServices.dataViews.create({
       id: TSDB_DOWNSAMPLED_DATA_VIEW_ID,
       title: downsampledDataViewTitle,
@@ -63,7 +66,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     if (downsampledTargetIndex) {
       await esClient.indices.delete({ index: downsampledTargetIndex }, { ignore: [404] });
     }
-    await esClient.indices.delete({ index: TSDB_INDEX }, { ignore: [404] });
+    await esClient.indices.delete({ index: KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX }, { ignore: [404] });
   });
 
   test('defaults to median without warnings for non-rolled-up metrics', async ({

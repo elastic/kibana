@@ -55,7 +55,7 @@ import { agentPolicyService } from '../agent_policy';
 import { getInstallation, getPackageInfo } from '../epm/packages';
 import { runWithCache } from '../epm/packages/cache';
 import { appContextService, cloudConnectorService } from '..';
-import { FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
+import { FleetError, FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 } from '../../constants';
 
 import type { PackageInfo } from '../../types';
@@ -336,7 +336,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         esClient: this.esClient,
         logger: this.logger,
         cloudConnectorName: data.cloud_connector?.name,
-        policyTemplate,
       });
 
       newPackagePolicy = updatedPackagePolicy;
@@ -436,9 +435,30 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     const force = data.force;
     const policyTemplate = data.policy_template;
 
-    // Load and guard the target. A missing policy, or one that is not agentless throws a 404
-    const existingAgentPolicy = await this.getExistingAgentlessAgentPolicy(policyId);
+    // Load and guard the target. A missing policy, or one that is not agentless throws a 404.
+    // Load the package policy first to resolve the true agent policy ID: policies created before
+    // the same-ID invariant (createAgentlessPolicy line 225) may have a different agent policy ID.
     const existingPackagePolicy = await this.getExistingAgentlessPackagePolicy(policyId);
+    // Fall back to policyId only if policy_ids is somehow empty (corrupt SO) to preserve
+    // the prior behaviour for well-formed new policies where the IDs are equal.
+    const resolvedAgentPolicyId = existingPackagePolicy.policy_ids[0];
+    const agentPolicyId = resolvedAgentPolicyId ?? policyId;
+    if (!resolvedAgentPolicyId) {
+      this.logger.warn(
+        `Agentless package policy ${policyId} has no policy_ids entry; falling back to package policy ID as agent policy ID`
+      );
+    }
+    // Re-raise not-found with policyId so the caller sees the ID they sent, not the internal
+    // agent policy ID they've never seen.
+    let existingAgentPolicy: AgentPolicy;
+    try {
+      existingAgentPolicy = await this.getExistingAgentlessAgentPolicy(agentPolicyId);
+    } catch (error) {
+      if (error instanceof FleetNotFoundError) {
+        throw new FleetNotFoundError(`Agentless policy ${policyId} not found`);
+      }
+      throw error;
+    }
 
     const pkg = data.package;
     // `package` is accepted (full-replace, symmetric with POST). The package name is
@@ -498,7 +518,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         // is already an allow-list mapper that would drop them, so this is defensive/explicit, not a fix.
         ...omit(data, 'id', 'package', 'cloud_connector', 'create_dataset_templates'),
         namespace: data.namespace || 'default',
-        policy_ids: [policyId],
+        policy_ids: [agentPolicyId],
         supports_agentless: true,
         description: data.description ?? '',
         global_data_tags: data.global_data_tags ?? [],
@@ -529,7 +549,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         esClient: this.esClient,
         logger: this.logger,
         cloudConnectorName: data.cloud_connector?.name,
-        policyTemplate,
+        attachedCloudConnectorId: existingPackagePolicy.cloud_connector_id ?? undefined,
       });
 
       newPackagePolicy = integratedPackagePolicy;
@@ -557,12 +577,12 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       // a diverged workload. It also fires a best-effort deploy via the update event; the explicit
       // `deployPolicy({ throwOnAgentlessError: true })` below is the authoritative, error-surfacing
       // reconcile (the event-handler deploy can't surface a failure since it doesn't throw).
-      this.logger.debug(`Updating agentless agent policy ${policyId}`);
+      this.logger.debug(`Updating agentless agent policy ${agentPolicyId}`);
       agentPolicyUpdateAttempted = true; // set before await — same rollback-safety rationale as above
       await agentPolicyService.update(
         this.soClient,
         this.esClient,
-        policyId,
+        agentPolicyId,
         {
           name: getAgentlessAgentPolicyNameFromPackagePolicyName(data.name),
           namespace: data.namespace || 'default',
@@ -575,8 +595,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       // Re-sync the saved-object config to the live agentless workload. throwOnAgentlessError
       // makes a failed external reconcile fail the whole operation instead of silently
       // leaving the deployment out of sync.
-      this.logger.debug(`Deploy agentless policy ${policyId}`);
-      await agentPolicyService.deployPolicy(this.soClient, policyId, undefined, {
+      this.logger.debug(`Deploy agentless policy ${agentPolicyId}`);
+      await agentPolicyService.deployPolicy(this.soClient, agentPolicyId, undefined, {
         throwOnAgentlessError: true,
       });
 
@@ -593,6 +613,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
       await this.rollbackAgentlessPolicyUpdate({
         policyId,
+        agentPolicyId,
         existingPackagePolicy,
         existingAgentPolicy,
         createdCloudConnectorId,
@@ -619,13 +640,26 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
       : undefined;
 
+    // Resolve the true agent policy ID from the package policy. Using getExistingAgentlessPackagePolicy
+    // ensures a non-agentless package policy ID returns a 404 rather than resolving its real agent
+    // policy and operating on it. Legacy policies (created before the same-ID invariant) may have a
+    // different agent policy ID stored in policy_ids[0].
+    const existingPackagePolicy = await this.getExistingAgentlessPackagePolicy(policyId);
+    const resolvedAgentPolicyId = existingPackagePolicy.policy_ids[0];
+    const agentPolicyId = resolvedAgentPolicyId ?? policyId;
+    if (!resolvedAgentPolicyId) {
+      this.logger.warn(
+        `Agentless package policy ${policyId} has no policy_ids entry; falling back to package policy ID as agent policy ID`
+      );
+    }
+
     let agentPolicy;
     try {
-      agentPolicy = await agentPolicyService.get(this.soClient, policyId);
+      agentPolicy = await agentPolicyService.get(this.soClient, agentPolicyId);
     } catch (e) {
       if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        this.logger.warn(`Agent policy ${policyId} not found, cleaning up orphaned resources`);
-        await this.deleteOrphanedAgentlessResources(policyId, user);
+        this.logger.warn(`Agent policy ${agentPolicyId} not found, cleaning up orphaned resources`);
+        await this.deleteOrphanedAgentlessResources(agentPolicyId, user, options);
         return;
       }
       throw e;
@@ -636,7 +670,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     }
 
     // Delete agent policy (this will also delete associated package policies)
-    await agentPolicyService.delete(this.soClient, this.esClient, policyId, {
+    await agentPolicyService.delete(this.soClient, this.esClient, agentPolicyId, {
       force: options?.force,
       user,
     });
@@ -1008,19 +1042,19 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
    * not-found error (not `null`) for a missing policy, so it must be normalized here rather
    * than relying on a truthiness guard.
    */
-  private async getExistingAgentlessAgentPolicy(policyId: string): Promise<AgentPolicy> {
+  private async getExistingAgentlessAgentPolicy(agentPolicyId: string): Promise<AgentPolicy> {
     let agentPolicy: AgentPolicy | null;
     try {
-      agentPolicy = await agentPolicyService.get(this.soClient, policyId);
+      agentPolicy = await agentPolicyService.get(this.soClient, agentPolicyId);
     } catch (error) {
       if (error instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        throw new FleetNotFoundError(`Agentless policy ${policyId} not found`);
+        throw new FleetNotFoundError(`Agentless policy ${agentPolicyId} not found`);
       }
       throw error;
     }
 
     if (!agentPolicy?.supports_agentless) {
-      throw new FleetNotFoundError(`Agentless policy ${policyId} not found`);
+      throw new FleetNotFoundError(`Agentless policy ${agentPolicyId} not found`);
     }
 
     return agentPolicy;
@@ -1063,6 +1097,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
    */
   private async rollbackAgentlessPolicyUpdate({
     policyId,
+    agentPolicyId,
     existingPackagePolicy,
     existingAgentPolicy,
     createdCloudConnectorId,
@@ -1073,6 +1108,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     originalError,
   }: {
     policyId: string;
+    agentPolicyId: string;
     existingPackagePolicy: PackagePolicy;
     existingAgentPolicy: AgentPolicy;
     createdCloudConnectorId?: string;
@@ -1115,12 +1151,12 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
     if (agentPolicyUpdateAttempted) {
       attempted.push('agent policy');
-      this.logger.debug(`Rolling back: restoring agent policy ${policyId}`);
+      this.logger.debug(`Rolling back: restoring agent policy ${agentPolicyId}`);
       await agentPolicyService
         .update(
           this.soClient,
           this.esClient,
-          policyId,
+          agentPolicyId,
           {
             name: existingAgentPolicy.name,
             namespace: existingAgentPolicy.namespace,
@@ -1132,7 +1168,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         .catch((e: Error) => {
           failed.push('agent policy');
           this.logger.error(
-            `Failed to roll back agent policy ${policyId} (original update error: ${originalError.message}): ${e.message}`,
+            `Failed to roll back agent policy ${agentPolicyId} (original update error: ${originalError.message}): ${e.message}`,
             { error: e }
           );
         });
@@ -1176,19 +1212,49 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     }
   }
 
-  private async deleteOrphanedAgentlessResources(policyId: string, user?: AuthenticatedUser) {
-    const packagePolicies = await this.packagePolicyService.findAllForAgentPolicy(
+  private async deleteOrphanedAgentlessResources(
+    policyId: string,
+    user?: AuthenticatedUser,
+    options?: { force?: boolean }
+  ) {
+    const allPackagePolicies = await this.packagePolicyService.findAllForAgentPolicy(
       this.soClient,
       policyId
     );
 
-    if (packagePolicies.length > 0) {
-      await this.packagePolicyService.delete(
+    const agentlessPackagePolicies = allPackagePolicies.filter((pp) => pp.supports_agentless);
+    const skippedIds = allPackagePolicies.filter((pp) => !pp.supports_agentless).map((pp) => pp.id);
+
+    if (skippedIds.length > 0) {
+      this.logger.warn(
+        `Skipping deletion of non-agentless package policies for orphaned agent policy ${policyId}: ${skippedIds.join(
+          ', '
+        )}`
+      );
+    }
+
+    const managedIds = agentlessPackagePolicies
+      .filter((pp) => pp.is_managed && !options?.force)
+      .map((pp) => pp.id);
+    if (managedIds.length > 0) {
+      throw new FleetError(
+        `Cannot delete managed agentless policies without force: ${managedIds.join(
+          ', '
+        )}. Pass force: true to override.`
+      );
+    }
+
+    let deleteErrors: string[] = [];
+    if (agentlessPackagePolicies.length > 0) {
+      const deleteResult = await this.packagePolicyService.delete(
         this.soClient,
         this.esClient,
-        packagePolicies.map((pp) => pp.id),
-        { force: true, user: user ?? undefined, skipUnassignFromAgentPolicies: true }
+        agentlessPackagePolicies.map((pp) => pp.id),
+        { force: options?.force, user: user ?? undefined }
       );
+      deleteErrors = deleteResult
+        .filter((r) => !r.success)
+        .map((r) => `${r.id}: ${r.body?.message ?? 'unknown error'}`);
     }
 
     try {
@@ -1196,6 +1262,18 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     } catch (e) {
       this.logger.warn(
         `Failed to delete agentless deployment for orphaned policy ${policyId}: ${e.message}`
+      );
+    }
+
+    if (agentlessPackagePolicies.length === 0) {
+      throw new FleetNotFoundError(`No agentless package policies found for policy ${policyId}`);
+    }
+
+    if (deleteErrors.length > 0) {
+      throw new PackagePolicyRequestError(
+        `Failed to delete some package policies for orphaned agent policy ${policyId}: ${deleteErrors.join(
+          '; '
+        )}`
       );
     }
   }

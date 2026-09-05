@@ -59,14 +59,21 @@ export const getStaticProjectScopeLabel = (projectRouting?: ProjectRouting): str
   }
 };
 
-export const getProjectScopeSortValue = (projectRouting?: ProjectRouting): string => {
+export const getProjectScopeSortValue = (
+  projectRouting?: ProjectRouting,
+  originProjectId?: string
+): string => {
   if (projectRouting === PROJECT_ROUTING.ALL) {
     return 'all';
   }
 
   // A missing project routing value means the transform is origin-only, which is
-  // the same display bucket as the explicit `_alias:_origin` routing value.
-  if (projectRouting === undefined || projectRouting === PROJECT_ROUTING.ORIGIN) {
+  // the same display bucket as explicit origin-only routing values.
+  if (
+    projectRouting === undefined ||
+    projectRouting === PROJECT_ROUTING.ORIGIN ||
+    (originProjectId && projectRouting === `_id:${originProjectId}`)
+  ) {
     return 'origin';
   }
 
@@ -107,6 +114,7 @@ const ProjectScopePopoverContent = ({
       fetchProjectsByRouting={fetchProjects}
       controlsState="hidden"
       customHeaderText={popoverTitle}
+      showProjectTags={false}
     />
   );
 };
@@ -133,6 +141,10 @@ const CustomProjectScopeLabel = ({ cpsManager, projectRouting }: ProjectScopeCol
 
   if (projectCount === 0) {
     return unknownProjectScopeLabel;
+  }
+
+  if (originProject && linkedProjects.length === 0) {
+    return originProjectLabel;
   }
 
   return `${projectCount}/${cpsManager.getTotalProjectCount()}`;
@@ -174,6 +186,7 @@ export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeC
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
+      panelProps={{ css: { width: 320 } }}
       anchorPosition="downLeft"
       repositionOnScroll
     >

@@ -25,9 +25,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceVars } from './use_service_settings';
-import type { TransportType } from './field_config';
-import { getRequiredTextFields } from './field_config';
+import { makeDsView } from '../../aws_service_matrix';
+import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
+import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
 import { ServiceFieldsForm } from './service_fields_form';
 import { isDuplicateNameTaken } from './duplicate_name';
 
@@ -38,7 +38,12 @@ interface DuplicateServiceModalProps {
   suggestedName: string;
   /** All existing instance names — used for collision detection. */
   existingNames: string[];
-  onAdd: (name: string, fields: Record<string, string>, transport: TransportType | null) => void;
+  globalRegion: string;
+  onAdd: (
+    name: string,
+    varsByDataStream: Record<string, ServiceDataStreamVars>,
+    enabledDataStreams: string[]
+  ) => void;
   onCancel: () => void;
 }
 
@@ -47,26 +52,53 @@ export function DuplicateServiceModal({
   sourceConfig,
   suggestedName,
   existingNames,
+  globalRegion,
   onAdd,
   onCancel,
 }: DuplicateServiceModalProps) {
   const [name, setName] = useState(suggestedName);
   const [nameTouched, setNameTouched] = useState(false);
 
-  const [draft, setDraft] = useState<Record<string, string>>({ ...sourceConfig.vars });
-  const [draftTransport, setDraftTransport] = useState<TransportType | null>(sourceConfig.trigger);
-
-  const handleFieldChange = (fieldName: string, value: string) => {
-    setDraft((prev) => ({ ...prev, [fieldName]: value }));
-  };
+  const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
+    ...sourceConfig.varsByDataStream,
+  }));
 
   const trimmedName = name.trim();
   const nameEmpty = trimmedName === '';
   const nameTaken = !nameEmpty && isDuplicateNameTaken(trimmedName, existingNames);
   const nameInvalid = nameEmpty || nameTaken;
 
-  const requiredTextFields = getRequiredTextFields(service, draftTransport);
-  const anyRequiredEmpty = requiredTextFields.some((f) => !(draft[f] ?? '').trim());
+  const singleDs = service.dataStreams.length === 1;
+  const enabledDsFromInputs = service.dataStreams.filter((dsId) => {
+    const dsVars = draftByDs[dsId];
+    if (dsVars) return dsVars.enabledInputs.length > 0;
+    if (singleDs) return true;
+    return (service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs?.length ?? 0) > 0;
+  });
+  const activeDataStreams =
+    enabledDsFromInputs.length > 0 ? enabledDsFromInputs : service.dataStreams;
+
+  const anyRequiredEmpty = activeDataStreams.some((dsId) => {
+    const dsInfo = service.varDefsByDataStream?.[dsId];
+    const dsVars = draftByDs[dsId] ?? { enabledInputs: [], varsByInput: {} };
+    const activeInputs = dsVars.enabledInputs.length
+      ? dsVars.enabledInputs
+      : singleDs
+      ? dsInfo?.inputs ?? []
+      : dsInfo?.defaultEnabledInputs?.length
+      ? dsInfo.defaultEnabledInputs
+      : dsInfo?.inputs?.slice(0, 1) ?? [];
+    const dsView = makeDsView(service, dsId);
+    return activeInputs.some((inp) =>
+      getRequiredTextFields(dsView, inp).some((f) => {
+        const meta = resolveFieldMeta(dsView, inp, f);
+        const raw = dsVars.varsByInput[inp]?.[f];
+        const effective = meta ? toTyped(raw, meta) : raw ?? '';
+        if (Array.isArray(effective)) return effective.length === 0;
+        return typeof effective === 'string' && !effective.trim();
+      })
+    );
+  });
 
   const canAdd = !nameInvalid && !anyRequiredEmpty;
 
@@ -85,7 +117,13 @@ export function DuplicateServiceModal({
       setNameTouched(true);
       return;
     }
-    onAdd(trimmedName, draft, draftTransport);
+    const enabledDataStreams = service.dataStreams.filter((dsId) => {
+      const dsVars = draftByDs[dsId];
+      if (dsVars) return dsVars.enabledInputs.length > 0;
+      if (singleDs) return true;
+      return (service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs?.length ?? 0) > 0;
+    });
+    onAdd(trimmedName, draftByDs, enabledDataStreams);
   };
 
   return (
@@ -140,11 +178,45 @@ export function DuplicateServiceModal({
 
         <ServiceFieldsForm
           service={service}
-          draft={draft}
-          draftTransport={draftTransport}
-          onFieldChange={handleFieldChange}
-          onTransportChange={setDraftTransport}
-          showTransportPrefix
+          varsByDataStream={draftByDs}
+          globalRegion={globalRegion}
+          onFieldChange={(dsId, input, fieldName, value) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const defaultInputs = singleDs
+                ? dsInfo?.inputs ?? []
+                : dsInfo?.defaultEnabledInputs ?? [];
+              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  varsByInput: {
+                    ...existing.varsByInput,
+                    [input]: { ...(existing.varsByInput[input] ?? {}), [fieldName]: value },
+                  },
+                },
+              };
+            })
+          }
+          onInputToggle={(dsId, input, enabled) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const defaultInputs = singleDs
+                ? dsInfo?.inputs ?? []
+                : dsInfo?.defaultEnabledInputs ?? [];
+              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  enabledInputs: enabled
+                    ? [...existing.enabledInputs, input]
+                    : existing.enabledInputs.filter((i) => i !== input),
+                },
+              };
+            })
+          }
         />
       </EuiModalBody>
 

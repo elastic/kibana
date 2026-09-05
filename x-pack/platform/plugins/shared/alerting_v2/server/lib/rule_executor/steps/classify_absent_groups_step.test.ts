@@ -30,8 +30,13 @@ const createPluginConfigAccessor = () => {
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,
-      run: { alerts: { max: 10000 }, query: { maxResponseSize: 50 * 1024 * 1024 } },
+      run: {
+        alerts: { max: 10000 },
+        maxGroupsPerExecution: 10000,
+        query: { maxResponseSize: 50 * 1024 * 1024 },
+      },
     },
+    esql: { responseFormat: 'json' },
   };
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
 };
@@ -190,6 +195,29 @@ describe('ClassifyAbsentGroupsStep', () => {
       expect(internalEsClient.esql.query).toHaveBeenCalledTimes(1);
       // Short-circuits before the data-presence query.
       expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('reuses activeGroups from state instead of re-querying when present', async () => {
+      const { step, internalEsClient } = createStep();
+      const hashRec = hashFor('host-rec');
+
+      const rule = createRuleResponse({
+        kind: 'alert',
+        recovery_strategy: 'no_breach',
+        grouping: { fields: ['host.name'] },
+      });
+
+      const state = createRulePipelineState({
+        rule,
+        activeGroups: [{ group_hash: hashRec }],
+        alertEventsBatch: [],
+      });
+
+      const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(internalEsClient.esql.query).not.toHaveBeenCalled();
+      const finalBatch = results[results.length - 1].state.alertEventsBatch!;
+      expect(statusesByGroup(finalBatch)).toEqual({ [hashRec]: 'recovered' });
     });
   });
 

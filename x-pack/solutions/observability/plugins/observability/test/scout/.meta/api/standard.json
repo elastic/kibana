@@ -1,8 +1,7 @@
 {
-  "sha1": "a50038f9fc71e8c43a6ded33884ddc8ea54a6e46",
+  "sha1": "a4c2116a050e1a22d132dfbbd9818716c5129f1b",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -1800,8 +1799,8 @@
       }
     },
     {
-      "id": "c7e4e7d399ecfe6-42b81244286f3a3",
-      "title": "Observability alerts – no privilege cannot read muted alert state via _find_muted_alerts",
+      "id": "c7e4e7d399ecfe6-fa4a805234e221f",
+      "title": "Observability alerts – no privilege cannot check investigation availability",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1813,6 +1812,22 @@
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
         "line": 90,
         "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-42b81244286f3a3",
+      "title": "Observability alerts – no privilege cannot read muted alert state via _find_muted_alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 103,
+        "column": 7
       }
     },
     {

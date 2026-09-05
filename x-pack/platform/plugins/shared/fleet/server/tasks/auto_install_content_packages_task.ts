@@ -65,6 +65,7 @@ export class AutoInstallContentPackagesTask {
   private discoveryMap?: DiscoveryMap;
   private discoveryMapLastFetched: number = 0;
   private lastPrerelease: boolean = false;
+  private lastDatasetsWithDataCount?: number;
 
   constructor(setupContract: AutoInstallContentPackagesTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
@@ -329,9 +330,14 @@ export class AutoInstallContentPackagesTask {
     const datasetsWithData = [
       ...new Set(allDataStreamNames.map((name) => name.split('-')[1])),
     ].filter((dataset) => !installedSet.has(dataset));
-    this.logger.info(
-      `[AutoInstallContentPackagesTask] Found ${datasetsWithData.length} datasets with data`
-    );
+    const count = datasetsWithData.length;
+    const message = `[AutoInstallContentPackagesTask] Found ${count} datasets with data`;
+    if (this.lastDatasetsWithDataCount !== count) {
+      this.logger.info(message);
+    } else {
+      this.logger.debug(message);
+    }
+    this.lastDatasetsWithDataCount = count;
     return datasetsWithData;
   }
 

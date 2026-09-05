@@ -18,6 +18,7 @@ import {
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
 } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+import type { ReasoningPromptDiagnostics } from '@kbn/inference-prompt-utils';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { MemoryDiscoveryTools } from './memory_discovery_tools';
@@ -39,6 +40,7 @@ interface Params {
   connectorId: string;
   systemPrompt: string;
   maxExistingQueriesForContext?: number;
+  maxDurationMs?: number;
   queryValidationTimeoutMs?: number;
 }
 
@@ -60,12 +62,14 @@ export async function identifyKIQueries(
   queries: GeneratedSignificantEventQuery[];
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
+  reasoningDiagnostics: ReasoningPromptDiagnostics;
 }> {
   const {
     definition,
     connectorId,
     systemPrompt,
     maxExistingQueriesForContext,
+    maxDurationMs,
     queryValidationTimeoutMs,
   } = params;
   const {
@@ -121,27 +125,29 @@ export async function identifyKIQueries(
     },
   });
 
-  const { queries, tokensUsed, toolUsage } = await identifyKIQueriesThroughAgent({
-    stream: definition,
-    esClient,
-    inferenceClient: boundInferenceClient,
-    logger,
-    signal,
-    systemPrompt: combinedSystemPrompt,
-    getFeatures: async (filters) => {
-      const response = await kiClient.getFeatures(definition.name, {
-        ...filters,
-        excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
-      });
-      return response.hits;
-    },
-    additionalTools: hasAdditionalTools ? additionalTools : undefined,
-    additionalToolCallbacks: hasAdditionalTools ? additionalToolCallbacks : undefined,
-    existingQueries,
-    maxExistingQueriesForContext,
-    maxSteps: semanticCodeSearchTools ? MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS : undefined,
-    queryValidationTimeoutMs,
-  });
+  const { queries, tokensUsed, toolUsage, reasoningDiagnostics } =
+    await identifyKIQueriesThroughAgent({
+      stream: definition,
+      esClient,
+      inferenceClient: boundInferenceClient,
+      logger,
+      signal,
+      systemPrompt: combinedSystemPrompt,
+      getFeatures: async (filters) => {
+        const response = await kiClient.getFeatures(definition.name, {
+          ...filters,
+          excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
+        });
+        return response.hits;
+      },
+      additionalTools: hasAdditionalTools ? additionalTools : undefined,
+      additionalToolCallbacks: hasAdditionalTools ? additionalToolCallbacks : undefined,
+      existingQueries,
+      maxExistingQueriesForContext,
+      maxSteps: semanticCodeSearchTools ? MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS : undefined,
+      maxDurationMs,
+      queryValidationTimeoutMs,
+    });
 
   return {
     queries: queries.map((query) => ({
@@ -156,5 +162,6 @@ export async function identifyKIQueries(
     })),
     tokensUsed,
     toolUsage,
+    reasoningDiagnostics,
   };
 }

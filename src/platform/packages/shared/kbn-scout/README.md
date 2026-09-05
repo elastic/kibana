@@ -536,6 +536,7 @@ node scripts/scout start-server --arch <arch> --domain <domain>
 - **`--arch`**: `stateful` or `serverless`.
 - **`--domain`**: e.g. `classic`, `search`, `observability_complete`, `security_complete`. Use `node scripts/scout start-server --help` for the full list.
 - **`--preserveEsData`**: Reuse existing serverless ES object store data on startup instead of cleaning it (useful when restarting after crashes).
+- **Rspack HMR**: Disabled by default. Set `KBN_HMR=true` before starting the servers to enable it.
 
 This command is useful for manual testing or running tests via an IDE.
 

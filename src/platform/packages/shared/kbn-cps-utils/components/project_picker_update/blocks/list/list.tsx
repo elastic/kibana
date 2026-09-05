@@ -32,9 +32,13 @@ export interface ProjectPickerListProps {
    * from its anchor button.
    */
   scrollContainerRef?: RefObject<HTMLElement>;
+  showProjectTags?: boolean;
 }
 
-export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps) {
+export function ProjectPickerList({
+  scrollContainerRef,
+  showProjectTags = true,
+}: ProjectPickerListProps) {
   const buttonRef = useRef<HTMLElement | null>(null);
   const [activePopover, setActivePopover] = useState<ActivePopover>(null);
   const actions = useProjectPickerActions();
@@ -156,7 +160,7 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
           closeHandler={closePopover}
         />
       ) : null}
-      {activePopover?.kind === 'tags' && activeProject && buttonRef.current ? (
+      {showProjectTags && activePopover?.kind === 'tags' && activeProject && buttonRef.current ? (
         <ProjectPickerListItemTagsPopover
           key={`tags-${activeProject._id}`}
           button={buttonRef.current}
@@ -180,13 +184,14 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
             const isSelected = selectedProjectIdsSet.has(project._id);
 
             return (
-              <EuiFlexItem key={project._id} css={styles.listItemContainer}>
+              <EuiFlexItem key={project._id} grow={false} css={styles.listItemContainer}>
                 <ProjectPickerListItem
                   isSelected={isSelected}
                   isToggleDisabled={isSelected && includedVisibleProjectIds.length === 1}
                   isInteractionsDisabled={state.isFilterProposalPending}
                   controlsState={state.controlsState}
                   isOriginProject={state.originProjectId === project._id}
+                  showProjectTags={showProjectTags}
                   toggleDisabledMessage={toggleDisabledMessage}
                   project={project}
                   onContextMenu={onContextMenu}

@@ -46,31 +46,6 @@ export async function listMcpTools({
 }
 
 /**
- * Retrieves the input schema for a specific MCP tool by calling listTools on the connector.
- * Returns undefined if the connector or tool is not found.
- */
-async function getMcpToolInputSchema({
-  actions,
-  request,
-  connectorId,
-  toolName,
-}: {
-  actions: ActionsPluginStart;
-  request: KibanaRequest;
-  connectorId: string;
-  toolName: string;
-}): Promise<Record<string, unknown> | undefined> {
-  try {
-    const { tools } = await listMcpTools({ actions, request, connectorId });
-    const tool = tools.find((t) => t.name === toolName);
-    return tool?.inputSchema;
-  } catch (error) {
-    // Connector not found or other error - return undefined so getSchema will throw
-    return undefined;
-  }
-}
-
-/**
  * Retrieves a specific MCP tool by name by calling listTools on the connector.
  * Returns undefined if the connector or tool is not found.
  */
@@ -174,6 +149,20 @@ export const getMcpToolType = ({
   return {
     toolType: ToolType.mcp,
     getDynamicProps: (config, { request }) => {
+      // Memoize the listTools call so repeated getSchema() invocations don't
+      // each pay a full connector round-trip.
+      let toolsPromise: Promise<ListToolsResponse | undefined> | undefined;
+      const getToolsOnce = () => {
+        if (!toolsPromise) {
+          toolsPromise = listMcpTools({
+            actions,
+            request,
+            connectorId: config.connector_id,
+          }).catch(() => undefined);
+        }
+        return toolsPromise;
+      };
+
       return {
         getHandler: () => {
           return async (params, context) => {
@@ -234,19 +223,12 @@ export const getMcpToolType = ({
         },
 
         getSchema: async () => {
-          // Retrieve input schema by calling listTools on the MCP connector
-          const inputSchema = await getMcpToolInputSchema({
-            actions,
-            request,
-            connectorId: config.connector_id,
-            toolName: config.tool_name,
-          });
-
+          const result = await getToolsOnce();
+          const inputSchema = result?.tools.find((t) => t.name === config.tool_name)?.inputSchema;
           if (inputSchema) {
             const zodSchema = fromJSONSchema(inputSchema as Record<string, unknown>);
             return (zodSchema ?? z.object({})) as z.ZodObject<any>;
           }
-
           return z.object({});
         },
 

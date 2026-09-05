@@ -8,31 +8,45 @@
 import {
   getRegionFieldName,
   getRequiredTextFields,
-  getInlineFields,
   getFlyoutFields,
+  resolveFieldMeta,
+  toTyped,
+  toDraft,
 } from './field_config';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+
+function makeVarDef(
+  name: string,
+  type: RegistryVarsEntry['type'],
+  opts: Partial<RegistryVarsEntry> = {}
+): RegistryVarsEntry {
+  return { name, type, title: name, show_user: true, ...opts } as RegistryVarsEntry;
+}
 
 function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsServiceMatrixEntry {
   return {
     id: 'test',
     name: 'Test Service',
-    category: 'Compute',
-    signalType: 'logs',
+    category: 'compute',
+    signalTypes: ['logs'],
+    dataStreams: [],
     inputs: [],
-    deliveryMethods: [],
+    deploymentMethods: [],
     showInUI: true,
+    packageName: 'aws',
+    defaultEnabled: true,
     ...overrides,
   } as AwsServiceMatrixEntry;
 }
 
 describe('getRegionFieldName', () => {
-  it('returns "region" for S3 transport when service has region in requiredConfig', () => {
+  it('returns "region" for S3 input when service has region in requiredConfig', () => {
     const service = makeService({ requiredConfig: ['region', 'bucket_arn'] });
     expect(getRegionFieldName(service, 'aws-s3')).toBe('region');
   });
 
-  it('returns "region_name" for CloudWatch transport when service has region_name in requiredConfig', () => {
+  it('returns "region_name" for CloudWatch input when service has region_name in requiredConfig', () => {
     const service = makeService({ requiredConfig: ['region_name', 'log_group_arn'] });
     expect(getRegionFieldName(service, 'aws-cloudwatch')).toBe('region_name');
   });
@@ -46,115 +60,216 @@ describe('getRegionFieldName', () => {
     const service = makeService({ requiredConfig: [] });
     expect(getRegionFieldName(service, 'aws-s3')).toBe('aws_region');
   });
+});
 
-  it('does not return "region" for S3 when service lacks it in requiredConfig', () => {
-    // service only has aws_region, not region
-    const service = makeService({ requiredConfig: ['aws_region'] });
-    expect(getRegionFieldName(service, 'aws-s3')).toBe('aws_region');
+describe('resolveFieldMeta', () => {
+  it('returns undefined when varDefsByInput is absent', () => {
+    const service = makeService();
+    expect(resolveFieldMeta(service, 'aws-s3', 'bucket_arn')).toBeUndefined();
+  });
+
+  it('resolves label from title', () => {
+    const service = makeService({
+      varDefsByInput: {
+        'aws-s3': { bucket_arn: makeVarDef('bucket_arn', 'text', { title: 'Bucket ARN' }) },
+      },
+    });
+    const meta = resolveFieldMeta(service, 'aws-s3', 'bucket_arn');
+    expect(meta?.def.title).toBe('Bucket ARN');
+  });
+
+  it('resolves a var under its own input', () => {
+    const service = makeService({
+      varDefsByInput: {
+        'aws-s3': { bucket_arn: makeVarDef('bucket_arn', 'text') },
+      },
+    });
+    expect(resolveFieldMeta(service, 'aws-s3', 'bucket_arn')).toBeDefined();
+  });
+
+  it('returns undefined when activeInput does not match', () => {
+    const service = makeService({
+      varDefsByInput: {
+        'aws-s3': { bucket_arn: makeVarDef('bucket_arn', 'text') },
+      },
+    });
+    expect(resolveFieldMeta(service, 'aws-cloudwatch', 'bucket_arn')).toBeUndefined();
+  });
+
+  it('falls back to first-match scan when activeInput is null', () => {
+    const service = makeService({
+      varDefsByInput: {
+        'aws-s3': { bucket_arn: makeVarDef('bucket_arn', 'text') },
+      },
+    });
+    expect(resolveFieldMeta(service, null, 'bucket_arn')).toBeDefined();
+  });
+
+  it('allows two inputs to each hold a var of the same name independently', () => {
+    const s3Def = makeVarDef('queue_url', 'text', { title: 'S3 Queue' });
+    const cwDef = makeVarDef('queue_url', 'text', { title: 'CW Queue' });
+    const service = makeService({
+      varDefsByInput: {
+        'aws-s3': { queue_url: s3Def },
+        'aws-cloudwatch': { queue_url: cwDef },
+      },
+    });
+    expect(resolveFieldMeta(service, 'aws-s3', 'queue_url')?.def.title).toBe('S3 Queue');
+    expect(resolveFieldMeta(service, 'aws-cloudwatch', 'queue_url')?.def.title).toBe('CW Queue');
+  });
+
+  it('sets isBool true for type bool', () => {
+    const service = makeService({
+      varDefsByInput: {
+        'aws-s3': { collect_s3_logs: makeVarDef('collect_s3_logs', 'bool') },
+      },
+    });
+    const meta = resolveFieldMeta(service, 'aws-s3', 'collect_s3_logs');
+    expect(meta?.isBool).toBe(true);
+  });
+
+  it('sets multi true for multi vars', () => {
+    const service = makeService({
+      varDefsByInput: {
+        'aws-s3': { tags: makeVarDef('tags', 'text', { multi: true }) },
+      },
+    });
+    const meta = resolveFieldMeta(service, 'aws-s3', 'tags');
+    expect(meta?.multi).toBe(true);
+  });
+});
+
+describe('toTyped / toDraft', () => {
+  const boolMeta = resolveFieldMeta(
+    makeService({ varDefsByInput: { 'aws-s3': { f: makeVarDef('f', 'bool') } } }),
+    'aws-s3',
+    'f'
+  )!;
+  const multiMeta = resolveFieldMeta(
+    makeService({ varDefsByInput: { 'aws-s3': { f: makeVarDef('f', 'text', { multi: true }) } } }),
+    'aws-s3',
+    'f'
+  )!;
+  const textMeta = resolveFieldMeta(
+    makeService({ varDefsByInput: { 'aws-s3': { f: makeVarDef('f', 'text') } } }),
+    'aws-s3',
+    'f'
+  )!;
+
+  it('toTyped: bool string "true" → true', () => {
+    expect(toTyped('true', boolMeta)).toBe(true);
+  });
+
+  it('toTyped: bool string "false" → false', () => {
+    expect(toTyped('false', boolMeta)).toBe(false);
+  });
+
+  it('toTyped: bool undefined uses manifest default', () => {
+    expect(toTyped(undefined, boolMeta)).toBe(false);
+  });
+
+  it('toTyped: multi comma-separated → array', () => {
+    expect(toTyped('a,b, c', multiMeta)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('toTyped: multi empty → empty array', () => {
+    expect(toTyped('', multiMeta)).toEqual([]);
+  });
+
+  it('toTyped: text passes through', () => {
+    expect(toTyped('hello', textMeta)).toBe('hello');
+  });
+
+  it('toDraft: array → joined string', () => {
+    expect(toDraft(['a', 'b'])).toBe('a,b');
+  });
+
+  it('toDraft: bool → string', () => {
+    expect(toDraft(true)).toBe('true');
+    expect(toDraft(false)).toBe('false');
+  });
+
+  it('toDraft: undefined → empty string', () => {
+    expect(toDraft(undefined)).toBe('');
   });
 });
 
 describe('getRequiredTextFields', () => {
-  it('returns bucket_arn for S3 transport', () => {
-    const service = makeService({ requiredConfig: ['bucket_arn', 'region'] });
-    expect(getRequiredTextFields(service, 'aws-s3')).toEqual(['bucket_arn']);
-  });
-
-  it('returns log_group_arn for CloudWatch transport', () => {
-    const service = makeService({ requiredConfig: ['log_group_arn', 'region_name'] });
-    expect(getRequiredTextFields(service, 'aws-cloudwatch')).toEqual(['log_group_arn']);
-  });
-
-  it('excludes region fields (they have a global fallback)', () => {
-    const service = makeService({ requiredConfig: ['region', 'bucket_arn'] });
+  it('excludes region fields', () => {
+    const service = makeService({
+      requiredConfig: ['region', 'bucket_arn'],
+      varDefsByInput: {
+        'aws-s3': {
+          region: makeVarDef('region', 'text'),
+          bucket_arn: makeVarDef('bucket_arn', 'text'),
+        },
+      },
+    });
     const result = getRequiredTextFields(service, 'aws-s3');
     expect(result).not.toContain('region');
-    expect(result).not.toContain('region_name');
-    expect(result).not.toContain('aws_region');
+    expect(result).toContain('bucket_arn');
   });
 
-  it('excludes fields whose transport does not match the active transport', () => {
-    // bucket_arn is transport: aws-s3; when active transport is cloudwatch it should be excluded
-    const service = makeService({ requiredConfig: ['bucket_arn', 'log_group_arn'] });
+  it('excludes vars belonging to a different input', () => {
+    const service = makeService({
+      requiredConfig: ['bucket_arn', 'log_group_arn'],
+      varDefsByInput: {
+        'aws-s3': { bucket_arn: makeVarDef('bucket_arn', 'text') },
+        'aws-cloudwatch': { log_group_arn: makeVarDef('log_group_arn', 'text') },
+      },
+    });
     const result = getRequiredTextFields(service, 'aws-cloudwatch');
     expect(result).not.toContain('bucket_arn');
     expect(result).toContain('log_group_arn');
   });
 
-  it('returns detector_id (no transport restriction) regardless of active transport', () => {
-    const service = makeService({ requiredConfig: ['detector_id'] });
-    expect(getRequiredTextFields(service, 'aws-s3')).toContain('detector_id');
-    expect(getRequiredTextFields(service, 'aws-cloudwatch')).toContain('detector_id');
-    expect(getRequiredTextFields(service, null)).toContain('detector_id');
+  it('excludes bool vars', () => {
+    const service = makeService({
+      requiredConfig: ['collect_s3_logs'],
+      varDefsByInput: {
+        'aws-s3': { collect_s3_logs: makeVarDef('collect_s3_logs', 'bool') },
+      },
+    });
+    expect(getRequiredTextFields(service, 'aws-s3')).not.toContain('collect_s3_logs');
   });
 
-  it('returns empty array when service has no requiredConfig', () => {
-    const service = makeService({ requiredConfig: [] });
-    expect(getRequiredTextFields(service, null)).toEqual([]);
-  });
-});
-
-describe('getInlineFields', () => {
-  it('returns empty array — all fields have been moved to flyout placement', () => {
-    // bucket_arn, log_group_arn, detector_id all now have placement: flyout
-    const service = makeService({ requiredConfig: ['bucket_arn', 'log_group_arn', 'detector_id'] });
-    expect(getInlineFields(service, 'aws-s3')).toEqual([]);
-    expect(getInlineFields(service, 'aws-cloudwatch')).toEqual([]);
+  it('returns empty array when no varDefsByInput present', () => {
+    const service = makeService({ requiredConfig: ['bucket_arn'] });
+    expect(getRequiredTextFields(service, 'aws-s3')).toEqual([]);
   });
 });
 
 describe('getFlyoutFields', () => {
-  it('includes region field for S3 transport', () => {
-    const service = makeService({ requiredConfig: ['region', 'bucket_arn'] });
-    expect(getFlyoutFields(service, 'aws-s3')).toContain('region');
-  });
-
-  it('includes bucket_arn for S3 (now flyout-placed)', () => {
-    const service = makeService({ requiredConfig: ['bucket_arn'] });
-    expect(getFlyoutFields(service, 'aws-s3')).toContain('bucket_arn');
-  });
-
-  it('excludes S3-specific fields when CloudWatch is active', () => {
-    const service = makeService({ requiredConfig: ['bucket_arn', 'log_group_arn'] });
-    const result = getFlyoutFields(service, 'aws-cloudwatch');
-    expect(result).not.toContain('bucket_arn');
-    expect(result).toContain('log_group_arn');
-  });
-
-  it('includes fields from optionalConfig (e.g. regions)', () => {
-    const service = makeService({ requiredConfig: [], optionalConfig: ['regions'] });
-    expect(getFlyoutFields(service, null)).toContain('regions');
-  });
-
-  it('includes regions from optionalConfig and required bucket_arn together', () => {
+  it('excludes bool vars', () => {
     const service = makeService({
-      requiredConfig: ['bucket_arn', 'region'],
-      optionalConfig: ['regions'],
+      requiredConfig: ['collect_s3_logs'],
+      varDefsByInput: {
+        'aws-s3': { collect_s3_logs: makeVarDef('collect_s3_logs', 'bool') },
+      },
     });
-    const result = getFlyoutFields(service, 'aws-s3');
-    expect(result).toContain('bucket_arn');
-    expect(result).toContain('regions');
-  });
-});
-
-describe('getRequiredTextFields — optionalConfig exclusion', () => {
-  it('does not count regions in optionalConfig as required', () => {
-    // Services that moved regions to optionalConfig should not block Continue
-    const service = makeService({ requiredConfig: [], optionalConfig: ['regions'] });
-    expect(getRequiredTextFields(service, null)).toEqual([]);
+    expect(getFlyoutFields(service, 'aws-s3')).not.toContain('collect_s3_logs');
   });
 
-  it('does not count metrics in optionalConfig as required', () => {
-    const service = makeService({ requiredConfig: [], optionalConfig: ['regions', 'metrics'] });
-    expect(getRequiredTextFields(service, null)).toEqual([]);
-  });
-
-  it('still returns bucket_arn when in requiredConfig alongside optionalConfig', () => {
+  it('excludes vars belonging to a different input', () => {
     const service = makeService({
-      requiredConfig: ['bucket_arn', 'region'],
-      optionalConfig: ['regions'],
+      requiredConfig: ['bucket_arn', 'log_group_arn'],
+      varDefsByInput: {
+        'aws-s3': { bucket_arn: makeVarDef('bucket_arn', 'text') },
+        'aws-cloudwatch': { log_group_arn: makeVarDef('log_group_arn', 'text') },
+      },
     });
-    expect(getRequiredTextFields(service, 'aws-s3')).toContain('bucket_arn');
-    expect(getRequiredTextFields(service, 'aws-s3')).not.toContain('regions');
+    expect(getFlyoutFields(service, 'aws-cloudwatch')).not.toContain('bucket_arn');
+    expect(getFlyoutFields(service, 'aws-cloudwatch')).toContain('log_group_arn');
+  });
+
+  it('includes fields from optionalConfig', () => {
+    const service = makeService({
+      requiredConfig: [],
+      optionalConfig: ['queue_url'],
+      varDefsByInput: {
+        'aws-s3': { queue_url: makeVarDef('queue_url', 'text') },
+      },
+    });
+    expect(getFlyoutFields(service, 'aws-s3')).toContain('queue_url');
   });
 });

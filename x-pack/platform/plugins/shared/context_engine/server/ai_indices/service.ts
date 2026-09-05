@@ -15,6 +15,7 @@ import {
 } from '../../common/constants';
 import type {
   AiIndexDest,
+  AiIndexFeedbackAnalysis,
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
@@ -32,8 +33,8 @@ import { createAiIndexStorageClient } from './storage';
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
   ...(document.description !== undefined && { description: document.description }),
-  ...(document.feedback_agent_id !== undefined && {
-    feedback_agent_id: document.feedback_agent_id,
+  ...(document.feedback_analysis !== undefined && {
+    feedback_analysis: document.feedback_analysis,
   }),
   managed: document.managed ?? false,
   dest: document.dest,
@@ -150,6 +151,37 @@ export class AiIndexService {
       }
       throw error;
     }
+  }
+
+  /**
+   * Replaces only the feedback analysis block, leaving the rest of the entry —
+   * including its `managed` flag and its dest — untouched.
+   *
+   * Unlike {@link put} this is permitted on managed entries. A managed entry's
+   * *definition* is owned by the plugin that registers it, but which agent
+   * analyzes it and how often is operator preference; without this carve-out
+   * the indices that ship by default would be the only ones that could never
+   * be analyzed.
+   */
+  async setFeedbackAnalysis(
+    aiIndexId: string,
+    feedbackAnalysis: AiIndexFeedbackAnalysis
+  ): Promise<AiIndexFeedbackAnalysis> {
+    const existing = await this.findDocument(aiIndexId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+
+    // The dest is unchanged, so it is not re-validated here: an index whose
+    // backing store was deleted after registration must still be switchable
+    // off.
+    await this.writeDocument(
+      aiIndexId,
+      { ...existing.document, feedback_analysis: feedbackAnalysis },
+      existing
+    );
+
+    return feedbackAnalysis;
   }
 
   async get(aiIndexId: string): Promise<AiIndexHttpItem> {

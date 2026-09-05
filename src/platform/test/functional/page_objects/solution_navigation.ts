@@ -111,11 +111,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     // check that chrome ui is in project/solution mode
     async expectExists() {
       await retry.try(async () => {
-        const exists =
-          (await testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) ||
-          (await testSubjects.exists('kibanaProjectHeader', { timeout: 0 }));
+        const exists = await testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 });
         if (!exists) {
-          throw new Error('Neither chromeNextGlobalHeader nor kibanaProjectHeader is present');
+          throw new Error('chromeNextGlobalHeader is not present');
         }
       });
     },

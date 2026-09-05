@@ -15,7 +15,6 @@ import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/rout
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
-  hasWorkflowExecutionReadPrivilege,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
 import { workflowIdParamSchema } from '../utils/schemas';
@@ -85,9 +84,6 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          if (!hasWorkflowExecutionReadPrivilege(request)) {
-            return response.forbidden();
-          }
           const spaceId = spaces.getSpaceId(request);
           const { workflowId } = request.params;
           const query = request.query;

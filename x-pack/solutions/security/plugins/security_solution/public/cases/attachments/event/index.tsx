@@ -6,20 +6,21 @@
  */
 
 import React, { Suspense, lazy, type ComponentType } from 'react';
-import { EuiAvatar } from '@elastic/eui';
-import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
+import type {
+  CommonAttachmentListViewProps,
+  UnifiedReferenceAttachmentViewProps,
+} from '@kbn/cases-plugin/public';
 import { AttachmentActionType, defineAttachment } from '@kbn/cases-plugin/public';
 import {
   SECURITY_EVENT_ATTACHMENT_TYPE,
   isIndexMetadata,
   toStringArray,
 } from '@kbn/cases-plugin/common';
-import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { UserActionTitle } from '@kbn/cases-components';
 import { SecurityEventAttachmentPayloadSchema } from '../../../../common/cases/attachments/event';
 import { getNonEmptyField } from './utils';
 import {
-  DELETE_EVENTS_SUCCESS_TITLE,
+  DELETE_EVENTS_SUCCESS_TOAST,
   EVENT_COMMENT_LABEL_TITLE,
   EVENT_DISPLAY_NAME,
   MULTIPLE_EVENTS_COMMENT_LABEL_TITLE,
@@ -37,13 +38,13 @@ const EventTabContent = lazy(async () => {
   return { default: Component };
 });
 
-const EventTabContentWrapper: ComponentType<CommonAttachmentTabViewProps> = (props) => (
+const EventTabContentWrapper: ComponentType<CommonAttachmentListViewProps> = (props) => (
   <Suspense fallback={null}>
     <EventTabContent {...props} />
   </Suspense>
 );
 
-const getAttachmentViewObject = (props: UnifiedReferenceAttachmentViewProps) => {
+const getCreationActivity = (props: UnifiedReferenceAttachmentViewProps) => {
   const { savedObjectId, attachmentId, metadata } = props;
   const eventIds = toStringArray(attachmentId);
   const isSingleEvent = eventIds.length === 1;
@@ -62,27 +63,25 @@ const getAttachmentViewObject = (props: UnifiedReferenceAttachmentViewProps) => 
         dataTestSubj={`event-user-action-${savedObjectId}`}
       />
     ),
-    timelineAvatar: <EuiAvatar name="event" color="subdued" iconType="bell" aria-label="event" />,
-    deleteSuccessTitle: DELETE_EVENTS_SUCCESS_TITLE(Math.max(eventIds.length, 1)),
-    getActions: (actionProps: UnifiedReferenceAttachmentViewProps) => {
-      const actions = [];
-      if (isSingleEvent && eventIds[0] && index) {
-        actions.push({
-          type: AttachmentActionType.CUSTOM as const,
-          isPrimary: true,
-          render: () => (
-            <Suspense fallback={null}>
-              <ShowEventButton id={actionProps.savedObjectId} eventId={eventIds[0]} index={index} />
-            </Suspense>
-          ),
-        });
-      }
-      return actions;
-    },
+    deleteSuccessToast: DELETE_EVENTS_SUCCESS_TOAST(Math.max(eventIds.length, 1)),
+    getActions: () =>
+      isSingleEvent && eventIds[0] && index
+        ? [
+            {
+              type: AttachmentActionType.CUSTOM as const,
+              isPrimary: true,
+              render: () => (
+                <Suspense fallback={null}>
+                  <ShowEventButton id={savedObjectId} eventId={eventIds[0]} index={index} />
+                </Suspense>
+              ),
+            },
+          ]
+        : [],
   };
 };
 
-const getAttachmentRemovalObject = (props: UnifiedReferenceAttachmentViewProps) => {
+const getRemovalActivity = (props: UnifiedReferenceAttachmentViewProps) => {
   const eventIds = toStringArray(props.attachmentId);
   if (eventIds.length <= 1) {
     return { event: REMOVED_EVENT_LABEL_TITLE };
@@ -96,12 +95,12 @@ const getAttachmentRemovalObject = (props: UnifiedReferenceAttachmentViewProps) 
 export const getEventType = () =>
   defineAttachment({
     id: SECURITY_EVENT_ATTACHMENT_TYPE,
-    displayName: EVENT_DISPLAY_NAME,
-    icon: 'bell',
+    getLabel: () => EVENT_DISPLAY_NAME,
+    getIcon: () => 'bell',
     schema: SecurityEventAttachmentPayloadSchema,
-    getAttachmentViewObject: (props) => getAttachmentViewObject(props),
-    getAttachmentRemovalObject: (props) => getAttachmentRemovalObject(props),
-    getAttachmentTabViewObject: () => ({
+    getCreationActivity,
+    getRemovalActivity,
+    getAttachmentList: () => ({
       children: EventTabContentWrapper,
     }),
   });

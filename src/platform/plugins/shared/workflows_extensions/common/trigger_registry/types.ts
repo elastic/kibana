@@ -76,4 +76,10 @@ export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
    * Required so every trigger explicitly declares its contract. Set 'stable' for GA triggers (no badge).
    */
   stability: StabilityLevel;
+  /**
+   * When true, YAML must include a non-empty `connector-id` on this trigger,
+   * which is matched to `event.connectorId` at runtime.
+   * Only connector-event–derived triggers set this.
+   */
+  requiresConnectorId?: boolean;
 }

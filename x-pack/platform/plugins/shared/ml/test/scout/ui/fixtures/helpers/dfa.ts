@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient, ApiServicesFixture, EsClient } from '@kbn/scout';
+import type { KbnClient, ApiServicesFixture, EsClient, ScoutWorkerFixtures } from '@kbn/scout';
 import { ML_TEST_DASHBOARD_ATTRIBUTES } from '../constants';
 
 interface CleanupDfaTestArgs {
@@ -18,14 +18,78 @@ interface CleanupDfaTestArgs {
   destinationIndex: string;
 }
 
+interface SetupDfaSourceArgs {
+  esArchiver: ScoutWorkerFixtures['esArchiver'];
+  apiServices: ApiServicesFixture;
+  kbnClient: KbnClient;
+  esClient: EsClient;
+  archivePath: string;
+  indexName: string;
+  /** Optional; omit for indices without a time field (e.g. ft_ihp_outlier). */
+  timeFieldName?: string;
+}
+
+/**
+ * Loads an ES archive, creates the source data view + ML Test dashboard, and
+ * verifies ingest + saved objects exist before any UI step runs.
+ */
+export const setupDfaSourceFixtures = async ({
+  esArchiver,
+  apiServices,
+  kbnClient,
+  esClient,
+  archivePath,
+  indexName,
+  timeFieldName,
+}: SetupDfaSourceArgs): Promise<{ dataViewId: string; dashboardId: string }> => {
+  await esArchiver.loadIfNeeded(archivePath);
+
+  const { count } = await esClient.count({ index: indexName });
+  if (count === 0) {
+    throw new Error(
+      `Expected documents in index '${indexName}' after loading ${archivePath}, but count was 0`
+    );
+  }
+
+  const { data: dataView } = await apiServices.dataViews.create({
+    title: indexName,
+    name: indexName,
+    ...(timeFieldName ? { timeFieldName } : {}),
+    override: true,
+  });
+
+  if (!dataView?.id) {
+    throw new Error(`Failed to create data view '${indexName}'`);
+  }
+
+  const { data: foundViews } = await apiServices.dataViews.find(
+    (dv) => dv.title === indexName || dv.name === indexName
+  );
+  if (foundViews.length === 0) {
+    throw new Error(`Data view '${indexName}' was created but is not returned by dataViews.find`);
+  }
+
+  const dashboardId = await createMLTestDashboard(kbnClient);
+
+  return { dataViewId: dataView.id, dashboardId };
+};
+
 /**
  * Creates the shared 'ML Test' dashboard saved object used in every DFA spec's beforeAll.
  * Returns the saved-object id so the caller can pass it to cleanupDfaTest.
  */
 export const createMLTestDashboard = async (kbnClient: KbnClient): Promise<string> => {
+  const existing = await kbnClient.savedObjects.find<{ title?: string }>({ type: 'dashboard' });
+  const match = existing.saved_objects.find(
+    (so) => so.attributes.title === ML_TEST_DASHBOARD_ATTRIBUTES.title
+  );
+  if (match) {
+    return match.id;
+  }
+
   const dashboard = await kbnClient.savedObjects.create({
     type: 'dashboard',
-    overwrite: false,
+    overwrite: true,
     attributes: ML_TEST_DASHBOARD_ATTRIBUTES,
   });
   return dashboard.id;

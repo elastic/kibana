@@ -29,6 +29,8 @@ const createSpacesClientMock = () => {
       });
     }),
     getPersistedFeatureVisibility: jest.fn().mockResolvedValue([]),
+    isInitialSolutionSetupRequired: jest.fn().mockResolvedValue(false),
+    completeInitialSolutionSetup: jest.fn().mockResolvedValue(undefined),
     create: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     update: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     createSavedObjectFinder: repositoryMock.createPointInTimeFinder,

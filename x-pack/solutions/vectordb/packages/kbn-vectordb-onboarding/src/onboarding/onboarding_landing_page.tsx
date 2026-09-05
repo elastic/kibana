@@ -31,7 +31,8 @@ export const OnboardingLandingPage = () => {
   const { euiTheme } = useEuiTheme();
   const { elasticsearchUrl, apiKey, isLoading } = useOnboardingCredentials();
   const { services } = useKibana();
-  const vectorDatabaseDocsUrl = services.docLinks.links.enterpriseSearch.vectorDatabaseGetStarted;
+  const vectorDatabaseDocsUrl =
+    services.docLinks.links.enterpriseSearch.vectorDatabaseFullTextSearch;
 
   useEffect(() => {
     markOnboardingSeen();
@@ -65,6 +66,7 @@ export const OnboardingLandingPage = () => {
                 elasticsearchUrl={elasticsearchUrl}
                 apiKey={apiKey}
                 isLoading={isLoading}
+                showConnectionTypeSelector
                 telemetryPage="pathSelection"
               />
             </EuiFlexItem>

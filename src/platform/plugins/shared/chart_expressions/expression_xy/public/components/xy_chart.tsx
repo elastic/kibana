@@ -791,6 +791,7 @@ export function XYChart({
       style.tickLabel = {
         ...style.tickLabel,
         truncate: style.tickLabel.truncate ?? 'middle',
+        wrapLines: 2,
       };
 
       if (!isHorizontalChart(dataLayers)) {

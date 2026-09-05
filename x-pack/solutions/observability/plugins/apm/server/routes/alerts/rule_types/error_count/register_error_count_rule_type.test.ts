@@ -35,7 +35,7 @@ describe('Error count alert', () => {
     });
 
     await executor({ params });
-    expect(services.alertsClient.report).not.toBeCalled();
+    expect(services.alertsClient.report).not.toHaveBeenCalled();
   });
 
   it('sends alerts with service name and environment for those that exceeded the threshold', async () => {

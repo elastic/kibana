@@ -19,7 +19,11 @@ import type { VisContextUnmapped } from '@kbn/saved-search-plugin/common/types';
 import { isEqualFilters } from '../../utils/state_comparators';
 import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
-import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
+import {
+  selectTabRuntimeState,
+  selectTabTypeForPersistence,
+  type RuntimeStateManager,
+} from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
 import {
   fromSavedObjectTabToAppState,
@@ -74,11 +78,19 @@ export const selectHasUnsavedChanges = (
       continue;
     }
 
+    const tabState = selectTab(state, tabId);
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+
+    // Normalize both sides against the same tab type to avoid phantom changes.
+    const tabType = selectTabTypeForPersistence({ runtimeStateManager, tabState });
+
     // Ensure the persisted tab accounts for default app state values when comparing,
     // otherwise initializing a tab could automatically trigger unsaved changes.
     const persistedTabWithDefaults = fromTabStateToSavedObjectTab({
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
+        profileStateRegistry: services.profileStateRegistry,
         initialAppState: getInitialAppState({
           initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
           persistedTab,
@@ -93,16 +105,14 @@ export const selectHasUnsavedChanges = (
       overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
       currentDataView: undefined,
+      tabType,
     });
-
-    const tabState = selectTab(state, tabId);
-    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
 
     const normalizedTab = fromTabStateToSavedObjectTab({
       tab: tabState,
       currentDataView,
       services,
+      tabType,
     });
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
@@ -232,6 +242,8 @@ const TAB_COMPARATORS: TabComparators = {
   chartInterval: fieldComparator('chartInterval', 'auto'),
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
+  documentsDisplayMode: fieldComparator('documentsDisplayMode', 'table'),
+  jsonModeSettings: fieldComparator('jsonModeSettings', {}),
   esqlApproximation: fieldComparator('esqlApproximation', false),
   visContext: visContextComparator,
   controlGroupJson: (a, b) => {
@@ -240,4 +252,5 @@ const TAB_COMPARATORS: TabComparators = {
     const testB = JSON.parse(b ?? '{}');
     return isEqual(testA, testB);
   },
+  tabTypeState: fieldComparator('tabTypeState', undefined),
 };

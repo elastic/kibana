@@ -42,6 +42,24 @@ const config: WorkflowSelectorConfig = {
 />
 ```
 
+### `RunWorkflowPanel`
+
+A panel that lets a host plugin select and run a workflow with caller-provided inputs. Render it
+within Kibana's React context so it can use the application, notification, and rendering services.
+
+```tsx
+import { RunWorkflowPanel } from '@kbn/workflows-ui';
+
+<RunWorkflowPanel
+  inputs={{ caseId }}
+  onClose={() => closePopover()}
+  onExecute={() => trackWorkflowRun()}
+/>
+```
+
+Use `visibility` to request managed workflows for a selector or solution. The optional
+`filterWorkflow` and `sortWorkflow` callbacks can further tailor the displayed workflows.
+
 ## Dependencies
 
 - `@kbn/workflows` - For workflow types and utilities

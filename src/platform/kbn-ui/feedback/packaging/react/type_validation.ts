@@ -25,6 +25,7 @@
 import type {
   FeedbackTriggerButtonProps as SourceTriggerButtonProps,
   FeedbackContainerProps as SourceContainerProps,
+  FeedbackSuccessToastBodyProps as SourceSuccessToastBodyProps,
 } from '../../src';
 import type {
   FeedbackRegistryEntry as SourceFeedbackRegistryEntry,
@@ -37,6 +38,7 @@ import type {
 import type {
   FeedbackTriggerButtonProps as PackagedTriggerButtonProps,
   FeedbackContainerProps as PackagedContainerProps,
+  FeedbackSuccessToastBodyProps as PackagedSuccessToastBodyProps,
   FeedbackRegistryEntry as PackagedFeedbackRegistryEntry,
   FeedbackQuestion as PackagedFeedbackQuestion,
   FeedbackSubmittedData as PackagedFeedbackSubmittedData,
@@ -50,6 +52,7 @@ const _submittedData: PackagedFeedbackSubmittedData = {} as SourceFeedbackSubmit
 const _formData: PackagedFeedbackFormData = {} as SourceFeedbackFormData;
 const _triggerButtonProps: PackagedTriggerButtonProps = {} as SourceTriggerButtonProps;
 const _containerProps: PackagedContainerProps = {} as SourceContainerProps;
+const _successToastBodyProps: PackagedSuccessToastBodyProps = {} as SourceSuccessToastBodyProps;
 
 void _registryEntry;
 void _question;
@@ -57,5 +60,6 @@ void _submittedData;
 void _formData;
 void _triggerButtonProps;
 void _containerProps;
+void _successToastBodyProps;
 
 export const TYPE_VALIDATION_PASSED = true;

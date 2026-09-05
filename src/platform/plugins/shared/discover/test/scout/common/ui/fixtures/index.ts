@@ -48,7 +48,10 @@ type DiscoverSessionCreateData = Omit<DiscoverSessionApiData, 'description' | 't
 };
 
 export interface DiscoverScoutSpace extends ScoutSpaceParallelFixture {
-  setupDiscoverDefaults: (options?: { loadFlightsDataView?: boolean }) => Promise<void>;
+  setupDiscoverDefaults: (options?: {
+    loadFlightsDataView?: boolean;
+    loadLongWindowDataView?: boolean;
+  }) => Promise<void>;
   teardownDiscoverDefaults: () => Promise<void>;
   getDataViewId: (title: string) => string;
   createDiscoverSession: (data: DiscoverSessionCreateData) => Promise<string>;
@@ -96,10 +99,16 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
 
       const discoverScoutSpace: DiscoverScoutSpace = {
         ...scoutSpace,
-        setupDiscoverDefaults: async ({ loadFlightsDataView = false } = {}) => {
+        setupDiscoverDefaults: async ({
+          loadFlightsDataView = false,
+          loadLongWindowDataView = false,
+        } = {}) => {
           await loadSavedObjects(testData.DISCOVER_KBN_ARCHIVE);
           if (loadFlightsDataView) {
             await loadSavedObjects(testData.FLIGHTS_KBN_ARCHIVE);
+          }
+          if (loadLongWindowDataView) {
+            await loadSavedObjects(testData.LONG_WINDOW_LOGSTASH_KBN_ARCHIVE);
           }
           await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
           await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);

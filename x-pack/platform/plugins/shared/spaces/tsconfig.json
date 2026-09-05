@@ -11,8 +11,18 @@
       "@kbn/core-user-settings-types"
     ]
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_cps_local/**/*", "../../../../../typings/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/scout/**/*",
+    "test/scout_cps_local/**/*",
+    "test/scout_initial_solution_setup/**/*",
+    "test/scout_initial_solution_setup_api/**/*",
+    "../../../../../typings/**/*"
+  ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
     "@kbn/es-ui-shared-plugin",
@@ -60,6 +70,7 @@
     "@kbn/core-application-browser-mocks",
     "@kbn/ui-theme",
     "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-browser-hooks",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-spaces-common",
     "@kbn/css-utils",
@@ -78,9 +89,12 @@
     "@kbn/deeplinks-search",
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-shared",
+    "@kbn/deeplinks-vectordb",
     "@kbn/deeplinks-workplace-ai",
     "@kbn/core-user-profile-server",
-    "@kbn/ui-callout"
+    "@kbn/core-http-browser",
+    "@kbn/ui-callout",
+    "@kbn/core-user-profile-common"
   ],
   "exclude": ["target/**/*"]
 }

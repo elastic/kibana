@@ -9,6 +9,7 @@ import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import type {
   AssistantResponse,
+  ConversationRoundAuthor,
   ConversationRoundStep,
   ReasoningStep,
   ToolCallStep,
@@ -16,9 +17,11 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
+  getConversationRoundAuthorDisplayName,
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
+  isSubagentRosterUpdatedStep,
   isAskUserQuestionStep,
   isRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
@@ -35,7 +38,7 @@ import type {
   ProcessedRoundInput,
 } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
-import { formatSystemNotice } from '../prompts/utils/actions';
+import { formatSystemNotice, formatSubagentRosterNotice } from '../prompts/utils/actions';
 import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
@@ -84,6 +87,7 @@ export const convertPreviousRounds = async ({
   compactionSummary,
   conversationTimestamp,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
+  const subagentRosterFallback = conversation.subagentRosterFallback;
   const messages: BaseMessage[] = [];
   const attachmentTypeInstructionsProvided = new Set<string>();
 
@@ -105,6 +109,15 @@ export const convertPreviousRounds = async ({
     const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
     messages.push(createUserMessage('[Previous conversation context was compacted]'));
     messages.push(createAIMessage(summaryText));
+
+    // Inject back subagent roaster notice after compaction
+    if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
+      const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, id]) => ({
+        name,
+        conversation_id: id,
+      }));
+      messages.push(createUserMessage(formatSubagentRosterNotice(fallbackRoster)));
+    }
   }
 
   for (const round of rounds) {
@@ -167,6 +180,8 @@ export const roundToLangchain = async (
     for (const step of round.steps) {
       if (isBackgroundAgentCompleteStep(step)) {
         messages.push(createUserMessage(formatSystemNotice(step)));
+      } else if (isSubagentRosterUpdatedStep(step)) {
+        messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));
       } else if (isRelevantSkillsStep(step)) {
         if (step.skills.length > 0) {
           messages.push(createRelevantSkillsNoticeMessage(step.skills));
@@ -216,7 +231,7 @@ const formatRoundInput = ({
   attachmentTypes?: ProcessedAttachmentType[];
   attachmentTypeInstructionsProvided?: Set<string>;
 }): HumanMessage => {
-  const { message, attachments, attachment_context, attachment_refs } = input;
+  const { message, attachments, attachment_context, attachment_refs, author } = input;
 
   let content = message;
 
@@ -257,21 +272,56 @@ const formatRoundInput = ({
     }
   }
 
-  if (timestamp && timestamp !== new Date(0).toISOString()) {
-    content = `[Sent: ${formatDate(timestamp)}]\n\n${content}`;
+  const prefix = formatInputPrefix({ author, timestamp });
+  if (prefix) {
+    content = `${prefix}\n\n${content}`;
   }
 
   return createUserMessage(content);
 };
 
+const formatInputPrefix = ({
+  author,
+  timestamp,
+}: {
+  author?: ConversationRoundAuthor;
+  timestamp?: string;
+}): string | undefined => {
+  const parts: string[] = [];
+  const authorLabel = getAuthorLabel(author);
+  if (authorLabel) {
+    parts.push(`User: ${authorLabel}`);
+  }
+  if (timestamp && timestamp !== new Date(0).toISOString()) {
+    parts.push(`Sent: ${formatDate(timestamp)}`);
+  }
+  if (parts.length === 0) {
+    return undefined;
+  }
+  return `[${parts.join(' — ')}]`;
+};
+
+const getAuthorLabel = (author?: ConversationRoundAuthor): string | undefined => {
+  if (!author) return undefined;
+
+  const displayName = getConversationRoundAuthorDisplayName(author);
+
+  if (displayName) {
+    return displayName;
+  }
+
+  return author.id;
+};
+
 const formatAttachment = ({ attachment }: { attachment: ProcessedAttachment }): XmlNode => {
+  const { representation } = attachment;
   return {
     tagName: 'attachment',
     attributes: {
       type: attachment.attachment.type,
       id: attachment.attachment.id,
     },
-    children: [attachment.representation.value],
+    children: [representation.type === 'text' ? representation.value : ''],
   };
 };
 

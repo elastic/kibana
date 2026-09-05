@@ -12,6 +12,8 @@ import { createMemoryHistory } from 'history';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { DeepPartial } from '@kbn/utility-types';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 import { PipelinesList } from './main';
 import type { PipelineTable } from './table';
@@ -142,18 +144,27 @@ jest.mock('./pipeline_flyout', () => ({
   ),
 }));
 
-const renderPipelinesList = (path: string, services: DeepPartialMockServices) => {
+const renderList = (
+  history: ReturnType<typeof createMemoryHistory>,
+  services: DeepPartialMockServices
+) => {
   mockUseKibana.mockReturnValue({ services });
-  const history = createMemoryHistory({ initialEntries: [path] });
   return render(
-    <I18nProvider>
-      <Router history={history}>
-        <Routes>
-          <Route exact path={'/'} component={PipelinesList} />
-        </Routes>
-      </Router>
-    </I18nProvider>
+    <MockAppHeaderProvider>
+      <I18nProvider>
+        <Router history={history}>
+          <Routes>
+            <Route exact path={'/'} component={PipelinesList} />
+          </Routes>
+        </Router>
+      </I18nProvider>
+    </MockAppHeaderProvider>
   );
+};
+
+const renderPipelinesList = (path: string, services: DeepPartialMockServices) => {
+  const history = createMemoryHistory({ initialEntries: [path] });
+  return renderList(history, services);
 };
 
 describe('PipelinesList section', () => {
@@ -227,17 +238,7 @@ describe('PipelinesList section', () => {
       it('SHOULD render the PipelineTable and allow opening the flyout via table callback', () => {
         const history = createMemoryHistory({ initialEntries: ['/'] });
         const historyPushSpy = jest.spyOn(history, 'push');
-        mockUseKibana.mockReturnValue({ services });
-
-        render(
-          <I18nProvider>
-            <Router history={history}>
-              <Routes>
-                <Route exact path={'/'} component={PipelinesList} />
-              </Routes>
-            </Router>
-          </I18nProvider>
-        );
+        renderList(history, services);
 
         expect(screen.getByTestId('pipelineTable')).toBeInTheDocument();
 
@@ -249,17 +250,7 @@ describe('PipelinesList section', () => {
         it('SHOULD double encode pipeline name and push encoded path', () => {
           const history = createMemoryHistory({ initialEntries: ['/'] });
           const historyPushSpy = jest.spyOn(history, 'push');
-          mockUseKibana.mockReturnValue({ services });
-
-          render(
-            <I18nProvider>
-              <Router history={history}>
-                <Routes>
-                  <Route exact path={'/'} component={PipelinesList} />
-                </Routes>
-              </Router>
-            </I18nProvider>
-          );
+          renderList(history, services);
 
           fireEvent.click(screen.getByTestId('editPipeline'));
 
@@ -274,17 +265,7 @@ describe('PipelinesList section', () => {
           const history = createMemoryHistory({ initialEntries: ['/'] });
           const historyPushSpy = jest.spyOn(history, 'push');
           jest.spyOn(console, 'warn').mockImplementation(() => {});
-          mockUseKibana.mockReturnValue({ services });
-
-          render(
-            <I18nProvider>
-              <Router history={history}>
-                <Routes>
-                  <Route exact path={'/'} component={PipelinesList} />
-                </Routes>
-              </Router>
-            </I18nProvider>
-          );
+          renderList(history, services);
 
           fireEvent.click(screen.getByTestId('clonePipeline'));
 
@@ -297,17 +278,7 @@ describe('PipelinesList section', () => {
       describe('AND WHEN the URL contains a pipeline query param', () => {
         it('SHOULD open the PipelineFlyout on mount', () => {
           const history = createMemoryHistory({ initialEntries: ['/?pipeline=my-pipeline'] });
-          mockUseKibana.mockReturnValue({ services });
-
-          render(
-            <I18nProvider>
-              <Router history={history}>
-                <Routes>
-                  <Route exact path={'/'} component={PipelinesList} />
-                </Routes>
-              </Router>
-            </I18nProvider>
-          );
+          renderList(history, services);
 
           expect(screen.getByTestId('pipelineFlyout')).toBeInTheDocument();
           expect(screen.getByText('FLYOUT my-pipeline')).toBeInTheDocument();
@@ -320,17 +291,7 @@ describe('PipelinesList section', () => {
                 initialEntries: [`/?pipeline=${encodeURIComponent(unknownCreateName)}`],
               });
               const historyPushSpy = jest.spyOn(history, 'push');
-              mockUseKibana.mockReturnValue({ services });
-
-              render(
-                <I18nProvider>
-                  <Router history={history}>
-                    <Routes>
-                      <Route exact path={'/'} component={PipelinesList} />
-                    </Routes>
-                  </Router>
-                </I18nProvider>
-              );
+              renderList(history, services);
 
               expect(screen.getByTestId('pipelineFlyout')).toBeInTheDocument();
               expect(screen.getByText(`FLYOUT ${unknownCreateName}`)).toBeInTheDocument();
@@ -346,7 +307,7 @@ describe('PipelinesList section', () => {
       });
 
       describe('AND WHEN manage processors is enabled and user has privileges', () => {
-        it('SHOULD show the Manage processors button', () => {
+        it('SHOULD show the Manage processors button', async () => {
           const servicesWithManageProcessors = createServicesWithLoadPipelines(
             {
               data: [{ name: 'p1', description: '', processors: [], on_failure: [] }],
@@ -360,7 +321,8 @@ describe('PipelinesList section', () => {
 
           renderPipelinesList('/', servicesWithManageProcessors);
 
-          expect(screen.getByText(/Manage processors/i)).toBeInTheDocument();
+          await openAppMenuOverflow();
+          expect(screen.getByTestId('manageProcessorsLink')).toBeInTheDocument();
         });
       });
     });

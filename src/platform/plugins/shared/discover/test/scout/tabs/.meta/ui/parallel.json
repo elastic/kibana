@@ -1,21 +1,9 @@
 {
-  "sha1": "dc09bc460987149fc38480269c9f932924f7c0b9",
+  "sha1": "a56d807169262adc6d6e6b470aae065bca603ee5",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "6c80b774cf64439-77a83c0bedb19bd",
-      "title": "Teardown tabs tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "11b6599941153f8-ebb8e7d98ca43bb",
       "title": "Setup tabs tests data",
@@ -36,7 +24,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 66,
+        "line": 37,
         "column": 23
       }
     },
@@ -49,7 +37,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 76,
+        "line": 47,
         "column": 18
       }
     },
@@ -62,8 +50,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 101,
-        "column": 22
+        "line": 74,
+        "column": 20
       }
     },
     {
@@ -75,8 +63,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 129,
-        "column": 33
+        "line": 101,
+        "column": 13
       }
     },
     {
@@ -88,7 +76,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 147,
+        "line": 121,
         "column": 22
       }
     },
@@ -236,6 +224,19 @@
       }
     },
     {
+      "id": "71f7ec98738b310-d006a1b3c051acc",
+      "title": "Discover tabs - keyboard navigation and reorder navigates and reorders tabs with the keyboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/keyboard_navigation.spec.ts",
+        "line": 23,
+        "column": 25
+      }
+    },
+    {
       "id": "c0ab452c928d6d9-139d70694ca4bd8",
       "title": "Discover tabs - new search clears tabs clears saved and unsaved tabs when starting a new session",
       "expectedStatus": "passed",
@@ -244,7 +245,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_search_clears_tabs.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 25
       }
     },
@@ -413,7 +414,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/refresh_uninitialized_tabs.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 25
       }
     },
@@ -660,7 +661,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 25
       }
     },
@@ -673,7 +674,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 11
       }
     },
@@ -842,8 +843,19 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/unsaved_local_state.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 25
+      }
+    },
+    {
+      "id": "6c80b774cf64439-77a83c0bedb19bd",
+      "title": "Teardown tabs tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

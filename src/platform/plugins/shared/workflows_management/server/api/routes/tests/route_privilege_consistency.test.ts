@@ -155,9 +155,6 @@ const INTERNAL_READ_EXCEPTIONS: Record<string, string[]> = {
   // the caller. See WorkflowsManagementApi.resumeWorkflowExecution →
   // WorkflowExecutionQueryService.getWaitingStepExecutionId.
   'POST:/api/workflows/executions/{executionId}/resume': [WORKFLOWS_STEP_EXECUTIONS_INDEX],
-  // Managed-execution authorization checks read the parent workflow metadata but do not return it.
-  'GET:/api/workflows/workflow/{workflowId}/executions': [WORKFLOWS_INDEX],
-  'GET:/api/workflows/workflow/{workflowId}/executions/steps': [WORKFLOWS_INDEX],
 };
 
 /**
@@ -654,7 +651,7 @@ describe('Route privilege/ES-operation consistency', () => {
 
     // ── WorkflowsManagementApi ──
 
-    const api = new WorkflowsManagementApi(workflowsService, true);
+    const api = new WorkflowsManagementApi(workflowsService, true, mockLogger);
 
     // ── Capturing mock router ──
 

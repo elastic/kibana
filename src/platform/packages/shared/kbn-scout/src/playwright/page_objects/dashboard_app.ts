@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Download } from 'playwright-core';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { RenderablePage } from './renderable_page';
@@ -37,6 +38,7 @@ export class DashboardApp {
   private readonly editModeButton;
   private readonly viewOnlyModeButton;
   private readonly dashboardViewport;
+  private readonly editInDiscoverLink;
   private readonly embeddablePanel;
   private readonly controlsGroup;
   private readonly controlFrame;
@@ -54,12 +56,15 @@ export class DashboardApp {
   private readonly confirmSaveButton;
   private readonly quickSaveSecondaryButton;
   private readonly interactiveSaveMenuItem;
+  /** Unsaved-changes badge on the save split button. */
+  public readonly unsavedChangesIndicator;
 
   // Library flyout
   private readonly savedObjectsFinderTable;
   private readonly savedObjectFinderLoadingIndicator;
   private readonly savedObjectFinderSearchInput;
   private readonly addEmbeddableSuccess;
+  private readonly savedSearchDocTable;
 
   // Markdown panel
   private readonly markdownEditorApplyButton;
@@ -88,6 +93,9 @@ export class DashboardApp {
     this.editModeButton = this.page.testSubj.locator('dashboardEditMode');
     this.viewOnlyModeButton = this.page.testSubj.locator('dashboardViewOnlyMode');
     this.dashboardViewport = this.page.testSubj.locator('dshDashboardViewport');
+    this.editInDiscoverLink = this.page.testSubj.locator(
+      'discoverEmbeddableInlineEditEditInDiscoverLink'
+    );
     this.embeddablePanel = this.page.testSubj.locator('embeddablePanel');
     this.controlsGroup = this.page.testSubj.locator('controls-group-wrapper');
     this.controlFrame = this.page.testSubj.locator('control-frame');
@@ -111,6 +119,9 @@ export class DashboardApp {
       'dashboardQuickSaveMenuItem-secondary-button'
     );
     this.interactiveSaveMenuItem = this.page.testSubj.locator('dashboardInteractiveSaveMenuItem');
+    this.unsavedChangesIndicator = this.page.testSubj.locator(
+      'split-button-notification-indicator'
+    );
 
     // Library flyout
     this.savedObjectsFinderTable = this.page.testSubj.locator('savedObjectsFinderTable');
@@ -119,6 +130,7 @@ export class DashboardApp {
     );
     this.savedObjectFinderSearchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
     this.addEmbeddableSuccess = this.page.testSubj.locator('addEmbeddableToDashboardSuccess');
+    this.savedSearchDocTable = this.page.testSubj.locator('embeddedSavedSearchDocTable');
 
     // Markdown panel
     this.markdownEditorApplyButton = this.page.testSubj.locator('markdownEditorApplyButton');
@@ -240,7 +252,7 @@ export class DashboardApp {
   async clickCancelOutOfEditMode() {
     await expect(this.viewOnlyModeButton).toBeVisible();
     await this.viewOnlyModeButton.click();
-    await expect(this.editModeButton).toBeHidden();
+    await expect(this.editModeButton).toBeVisible();
   }
 
   async ensureViewMode() {
@@ -605,14 +617,21 @@ export class DashboardApp {
   }
 
   async getSavedSearchRowCount(): Promise<number> {
-    return this.page.evaluate(() => {
-      const docElement = document.querySelector('[data-document-number]');
-      const docCount = Number(docElement?.getAttribute('data-document-number') ?? '0');
-      const rowCount = document.querySelectorAll(
-        '[data-test-subj="docTableExpandToggleColumn"]'
-      ).length;
-      return Math.max(docCount, rowCount);
-    });
+    const [rowCount = 0] = await this.getSavedSearchRowCounts();
+    return rowCount;
+  }
+
+  async getSavedSearchRowCounts(): Promise<number[]> {
+    return this.savedSearchDocTable.evaluateAll((tables) =>
+      tables.map((table) => {
+        const docElement = table.querySelector('[data-document-number]');
+        const docCount = Number(docElement?.getAttribute('data-document-number') ?? '0');
+        const rowCount = table.querySelectorAll(
+          '[data-test-subj="docTableExpandToggleColumn"]'
+        ).length;
+        return Math.max(docCount, rowCount);
+      })
+    );
   }
 
   async getTagCloudTexts(): Promise<string[][]> {
@@ -927,12 +946,34 @@ export class DashboardApp {
       const actionInPanel = panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
       await actionInPanel.click();
     } else {
-      // Open context menu and click action
+      // Open context menu and click action. The menu renders in a portal outside the panel, so it
+      // cannot be panel-scoped; filtering to the visible match skips the hidden quick-action
+      // buttons that every other panel on the dashboard renders under the same test subject.
       await this.openPanelContextMenu(title);
-      await this.page.testSubj.click(actionTestSubj);
+      await this.page.testSubj.locator(actionTestSubj).filter({ visible: true }).click();
       // Wait for context menu to close after clicking the action
       await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
     }
+  }
+
+  async editLinkedDiscoverPanel(title: string) {
+    await this.clickPanelAction('embeddablePanelAction-editPanel', title);
+    await this.editInDiscoverLink.waitFor({ state: 'visible' });
+    await this.editInDiscoverLink.click();
+  }
+
+  /** Generates and downloads a CSV report for a Discover session panel. */
+  async exportPanelAsCsv(title?: string): Promise<Download> {
+    await this.toasts.dismissAll();
+    await this.clickPanelAction('embeddablePanelAction-generateCsvReport', title);
+
+    const downloadButton = this.page.testSubj.locator('downloadCompletedReportButton');
+    // Report generation runs asynchronously and can be slow on shared CI workers.
+    await downloadButton.waitFor({ state: 'visible', timeout: 120_000 });
+
+    const downloadPromise = this.page.waitForEvent('download');
+    await downloadButton.click();
+    return downloadPromise;
   }
 
   /**
@@ -960,6 +1001,29 @@ export class DashboardApp {
     await expect(this.page.testSubj.locator('unlinkPanelSuccess')).toBeVisible();
     // Verify the panel is now unlinked
     await this.expectNotLinkedToLibrary(title);
+  }
+
+  /** Opens the inspector flyout for the given panel (or the first panel if omitted). */
+  async openInspector(title?: string) {
+    await this.clickPanelAction('embeddablePanelAction-openInspector', title);
+    await this.page.testSubj.locator('inspectorPanel').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * From the dashboard listing page, discards the unsaved draft for the given dashboard title.
+   * Navigates to the listing first, then clicks the discard button if it exists (guard against
+   * tests that failed before a draft was created).
+   */
+  async discardUnsavedDashboard(title = 'New Dashboard') {
+    await this.page.gotoApp('dashboards');
+    const discardButton = this.page.testSubj.locator(
+      `discard-unsaved-${title.replace(/\s/g, '-')}`
+    );
+    if (await discardButton.isVisible()) {
+      await discardButton.click();
+      await this.page.testSubj.click('confirmModalConfirmButton');
+      await discardButton.waitFor({ state: 'hidden' });
+    }
   }
 
   /**

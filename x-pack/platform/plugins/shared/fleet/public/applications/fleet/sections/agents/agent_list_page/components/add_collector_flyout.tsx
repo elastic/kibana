@@ -48,6 +48,7 @@ import {
   useDefaultOutput,
   useStartServices,
 } from '../../../../hooks';
+import { isBeatsOutput } from '../../../../../../../common/services/output_helpers';
 import { AgentEnrollmentConfirmationStep, usePollingAgentCount } from '../../../../components';
 import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
 import { useYaml } from '../../../../../../services';
@@ -179,7 +180,9 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     fleetServerHosts.data?.items?.find((item) => item.is_default)?.host_urls?.[0] || '';
   const { spaceId } = useFleetStatus();
   const { output: defaultOutput } = useDefaultOutput();
-  const defaultEsHost = defaultOutput?.hosts?.[0] ?? DEFAULT_ES_HOST;
+  const defaultEsHost =
+    (defaultOutput && isBeatsOutput(defaultOutput) ? defaultOutput.hosts?.[0] : undefined) ??
+    DEFAULT_ES_HOST;
   // The active space resolves asynchronously (see useFleetStatus), starting as `undefined`.
   // Until it's known we must not resolve the OpAMP policy/token, otherwise getOpAMPPolicyId
   // falls back to the unprefixed default-space id and the collector enrolls into the Default

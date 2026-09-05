@@ -19,10 +19,11 @@ const patchOperationSchema = z
   .object({
     old_text: z
       .string()
+      .min(1)
       .max(MAX_TEXT_LENGTH)
       .optional()
       .describe(
-        'Exact text to find in the document (must be unique). Omit new_text to delete this text.'
+        'Exact non-empty text to find (must be unique). Empty string is invalid — it matches every position. Omit new_text to delete this text.'
       ),
     new_text: z
       .string()
@@ -31,10 +32,11 @@ const patchOperationSchema = z
       .describe('Replacement text. Only used with old_text.'),
     heading: z
       .string()
+      .min(1)
       .max(MAX_TITLE_LENGTH)
       .optional()
       .describe(
-        'Target a specific markdown heading. Used with "content" to replace the section, or with "append" to add under it.'
+        'Plain heading title without # prefixes (e.g. "Notes"). Used with "content" to replace the section, or with "append" to add under it.'
       ),
     content: z
       .string()
@@ -43,9 +45,12 @@ const patchOperationSchema = z
       .describe('Replace the entire content under the specified heading with this text.'),
     append: z
       .string()
+      .min(1)
       .max(MAX_TEXT_LENGTH)
       .optional()
-      .describe('Append this text to the end of the document, or under the specified heading.'),
+      .describe(
+        'Non-empty text to append at EOF, or under heading. Combine only with heading. Never combine with old_text, new_text, or content. Do not pass an empty string.'
+      ),
   })
   .refine(
     (op) => op.old_text !== undefined || op.heading !== undefined || op.append !== undefined,
@@ -53,7 +58,51 @@ const patchOperationSchema = z
       message:
         'Each operation must specify one of: old_text (search-and-replace), heading+content (section replace), or append.',
     }
-  );
+  )
+  .superRefine((op, ctx) => {
+    const hasOldText = op.old_text !== undefined;
+    const hasAppend = op.append !== undefined;
+    const hasHeadingContent = op.heading !== undefined && op.content !== undefined;
+
+    if (
+      hasOldText &&
+      (op.heading !== undefined || op.content !== undefined || op.append !== undefined)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['old_text'],
+        message: 'old_text cannot be combined with heading, content, or append.',
+      });
+    }
+    if (hasAppend && (op.new_text !== undefined || op.content !== undefined)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['append'],
+        message: 'append cannot be combined with new_text or content.',
+      });
+    }
+    if (op.content !== undefined && !hasHeadingContent) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['content'],
+        message: 'content requires heading and cannot be used with append.',
+      });
+    }
+    if (op.new_text !== undefined && !hasOldText) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['new_text'],
+        message: 'new_text requires old_text.',
+      });
+    }
+    if (op.heading !== undefined && !hasHeadingContent && !hasAppend) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['heading'],
+        message: 'heading requires content or append.',
+      });
+    }
+  });
 
 const memoryPatchSchema = z.object({
   id: z.string().max(MAX_ID_LENGTH).optional().describe('Target page by UUID.'),
@@ -172,9 +221,10 @@ export const createMemoryPatchTool = ({
   type: ToolType.builtin,
   description:
     'Apply targeted edits to an existing memory page without sending the full document. ' +
-    'Supports: (A) search-and-replace with old_text/new_text, ' +
-    '(B) heading-level replace with heading/content, ' +
-    '(C) append with append (optionally under a heading). ' +
+    'Each operation uses exactly one form: (A) old_text with optional new_text, ' +
+    '(B) heading with content, or (C) append with optional heading. ' +
+    'For a discovery history update, use one operation with heading "Detection history" and append only. ' +
+    'old_text must be non-empty and unique; a prefix of the body deletes the rest. ' +
     'Multiple operations can be batched in one call.',
   schema: memoryPatchSchema,
   tags: ['memory'],
@@ -211,6 +261,10 @@ export const createMemoryPatchTool = ({
 
       for (const op of operations) {
         if (op.old_text !== undefined) {
+          if (op.old_text.length === 0) {
+            errors.push('old_text must be non-empty; empty string matches every position');
+            continue;
+          }
           // Search-and-replace
           const result = applySearchReplace(currentContent, op.old_text, op.new_text);
           if (result.applied) {

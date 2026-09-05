@@ -212,7 +212,10 @@ describe('Lead Generation Task', () => {
 
     // Re-created in each beforeEach so clearAllMocks() doesn't wipe return values
     let mockCore: { elasticsearch: { client: { asScoped: jest.Mock } } };
-    let mockStartPlugins: { entityStore: { createCRUDClient: jest.Mock }; inference: object };
+    let mockStartPlugins: {
+      entityStore: { createCRUDClient: jest.Mock; createRelationshipsClient: jest.Mock };
+      inference: object;
+    };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let capturedCreateTaskRunner: any;
 
@@ -227,11 +230,14 @@ describe('Lead Generation Task', () => {
         },
       };
       mockStartPlugins = {
-        entityStore: { createCRUDClient: jest.fn().mockReturnValue({}) },
+        entityStore: {
+          createCRUDClient: jest.fn().mockReturnValue({}),
+          createRelationshipsClient: jest.fn().mockReturnValue({}),
+        },
         inference: {},
       };
 
-      (runLeadGenerationPipeline as jest.Mock).mockResolvedValue({ total: 3 });
+      (runLeadGenerationPipeline as jest.Mock).mockResolvedValue(undefined);
       (updateLeadGenerationConfig as jest.Mock).mockResolvedValue(undefined);
       (resolveChatModel as jest.Mock).mockResolvedValue({});
 

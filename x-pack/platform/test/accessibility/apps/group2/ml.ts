@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         const dfaClassificationJobTrainingPercent = 30;
 
         const uploadFilePath = require.resolve(
-          '../../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
+          '../../../fixtures/ml/files_to_import/artificial_server_log'
         );
 
         before(async () => {

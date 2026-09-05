@@ -28,6 +28,7 @@ export class EisModelsPage {
   readonly flyoutRegionBadges: Locator;
   readonly flyoutAddEndpointButton: Locator;
   readonly flyoutCloseButton: Locator;
+  readonly flyoutRegionUnavailableCallout: Locator;
   readonly allEndpointRows: Locator;
 
   // Add/View Endpoint Modal
@@ -71,7 +72,10 @@ export class EisModelsPage {
     this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
 
     // Search and Filters
-    this.searchBar = this.page.testSubj.locator('eisModelsSearchBar');
+    // The search box belongs to the Content List toolbar, which derives its
+    // subjects from the toolbar root.
+    this.searchBar = this.page.testSubj.locator('contentListToolbar-searchBox');
+    // Resolves to the popover's filter button, so it is clicked directly.
     this.modelFamilyFilter = this.page.testSubj.locator('modelFamilyFilterMultiselect');
 
     // Model Cards
@@ -89,6 +93,9 @@ export class EisModelsPage {
     this.flyoutRegionBadges = this.page.testSubj.locator('flyoutRegionBadges');
     this.flyoutAddEndpointButton = this.page.testSubj.locator('modelDetailFlyoutAddEndpointButton');
     this.flyoutCloseButton = this.page.testSubj.locator('modelDetailFlyoutCloseButton');
+    this.flyoutRegionUnavailableCallout = this.page.testSubj.locator(
+      'modelDetailFlyoutRegionUnavailableCallout'
+    );
     this.allEndpointRows = this.page.testSubj
       .locator('modelDetailFlyout')
       .locator('[data-test-subj^="endpoint-row-"]');
@@ -149,6 +156,22 @@ export class EisModelsPage {
   public async goto() {
     await this.page.gotoApp('management/modelManagement/elastic_inference_service');
     await this.page.testSubj.waitForSelector('appHeaderTitle', { state: 'visible' });
+  }
+
+  // --- Actions ---
+
+  /**
+   * `EuiSearchBar` commits its value on keyup, the native `search` event, or a
+   * native `change` event — never on a bare `input`, which is all
+   * `Locator.fill` dispatches. Pressing Enter fires the `search` event.
+   */
+  public async search(term: string) {
+    await this.searchBar.fill(term);
+    await this.searchBar.press('Enter');
+  }
+
+  public async clearSearch() {
+    await this.search('');
   }
 
   // --- Parameterized Locators ---

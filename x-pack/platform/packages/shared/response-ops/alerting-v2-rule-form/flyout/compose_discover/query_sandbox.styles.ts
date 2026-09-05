@@ -14,7 +14,7 @@ const sandboxRootCss = css`
 `;
 
 const timeFieldSelectCss = css`
-  width: 200px;
+  width: 250px;
   min-width: 0;
 `;
 

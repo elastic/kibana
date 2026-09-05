@@ -7,11 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { listApisForTarget, targetSchema } from '../../api';
-import type { ApiSummary, ApiTarget } from '../../api';
+import type { ApiSummary } from '../../api';
 import { registryUnavailableErrorResult } from './errors';
 
 export interface ApiDiscoverResultData {

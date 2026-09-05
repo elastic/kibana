@@ -22,9 +22,9 @@ import {
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
+import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import type { FormValues } from '../types';
 import { getRunbookContent } from '../utils/artifact_data';
-import { resolveArtifactId } from '../utils/artifact_mappers';
 
 const RUNBOOK_ROW_ID = 'ruleV2FormRunbookField';
 const RUNBOOK_MAX_LENGTH = RUNBOOK_CONTENT_LIMIT;

@@ -10,6 +10,15 @@ import type {
   AlertEventSeverity,
 } from '../../resources/datastreams/alert_events';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
+import type {
+  DispatchOutcome,
+  DispatchPlan,
+  EpisodeScan,
+  EpisodeTriage,
+  PolicyCatalog,
+  RuleCatalog,
+  SuppressionIndex,
+} from './state';
 import type { DispatchFailureReason } from './steps/constants';
 
 export type RuleId = string;
@@ -92,8 +101,8 @@ export interface ActionPolicy {
   groupBy: string[];
   /** User-defined tags for organizing and filtering policies */
   tags: string[];
-  /** How episodes are grouped into action group payloads */
-  groupingMode?: 'per_episode' | 'all' | 'per_field';
+  /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
+  groupingMode: 'per_episode' | 'all' | 'per_field';
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
@@ -171,22 +180,22 @@ export interface DispatcherPipelineInput {
 
 export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
-  readonly episodes?: AlertEpisode[];
-  /** True when the episode scan reached EPISODE_QUERY_LIMIT and a tail was deferred. */
-  readonly truncated?: boolean;
+  /** Result of the windowed candidate scan (episodes + truncation flag). */
+  readonly scan?: EpisodeScan;
   /** Count of episodes that received an `.alert-actions` record this tick. */
   readonly recordedEpisodes?: number;
-  readonly suppressions?: AlertEpisodeSuppression[];
-  readonly dispatchable?: AlertEpisode[];
-  readonly suppressed?: Array<AlertEpisode & { reason: string }>;
-  readonly rules?: Map<RuleId, Rule>;
-  readonly policies?: Map<ActionPolicyId, ActionPolicy>;
+  /** Suppression facts from `.alert-actions`, indexed for per-episode lookup. */
+  readonly suppressions?: SuppressionIndex;
+  /** Dispatchable vs suppressed verdict on the scanned episodes. */
+  readonly triage?: EpisodeTriage;
+  readonly rules?: RuleCatalog;
+  readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
   readonly groups?: ActionGroup[];
-  readonly dispatch?: ActionGroup[];
-  readonly throttled?: ActionGroup[];
-  readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
-  readonly dispatchFailures?: DispatchFailure[];
+  /** Delivery decision: groups eligible to dispatch now vs groups held back. */
+  readonly plan?: DispatchPlan;
+  /** Dispatch results: workflow executions per group and failed attempts. */
+  readonly outcome?: DispatchOutcome;
 }
 
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';

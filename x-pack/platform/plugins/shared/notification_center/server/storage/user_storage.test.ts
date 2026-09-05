@@ -9,9 +9,10 @@ import { userStorageServiceMock } from '@kbn/core-user-storage-server-mocks';
 import {
   registerNotificationUserStorage,
   readAllBeforeSchema,
-  readSchema,
+  overridesSchema,
+  MAX_OVERRIDES,
   READ_ALL_BEFORE_KEY,
-  READ_KEY,
+  OVERRIDES_KEY,
   READ_ALL_BEFORE_DEFAULT,
 } from './user_storage';
 
@@ -22,10 +23,12 @@ const collectRegistrations = () => {
   return userStorage.register.mock.calls[0][0];
 };
 
+const readOverride = (markedAt: string) => ({ read: true, markedAt });
+
 describe('notification center user storage', () => {
   describe('registerNotificationUserStorage', () => {
     it('registers the read-state keys in a single call', () => {
-      expect(Object.keys(collectRegistrations())).toEqual([READ_ALL_BEFORE_KEY, READ_KEY]);
+      expect(Object.keys(collectRegistrations())).toEqual([READ_ALL_BEFORE_KEY, OVERRIDES_KEY]);
     });
 
     it('registers every key as global with no preload', () => {
@@ -35,10 +38,10 @@ describe('notification center user storage', () => {
       }
     });
 
-    it('defaults the marker to the epoch default and the read list to empty', () => {
+    it('defaults the marker to the epoch default and the overrides to empty', () => {
       const registrations = collectRegistrations();
       expect(registrations[READ_ALL_BEFORE_KEY].defaultValue).toBe(READ_ALL_BEFORE_DEFAULT);
-      expect(registrations[READ_KEY].defaultValue).toEqual([]);
+      expect(registrations[OVERRIDES_KEY].defaultValue).toEqual({});
     });
   });
 
@@ -79,23 +82,59 @@ describe('notification center user storage', () => {
     });
   });
 
-  describe('read notification ids schema', () => {
-    it('accepts an array of notification ids', () => {
-      expect(readSchema.safeParse([]).success).toBe(true);
-      expect(readSchema.safeParse(['inference:model-a:eol']).success).toBe(true);
+  describe('overrides schema', () => {
+    it('accepts an empty record', () => {
+      expect(overridesSchema.safeParse({}).success).toBe(true);
     });
 
-    it('rejects a non-array', () => {
-      expect(readSchema.safeParse('inference:model-a:eol').success).toBe(false);
+    it('accepts a record of id to read override', () => {
+      expect(
+        overridesSchema.safeParse({
+          'inference:model-a:eol': readOverride('2026-07-09T12:00:00.000Z'),
+        }).success
+      ).toBe(true);
     });
 
-    it('rejects an array holding non-string entries', () => {
-      expect(readSchema.safeParse([1, 2, 3]).success).toBe(false);
+    it('rejects a non-object', () => {
+      expect(overridesSchema.safeParse('inference:model-a:eol').success).toBe(false);
     });
 
-    it('rejects a list past the safety ceiling', () => {
-      const overCeiling = Array.from({ length: 501 }, (_, i) => `id-${i}`);
-      expect(readSchema.safeParse(overCeiling).success).toBe(false);
+    it('rejects an override missing markedAt', () => {
+      expect(overridesSchema.safeParse({ a: { read: true } }).success).toBe(false);
+    });
+
+    it('rejects an override with a non-ISO markedAt', () => {
+      expect(overridesSchema.safeParse({ a: { read: true, markedAt: 'yesterday' } }).success).toBe(
+        false
+      );
+    });
+
+    it('rejects an override with a non-boolean read', () => {
+      expect(
+        overridesSchema.safeParse({ a: { read: 'yes', markedAt: '2026-07-09T12:00:00.000Z' } })
+          .success
+      ).toBe(false);
+    });
+
+    it('rejects a key that is not a valid notification id', () => {
+      expect(
+        overridesSchema.safeParse({ '': readOverride('2026-07-09T12:00:00.000Z') }).success
+      ).toBe(false);
+      expect(
+        overridesSchema.safeParse({
+          ['x'.repeat(513)]: readOverride('2026-07-09T12:00:00.000Z'),
+        }).success
+      ).toBe(false);
+    });
+
+    it('rejects a record past the safety ceiling', () => {
+      const overCeiling = Object.fromEntries(
+        Array.from({ length: MAX_OVERRIDES + 1 }, (_, i) => [
+          `id-${i}`,
+          readOverride('2026-07-09T12:00:00.000Z'),
+        ])
+      );
+      expect(overridesSchema.safeParse(overCeiling).success).toBe(false);
     });
   });
 });

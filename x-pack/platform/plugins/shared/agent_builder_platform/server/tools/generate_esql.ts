@@ -7,8 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { generateEsql, GenerateEsqlNoDataError } from '@kbn/agent-builder-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import {
+  generateEsql,
+  GenerateEsqlNoDataError,
+  setDefaultEsqlCacheKey,
+} from '@kbn/agent-builder-genai-utils';
+import { toHashedId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
@@ -67,7 +71,15 @@ const nlToEsqlToolSchema = z.object({
     ),
 });
 
-export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+export const generateEsqlTool = ({
+  organizationId,
+}: {
+  /** Raw organization id used to derive a stable EIS session id for prompt-cache stickiness. */
+  organizationId?: string;
+} = {}): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+  if (organizationId) {
+    setDefaultEsqlCacheKey(toHashedId(organizationId));
+  }
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,

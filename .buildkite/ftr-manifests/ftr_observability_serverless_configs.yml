@@ -20,7 +20,6 @@ enabled:
   - x-pack/solutions/observability/test/serverless/functional/configs/config.ml_and_discover.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.logs_essentials.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.onboarding.ts
-  - x-pack/platform/test/serverless/functional/configs/observability/config.examples.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.saved_objects_management.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.context_awareness.ts
@@ -29,7 +28,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/observability/config.group2.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group5.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group6.ts
-  - x-pack/platform/test/serverless/functional/configs/observability/config.reporting.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group8.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group9.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group11.ts
@@ -43,6 +41,7 @@ enabled:
   # serverless config files that run deployment-agnostic tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.ai_assistant.serverless.config.ts
-  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.group1.serverless.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.group2.serverless.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.serverless.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_agent.serverless.config.ts

@@ -63,6 +63,18 @@ describe('query_builders', () => {
       });
     });
 
+    it('adds a dataset filter when datasetId is provided', () => {
+      const query = buildExampleScoresQuery('example-123', { datasetId: 'dataset-abc' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual({ term: { 'example.dataset.id': 'dataset-abc' } });
+    });
+
+    it('omits the dataset filter when datasetId is absent', () => {
+      const query = buildExampleScoresQuery('example-123', {});
+      expect(query.bool.must).toHaveLength(1);
+      expect(query.bool.must[0]).toEqual({ term: { 'example.id': 'example-123' } });
+    });
+
     it('adds a space filter when spaceId is provided', () => {
       const query = buildExampleScoresQuery('example-123', { spaceId: 'marketing' });
       expect(query.bool.must).toHaveLength(2);

@@ -8,6 +8,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { DiscoverTabType } from '@kbn/discover-utils';
+import type { DiscoverSessionTabTypeState } from '@kbn/saved-search-plugin/common';
 import { isEqual } from 'lodash';
 
 /**
@@ -27,6 +29,14 @@ export enum ProfileStateType {
    */
   Persistent = 'persistent',
 }
+
+/**
+ * Profile state field types that the host persists in local tab storage across reloads.
+ */
+export const LOCALLY_PERSISTED_PROFILE_STATE_TYPES = [
+  ProfileStateType.Persistent,
+  ProfileStateType.Url,
+];
 
 /**
  * Describes the intended lifetime for each field in a profile state definition.
@@ -66,6 +76,46 @@ export type ProfileStateMap = Record<string, SerializableRecord | undefined>;
  */
 export type ProfileStateDefaultsHandling = 'none' | 'expand' | 'strip';
 
+type SavedTabType = DiscoverSessionTabTypeState['type'];
+
+type TabTypeState<TTabType extends SavedTabType> = Omit<
+  Extract<DiscoverSessionTabTypeState, { type: TTabType }>,
+  'type'
+>;
+
+type ProfileStateDefinitions = readonly ProfileStateDefinition<SerializableRecord>[];
+
+type ProfileStates<TDefinitions extends ProfileStateDefinitions> = {
+  [TIndex in keyof TDefinitions]: TDefinitions[TIndex]['defaultState'];
+};
+
+type PartialProfileStates<TDefinitions extends ProfileStateDefinitions> = {
+  [TIndex in keyof TDefinitions]: Partial<TDefinitions[TIndex]['defaultState']>;
+};
+
+/** Maps an ordered tuple of profile states to and from a tab type's complete saved payload. */
+export interface ProfileSavedStateTransform<
+  TTabType extends SavedTabType,
+  TDefinitions extends ProfileStateDefinitions
+> {
+  /** Saved tab type handled by this transform. */
+  tabType: TTabType;
+  /** State definitions in the order expected and returned by the transform callbacks. */
+  stateDefinitions: TDefinitions;
+  /** Converts effective profile states, with defaults expanded, to the complete saved payload. */
+  toSavedState: (profileStates: ProfileStates<TDefinitions>) => TabTypeState<TTabType>;
+  /** Restores partial profile states in the same order as `stateDefinitions`. */
+  fromSavedState: (savedState: TabTypeState<TTabType>) => PartialProfileStates<TDefinitions>;
+}
+
+/** Identity helper so callers don't have to write the transform's generics by hand. */
+export const createProfileSavedStateTransform = <
+  TTabType extends SavedTabType,
+  const TDefinitions extends ProfileStateDefinitions
+>(
+  transform: ProfileSavedStateTransform<TTabType, TDefinitions>
+): ProfileSavedStateTransform<TTabType, TDefinitions> => transform;
+
 type ProfileStateDescriptorEntry<TState extends SerializableRecord> = [
   keyof TState,
   ProfileStateDescriptor<TState>[keyof TState]
@@ -77,11 +127,14 @@ const getProfileStateDescriptorEntries = <TState extends SerializableRecord>(
   return Object.entries(descriptor) as Array<ProfileStateDescriptorEntry<TState>>;
 };
 
+type RegisteredTransform = ProfileSavedStateTransform<SavedTabType, ProfileStateDefinitions>;
+
 /**
- * Registry of profile state definitions supported by Discover.
+ * Registry of profile state definitions and saved state transforms supported by Discover.
  */
 export class ProfileStateRegistry {
   private readonly stateDefinitions = new Map<string, ProfileStateDefinition<SerializableRecord>>();
+  private readonly stateTransforms = new Map<DiscoverTabType, RegisteredTransform>();
 
   /**
    * Registers a profile state definition. Keys must be globally unique.
@@ -112,6 +165,90 @@ export class ProfileStateRegistry {
       isEqual(registeredDefinition.descriptor, definition.descriptor) &&
       isEqual(registeredDefinition.defaultState, definition.defaultState)
     );
+  }
+
+  /**
+   * Registers a saved state transform for an ordered tuple of matching state definitions.
+   */
+  public registerTransform<
+    TTabType extends SavedTabType,
+    const TDefinitions extends ProfileStateDefinitions
+  >(transform: ProfileSavedStateTransform<TTabType, TDefinitions>) {
+    if (this.stateTransforms.has(transform.tabType)) {
+      throw new Error(`Transform for tab type ${transform.tabType} is already registered.`);
+    }
+
+    const definitionKeys = new Set<string>();
+
+    for (const definition of transform.stateDefinitions) {
+      if (!this.hasDefinition(definition)) {
+        throw new Error(
+          `State with key ${definition.key} must be registered before this transform.`
+        );
+      }
+
+      if (definitionKeys.has(definition.key)) {
+        throw new Error(
+          `State with key ${definition.key} is already included in the transform for tab type ${transform.tabType}.`
+        );
+      }
+
+      definitionKeys.add(definition.key);
+    }
+
+    this.stateTransforms.set(transform.tabType, transform as unknown as RegisteredTransform);
+  }
+
+  /**
+   * Builds saved state from each transform's effective runtime state.
+   */
+  public toSavedState(
+    tabType: DiscoverTabType | undefined,
+    profileStateMap: ProfileStateMap
+  ): DiscoverSessionTabTypeState | undefined {
+    if (!tabType) {
+      return undefined;
+    }
+
+    const transform = this.stateTransforms.get(tabType);
+
+    if (!transform) {
+      return undefined;
+    }
+
+    const states = transform.stateDefinitions.map((definition) => ({
+      ...definition.defaultState,
+      ...profileStateMap[definition.key],
+    }));
+    const payload = transform.toSavedState(states);
+
+    return { type: tabType, ...payload } as DiscoverSessionTabTypeState;
+  }
+
+  /**
+   * Restores registered profile state and ignores unclaimed saved fields.
+   */
+  public fromSavedState(tabTypeState: DiscoverSessionTabTypeState | undefined): ProfileStateMap {
+    const profileStateMap: ProfileStateMap = {};
+
+    if (!tabTypeState) {
+      return profileStateMap;
+    }
+
+    const { type, ...payload } = tabTypeState;
+    const transform = this.stateTransforms.get(type);
+
+    if (!transform) {
+      return profileStateMap;
+    }
+
+    const states = transform.fromSavedState(payload);
+
+    for (const [index, definition] of transform.stateDefinitions.entries()) {
+      profileStateMap[definition.key] = states[index];
+    }
+
+    return profileStateMap;
   }
 
   /**

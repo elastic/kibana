@@ -302,6 +302,7 @@ export const GcpCredentialsFormAgentless = ({
             }
             isOrganization={isOrganization}
             packageInfo={packageInfo}
+            isEditPage={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
           <EuiSpacer size="s" />

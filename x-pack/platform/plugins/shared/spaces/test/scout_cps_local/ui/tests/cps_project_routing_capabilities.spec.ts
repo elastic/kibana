@@ -79,11 +79,8 @@ test.describe('Spaces CPS project routing - capabilities', { tag: CPS_ELIGIBLE_T
       await pageObjects.spaces.gotoEditSpace(spaceId);
       await pageObjects.spaces.waitForProjectRoutingPicker();
       await expect(pageObjects.spaces.cpsDefaultScopePanelLocator()).toBeVisible();
-      await expect(pageObjects.spaces.allProjectsRoutingButtonLocator()).toBeDisabled();
-      await expect(pageObjects.spaces.originProjectRoutingButtonLocator()).toHaveAttribute(
-        'aria-pressed',
-        'true'
-      );
+      await expect(pageObjects.spaces.originProjectSwitchLocator()).toBeDisabled();
+      await expect(pageObjects.spaces.originProjectSwitchLocator()).toBeChecked();
     });
   });
 });

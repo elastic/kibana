@@ -29,6 +29,8 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - **Prefer one suite per file**: keep a single top-level `test.describe(...)` (sequential) or `spaceTest.describe(...)` (parallel) and avoid nested `describe` blocks where possible.
 - **UI actions live in page objects**; assertions stay in the spec.
 - **Use APIs for setup/teardown**: prefer `apiServices`/`kbnClient`/`esArchiver` in hooks over clicking through the UI.
+- **Never suppress a lint rule to make it pass**: fix the code instead. A file-level `/* eslint-disable <rule> */` is never acceptable — it silences the rest of the file, including code written later. A single-line disable stating its reason is a last resort for a case the rule genuinely can't express, not a shortcut.
+- **No positional selectors**: `playwright/no-nth-methods` restricts `.first()`, `.nth()`, and `.last()`. `.first()` is a symptom, not a solution: either the selector matched more than one element (scope it to a container, or add a `data-test-subj`) or the collection wasn't rendered yet (wait on a `-loading` / `-loaded` subject). Identify the element instead (`filter({ hasText })`, `getByRole('row', { name })`), or iterate with `for (const item of await items.all())` — never `while ((await items.count()) > 0)`, which races the render. Escape hatch: **Avoid selecting elements by index or position** in `docs/extend/testing/ui-best-practices.md`.
 
 ## Auth (UI)
 
@@ -59,8 +61,6 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - **Use `readonly` class fields for static locators** — assign them in the constructor, not as getter methods. Use methods only for parameterized locators/actions. See `DashboardApp` in `kbn-scout` for the reference pattern.
 - **EUI components — prefer published EUI Test Helpers over raw selectors and legacy wrappers.** Drive EUI widgets through `page.components.*` (e.g. `page.components.comboBox(testSubj)`) — Scout's factories over `@elastic/eui-test-helpers`. Don't 1:1-map an old wrapper API: use only the interactions the test needs and push data-correctness checks to API/unit tests.
 - **Compatibility fallback only.** When no equivalent EUI test helper exists, fallback to using locators. Do not add or extend wrappers in a test suite. Route missing Component Object capabilities through the shared Apps DX/EUI contribution workflow.
-- **Avoid `.first()`, `.nth()`, `.last()`** — the `playwright/no-nth-methods` lint rule flags these. Instead, use `data-test-subj` attributes or other targeted selectors. If the component lacks a `data-test-subj`, add one rather than disabling the rule.
-- **Do not disable eslint rules** — avoid `eslint-disable` comments in test files. Fix the underlying issue (e.g., use targeted selectors instead of positional ones, add `data-test-subj` to the components) rather than suppressing the lint rule.
 
 ## Parallel UI specifics (spaceTest)
 
@@ -114,6 +114,9 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 ## Waiting + flake control
 
 - Don’t use `page.waitForTimeout`. Wait on a page-ready signal (loading indicator hidden, container visible, `expect.poll` on element counts).
+- **Bind the wait to the _terminal_ signal the assertion reads**, not an earlier step. Guarding the click, dismissing one toast, or waiting on one intermediate render while the asserted element still races is the top reason a wait-based flake fix recurs.
+- **Wait on the rendered outcome; if there's no element, expose one.** Prefer `expect(locator).toBeVisible()` on the element that shows the data. When nothing renders to wait on, add an app-side DOM signal (`data-test-subj` / `data-loaded` attribute) — it reflects the committed render (a response resolving ≠ the DOM updated) and doesn't couple to the endpoint. Prefer mocking/seeding when the flake is data arrival. Use `page.waitForResponse(...)` (armed *before* the action) only as a last resort for a no-UI gate (a background write or setup precondition); it's unreliable when several requests hit the same endpoint (e.g. a dashboard).
+- **Poll a read, never an action:** re-query _inside_ `expect.poll`/`toPass` (a handle captured once still goes stale); never re-fire a `click`/type/`goto`/request inside the loop — that hides an actionability bug rather than fixing it.
 - When an explicit wait is needed, prefer `locator.waitFor({ state: 'visible' })` over a bare `locator.waitFor()`. The two are equivalent (`visible` is the default state), but stating it keeps the intent explicit and consistent with RTL-style readiness checks.
 - If selectors aren’t stable, add `data-test-subj` (Scout uses it as the `testIdAttribute`).
 - Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`). Don’t use them in tests or page objects for app loading state management; rely on Playwright auto-waiting and page-ready signals instead.
@@ -142,6 +145,7 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 
 Open only what you need:
 
+- Rationale and worked examples behind the conventions above: `docs/extend/testing/ui-best-practices.md`
 - Browser authentication helpers and patterns: `references/scout-browser-auth.md`
 - Parallel UI (`spaceTest` + `scoutSpace`) isolation + global setup rules: `references/scout-ui-parallelism.md`
 - API services patterns (setup/teardown helpers shared with UI): `../scout-api-testing/references/scout-api-services.md`

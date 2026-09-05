@@ -13,6 +13,7 @@ import type { YamlEditorFormValues } from '../../components/template_form';
 import { useGetTemplate } from '../../hooks/use_get_template';
 import { useUpdateTemplate } from '../../hooks/use_update_template';
 import { TemplateFormLayout } from '../../components/template_form_layout';
+import { useTemplateUpdatedEBT } from '../../../../analytics/templates';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
 import type { TemplateMetadata } from '../../utils/template_metadata';
@@ -25,6 +26,7 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
   const { templateId } = useTemplateViewParams();
   const { data: template } = useGetTemplate(templateId);
   const { mutateAsync, isLoading: isSaving } = useUpdateTemplate();
+  const reportTemplateUpdated = useTemplateUpdatedEBT();
 
   useCasesTemplatesBreadcrumbs(template?.name ?? i18n.EDIT_TEMPLATE_TITLE);
 
@@ -74,9 +76,11 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
           isEnabled,
         },
       });
+      // Reported after the write resolves, so a rejected save stays silent.
+      reportTemplateUpdated({ entryPoint: 'template_editor' });
       // Stay in the editor after saving (no redirect to the list) so authoring can continue.
     },
-    [mutateAsync, templateId, template?.description, template?.tags]
+    [mutateAsync, templateId, template?.description, template?.tags, reportTemplateUpdated]
   );
 
   if (!template) {

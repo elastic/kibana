@@ -6,6 +6,8 @@
  */
 
 export { Streams, streamDefinitionSchema } from './src/models/streams';
+export type * as StreamsV2 from './src/v2';
+export * as StreamsV2Examples from './src/v2/__examples__';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export {
@@ -80,6 +82,7 @@ export {
   extractBucketColumnName,
   extractBucketIntervalMs,
   extractBucketTargetField,
+  extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
   getFromSources,

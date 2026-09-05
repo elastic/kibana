@@ -161,6 +161,7 @@ export class DataViewsAsCodeService {
       page,
       perPage,
       search,
+      searchFields: ['name', 'title'],
       fields: ['name', 'title', 'timeFieldName'],
     });
 

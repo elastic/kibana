@@ -16,7 +16,7 @@ import { CASES_ALL_WITH_ALERTS_ROLE } from '../../fixtures/roles';
 // add-to-case row actions and can open the new/existing case dialogs.
 test.describe(
   'Observability alerts - add to case (all privileges)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient }) => {
       await generateObservabilityAlerts(esClient);

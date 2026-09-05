@@ -52,7 +52,7 @@ export const ftrManifest: {
 } = {
   default: {
     queue: 'n2-4-spot',
-    channels: new Set(['ci-on-commit', 'ci-batch-3h']),
+    channels: new Set(['ci-on-commit']),
   },
   paths: {
     stateful: statefulFTRManifestPaths,

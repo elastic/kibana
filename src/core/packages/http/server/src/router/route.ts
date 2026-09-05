@@ -494,6 +494,13 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   httpResource?: boolean;
 
   /**
+   * When set to `info`, core emits a slim HTTP response log at info for this
+   * route (`status`, `path`, `http.request.id`). The full access-log record
+   * remains at debug.
+   */
+  httpResponseLogLevel?: 'info';
+
+  /**
    * Based on the the ES API specification (see https://github.com/elastic/elasticsearch-specification)
    * Kibana APIs can also specify some metadata about API availability.
    *

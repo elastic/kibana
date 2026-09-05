@@ -62,6 +62,11 @@ import type { ConfigType } from '../config';
 import type { CasesEventBus } from '../events/event_bus';
 import { getSavedObjectsTypes } from '../../common';
 import type {
+  EnsureAuthorizedToRunWorkflowParams,
+  WorkflowRunAuthorizationDeps,
+} from '../workflows/execution/authorize_workflow_run';
+import { ensureAuthorizedToRunWorkflow } from '../workflows/execution/authorize_workflow_run';
+import type {
   CasesActivityV2WriterContract,
   CasesAnalyticsV2DataViewRefresher,
   CasesAnalyticsV2WriterContract,
@@ -163,22 +168,11 @@ export class CasesClientFactory {
     this.validateInitialization();
 
     const auditLogger = this.options.securityPluginSetup.audit.asScoped(request);
-
-    const auth = await Authorization.create({
+    const auth = await this.createAuthorization(request);
+    const unsecuredSavedObjectsClient = this.getUnsecuredSavedObjectsClient(
       request,
-      securityAuth: this.options.securityPluginStart?.authz,
-      spaces: this.options.spacesPluginStart,
-      features: this.options.featuresPluginStart,
-      auditLogger: new AuthorizationAuditLogger(auditLogger),
-      logger: this.logger,
-    });
-
-    const unsecuredSavedObjectsClient = savedObjectsService.getScopedClient(request, {
-      includedHiddenTypes: getSavedObjectsTypes(this.options.config),
-      // this tells the security plugin to not perform SO authorization and audit logging since we are handling
-      // that manually using our Authorization class and audit logger.
-      excludedExtensions: [SECURITY_EXTENSION_ID],
-    });
+      savedObjectsService
+    );
 
     const savedObjectsSerializer = savedObjectsService.createSerializer();
     const alertsClient = await this.options.ruleRegistry.getRacClientWithRequest(request);
@@ -226,10 +220,93 @@ export class CasesClientFactory {
     });
   }
 
+  /**
+   * Creates a request-scoped authorizer for the workflow-run entry point.
+   */
+  public async createWorkflowRunAuthorizer({
+    request,
+    savedObjectsService,
+  }: {
+    request: KibanaRequest;
+    savedObjectsService: SavedObjectsServiceStart;
+  }): Promise<{
+    ensureAuthorizedToRunWorkflow: (params: EnsureAuthorizedToRunWorkflowParams) => Promise<void>;
+  }> {
+    this.validateInitialization();
+
+    const authorization = await this.createAuthorization(request);
+    const unsecuredSavedObjectsClient = this.getUnsecuredSavedObjectsClient(
+      request,
+      savedObjectsService
+    );
+    const caseService = this.createCaseService(
+      unsecuredSavedObjectsClient,
+      this.createAttachmentService(unsecuredSavedObjectsClient)
+    );
+
+    const deps: WorkflowRunAuthorizationDeps = { authorization, caseService, logger: this.logger };
+    return {
+      ensureAuthorizedToRunWorkflow: (params) => ensureAuthorizedToRunWorkflow(params, deps),
+    };
+  }
+
   private validateInitialization(): asserts this is this & { options: CasesClientFactoryArgs } {
     if (!this.isInitialized || this.options == null) {
       throw new Error('CasesClientFactory must be initialized before calling create');
     }
+  }
+
+  private async createAuthorization(request: KibanaRequest): Promise<Authorization> {
+    this.validateInitialization();
+    const auditLogger = this.options.securityPluginSetup.audit.asScoped(request);
+    return Authorization.create({
+      request,
+      securityAuth: this.options.securityPluginStart?.authz,
+      spaces: this.options.spacesPluginStart,
+      features: this.options.featuresPluginStart,
+      auditLogger: new AuthorizationAuditLogger(auditLogger),
+      logger: this.logger,
+    });
+  }
+
+  private getUnsecuredSavedObjectsClient(
+    request: KibanaRequest,
+    savedObjectsService: SavedObjectsServiceStart
+  ): SavedObjectsClientContract {
+    this.validateInitialization();
+    return savedObjectsService.getScopedClient(request, {
+      includedHiddenTypes: getSavedObjectsTypes(this.options.config),
+      // this tells the security plugin to not perform SO authorization and audit logging since we are handling
+      // that manually using our Authorization class and audit logger.
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+  }
+
+  private createAttachmentService(
+    unsecuredSavedObjectsClient: SavedObjectsClientContract
+  ): AttachmentService {
+    this.validateInitialization();
+    return new AttachmentService({
+      log: this.logger,
+      unsecuredSavedObjectsClient,
+      config: this.options.config,
+      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
+    });
+  }
+
+  private createCaseService(
+    unsecuredSavedObjectsClient: SavedObjectsClientContract,
+    attachmentService: AttachmentService
+  ): CasesService {
+    this.validateInitialization();
+    return new CasesService({
+      log: this.logger,
+      unsecuredSavedObjectsClient,
+      attachmentService,
+      analyticsV2Writer: this.options.analyticsV2Writer,
+      analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
+      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
+    });
   }
 
   private createServices({
@@ -251,12 +328,7 @@ export class CasesClientFactory {
   }): CasesServices {
     this.validateInitialization();
 
-    const attachmentService = new AttachmentService({
-      log: this.logger,
-      unsecuredSavedObjectsClient,
-      config: this.options.config,
-      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
-    });
+    const attachmentService = this.createAttachmentService(unsecuredSavedObjectsClient);
 
     const spaceId =
       this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -290,14 +362,7 @@ export class CasesClientFactory {
           .then(({ fieldDefinitions }) => fieldDefinitions),
     });
 
-    const caseService = new CasesService({
-      log: this.logger,
-      unsecuredSavedObjectsClient,
-      attachmentService,
-      analyticsV2Writer: this.options.analyticsV2Writer,
-      analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
-      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
-    });
+    const caseService = this.createCaseService(unsecuredSavedObjectsClient, attachmentService);
 
     const licensingService = new LicensingService(
       this.options.licensingPluginStart.license$,
@@ -321,7 +386,13 @@ export class CasesClientFactory {
     return {
       templatesService,
       fieldDefinitionsService,
-      alertsService: new AlertService(esClient, this.logger, alertsClient),
+      alertsService: new AlertService(
+        esClient,
+        this.logger,
+        alertsClient,
+        this.options.casesEventBus,
+        request
+      ),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),

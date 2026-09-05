@@ -60,6 +60,8 @@ export {
   findRuleIdByName,
   deleteRuleById,
   deleteRulesByPrefix,
+  searchRulesList,
+  openRulesListAndSearch,
 } from './helpers';
 export {
   setMonacoValue,

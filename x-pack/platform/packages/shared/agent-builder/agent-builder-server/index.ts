@@ -27,7 +27,9 @@ export type {
   ScopedRunnerRunToolsParams,
   RunContext,
   RunContextStackEntry,
+  RunApprovals,
   RunToolParams,
+  RequestBoundRunToolParams,
   RunToolFn,
   Runner,
   RunToolReturn,
@@ -86,6 +88,7 @@ export type {
   ExperimentalFeatures,
   SubAgentExecutor,
   SubAgentExecution,
+  ConversationClient,
 } from './agents';
 export type {
   AgentBuilderHooks,
@@ -110,6 +113,7 @@ export {
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
 export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './telemetry';
+export { toHashedId } from './telemetry';
 export type {
   BuiltInPluginDefinition,
   PluginCreateRequest,
@@ -130,6 +134,8 @@ export type {
   InternalAgentDefinition,
   InternalAgentDefinitionAvailabilityHandler,
   AgentRegistry,
+  AiIndexDetail,
+  AiIndexResolver,
 } from './agents';
 export type { SkillRegistry } from './skills';
 export type { RendererTypeDefinition } from './renderers';
@@ -151,6 +157,14 @@ export type {
   AgentBuilderManagementSetup,
   RuntimeStart,
   ConversationsStart,
+  ConversationTemplatesSetup,
+  ConversationTemplatesStart,
 } from './plugin_contract';
 export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
+export type {
+  AvailabilityContext,
+  AvailabilityResult,
+  AvailabilityHandler,
+  AvailabilityConfig,
+} from './availability';

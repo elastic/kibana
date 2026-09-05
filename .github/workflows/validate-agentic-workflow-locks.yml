@@ -16,7 +16,7 @@ permissions:
 # github/gh-aw-actions/setup entry in .github/aw/actions-lock.json;
 # the verify step below enforces that.
 env:
-  GH_AW_VERSION: v0.81.6
+  GH_AW_VERSION: v0.86.2
 
 concurrency:
   group: validate-agentic-workflow-locks-${{ github.event.pull_request.number || github.ref }}
@@ -30,7 +30,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -52,7 +52,7 @@ jobs:
           fi
 
       - name: Install gh-aw CLI
-        uses: github/gh-aw/actions/setup-cli@eed4304d8740f0593f2797276cb8299d228ffd9b # v0.81.6
+        uses: github/gh-aw/actions/setup-cli@d7426cced84ccaedbcd1fa17aaf421d87513d74c # v0.87.7
         with:
           version: ${{ env.GH_AW_VERSION }}
 

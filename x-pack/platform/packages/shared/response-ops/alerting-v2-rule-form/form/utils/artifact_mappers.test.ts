@@ -5,19 +5,34 @@
  * 2.0.
  */
 
-import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
-import { resolveArtifactId } from './artifact_mappers';
+import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { mapArtifacts } from './artifact_mappers';
 
-describe('resolveArtifactId', () => {
-  it('keeps an existing id', () => {
-    expect(resolveArtifactId(RUNBOOK_ARTIFACT_TYPE, 'runbook-1')).toBe('runbook-1');
+describe('mapArtifacts', () => {
+  it('returns undefined for an empty list', () => {
+    expect(mapArtifacts([])).toBeUndefined();
+    expect(mapArtifacts(undefined)).toBeUndefined();
   });
 
-  it.each([
-    ['undefined', undefined],
-    ['empty', ''],
-    ['blank', '   '],
-  ])('generates a prefixed id when the existing id is %s', (_label, existingId) => {
-    expect(resolveArtifactId(RUNBOOK_ARTIFACT_TYPE, existingId)).toMatch(/^runbook-.+/);
+  it('projects artifacts to the public { id, type, data } shape', () => {
+    const artifacts = [
+      {
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: 'steps' },
+        value: 'steps',
+      },
+      {
+        id: 'dashboard-1',
+        type: DASHBOARD_ARTIFACT_TYPE,
+        data: { dashboardId: 'dash-1' },
+        value: 'dash-1',
+      },
+    ];
+
+    expect(mapArtifacts(artifacts)).toEqual([
+      { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'steps' } },
+      { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+    ]);
   });
 });

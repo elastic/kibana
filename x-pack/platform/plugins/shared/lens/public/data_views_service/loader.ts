@@ -177,11 +177,13 @@ export async function ensureESQLTimeFieldOnAdHocDataViews({
   textBasedState,
   dataViewsService,
   http,
+  projectRouting,
 }: {
   adHocDataViews: Record<string, DataViewSpec>;
   textBasedState: TextBasedPersistedState | undefined;
   dataViewsService: DataViewsContract;
   http?: HttpStart;
+  projectRouting?: string;
 }): Promise<Record<string, DataViewSpec>> {
   if (!textBasedState?.layers) {
     return adHocDataViews;
@@ -200,7 +202,11 @@ export async function ensureESQLTimeFieldOnAdHocDataViews({
       continue;
     }
 
-    const timeFieldName = await getESQLTimeField({ query: layer.query.esql, http });
+    const timeFieldName = await getESQLTimeField({
+      query: layer.query.esql,
+      http,
+      projectRouting,
+    });
 
     if (timeFieldName && layer.index && result[layer.index]) {
       result[layer.index] = { ...result[layer.index], timeFieldName };

@@ -18,9 +18,9 @@ export interface RunLeadGenerationInBackgroundArgs {
 
 /**
  * Fires runLeadGenerationPipeline in a background IIFE and persists
- * success/error status via upsertLeadGenerationConfig. Errors thrown by
- * createLeads (including ES security_exception) are caught here and surface
- * via the status endpoint's `lastError` field rather than propagating to the caller.
+ * success/error status via upsertLeadGenerationConfig. Pipeline errors
+ * (including ES security_exception) are caught here and surface via the
+ * status endpoint's `lastError` field rather than propagating to the caller.
  */
 export const runLeadGenerationInBackground = ({
   pipelineArgs,

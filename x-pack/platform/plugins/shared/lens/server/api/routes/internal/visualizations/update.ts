@@ -112,7 +112,9 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
           throw result.item.error;
         }
 
-        const responseItem = getLensInternalResponseItem(builder, result.item);
+        const responseItem = lensUpdateResponseBodySchema.parse(
+          getLensInternalResponseItem(builder, result.item)
+        );
 
         if (createdNew) {
           return res.created<LensUpdateResponseBody>({

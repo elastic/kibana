@@ -20,13 +20,7 @@ import type { ClientPluginsStart } from '../../../../../plugin';
 describe('WrappedPageTemplate', () => {
   const inPageBreadcrumbs = [{ text: 'Monitors', href: '/app/synthetics/monitors' }];
 
-  const renderTemplate = ({
-    chromeStyle,
-    isNextChromeEnabled,
-  }: {
-    chromeStyle: ChromeStyle;
-    isNextChromeEnabled: boolean;
-  }) => {
+  const renderTemplate = ({ chromeStyle }: { chromeStyle: ChromeStyle }) => {
     const defaultChrome = coreMock.createStart().chrome;
     const receivedPageHeaders: Array<EuiPageHeaderProps | undefined> = [];
 
@@ -50,7 +44,6 @@ describe('WrappedPageTemplate', () => {
             ...defaultChrome,
             getChromeStyle: () => chromeStyle,
             getChromeStyle$: () => new BehaviorSubject<ChromeStyle>(chromeStyle).asObservable(),
-            next: { ...defaultChrome.next, isEnabled: isNextChromeEnabled },
           },
           observabilityShared,
         },
@@ -61,26 +54,20 @@ describe('WrappedPageTemplate', () => {
   };
 
   it('keeps the in-page breadcrumbs in classic chrome', () => {
-    const pageHeaders = renderTemplate({ chromeStyle: 'classic', isNextChromeEnabled: false });
-
-    expect(pageHeaders.at(-1)?.breadcrumbs).toEqual(inPageBreadcrumbs);
-  });
-
-  it('keeps the in-page breadcrumbs in solution view while the new chrome is disabled', () => {
-    const pageHeaders = renderTemplate({ chromeStyle: 'project', isNextChromeEnabled: false });
+    const pageHeaders = renderTemplate({ chromeStyle: 'classic' });
 
     expect(pageHeaders.at(-1)?.breadcrumbs).toEqual(inPageBreadcrumbs);
   });
 
   it('drops the in-page breadcrumbs when the new chrome header renders its own back button', () => {
-    const pageHeaders = renderTemplate({ chromeStyle: 'project', isNextChromeEnabled: true });
+    const pageHeaders = renderTemplate({ chromeStyle: 'project' });
 
     expect(pageHeaders.at(-1)?.breadcrumbs).toBeUndefined();
     expect(pageHeaders.at(-1)?.pageTitle).toEqual('Monitor name');
   });
 
   it('drops the in-page breadcrumbs on the very first render', () => {
-    const pageHeaders = renderTemplate({ chromeStyle: 'project', isNextChromeEnabled: true });
+    const pageHeaders = renderTemplate({ chromeStyle: 'project' });
 
     expect(pageHeaders[0]?.breadcrumbs).toBeUndefined();
   });

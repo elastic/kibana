@@ -10,6 +10,8 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
+import { createMockWorkflowDataClient } from '@kbn/workflows-execution-engine/server/mocks';
+
 import type { WorkflowSearchDeps } from './types';
 import { WorkflowSearchService } from './workflow_search_service';
 import { createCircuitBreakerError } from '../api/routes/utils/__fixtures__/circuit_breaker_error';
@@ -39,6 +41,7 @@ const makeDeps = () => {
       getClient: () => storageClient,
     } as unknown as WorkflowSearchDeps['workflowStorage'],
     esClient,
+    workflowExecutionsDataClient: createMockWorkflowDataClient(),
   };
   return { deps, storageClient, esClient, logger };
 };
