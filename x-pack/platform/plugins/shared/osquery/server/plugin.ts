@@ -89,8 +89,21 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       security: plugins.security,
       telemetryEventsSender: this.telemetryEventsSender,
       licensing: plugins.licensing,
-      cpsEnabled:
-        (plugins.cps?.getCpsEnabled() ?? false) && experimentalFeatures.crossProjectSearch,
+      isCpsActive: async (request) => {
+        if (!experimentalFeatures.crossProjectSearch) {
+          return false;
+        }
+
+        const [, startPlugins] = await core.getStartServices();
+
+        // `cps.isCpsActive` is tri-state: `undefined` means the linked projects could not be
+        // resolved, which is not the same as there being none. Osquery collapses that to "do not
+        // fan out" deliberately. An unresolved scope is one whose index grants we cannot inspect --
+        // almost always a custom role missing `read_project_routing` -- and fanning those out would
+        // put exactly the principals we know least about on `asCurrentUser`. The cost is that such
+        // a role reads origin-only until the predefined roles carry the privilege.
+        return (await startPlugins.cps?.isCpsActive(request)) === true;
+      },
     };
 
     initSavedObjects(core.savedObjects);

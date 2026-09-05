@@ -7,6 +7,7 @@
 
 import { isBoom } from '@hapi/boom';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import pLimit from 'p-limit';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
 import { withAllProjectsRouting } from '../../../significant_events/rules/project_routing';
 import {
@@ -23,11 +24,12 @@ import {
 } from './rules_management_client';
 
 const FIND_PAGE_SIZE = 500;
+const RULE_EXISTS_CONCURRENCY = 10;
 
 export interface RulesAdapterV2Params {
   rulesClient: Pick<
     RulesClientApi,
-    'createRule' | 'updateRule' | 'bulkDeleteRules' | 'findRules' | 'getTags'
+    'createRule' | 'updateRule' | 'bulkDeleteRules' | 'findRules' | 'getTags' | 'ruleExists'
   >;
   isServerless: boolean;
 }
@@ -89,6 +91,17 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 bulk delete failed for ${fatal.length} rule(s): ${detail}`);
     }
+  }
+
+  async findExistingRuleIds(ids: string[]): Promise<string[]> {
+    const limit = pLimit(RULE_EXISTS_CONCURRENCY);
+    const results = await Promise.all(
+      ids.map((id) =>
+        limit(async () => ({ id, exists: await this.rulesClient.ruleExists({ id }) }))
+      )
+    );
+
+    return results.filter(({ exists }) => exists).map(({ id }) => id);
   }
 
   async findOwnedRuleIds(streamName: string): Promise<string[]> {
