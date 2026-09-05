@@ -108,17 +108,15 @@ export class InventoryPage {
     this.alertsHeaderButton = this.page.getByTestId('infrastructure-alerts-and-rules');
     this.alertsMenu = this.page.getByTestId('metrics-alert-menu');
 
-    this.inventoryAlertsMenuOption = this.alertsMenu.getByTestId('inventory-alerts-menu-option');
-    this.createInventoryRuleButton = this.alertsMenu.getByTestId('inventory-alerts-create-rule');
+    this.inventoryAlertsMenuOption = this.page.getByTestId('inventory-alerts-menu-option');
+    this.createInventoryRuleButton = this.page.getByTestId('inventory-alerts-create-rule');
 
-    this.metricsAlertsMenuOption = this.alertsMenu.getByTestId(
-      'metrics-threshold-alerts-menu-option'
-    );
-    this.createMetricsThresholdRuleButton = this.alertsMenu.getByTestId(
+    this.metricsAlertsMenuOption = this.page.getByTestId('metrics-threshold-alerts-menu-option');
+    this.createMetricsThresholdRuleButton = this.page.getByTestId(
       'metrics-threshold-alerts-create-rule'
     );
 
-    this.customThresholdAlertMenuOption = this.alertsMenu.getByTestId(
+    this.customThresholdAlertMenuOption = this.page.getByTestId(
       'custom-threshold-alerts-menu-option'
     );
 
