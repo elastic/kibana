@@ -29,7 +29,7 @@ import {
 import * as createPromiseFromRuleImportStream from '../../../logic/import/create_promise_from_rule_import_stream';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { importRulesRoute } from './route';
-import { HttpAuthzError } from '../../../../../machine_learning/validation';
+import { createRuleImportErrorObject } from '../../../logic/detection_rules_client/methods/import_rules/errors';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
@@ -42,9 +42,9 @@ jest.mock('../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_cli
 }));
 
 // Skipped in https://github.com/elastic/kibana/pull/212761
-// We have to find a way to use original detectionRulesClient.importRules() while mocking detectionRulesClient.importRule().
-// detectionRulesClient.importRules() uses detectionRulesClient.importRule() under the hood.
-// Without proper mocking this test suite will test the mock.
+// The suite mocks detectionRulesClient.importRules() entirely, so most of these tests
+// exercise the mock instead of the import logic. It needs a rewrite against the real
+// detection rules client (import logic itself is covered by detection_rules_client.import_rules.test.ts).
 describe.skip('Import rules route', () => {
   let config: ReturnType<typeof configMock.createDefault>;
   let server: ReturnType<typeof serverMock.create>;
@@ -63,7 +63,9 @@ describe.skip('Import rules route', () => {
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
-    clients.detectionRulesClient.importRule.mockResolvedValue(getRulesSchemaMock());
+    clients.detectionRulesClient.importRules.mockResolvedValue({
+      responses: [{ rule_id: 'rule-1' }],
+    });
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -106,8 +108,10 @@ describe.skip('Import rules route', () => {
 
   describe('unhappy paths', () => {
     test('returns a 403 error object if ML Authz fails', async () => {
-      clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
-        throw new HttpAuthzError('mocked validation message');
+      clients.detectionRulesClient.importRules.mockResolvedValueOnce({
+        responses: [
+          createRuleImportErrorObject({ ruleId: 'rule-1', message: 'mocked validation message' }),
+        ],
       });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -160,7 +164,7 @@ describe.skip('Import rules route', () => {
 
     describe('with prebuilt rules customization enabled', () => {
       beforeEach(() => {
-        clients.detectionRulesClient.importRules.mockResolvedValueOnce([]);
+        clients.detectionRulesClient.importRules.mockResolvedValueOnce({ responses: [] });
         clients.detectionRulesClient.getRuleCustomizationStatus.mockReturnValue({
           isRulesCustomizationEnabled: true,
         });
@@ -233,9 +237,14 @@ describe.skip('Import rules route', () => {
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
-        clients.detectionRulesClient.importRule.mockRejectedValue({
-          message: 'Rule with this rule_id already exists',
-          statusCode: 409,
+        clients.detectionRulesClient.importRules.mockResolvedValue({
+          responses: [
+            createRuleImportErrorObject({
+              ruleId: 'rule-1',
+              type: 'conflict',
+              message: 'Rule with this rule_id already exists',
+            }),
+          ],
         });
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
@@ -449,9 +458,14 @@ describe.skip('Import rules route', () => {
       });
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.detectionRulesClient.importRule.mockRejectedValueOnce({
-          message: 'Rule with this rule_id already exists',
-          statusCode: 409,
+        clients.detectionRulesClient.importRules.mockResolvedValueOnce({
+          responses: [
+            createRuleImportErrorObject({
+              ruleId: 'rule-1',
+              type: 'conflict',
+              message: 'Rule with this rule_id already exists',
+            }),
+          ],
         });
         const multiRequest = getImportRulesRequest(
           buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2', 'rule-3']))

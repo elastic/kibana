@@ -5,69 +5,70 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash/fp';
 import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine';
 import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
-import type { IRuleSourceImporter } from './rule_source_importer';
-import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
-import { isRuleConflictError, isRuleImportError } from './errors';
+import type {
+  IDetectionRulesClient,
+  ImportRuleSuccess,
+  RuleImportErrorObject,
+} from '../detection_rules_client/detection_rules_client_interface';
+import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../api/constants';
 
 /**
- * Takes a stream of rules to be imported and either creates or updates rules
- * based on user overwrite preferences
- * @param ruleChunks {@link RuleToImport} - rules being imported
- * @param overwriteRules {boolean} - whether to overwrite existing rules
- * with imported rules if their rule_id matches
- * @param detectionRulesClient {object}
- * @returns {Promise} an array of error and success messages from import
+ * Takes the parsed rules to be imported and either creates or updates rules
+ * based on user overwrite preferences. Chunks at `RULE_IMPORT_BULK_CREATE_BATCH_SIZE`
+ * so each call to `detectionRulesClient.importRules` — and the inner
+ * `rulesClient.bulkCreateRules` — stays inside ES/alerting caps.
  */
 export const importRules = async ({
-  ruleChunks,
+  rules,
   changeTracking,
   overwriteRules,
   detectionRulesClient,
-  ruleSourceImporter,
   allowMissingConnectorSecrets,
 }: {
-  ruleChunks: RuleToImport[][];
-  changeTracking?: SecurityRuleChangeTracking<never>;
+  rules: RuleToImport[];
+  changeTracking?: SecurityRuleChangeTracking;
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
-  ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
 }): Promise<ImportRuleResponse[]> => {
   const response: ImportRuleResponse[] = [];
 
-  if (ruleChunks.length === 0) {
+  if (rules.length === 0) {
     return response;
   }
 
-  for (const rules of ruleChunks) {
-    const importedRulesResponse = await detectionRulesClient.importRules({
+  for (const batch of chunk(RULE_IMPORT_BULK_CREATE_BATCH_SIZE, rules)) {
+    const { responses } = await detectionRulesClient.importRules({
       allowMissingConnectorSecrets,
       overwriteRules,
-      ruleSourceImporter,
-      rules,
+      rules: batch,
       changeTracking,
     });
-
-    const importResponses = importedRulesResponse.map((rule) => {
-      if (isRuleImportError(rule)) {
-        return createBulkErrorObject({
-          message: rule.error.message,
-          statusCode: isRuleConflictError(rule) ? 409 : 400,
-          ruleId: rule.error.ruleId,
-        });
-      }
-
-      return {
-        rule_id: rule.rule_id,
-        status_code: 200,
-      };
-    });
-
-    response.push(...importResponses);
+    response.push(...responses.map(toImportRuleResponse));
   }
 
   return response;
+};
+
+const toImportRuleResponse = (
+  response: ImportRuleSuccess | RuleImportErrorObject
+): ImportRuleResponse => {
+  if ('error' in response) {
+    const { ruleId, message, type } = response.error;
+
+    return createBulkErrorObject({
+      message,
+      statusCode: type === 'conflict' ? 409 : 400,
+      ruleId,
+    });
+  }
+
+  return {
+    rule_id: response.rule_id,
+    status_code: 200,
+  };
 };

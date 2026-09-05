@@ -5,7 +5,19 @@
  * 2.0.
  */
 
-import { has } from 'lodash';
+import type {
+  RuleSource,
+  RuleToImport,
+  ValidatedRuleToImport,
+} from '../../../../../../../../common/api/detection_engine';
+
+export interface ImportRuleSuccess {
+  rule_id: string;
+}
+
+export interface ImportRulesResult {
+  responses: Array<ImportRuleSuccess | RuleImportErrorObject>;
+}
 
 export type RuleImportErrorType = 'conflict' | 'unknown';
 
@@ -23,27 +35,10 @@ export interface RuleImportErrorObject {
   };
 }
 
-export const createRuleImportErrorObject = ({
-  ruleId,
-  message,
-  type,
-}: {
-  ruleId: string;
-  message: string;
-  type?: RuleImportErrorType;
-}): RuleImportErrorObject => ({
-  error: {
-    ruleId,
-    message,
-    type: type ?? 'unknown',
-  },
-});
-
-export const isRuleImportError = (obj: unknown): obj is RuleImportErrorObject =>
-  has(obj, 'error') &&
-  has(obj, 'error.ruleId') &&
-  has(obj, 'error.type') &&
-  has(obj, 'error.message');
-
-export const isRuleConflictError = (error: RuleImportErrorObject): boolean =>
-  error.error.type === 'conflict';
+// Survivors of per-rule validation that proceed to conflict classification.
+export interface ImportableRuleData {
+  rule: ValidatedRuleToImport;
+  immutable: boolean;
+  ruleSource: RuleSource;
+  exceptionsList: RuleToImport['exceptions_list'];
+}
