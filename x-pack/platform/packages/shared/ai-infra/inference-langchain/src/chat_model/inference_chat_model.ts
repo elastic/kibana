@@ -35,7 +35,6 @@ import type {
   ChatCompleteCacheControl,
   FunctionCallingMode,
   ConnectorTelemetryMetadata,
-  ChatCompleteAnonymizationMetadata,
   ChatCompleteResponse,
 } from '@kbn/inference-common';
 import {
@@ -70,7 +69,7 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   telemetryMetadata?: ConnectorTelemetryMetadata;
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
-  anonymizationMetadata?: ChatCompleteAnonymizationMetadata;
+  agentId?: string;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -106,7 +105,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   // @ts-ignore unused for now
   private readonly logger: Logger;
   private readonly telemetryMetadata?: ConnectorTelemetryMetadata;
-  private readonly anonymizationMetadata?: ChatCompleteAnonymizationMetadata;
+  private readonly agentId?: string;
 
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
@@ -123,7 +122,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.chatComplete = args.chatComplete;
     this.connector = args.connector;
     this.telemetryMetadata = args.telemetryMetadata;
-    this.anonymizationMetadata = args.anonymizationMetadata;
+    this.agentId = args.agentId;
 
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;
@@ -222,7 +221,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       maxRetries: this.maxRetries,
       metadata: {
         ...(this.telemetryMetadata ? { connectorTelemetry: this.telemetryMetadata } : {}),
-        ...(this.anonymizationMetadata ? { anonymization: this.anonymizationMetadata } : {}),
+        ...(this.sessionId || this.agentId
+          ? { anonymization: { sessionId: this.sessionId, agentId: this.agentId } }
+          : {}),
       },
       timeout: options.timeout ?? this.timeout,
       maxContentLength: this.maxContentLength,

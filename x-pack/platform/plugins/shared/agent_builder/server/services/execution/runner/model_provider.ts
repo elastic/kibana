@@ -20,10 +20,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
-import type {
-  ConnectorTelemetryMetadata,
-  ChatCompleteAnonymizationMetadata,
-} from '@kbn/inference-common';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import type { TrackingService } from '../../../telemetry';
@@ -40,7 +37,7 @@ export interface CreateModelProviderOpts {
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   telemetryMetadata?: ConnectorTelemetryMetadata;
-  anonymizationMetadata?: ChatCompleteAnonymizationMetadata;
+  agentId?: string;
   maxContentLength?: number;
 }
 
@@ -54,11 +51,7 @@ export type CreateModelProviderFactoryFn = (
 export type ModelProviderFactoryFn = (
   opts: Pick<
     CreateModelProviderOpts,
-    | 'request'
-    | 'defaultConnectorId'
-    | 'telemetryMetadata'
-    | 'anonymizationMetadata'
-    | 'maxContentLength'
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'agentId' | 'maxContentLength'
   >
 ) => ModelProvider;
 
@@ -90,7 +83,7 @@ export const createModelProvider = ({
   searchInferenceEndpoints,
   logger,
   telemetryMetadata,
-  anonymizationMetadata,
+  agentId,
   maxContentLength,
 }: CreateModelProviderOpts): ModelProvider => {
   const resolvedTelemetryMetadata = telemetryMetadata ?? MODEL_TELEMETRY_METADATA;
@@ -186,18 +179,14 @@ export const createModelProvider = ({
       },
       chatModelOptions: {
         telemetryMetadata: resolvedTelemetryMetadata,
-        ...(anonymizationMetadata ? { anonymizationMetadata } : {}),
+        ...(agentId !== undefined ? { agentId } : {}),
         ...(maxContentLength !== undefined ? { maxContentLength } : {}),
       },
     });
 
-    const boundMetadata = {
-      connectorTelemetry: resolvedTelemetryMetadata,
-      ...(anonymizationMetadata ? { anonymization: anonymizationMetadata } : {}),
-    };
     const inferenceClient = inference.getClient({
       request,
-      bindTo: { connectorId, metadata: boundMetadata },
+      bindTo: { connectorId, metadata: { connectorTelemetry: resolvedTelemetryMetadata } },
       callbacks: {
         complete: [completionCallback],
       },
