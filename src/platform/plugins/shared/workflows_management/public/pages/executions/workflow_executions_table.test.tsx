@@ -15,6 +15,8 @@ import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
+jest.setTimeout(30_000);
+
 const mockSetSelectedExecution = jest.fn();
 const mockUseWorkflowUrlState = jest.fn(() => ({
   selectedExecutionId: undefined as string | undefined,
