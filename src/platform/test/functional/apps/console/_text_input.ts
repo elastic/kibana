@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/288645
-  describe.skip('text input', function testTextInput() {
+  describe('text input', function testTextInput() {
     before(async () => {
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.skipTourIfExists();
@@ -41,8 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           const actualRequest = await PageObjects.console.getEditorText();
-          // The data should be appended after the existing text
-          expect(actualRequest.trim()).to.eql('GET _search\nhello');
+          // INTENTIONALLY BROKEN to exercise the skipped-on-main evaluator (revert before merge)
+          expect(actualRequest.trim()).to.eql('GET _search\nINTENTIONALLY_BROKEN');
         });
       });
 
