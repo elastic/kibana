@@ -28,53 +28,19 @@ const unquoteBracketKey = (inner: string): string | null => {
 };
 
 export function parsePath(path: string): string[] | null {
-  const segments: string[] = [];
-  let current = '';
-  let i = 0;
-  while (i < path.length) {
-    const ch = path[i];
-    if (ch === '.') {
-      if (i === path.length - 1) {
-        return null;
-      }
-      if (current !== '') {
-        segments.push(current);
-        current = '';
-      } else if (segments.length === 0 || path[i - 1] !== ']') {
-        return null;
-      }
-    } else if (ch === '[') {
-      if (current !== '') {
-        segments.push(current);
-        current = '';
-      } else if (segments.length === 0) {
-        return null;
-      }
-      const close = path.indexOf(']', i + 1);
-      if (close === -1) {
-        return null;
-      }
-      const inner = path.slice(i + 1, close).trim();
-      const quoted = unquoteBracketKey(inner);
-      if (quoted !== null) {
-        segments.push(quoted);
-      } else if (/^-?\d+$/.test(inner)) {
-        segments.push(inner);
-      } else if (inner.length === 0) {
-        return null;
-      } else {
-        segments.push(LIQUID_DYNAMIC_KEY_SEGMENT);
-      }
-      i = close;
-    } else {
-      current += ch;
+  const normalized = path.replace(/\[([^\]]+)\]/g, (_, raw: string) => {
+    const inner = raw.trim();
+    const quoted = unquoteBracketKey(inner);
+    if (quoted !== null) {
+      return `.${quoted}`;
     }
-    i += 1;
-  }
-  if (current !== '') {
-    segments.push(current);
-  }
-  return segments.length === 0 || segments.some((segment) => segment === '') ? null : segments;
+    if (/^-?\d+$/.test(inner)) {
+      return `.${inner}`;
+    }
+    return `.${LIQUID_DYNAMIC_KEY_SEGMENT}`;
+  });
+  const segments = normalized.split('.');
+  return segments.some((segment) => segment === '') ? null : segments;
 }
 
 interface GetSchemaAtPathResult {
