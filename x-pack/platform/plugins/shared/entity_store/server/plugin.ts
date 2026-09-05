@@ -19,7 +19,11 @@ import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { scheduleLegacySecurityAssetsMigrationIfNeeded } from './tasks/legacy_security_assets_migration_task';
-import { isLegacySecurityAssetsMigrationEnabled } from './infra/feature_flags';
+import {
+  isEntityProvenanceEnabled,
+  isLegacySecurityAssetsMigrationEnabled,
+} from './infra/feature_flags';
+import { scheduleEntityProvenanceMappingMigrationIfNeeded } from './tasks/entity_provenance_mapping_migration_task';
 import { registerTriggers } from './workflow/triggers';
 import { registerSteps } from './workflow/steps';
 import { registerUiSettings } from './infra/feature_flags/register';
@@ -140,6 +144,12 @@ export class EntityStorePlugin
       taskManager: plugins.taskManager,
       logger: this.logger,
       isMigrationEnabled: () => isLegacySecurityAssetsMigrationEnabled(core.featureFlags),
+    });
+    void scheduleEntityProvenanceMappingMigrationIfNeeded({
+      coreStart: core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      isMigrationEnabled: () => isEntityProvenanceEnabled(core.featureFlags),
     });
 
     const logger = this.logger;

@@ -10,6 +10,10 @@ The risk score maintainer (`id: 'risk-score'`) is registered by `security_soluti
 | `securitySolution:entityStoreEnableV2` | UI setting | Runtime `idBasedRiskScoringEnabled` — entity store dual-write (read via `getIsIdBasedRiskScoringEnabled()`) | `true`, `readonly: true` |
 | `riskScoreCreateMissingEntitiesEnabled` | Experimental feature (`kibana.dev.yml` / `enableExperimental`) | Opt-in for the create-if-missing path only (see below). Requires Kibana restart. | `false` |
 
+The platform Cloud feature flag `entityStore.entityProvenanceEnabled` is separate from these
+three risk-score gates. It controls the `entity.created_by` mapping migration and
+logs-extraction backfill, and defaults to `false`.
+
 `riskScoreCreateMissingEntitiesEnabled` is ANDed with the UI setting in `loadRunConfiguration` — **both** must be on for creation to occur, so it can be disabled independently without turning off dual-write:
 
 ```typescript
@@ -111,7 +115,10 @@ From `scoreBaseEntities` (`maintainer/steps/score_base_entities.ts`):
 
 ## Provenance: `entity.created_by`
 
-New `managedValue` keyword field (`ENTITY_CREATED_BY_FIELD = 'entity.created_by'`), values from `ENTITY_CREATED_BY`. Deep-import it from `@kbn/entity-store/common/domain/definitions/common_fields`, **not** the `common` barrel — see the page-load gotcha in [SKILL.md](../SKILL.md):
+`entity.created_by` is a `managedValue` keyword field (`ENTITY_CREATED_BY_FIELD =
+'entity.created_by'`), with values from `ENTITY_CREATED_BY`. Deep-import it from
+`@kbn/entity-store/common/domain/definitions/common_fields`, **not** the `common` barrel — see
+the page-load gotcha in [SKILL.md](../SKILL.md):
 
 ```typescript
 export const ENTITY_CREATED_BY = {
@@ -120,7 +127,18 @@ export const ENTITY_CREATED_BY = {
 } as const;
 ```
 
-Written once, on create, never overwritten by dual-write updates. Logs extraction stamps it with `COALESCE(entity.created_by, "logs_extraction")` so a maintainer-created entity's stamp survives extraction, and pre-existing entities get backfilled to `logs_extraction` the first time extraction touches them.
+The create-if-missing path writes the field once on create and dual-write updates never overwrite
+it. That path remains independently gated by `riskScoreCreateMissingEntitiesEnabled`.
+
+Logs extraction only references or backfills the field when the platform Cloud feature flag
+`entityStore.entityProvenanceEnabled` is on. Before building the ES|QL query, Entity Store
+idempotently installs current component/index templates and applies
+`entity.created_by: keyword` in place to the resolved latest index. Only after that succeeds does
+the query emit `COALESCE(entity.created_by, "logs_extraction")`, preserving a maintainer-created
+stamp and backfilling touched pre-existing entities. If the mapping update fails, extraction runs
+without the provenance reference and retries later, preventing `Unknown column` failures on
+pre-existing indices. A one-shot upgrade task proactively performs the same migration for
+installed namespaces.
 
 ## Funnel & Telemetry Semantics
 

@@ -7,9 +7,29 @@
 
 import type { FeatureFlagDefinitions } from '@kbn/core-feature-flags-server';
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
-import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../common';
+import { FF_ENTITY_PROVENANCE_ENABLED, FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../common';
 
 export const featureFlags: FeatureFlagDefinitions = [
+  {
+    key: FF_ENTITY_PROVENANCE_ENABLED,
+    name: 'Enable Entity Store entity provenance',
+    description:
+      'When enabled, Entity Store mappings are upgraded to include `entity.created_by` before logs extraction records and backfills entity provenance.',
+    tags: ['entity-store', 'security-entity-analytics'],
+    variationType: 'boolean',
+    variations: [
+      {
+        name: 'Enabled',
+        description: 'Upgrade mappings and record entity provenance',
+        value: true,
+      },
+      {
+        name: 'Disabled',
+        description: 'Do not upgrade mappings or record entity provenance',
+        value: false,
+      },
+    ],
+  },
   {
     key: FF_MIGRATE_LEGACY_SECURITY_ASSETS,
     name: 'Migrate Entity Store legacy Security-scoped indices',

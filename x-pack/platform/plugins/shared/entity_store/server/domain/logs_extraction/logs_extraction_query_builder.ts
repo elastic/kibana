@@ -17,6 +17,10 @@ import {
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
 import {
+  ENTITY_CREATED_BY,
+  ENTITY_CREATED_BY_FIELD,
+} from '../../../common/domain/definitions/common_fields';
+import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsqlFromDefinition,
 } from '../../../common/domain/euid/esql';
@@ -73,6 +77,7 @@ interface LogsExtractionQueryParams {
   pagination?: PaginationParams;
   logsPageCursorStart?: LogSlicePaginationParams;
   logsPageCursorEnd?: LogSlicePaginationParams;
+  provenanceEnabled?: boolean;
 }
 
 export function buildLogsExtractionEsqlQuery({
@@ -86,6 +91,7 @@ export function buildLogsExtractionEsqlQuery({
   pagination,
   logsPageCursorStart,
   logsPageCursorEnd,
+  provenanceEnabled = false,
 }: LogsExtractionQueryParams): string {
   const { fields, type, entityTypeFallback } = entityDefinition;
 
@@ -187,7 +193,7 @@ export function buildLogsExtractionEsqlQuery({
   // Perform the final merge of the fields between latest and recent data
   // and some custom field evaluations, like type and name fallback
   parts.push(`| EVAL ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)},
-              ${customFieldEvalLogic(type, entityTypeFallback)}`);
+              ${customFieldEvalLogic(type, entityTypeFallback, provenanceEnabled)}`);
 
   // Rename the fields to the final names
   parts.push(`| RENAME
@@ -235,7 +241,11 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]): string {
     .join(',\n ');
 }
 
-function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string): string {
+function customFieldEvalLogic(
+  type: EntityType,
+  entityTypeFallback?: string,
+  provenanceEnabled = false
+): string {
   const evals = [
     `${TIMESTAMP_FIELD} = ${recentData('timestamp')}`,
     `${ENTITY_NAME_FIELD} = CASE(${esqlIsNotNullOrEmpty(
@@ -247,6 +257,12 @@ function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string): st
 
   if (entityTypeFallback) {
     evals.push(`${ENTITY_TYPE_FIELD} = COALESCE(${ENTITY_TYPE_FIELD}, "${entityTypeFallback}")`);
+  }
+
+  if (provenanceEnabled) {
+    evals.push(
+      `${ENTITY_CREATED_BY_FIELD} = COALESCE(${ENTITY_CREATED_BY_FIELD}, "${ENTITY_CREATED_BY.LogsExtraction}")`
+    );
   }
 
   return evals.join(',\n ');
