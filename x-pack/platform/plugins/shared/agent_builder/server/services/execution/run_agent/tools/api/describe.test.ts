@@ -94,7 +94,6 @@ describe('createDescribeApiTool', () => {
     expect(data.method).toBe('PUT');
     expect(data.path).toBe('/{index}');
     expect(data.destructive).toBe(false);
-    expect(data.unsupported_reason).toBeUndefined();
     expect(data.params_schema_yaml).toContain('description: Name of the index.');
     expect(data.expandable_types).toEqual([]);
   });
@@ -160,7 +159,7 @@ describe('createDescribeApiTool', () => {
     expect(data.params_schema_yaml).toContain('mappings');
   });
 
-  it('explains why an NDJSON API cannot be executed', async () => {
+  it('presents the payload of an NDJSON API as a parameter', async () => {
     loadApi.mockResolvedValue(
       createLoadedApi({
         name: 'bulk',
@@ -169,6 +168,17 @@ describe('createDescribeApiTool', () => {
         method: 'POST',
         path: '/_bulk',
         bodyFormat: 'ndjson',
+        input: {
+          type: 'object',
+          properties: {
+            operations: {
+              type: 'array',
+              description: 'The operations to perform.',
+              'x-found-in': 'body',
+              'x-body-root': true,
+            },
+          },
+        },
         destructive: true,
       })
     );
@@ -180,7 +190,9 @@ describe('createDescribeApiTool', () => {
     )) as ToolHandlerStandardReturn;
 
     const data = result.results[0].data as ApiDescribeResultData;
-    expect(data.unsupported_reason).toContain('NDJSON');
+    expect(data.params_schema_yaml).toContain('operations');
+    expect(data.params_schema_yaml).toContain('description: The operations to perform.');
+    expect(data.params_schema_yaml).not.toContain('x-body-root');
   });
 
   it('falls back to the raw schema when references cannot be resolved', async () => {

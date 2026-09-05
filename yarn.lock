@@ -2232,10 +2232,10 @@
     "@types/node-jose" "1.1.10"
     node-jose "2.2.0"
 
-"@elastic/schemas@0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@elastic/schemas/-/schemas-0.4.4.tgz#07335d909a1f59948b448e8bbc3e988f96eab8c5"
-  integrity sha512-Aeg/2bme133KAQlgI2zBNaxowR93ejHW0ldDbohs9VObLnL+08+U5CSve8K3YzXGsoeh8PI3NGCube6rks82Aw==
+"@elastic/schemas@0.7.2":
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/@elastic/schemas/-/schemas-0.7.2.tgz#35316a79882e94b401a9cc9c62cf64fb2d626283"
+  integrity sha512-n82fOdrTWPny0mXJSAU5yVbxng8P66DCXsjlzUjk43Vl0JucgVXzUhKAs072YNi22HIp5wOR6xaDowzrse87SA==
   optionalDependencies:
     zod "^4.4.3"
 

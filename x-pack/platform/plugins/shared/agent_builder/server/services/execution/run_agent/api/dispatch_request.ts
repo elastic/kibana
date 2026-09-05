@@ -10,7 +10,6 @@ import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { toSelfFetchQuery } from './query_params';
-import { isRecord } from './types';
 import type { ApiRequest } from './types';
 
 export interface DispatchApiRequestParams {
@@ -49,7 +48,7 @@ export const dispatchApiRequest = async ({
   selfClient,
   request,
 }: DispatchApiRequestParams): Promise<unknown> => {
-  const { method, path, querystring, body } = apiRequest;
+  const { method, path, querystring, body, bulkBody } = apiRequest;
 
   if (target === 'kibana') {
     return selfClient.asScoped(request).fetch(path, {
@@ -69,7 +68,9 @@ export const dispatchApiRequest = async ({
   if (querystring != null) {
     transportParams.querystring = querystring;
   }
-  if (isRecord(body)) {
+  if (Array.isArray(bulkBody)) {
+    transportParams.bulkBody = bulkBody;
+  } else if (body != null) {
     transportParams.body = body;
   }
 

@@ -174,7 +174,7 @@
     "@elastic/react-search-ui-views": "1.24.2",
     "@elastic/request-converter": "9.5.1",
     "@elastic/request-crypto": "2.0.4",
-    "@elastic/schemas": "0.4.4",
+    "@elastic/schemas": "0.7.2",
     "@elastic/search-ui": "1.24.2",
     "@elastic/search-ui-app-search-connector": "1.24.1",
     "@elastic/search-ui-engines-connector": "1.24.2",

@@ -9,6 +9,9 @@ import type { ApiTarget } from '@kbn/agent-builder-common';
 import { toDescribedDefinition, toDescribedSchema } from '../describe_schema';
 import { getRegistries } from '../registry';
 import { getValidator } from '../validate_params';
+import { prepareApiRequest } from '../prepare_request';
+import { isRecord } from '../types';
+import type { ApiRegistryDefinition } from '../types';
 
 // Ceiling for a described API schema, and for the expansion of any type it stubs.
 const MAX_DESCRIBED_CHARS = 40_000;
@@ -18,20 +21,47 @@ interface ApiInput {
   input: Record<string, unknown>;
 }
 
-const loadApiInputs = async (target: ApiTarget): Promise<ApiInput[]> => {
+interface LoadedApiDefinition {
+  id: string;
+  definition: ApiRegistryDefinition;
+}
+
+interface ParamRouting {
+  name: string;
+  foundIn?: string;
+  isBodyRoot: boolean;
+  type?: string;
+}
+
+const loadApiDefinitions = async (target: ApiTarget): Promise<LoadedApiDefinition[]> => {
   const registries = await getRegistries();
   const registry = registries[target];
-  const inputs: ApiInput[] = [];
+  const definitions: LoadedApiDefinition[] = [];
 
   for (const meta of registry.manifest) {
     const { definition } = await registry.loadApi(meta.id);
+    definitions.push({ id: meta.id, definition });
+  }
+
+  return definitions;
+};
+
+const loadApiInputs = async (target: ApiTarget): Promise<ApiInput[]> => {
+  const inputs: ApiInput[] = [];
+
+  for (const { id, definition } of await loadApiDefinitions(target)) {
     if (definition.input) {
-      inputs.push({ id: meta.id, input: definition.input });
+      inputs.push({ id, input: definition.input });
     }
   }
 
   return inputs;
 };
+
+const loadNdjsonApis = async (target: ApiTarget): Promise<ApiInput[]> =>
+  (await loadApiDefinitions(target))
+    .filter(({ definition }) => definition.bodyFormat === 'ndjson')
+    .map(({ id, definition }) => ({ id, input: definition.input ?? {} }));
 
 const isLocalRef = (ref: string): boolean => ref === '#' || ref.startsWith('#/$defs/');
 
@@ -55,6 +85,22 @@ const collectRefs = (node: unknown, found: string[]): string[] => {
 
 const crossFileRefs = (node: unknown): string[] =>
   collectRefs(node, []).filter((ref) => !isLocalRef(ref));
+
+const paramRoutings = (input: ApiRegistryDefinition['input']): ParamRouting[] => {
+  const properties = input?.properties;
+  if (!isRecord(properties)) {
+    return [];
+  }
+  return Object.entries(properties).map(([name, spec]) => {
+    const { 'x-found-in': foundIn, 'x-body-root': bodyRoot, type } = isRecord(spec) ? spec : {};
+    return {
+      name,
+      ...(typeof foundIn === 'string' ? { foundIn } : {}),
+      isBodyRoot: bodyRoot === true,
+      ...(typeof type === 'string' ? { type } : {}),
+    };
+  });
+};
 
 const containsKey = (node: unknown, key: string): boolean => {
   if (Array.isArray(node)) {
@@ -343,24 +389,123 @@ describe('@elastic/schemas registries', () => {
     });
   });
 
-  describe('NDJSON APIs', () => {
-    it.each(['bulk', 'msearch'])(
-      '%s still models no body parameter, which is why execute refuses it',
-      async (id) => {
-        // If this starts failing, upstream has added a way to supply the payload and the NDJSON
-        // refusal in execute.ts can be revisited.
-        const { elasticsearch } = await getRegistries();
-        const { definition } = await elasticsearch.loadApi(id);
+  describe('body-root payloads', () => {
+    it.each<ApiTarget>(['elasticsearch', 'kibana'])(
+      'gives every %s API at most one body-root parameter, alone in the body',
+      async (target) => {
+        const problems: string[] = [];
 
-        expect(definition.bodyFormat).toBe('ndjson');
+        for (const { id, definition } of await loadApiDefinitions(target)) {
+          const params = paramRoutings(definition.input);
+          const bodyRoots = params.filter(({ isBodyRoot }) => isBodyRoot);
+          if (bodyRoots.length === 0) {
+            continue;
+          }
 
-        const properties = (definition.input?.properties ?? {}) as Record<
-          string,
-          { 'x-found-in'?: string }
-        >;
-        const locations = Object.values(properties).map((spec) => spec['x-found-in']);
-        expect(locations).not.toContain('body');
+          const rootNames = bodyRoots.map(({ name }) => name);
+          if (rootNames.length > 1) {
+            problems.push(`${id}: ${rootNames.join(', ')}`);
+          }
+
+          const alongside = params.filter(
+            ({ name, foundIn }) => foundIn === 'body' && !rootNames.includes(name)
+          );
+          if (alongside.length > 0) {
+            problems.push(
+              `${id}: "${rootNames.join(', ')}" shares the body with ${alongside
+                .map(({ name }) => name)
+                .join(', ')}`
+            );
+          }
+        }
+
+        expect(problems).toEqual([]);
       }
     );
+
+    it.each([
+      ['bulk', 'operations'],
+      ['msearch', 'searches'],
+    ])('%s takes its NDJSON payload in the "%s" parameter', async (id, param) => {
+      const { elasticsearch } = await getRegistries();
+      const { definition } = await elasticsearch.loadApi(id);
+
+      expect(definition.bodyFormat).toBe('ndjson');
+      expect(paramRoutings(definition.input).filter(({ isBodyRoot }) => isBodyRoot)).toEqual([
+        { name: param, foundIn: 'body', isBodyRoot: true, type: 'array' },
+      ]);
+    });
+
+    it('models every Elasticsearch NDJSON payload as a single body-root array', async () => {
+      // `dispatchApiRequest` forwards that array as the client's `bulkBody`, which serializes it
+      // into newline-delimited lines, so any other shape would leave the payload out of the request.
+      const apis = await loadNdjsonApis('elasticsearch');
+      const problems = apis
+        .filter(({ input }) => {
+          const bodyRoots = paramRoutings(input).filter(({ isBodyRoot }) => isBodyRoot);
+          return bodyRoots.length !== 1 || bodyRoots[0].type !== 'array';
+        })
+        .map(({ id }) => id);
+
+      expect(problems).toEqual([]);
+      expect(apis.length).toBeGreaterThan(0);
+    });
+
+    it('ships no NDJSON API on Kibana, whose dispatch never sends one', async () => {
+      const apis = await loadNdjsonApis('kibana');
+
+      expect(apis.map(({ id }) => id)).toEqual([]);
+    });
+
+    it('sends an indexed document as the body itself, not wrapped in its parameter name', async () => {
+      const prepared = await prepareApiRequest({
+        target: 'elasticsearch',
+        api: 'index',
+        params: { index: 'logs', id: '1', document: { field: 1 } },
+        spaceId: 'default',
+      });
+
+      expect(prepared).toEqual(
+        expect.objectContaining({
+          status: 'prepared',
+          request: expect.objectContaining({ body: { field: 1 } }),
+        })
+      );
+    });
+
+    it('sends a Kibana body-root payload as the body itself', async () => {
+      const prepared = await prepareApiRequest({
+        target: 'kibana',
+        api: 'tags.post-tags',
+        params: { body: { name: 'my-tag', color: '#ffffff', description: '' } },
+        spaceId: 'default',
+      });
+
+      expect(prepared).toEqual(
+        expect.objectContaining({
+          status: 'prepared',
+          request: expect.objectContaining({
+            body: { name: 'my-tag', color: '#ffffff', description: '' },
+          }),
+        })
+      );
+    });
+
+    it('hands the bulk payload over as the array the NDJSON body is built from', async () => {
+      const operations = [{ index: { _index: 'logs' } }, { field: 1 }];
+      const prepared = await prepareApiRequest({
+        target: 'elasticsearch',
+        api: 'bulk',
+        params: { index: 'logs', operations },
+        spaceId: 'default',
+      });
+
+      expect(prepared).toEqual(
+        expect.objectContaining({
+          status: 'prepared',
+          request: expect.objectContaining({ bulkBody: operations }),
+        })
+      );
+    });
   });
 });
