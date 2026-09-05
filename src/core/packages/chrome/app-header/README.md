@@ -116,10 +116,11 @@ it owns the bottom separator and title actions remain visible without hovering.
 ## Dashboard AI action
 
 `DashboardAppHeader` from `@kbn/app-header/dashboard` is a temporary, Dashboard-only escape hatch
-for an inline AI control in the App Menu cluster: after visible secondary actions, before
-overflow/More and the primary action. It is standalone/inline-only: registered and embedded Chrome
-headers cannot use it. Other apps must keep using `AppHeader`. Remove the wrapper when the
-Dashboard canvas overlay replaces the header action.
+for a pinned AI action in the App Menu cluster: after visible secondary items, before More and the
+primary action. Collapsed keeps an icon-only control beside More, outside the overflow popover. It
+is standalone/inline-only: registered and embedded Chrome headers cannot use it. Other apps must
+keep using `AppHeader`. Remove the wrapper when the Dashboard canvas overlay replaces the header
+action.
 
 ## Loading skeleton
 

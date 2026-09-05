@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
-import type { AppMenuBeforePrimaryAction, AppMenuStaticItem } from '@kbn/ui-app-menu';
+import type { AppMenuPinnedAction, AppMenuStaticItem } from '@kbn/ui-app-menu';
 import type { AppHeaderBack, AppHeaderConfig } from './types';
 import { AppHeaderShell } from './app_header_shell';
 import { AppBadges } from './app_badges';
@@ -43,10 +43,10 @@ export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back'> & {
   titleAppend?: ReactNode;
   borderless?: boolean;
   /**
-   * Temporary Dashboard-only escape hatch. Do not add callers outside `@kbn/app-header/dashboard`.
-   * Renders after visible secondary items, before overflow/More — not immediately before primary.
+   * Temporary Dashboard-only pinned menu action. Do not add callers outside `@kbn/app-header/dashboard`.
+   * Renders after visible secondary items and before More as a direct App Menu child.
    */
-  beforePrimaryAction?: AppMenuBeforePrimaryAction;
+  pinnedMenuAction?: AppMenuPinnedAction;
 };
 
 const getPublicAppHeaderViewProps = ({
@@ -65,7 +65,7 @@ const getPublicAppHeaderViewProps = ({
   fallbackMenu,
   titleAppend,
   borderless,
-  beforePrimaryAction,
+  pinnedMenuAction,
 }: AppHeaderViewProps): AppHeaderViewProps => {
   const secondaryContent = description ? { description } : metadata ? { metadata } : {};
 
@@ -84,7 +84,7 @@ const getPublicAppHeaderViewProps = ({
     fallbackMenu,
     titleAppend,
     borderless,
-    beforePrimaryAction,
+    pinnedMenuAction,
   };
 };
 
@@ -105,7 +105,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
     borderless,
     staticItems,
     fallbackMenu,
-    beforePrimaryAction,
+    pinnedMenuAction,
   }) => {
     const hasStaticItems = !!staticItems?.some((item) => !item.global);
 
@@ -140,7 +140,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
       !!metadata?.length ||
       hasStaticItems ||
       !!fallbackMenu ||
-      !!beforePrimaryAction;
+      !!pinnedMenuAction;
 
     if (!show) {
       return null;
@@ -164,7 +164,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
             menu={menu}
             staticItems={staticItems}
             fallbackMenu={fallbackMenu}
-            beforePrimaryAction={beforePrimaryAction}
+            pinnedAction={pinnedMenuAction}
           />
         }
         secondaryContent={

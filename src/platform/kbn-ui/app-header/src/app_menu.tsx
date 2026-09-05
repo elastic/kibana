@@ -9,11 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense } from 'react';
-import type {
-  AppMenuBeforePrimaryAction,
-  AppMenuConfig,
-  AppMenuStaticItem,
-} from '@kbn/ui-app-menu';
+import type { AppMenuConfig, AppMenuPinnedAction, AppMenuStaticItem } from '@kbn/ui-app-menu';
 
 const AppMenuComponentInternal = lazy(async () => {
   const { AppMenuComponentInternal: Component } = await import('@kbn/ui-app-menu');
@@ -24,25 +20,25 @@ export interface AppMenuProps {
   menu?: AppMenuConfig;
   staticItems?: AppMenuStaticItem[];
   fallbackMenu?: ReactNode;
-  /** Temporary Dashboard-only escape hatch. After visible secondary items, before More. Do not adopt. */
-  beforePrimaryAction?: AppMenuBeforePrimaryAction;
+  /** Temporary Dashboard-only pinned action. After visible secondary items, before More. Do not adopt. */
+  pinnedAction?: AppMenuPinnedAction;
 }
 
 export const AppMenu = React.memo<AppMenuProps>(
-  ({ menu, staticItems, fallbackMenu, beforePrimaryAction }) => {
+  ({ menu, staticItems, fallbackMenu, pinnedAction }) => {
     const hasStaticItems = !!staticItems?.some((item) => !item.global);
 
     if (!menu && fallbackMenu) {
       return <>{fallbackMenu}</>;
     }
 
-    if (menu || hasStaticItems || beforePrimaryAction) {
+    if (menu || hasStaticItems || pinnedAction) {
       return (
         <Suspense>
           <AppMenuComponentInternal
             config={menu}
             staticItems={staticItems}
-            beforePrimaryAction={beforePrimaryAction}
+            pinnedAction={pinnedAction}
           />
         </Suspense>
       );

@@ -258,12 +258,12 @@ describe('AppHeader adapter', () => {
     expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
   });
 
-  it('drops a cast-in beforePrimaryAction on ordinary AppHeader', async () => {
+  it('drops a cast-in pinnedMenuAction on ordinary AppHeader', async () => {
     renderAppHeader(
       <AppHeader
         {...({
           title: 'Dashboard',
-          beforePrimaryAction: {
+          pinnedMenuAction: {
             inline: <button type="button" data-test-subj="cast-inline-sentinel" />,
             collapsed: <button type="button" data-test-subj="cast-collapsed-sentinel" />,
           },

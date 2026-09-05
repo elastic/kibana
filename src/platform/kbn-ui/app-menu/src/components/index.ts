@@ -11,7 +11,7 @@ export {
   AppMenuComponent,
   AppMenuComponentInternal,
   type AppMenuBreakpointSource,
-  type AppMenuBeforePrimaryAction,
+  type AppMenuPinnedAction,
   type AppMenuComponentInternalProps,
 } from './app_menu';
 export { AppMenuLoading, type AppMenuLoadingProps } from './app_menu_loading';

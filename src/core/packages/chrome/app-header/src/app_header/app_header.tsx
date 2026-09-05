@@ -26,7 +26,7 @@ import { LegacyHeaderActionMenu } from './legacy_action_menu';
 
 export type AppHeaderViewProps = DistributiveOmit<
   AppHeaderPresentationProps,
-  'staticItems' | 'fallbackMenu' | 'titleAppend' | 'borderless' | 'beforePrimaryAction'
+  'staticItems' | 'fallbackMenu' | 'titleAppend' | 'borderless' | 'pinnedMenuAction'
 > & {
   docLink?: string;
   showAddIntegrations?: boolean;
@@ -65,10 +65,10 @@ const getPublicAppHeaderViewProps = ({
   };
 };
 
-/** Resolves chrome-connected header props. `beforePrimaryAction` is a temporary Dashboard-only extra (after secondary items, before More). */
+/** Resolves chrome-connected header props. `pinnedMenuAction` is a temporary Dashboard-only extra. */
 export const usePresentationProps = (
   props: AppHeaderViewProps,
-  extras?: Pick<AppHeaderPresentationProps, 'titleAppend' | 'borderless' | 'beforePrimaryAction'>
+  extras?: Pick<AppHeaderPresentationProps, 'titleAppend' | 'borderless' | 'pinnedMenuAction'>
 ): AppHeaderPresentationProps => {
   const publicProps = getPublicAppHeaderViewProps(props);
   const back = useBackNavTargets(publicProps.back);

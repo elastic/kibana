@@ -40,17 +40,17 @@ export interface AppMenuItemsProps {
 }
 
 /**
- * Temporary Dashboard-only insertion seam. Do not adopt.
- * Inline sits after visible secondary items and before overflow/More — not immediately before primary.
+ * Temporary Dashboard-only pinned seam. Do not adopt.
+ * Inline is a direct App Menu child after visible secondary items and before More.
  */
-export interface AppMenuBeforePrimaryAction {
+export interface AppMenuPinnedAction {
   inline: ReactNode;
   collapsed: ReactNode;
 }
 
 export type AppMenuComponentInternalProps = AppMenuItemsProps & {
   /** Temporary Dashboard-only escape hatch. Not part of the public App Menu API. */
-  beforePrimaryAction?: AppMenuBeforePrimaryAction;
+  pinnedAction?: AppMenuPinnedAction;
 };
 
 const hasNoItems = (config: AppMenuConfig) =>
@@ -75,7 +75,7 @@ export const AppMenuComponentInternal = ({
   visible = true,
   breakpointSource = 'application',
   staticItems,
-  beforePrimaryAction,
+  pinnedAction,
 }: AppMenuComponentInternalProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
 
@@ -88,7 +88,7 @@ export const AppMenuComponentInternal = ({
    */
   const hasVisibleStaticItems = hasNonGlobalStaticItems(staticItems);
 
-  if ((!config || hasNoItems(config)) && !hasVisibleStaticItems && !beforePrimaryAction) {
+  if ((!config || hasNoItems(config)) && !hasVisibleStaticItems && !pinnedAction) {
     return null;
   }
 
@@ -142,15 +142,21 @@ export const AppMenuComponentInternal = ({
     const inlineItems = displayedItems.slice(0, inlineItemLimit);
     const responsiveOverflowItems = [...displayedItems.slice(inlineItemLimit), ...overflowItems];
     const shouldShowOverflow = responsiveOverflowItems.length > 0 || hasStaticItems;
-    const hasSecondaryActions =
-      Boolean(switchConfig) ||
-      inlineItems.length > 0 ||
-      Boolean(beforePrimaryAction?.inline) ||
-      shouldShowOverflow;
+    const overflowComponent = shouldShowOverflow ? (
+      <AppMenuOverflowButton
+        items={responsiveOverflowItems}
+        staticItems={processedStaticItems}
+        isPopoverOpen={openPopoverId === showMoreButtonId}
+        onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+        onPopoverClose={handleOnPopoverClose}
+      />
+    ) : undefined;
+    const hasVisibleSecondaryItems = Boolean(switchConfig) || inlineItems.length > 0;
+    const hasSecondaryCluster = hasVisibleSecondaryItems || (!pinnedAction && shouldShowOverflow);
 
     return (
       <>
-        {hasSecondaryActions && (
+        {hasSecondaryCluster && (
           <div css={secondaryActionsCss}>
             {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
             {inlineItems.map((menuItem) => (
@@ -162,18 +168,11 @@ export const AppMenuComponentInternal = ({
                 onPopoverClose={handleOnPopoverClose}
               />
             ))}
-            {beforePrimaryAction?.inline}
-            {shouldShowOverflow && (
-              <AppMenuOverflowButton
-                items={responsiveOverflowItems}
-                staticItems={processedStaticItems}
-                isPopoverOpen={openPopoverId === showMoreButtonId}
-                onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-                onPopoverClose={handleOnPopoverClose}
-              />
-            )}
+            {!pinnedAction ? overflowComponent : undefined}
           </div>
         )}
+        {pinnedAction?.inline}
+        {pinnedAction ? overflowComponent : undefined}
         {primaryActionComponent}
       </>
     );
@@ -183,7 +182,7 @@ export const AppMenuComponentInternal = ({
     collapsed: (
       <>
         {collapsedComponent}
-        {beforePrimaryAction?.collapsed}
+        {pinnedAction?.collapsed}
       </>
     ),
     minimal: renderInlineContent(0),

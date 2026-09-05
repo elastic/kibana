@@ -291,10 +291,10 @@ describe('AppMenu', () => {
     });
   });
 
-  describe('beforePrimaryAction', () => {
+  describe('pinnedAction', () => {
     const inlineSentinel = <button type="button" data-test-subj="inline-sentinel" />;
     const collapsedSentinel = <button type="button" data-test-subj="collapsed-sentinel" />;
-    const beforePrimaryAction = { inline: inlineSentinel, collapsed: collapsedSentinel };
+    const pinnedAction = { inline: inlineSentinel, collapsed: collapsedSentinel };
     const primaryActionItem = {
       id: 'save',
       label: 'Save',
@@ -313,15 +313,10 @@ describe('AppMenu', () => {
       expect(documentIndex(earlier)).toBeLessThan(documentIndex(later));
     };
 
-    it('places the inline action after any switch, before More, then primary at s', () => {
+    it('places the pinned action before More, then primary at s', () => {
       mockCurrentBreakpoint = 's';
 
-      render(
-        <AppMenuComponentInternal
-          config={configWithPrimary}
-          beforePrimaryAction={beforePrimaryAction}
-        />
-      );
+      render(<AppMenuComponentInternal config={configWithPrimary} pinnedAction={pinnedAction} />);
 
       expectFollows(
         screen.getByTestId('inline-sentinel'),
@@ -334,7 +329,7 @@ describe('AppMenu', () => {
       expect(screen.queryByTestId('collapsed-sentinel')).not.toBeInTheDocument();
     });
 
-    it('places displayed items before the inline action, then More, then primary at xl', () => {
+    it('places displayed items before the pinned action, then More, then primary at xl', () => {
       const overflowConfig: AppMenuConfig = {
         items: [
           ...defaultItems,
@@ -350,12 +345,7 @@ describe('AppMenu', () => {
         primaryActionItem,
       };
 
-      render(
-        <AppMenuComponentInternal
-          config={overflowConfig}
-          beforePrimaryAction={beforePrimaryAction}
-        />
-      );
+      render(<AppMenuComponentInternal config={overflowConfig} pinnedAction={pinnedAction} />);
 
       expectFollows(screen.getByText('Item 1'), screen.getByTestId('inline-sentinel'));
       expectFollows(
@@ -371,12 +361,7 @@ describe('AppMenu', () => {
     it('places the collapsed action after More and keeps the primary action in the popover at xs', () => {
       mockCurrentBreakpoint = 'xs';
 
-      render(
-        <AppMenuComponentInternal
-          config={configWithPrimary}
-          beforePrimaryAction={beforePrimaryAction}
-        />
-      );
+      render(<AppMenuComponentInternal config={configWithPrimary} pinnedAction={pinnedAction} />);
 
       expectFollows(
         screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton),
@@ -390,22 +375,20 @@ describe('AppMenu', () => {
       expect(screen.getByTestId(getAppMenuActionButtonTestSubj('save'))).toBeInTheDocument();
     });
 
-    it('renders when only beforePrimaryAction is supplied', () => {
-      const { container } = render(
-        <AppMenuComponentInternal beforePrimaryAction={beforePrimaryAction} />
-      );
+    it('renders when only pinnedAction is supplied', () => {
+      const { container } = render(<AppMenuComponentInternal pinnedAction={pinnedAction} />);
 
       expect(container).not.toBeEmptyDOMElement();
       expect(screen.getByTestId('inline-sentinel')).toBeInTheDocument();
       expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).not.toBeInTheDocument();
     });
 
-    it('drops a cast-in beforePrimaryAction on ordinary AppMenuComponent', () => {
+    it('drops a cast-in pinnedAction on ordinary AppMenuComponent', () => {
       render(
         <AppMenuComponent
           {...({
             config: defaultConfig,
-            beforePrimaryAction: {
+            pinnedAction: {
               inline: <button type="button" data-test-subj="cast-inline-sentinel" />,
               collapsed: <button type="button" data-test-subj="cast-collapsed-sentinel" />,
             },

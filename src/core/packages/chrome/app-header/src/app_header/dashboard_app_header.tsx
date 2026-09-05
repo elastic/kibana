@@ -32,9 +32,9 @@ export type DashboardAppHeaderProps = AppHeaderProps & {
   aiAction?: DashboardAppHeaderAiAction;
 };
 
-const createBeforePrimaryAction = (
+const createPinnedMenuAction = (
   aiAction: DashboardAppHeaderAiAction
-): NonNullable<AppHeaderPresentationProps['beforePrimaryAction']> => {
+): NonNullable<AppHeaderPresentationProps['pinnedMenuAction']> => {
   const { id, label, run, disabled, tooltip, testId } = aiAction;
   const onClick = () => {
     void run();
@@ -79,7 +79,7 @@ export const DashboardAppHeader = React.memo<DashboardAppHeaderProps>(({ aiActio
   useInlineAppHeader();
   const presentationProps = usePresentationProps(
     props,
-    aiAction ? { beforePrimaryAction: createBeforePrimaryAction(aiAction) } : undefined
+    aiAction ? { pinnedMenuAction: createPinnedMenuAction(aiAction) } : undefined
   );
   return <AppHeaderPresentation {...presentationProps} title={props.title} />;
 });
