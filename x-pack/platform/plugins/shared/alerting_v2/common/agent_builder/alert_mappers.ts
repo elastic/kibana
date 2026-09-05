@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AlertEpisode, EpisodeAttachmentData } from '@kbn/alerting-v2-schemas';
-import { resolveEpisodeLabel } from './resolve_episode_label';
+import type { AlertEpisode, AlertAttachmentData } from '@kbn/alerting-v2-schemas';
+import { resolveAlertLabel } from './resolve_alert_label';
 
 export interface AlertEpisodeToAttachmentOptions {
   ruleName?: string;
@@ -29,19 +29,19 @@ const mapNullFieldsToUndefined = <T extends Record<string, unknown>>(
  * Maps an {@link AlertEpisode} row to attachment `data`, converting any `null` field to `undefined`.
  * Copies only attachment-schema fields so extra ES|QL columns cannot fail a `.strict()` parse.
  */
-export const alertEpisodeToEpisodeAttachment = (
+export const alertEpisodeToAlertAttachment = (
   episode: AlertEpisode,
   options: AlertEpisodeToAttachmentOptions = {}
-): EpisodeAttachmentData =>
+): AlertAttachmentData =>
   mapNullFieldsToUndefined({
     '@timestamp': episode['@timestamp'],
-    'episode.id': episode['episode.id'],
-    'episode.label': resolveEpisodeLabel({
+    'alert.id': episode['episode.id'],
+    'alert.label': resolveAlertLabel({
       episode,
       ruleName: options.ruleName,
       groupingFields: options.groupingFields,
     }),
-    'episode.status': episode['episode.status'],
+    'alert.status': episode['episode.status'],
     'rule.id': episode['rule.id'],
     group_hash: episode.group_hash,
     first_timestamp: episode.first_timestamp,
@@ -53,6 +53,6 @@ export const alertEpisodeToEpisodeAttachment = (
     last_snooze_action: episode.last_snooze_action,
     snooze_expiry: episode.snooze_expiry,
     last_tags: episode.last_tags,
-    episode_data: episode.episode_data,
+    alert_data: episode.episode_data,
     severity: episode.severity,
   });

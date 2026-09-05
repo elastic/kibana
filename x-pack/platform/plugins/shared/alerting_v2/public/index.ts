@@ -269,16 +269,13 @@ const pluginModule = new ContainerModule(({ bind }) => {
           }
         );
         import(
-          /* webpackChunkName: "alerting_v2_episode_attachment" */
-          './agent_builder/attachments/episode_attachment_definition'
+          /* webpackChunkName: "alerting_v2_alert_attachment" */
+          './agent_builder/attachments/alert_attachment_definition'
         ).then(
-          ({
-            createEpisodeAttachmentDefinition,
-            EPISODE_ATTACHMENT_TYPE: episodeAttachmentType,
-          }) => {
+          ({ createAlertAttachmentDefinition, ALERT_ATTACHMENT_TYPE: alertAttachmentType }) => {
             agentBuilder.attachments.addAttachmentType(
-              episodeAttachmentType,
-              createEpisodeAttachmentDefinition()
+              alertAttachmentType,
+              createAlertAttachmentDefinition()
             );
           }
         );

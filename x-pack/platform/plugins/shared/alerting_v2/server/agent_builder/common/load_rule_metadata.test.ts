@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EPISODE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { ALERT_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
 import type { RulesClient } from '../../lib/rules_client';
 import { loadRuleMetadata } from './load_rule_metadata';
@@ -42,13 +42,13 @@ describe('loadRuleMetadata', () => {
       loadRuleMetadata(
         { getRule } as unknown as RulesClient,
         'rule-1',
-        loggerService.withLabels({ attachment_type: EPISODE_ATTACHMENT_TYPE })
+        loggerService.withLabels({ attachment_type: ALERT_ATTACHMENT_TYPE })
       )
     ).resolves.toEqual({});
 
     expect(mockLogger.debug).toHaveBeenCalledWith(
       'Failed to load rule metadata for episode label; falling back to rule id: not found',
-      { labels: { attachment_type: EPISODE_ATTACHMENT_TYPE, rule_id: 'rule-1' } }
+      { labels: { attachment_type: ALERT_ATTACHMENT_TYPE, rule_id: 'rule-1' } }
     );
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });

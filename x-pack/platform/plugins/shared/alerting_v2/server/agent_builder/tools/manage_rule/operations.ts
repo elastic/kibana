@@ -177,7 +177,7 @@ export const setGroupingOperationSchema = groupingSchema
     operation: z.literal('set_grouping'),
   })
   .describe(
-    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own episode instead of one combined alert.'
+    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own alert instead of one combined alert.'
   );
 
 export const setStateTransitionOperationSchema = stateTransitionSchema

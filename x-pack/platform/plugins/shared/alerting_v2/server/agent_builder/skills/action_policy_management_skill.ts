@@ -100,7 +100,7 @@ Do **not** use this skill for:
 
 ## Action Policies
 
-An action policy is a **space-scoped saved object** that controls how alert episodes are matched, grouped, throttled, and dispatched to workflow destinations. They are not embedded in rules: one policy can match episodes from many rules.
+An action policy is a **space-scoped saved object** that controls how alerts are matched, grouped, throttled, and dispatched to workflow destinations. They are not embedded in rules: one policy can match alerts from many rules.
 
 ---
 
@@ -214,10 +214,10 @@ When notifying on one specific rule (\`rule.id\` matcher, pre-assigned \`ruleId\
 When the user wants one policy across several rules, a catch-all, or routing by tag/severity, consult the [action-policy-multi-rule reference](./references/action-policy-multi-rule.md).
 
 ### Matchers
-When the user asks how to match episodes, or which KQL fields are available, consult the [action-policy-matchers reference](./references/action-policy-matchers.md).
+When the user asks how to match alerts, or which KQL fields are available, consult the [action-policy-matchers reference](./references/action-policy-matchers.md).
 
 ### Grouping Modes
-When the user asks how episodes are grouped (per episode, all together, by field), consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
+When the user asks how alerts are grouped (\`per_episode\`, all together, by field), consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
 
 ### Throttle Strategies
 When the user asks how often notifications fire, or to change throttle strategy, consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md).

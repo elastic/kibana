@@ -52,7 +52,7 @@ import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { useEpisodeAutoAttach } from '../../agent_builder/use_episode_auto_attach';
+import { useAlertAutoAttach } from '../../agent_builder/use_alert_auto_attach';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
@@ -136,7 +136,7 @@ export function EpisodeDetailsPage() {
   const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
   const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
 
-  useEpisodeAutoAttach(episode, {
+  useAlertAutoAttach(episode, {
     ruleName: episodeRuleName,
     groupingFields,
   });

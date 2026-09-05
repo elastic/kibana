@@ -10,17 +10,13 @@ import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolType } from '@kbn/agent-builder-common';
-import {
-  ALERT_EPISODE_STATUS,
-  type AlertEpisode,
-  type EpisodeAttachmentData,
-} from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, type AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { EpisodesClient } from '../../../lib/episodes_client';
 import type { RulesClient } from '../../../lib/rules_client';
 import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
-import { refreshEpisodeTool, refreshEpisodeToolId } from './refresh_episode';
+import { refreshAlertTool, refreshAlertToolId } from './refresh_alert';
 
-const baseEpisodeData: EpisodeAttachmentData = {
+const baseEpisodeRow: AlertEpisode = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
   'episode.id': 'ep-1',
   'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
@@ -33,7 +29,7 @@ const baseEpisodeData: EpisodeAttachmentData = {
   last_tags: ['ops'],
 };
 
-describe('refreshEpisodeTool', () => {
+describe('refreshAlertTool', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let get: jest.Mock;
@@ -55,9 +51,9 @@ describe('refreshEpisodeTool', () => {
   });
 
   const createTool = (canReadResult: boolean = true) =>
-    refreshEpisodeTool({
+    refreshAlertTool({
       attachmentId: 'attach-1',
-      episodeId: 'ep-1',
+      alertId: 'ep-1',
       logger: loggerService,
       getEpisodesClient: () => ({ get } as unknown as EpisodesClient),
       getRulesClient: () => ({ getRule } as unknown as RulesClient),
@@ -66,8 +62,8 @@ describe('refreshEpisodeTool', () => {
 
   describe('id', () => {
     it('is unique per attachment instance', () => {
-      expect(refreshEpisodeToolId('attach-1')).toBe('platform.alerting.refresh_episode.attach-1');
-      expect(createTool().id).toBe(refreshEpisodeToolId('attach-1'));
+      expect(refreshAlertToolId('attach-1')).toBe('platform.alerting.refresh_alert.attach-1');
+      expect(createTool().id).toBe(refreshAlertToolId('attach-1'));
     });
   });
 
@@ -82,9 +78,9 @@ describe('refreshEpisodeTool', () => {
   });
 
   describe('handler', () => {
-    it('returns the latest episode snapshot', async () => {
+    it('returns the latest alert snapshot', async () => {
       const refreshed: AlertEpisode = {
-        ...baseEpisodeData,
+        ...baseEpisodeRow,
         'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
         last_timestamp: '2026-04-20T12:00:00.000Z',
         severity: 'low',
@@ -99,8 +95,8 @@ describe('refreshEpisodeTool', () => {
           {
             type: ToolResultType.other,
             data: expect.objectContaining({
-              'episode.id': 'ep-1',
-              'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
+              'alert.id': 'ep-1',
+              'alert.status': ALERT_EPISODE_STATUS.INACTIVE,
               last_timestamp: '2026-04-20T12:00:00.000Z',
               severity: 'low',
             }),
@@ -109,8 +105,8 @@ describe('refreshEpisodeTool', () => {
       });
     });
 
-    it('includes the episode label when the rule can be loaded', async () => {
-      get.mockResolvedValueOnce(baseEpisodeData);
+    it('includes the alert label when the rule can be loaded', async () => {
+      get.mockResolvedValueOnce(baseEpisodeRow);
       getRule.mockResolvedValueOnce({ metadata: { name: 'Host CPU high' } });
 
       const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
@@ -120,7 +116,7 @@ describe('refreshEpisodeTool', () => {
         results: [
           {
             type: ToolResultType.other,
-            data: expect.objectContaining({ 'episode.label': 'Host CPU high alert' }),
+            data: expect.objectContaining({ 'alert.label': 'Host CPU high alert' }),
           },
         ],
       });
@@ -128,7 +124,7 @@ describe('refreshEpisodeTool', () => {
 
     it('includes the rule name and group when both are available', async () => {
       get.mockResolvedValueOnce({
-        ...baseEpisodeData,
+        ...baseEpisodeRow,
         episode_data: JSON.stringify({ host: { name: 'web-01' } }),
       });
       getRule.mockResolvedValueOnce({
@@ -142,14 +138,14 @@ describe('refreshEpisodeTool', () => {
         results: [
           {
             type: ToolResultType.other,
-            data: expect.objectContaining({ 'episode.label': 'Host CPU high alert for web-01' }),
+            data: expect.objectContaining({ 'alert.label': 'Host CPU high alert for web-01' }),
           },
         ],
       });
     });
 
     it('falls back to rule ID label when the rule cannot be loaded and there is no group name', async () => {
-      get.mockResolvedValueOnce(baseEpisodeData);
+      get.mockResolvedValueOnce(baseEpisodeRow);
       getRule.mockRejectedValueOnce(new Error('not found'));
 
       const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
@@ -158,7 +154,7 @@ describe('refreshEpisodeTool', () => {
         results: [
           {
             type: ToolResultType.other,
-            data: expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' }),
+            data: expect.objectContaining({ 'alert.label': 'Alert for rule rule-1' }),
           },
         ],
       });
@@ -166,7 +162,7 @@ describe('refreshEpisodeTool', () => {
 
     it('falls back to rule ID label when the rule cannot be loaded and grouping fields are unknown', async () => {
       get.mockResolvedValueOnce({
-        ...baseEpisodeData,
+        ...baseEpisodeRow,
         episode_data: JSON.stringify({ host: { name: 'web-01' } }),
       });
       getRule.mockRejectedValueOnce(new Error('not found'));
@@ -177,15 +173,15 @@ describe('refreshEpisodeTool', () => {
         results: [
           {
             type: ToolResultType.other,
-            data: expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' }),
+            data: expect.objectContaining({ 'alert.label': 'Alert for rule rule-1' }),
           },
         ],
       });
     });
 
     it('normalizes null optional fields', async () => {
-      const episodeWithNulls = {
-        ...baseEpisodeData,
+      const episodeWithNulls: AlertEpisode = {
+        ...baseEpisodeRow,
         last_ack_action: null,
         last_assignee_uid: null,
         last_snooze_action: null,
@@ -193,7 +189,7 @@ describe('refreshEpisodeTool', () => {
         last_tags: null,
         episode_data: null,
         severity: null,
-      } as AlertEpisode;
+      };
       get.mockResolvedValueOnce(episodeWithNulls);
 
       const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
@@ -203,13 +199,13 @@ describe('refreshEpisodeTool', () => {
           {
             type: ToolResultType.other,
             data: expect.objectContaining({
-              'episode.id': 'ep-1',
+              'alert.id': 'ep-1',
               last_ack_action: undefined,
               last_assignee_uid: undefined,
               last_snooze_action: undefined,
               snooze_expiry: undefined,
               last_tags: undefined,
-              episode_data: undefined,
+              alert_data: undefined,
               severity: undefined,
             }),
           },
@@ -217,7 +213,7 @@ describe('refreshEpisodeTool', () => {
       });
     });
 
-    it('returns an error when the episode is missing', async () => {
+    it('returns an error when the alert is missing', async () => {
       get.mockResolvedValueOnce(undefined);
 
       const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
@@ -282,7 +278,7 @@ describe('refreshEpisodeTool', () => {
     });
 
     it('checks Alerts: Read before refreshing', async () => {
-      get.mockResolvedValueOnce(baseEpisodeData);
+      get.mockResolvedValueOnce(baseEpisodeRow);
 
       await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 

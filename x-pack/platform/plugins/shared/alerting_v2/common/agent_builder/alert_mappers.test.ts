@@ -7,7 +7,7 @@
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
-import { alertEpisodeToEpisodeAttachment } from './episode_mappers';
+import { alertEpisodeToAlertAttachment } from './alert_mappers';
 
 const baseEpisode = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
@@ -20,10 +20,10 @@ const baseEpisode = {
   duration: 3600000,
 };
 
-describe('alertEpisodeToEpisodeAttachment', () => {
-  it('copies episode fields into attachment data', () => {
+describe('alertEpisodeToAlertAttachment', () => {
+  it('maps episode fields onto alert attachment data', () => {
     expect(
-      alertEpisodeToEpisodeAttachment({
+      alertEpisodeToAlertAttachment({
         ...baseEpisode,
         triggered_at: '2026-04-10T11:05:00.000Z',
         last_ack_action: 'ack',
@@ -34,32 +34,32 @@ describe('alertEpisodeToEpisodeAttachment', () => {
       })
     ).toEqual(
       expect.objectContaining({
-        'episode.id': 'ep-1',
+        'alert.id': 'ep-1',
         triggered_at: '2026-04-10T11:05:00.000Z',
         last_ack_action: 'ack',
         last_assignee_uid: 'user-1',
         last_tags: ['ops'],
-        episode_data: '{"host":"a"}',
+        alert_data: '{"host":"a"}',
         severity: 'high',
       })
     );
   });
 
-  it('resolves the episode label from the rule name', () => {
-    expect(alertEpisodeToEpisodeAttachment(baseEpisode, { ruleName: 'Host CPU high' })).toEqual(
-      expect.objectContaining({ 'episode.label': 'Host CPU high alert' })
+  it('resolves the alert label from the rule name', () => {
+    expect(alertEpisodeToAlertAttachment(baseEpisode, { ruleName: 'Host CPU high' })).toEqual(
+      expect.objectContaining({ 'alert.label': 'Host CPU high alert' })
     );
   });
 
   it('falls back to rule ID label when no rule name is provided', () => {
-    expect(alertEpisodeToEpisodeAttachment(baseEpisode)).toEqual(
-      expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' })
+    expect(alertEpisodeToAlertAttachment(baseEpisode)).toEqual(
+      expect.objectContaining({ 'alert.label': 'Alert for rule rule-1' })
     );
   });
 
   it('normalizes null optional fields from ES|QL to undefined', () => {
     expect(
-      alertEpisodeToEpisodeAttachment({
+      alertEpisodeToAlertAttachment({
         ...baseEpisode,
         triggered_at: null,
         last_ack_action: null,
@@ -78,7 +78,7 @@ describe('alertEpisodeToEpisodeAttachment', () => {
         last_snooze_action: undefined,
         snooze_expiry: undefined,
         last_tags: undefined,
-        episode_data: undefined,
+        alert_data: undefined,
         severity: undefined,
       })
     );
@@ -91,7 +91,7 @@ describe('alertEpisodeToEpisodeAttachment', () => {
       duration: null,
     } as unknown as AlertEpisode;
 
-    const result = alertEpisodeToEpisodeAttachment(episodeWithNullRequiredFields);
+    const result = alertEpisodeToAlertAttachment(episodeWithNullRequiredFields);
 
     expect(result.group_hash).toBeUndefined();
     expect(result.duration).toBeUndefined();
@@ -104,7 +104,7 @@ describe('alertEpisodeToEpisodeAttachment', () => {
       extra_column: 'should-not-copy',
     } as unknown as AlertEpisode;
 
-    expect(alertEpisodeToEpisodeAttachment(episodeWithExtraColumn)).not.toHaveProperty(
+    expect(alertEpisodeToAlertAttachment(episodeWithExtraColumn)).not.toHaveProperty(
       'extra_column'
     );
   });
