@@ -12,11 +12,7 @@ import {
   type AttachmentUIDefinition,
 } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import {
-  getBreachEsqlQuery,
-  RULE_ATTACHMENT_TYPE,
-  type RuleAttachmentData,
-} from '@kbn/alerting-v2-schemas';
+import { RULE_ATTACHMENT_TYPE, type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 
 export { RULE_ATTACHMENT_TYPE };
 import { Context } from '@kbn/core-di-browser';
@@ -49,8 +45,8 @@ export const createRuleAttachmentDefinition = ({
       },
       kind: data.kind,
       time_field: data.time_field,
-      schedule: { interval: data.schedule?.every },
-      query: data.query ? getBreachEsqlQuery(data.query) : undefined,
+      schedule: data.schedule,
+      query: data.query,
       enabled: data.enabled,
     }),
 
