@@ -870,6 +870,58 @@ describe('utils', () => {
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG (400) when a recovering delay is set while recovery is disabled', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 3 },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message:
+            'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG when a recovering_timeframe is set while recovery is unset', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: undefined,
+        state_transition: { recovering_timeframe: '5m' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('does not throw for a recovering delay when recovery is enabled', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'no_breach',
+        state_transition: { recovering_count: 3, recovering_timeframe: '5m' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('does not throw for recovering_count 0 (immediate) when recovery is disabled', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
   });
 
   describe('pickImmutable', () => {

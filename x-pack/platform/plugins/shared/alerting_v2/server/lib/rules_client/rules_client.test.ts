@@ -577,6 +577,36 @@ describe('RulesClient', () => {
       ).resolves.not.toThrow();
     });
 
+    it('throws 400 when disabling recovery leaves a stored recovering delay inert', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+        recovery_strategy: 'no_breach',
+        state_transition: { recovering_count: 3 },
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-inert-recovery-delay',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-inert-recovery-delay',
+          data: { recovery_strategy: 'none' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message:
+          'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
     it('throws 400 when updating a signal rule query to composed format', async () => {
       const client = createClient();
 

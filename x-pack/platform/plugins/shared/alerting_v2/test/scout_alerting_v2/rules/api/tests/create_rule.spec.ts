@@ -310,6 +310,23 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'validation: rejects a recovering delay when recovery is disabled',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'invalid-inert-recovery-delay' },
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 0, recovering_count: 2 },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
     'create: returns 201 with the signal kind round-tripped to the response',
     async ({ apiClient, apiServices }) => {
       // Signal rules must opt out of the default `state_transition`,

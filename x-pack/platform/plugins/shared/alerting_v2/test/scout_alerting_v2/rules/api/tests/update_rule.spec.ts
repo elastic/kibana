@@ -545,6 +545,30 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  apiTest(
+    'validation: should reject disabling recovery that would leave a stored recovering delay inert',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-inert-recovery-delay-on-update' },
+          recovery_strategy: 'no_breach',
+          state_transition: { pending_count: 0, recovering_count: 3 },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'none' },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_STATE_TRANSITION_CONFIG');
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.recovery_strategy).toBe('no_breach');
+    }
+  );
+
   const buildSignalRuleData = (name: string) =>
     buildCreateRuleData({
       kind: 'signal',

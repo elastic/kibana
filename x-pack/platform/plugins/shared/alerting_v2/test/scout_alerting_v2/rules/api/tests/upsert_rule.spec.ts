@@ -288,6 +288,22 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
+    'validation: should reject a recovering delay when recovery is disabled',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(getRuleUrl('any-id'), {
+        headers: writerHeaders,
+        body: buildCreateRuleData({
+          metadata: { name: 'upsert-inert-recovery-delay' },
+          recovery_strategy: 'none',
+          state_transition: { pending_count: 0, recovering_count: 2 },
+        }),
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
     'authorization: should return 201 for a user with full alerting_v2 privileges',
     async ({ apiClient }) => {
       const response = await apiClient.put(getRuleUrl('writer-can-upsert'), {

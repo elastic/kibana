@@ -12,6 +12,7 @@ import {
   IMMUTABLE_RULE_FIELDS,
   isNoDataQueryConsistentWithStrategy,
   isNoDataQueryProvidedForStrategy,
+  isRecoveryDelayAllowed,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
   isSignalQueryBreachOnly,
@@ -411,6 +412,13 @@ export function validateMergedRuleAttributes(
       message:
         'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
       code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      details: { rule_id: ruleId },
+    },
+    {
+      valid: isRecoveryDelayAllowed(attrs),
+      message:
+        'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+      code: ALERTING_ERROR_CODES.INVALID_STATE_TRANSITION_CONFIG,
       details: { rule_id: ruleId },
     },
   ];

@@ -706,6 +706,38 @@ describe('executeRuleOperations', () => {
       );
     });
 
+    it('throws when a recovering delay is set while recovery is disabled', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'alert' },
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+        },
+        { operation: 'set_state_transition', pending_count: 0, recovering_count: 2 },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled'
+      );
+      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
+        RuleOperationValidationError
+      );
+    });
+
+    it('allows recovering_count 0 (immediate) while recovery is disabled', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'alert' },
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+        },
+        { operation: 'set_state_transition', pending_count: 0, recovering_count: 0 },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+      expect(result.data.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
+    });
+
     it('throws when signal rule uses composed query format', async () => {
       const ops: RuleOperation[] = [
         { operation: 'set_kind', kind: 'signal' },

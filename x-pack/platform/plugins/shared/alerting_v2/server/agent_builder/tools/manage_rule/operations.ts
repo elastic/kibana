@@ -32,6 +32,7 @@ import {
   isStateTransitionAllowed,
   isSignalUsingStandaloneFormat,
   isSignalQueryBreachOnly,
+  isRecoveryDelayAllowed,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
   isNoDataQueryConsistentWithStrategy,
@@ -567,6 +568,12 @@ export const executeRuleOperations = async (
   if (!isSignalQueryBreachOnly(next)) {
     throw new RuleOperationValidationError(
       'Signal rules cannot set recovery_strategy or no_data_strategy.'
+    );
+  }
+
+  if (!isRecoveryDelayAllowed(next)) {
+    throw new RuleOperationValidationError(
+      'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).'
     );
   }
 
