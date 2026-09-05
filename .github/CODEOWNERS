@@ -1411,8 +1411,11 @@ x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/secur
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-forensics @elastic/security-detection-platform
+x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-raw-log-corroboration @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-pnd-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
