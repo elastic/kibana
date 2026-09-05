@@ -31,7 +31,7 @@ export const allowedExperimentalValues = Object.freeze({
    * request to resolve at least one linked project via `cps.isCpsActive()`, so a serverless project
    * with no linked projects reads exactly as it did before CPS. Has no effect on stateful Kibana.
    */
-  crossProjectSearch: false,
+  crossProjectSearch: true,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
