@@ -16,10 +16,11 @@ import type { ParsedMetricItem } from '../../../types';
 
 /**
  * Formats a single-line ES|QL query into a multi-line format where each
- * pipe command is on its own line with `  | ` indentation.
+ * pipe command is on its own line with `  | ` indentation. SET directives
+ * from the composer stay on their own leading line.
  */
 function formatQuery(basicQuery: string): string {
-  return basicQuery.replace(/ \| /g, '\n  | ');
+  return basicQuery.replace(/ \| /g, '\n  | ').replace(/^(SET .+?;)\s*/, '$1\n');
 }
 
 interface CreateESQLQueryParams {
@@ -50,7 +51,7 @@ export function createESQLQuery({
   whereStatements = [],
   originalSource,
   gridSettings,
-}: CreateESQLQueryParams) {
+}: CreateESQLQueryParams): string {
   const { metricName, metricTypes, fieldTypes, indexName } = metricItem;
   const index = isSingleSource(originalSource) ? originalSource : indexName;
   const instrument = firstNonNullable(metricTypes);
@@ -71,7 +72,9 @@ export function createESQLQuery({
     return '';
   }
 
+  // Metric-specific streams can omit fields referenced by filters inherited from the parent query.
   const query = esql.ts(index);
+  query.addSetCommand('unmapped_fields', 'NULLIFY');
   const timeBucketAggregation = createTimeBucketAggregation({});
   const splitAccessorsClause =
     splitAccessors.length > 0
