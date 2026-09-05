@@ -34,8 +34,8 @@ import {
   LLM_TOOLS,
 } from '@arizeai/openinference-semantic-conventions';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import type { ToolDefinition } from '@kbn/inference-common';
 import type { GenAIInputMessage, GenAIOutputMessage, GenAITextPart } from '../types';
+import type { GenAiToolDefinition } from '../gen_ai_tool_definitions';
 import { GenAISemanticConventions } from '../types';
 import { flattenAttributes } from '../util/flatten_attributes';
 import { parseJsonAttr } from '../util/parse_json_attr';
@@ -107,20 +107,17 @@ export function getChatSpan(span: tracing.ReadableSpan) {
 
   span.attributes[INPUT_VALUE] = JSON.stringify(allInputForDisplay);
 
-  const parsedTools: Record<string, ToolDefinition> = span.attributes[
-    GenAISemanticConventions.GenAIToolDefinitions
-  ]
-    ? parseJsonAttr<Record<string, ToolDefinition>>(
-        span.attributes[GenAISemanticConventions.GenAIToolDefinitions]
-      ) ?? {}
-    : {};
+  const parsedTools = span.attributes[GenAISemanticConventions.GenAIToolDefinitions]
+    ? parseJsonAttr<unknown>(span.attributes[GenAISemanticConventions.GenAIToolDefinitions])
+    : undefined;
+  const toolDefinitions = Array.isArray(parsedTools) ? (parsedTools as GenAiToolDefinition[]) : [];
 
   span.attributes[LLM_TOOLS] = JSON.stringify(
-    Object.entries(parsedTools).map(([name, definition]) => {
+    toolDefinitions.map(({ name, description, parameters }) => {
       return {
         'tool.name': name,
-        'tool.description': definition.description,
-        'tool.json_schema': definition.schema,
+        'tool.description': description,
+        'tool.json_schema': parameters,
       };
     })
   );

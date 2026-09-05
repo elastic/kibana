@@ -156,6 +156,20 @@ export const ALERTS_ONLY_ROLE: KibanaRole = {
   ],
 };
 
+export const INVESTIGATE_ALERT_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['.alerts-observability.*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { observabilityAlerts: ['read'], agentBuilder: ['all'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
 /**
  * Alerts table embeddable (dashboard alert panel) personas; both add
  * `dashboard: ['all']` to create a dashboard and open the add-panel flyout.

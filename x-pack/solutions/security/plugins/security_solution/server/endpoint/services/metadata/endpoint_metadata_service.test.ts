@@ -400,8 +400,10 @@ describe('EndpointMetadataService', () => {
     beforeEach(() => {
       readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
       request = httpServerMock.createKibanaRequest();
-      testMockedContext.endpointAppContextService.isCpsEnabled.mockReturnValue(true);
-      testMockedContext.endpointAppContextService.getReadEsClient.mockReturnValue(readEsClientMock);
+      testMockedContext.endpointAppContextService.isCpsActive.mockResolvedValue(true);
+      testMockedContext.endpointAppContextService.getReadEsClient.mockResolvedValue(
+        readEsClientMock
+      );
       // Default: empty search results so tests that only care about client routing don't throw
       readEsClientMock.search.mockResolvedValue({
         took: 0,
@@ -413,9 +415,10 @@ describe('EndpointMetadataService', () => {
 
     describe('#getHostMetadataList', () => {
       it('should read as the request user so the list can fan out to linked projects', async () => {
+        const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await metadataService.getHostMetadataList(
           { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
-          testMockedContext.endpointAppContextService.asScoped(request)
+          scoped
         );
 
         expect(testMockedContext.endpointAppContextService.getReadEsClient).toHaveBeenCalledWith(
@@ -447,9 +450,10 @@ describe('EndpointMetadataService', () => {
       it('should pass `ignoreMissing: true` to `agentPolicy.getByIds` so missing linked-project policies do not throw', async () => {
         testMockedContext.fleetServices.agentPolicy.getByIds.mockResolvedValue([]);
 
+        const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await metadataService.getHostMetadataList(
           { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
-          testMockedContext.endpointAppContextService.asScoped(request)
+          scoped
         );
 
         expect(testMockedContext.fleetServices.agentPolicy.getByIds).toHaveBeenCalledWith(
@@ -460,7 +464,7 @@ describe('EndpointMetadataService', () => {
       });
 
       it('should leave the origin-only policy lookup exactly as it was when CPS is off', async () => {
-        testMockedContext.endpointAppContextService.isCpsEnabled.mockReturnValue(false);
+        testMockedContext.endpointAppContextService.isCpsActive.mockResolvedValue(false);
         esClient.search.mockResolvedValue({
           took: 0,
           timed_out: false,
@@ -497,9 +501,10 @@ describe('EndpointMetadataService', () => {
         // which enrichHostMetadata catches and logs — the row is still produced
         testMockedContext.fleetServices.agentPolicy.get.mockResolvedValue(null);
 
+        const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         const result = await metadataService.getHostMetadataList(
           { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
-          testMockedContext.endpointAppContextService.asScoped(request)
+          scoped
         );
 
         expect(result.data).toHaveLength(1);
@@ -532,11 +537,9 @@ describe('EndpointMetadataService', () => {
           new Error('agent is not visible in this space')
         );
 
+        const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(
-          metadataService.getHostMetadata(
-            endpointMetadataDoc.agent.id,
-            testMockedContext.endpointAppContextService.asScoped(request)
-          )
+          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, scoped)
         ).rejects.toThrow();
       });
 
@@ -589,11 +592,9 @@ describe('EndpointMetadataService', () => {
         // No locally enrolled agent → the document belongs to the linked project
         (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
 
+        const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(
-          metadataService.getHostMetadata(
-            endpointMetadataDoc.agent.id,
-            testMockedContext.endpointAppContextService.asScoped(request)
-          )
+          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, scoped)
         ).resolves.toBeDefined();
       });
 
@@ -644,11 +645,9 @@ describe('EndpointMetadataService', () => {
         );
         (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
 
+        const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(
-          metadataService.getHostMetadata(
-            endpointMetadataDoc.agent.id,
-            testMockedContext.endpointAppContextService.asScoped(request)
-          )
+          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, scoped)
         ).resolves.toBeDefined();
       });
 
@@ -688,11 +687,9 @@ describe('EndpointMetadataService', () => {
         );
         (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
 
+        const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(
-          metadataService.getHostMetadata(
-            endpointMetadataDoc.agent.id,
-            testMockedContext.endpointAppContextService.asScoped(request)
-          )
+          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, scoped)
         ).rejects.toThrow();
       });
 
@@ -732,11 +729,9 @@ describe('EndpointMetadataService', () => {
         );
         (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
 
+        const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(
-          metadataService.getHostMetadata(
-            endpointMetadataDoc.agent.id,
-            testMockedContext.endpointAppContextService.asScoped(request)
-          )
+          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, scoped)
         ).rejects.toThrow();
       });
 
@@ -788,7 +783,7 @@ describe('EndpointMetadataService', () => {
         (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
 
         // Build a scoped object where getSpace rejects — the space does not exist on this project
-        const scoped = testMockedContext.endpointAppContextService.asScoped(request);
+        const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         const scopedWithInvalidSpace = {
           ...scoped,
           getSpace: () => Promise.reject(new Error('Saved object [space/only-there] not found')),
@@ -830,11 +825,9 @@ describe('EndpointMetadataService', () => {
           localAgent,
         ]);
 
+        const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(
-          metadataService.getHostMetadata(
-            endpointMetadataDoc.agent.id,
-            testMockedContext.endpointAppContextService.asScoped(request)
-          )
+          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, scoped)
         ).rejects.toThrow();
       });
     });

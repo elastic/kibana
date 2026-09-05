@@ -37,7 +37,7 @@ export const HomePage = () => {
   const hasData = stats.indicesCount !== 0 || (stats.vectorCount ?? 0) > 0;
 
   const username = user?.full_name || user?.email;
-  const vectorDatabaseDocsUrl = docLinks.links.enterpriseSearch.vectorDatabaseGetStarted;
+  const vectorDatabaseDocsUrl = docLinks.links.enterpriseSearch.vectorDatabaseFullTextSearch;
 
   const statCardDeps = { application, stats, isLoading };
   const dataCard = getDataCard(statCardDeps);
@@ -97,7 +97,7 @@ export const HomePage = () => {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <HomePageStatPanel {...dataCard} />
+            <HomePageStatPanel {...dataCard} newIndex={stats.newIndex} />
           </EuiFlexItem>
 
           <EuiFlexItem>

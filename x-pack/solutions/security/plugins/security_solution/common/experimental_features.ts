@@ -89,8 +89,10 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
-   * it covers from the internal user to a project-routed current-user client. Off until the request
-   * user holds index privileges on the Defend indices: a missing grant drops rows silently.
+   * it covers from the internal user to a project-routed current-user client. Fan-out additionally
+   * requires the request to resolve at least one linked project via `cps.isCpsActive()`, so a
+   * serverless project with no linked projects reads exactly as it did before CPS. Off until the
+   * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
    */
   defendCrossProjectSearch: false,
 
@@ -340,6 +342,13 @@ export const allowedExperimentalValues = Object.freeze({
    * from the locally stored kibana mappings after a MITRE version bump.
    */
   mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: false,
 
   /**
    * Enables the SIEM Rule Migrations Agent Builder tools.

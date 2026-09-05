@@ -7,7 +7,7 @@
 
 import { Streams, streamMatchesIndexPatterns } from '@kbn/streams-schema';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { parseStreamNameFromConcurrencyKey } from '../../../../lib/workflows/onboarding_workflow_client';
 
 export interface StreamCandidate {
@@ -105,6 +105,8 @@ export const classifyStreams = ({
 
     if (!isTerminalStatus(execution.status)) {
       alreadyRunning.push({ streamName, scheduledAt: execution.startedAt ?? null });
+    } else if (execution.status === ExecutionStatus.CANCELLED) {
+      candidates.push({ streamName, lastCompletedAt: null });
     } else {
       const finishedMs = execution.finishedAt ? new Date(execution.finishedAt).getTime() : 0;
       if (now - finishedMs >= intervalMs) {

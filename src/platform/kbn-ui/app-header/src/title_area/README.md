@@ -77,6 +77,10 @@ activates, so editable and non-editable headings line up identically.
 
 ## Edge cases that are deliberately handled
 
+- **No-back title offset.** When there is no back button, the title (and a matching
+  placeholder) gets a start inset so the text lines up with the back-button slot.
+  Standard uses `xs`. Compact uses `s`, because its 8px shell sits too close to a
+  rounded workspace corner. Do not add a second inset on the title-area wrapper.
 - **Edit mode has a minimum width.** `editingTitleFrame` floors the grid track to
   `~128px` (`minmax(calc(size.base * 8), max-content)`) so a short or empty title still
   gives a comfortable click/typing target instead of collapsing to content width (or to

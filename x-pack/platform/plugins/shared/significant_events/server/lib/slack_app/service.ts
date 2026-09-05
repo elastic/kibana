@@ -8,7 +8,12 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { RelayRequestError, type RelayClientContract } from '@kbn/actions-plugin/server';
+import {
+  RelayRequestError,
+  type InMemoryConnector,
+  type RelayClientContract,
+} from '@kbn/actions-plugin/server';
+import { RELAY_AUTH_ID } from '@kbn/connector-specs';
 import type {
   SlackAppBindingsResponse,
   SlackAppConnectResponse,
@@ -25,6 +30,32 @@ import {
 import { SlackAppUnavailableError } from './errors';
 import { getKibanaUrl } from './get_kibana_url';
 
+/**
+ * One instance per deployment, under a stable id: rules and workflows reference it directly, so it
+ * must survive restarts and reconnects unchanged.
+ */
+export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
+
+/** The Elastic Slack app is not its own connector type — it is the `relay` auth method on this one. */
+const ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID = '.slack2';
+
+const ELASTIC_APPS_SLACK_CONNECTOR_NAME = 'Slack (Elastic app)';
+
+const buildConnector = (tenantKey: string): InMemoryConnector => ({
+  id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+  actionTypeId: ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID,
+  name: ELASTIC_APPS_SLACK_CONNECTOR_NAME,
+  // The Relay holds the Slack credentials, so naming the workspace is all this needs. `config`
+  // mirrors the auth type in plaintext, as `ensureConfigAuthType` does for saved connectors.
+  config: { authType: RELAY_AUTH_ID },
+  secrets: { authType: RELAY_AUTH_ID, tenantKey },
+  isMissingSecrets: false,
+  isPreconfigured: true,
+  isDeprecated: false,
+  isSystemAction: false,
+  isConnectorTypeDeprecated: false,
+});
+
 /** Pagination options for a single page of connected channels. */
 export interface ListBindingsOptions {
   /** Opaque cursor from a previous page's `nextCursor`; omit for the first page. */
@@ -35,6 +66,12 @@ export interface ListBindingsOptions {
 
 export class SlackAppService {
   private readonly logger: Logger;
+
+  /**
+   * An id collision clears only by editing `kibana.yml` and restarting, so the reconcile loop would
+   * otherwise repeat the warning every interval for the life of the process.
+   */
+  private idTakenWarned = false;
 
   constructor(private readonly server: StreamsServer) {
     this.logger = server.logger.get('slack-app');
@@ -60,6 +97,74 @@ export class SlackAppService {
     return this.server.core.savedObjects.getScopedClient(request, {
       includedHiddenTypes: [RELAY_APP_CONNECTION_SO_TYPE],
     });
+  }
+
+  /**
+   * Unregisters first because `registerDynamicConnector` is a no-op when the id is taken, so a
+   * reconnect to a different workspace would otherwise keep serving the previous tenant key.
+   *
+   * When the id is held by a connector this app does not own (a preconfigured `elastic-apps-slack`
+   * in `kibana.yml`) the unregister leaves it in place and the register is refused, so the call must
+   * not be treated as having taken effect.
+   */
+  private publishConnector(tenantKey: string): void {
+    this.server.actions.unregisterDynamicConnector(ELASTIC_APPS_SLACK_CONNECTOR_ID);
+
+    if (this.server.actions.registerDynamicConnector(buildConnector(tenantKey))) {
+      this.logger.debug(`Registered the ${ELASTIC_APPS_SLACK_CONNECTOR_ID} connector`);
+      this.idTakenWarned = false;
+      return;
+    }
+
+    if (!this.idTakenWarned) {
+      this.idTakenWarned = true;
+      this.logger.warn(
+        `Could not register the "${ELASTIC_APPS_SLACK_CONNECTOR_ID}" connector: a connector with that id already exists and is not managed by the Elastic Slack app. Remove it from your Kibana configuration so the Elastic Slack app can own the id.`
+      );
+    }
+  }
+
+  private withdrawConnector(): void {
+    if (this.server.actions.unregisterDynamicConnector(ELASTIC_APPS_SLACK_CONNECTOR_ID)) {
+      this.logger.debug(`Unregistered the ${ELASTIC_APPS_SLACK_CONNECTOR_ID} connector`);
+    }
+  }
+
+  /**
+   * Lets a reconcile tell "already correct" from "registered for the wrong workspace". Matches on
+   * `isDynamic` as well as the id, because only dynamic connectors are ones this app registered and
+   * can unregister: a foreign connector squatting the id must never read as already correct.
+   */
+  private getRegisteredTenantKey(): string | undefined {
+    const connector = this.server.actions.inMemoryConnectors.find(
+      ({ id, isDynamic }) => id === ELASTIC_APPS_SLACK_CONNECTOR_ID && isDynamic === true
+    );
+    const tenantKey = (connector?.secrets as { tenantKey?: unknown } | undefined)?.tenantKey;
+    return typeof tenantKey === 'string' ? tenantKey : undefined;
+  }
+
+  /**
+   * Brings this process's connector in line with the stored connection. In-memory connectors are
+   * per-process, so a connect handled by another node only reaches here. Safe to call repeatedly.
+   */
+  async reconcileConnector(soClient: SavedObjectsClientContract): Promise<void> {
+    // Gated like every request, so disabling the app also withdraws the connector rather than
+    // leaving one that can only fail.
+    const available = await this.getRelayClient();
+    const connection = available ? await this.readConnection(soClient) : undefined;
+    const desiredTenantKey =
+      connection?.status === RELAY_APP_CONNECTION_STATUS.connected
+        ? connection.tenantKey ?? undefined
+        : undefined;
+
+    if (desiredTenantKey === this.getRegisteredTenantKey()) {
+      return;
+    }
+    if (!desiredTenantKey) {
+      this.withdrawConnector();
+      return;
+    }
+    this.publishConnector(desiredTenantKey);
   }
 
   private async readConnection(
@@ -218,6 +323,10 @@ export class SlackAppService {
       createdAt: now,
     });
 
+    // The install may land on a different workspace, so any leftover connector now carries a stale
+    // tenant key. Republished once the claim completes.
+    this.withdrawConnector();
+
     return { authorizeUrl: installResponse.authorize_url };
   }
 
@@ -243,6 +352,7 @@ export class SlackAppService {
       apiKeyId: null,
       error: message,
     });
+    this.withdrawConnector();
 
     return { available: true, status: RELAY_APP_CONNECTION_STATUS.error, error: message };
   }
@@ -298,6 +408,7 @@ export class SlackAppService {
             tenantKey: claim.tenant_key,
             status: RELAY_APP_CONNECTION_STATUS.connected,
           });
+          this.publishConnector(claim.tenant_key);
           return { available: true, status: RELAY_APP_CONNECTION_STATUS.connected };
         }
       } catch (error) {
@@ -406,6 +517,10 @@ export class SlackAppService {
     if (!connection) {
       return { status: 'disconnected' };
     }
+
+    // Up front, not on the success path: a failed unbind below leaves the connection in `error` for
+    // the user to retry, and rules must not keep posting through a connection being torn down.
+    this.withdrawConnector();
 
     if (connection.apiKeyId) {
       await this.invalidateApiKey(connection.apiKeyId, 'on disconnect');

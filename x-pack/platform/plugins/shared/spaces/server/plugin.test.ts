@@ -244,6 +244,8 @@ describe('Spaces plugin', () => {
           deleteNpre: jest.fn(),
           canPutNpre: jest.fn(),
         }),
+        getLinkedProjects: jest.fn().mockResolvedValue([]),
+        isCpsActive: jest.fn().mockResolvedValue(false),
       };
 
       const spacesStart = plugin.start(coreStart, {

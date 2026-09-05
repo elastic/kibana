@@ -73,6 +73,7 @@ export const createExportRouteHandler =
     const esFilters = request.body?.esFilters;
 
     const logger = osqueryContext.logFactory.get('export_results');
+    const cpsActive = await osqueryContext.isCpsActive(request);
 
     // Validate the KQL filter at the route boundary so invalid kuery surfaces
     // as a 400 before any ES round-trips. Compose the full filter string the
@@ -122,7 +123,7 @@ export const createExportRouteHandler =
     const [coreStart] = await osqueryContext.getStartServices();
     const clusterClient = coreStart.elasticsearch.client;
     const internalEsClient = clusterClient.asInternalUser;
-    const readEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
+    const readEsClient = getReadEsClient(clusterClient, request, cpsActive);
 
     // Resolve integration namespaces once and reuse them for both the PIT scope
     // (buildExportResultsIndex below) and the factory's search body, so the PIT
@@ -254,7 +255,7 @@ export const createExportRouteHandler =
       const searchContext = await getScopedSearch(
         context,
         request,
-        osqueryContext.cpsEnabled,
+        cpsActive,
         osqueryContext.getStartServices
       );
 

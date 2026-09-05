@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { badRequest, conflict, notFound } from '@hapi/boom';
+import { badRequest, conflict, notFound, serverUnavailable } from '@hapi/boom';
 import {
   InvestigationConflictError,
   InvestigationNotFoundError,
   InvestigationSubjectMissingError,
+  InvestigationUnavailableError,
+  InvalidInvestigationContextError,
 } from '../client/errors';
 
 export function rethrowInvestigationClientError(error: unknown): never {
@@ -21,6 +23,12 @@ export function rethrowInvestigationClientError(error: unknown): never {
   }
   if (error instanceof InvestigationConflictError) {
     throw conflict(error.message);
+  }
+  if (error instanceof InvalidInvestigationContextError) {
+    throw badRequest(error.message);
+  }
+  if (error instanceof InvestigationUnavailableError) {
+    throw serverUnavailable(error.message);
   }
   throw error;
 }
