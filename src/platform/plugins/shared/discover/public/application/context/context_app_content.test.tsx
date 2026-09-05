@@ -69,6 +69,8 @@ describe('ContextAppContent test', () => {
       setAppState: () => {},
       addFilter: () => {},
       interceptedWarnings: [],
+      isWarningCalloutDismissed: false,
+      onDismissWarningCallout: () => {},
       ...overrides,
     } as unknown as ContextAppContentProps;
     renderWithKibanaRenderContext(

@@ -15,12 +15,14 @@ import type { SearchResponseWarning } from '../../types';
 
 interface Props {
   warnings: SearchResponseWarning[];
+  isDismissed: boolean;
+  onDismiss: () => void;
 }
 
 export const SearchResponseWarningsCallout = (props: Props) => {
   const viewDetailsActionProps = useViewDetailsActionProps(props.warnings);
 
-  if (!props.warnings.length) {
+  if (!props.warnings.length || props.isDismissed) {
     return null;
   }
 
@@ -31,6 +33,7 @@ export const SearchResponseWarningsCallout = (props: Props) => {
       size="s"
       actionProps={{ primary: viewDetailsActionProps }}
       data-test-subj="searchResponseWarningsCallout"
+      onDismiss={props.onDismiss}
     />
   );
 };

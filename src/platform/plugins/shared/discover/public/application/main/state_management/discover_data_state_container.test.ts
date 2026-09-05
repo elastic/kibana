@@ -55,6 +55,8 @@ describe('test getDataStateContainer', () => {
     const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
 
     expect(dataState.refetch$).toBeInstanceOf(Subject);
+    expect(dataState.isWarningCalloutDismissed$).toBeInstanceOf(BehaviorSubject);
+    expect(dataState.isWarningCalloutDismissed$.getValue()).toBe(false);
     expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
@@ -110,6 +112,49 @@ describe('test getDataStateContainer', () => {
     expect(
       stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
     ).toHaveBeenCalled();
+
+    unsubscribe();
+  });
+
+  test('does not reset warning callout dismiss on fetch more', async () => {
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    mockFetchDocuments.mockResolvedValue({ records: records.slice(2) });
+
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+    dataState.data$.documents$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: records.slice(0, 2),
+    }) as DataDocuments$;
+
+    const unsubscribe = dataState.subscribe();
+    dataState.isWarningCalloutDismissed$.next(true);
+
+    dataState.refetch$.next('fetch_more');
+    await waitFor(() => {
+      expect(dataState.data$.documents$.value.result).toEqual(records);
+    });
+    expect(dataState.isWarningCalloutDismissed$.getValue()).toBe(true);
+
+    unsubscribe();
+  });
+
+  test('resets warning callout dismiss when a new fetch completes', async () => {
+    mockFetchDocuments.mockResolvedValue({ records: [] });
+    discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+      return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+    });
+
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+    const unsubscribe = dataState.subscribe();
+    dataState.isWarningCalloutDismissed$.next(true);
+
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+    });
+    expect(dataState.isWarningCalloutDismissed$.getValue()).toBe(false);
 
     unsubscribe();
   });
