@@ -22,6 +22,13 @@ export interface NonPersistedDisplayOptions {
   solutionNavIdOverride?: 'oblt' | 'security' | 'search';
   enableDocumentViewer?: boolean;
   enableFilters?: boolean;
+  documentViewerFlyoutType?: 'push' | 'overlay';
+  /**
+   * When true and stored columns are empty, apply Discover profile/ES|QL column defaults
+   * for display only. Matching profile widths stay display-only after column edits.
+   * Dashboard hosts should leave this unset.
+   */
+  autoApplyDiscoverColumnDefaults?: boolean;
 }
 
 export type EditableSavedSearchAttributes = Partial<

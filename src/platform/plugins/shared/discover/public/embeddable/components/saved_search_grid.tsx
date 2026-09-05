@@ -50,12 +50,19 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   initialDocViewerTabId: string | undefined;
   docViewerRef: React.RefObject<DocViewerApi>;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
+  documentViewerFlyoutType?: 'push' | 'overlay';
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { enableDocumentViewer, inlineEditing, interceptedWarnings, ...gridProps } = props;
+  const {
+    enableDocumentViewer,
+    inlineEditing,
+    interceptedWarnings,
+    documentViewerFlyoutType,
+    ...gridProps
+  } = props;
   const { euiTheme } = useEuiTheme();
   const setExpandedDoc = props.setExpandedDoc ?? noopSetExpandedDoc;
 
@@ -84,6 +91,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         filters={props.filters}
         docViewerRef={props.docViewerRef}
         hideFilteringOnComputedColumns={true}
+        flyoutType={documentViewerFlyoutType}
       />
     ),
     [
@@ -97,6 +105,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.onRemoveColumn,
       props.query,
       props.savedSearchId,
+      documentViewerFlyoutType,
     ]
   );
 
