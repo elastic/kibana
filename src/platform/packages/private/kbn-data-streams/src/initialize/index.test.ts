@@ -532,6 +532,195 @@ describe('initialize - versioning logic', () => {
     });
   });
 
+  describe('system data stream verification (devMode)', () => {
+    const systemDataStream: DataStreamDefinition<typeof testMappings> = {
+      name: 'test-system-data-stream',
+      version: 1,
+      system: true,
+      template: { mappings: testMappings },
+    };
+
+    const mockNoIndexTemplate = () =>
+      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+        Promise.reject(
+          new EsErrors.ResponseError({
+            statusCode: 404,
+            body: { error: { type: 'resource_not_found_exception' } },
+            warnings: [],
+            headers: {},
+            meta: {} as any,
+          })
+        )
+      );
+
+    const mockNoDataStream = () =>
+      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+        Promise.reject(
+          new EsErrors.ResponseError({
+            statusCode: 404,
+            body: { error: { type: 'resource_not_found_exception' } },
+            warnings: [],
+            headers: {},
+            meta: {} as any,
+          })
+        )
+      );
+
+    it('throws in devMode when newly created stream is not a system data stream', async () => {
+      mockNoIndexTemplate();
+      mockNoDataStream();
+
+      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
+      (elasticsearchClient.indices.createDataStream as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
+
+      // Re-fetch after creation returns system: false (ES did not recognise as system stream)
+      (elasticsearchClient.indices.getDataStream as jest.Mock).mockResolvedValueOnce({
+        data_streams: [{ name: systemDataStream.name, system: false, indices: [] }],
+      });
+
+      await expect(
+        initialize({
+          logger,
+          elasticsearchClient,
+          dataStream: systemDataStream,
+          lazyCreation: false,
+          devMode: true,
+        })
+      ).rejects.toThrow(/system data stream/i);
+    });
+
+    it('throws in devMode when pre-existing stream is not a system data stream', async () => {
+      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockResolvedValueOnce({
+        index_templates: [
+          {
+            name: systemDataStream.name,
+            index_template: {
+              _meta: {
+                version: 1,
+                previousVersions: [],
+                userAgent: '@kbn/data-streams',
+                managed: true,
+              },
+            },
+          },
+        ],
+      });
+
+      // Pre-existing stream — system: false
+      (elasticsearchClient.indices.getDataStream as jest.Mock).mockResolvedValueOnce({
+        data_streams: [
+          {
+            name: systemDataStream.name,
+            system: false,
+            indices: [{ index_name: '.ds-test-000001', index_uuid: 'uuid' }],
+          },
+        ],
+      });
+
+      await expect(
+        initialize({
+          logger,
+          elasticsearchClient,
+          dataStream: systemDataStream,
+          lazyCreation: false,
+          devMode: true,
+        })
+      ).rejects.toThrow(/system data stream/i);
+    });
+
+    it('does not throw in devMode when stream is correctly a system data stream', async () => {
+      mockNoIndexTemplate();
+      mockNoDataStream();
+
+      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
+      (elasticsearchClient.indices.createDataStream as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
+
+      // Re-fetch after creation returns system: true
+      (elasticsearchClient.indices.getDataStream as jest.Mock).mockResolvedValueOnce({
+        data_streams: [{ name: systemDataStream.name, system: true, indices: [] }],
+      });
+
+      await expect(
+        initialize({
+          logger,
+          elasticsearchClient,
+          dataStream: systemDataStream,
+          lazyCreation: false,
+          devMode: true,
+        })
+      ).resolves.toEqual({ dataStreamReady: true });
+    });
+
+    it('skips the system check when devMode is false', async () => {
+      mockNoIndexTemplate();
+      mockNoDataStream();
+
+      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
+      (elasticsearchClient.indices.createDataStream as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
+
+      // No re-fetch should happen; resolve anyway to catch unexpected calls
+      (elasticsearchClient.indices.getDataStream as jest.Mock).mockResolvedValueOnce({
+        data_streams: [{ name: systemDataStream.name, system: false, indices: [] }],
+      });
+
+      await expect(
+        initialize({
+          logger,
+          elasticsearchClient,
+          dataStream: systemDataStream,
+          lazyCreation: false,
+          devMode: false,
+        })
+      ).resolves.toEqual({ dataStreamReady: true });
+
+      // getDataStream should have been called exactly once (the initial existence check), not twice
+      expect(elasticsearchClient.indices.getDataStream).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips the system check when system is not set to true', async () => {
+      const nonSystemDataStream: DataStreamDefinition<typeof testMappings> = {
+        name: 'test-non-system-data-stream',
+        version: 1,
+        template: { mappings: testMappings },
+      };
+
+      mockNoIndexTemplate();
+      mockNoDataStream();
+
+      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
+      (elasticsearchClient.indices.createDataStream as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
+
+      await expect(
+        initialize({
+          logger,
+          elasticsearchClient,
+          dataStream: nonSystemDataStream,
+          lazyCreation: false,
+          devMode: true,
+        })
+      ).resolves.toEqual({ dataStreamReady: true });
+
+      // No extra getDataStream call for verification
+      expect(elasticsearchClient.indices.getDataStream).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('initial creation', () => {
     it('should create index template and data stream on first initialization', async () => {
       const dataStream = createTestDataStream(1);

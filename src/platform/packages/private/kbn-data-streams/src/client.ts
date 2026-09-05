@@ -69,9 +69,15 @@ export class DataStreamClient<
     elasticsearchClient: ElasticsearchClient;
     logger: Logger;
     lazyCreation?: boolean;
+    /** When true, additional dev-only safety checks run (e.g. system data stream verification). */
+    devMode?: boolean;
   }) {
     validateClientArgs(args);
-    const { dataStreamReady } = await initialize({ ...args, lazyCreation: args.lazyCreation });
+    const { dataStreamReady } = await initialize({
+      ...args,
+      lazyCreation: args.lazyCreation,
+      devMode: args.devMode,
+    });
     if (!dataStreamReady) {
       return;
     }

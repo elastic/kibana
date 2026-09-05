@@ -24,11 +24,14 @@ export async function initialize({
   dataStream,
   elasticsearchClient,
   lazyCreation,
+  devMode,
 }: {
   logger: Logger;
   dataStream: AnyDataStreamDefinition;
   elasticsearchClient: ElasticsearchClient;
   lazyCreation?: boolean;
+  /** When true, additional safety checks run that would be too expensive for production. */
+  devMode?: boolean;
 }) {
   logger = logger.get('data-streams-setup');
   logger.debug(`Setting up index template for data stream: ${dataStream.name}`);
@@ -70,7 +73,55 @@ export async function initialize({
     skipCreation: !createDataStreamIfDoesntExist,
   });
 
-  return {
-    dataStreamReady: indexTemplateReady && dataStreamReady,
-  };
+  const isReady = indexTemplateReady && dataStreamReady;
+
+  if (devMode && dataStream.system === true && isReady) {
+    await verifySystemDataStream({
+      logger,
+      dataStream,
+      elasticsearchClient,
+      // Reuse the pre-creation snapshot when the stream already existed; re-fetch when it was
+      // just created (existingDataStream was undefined at that point).
+      cachedDataStream: existingDataStream,
+    });
+  }
+
+  return { dataStreamReady: isReady };
+}
+
+/**
+ * In dev/CI mode: confirm that Elasticsearch considers this data stream a system data stream.
+ *
+ * A stream is only protected by ES when a `SystemDataStreamDescriptor` has been registered for
+ * it. If that descriptor is missing the stream will be created without the `system: true` flag
+ * and backing indices won't inherit system-index protections — a silent data-exposure risk.
+ * Throwing here surfaces the misconfiguration before it can reach production.
+ */
+async function verifySystemDataStream({
+  logger,
+  dataStream,
+  elasticsearchClient,
+  cachedDataStream,
+}: {
+  logger: Logger;
+  dataStream: AnyDataStreamDefinition;
+  elasticsearchClient: ElasticsearchClient;
+  cachedDataStream: Awaited<ReturnType<typeof getExistingDataStream>>;
+}) {
+  // When the stream already existed we have its metadata; when it was just created we must
+  // fetch it now so we see the post-creation ES state.
+  const streamInfo =
+    cachedDataStream ?? (await getExistingDataStream(elasticsearchClient, dataStream.name, logger));
+
+  if (!streamInfo?.system) {
+    throw new Error(
+      `[DEV] Data stream "${dataStream.name}" is defined with \`system: true\` but ` +
+        `Elasticsearch does not report it as a system data stream. ` +
+        `Ensure a SystemDataStreamDescriptor is registered with Elasticsearch for this stream ` +
+        `before initialising it in Kibana, or set \`system: false\` in the definition if this ` +
+        `stream does not need system-level protection. See kibana-team#3797 for details.`
+    );
+  }
+
+  logger.debug(`Verified system data stream: ${dataStream.name}`);
 }
