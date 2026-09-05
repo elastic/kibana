@@ -313,7 +313,7 @@ describe('AppMenu', () => {
       expect(documentIndex(earlier)).toBeLessThan(documentIndex(later));
     };
 
-    it('places the inline action after More and before the primary action at s', () => {
+    it('places the inline action after any switch, before More, then primary at s', () => {
       mockCurrentBreakpoint = 's';
 
       render(
@@ -324,17 +324,17 @@ describe('AppMenu', () => {
       );
 
       expectFollows(
-        screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton),
-        screen.getByTestId('inline-sentinel')
+        screen.getByTestId('inline-sentinel'),
+        screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)
       );
       expectFollows(
-        screen.getByTestId('inline-sentinel'),
+        screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton),
         screen.getByTestId(getAppMenuActionButtonTestSubj('save'))
       );
       expect(screen.queryByTestId('collapsed-sentinel')).not.toBeInTheDocument();
     });
 
-    it('places the inline action after displayed items and More and before the primary action at xl', () => {
+    it('places displayed items before the inline action, then More, then primary at xl', () => {
       const overflowConfig: AppMenuConfig = {
         items: [
           ...defaultItems,
@@ -357,16 +357,13 @@ describe('AppMenu', () => {
         />
       );
 
+      expectFollows(screen.getByText('Item 1'), screen.getByTestId('inline-sentinel'));
       expectFollows(
-        screen.getByText('Item 1'),
+        screen.getByTestId('inline-sentinel'),
         screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)
       );
       expectFollows(
         screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton),
-        screen.getByTestId('inline-sentinel')
-      );
-      expectFollows(
-        screen.getByTestId('inline-sentinel'),
         screen.getByTestId(getAppMenuActionButtonTestSubj('save'))
       );
     });
@@ -400,6 +397,7 @@ describe('AppMenu', () => {
 
       expect(container).not.toBeEmptyDOMElement();
       expect(screen.getByTestId('inline-sentinel')).toBeInTheDocument();
+      expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).not.toBeInTheDocument();
     });
 
     it('drops a cast-in beforePrimaryAction on ordinary AppMenuComponent', () => {

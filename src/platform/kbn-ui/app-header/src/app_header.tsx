@@ -42,7 +42,10 @@ export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back'> & {
    */
   titleAppend?: ReactNode;
   borderless?: boolean;
-  /** Temporary Dashboard-only escape hatch. Do not add callers outside `@kbn/app-header/dashboard`. */
+  /**
+   * Temporary Dashboard-only escape hatch. Do not add callers outside `@kbn/app-header/dashboard`.
+   * Renders after visible secondary items, before overflow/More — not immediately before primary.
+   */
   beforePrimaryAction?: AppMenuBeforePrimaryAction;
 };
 

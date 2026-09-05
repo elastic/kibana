@@ -15,6 +15,7 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-type
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/ui-app-header';
+import { APP_MENU_TEST_SUBJECTS, getAppMenuActionButtonTestSubj } from '@kbn/app-menu';
 import { DashboardAppHeader } from './dashboard_app_header';
 import type { DashboardAppHeaderAiAction } from './dashboard_app_header';
 
@@ -99,6 +100,45 @@ describe('DashboardAppHeader', () => {
     const button = await screen.findByRole('button', { name: 'Ask AI' });
     expect(button).toBeDisabled();
     expect(button.closest('.euiToolTipAnchor')).not.toBeInTheDocument();
+  });
+
+  it('places the AI control after a visible secondary item and before More and Save', async () => {
+    renderHeader(
+      <DashboardAppHeader
+        title="Dashboard"
+        aiAction={createAiAction({ testId: 'dashboardAiAction' })}
+        menu={{
+          items: [
+            { id: 'share', label: 'Share', run: jest.fn(), iconType: 'share', order: 1 },
+            {
+              id: 'overflowItem',
+              label: 'Overflow item',
+              run: jest.fn(),
+              iconType: 'gear',
+              order: 2,
+              overflow: true,
+            },
+          ],
+          primaryActionItem: {
+            id: 'save',
+            label: 'Save',
+            run: jest.fn(),
+            iconType: 'save',
+          },
+        }}
+      />
+    );
+
+    const secondaryItem = await screen.findByText('Share');
+    const aiButton = screen.getByRole('button', { name: 'Ask AI' });
+    const moreButton = screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton);
+    const saveButton = screen.getByTestId(getAppMenuActionButtonTestSubj('save'));
+    const documentIndex = (element: HTMLElement): number =>
+      Array.from(document.body.querySelectorAll('*')).indexOf(element);
+
+    expect(documentIndex(secondaryItem)).toBeLessThan(documentIndex(aiButton));
+    expect(documentIndex(aiButton)).toBeLessThan(documentIndex(moreButton));
+    expect(documentIndex(moreButton)).toBeLessThan(documentIndex(saveButton));
   });
 
   it('renders an icon-only control with the same accessible name when collapsed', async () => {

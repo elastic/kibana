@@ -39,7 +39,10 @@ export interface AppMenuItemsProps {
   staticItems?: AppMenuStaticItem[];
 }
 
-/** Temporary Dashboard-only insertion seam. Do not adopt. */
+/**
+ * Temporary Dashboard-only insertion seam. Do not adopt.
+ * Inline sits after visible secondary items and before overflow/More — not immediately before primary.
+ */
 export interface AppMenuBeforePrimaryAction {
   inline: ReactNode;
   collapsed: ReactNode;
@@ -140,7 +143,10 @@ export const AppMenuComponentInternal = ({
     const responsiveOverflowItems = [...displayedItems.slice(inlineItemLimit), ...overflowItems];
     const shouldShowOverflow = responsiveOverflowItems.length > 0 || hasStaticItems;
     const hasSecondaryActions =
-      Boolean(switchConfig) || inlineItems.length > 0 || shouldShowOverflow;
+      Boolean(switchConfig) ||
+      inlineItems.length > 0 ||
+      Boolean(beforePrimaryAction?.inline) ||
+      shouldShowOverflow;
 
     return (
       <>
@@ -156,6 +162,7 @@ export const AppMenuComponentInternal = ({
                 onPopoverClose={handleOnPopoverClose}
               />
             ))}
+            {beforePrimaryAction?.inline}
             {shouldShowOverflow && (
               <AppMenuOverflowButton
                 items={responsiveOverflowItems}
@@ -167,7 +174,6 @@ export const AppMenuComponentInternal = ({
             )}
           </div>
         )}
-        {beforePrimaryAction?.inline}
         {primaryActionComponent}
       </>
     );

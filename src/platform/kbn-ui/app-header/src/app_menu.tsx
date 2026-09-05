@@ -24,7 +24,7 @@ export interface AppMenuProps {
   menu?: AppMenuConfig;
   staticItems?: AppMenuStaticItem[];
   fallbackMenu?: ReactNode;
-  /** Temporary Dashboard-only escape hatch. Do not adopt. */
+  /** Temporary Dashboard-only escape hatch. After visible secondary items, before More. Do not adopt. */
   beforePrimaryAction?: AppMenuBeforePrimaryAction;
 }
 

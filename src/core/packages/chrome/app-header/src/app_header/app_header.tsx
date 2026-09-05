@@ -65,7 +65,7 @@ const getPublicAppHeaderViewProps = ({
   };
 };
 
-/** Resolves chrome-connected header props. `beforePrimaryAction` is a temporary Dashboard-only extra. */
+/** Resolves chrome-connected header props. `beforePrimaryAction` is a temporary Dashboard-only extra (after secondary items, before More). */
 export const usePresentationProps = (
   props: AppHeaderViewProps,
   extras?: Pick<AppHeaderPresentationProps, 'titleAppend' | 'borderless' | 'beforePrimaryAction'>
