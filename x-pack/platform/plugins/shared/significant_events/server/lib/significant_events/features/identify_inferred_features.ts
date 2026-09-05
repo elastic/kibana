@@ -6,10 +6,9 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ToolsStart } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { StreamType } from '@kbn/streams-schema';
 import {
   type Feature,
@@ -21,7 +20,6 @@ import {
 } from '@kbn/significant-events-schema';
 import {
   EMPTY_TOKENS,
-  identifyFeatures,
   type InferenceDocument,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
@@ -30,26 +28,16 @@ import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
-import { PromptsConfigService } from '@kbn/streams-plugin/server';
-import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
-import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
-import { MemoryServiceImpl } from '../../../memory_and_investigation/lib/memory';
-import { createMemoryDiscoveryTools, type MemoryDiscoveryTools } from '../memory_discovery_tools';
-import {
-  createKiExtractionContextTools,
-  type KiExtractionContextTools,
-} from '../ki_extraction_context_tools';
-
 import {
   reconcileInferredFeatures,
   toFeatureSummary,
   toFeatureProjection,
 } from './reconcile_features';
-import { createInferenceToolsFromAgentBuilder } from '../../agent_builder/inference_tool_bridge';
+import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
+import { FeatureNotEnabledError } from '../../errors/feature_not_enabled_error';
 
 export { findSimilarFeatures } from './feature_similarity_search';
-import { buildFeatureSimilarityInferenceTools } from './feature_similarity_search';
 
 const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 
@@ -257,40 +245,6 @@ export function buildTelemetry(
 }
 
 // ---------------------------------------------------------------------------
-// LLM inference wrapper
-// ---------------------------------------------------------------------------
-
-type InferenceResult =
-  | {
-      success: true;
-      rawFeatures: BaseFeature[];
-      ignoredFeatures: IgnoredFeature[];
-      tokensUsed: ChatCompletionTokenCount;
-    }
-  | { success: false };
-
-async function tryIdentifyFeatures(
-  args: Parameters<typeof identifyFeatures>[0]
-): Promise<InferenceResult> {
-  try {
-    const result = await identifyFeatures(args);
-    return {
-      success: true,
-      rawFeatures: result.features,
-      ignoredFeatures: result.ignoredFeatures,
-      tokensUsed: result.tokensUsed,
-    };
-  } catch (error) {
-    if (args.signal.aborted) {
-      throw error;
-    }
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    args.logger.warn(`LLM inference failed: ${errorMsg}`);
-    return { success: false };
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Single inferred-features iteration (internal)
 // ---------------------------------------------------------------------------
 
@@ -305,14 +259,13 @@ interface RunInferredIterationOptions {
   totalFilters: number;
   filtersCapped: boolean;
   hasFilteredDocuments: boolean;
-  inferenceClient: BoundInferenceClient;
-  systemPrompt: string;
+  agentBuilder: AgentBuilderPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
   logger: Logger;
   signal: AbortSignal;
   tuning: IterationTuningParams;
   iteration: number;
-  additionalTools?: Record<string, ToolDefinition>;
-  additionalToolCallbacks?: Record<string, ToolCallback>;
 }
 
 interface InferredIterationResult {
@@ -345,14 +298,13 @@ async function runInferredIteration({
   totalFilters,
   filtersCapped,
   hasFilteredDocuments,
-  inferenceClient,
-  systemPrompt,
+  agentBuilder,
+  request,
+  connectorId,
   logger,
   signal,
   tuning,
   iteration,
-  additionalTools,
-  additionalToolCallbacks,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
   const {
     max_excluded_features_in_prompt:
@@ -379,21 +331,32 @@ async function runInferredIteration({
     .slice(0, maxExcludedFeaturesInPrompt)
     .map(toFeatureProjection);
 
-  const inferResult = await tryIdentifyFeatures({
-    streamName,
-    sampleDocuments: documents,
-    excludedFeatures: excludedSummaries,
-    inferenceClient,
-    systemPrompt,
-    logger,
-    signal,
-    previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
-    knownFeatureIds,
-    additionalTools,
-    additionalToolCallbacks,
-  });
+  let rawFeatures: BaseFeature[];
+  let ignoredFeatures: IgnoredFeature[];
+  let tokensUsed: ChatCompletionTokenCount;
 
-  if (!inferResult.success) {
+  try {
+    const result = await executeFeatureIdentificationAgent({
+      agentBuilder,
+      request,
+      connectorId,
+      streamName,
+      sampleDocuments: documents,
+      excludedFeatures: excludedSummaries,
+      previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
+      knownFeatureIds,
+      signal,
+      logger,
+    });
+    rawFeatures = result.features;
+    ignoredFeatures = result.ignoredFeatures;
+    tokensUsed = result.tokensUsed;
+  } catch (error) {
+    if (signal.aborted) {
+      throw error;
+    }
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    logger.warn(`Feature identification agent failed: ${errorMsg}`);
     return {
       docsCount,
       docIds,
@@ -403,8 +366,6 @@ async function runInferredIteration({
       outcome: { state: 'failure' },
     };
   }
-
-  const { rawFeatures, ignoredFeatures, tokensUsed } = inferResult;
 
   const { newFeatures, updatedFeatures, codeIgnoredCount, remappedCount } =
     reconcileInferredFeatures({
@@ -442,8 +403,8 @@ async function runInferredIteration({
 export interface IdentifyInferredFeaturesOptions {
   esClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
-  soClient: SavedObjectsClientContract;
-  inferenceClient: BoundInferenceClient;
+  agentBuilder?: AgentBuilderPluginStart;
+  request: KibanaRequest;
   connectorId: string;
   logger: Logger;
   signal: AbortSignal;
@@ -457,8 +418,6 @@ export interface IdentifyInferredFeaturesOptions {
   iteration?: number;
   tuning?: IterationTuningParams;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
-  agentBuilderTools?: ToolsStart;
-  request?: KibanaRequest;
 }
 
 export interface IdentifyInferredFeaturesResult {
@@ -472,8 +431,8 @@ export interface IdentifyInferredFeaturesResult {
 export async function identifyInferredFeatures({
   esClient,
   kiClient,
-  soClient,
-  inferenceClient,
+  agentBuilder,
+  request,
   connectorId,
   logger,
   signal,
@@ -487,83 +446,19 @@ export async function identifyInferredFeatures({
   iteration = 1,
   tuning = {},
   trackFeaturesIdentified,
-  agentBuilderTools,
-  request,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
-  const [
-    { hits: allFeatures },
-    { hits: excludedFeatures },
-    { featurePromptOverride: systemPrompt },
-  ] = await Promise.all([
+  if (!agentBuilder) {
+    throw new FeatureNotEnabledError(
+      'Feature identification requires Agent Builder, which is not available'
+    );
+  }
+
+  const [{ hits: allFeatures }, { hits: excludedFeatures }] = await Promise.all([
     kiClient.getFeatures(streamName),
     kiClient.getExcludedFeatures(streamName),
-    new PromptsConfigService({ soClient, logger }).getPrompt(),
   ]);
 
   const discoveredFeatures = allFeatures.filter((f) => !isComputedFeature(f) && f.run_id === runId);
-
-  // Expose read-only grounding tools to feature extraction so it can anchor new
-  // KI features in durable prior knowledge:
-  // - memory: prior learnings, known-benign patterns, past false positives.
-  // - significant_event_search: prior Significant Events (already-tracked /
-  //   demoted patterns). Only available when Agent Builder tools are wired.
-  const memoryTools = createMemoryDiscoveryTools({
-    memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
-  });
-
-  const kiExtractionContextTools =
-    agentBuilderTools && request
-      ? await createKiExtractionContextTools({
-          agentBuilderTools,
-          request,
-          logger: logger.get('ki_extraction_context'),
-        })
-      : undefined;
-
-  const groundingToolsets = [memoryTools, kiExtractionContextTools].filter(
-    (toolset): toolset is MemoryDiscoveryTools | KiExtractionContextTools => toolset !== undefined
-  );
-
-  // Bridge the managed Agent Builder tool when available (single schema source; stream_name injected
-  // server-side), else a direct KI-client fallback so dedup still works without Agent Builder.
-  let searchTools =
-    agentBuilderTools && request
-      ? await createInferenceToolsFromAgentBuilder({
-          tools: agentBuilderTools,
-          request,
-          specs: [
-            {
-              sourceToolId: platformSignificantEventsTools.searchSimilarFeatures,
-              name: 'search_similar_features',
-              hiddenParams: ['stream_name'],
-              prepare: () => ({ params: { stream_name: streamName } }),
-            },
-          ],
-          logger: logger.get('feature_similarity_search'),
-        })
-      : buildFeatureSimilarityInferenceTools({ kiClient, streamName });
-
-  if (
-    !searchTools.tools.search_similar_features ||
-    !searchTools.callbacks.search_similar_features
-  ) {
-    searchTools = buildFeatureSimilarityInferenceTools({ kiClient, streamName });
-  }
-
-  const additionalTools: Record<string, ToolDefinition> = Object.assign(
-    {},
-    ...groundingToolsets.map((toolset) => toolset.tools),
-    searchTools.tools
-  );
-  const additionalToolCallbacks: Record<string, ToolCallback> = Object.assign(
-    {},
-    ...groundingToolsets.map((toolset) => toolset.callbacks),
-    searchTools.callbacks
-  );
-  const combinedSystemPrompt = groundingToolsets.reduce(
-    (prompt, toolset) => `${prompt}\n${toolset.promptSnippet}`,
-    systemPrompt
-  );
 
   const startedAt = Date.now();
 
@@ -578,14 +473,13 @@ export async function identifyInferredFeatures({
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
-    inferenceClient,
-    systemPrompt: combinedSystemPrompt,
+    agentBuilder,
+    request,
+    connectorId,
     logger,
     signal,
     tuning,
     iteration,
-    additionalTools,
-    additionalToolCallbacks,
   });
 
   const { docsCount, docIds, outcome } = iterationResult;

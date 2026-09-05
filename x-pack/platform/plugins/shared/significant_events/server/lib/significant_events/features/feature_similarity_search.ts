@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import {
   INFERRED_FEATURE_TYPES,
   MAX_ID_LENGTH,
@@ -22,7 +21,6 @@ export const FEATURE_SIMILARITY_TOOL_DESCRIPTION =
   'Pass every candidate absent from known_feature_ids in the candidates array; results are ' +
   'grouped by candidate_id, each with at most five same-type matches in semantic relevance order.';
 
-/** One candidate feature the model wants to check for a semantic match; shared by the Agent Builder tool and the inference fallback. */
 export const featureCandidateSchema = z.object({
   candidate_id: z
     .string()
@@ -71,7 +69,6 @@ export const findSimilarFeatures = async ({
     }));
 };
 
-/** Fan out a batch of candidates concurrently, isolating a per-candidate failure into its own group. */
 export const searchFeaturesForCandidates = async ({
   kiClient,
   streamName,
@@ -95,38 +92,3 @@ export const searchFeaturesForCandidates = async ({
       }
     })
   );
-
-/** Direct KI-client fallback for the search tool, used when Agent Builder is unavailable to bridge the managed one. */
-export const buildFeatureSimilarityInferenceTools = ({
-  kiClient,
-  streamName,
-}: {
-  kiClient: Pick<KnowledgeIndicatorClient, 'findFeatures'>;
-  streamName: string;
-}): { tools: Record<string, ToolDefinition>; callbacks: Record<string, ToolCallback> } => {
-  const { $schema, ...schema } = z.toJSONSchema(
-    z.object({ candidates: z.array(featureCandidateSchema).max(MAX_SEARCH_CANDIDATES) }),
-    { unrepresentable: 'any', io: 'input' }
-  ) as { $schema?: string };
-
-  return {
-    tools: {
-      search_similar_features: {
-        description: FEATURE_SIMILARITY_TOOL_DESCRIPTION,
-        schema,
-      } as ToolDefinition,
-    },
-    callbacks: {
-      search_similar_features: async (toolCall) => {
-        const rawCandidates = (toolCall.function.arguments as { candidates?: unknown })?.candidates;
-        const candidates = (Array.isArray(rawCandidates) ? rawCandidates : []).slice(
-          0,
-          MAX_SEARCH_CANDIDATES
-        ) as FeatureCandidate[];
-        const groups = await searchFeaturesForCandidates({ kiClient, streamName, candidates });
-        const results = groups.map((group) => ({ type: 'other', data: group }));
-        return { response: { results, count: results.length } };
-      },
-    },
-  };
-};

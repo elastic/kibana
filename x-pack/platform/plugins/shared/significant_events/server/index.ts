@@ -19,6 +19,13 @@ export const plugin = async (ctx: PluginInitializerContext) => {
 
 export { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from './agent_builder/agents/discovery/discovery';
 
+export { FEATURE_IDENTIFICATION_AGENT_ID } from './agent_builder/agents/feature_identification';
+export { buildFeatureIdentificationUserMessage } from './lib/significant_events/features/build_user_message';
+export {
+  parseFinalizedFeatures,
+  type RawFinalizeFeaturesParams,
+} from './lib/significant_events/features/parse_finalized_features';
+
 export { SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID } from './agent_builder/tools/tool_ids';
 
 export { platformStreamsMemoryTools } from './memory_and_investigation/tools/memory/tool_ids';

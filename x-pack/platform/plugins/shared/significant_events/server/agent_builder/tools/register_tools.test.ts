@@ -18,6 +18,8 @@ import {
 import { createMockGetScopedClients } from '../utils/test_helpers';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
+import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
+import { platformStreamsMemoryTools } from '../../memory_and_investigation/tools/memory/tool_ids';
 
 const createMockServer = (): Pick<StreamsServer, 'isServerless' | 'core'> => ({
   isServerless: false,
@@ -31,6 +33,9 @@ describe('registerAgentBuilderTools', () => {
   const telemetry = {
     trackAgentBuilderKnowledgeIndicatorCreated: jest.fn(),
   } as unknown as EbtTelemetryClient;
+  const memoryToolsOptions = {
+    getMemoryService: jest.fn(),
+  } as unknown as MemoryToolsOptions;
 
   it('registers all expected tools', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
@@ -42,6 +47,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      memoryToolsOptions,
     });
 
     const registeredIds = agentBuilder.tools.register.mock.calls.map((call) => call[0].id);
@@ -51,6 +57,9 @@ describe('registerAgentBuilderTools', () => {
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID);
+    expect(registeredIds).toContain(platformStreamsMemoryTools.memorySearch);
+    expect(registeredIds).toContain(platformStreamsMemoryTools.memoryRead);
+    expect(registeredIds).toContain(platformStreamsMemoryTools.memoryList);
   });
 
   it('registers tools with non-empty descriptions and schemas', () => {
@@ -63,6 +72,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      memoryToolsOptions,
     });
 
     for (const [tool] of agentBuilder.tools.register.mock.calls) {
@@ -82,6 +92,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      memoryToolsOptions,
     });
 
     expect(agentBuilder.tools.register).not.toHaveBeenCalled();

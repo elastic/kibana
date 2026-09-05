@@ -7,7 +7,6 @@
 
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import {
-  EMPTY_TOKENS,
   formatRawDocument,
   identifyFeatures,
   sumTokens,
@@ -26,6 +25,11 @@ import {
   type Evaluator,
   type Example,
 } from '@kbn/evals';
+import {
+  FEATURE_IDENTIFICATION_AGENT_ID,
+  buildFeatureIdentificationUserMessage,
+} from '@kbn/significant-events-plugin/server';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
@@ -51,6 +55,7 @@ import {
 } from '../../src/datasets';
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
+import { parseFeaturesFromSteps } from '../../src/evaluators/ki_feature_extraction/parse_features_from_steps';
 
 interface AvailableDeduplicationScenario {
   scenario: KIFeatureDeduplicationScenario;
@@ -169,7 +174,19 @@ evaluate.describe(
     const activeDatasets = getActiveDatasets();
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, log }) => {
+    evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          },
+        },
+      });
+      log.info('Enabled significant events availability feature flag');
+
       const snapshots = await buildAvailableSnapshotsBySource(
         activeDatasets,
         (dataset) => dataset.kiFeatureDeduplication,
@@ -227,10 +244,10 @@ evaluate.describe(
           'KI feature deduplication',
           async ({
             esClient,
-            inferenceClient,
+            agentBuilderClient,
             evaluators,
             evaluationConnector,
-            logger,
+            inferenceClient,
             executorClient,
             traceEsClient,
             log,
@@ -304,9 +321,7 @@ evaluate.describe(
                   const accumulated = new FeatureAccumulator();
                   const mergeEvents = [];
                   const fingerprintOnlyMergeEvents = [];
-                  // Deduplication identifies once per iteration, so provider
-                  // token counts are summed to match the trace-derived totals.
-                  let tokensUsed = EMPTY_TOKENS;
+                  let tokensUsed = sumTokens({});
 
                   for (let i = 0; i < input.iterations; i++) {
                     const sampledHits = await collectSampleDocuments({
@@ -323,18 +338,28 @@ evaluate.describe(
                       .getAll()
                       .map(toPreviouslyIdentifiedFeature);
 
-                    const { features: identifiedFeatures, tokensUsed: iterationTokens } =
-                      await identifyFeatures({
-                        streamName: input.stream_name,
-                        sampleDocuments,
-                        systemPrompt: featuresPrompt,
-                        inferenceClient,
-                        logger,
-                        signal: new AbortController().signal,
-                        previouslyIdentifiedFeatures,
-                      });
+                    const userMessage = buildFeatureIdentificationUserMessage({
+                      streamName: MANAGED_STREAM_NAME,
+                      sampleDocuments: JSON.stringify(sampleDocuments),
+                      previouslyIdentifiedFeatures:
+                        previouslyIdentifiedFeatures.length > 0
+                          ? JSON.stringify(previouslyIdentifiedFeatures)
+                          : undefined,
+                    });
 
-                    tokensUsed = sumTokens({ accumulated: tokensUsed, added: iterationTokens });
+                    const converseResult = await agentBuilderClient.converse({
+                      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
+                      input: userMessage,
+                    });
+
+                    const { features: identifiedFeatures } = parseFeaturesFromSteps(
+                      converseResult.steps,
+                      input.stream_name
+                    );
+                    tokensUsed = sumTokens({
+                      accumulated: tokensUsed,
+                      added: converseResult.tokensUsed,
+                    });
 
                     iterations.push({
                       features: identifiedFeatures,
@@ -363,8 +388,8 @@ evaluate.describe(
                     mergeEvents,
                     fingerprintOnlyMergeEvents,
                     finalFeatures: accumulated.getAll(),
-                    traceId: getCurrentTraceId(),
                     tokens_used: tokensUsed,
+                    traceId: getCurrentTraceId(),
                   };
                 },
               },
