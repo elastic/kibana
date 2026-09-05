@@ -45,8 +45,6 @@ interface RoundInputProps {
   attachmentRefs?: AttachmentVersionRef[];
   conversationAttachments?: VersionedAttachment[];
   fallbackAttachments?: Attachment[];
-  origin?: ConversationRoundOrigin;
-  author?: ConversationRoundAuthor;
 }
 
 export const RoundInput = ({
@@ -58,8 +56,6 @@ export const RoundInput = ({
   attachmentRefs,
   conversationAttachments,
   fallbackAttachments,
-  origin,
-  author,
 }: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
   const [isHovering, setIsHovering] = useState(false);
