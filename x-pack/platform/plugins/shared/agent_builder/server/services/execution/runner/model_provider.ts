@@ -186,7 +186,10 @@ export const createModelProvider = ({
 
     const inferenceClient = inference.getClient({
       request,
-      bindTo: { connectorId, metadata: { connectorTelemetry: resolvedTelemetryMetadata } },
+      bindTo: {
+        connectorId,
+        ...(telemetryMetadata ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
+      },
       callbacks: {
         complete: [completionCallback],
       },
