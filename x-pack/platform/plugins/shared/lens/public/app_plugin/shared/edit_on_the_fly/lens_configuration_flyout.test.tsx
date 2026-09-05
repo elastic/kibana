@@ -184,7 +184,11 @@ describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
     propsOverrides: Partial<EditConfigPanelProps> = {},
     query?: Query | AggregateQuery,
-    stateOverrides: { hideTextBasedEditor?: boolean } = {}
+    stateOverrides: {
+      hideTextBasedEditor?: boolean;
+      datasourceStates?: Record<string, { isLoading: boolean; state: unknown }>;
+      activeDatasourceId?: string;
+    } = {}
   ) {
     const mockCoreStart = coreMock.createStart();
     mockCoreStart.rendering.addContext = createAddContextMock();
@@ -300,6 +304,37 @@ describe('LensEditConfigurationFlyout', () => {
     expect(updatePanelStateSpy).toHaveBeenCalled();
   });
 
+  it('should restore all previous datasource states on cancel, not only the active one', async () => {
+    const updatePanelStateSpy = jest.fn();
+    const multiDatasourceAttributes = {
+      ...lensAttributes,
+      state: {
+        ...lensAttributes.state,
+        datasourceStates: {
+          formBased: mockFormBasedStateChanged,
+          textBased: mockTextBasedState,
+        },
+      },
+    } as unknown as TypedLensSerializedState['attributes'];
+
+    await renderConfigFlyout({
+      attributes: multiDatasourceAttributes,
+      updatePanelState: updatePanelStateSpy,
+    });
+    await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
+
+    expect(updatePanelStateSpy).toHaveBeenCalledWith(
+      mockFormBasedStateChanged,
+      expect.anything(),
+      undefined,
+      'formBased',
+      {
+        formBased: { isLoading: false, state: mockFormBasedStateChanged },
+        textBased: { isLoading: false, state: mockTextBasedState },
+      }
+    );
+  });
+
   it('should call the updateByRefInput callback with savedObjectId and previous attributes if cancel button is clicked and savedObjectId exists', async () => {
     const updateByRefInputSpy = jest.fn();
 
@@ -402,8 +437,13 @@ describe('LensEditConfigurationFlyout', () => {
   it('should display the suggestions if query is ES|QL', async () => {
     await renderConfigFlyout(
       { attributes: esqlLensAttributes },
+      { esql: 'from index1 | limit 10' },
       {
-        esql: 'from index1 | limit 10',
+        datasourceStates: {
+          formBased: { isLoading: false, state: mockFormBasedState },
+          textBased: { isLoading: false, state: { layers: {} } },
+        },
+        activeDatasourceId: 'textBased',
       }
     );
     expect(screen.getByTestId('InlineEditingESQLEditor')).toBeInTheDocument();
@@ -413,7 +453,14 @@ describe('LensEditConfigurationFlyout', () => {
   it('should display the ES|QL results table if hideTextBasedEditor is false and query is ES|QL', async () => {
     await renderConfigFlyout(
       { hideTextBasedEditor: false, attributes: esqlLensAttributes },
-      { esql: 'from index1 | limit 10' }
+      { esql: 'from index1 | limit 10' },
+      {
+        datasourceStates: {
+          formBased: { isLoading: false, state: mockFormBasedState },
+          textBased: { isLoading: false, state: { layers: {} } },
+        },
+        activeDatasourceId: 'textBased',
+      }
     );
     await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
   });
