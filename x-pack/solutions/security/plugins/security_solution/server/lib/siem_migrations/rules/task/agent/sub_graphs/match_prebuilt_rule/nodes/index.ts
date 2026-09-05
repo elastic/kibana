@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { getRuleMigrationAgent } from './graph';
-export { getRuleMigrationAgentV2 } from './graph_v2';
+export { getMatchPrebuiltRuleAgentNode, getFinalizeMatchNode } from './match_prebuilt_rule';
