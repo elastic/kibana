@@ -390,6 +390,11 @@ MODELS = [
     # 2026-09-03: clean tool call, 1.7s round-trip (10x faster than GLM-5.3).
     # Same proxy + endpoint flow; --shards 4 to start.
     "openrouter-deepseek-v4-pro",
+    # Self-hosted Qwen3.8-27B on the A100 (SGLang, 2×TP1 cells). Rides the
+    # same on-VM proxy path with PROXY_UPSTREAM=public cell URL + bearer
+    # from /tmp/selfhost.env (shipped by deploy()). Quality scorecard for
+    # qwen38-local in OmniRoute combos; judge stays on EIS (different family).
+    "selfhost-qwen38",
     # NOTE: gemini-3.7-flash exists only as an OpenRouter connector and needs
     # the proxy + ES JAR reasoning patch flow (kibana-evals skill
     # scripts/openrouter-proxy.py). It is NOT in the default sweep; run it as
@@ -452,6 +457,12 @@ def vm_name(model: str, shard: Optional[str] = None) -> str:
     # a [:24] truncation collided gemini-2-5-flash-lite onto gemini-2-5-flash's
     # VM (dirty ES → 409 dataset conflict).
     prefix = suite_profile()["vm_prefix"]
+    # VM_NAME_SUFFIX isolates parallel sweeps of the same model (e.g. judge
+    # A/B stability reruns). Without it two sweeps resolve the same VM names
+    # and stomp each other's stacks.
+    suffix_env = os.environ.get("VM_NAME_SUFFIX", "")
+    if suffix_env:
+        prefix = f"{prefix}-{suffix_env}"[:40]
     slug = model.replace("eis-", "").replace(".", "-").replace("_", "-")
     # Shard suffix keeps each slice on its own box. Two eval stacks on one VM
     # OOM each other and corrupt local ES, so the suffix is load-bearing.
@@ -538,6 +549,12 @@ def deploy(ip: str) -> None:
     # them inside its openrouter- branch.
     scp(str(base / "openrouter_proxy.py"), ip, "/tmp/openrouter_proxy.py")
     scp(str(base / "create_openrouter_endpoint.py"), ip, "/tmp/create_openrouter_endpoint.py")
+    # Self-hosted model env (selfhost-* models): upstream URL + bearer for the
+    # on-VM proxy. Values come from local secrets; ship only when present so
+    # EIS/OpenRouter-only runs need nothing extra.
+    selfhost_env = base / ".selfhost.env"
+    if selfhost_env.exists():
+        scp(str(selfhost_env), ip, "/tmp/selfhost.env")
     # Matrix config carries the OpenRouter API model ids (matchIds) that the
     # connectors cache does NOT. The VM's Kibana checkout is main, not this
     # branch — it lacks the persona-matrix suite entirely, so ship the config.
