@@ -14,7 +14,10 @@ import { getAllListTypes } from './find_all_exception_list_types';
 import { sortExceptionListsToUpdateOrCreate } from './sort_exception_lists_to_create_update';
 import { bulkCreateImportedLists } from './bulk_create_imported_lists';
 import { bulkUpdateImportedLists } from './bulk_update_imported_lists';
-import { deleteListItemsToBeOverwritten } from './delete_list_items_to_overwrite';
+import {
+  type ExistingListItem,
+  getListItemsToBeOverwritten,
+} from './delete_list_items_to_overwrite';
 import { sortListsImportsByNamespace } from './sort_import_by_namespace';
 import { sortImportResponses } from './sort_import_responses';
 /**
@@ -36,8 +39,9 @@ export const importExceptionLists = async ({
   listsChunks: ImportExceptionListSchemaDecoded[][];
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
-}): Promise<ImportDataResponse> => {
+}): Promise<ImportDataResponse & { existingItems: ExistingListItem[] }> => {
   let importExceptionListsResponse: ImportResponse[] = [];
+  const existingItems: ExistingListItem[] = [];
 
   for await (const listChunk of listsChunks) {
     // sort by namespaceType
@@ -69,13 +73,11 @@ export const importExceptionLists = async ({
       listsToCreate,
       savedObjectsClient,
     });
-    // lists that are to be updated where overwrite is true, need to have
-    // existing items removed. By selecting to overwrite, user selects to
-    // overwrite entire list + items
-    await deleteListItemsToBeOverwritten({
+    const itemsToOverwrite = await getListItemsToBeOverwritten({
       listsOfItemsToDelete: listItemsToDelete,
       savedObjectsClient,
     });
+    existingItems.push(...itemsToOverwrite);
 
     const bulkUpdateResponse = await bulkUpdateImportedLists({
       listsToUpdate,
@@ -90,5 +92,5 @@ export const importExceptionLists = async ({
     ];
   }
 
-  return sortImportResponses(importExceptionListsResponse);
+  return { ...sortImportResponses(importExceptionListsResponse), existingItems };
 };

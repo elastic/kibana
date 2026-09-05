@@ -25,6 +25,7 @@ import { importExceptionListItems } from './utils/import/import_exception_list_i
 import { getTupleErrorsAndUniqueExceptionLists } from './utils/import/dedupe_incoming_lists';
 import { getTupleErrorsAndUniqueExceptionListItems } from './utils/import/dedupe_incoming_items';
 import { createExceptionsStreamFromNdjson } from './utils/import/create_exceptions_stream_logic';
+import { deleteListItemsToBeOverwritten } from './utils/import/delete_list_items_to_overwrite';
 
 export interface PromiseFromStreams {
   lists: Array<ImportExceptionListSchemaDecoded | Error>;
@@ -160,6 +161,20 @@ export const importExceptions = async ({
     savedObjectsClient,
     user,
   });
+
+  const importCompletedWithoutErrors =
+    importExceptionListsResponse.errors.length === 0 &&
+    exceptionListDuplicateErrors.length === 0 &&
+    importExceptionListItemsResponse.errors.length === 0 &&
+    exceptionListItemsDuplicateErrors.length === 0;
+
+  if (importCompletedWithoutErrors) {
+    await deleteListItemsToBeOverwritten({
+      existingItems: importExceptionListsResponse.existingItems,
+      importedItems: uniqueExceptionListItems,
+      savedObjectsClient,
+    });
+  }
 
   const importsSummary = {
     errors: [

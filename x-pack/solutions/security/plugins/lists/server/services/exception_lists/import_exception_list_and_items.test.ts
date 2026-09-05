@@ -13,16 +13,27 @@ import { createExtensionPointStorageMock } from '../extension_points/extension_p
 
 import { importExceptionLists } from './utils/import/import_exception_lists';
 import { importExceptionListItems } from './utils/import/import_exception_list_items';
+import { deleteListItemsToBeOverwritten } from './utils/import/delete_list_items_to_overwrite';
 import { getExceptionListSavedObjectClientMock, toReadable } from './exception_list_client.mock';
 import { ExceptionListClient } from './exception_list_client';
 
 jest.mock('./utils/import/import_exception_lists');
 jest.mock('./utils/import/import_exception_list_items');
+jest.mock('./utils/import/delete_list_items_to_overwrite');
 
 describe('import_exception_list_and_items', () => {
+  const existingItems = [
+    {
+      id: 'existing-item-id',
+      item_id: 'existing-item',
+      list_id: 'test_list_id',
+      namespace_type: 'single',
+    },
+  ];
   let exceptionListClient: ExceptionListClient;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     exceptionListClient = new ExceptionListClient({
       enableServerExtensionPoints: false,
       savedObjectsClient: getExceptionListSavedObjectClientMock(),
@@ -34,6 +45,7 @@ describe('import_exception_list_and_items', () => {
   beforeEach(() => {
     (importExceptionLists as jest.Mock).mockResolvedValue({
       errors: [],
+      existingItems,
       success: true,
       success_count: 1,
     });
@@ -117,5 +129,39 @@ describe('import_exception_list_and_items', () => {
       success_exception_list_items: true,
       success_exception_lists: true,
     });
+    expect(deleteListItemsToBeOverwritten).toHaveBeenCalledWith({
+      existingItems,
+      importedItems: [
+        expect.objectContaining({
+          item_id: 'test_item_id',
+          list_id: 'test_list_id',
+          namespace_type: 'single',
+        }),
+      ],
+      savedObjectsClient: expect.anything(),
+    });
+    expect((importExceptionListItems as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (deleteListItemsToBeOverwritten as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  test('it should preserve existing items when any import error occurs', async () => {
+    (importExceptionListItems as jest.Mock).mockResolvedValue({
+      errors: [{ error: { message: 'some error occurred', status_code: 400 } }],
+      success: false,
+      success_count: 0,
+    });
+
+    await exceptionListClient.importExceptionListAndItems({
+      exceptionsToImport: toReadable([
+        getImportExceptionsListSchemaMock('test_list_id'),
+        getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
+      ]),
+      generateNewListId: false,
+      maxExceptionsImportSize: 10000,
+      overwrite: true,
+    });
+
+    expect(deleteListItemsToBeOverwritten).not.toHaveBeenCalled();
   });
 });
