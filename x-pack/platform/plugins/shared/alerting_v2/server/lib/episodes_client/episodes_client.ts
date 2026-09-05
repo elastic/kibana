@@ -7,9 +7,12 @@
 
 import { inject, injectable } from 'inversify';
 import {
+  buildEpisodeEventsQuery,
   buildEpisodeGroupHashQuery,
   buildEpisodeQuery,
   type AlertEpisodeEsqlRow,
+  type BuildEpisodeEventsQueryOptions,
+  type EpisodeEventRow,
   type EpisodeGroupHashEsqlRow,
 } from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
@@ -49,5 +52,15 @@ export class EpisodesClient {
     }
 
     return { ...row, last_tags: normalizeTags(row.last_tags) };
+  }
+
+  /** `.rule-events` rows for one episode, same query as the details timeline. */
+  public async getEvents(
+    episodeId: string,
+    options?: BuildEpisodeEventsQueryOptions
+  ): Promise<EpisodeEventRow[]> {
+    return this.queryService.executeQueryRows<EpisodeEventRow>({
+      query: buildEpisodeEventsQuery(this.spaceId, episodeId, options).print('basic'),
+    });
   }
 }
