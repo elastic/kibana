@@ -216,17 +216,14 @@ export class StreamsApp {
   }
 
   /**
-   * Click near the top of a node card so the floating toolbar (bottom-center)
-   * cannot intercept the pointer when a node sits toward the bottom of the pane.
+   * Click the node title so the target stays inside the card at any zoom level and clear of the
+   * bottom-center toolbar, unlike a fixed pixel offset that falls off short, zoomed-out cards.
    */
   async clickCanvasNode(
     node: Locator,
     options: { button?: 'left' | 'right'; modifiers?: Array<'Shift'> } = {}
   ) {
-    await node.click({
-      position: { x: 24, y: 16 },
-      ...options,
-    });
+    await node.getByTestId('streamsCanvasNodeTitle').click(options);
   }
 
   async rightClickCanvasNode(node: Locator) {
