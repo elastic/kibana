@@ -785,17 +785,23 @@ export abstract class LayoutMixin extends SaveMixin {
 
   async showChart() {
     const showButton = this.page.testSubj.locator('dscShowHistogramButton');
+    const hideButton = this.page.testSubj.locator('dscHideHistogramButton');
+    // The toggle renders as exactly one of these; wait for it to mount before
+    // probing so a slow post-navigation render can't make the guard silently no-op.
+    await expect(showButton.or(hideButton)).toBeVisible();
     if (await showButton.isVisible()) {
       await showButton.click();
-      await this.waitUntilTabIsLoaded();
+      await expect(this.getHistogramChart()).toBeVisible();
     }
   }
 
   async hideChart() {
+    const showButton = this.page.testSubj.locator('dscShowHistogramButton');
     const hideButton = this.page.testSubj.locator('dscHideHistogramButton');
+    await expect(showButton.or(hideButton)).toBeVisible();
     if (await hideButton.isVisible()) {
       await hideButton.click();
-      await this.waitUntilTabIsLoaded();
+      await expect(this.getHistogramChart()).toBeHidden();
     }
   }
 
