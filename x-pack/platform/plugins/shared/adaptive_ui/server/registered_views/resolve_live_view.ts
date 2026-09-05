@@ -53,23 +53,25 @@ const pickInvestigationId = (event: SignificantEvent): string | undefined => {
     .at(-1)?.workflow_execution_id;
 };
 
-const toInvestigationInput = (investigation: GetInvestigationResponse): InvestigationInput => {
-  // `result` is already validated against `investigationStateSchema` by the investigations
-  // client, which drops it wholesale rather than handing back a half-parsed payload.
-  const { result, subject, conclusion } = investigation;
-  const eventId = subject?.type === 'significant_event' ? subject.id : undefined;
-
-  return {
-    investigation_id: investigation.investigation_id,
-    status: investigation.status,
-    event_id: eventId,
-    summary: result?.summary ?? conclusion ?? 'Investigation has no structured summary yet.',
-    conclusion: result?.conclusion ?? conclusion,
-    recommendations: result?.recommendations,
-    blind_spots: result?.blind_spots,
-    hypotheses: result?.hypotheses,
-  };
-};
+const toInvestigationInput = ({
+  investigation_id: investigationId,
+  status,
+  subject,
+  summary,
+  conclusion,
+  recommendations,
+  blind_spots: blindSpots,
+  hypotheses,
+}: GetInvestigationResponse): InvestigationInput => ({
+  investigation_id: investigationId,
+  status,
+  event_id: subject?.type === 'significant_event' ? subject.id : undefined,
+  summary: summary ?? conclusion ?? 'Investigation has no structured summary yet.',
+  conclusion,
+  recommendations,
+  blind_spots: blindSpots,
+  hypotheses,
+});
 
 const validatedSpec = (spec: ViewSpec, viewId: string): ResolveLiveViewResult => {
   const validation = validateView(spec);

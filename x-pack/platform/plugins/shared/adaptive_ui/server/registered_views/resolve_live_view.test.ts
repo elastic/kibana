@@ -30,30 +30,28 @@ const liveInvestigation = {
   investigation_id: 'inv-003',
   subject: { type: 'significant_event' as const, id: 'evt-003' },
   status: 'completed' as const,
-  conclusion: 'Missing retention policies caused unbounded growth.',
-  result: {
-    summary: 'Investigate disk watermark write throttling on logs.elasticsearch.',
-    conclusion: 'ILM retention misconfiguration left long-lived indices active.',
-    hypotheses: [
-      {
-        candidate: 'ILM retention misconfiguration left long-lived indices active',
-        confidence: 0.91,
-        status: 'confirmed' as const,
-      },
-    ],
-    recommendations: [
-      {
-        title: 'Restore the missing ILM policy',
-        description: 'Attach a delete phase at 30 days for the elasticsearch logs datastream.',
-      },
-    ],
-    blind_spots: [
-      {
-        title: 'No hot/warm allocation metrics',
-        description: 'Node disk stats are sampled without per-index breakdown.',
-      },
-    ],
-  },
+  created_at: '2026-08-25T13:50:00.000Z',
+  summary: 'Investigate disk watermark write throttling on logs.elasticsearch.',
+  conclusion: 'ILM retention misconfiguration left long-lived indices active.',
+  hypotheses: [
+    {
+      candidate: 'ILM retention misconfiguration left long-lived indices active',
+      confidence: 0.91,
+      status: 'confirmed' as const,
+    },
+  ],
+  recommendations: [
+    {
+      title: 'Restore the missing ILM policy',
+      description: 'Attach a delete phase at 30 days for the elasticsearch logs datastream.',
+    },
+  ],
+  blind_spots: [
+    {
+      title: 'No hot/warm allocation metrics',
+      description: 'Node disk stats are sampled without per-index breakdown.',
+    },
+  ],
 };
 
 const createDeps = (overrides: Partial<ResolveLiveViewDeps> = {}): ResolveLiveViewDeps => ({
