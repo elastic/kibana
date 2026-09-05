@@ -41,6 +41,21 @@ apiTest.describe('lens visualizations - create', { tag: tags.deploymentAgnostic 
     expect(response.body.data.description).toBe(description);
   });
 
+  apiTest('should create without a tags field (backward compatibility)', async ({ apiClient }) => {
+    const { tags: _, ...bodyWithoutTags } = getExampleLensBody();
+
+    const response = await apiClient.post(LENS_API_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: bodyWithoutTags,
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(201);
+  });
+
   apiTest('should persist tags through the create response', async ({ apiClient }) => {
     const response = await apiClient.post(LENS_API_PATH, {
       headers: {

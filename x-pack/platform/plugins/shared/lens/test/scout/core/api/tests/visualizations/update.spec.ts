@@ -50,6 +50,21 @@ apiTest.describe('lens visualizations - update', { tag: tags.deploymentAgnostic 
     expect(response.body.data.title).toBe(title);
   });
 
+  apiTest('should update without a tags field (backward compatibility)', async ({ apiClient }) => {
+    const { tags: _omitted, ...bodyWithoutTags } = getExampleLensBody('No-tags title');
+
+    const response = await apiClient.put(`${LENS_API_PATH}/${KNOWN_LENS_ID}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: bodyWithoutTags,
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+  });
+
   apiTest('should persist tags through the update response', async ({ apiClient }) => {
     const response = await apiClient.put(`${LENS_API_PATH}/${KNOWN_LENS_ID}`, {
       headers: {
