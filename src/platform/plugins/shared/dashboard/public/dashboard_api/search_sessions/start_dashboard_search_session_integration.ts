@@ -10,9 +10,11 @@
 import { type BehaviorSubject, combineLatest, filter, skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 
 import type { DashboardApi, DashboardCreationOptions } from '../..';
 import { dataService } from '../../services/kibana_services';
+import { dashboardCacheService } from '../../services/dashboard_cache_service';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import type { DashboardInternalApi } from '../types';
 import { newSession$ } from './new_session';
@@ -86,6 +88,18 @@ export function startDashboardSearchSessionIntegration(
 
       if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
         setSearchSessionId(updatedSearchSessionId);
+
+        // Update cache so future reopens can reuse this session
+        const dashboardId = dashboardApi.savedObjectId$.getValue();
+        if (dashboardId) {
+          const currentTimeRange = dashboardApi.timeRange$.getValue();
+          if (currentTimeRange) {
+            dashboardCacheService.setCacheEntry(dashboardId, {
+              sessionId: updatedSearchSessionId,
+              absoluteTimeRange: getAbsoluteTimeRange(currentTimeRange),
+            });
+          }
+        }
       }
 
       searchSessionGenerationInProgress$.next(false);
