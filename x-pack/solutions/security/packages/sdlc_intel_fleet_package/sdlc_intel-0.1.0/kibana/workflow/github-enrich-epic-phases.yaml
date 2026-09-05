@@ -108,24 +108,28 @@ steps:
           prTotal: 0
           mergedPrTotal: 0
 
-      - name: load_sub_issue_edges
-        type: elasticsearch.search
-        with:
-          index: '{{ consts.relationshipsIndex }}'
-          ignore_unavailable: true
-          allow_no_indices: true
-          size: 200
-          query:
-            bool:
-              must:
-                - term:
-                    relation: parent_of
-                - term:
-                    from: '${{ variables.epicUrl }}'
+      - name: skip_epic_without_url
+        type: if
+        condition: "${{ variables.epicUrl != null and variables.epicUrl != \"\" }}"
+        steps:
+          - name: load_sub_issue_edges
+            type: elasticsearch.search
+            with:
+              index: '{{ consts.relationshipsIndex }}'
+              ignore_unavailable: true
+              allow_no_indices: true
+              size: 200
+              query:
+                bool:
+                  must:
+                    - term:
+                        relation: parent_of
+                    - term:
+                        from: '${{ variables.epicUrl }}'
 
       - name: index_child_tickets
         type: foreach
-        foreach: '${{ steps.load_sub_issue_edges.output.hits.hits | json }}'
+        foreach: '${{ steps.load_sub_issue_edges.output.hits.hits | default: [] | json }}'
         steps:
           - name: load_child_issue
             type: elasticsearch.search
