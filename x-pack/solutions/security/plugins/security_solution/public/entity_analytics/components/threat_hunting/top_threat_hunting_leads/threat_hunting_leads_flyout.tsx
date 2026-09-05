@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -199,6 +200,20 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick }) => {
                 </EuiToolTip>
               </h4>
             </EuiFlexItem>
+            {lead.origin === 'exploratory' && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.EXPLORATORY_BADGE_TOOLTIP}>
+                  <EuiBadge
+                    color="primary"
+                    iconType="sparkles"
+                    tabIndex={0}
+                    data-test-subj="leadExploratoryBadge"
+                  >
+                    {i18n.EXPLORATORY_BADGE_LABEL}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
 

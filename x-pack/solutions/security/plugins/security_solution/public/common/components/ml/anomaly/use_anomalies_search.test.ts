@@ -158,6 +158,6 @@ describe('useAggregatedAnomaliesByJob', () => {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => expect(mockAddToastError).not.toBeCalled());
+    await waitFor(() => expect(mockAddToastError).not.toHaveBeenCalled());
   });
 });

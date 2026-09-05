@@ -92,7 +92,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     const { rerender } = render(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
 
     useSelectorMock.mockClear();
     useSelectorMock.mockImplementation((callback) => {
@@ -100,7 +100,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
+    expect(trackMetric).toHaveBeenCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
   });
 
   it('only tracks loaded once', () => {
@@ -109,7 +109,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     const { rerender } = render(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
 
     useSelectorMock.mockClear();
     useSelectorMock.mockImplementation((callback) => {
@@ -118,7 +118,7 @@ describe('Elements Loaded Telemetry', () => {
 
     rerender(<Component workpad={mockWorkpad} />);
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).toBeCalledTimes(1);
+    expect(trackMetric).toHaveBeenCalledTimes(1);
   });
 
   it('does not track if resolvedArgs are never pending', () => {
@@ -128,7 +128,7 @@ describe('Elements Loaded Telemetry', () => {
 
     const { rerender } = render(<Component workpad={mockWorkpad} />);
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
   });
 
   it('tracks if elements are in error state after load', () => {
@@ -137,7 +137,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     const { rerender } = render(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
 
     useSelectorMock.mockClear();
     useSelectorMock.mockImplementation((callback) => {
@@ -145,7 +145,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, [
+    expect(trackMetric).toHaveBeenCalledWith(METRIC_TYPE.LOADED, [
       WorkpadLoadedMetric,
       WorkpadLoadedWithErrorsMetric,
     ]);
@@ -169,10 +169,10 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     const { rerender } = render(<Component workpad={otherWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
 
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
 
     useSelectorMock.mockClear();
     useSelectorMock.mockImplementation((callback) => {
@@ -180,7 +180,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
+    expect(trackMetric).toHaveBeenCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
   });
 
   it('does not track if workpad has no elements', () => {
@@ -195,6 +195,6 @@ describe('Elements Loaded Telemetry', () => {
 
     const { rerender } = render(<Component workpad={otherWorkpad} />);
     rerender(<Component workpad={otherWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
   });
 });

@@ -228,7 +228,7 @@ describe('LogEntries search strategy', () => {
       mockDependencies
     );
 
-    await expect(response.toPromise()).rejects.toThrowError(errors.ResponseError);
+    await expect(response.toPromise()).rejects.toThrow(errors.ResponseError);
   });
 
   it('forwards cancellation to the underlying search strategy', async () => {

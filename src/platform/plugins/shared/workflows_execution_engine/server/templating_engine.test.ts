@@ -478,7 +478,7 @@ describe('WorkflowTemplatingEngine', () => {
     describe('invalid expression', () => {
       it('should throw error for non-output template', () => {
         const template = `{% if true %}foo{% endif %}`;
-        expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
+        expect(() => templatingEngine.evaluateExpression(template, {})).toThrow(
           'The provided expression is invalid. Got: {% if true %}foo{% endif %}'
         );
       });
@@ -486,7 +486,7 @@ describe('WorkflowTemplatingEngine', () => {
       it('should throw error for multi-node template', () => {
         const template = `{{ "foo" }} {{ "bar" }}`;
 
-        expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
+        expect(() => templatingEngine.evaluateExpression(template, {})).toThrow(
           'The provided expression is invalid. Got: {{ "foo" }} {{ "bar" }}'
         );
       });

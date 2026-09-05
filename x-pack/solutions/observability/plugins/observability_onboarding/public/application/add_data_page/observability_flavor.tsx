@@ -16,10 +16,12 @@ import type { LogoIconProps } from '../shared/logo_icon';
 import { LogoIcon } from '../shared/logo_icon';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 import { addPathParamToUrl } from '../package_list_search_form/use_card_url_rewrite';
+import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import { IS_INGEST_HUB_ONBOARDING_ENABLED } from '../../../common/feature_flags';
 import { INTEGRATION_TILES } from './integration_tiles';
 import { INTEGRATION_MINI_TILES } from './integration_mini_tiles';
 import { useCollectionCards } from './use_collection_cards';
+import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 
 const tileIcon = (logo: LogoIconProps['logo'], color: LogoIconProps['color']) => (
   <LogoIcon logo={logo} isAvatar size="l" avatarType="space" hasBorder color={color} />
@@ -45,6 +47,9 @@ export const useObservabilityCuratedCategories = ({
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
 
   return useMemo(() => {
     const getUrlForApp = application?.getUrlForApp;
@@ -87,7 +92,11 @@ export const useObservabilityCuratedCategories = ({
       };
     };
 
-    return INTEGRATION_TILES.map((category) => ({
+    // Logs Essentials (metrics onboarding off) drops the Applications category,
+    // mirroring how V1 hid the Application use case on that tier.
+    return INTEGRATION_TILES.filter(
+      (category) => metricsOnboardingEnabled || category.id !== 'applications'
+    ).map((category) => ({
       id: category.id,
       label: category.label,
       tiles: category.tiles.map((tile) => {
@@ -118,6 +127,7 @@ export const useObservabilityCuratedCategories = ({
     featureFlags,
     isServerless,
     isManagedOtlpServiceAvailable,
+    metricsOnboardingEnabled,
     collections,
     onOpenCollection,
   ]);
@@ -131,23 +141,39 @@ export const useObservabilityMiniTiles = ({
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application },
+    services: {
+      application,
+      context: { isServerless },
+    },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const collections = useCollectionCards();
+  const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
 
   return useMemo(() => {
     const getUrlForApp = application?.getUrlForApp;
     const createUrl = getUrlForApp?.('integrations', { path: '/create' });
-    const dynamicNavigation: Record<string, { href?: string }> = {
-      auto_import: {
-        href: createUrl ? addPathParamToUrl(createUrl, {}) : undefined,
-      },
-      upload_file: {
-        href: addPathParamToUrl(`${getUrlForApp?.('home')}#/tutorial_directory/fileDataViz`, {}),
-      },
-    };
+    const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
+    const apmHref = isServerless ? apmUrl : addPathParamToUrl(apmUrl, {});
+    const dynamicNavigation: Record<string, { href?: string; onClick?: React.MouseEventHandler }> =
+      {
+        opentelemetry: isManagedOtlpServiceAvailable
+          ? reactRouterNavigate(history, '/otel-apm')
+          : { href: apmHref },
+        auto_import: {
+          href: createUrl ? addPathParamToUrl(createUrl, {}) : undefined,
+        },
+        upload_file: {
+          href: addPathParamToUrl(`${getUrlForApp?.('home')}#/tutorial_directory/fileDataViz`, {}),
+        },
+      };
 
-    return INTEGRATION_MINI_TILES.map((tile) => {
+    const pricingState = metricsOnboardingEnabled ? 'metrics' : 'logs-essentials';
+    return INTEGRATION_MINI_TILES.filter(
+      (tile) => !tile.visibleOn || tile.visibleOn === pricingState
+    ).map((tile) => {
       const collectionGroup = tile.collectionGroup;
       const collection = collectionGroup ? collections.get(collectionGroup) : undefined;
       const eprUrl = tile.eprPackage
@@ -175,5 +201,14 @@ export const useObservabilityMiniTiles = ({
         ...navigation,
       };
     });
-  }, [history, euiTheme, application, collections, onOpenCollection]);
+  }, [
+    history,
+    euiTheme,
+    application,
+    isServerless,
+    isManagedOtlpServiceAvailable,
+    metricsOnboardingEnabled,
+    collections,
+    onOpenCollection,
+  ]);
 };

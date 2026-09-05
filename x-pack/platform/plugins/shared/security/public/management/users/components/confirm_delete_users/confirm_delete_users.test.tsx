@@ -51,11 +51,11 @@ describe('ConfirmDeleteUsers', () => {
       />
     );
 
-    expect(onCancel).toBeCalledTimes(0);
+    expect(onCancel).toHaveBeenCalledTimes(0);
 
     wrapper.find('EuiButtonEmpty[data-test-subj="confirmModalCancelButton"]').simulate('click');
 
-    expect(onCancel).toBeCalledTimes(1);
+    expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it('deletes the requested users when confirmed', () => {
@@ -73,9 +73,9 @@ describe('ConfirmDeleteUsers', () => {
 
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
-    expect(apiClientMock.deleteUser).toBeCalledTimes(2);
-    expect(apiClientMock.deleteUser).toBeCalledWith('foo');
-    expect(apiClientMock.deleteUser).toBeCalledWith('bar');
+    expect(apiClientMock.deleteUser).toHaveBeenCalledTimes(2);
+    expect(apiClientMock.deleteUser).toHaveBeenCalledWith('foo');
+    expect(apiClientMock.deleteUser).toHaveBeenCalledWith('bar');
   });
 
   it('attempts to delete all users even if some fail', () => {
@@ -100,8 +100,8 @@ describe('ConfirmDeleteUsers', () => {
 
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
-    expect(apiClientMock.deleteUser).toBeCalledTimes(2);
-    expect(apiClientMock.deleteUser).toBeCalledWith('foo');
-    expect(apiClientMock.deleteUser).toBeCalledWith('bar');
+    expect(apiClientMock.deleteUser).toHaveBeenCalledTimes(2);
+    expect(apiClientMock.deleteUser).toHaveBeenCalledWith('foo');
+    expect(apiClientMock.deleteUser).toHaveBeenCalledWith('bar');
   });
 });

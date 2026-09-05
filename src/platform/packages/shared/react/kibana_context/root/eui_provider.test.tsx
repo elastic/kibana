@@ -69,7 +69,7 @@ describe('KibanaEuiProvider', () => {
 
     expect(euiTheme!.colorMode).toEqual('DARK');
     expect(euiTheme!.euiTheme.breakpoint.xxl).toEqual(1600);
-    expect(consoleWarnMock).not.toBeCalled();
+    expect(consoleWarnMock).not.toHaveBeenCalled();
   });
 
   it('propagates changes of the coreTheme observable', async () => {
@@ -98,7 +98,7 @@ describe('KibanaEuiProvider', () => {
       expect(euiTheme!.colorMode).toEqual('LIGHT');
     });
 
-    expect(consoleWarnMock).not.toBeCalled();
+    expect(consoleWarnMock).not.toHaveBeenCalled();
   });
 
   it('passes component defaults to EuiProvider', async () => {

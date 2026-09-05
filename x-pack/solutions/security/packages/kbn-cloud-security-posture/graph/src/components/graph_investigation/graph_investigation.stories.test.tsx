@@ -362,7 +362,7 @@ describe('GraphInvestigation Component', () => {
       getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).click();
 
       // Assert
-      expect(setSearchBarToggled).lastCalledWith(true);
+      expect(setSearchBarToggled).toHaveBeenLastCalledWith(true);
     });
 
     it('toggles searchBar off on click', async () => {
@@ -384,7 +384,7 @@ describe('GraphInvestigation Component', () => {
       getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).click();
 
       // Assert
-      expect(setSearchBarToggled).lastCalledWith(false);
+      expect(setSearchBarToggled).toHaveBeenLastCalledWith(false);
     });
 
     it('shows filters counter when KQL filter is applied', async () => {

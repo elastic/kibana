@@ -53,6 +53,7 @@ const createEvent = (
     experimentRunId: 'run-1',
     traceId: 'trace-eval-1',
     exampleId: 'example-1',
+    direction: 'maximize',
   },
   exampleId: 'example-1',
   ...overrides,
@@ -218,6 +219,43 @@ describe('buildIngestRequest', () => {
     });
 
     expect(requests[0].scores[0].example).not.toHaveProperty('metadata');
+  });
+
+  it('maps evaluationRun.direction to evaluator.direction', () => {
+    const requests = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: {
+        kind: 'event',
+        event: createEvent({
+          evaluationRun: {
+            ...createEvent().evaluationRun,
+            direction: 'minimize',
+          },
+        }),
+      },
+    });
+
+    expect(requests[0].scores[0].evaluator).toMatchObject({
+      name: 'Correctness',
+      direction: 'minimize',
+    });
+  });
+
+  it('persists direction: maximize for quality evaluators', () => {
+    const requests = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: { kind: 'event', event: createEvent() },
+    });
+
+    expect(requests[0].scores[0].evaluator.direction).toBe('maximize');
   });
 
   it('uses explicit executionId for metadata.execution_id when provided', () => {

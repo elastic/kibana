@@ -133,6 +133,40 @@ describe('buildScoreDocuments', () => {
     ]);
   });
 
+  it('copies evaluator.direction onto every score document', () => {
+    const evaluatorResults: EvaluatorResult[] = [
+      {
+        evaluator: {
+          name: 'correctness',
+          version: '1.0.0',
+          kind: 'llm',
+          direction: 'maximize',
+        },
+        scores: [
+          { name: 'factuality', score: 0.9 },
+          { name: 'relevance', score: 0.7 },
+        ],
+      },
+      {
+        evaluator: {
+          name: 'latency',
+          version: '1.0.0',
+          kind: 'code',
+          direction: 'minimize',
+        },
+        scores: [{ name: 'latency', score: 12 }],
+      },
+    ];
+
+    const body = buildScoreDocuments({ ...baseParams, evaluatorResults });
+
+    expect(body.scores.map(({ evaluator }) => [evaluator.name, evaluator.direction])).toEqual([
+      ['correctness.factuality', 'maximize'],
+      ['correctness.relevance', 'maximize'],
+      ['latency', 'minimize'],
+    ]);
+  });
+
   it('omits optional fields that are not provided', () => {
     const evaluatorResults: EvaluatorResult[] = [
       { evaluator: { name: 'latency' }, scores: [{ name: 'latency', score: 12 }] },
@@ -152,6 +186,7 @@ describe('buildScoreDocuments', () => {
     expect(score.example.input).toBeUndefined();
     expect(score.task.trace_id).toBeUndefined();
     expect(score.task.output).toBeUndefined();
+    expect(score.evaluator.direction).toBeUndefined();
     expect(body.metadata.execution_id).toBeUndefined();
     expect(body.experiment_name).toBeUndefined();
   });

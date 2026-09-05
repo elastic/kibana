@@ -64,6 +64,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
+      diskSizeGb: 130
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -77,6 +78,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
+      diskSizeGb: 130
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -90,6 +92,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
+      diskSizeGb: 130
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -150,12 +153,11 @@ steps:
 
   - wait
 
-  - command: .buildkite/scripts/steps/artifacts/publish.sh
-    label: 'Publish Kibana Artifacts'
+  - command: .buildkite/scripts/steps/artifacts/upload_dra_pipeline.sh
+    label: 'Upload DRA Pipeline'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 180
-    timeout_in_minutes: 30
+    timeout_in_minutes: 10

@@ -22,7 +22,7 @@ import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plug
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import type { createDeprecatedRuleAssetSavedObject } from '../../helpers/rules';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
-import { IS_SERVERLESS } from '../../env_var_names_constants';
+import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../../env_var_names_constants';
 import { refreshSavedObjectIndices, rootRequest } from './common';
 
 export const getPrebuiltRulesStatus = () => {
@@ -205,8 +205,18 @@ const installByUploadPrebuiltRulesPackage = (packagePath: string): Cypress.Chain
 /**
  * Installs a prepared mock prebuilt rules package `security_detection_engine`.
  * Installing it up front prevents installing the real package when making API requests.
+ *
+ * On MKI (`CLOUD_SERVERLESS`) Fleet rejects that upload because the name exists in
+ * the registry, and `kbnTestServerArgs` are not applied. Leave the environment
+ * package in place. Specs that need mock-specific assets are tagged
+ * `@skipInServerlessMKI`.
  */
 export const installMockPrebuiltRulesPackage = (): Cypress.Chainable => {
+  if (Cypress.env(CLOUD_SERVERLESS)) {
+    cy.log('Skipping mock prebuilt rules package upload on MKI');
+    return cy.wrap(undefined);
+  }
+
   cy.log('Install mock prebuilt rules package');
 
   // On shared stacks a previous spec may have installed the real package from

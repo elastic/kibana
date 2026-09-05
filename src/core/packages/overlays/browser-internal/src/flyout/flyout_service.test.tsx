@@ -72,7 +72,7 @@ describe('FlyoutService', () => {
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         const { container } = render(mockReactDomRender.mock.calls[1][0]);
         expect(container.innerHTML).toMatchSnapshot();
-        expect(() => ref1.close()).not.toThrowError();
+        expect(() => ref1.close()).not.toThrow();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
       it('resolves onClose on the previous ref', async () => {
@@ -80,7 +80,7 @@ describe('FlyoutService', () => {
         ref1.onClose.then(onCloseComplete);
         flyouts.open(mountText('Flyout content 2'));
         await ref1.onClose;
-        expect(onCloseComplete).toBeCalledTimes(1);
+        expect(onCloseComplete).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -127,8 +127,8 @@ describe('FlyoutService', () => {
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();
       await ref1.close();
-      expect(mockReactDomUnmount).toBeCalledTimes(0);
-      expect(onCloseComplete).toBeCalledTimes(0);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(0);
+      expect(onCloseComplete).toHaveBeenCalledTimes(0);
     });
   });
 });

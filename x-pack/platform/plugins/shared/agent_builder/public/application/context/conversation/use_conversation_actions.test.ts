@@ -59,6 +59,21 @@ const pendingPrompt: AskUserQuestionPrompt = {
   questions,
 };
 
+describe('createConversationActions.addOptimisticRound', () => {
+  it('creates optimistic rounds without storing render-only author attribution', async () => {
+    const { queryClient, actions } = buildActions();
+    const queryKey = queryKeys.conversations.byId(conversationId);
+
+    await actions.addOptimisticRound({
+      userMessage: 'hello',
+      agentId: 'agent-1',
+    });
+
+    const conversation = queryClient.getQueryData<Conversation>(queryKey);
+    expect(conversation?.rounds.at(-1)?.author).toBeUndefined();
+  });
+});
+
 describe('createConversationActions.setAskUserQuestionAnswers', () => {
   it('back-fills answers onto an existing AskUserQuestionStep (update-existing)', () => {
     const { queryClient, actions } = buildActions();

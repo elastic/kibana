@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
+import { slackRelay } from './relay';
 import {
   SlackCreateConversationInputSchema,
   SlackGetConversationHistoryInputSchema,
@@ -258,6 +259,15 @@ export const Slack: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'relay',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.relay.label', {
+            defaultMessage: 'Elastic Slack app (Bot Token)',
+          }),
+        },
+      },
     ],
   },
 
@@ -268,10 +278,13 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/assistant.search.context
     searchMessages: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Slack messages by keyword. Returns matching messages with channel, sender, timestamp, and permalink. Use the dedicated fromUser, inChannel, after, and before parameters for filtering — do not embed Slack search operators in the query string.',
       input: SlackSearchMessagesInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'searchMessages');
+
         if (ctx.secrets?.authType === 'bearer') {
           throw new Error(
             i18n.translate('core.kibanaConnectorSpecs.slack.searchMessages.botTokenError', {
@@ -365,10 +378,16 @@ export const Slack: ConnectorSpec = {
 
     listChannels: {
       isTool: true,
+      scope: 'read',
       description:
         'List Slack channels/conversations the token can see (one page per call). Use this to answer which channels exist or to browse IDs before sendMessage. Pass nextCursor from the previous response to fetch the next page. Prefer this over many resolveChannelId calls for discovery.',
       input: SlackListChannelsInputSchema,
       handler: async (ctx, input: SlackListChannelsInput) => {
+        const relayConnection = slackRelay.getConnection(ctx);
+        if (relayConnection) {
+          return slackRelay.actions.listChannels(relayConnection, ctx, input);
+        }
+
         const params: SlackConversationsListParams = {
           types: input.types.join(','),
           exclude_archived: input.excludeArchived,
@@ -422,10 +441,16 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.list
     resolveChannelId: {
       isTool: true,
+      scope: 'read',
       description:
         'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use before sendMessage when you already know the target name but need its ID. To list or explore channels, use listChannels instead of many resolveChannelId calls.',
       input: SlackResolveChannelIdInputSchema,
       handler: async (ctx, input: SlackResolveChannelIdInput) => {
+        const relayConnection = slackRelay.getConnection(ctx);
+        if (relayConnection) {
+          return slackRelay.actions.resolveChannelId(relayConnection, ctx, input);
+        }
+
         const nameNorm = input.name.trim().replace(/^#/, '').toLowerCase();
 
         let cursor = input.cursor;
@@ -500,10 +525,13 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.history
     getConversationHistory: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch a page of recent messages from a Slack channel or DM. Returns messages newest-first. Pass nextCursor from the response to fetch older pages.',
       input: SlackGetConversationHistoryInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'getConversationHistory');
+
         const typedInput: SlackGetConversationHistoryInput =
           SlackGetConversationHistoryInputSchema.parse(input);
 
@@ -576,10 +604,13 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.info
     getConversationInfo: {
       isTool: true,
+      scope: 'read',
       description:
         'Look up metadata for a single Slack channel or DM by ID. Returns the channel object (name, privacy, membership, topic, purpose).',
       input: SlackGetConversationInfoInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'getConversationInfo');
+
         const typedInput: SlackGetConversationInfoInput =
           SlackGetConversationInfoInputSchema.parse(input);
 
@@ -617,10 +648,13 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.lookupByEmail
     lookupUserByEmail: {
       isTool: true,
+      scope: 'read',
       description:
         'Find a Slack user by email address. Returns the matching user object including id, name, and profile. Throws if no user has that email.',
       input: SlackLookupUserByEmailInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'lookupUserByEmail');
+
         const typedInput: SlackLookupUserByEmailInput =
           SlackLookupUserByEmailInputSchema.parse(input);
 
@@ -651,10 +685,13 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.list
     listUsers: {
       isTool: true,
+      scope: 'read',
       description:
         'List Slack workspace users (one page per call). Pass nextCursor from the previous response to fetch the next page.',
       input: SlackListUsersInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'listUsers');
+
         const typedInput: SlackListUsersInput = SlackListUsersInputSchema.parse(input);
 
         const params: Record<string, string | number | boolean> = {
@@ -728,10 +765,13 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.conversations
     listUserConversations: {
       isTool: true,
+      scope: 'read',
       description:
         'List the channels/conversations a Slack user is a member of (one page per call). Omit user to list for the authenticated user. Pass nextCursor to fetch the next page.',
       input: SlackListUserConversationsInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'listUserConversations');
+
         const typedInput: SlackListUserConversationsInput =
           SlackListUserConversationsInputSchema.parse(input);
 
@@ -787,10 +827,13 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/auth.test
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Return the identity the Slack connector is authenticated as. Useful before sendMessage to confirm the workspace, or to resolve "me" to a user ID for other actions.',
       input: SlackWhoAmIInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'whoAmI');
+
         const typedInput: SlackWhoAmIInput = SlackWhoAmIInputSchema.parse(input);
 
         const response = await slackRequestWithRateLimitRetry<SlackAuthTestResponse>({
@@ -831,10 +874,13 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/files.info
     getFileInfo: {
       isTool: true,
+      scope: 'read',
       description:
         'Look up a single Slack file by ID. Returns the file metadata (name, mimetype, size, urls, sharing channels).',
       input: SlackGetFileInfoInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'getFileInfo');
+
         const typedInput: SlackGetFileInfoInput = SlackGetFileInfoInputSchema.parse(input);
 
         const response = await slackRequestWithRateLimitRetry<SlackFilesInfoResponse>({
@@ -865,10 +911,13 @@ export const Slack: ConnectorSpec = {
     // Classic-paginated: uses `page`/`pages`, not cursor-based pagination.
     listFiles: {
       isTool: true,
+      scope: 'read',
       description:
         'List Slack files (one page per call). Filter by channel, user, time range, or types. Pass nextPage from the previous response to fetch the next page.',
       input: SlackListFilesInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'listFiles');
+
         const typedInput: SlackListFilesInput = SlackListFilesInputSchema.parse(input);
 
         const params: Record<string, string | number | boolean> = {
@@ -944,6 +993,8 @@ export const Slack: ConnectorSpec = {
         'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
       input: SlackCreateConversationInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'createConversation');
+
         const typedInput: SlackCreateConversationInput =
           SlackCreateConversationInputSchema.parse(input);
 
@@ -996,6 +1047,8 @@ export const Slack: ConnectorSpec = {
       description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'inviteToConversation');
+
         const typedInput: SlackInviteToConversationInput =
           SlackInviteToConversationInputSchema.parse(input);
 
@@ -1044,11 +1097,17 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/chat.postMessage
     sendMessage: {
       isTool: true,
+      scope: 'write',
       description:
         'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
       input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
+
+        const relayConnection = slackRelay.getConnection(ctx);
+        if (relayConnection) {
+          return slackRelay.actions.sendMessage(relayConnection, ctx, typedInput);
+        }
 
         const payload: Record<string, unknown> = {
           channel: typedInput.channel,
@@ -1109,6 +1168,12 @@ export const Slack: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Slack test handler');
+
+      const relayConnection = slackRelay.getConnection(ctx);
+      if (relayConnection) {
+        return slackRelay.test(relayConnection, ctx);
+      }
+
       // Test connection by calling auth.test which validates the token
       const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
       if (!response.data.ok) {

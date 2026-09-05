@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTextTruncate } from '@elastic/eui';
+import { EuiCode, EuiTextColor } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { KillProcessActionOutputContent } from '../../../../../common/endpoint/types';
 
@@ -41,11 +41,13 @@ export interface ProcessResultProps {
   command: 'kill-process' | 'suspend-process';
   processResult: Required<KillProcessActionOutputContent>['descendants'][number] &
     Pick<KillProcessActionOutputContent, 'process_name'>;
+  /** If Entity ID should be shown. `true` by default.  */
+  showEntityId?: boolean;
   'data-test-subj'?: string;
 }
 
 export const ProcessResult = memo<ProcessResultProps>(
-  ({ command, processResult, 'data-test-subj': dataTestSubj }) => {
+  ({ command, processResult, showEntityId = true, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     const processData: React.ReactNode = useMemo(() => {
@@ -65,7 +67,7 @@ export const ProcessResult = memo<ProcessResultProps>(
         );
       }
 
-      if (processResult?.entity_id) {
+      if (processResult?.entity_id && showEntityId) {
         if (processResultData.length > 0) {
           processResultData.push(<DataSeparator key="entityId-sep" />);
         }
@@ -97,34 +99,6 @@ export const ProcessResult = memo<ProcessResultProps>(
         );
       }
 
-      if (processResult?.command) {
-        if (processResultData.length > 0) {
-          processResultData.push(<DataSeparator key="command-sep" />);
-        }
-
-        processResultData.push(
-          <span key="command" className="eui-displayInlineBlock">
-            <EuiFlexGroup responsive={false} gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <FormattedMessage
-                  id="xpack.securitySolution.management.killProcessActionResult.command"
-                  defaultMessage="Command"
-                />{' '}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiCode className="eui-displayBlock">
-                  <EuiTextTruncate
-                    truncation="middle"
-                    width={350}
-                    text={processResult?.command ?? ''}
-                  />
-                </EuiCode>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </span>
-        );
-      }
-
       if (processResultData.length > 0) {
         processResultData.push(<DataSeparator key="failureMsg-sep" />);
       }
@@ -147,12 +121,12 @@ export const ProcessResult = memo<ProcessResultProps>(
       return processResultData;
     }, [
       command,
-      processResult?.command,
       processResult?.entity_id,
       processResult.error,
       processResult?.pid,
       processResult?.process_name,
       processResult.was_killed,
+      showEntityId,
     ]);
 
     return <div data-test-subj={getTestId()}>{processData}</div>;

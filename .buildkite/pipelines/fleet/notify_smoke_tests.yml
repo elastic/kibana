@@ -1,0 +1,14 @@
+notify:
+  - slack: '#fleet-notifications'
+    if: build.state == "failed"
+
+steps:
+  - label: ':smoke: Check fleet-smoke-tests for consecutive failures'
+    command: ts-node .buildkite/scripts/pipelines/fleet_smoke_tests/notify_fleet_smoke_tests.ts
+    env:
+      DRY_RUN: ${DRY_RUN:-false}
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2

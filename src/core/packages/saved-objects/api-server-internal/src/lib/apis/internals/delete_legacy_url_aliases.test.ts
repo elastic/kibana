@@ -40,7 +40,7 @@ describe('deleteLegacyUrlAliases', () => {
     const namespaces = [ALL_NAMESPACES_STRING];
     const params = setup({ type, id, namespaces, deleteBehavior: 'inclusive' });
 
-    await expect(() => deleteLegacyUrlAliases(params)).rejects.toThrowError(
+    await expect(() => deleteLegacyUrlAliases(params)).rejects.toThrow(
       `Failed to delete legacy URL aliases for ${type}/${id}: "namespaces" cannot include the * string`
     );
     expect(params.client.updateByQuery).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe('deleteLegacyUrlAliases', () => {
     mockGetEsErrorMessage.mockClear();
     mockGetEsErrorMessage.mockReturnValue('Oh no!');
 
-    await expect(() => deleteLegacyUrlAliases(params)).rejects.toThrowError(
+    await expect(() => deleteLegacyUrlAliases(params)).rejects.toThrow(
       `Failed to delete legacy URL aliases for ${type}/${id}: Oh no!`
     );
     expect(params.client.updateByQuery).toHaveBeenCalledTimes(1);

@@ -14,6 +14,7 @@ import {
   ALERT_CLOSE_MENU_ITEM_TEST_SUBJ,
   ClosingReasonOption,
   closedAlertsToastText,
+  ELASTIC_INTERNAL_ORIGIN_HEADER,
 } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
@@ -81,7 +82,7 @@ spaceTest.describe(
         // The 'x-elastic-internal-origin' header is required in serverless where
         // server.restrictInternalApis=true blocks internal routes without it.
         const meResponse = await page.request.get(kbnUrl.get(CURRENT_USER_PROFILE_API_PATH), {
-          headers: { 'x-elastic-internal-origin': 'Kibana' },
+          headers: ELASTIC_INTERNAL_ORIGIN_HEADER,
         });
         const { username } = await meResponse.json();
 

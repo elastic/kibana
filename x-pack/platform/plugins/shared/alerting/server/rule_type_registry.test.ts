@@ -172,7 +172,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(
           `Rule type \"123\" has invalid timeout: string is not a valid duration: 23 milisec.`
         )
@@ -204,7 +204,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(
           `Rule type \"123\" has invalid default interval: string is not a valid duration: foobar.`
         )
@@ -316,7 +316,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(
           `Rule type [id="${ruleType.id}"] cannot be registered. Action groups [recovered] are reserved by the framework.`
         )
@@ -370,7 +370,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(
           `Rule type [id="${ruleType.id}"] cannot be registered. Action group definitions cannot contain duplicate severity levels.`
         )
@@ -517,7 +517,7 @@ describe('Create Lifecycle', () => {
             id: 'backToAwesome',
             name: 'Back To Awesome',
           },
-          priority: TaskPriority.NormalLongRunning,
+          priority: TaskPriority.Deferrable,
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
@@ -530,13 +530,13 @@ describe('Create Lifecycle', () => {
         };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
-      expect(registry.get('test').priority).toEqual(TaskPriority.NormalLongRunning);
+      expect(registry.get('test').priority).toEqual(TaskPriority.Deferrable);
 
       expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
       expect(taskManager.registerTaskDefinitions.mock.calls[0][0]).toMatchObject({
         'alerting:test': {
           title: 'Test',
-          priority: TaskPriority.NormalLongRunning,
+          priority: TaskPriority.Deferrable,
           taskTypeGroup: 'alerting',
         },
       });
@@ -558,7 +558,7 @@ describe('Create Lifecycle', () => {
             id: 'backToAwesome',
             name: 'Back To Awesome',
           },
-          priority: TaskPriority.Low as TaskPriority.Normal, // Have to cast to force this error case
+          priority: TaskPriority.Maintenance as TaskPriority.Standard, // Have to cast to force this error case
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
@@ -570,7 +570,7 @@ describe('Create Lifecycle', () => {
           },
         };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(`Rule type \"test\" has invalid priority: 1.`)
       );
     });
@@ -615,7 +615,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(
           `Rule type [id="${ruleType.id}"] cannot be registered. Action group [backToAwesome] cannot be used as both a recovery and an active action group.`
         )

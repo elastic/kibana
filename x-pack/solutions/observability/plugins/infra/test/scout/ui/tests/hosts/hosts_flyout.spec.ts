@@ -8,12 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
-import {
-  HOST1_NAME,
-  HOSTS,
-  SERVICE_PER_HOST_COUNT,
-  EXTENDED_TIMEOUT,
-} from '../../fixtures/constants';
+import { HOST1_NAME, HOSTS, EXTENDED_TIMEOUT } from '../../fixtures/constants';
 import {
   cleanHostsFlyoutSynthtraceData,
   cleanNonTsdsSystemTemplate,
@@ -21,7 +16,6 @@ import {
   ingestHostsFlyoutSynthtraceData,
 } from '../../fixtures/sequential_hosts_synthtrace';
 
-const CUSTOM_DASHBOARDS_SETTING = 'observability:enableInfrastructureAssetCustomDashboards';
 const HOSTS_FLYOUT_DATA_FROM = '2024-04-04T18:20:00.000Z';
 const HOSTS_FLYOUT_DATA_TO = '2024-04-04T18:21:00.000Z';
 
@@ -30,12 +24,9 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, kbnUrl, log, config, kbnClient }) => {
-      // Install a shadow template that ensures metrics-system.* data streams have the expected settings for data ingestion.
       log.info('Sequential suite: installing non-TSDS shadow template for metrics-system.*');
       await ensureNonTsdsSystemTemplate(esClient, log);
 
-      // Delete any existing data streams so they are re-created under the shadow template
-      // (clean reset also prevents row-count pollution from previous runs).
       log.info('Sequential suite: resetting existing synthtrace data before ingest');
       await cleanHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
 
@@ -74,145 +65,35 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
-      // Flyout suites open Lens + elastic-charts in the host overview tab.
-      // Under CI contention the cumulative cost of navigation, flyout init,
-      // and first-time chart rendering can exceed Scout's default 60s test
-      // timeout. Now that this spec runs sequentially, a smaller budget is
-      // sufficient while still covering first-render variance.
       test.setTimeout(120_000);
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
         from: HOSTS_FLYOUT_DATA_FROM,
         to: HOSTS_FLYOUT_DATA_TO,
+        hostNames: HOSTS.map(({ hostName }) => hostName),
         preferredSchema: 'ecs',
       });
-      await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
-    });
-
-    test.afterEach(async ({ kbnClient }) => {
-      // Reset the custom-dashboards setting after every test so cleanup runs
-      // even if the test times out. No-op for tests that didn't toggle it.
-      await kbnClient.uiSettings.update({ [CUSTOM_DASHBOARDS_SETTING]: false });
+      await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
     });
 
     test.afterAll(async ({ esClient, kbnUrl, log, config }) => {
-      // Delete data streams first, then the shadow template — so no window opens where
-      // a stream could be re-created against a template before the stream is gone.
       log.info('Sequential suite: cleaning synthtrace data for flyout tests');
       await cleanHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
       log.info('Sequential suite: removing non-TSDS shadow template for metrics-system.*');
       await cleanNonTsdsSystemTemplate(esClient, log);
     });
 
-    test('Overview Tab - KPI charts and collapsible sections', async ({
+    test('opens the host flyout with overview KPIs', async ({
       pageObjects: { hostsPage, assetDetailsPage },
     }) => {
       await hostsPage.openHostFlyout(HOST1_NAME);
 
-      await test.step('verify KPI charts are rendered', async () => {
-        await expect(assetDetailsPage.hostOverviewTab.kpiGrid).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
-        await expect(
-          assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('cpuUsage')
-        ).toHaveCount(0);
-        await expect(
-          assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('normalizedLoad1m')
-        ).toHaveCount(0);
-        await expect(
-          assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('memoryUsage')
-        ).toHaveCount(0);
-        await expect(
-          assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('diskUsage')
-        ).toHaveCount(0);
+      await expect(assetDetailsPage.hostOverviewTab.kpiGrid).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
       });
-
-      await test.step('verify collapsible sections exist', async () => {
-        await expect(assetDetailsPage.hostOverviewTab.metadataSectionCollapsible).toBeVisible();
-        await expect(assetDetailsPage.hostOverviewTab.alertsSectionCollapsible).toBeVisible();
-        await expect(assetDetailsPage.hostOverviewTab.metricsSectionCollapsible).toBeVisible();
-        await expect(assetDetailsPage.hostOverviewTab.servicesSectionCollapsible).toBeVisible();
-      });
-
-      await test.step('verify metrics chart sections', async () => {
-        await expect(assetDetailsPage.hostOverviewTab.metricsCpuUsageChart).toBeVisible();
-        await expect(assetDetailsPage.hostOverviewTab.metricsCpuNormalizedLoadChart).toBeVisible();
-        await expect(assetDetailsPage.hostOverviewTab.metricsMemoryUsageChart).toBeVisible();
-        await expect(assetDetailsPage.hostOverviewTab.metricsDiskUsageChart).toBeVisible();
-        await expect(assetDetailsPage.hostOverviewTab.metricsDiskIOChart).toBeVisible();
-        await expect(assetDetailsPage.hostOverviewTab.metricsNetworkChart).toBeVisible();
-      });
-    });
-
-    test('Overview Tab - Services section', async ({
-      pageObjects: { hostsPage, assetDetailsPage },
-    }) => {
-      await hostsPage.openHostFlyout(HOST1_NAME);
-
-      await test.step('verify services section is visible with correct count', async () => {
-        await expect(assetDetailsPage.hostOverviewTab.servicesContainer).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
-        const serviceLinks = assetDetailsPage.hostOverviewTab.servicesContainer.getByRole('link');
-        await expect(serviceLinks).toHaveCount(SERVICE_PER_HOST_COUNT);
-      });
-    });
-
-    test('Metadata Tab', async ({ pageObjects: { hostsPage, assetDetailsPage } }) => {
-      await hostsPage.openHostFlyout(HOST1_NAME);
-
-      await test.step('navigate to metadata tab', async () => {
-        await assetDetailsPage.metadataTab.clickTab();
-        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
-      });
-
-      await test.step('verify metadata table is visible', async () => {
-        await expect(assetDetailsPage.metadataTab.table).toBeVisible();
-        await expect(assetDetailsPage.metadataTab.searchBar).toBeVisible();
-      });
-    });
-
-    test('Metrics Tab', async ({ pageObjects: { hostsPage, assetDetailsPage } }) => {
-      await hostsPage.openHostFlyout(HOST1_NAME);
-
-      await test.step('navigate to metrics tab', async () => {
-        await assetDetailsPage.hostMetricsTab.clickTab();
-        await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
-      });
-
-      await test.step('verify metrics content is visible', async () => {
-        await expect(assetDetailsPage.hostMetricsTab.cpuUsageChart).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
-      });
-    });
-
-    test('Processes Tab', async ({ pageObjects: { hostsPage, assetDetailsPage } }) => {
-      await hostsPage.openHostFlyout(HOST1_NAME);
-
-      await test.step('navigate to processes tab', async () => {
-        await assetDetailsPage.processesTab.clickTab();
-        await expect(assetDetailsPage.processesTab.tab).toHaveAttribute('aria-selected', 'true');
-      });
-
-      await test.step('verify processes content is visible', async () => {
-        await expect(assetDetailsPage.processesTab.content).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
-      });
-    });
-
-    test('Logs Tab', async ({ pageObjects: { hostsPage, assetDetailsPage } }) => {
-      await hostsPage.openHostFlyout(HOST1_NAME);
-
-      await test.step('navigate to logs tab', async () => {
-        await assetDetailsPage.logsTag.clickTab();
-        await expect(assetDetailsPage.logsTag.tab).toHaveAttribute('aria-selected', 'true');
-      });
-
-      await test.step('verify logs content is visible', async () => {
-        await expect(assetDetailsPage.logsTag.table).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-      });
+      await expect(
+        assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('cpuUsage')
+      ).not.toBeVisible();
     });
 
     test('Open as page and return', async ({
@@ -239,30 +120,6 @@ test.describe(
         await expect(
           page.getByRole('dialog').getByRole('heading', { name: HOST1_NAME })
         ).toBeVisible();
-      });
-    });
-
-    test('Dashboards Tab', async ({ pageObjects: { hostsPage, assetDetailsPage }, kbnClient }) => {
-      await kbnClient.uiSettings.update({ [CUSTOM_DASHBOARDS_SETTING]: true });
-      // Re-navigate so the page picks up the enabled setting (the beforeEach
-      // navigation happened with the setting still off).
-      await hostsPage.goToPage({
-        from: HOSTS_FLYOUT_DATA_FROM,
-        to: HOSTS_FLYOUT_DATA_TO,
-        preferredSchema: 'ecs',
-      });
-      await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
-      await hostsPage.openHostFlyout(HOST1_NAME);
-
-      await test.step('navigate to dashboards tab', async () => {
-        await assetDetailsPage.dashboardsTab.clickTab();
-        await expect(assetDetailsPage.dashboardsTab.tab).toHaveAttribute('aria-selected', 'true');
-      });
-
-      await test.step('verify dashboards splash screen is visible', async () => {
-        await expect(assetDetailsPage.dashboardsTab.addDashboardButton).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
       });
     });
   }

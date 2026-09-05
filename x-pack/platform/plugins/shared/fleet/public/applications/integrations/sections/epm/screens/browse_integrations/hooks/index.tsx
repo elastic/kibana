@@ -46,7 +46,7 @@ export function useBrowseIntegrationHook({
     eprPackageLoadingError,
     eprCategoryLoadingError,
     allCards,
-  } = useAvailablePackages({ prereleaseIntegrationsEnabled });
+  } = useAvailablePackages({ prereleaseIntegrationsEnabled, enableCollectionGrouping: true });
 
   const urlFilters = useUrlFilters();
 

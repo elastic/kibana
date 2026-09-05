@@ -15,11 +15,5 @@ plugins). It gates app/deep-link visibility in global search and the page itself
 unavailable the app is hidden from navigation/global search and direct visits show
 `SignificantEventsNotEnabledPrompt`.
 
-## Start contract
-
-- `getKnowledgeIndicatorsPanel()`: factory returning a lazy embeddable panel for
-  Streams stream overview. Pass `{ streamName }`. Providers and the panel chunk stay
-  behind a dynamic import so they are not part of SEA page-load.
-
 Deep links go through the share plugin locator registered under
 `SIGNIFICANT_EVENTS_APP_LOCATOR_ID`.

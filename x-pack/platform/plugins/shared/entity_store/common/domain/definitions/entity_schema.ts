@@ -152,6 +152,23 @@ export const setFieldsByConditionSchema = z.object({
 });
 export type SetFieldsByCondition = z.infer<typeof setFieldsByConditionSchema>;
 
+// Definition-owned reasons stay separate so a rule can only report a reason it owns.
+export const creationRejectionReasonSchema = z.enum([
+  'user_not_local_namespace',
+  'host_missing_host_id',
+]);
+export type CreationRejectionReason = z.infer<typeof creationRejectionReasonSchema>;
+
+/** Conditional rules require both `requires` and `rejectionReason`; `{}` opts in unconditionally. */
+const creatableFromSingleDocumentSchema = z.union([
+  z.strictObject({
+    requires: streamlangConditionSchema,
+    rejectionReason: creationRejectionReasonSchema,
+  }),
+  z.strictObject({}),
+]);
+export type CreatableFromSingleDocument = z.infer<typeof creatableFromSingleDocumentSchema>;
+
 export const entitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -170,6 +187,8 @@ export const entitySchema = z.object({
   whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
   // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
   whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
+  // Omission disables single-document creation for the entity type.
+  creatableFromSingleDocument: z.optional(creatableFromSingleDocumentSchema),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields

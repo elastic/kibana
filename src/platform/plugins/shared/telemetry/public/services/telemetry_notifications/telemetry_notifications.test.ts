@@ -20,9 +20,9 @@ describe('setOptedInNoticeSeen', () => {
     telemetryNotifications['optInStatusNoticeBannerId'] = bannerId;
     await telemetryNotifications.setOptInStatusNoticeSeen();
 
-    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledTimes(1);
-    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledWith(bannerId);
-    expect(telemetryService.setUserHasSeenNotice).toBeCalledTimes(1);
+    expect(telemetryNotifications['overlays'].banners.remove).toHaveBeenCalledTimes(1);
+    expect(telemetryNotifications['overlays'].banners.remove).toHaveBeenCalledWith(bannerId);
+    expect(telemetryService.setUserHasSeenNotice).toHaveBeenCalledTimes(1);
   });
 });
 

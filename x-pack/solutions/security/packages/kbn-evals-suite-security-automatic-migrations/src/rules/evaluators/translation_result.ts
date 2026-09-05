@@ -15,6 +15,7 @@ export const createTranslationResultEvaluator = (): Evaluator<
 > => ({
   name: 'Translation Result',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({
     output,
     expected,

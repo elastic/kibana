@@ -9,18 +9,7 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
-import { ATTACHMENTS_TAB_ID, TIMELINE_TAB_ID } from '@kbn/agent-builder-browser';
-
-const AttachmentsPlaceholder: React.FC = () => (
-  <EuiText size="s" color="subdued">
-    <p>
-      {i18n.translate(
-        'xpack.agentBuilderPlatform.conversationTemplateTabs.attachmentsPlaceholder',
-        { defaultMessage: 'Attachments coming soon.' }
-      )}
-    </p>
-  </EuiText>
-);
+import { TIMELINE_TAB_ID } from '@kbn/agent-builder-browser';
 
 const TimelinePlaceholder: React.FC = () => (
   <EuiText size="s" color="subdued">
@@ -37,14 +26,6 @@ export const registerConversationTemplateTabs = ({
 }: {
   conversationTemplates: ConversationTemplateServiceStartContract;
 }): void => {
-  conversationTemplates.registerTab(ATTACHMENTS_TAB_ID, {
-    label: i18n.translate(
-      'xpack.agentBuilderPlatform.conversationTemplateTabs.attachmentsTabLabel',
-      { defaultMessage: 'Attachments' }
-    ),
-    content: AttachmentsPlaceholder,
-  });
-
   conversationTemplates.registerTab(TIMELINE_TAB_ID, {
     label: i18n.translate('xpack.agentBuilderPlatform.conversationTemplateTabs.timelineTabLabel', {
       defaultMessage: 'Timeline',

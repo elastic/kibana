@@ -19,6 +19,7 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
 > => ({
   name: WORKFLOW_EVIDENCE_EVALUATOR_NAME,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const expectedStages = expected?.expectedWorkflowStages ?? [];
     const stages = output.workflow.stages;

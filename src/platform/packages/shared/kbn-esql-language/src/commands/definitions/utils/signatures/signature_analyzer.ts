@@ -135,7 +135,12 @@ export function getAcceptedParamTypes(state: SignatureInput): FunctionParameterT
     return ['any'];
   }
 
-  if (isHomogeneous && state.firstArgumentType && state.firstArgumentType !== 'unknown') {
+  if (
+    isHomogeneous &&
+    state.firstArgumentType &&
+    state.firstArgumentType !== 'unknown' &&
+    state.firstArgumentType !== 'param'
+  ) {
     return textualOrSingle(state.firstArgumentType);
   }
 

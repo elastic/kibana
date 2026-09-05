@@ -192,5 +192,74 @@ spaceTest.describe(
         });
       }
     );
+
+    spaceTest('reflects a non-default grid setting in the URL', async ({ pageObjects, page }) => {
+      const { metricsExperience } = pageObjects;
+      const { gridSettings } = metricsExperience;
+
+      await spaceTest.step('a fresh session carries no grid setting in the URL', async () => {
+        expect(metricsExperience.getProfileState(page.url())).not.toContain('counterAggregation');
+      });
+
+      await spaceTest.step('applying a counter aggregation writes it to the URL', async () => {
+        await gridSettings.selectCounterAggregation('max');
+        await gridSettings.apply();
+        // The URL is written through `kbnUrlControls`, which batches asynchronously and so is
+        // not settled by the time the flyout has closed.
+        await expect
+          .poll(() => metricsExperience.getProfileState(page.url()))
+          .toContain('counterAggregation:max');
+      });
+
+      await spaceTest.step('restoring the default aggregation strips it from the URL', async () => {
+        await gridSettings.selectCounterAggregation('sum');
+        await gridSettings.apply();
+        await expect
+          .poll(() => metricsExperience.getProfileState(page.url()))
+          .not.toContain('counterAggregation');
+      });
+    });
+
+    spaceTest('applies a grid setting supplied by the URL', async ({ pageObjects, page }) => {
+      const { metricsExperience } = pageObjects;
+      const { gridSettings } = metricsExperience;
+
+      await gridSettings.selectCounterAggregation('max');
+      await gridSettings.apply();
+      await expect
+        .poll(() => metricsExperience.getProfileState(page.url()))
+        .toContain('counterAggregation:max');
+      // Wait for 'max' to land in local storage before capturing the URL and then resetting,
+      // so the subsequent cleared-storage check is meaningful.
+      await expect
+        .poll(() => metricsExperience.getPersistedMetricsStateField('counterAggregation'))
+        .toBe('max');
+      const maxUrl = page.url();
+
+      await spaceTest.step('return the locally persisted setting to the default', async () => {
+        // Locally persisted state must disagree with the URL, otherwise a passing assertion
+        // below could be explained by local tab storage rather than by the URL.
+        await gridSettings.selectCounterAggregation('sum');
+        await gridSettings.apply();
+        await expect
+          .poll(() => metricsExperience.getProfileState(page.url()))
+          .not.toContain('counterAggregation');
+        // The default 'sum' is stripped from storage rather than written, so we cannot poll for
+        // its presence. Instead poll until counterAggregation is absent, confirming the throttled
+        // tab-state write has settled before we navigate to the captured URL.
+        await expect
+          .poll(() => metricsExperience.getPersistedMetricsStateField('counterAggregation'))
+          .toBeUndefined();
+      });
+
+      await spaceTest.step('opening the captured URL applies its grid setting', async () => {
+        await page.goto(maxUrl);
+        // See the reload test above for why a cold Discover re-init needs the longer timeout.
+        await expect(metricsExperience.grid).toBeVisible({ timeout: 30_000 });
+
+        await gridSettings.open();
+        await expect(gridSettings.counterSelect).toContainText('Maximum');
+      });
+    });
   }
 );

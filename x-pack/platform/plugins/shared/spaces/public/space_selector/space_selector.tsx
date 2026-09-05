@@ -15,7 +15,6 @@ import {
   EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -29,16 +28,16 @@ import type { Observable } from 'rxjs';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider, useQuery } from '@kbn/react-query';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { SpaceCards, SpaceTable } from './components';
+import { BackgroundPortal, SpaceCards, SpaceTable } from './components';
+import { InitialSolutionSetupPage } from './components/initial_solution_setup_page';
 import * as styles from './space_selector.styles';
-import type { Space } from '../../common';
+import type { GetInitialSolutionSetupResponse, Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -50,6 +49,7 @@ export interface SpaceSelectorProps {
   spacesManager: SpacesManager;
   serverBasePath: string;
   customBranding$: Observable<CustomBranding>;
+  initialSolutionSetupEnabled?: boolean;
 }
 
 const ViewToggle = ({
@@ -101,6 +101,7 @@ export const SpaceSelector = ({
   spacesManager,
   serverBasePath,
   customBranding$,
+  initialSolutionSetupEnabled = false,
 }: SpaceSelectorProps) => {
   const [currentViewMode, setCurrentViewMode] = useState<ViewMode>('grid');
   const [customLogo, setCustomLogo] = useState<string | undefined>(undefined);
@@ -109,14 +110,37 @@ export const SpaceSelector = ({
   const { euiTheme } = useEuiTheme();
 
   const {
+    data: initialSolutionSetup,
+    isLoading: isInitialSolutionSetupLoading,
+    error: initialSolutionSetupError,
+  } = useQuery<GetInitialSolutionSetupResponse, Error>({
+    queryKey: ['initial_solution_setup'],
+    queryFn: () => spacesManager.getInitialSolutionSetup(),
+    enabled: initialSolutionSetupEnabled,
+    // Fail open immediately; retries would leave non-managers on a spinner for seconds.
+    retry: false,
+  });
+
+  const isSetupRequired =
+    initialSolutionSetupEnabled &&
+    !initialSolutionSetupError &&
+    initialSolutionSetup?.required === true;
+  const canLoadSpaces =
+    !initialSolutionSetupEnabled ||
+    Boolean(initialSolutionSetupError) ||
+    initialSolutionSetup?.required === false;
+
+  const {
     data: spaces,
-    isLoading,
-    error,
+    isLoading: areSpacesLoading,
+    error: spacesError,
   } = useQuery<Space[], Error>({
     queryKey: ['spaces_list'],
     queryFn: () => spacesManager.getSpaces(),
-    enabled: !searchTerm,
+    enabled: canLoadSpaces && !searchTerm,
   });
+  const isLoading = areSpacesLoading;
+  const error = spacesError;
 
   useEffect(() => {
     setCurrentViewMode((spaces?.length ?? 0) > VIEW_MODE_THRESHOLD ? 'table' : 'grid');
@@ -200,6 +224,29 @@ export const SpaceSelector = ({
     },
     [headerRef]
   );
+
+  if (initialSolutionSetupEnabled && isInitialSolutionSetupLoading) {
+    return (
+      <KibanaPageTemplate css={styles.pageTemplateStyles} data-test-subj="kibanaSpaceSelector">
+        <BackgroundPortal />
+        <KibanaPageTemplate.Section color="transparent" paddingSize="xl">
+          <div css={styles.spacesLoadingSpinnerStyles} data-test-subj="spacesLoadingSpinner">
+            <EuiLoadingSpinner size="xl" />
+          </div>
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    );
+  }
+
+  if (isSetupRequired) {
+    return (
+      <InitialSolutionSetupPage
+        spacesManager={spacesManager}
+        serverBasePath={serverBasePath}
+        customLogo={customLogo}
+      />
+    );
+  }
 
   return (
     <KibanaPageTemplate css={styles.pageTemplateStyles} data-test-subj="kibanaSpaceSelector">
@@ -321,17 +368,3 @@ export const renderSpaceSelectorApp = (
   );
   return () => ReactDOM.unmountComponentAtNode(element);
 };
-
-// portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners
-const BackgroundPortal = React.memo(function BackgroundPortal() {
-  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
-  return (
-    <EuiPortal>
-      <div
-        className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-        css={kbnFullScreenBgCss}
-        role="presentation"
-      />
-    </EuiPortal>
-  );
-});

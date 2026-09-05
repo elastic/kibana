@@ -172,7 +172,7 @@ describe('XmattersActionConnectorFields renders', () => {
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.xmatters',
             name: 'xmatters',
@@ -209,7 +209,7 @@ describe('XmattersActionConnectorFields renders', () => {
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.xmatters',
             name: 'xmatters',

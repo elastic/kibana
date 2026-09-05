@@ -1,5 +1,5 @@
 {
-  "sha1": "14e4f0674120bf0afe8b34ce0f9c1ba923716d1b",
+  "sha1": "1388d4181e509e894a7836aaaa163ca4f632c94b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -355,6 +355,42 @@
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
         "line": 99,
         "column": 30
+      }
+    },
+    {
+      "id": "8556b3250071fcb-fbcaedd1b77b0da",
+      "title": "Metrics in Discover - Grid Settings reflects a non-default grid setting in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 157,
+        "column": 17
+      }
+    },
+    {
+      "id": "8556b3250071fcb-f6d4c458c4c09ba",
+      "title": "Metrics in Discover - Grid Settings applies a grid setting supplied by the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 183,
+        "column": 11
       }
     },
     {
@@ -835,7 +871,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 66
       }
     },
@@ -943,7 +979,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
-        "line": 108,
+        "line": 110,
         "column": 9
       }
     },

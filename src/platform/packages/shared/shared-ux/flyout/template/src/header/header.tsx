@@ -9,20 +9,37 @@
 
 import type { EuiFlyoutProps, UseEuiTheme } from '@elastic/eui';
 import {
+  EuiBadge,
+  EuiBadgeGroup,
   EuiFlyoutHeader,
+  EuiPopover,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTitle,
   useEuiMemoizedStyles,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
+import { InfoBlocks } from '@kbn/flyout-info-blocks';
+import { MetaBlocks } from '@kbn/flyout-meta-blocks';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { flyoutAssembly } from '../assembly';
-import { resolveZoneTestSubj, useFlyoutHeaderCollapse, useFlyoutTemplateConfig } from '../context';
+import { flyoutAssembly, headerAssembly, partsOf } from '../assembly';
+import {
+  resolveZoneTestSubj,
+  useFlyoutHeaderCollapse,
+  useFlyoutTabs,
+  useFlyoutTemplateConfig,
+} from '../context';
 import { renderTitleIcon, renderTitleWithIcon } from '../title_adornments';
 import type { FlyoutHeaderProps } from '../types';
+import { Badge, badgePart, BADGE_PART_NAME, type HeaderBadgeDescriptor } from './badge';
+import { InfoBlock, infoBlockPart, INFO_BLOCK_PART_NAME } from './info_block';
+import { MetaBlock as MetaBlockPart, metaBlockPart, META_BLOCK_PART_NAME } from './meta_block';
 
 /** Part name used for identifying the `Header` zone. */
 export const HEADER_PART_NAME = 'header';
@@ -33,7 +50,11 @@ const headerPart = flyoutAssembly.definePart({ name: HEADER_PART_NAME });
 const BaseHeader = headerPart.createComponent<FlyoutHeaderProps>();
 BaseHeader.displayName = 'FlyoutTemplate.Header';
 
-export const Header = BaseHeader;
+export const Header = Object.assign(BaseHeader, {
+  Badge,
+  InfoBlock,
+  MetaBlock: MetaBlockPart,
+});
 
 /** Maps `paddingSize` to the header's horizontal padding; `undefined` follows EuiFlyout's `'l'` default. */
 const resolveHorizontalPadding = (
@@ -116,6 +137,73 @@ const FullBleedDivider = ({ horizontalPadding }: { horizontalPadding: string }) 
   );
 };
 
+/** Badge counts above `MAX_VISIBLE_BADGES` collapse to `MAX_BADGES_BEFORE_OVERFLOW` plus an overflow badge. */
+const MAX_VISIBLE_BADGES = 5;
+const MAX_BADGES_BEFORE_OVERFLOW = MAX_VISIBLE_BADGES - 1;
+const MAX_BADGE_WIDTH = 200;
+
+/** Caps badge width so long labels ellipsize; `euiBadge__text` supplies the truncation. */
+const badgeGroupStyles = () => ({
+  group: css`
+    .euiBadge {
+      max-inline-size: ${MAX_BADGE_WIDTH}px;
+    }
+  `,
+});
+
+/** Overflow badge that reveals the collapsed badges in a popover. */
+const BadgeOverflow = ({ badges }: { badges: ReactNode[] }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const label = i18n.translate('sharedUXPackages.flyoutTemplate.header.badgeOverflowLabel', {
+    defaultMessage: '+{count} more',
+    values: { count: badges.length },
+  });
+  const ariaLabel = i18n.translate(
+    'sharedUXPackages.flyoutTemplate.header.badgeOverflowAriaLabel',
+    {
+      defaultMessage: 'Show {count} more badges',
+      values: { count: badges.length },
+    }
+  );
+
+  return (
+    <EuiPopover
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="downCenter"
+      panelPaddingSize="s"
+      button={
+        <EuiBadge
+          color="hollow"
+          onClick={() => setIsOpen((open) => !open)}
+          onClickAriaLabel={ariaLabel}
+          data-test-subj="flyoutHeaderBadgeOverflow"
+        >
+          {label}
+        </EuiBadge>
+      }
+      aria-label={ariaLabel}
+    >
+      <EuiBadgeGroup gutterSize="s" css={{ maxInlineSize: 240 }}>
+        {badges}
+      </EuiBadgeGroup>
+    </EuiPopover>
+  );
+};
+
+/** Renders a resolved `Header.Badge` descriptor. */
+const renderBadge = (badge: HeaderBadgeDescriptor, key: string): ReactNode => (
+  <EuiBadge
+    key={key}
+    color={badge.color}
+    iconType={badge.iconType}
+    iconSide={badge.iconSide}
+    data-test-subj={badge['data-test-subj']}
+  >
+    {badge.label}
+  </EuiBadge>
+);
+
 type HeaderZoneProps = FlyoutHeaderProps & {
   flyoutTitleId?: string;
 };
@@ -127,12 +215,16 @@ export const HeaderZone = ({
   titleTooltip,
   description,
   collapsed = false,
+  children,
   flyoutTitleId,
   'data-test-subj': dataTestSubj,
 }: HeaderZoneProps) => {
   const { euiTheme } = useEuiTheme();
+  const badgeStyles = useEuiMemoizedStyles(badgeGroupStyles);
   const collapseStyles = useEuiMemoizedStyles(collapsibleRegionStyles);
   const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
+  const { tabs, selectedTabId, selectTab } = useFlyoutTabs();
+  const items = useMemo(() => headerAssembly.parseChildren(children), [children]);
   const {
     isCollapsed: isScrollCollapsed,
     collapsibleRef,
@@ -143,7 +235,44 @@ export const HeaderZone = ({
   const isCollapsed = collapsed || isScrollCollapsed;
   const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
 
+  // Every block kind carries its `instanceId` forward as its React key, so reordering or
+  // removing one does not make React reuse the wrong element.
+  const metaBlockItems = useMemo(
+    () =>
+      partsOf(items, META_BLOCK_PART_NAME).flatMap((item) => {
+        const block = metaBlockPart.resolve(item, undefined);
+        return block ? [{ ...block, id: item.instanceId }] : [];
+      }),
+    [items]
+  );
+
+  const infoBlockItems = useMemo(
+    () =>
+      partsOf(items, INFO_BLOCK_PART_NAME).flatMap((item) => {
+        const block = infoBlockPart.resolve(item, undefined);
+        return block ? [{ ...block, id: item.instanceId }] : [];
+      }),
+    [items]
+  );
+
+  const badgeList = useMemo(
+    () =>
+      partsOf(items, BADGE_PART_NAME).flatMap((item) => {
+        const badge = badgePart.resolve(item, undefined);
+        return badge ? [renderBadge(badge, item.instanceId)] : [];
+      }),
+    [items]
+  );
+
   const hasDescription = Boolean(description);
+  const hasMetaBlocks = metaBlockItems.length > 0;
+  const hasBadges = badgeList.length > 0;
+  const hasInfoBlocks = infoBlockItems.length > 0;
+  const showTabs = tabs.length > 0;
+
+  const isOverflowing = badgeList.length > MAX_VISIBLE_BADGES;
+  const visibleBadges = isOverflowing ? badgeList.slice(0, MAX_BADGES_BEFORE_OVERFLOW) : badgeList;
+  const overflowBadges = isOverflowing ? badgeList.slice(MAX_BADGES_BEFORE_OVERFLOW) : [];
 
   return (
     <KibanaErrorBoundaryProvider>
@@ -178,7 +307,7 @@ export const HeaderZone = ({
               )}
             </div>
 
-            {/* Collapsible region: currently the description; later header parts land here too. */}
+            {/* Collapsible region: description, meta blocks, badges, info blocks. */}
             <div
               css={[
                 collapseStyles.wrapper,
@@ -197,13 +326,55 @@ export const HeaderZone = ({
                     </EuiText>
                   </>
                 )}
+                {hasMetaBlocks && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <MetaBlocks items={metaBlockItems} />
+                  </>
+                )}
+                {hasBadges && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiBadgeGroup gutterSize="s" css={badgeStyles.group}>
+                      {visibleBadges}
+                      {overflowBadges.length > 0 && <BadgeOverflow badges={overflowBadges} />}
+                    </EuiBadgeGroup>
+                  </>
+                )}
+                {hasInfoBlocks && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <InfoBlocks items={infoBlockItems} maxColumns="auto" />
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Always visible: spacing before the divider, which tightens when collapsed. */}
+            {/* Spacing before tabs/divider adapts to collapsed state. */}
             <div ref={!isCollapsed ? expandedSpacerRef : undefined}>
-              <EuiSpacer size={isCollapsed ? 'xs' : 'm'} />
+              <EuiSpacer size={isCollapsed ? 'xs' : showTabs ? 's' : 'm'} />
             </div>
+
+            {/* Always visible: tab bar. */}
+            {showTabs && (
+              <EuiTabs bottomBorder={false} size="m">
+                {tabs.map((tab) => (
+                  <EuiTab
+                    key={tab.id}
+                    id={tab.tabDomId}
+                    aria-controls={tab.panelDomId}
+                    isSelected={tab.id === selectedTabId}
+                    onClick={() => selectTab(tab.id)}
+                    disabled={tab.disabled}
+                    prepend={tab.prepend}
+                    append={tab.append}
+                    data-test-subj={tab['data-test-subj']}
+                  >
+                    {tab.label}
+                  </EuiTab>
+                ))}
+              </EuiTabs>
+            )}
 
             <FullBleedDivider horizontalPadding={horizontalPadding} />
           </div>

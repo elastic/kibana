@@ -28,6 +28,7 @@ describe('GET /internal/evals/evaluators', () => {
         kind: 'llm',
         origin: 'built_in',
         description: 'Groundedness evaluator',
+        direction: 'maximize',
         evidenceSchema: z.object({
           input: z.object({ message: z.string().min(1) }),
           response: z.object({ message: z.string().min(1) }),
@@ -41,6 +42,7 @@ describe('GET /internal/evals/evaluators', () => {
         kind: 'code',
         origin: 'built_in',
         description: 'Latency evaluator',
+        direction: 'minimize',
         evaluate: jest.fn(),
       },
       {
@@ -49,6 +51,7 @@ describe('GET /internal/evals/evaluators', () => {
         kind: 'code',
         origin: 'built_in',
         description: 'Input tokens evaluator',
+        direction: 'minimize',
         evaluate: jest.fn(),
       },
       {
@@ -57,6 +60,7 @@ describe('GET /internal/evals/evaluators', () => {
         kind: 'code',
         origin: 'built_in',
         description: 'Output tokens evaluator',
+        direction: 'minimize',
         evaluate: jest.fn(),
       },
       {
@@ -65,6 +69,7 @@ describe('GET /internal/evals/evaluators', () => {
         kind: 'code',
         origin: 'built_in',
         description: 'Tool calls evaluator',
+        direction: 'neutral',
         evaluate: jest.fn(),
       },
       {
@@ -73,6 +78,7 @@ describe('GET /internal/evals/evaluators', () => {
         kind: 'llm',
         origin: 'built_in',
         description: 'Correctness evaluator',
+        direction: 'maximize',
         referenceDataSchema: z.object({
           expected: z
             .string()
@@ -88,6 +94,7 @@ describe('GET /internal/evals/evaluators', () => {
         kind: 'llm',
         origin: 'user_defined',
         description: 'Tone evaluator',
+        direction: 'maximize',
         evaluate: jest.fn(),
       },
     ]);
@@ -155,7 +162,7 @@ describe('GET /internal/evals/evaluators', () => {
     const correctnessEval = response.payload.evaluators.find(
       (e: { name: string }) => e.name === 'correctness'
     );
-    expect(correctnessEval).toEqual({
+    expect(correctnessEval).toMatchObject({
       name: 'correctness',
       version: '1.0.0',
       kind: 'llm',
