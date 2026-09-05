@@ -74,6 +74,7 @@ export const updateActionTagsRoute = (
       },
       async (_, request, response) => {
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           const tags = [...new Set(request.body.tags)];
 
           if (tags.length > MAX_TAGS_PER_ACTION) {
@@ -94,11 +95,7 @@ export const updateActionTagsRoute = (
           const [coreStartServices] = await osqueryContext.getStartServices();
           const clusterClient = coreStartServices.elasticsearch.client;
           const internalEsClient = clusterClient.asInternalUser;
-          const dataReadEsClient = getReadEsClient(
-            clusterClient,
-            request,
-            osqueryContext.cpsEnabled
-          );
+          const dataReadEsClient = getReadEsClient(clusterClient, request, cpsActive);
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -112,7 +109,7 @@ export const updateActionTagsRoute = (
 
           const spaceFilter = buildSpaceIdFilter(spaceId);
           const scheduledSpaceFilter = buildSpaceIdFilter(spaceId, {
-            matchMissingSpaceId: !osqueryContext.cpsEnabled,
+            matchMissingSpaceId: !cpsActive,
           });
 
           const searchResult = await internalEsClient.search({

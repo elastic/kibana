@@ -56,21 +56,41 @@ export const createMockMonacoModel = (value: string): monaco.editor.ITextModel =
  * Creates a mock Monaco editor instance with a model and decorations collection.
  * Returns the editor, model, and decorations collection for easy assertion access.
  * The editor cast is centralized here — same rationale as `createMockMonacoModel`.
+ *
+ * All disposable listeners (`onDid*`) return a Jest mock `dispose` so tests can
+ * assert attachment without the real Monaco event infrastructure. `getVisibleRanges`
+ * defaults to returning a single full-document range; pass a custom implementation to
+ * simulate scroll state in minimap tests.
  */
-export const createMockMonacoEditor = (value: string) => {
+export const createMockMonacoEditor = (
+  value: string,
+  overrides?: Partial<monaco.editor.IStandaloneCodeEditor>
+) => {
   const model = createMockMonacoModel(value);
   const decorationsCollection = {
     clear: jest.fn(),
     set: jest.fn(),
   };
+  const lineCount = value.split('\n').length;
+  const editor: monaco.editor.IStandaloneCodeEditor = {
+    createDecorationsCollection: jest.fn(() => decorationsCollection),
+    getModel: jest.fn(() => model),
+    onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidChangeModelContent: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidScrollChange: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidLayoutChange: jest.fn(() => ({ dispose: jest.fn() })),
+    getPosition: jest.fn(() => ({ lineNumber: 1, column: 1 })),
+    getVisibleRanges: jest.fn(() => [{ startLineNumber: 1, endLineNumber: lineCount }]),
+    revealLineInCenter: jest.fn(),
+    setPosition: jest.fn(),
+    focus: jest.fn(),
+    dispose: jest.fn(),
+    getTopForLineNumber: jest.fn(() => 0),
+    getScrollTop: jest.fn(() => 0),
+    ...overrides,
+  } as unknown as monaco.editor.IStandaloneCodeEditor;
   return {
-    editor: {
-      createDecorationsCollection: jest.fn(() => decorationsCollection),
-      getModel: jest.fn(() => model),
-      onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
-      onDidChangeModelContent: jest.fn(() => ({ dispose: jest.fn() })),
-      getPosition: jest.fn(() => ({ lineNumber: 1, column: 1 })),
-    } as unknown as monaco.editor.IStandaloneCodeEditor,
+    editor,
     decorationsCollection,
     model,
   };
