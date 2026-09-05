@@ -101,17 +101,17 @@ export const CONDITION_OPERATOR_OPTIONS = [
 
 export const THRESHOLD_STEP_TITLE = i18n.translate(
   'xpack.alertingV2.ruleBuilder.threshold.stepTitle',
-  { defaultMessage: 'Condition' }
-);
-
-export const THRESHOLD_CREATE_FLYOUT_TITLE = i18n.translate(
-  'xpack.alertingV2.ruleBuilder.threshold.createFlyoutTitle',
-  { defaultMessage: 'Create Threshold rule' }
+  { defaultMessage: 'Alert Condition' }
 );
 
 export const THRESHOLD_CREATE_OPTION_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleTitle',
   { defaultMessage: 'Threshold rule' }
+);
+
+export const THRESHOLD_CREATE_FLYOUT_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleFlyoutTitle',
+  { defaultMessage: 'Create Threshold rule' }
 );
 
 export const THRESHOLD_CREATE_OPTION_DESCRIPTION = i18n.translate(

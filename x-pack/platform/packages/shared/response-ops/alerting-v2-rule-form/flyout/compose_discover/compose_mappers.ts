@@ -18,7 +18,6 @@ import {
 } from '../../form/utils/state_transition_helpers';
 import { resolveRecoveryStrategy } from '../../form/utils/rule_request_mappers';
 import type { FormValues } from '../../form/types';
-
 const DELAY_IMMEDIATE = 'immediate';
 const DELAY_BREACHES = 'breaches';
 const DELAY_DURATION = 'duration';
@@ -73,8 +72,9 @@ export const composeFormToCreateRequest = (
       description: formValues.metadata.description,
       owner: formValues.metadata.owner,
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
-      ...(builderType ? { builder_type: builderType } : {}),
-      ...(builderFields ? { builder_fields: builderFields } : {}),
+      ...(builderType && builderFields
+        ? { builder_type: builderType, builder_fields: builderFields }
+        : {}),
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
@@ -102,25 +102,20 @@ export const composeFormToUpdateRequest = (
     metadata,
     recovery_strategy,
     no_data_strategy,
+    query,
     ...rest
   } = request;
   return {
     ...rest,
     metadata: {
       ...metadata,
-      builder_type: metadata.builder_type ?? null,
-      // Only clear builder_fields when leaving builder mode. When a builder
-      // has no toFields yet (no builder_fields support), omit the key so the
-      // server preserves whatever is already stored.
-      ...(builderFields != null
-        ? { builder_fields: builderFields }
-        : !builderType
-        ? { builder_fields: null }
-        : {}),
+      builder_type: builderType ?? null,
+      builder_fields: builderFields ?? null,
       // Empty tags must be sent as an explicit `null` to clear them; omitting
       // the key would preserve the existing tags on a partial update.
       tags: formValues.metadata.tags?.length ? formValues.metadata.tags : null,
     },
+    ...(query === undefined ? {} : { query }),
     recovery_strategy: resolveRecoveryStrategy(formValues) ?? null,
     no_data_strategy: no_data_strategy ?? null,
     grouping: grouping ?? null,

@@ -15,11 +15,12 @@ export {
   RULE_BUILDER_REGISTRY,
   getRuleBuilderCreateOptions,
   registerRuleBuilder,
+  fromBuilderFields,
   useBuilderState,
+  thresholdRuleBuilderDefinition,
 } from './flyout/compose_discover/rule_builder';
 export type {
   BuilderState,
-  BuilderSubmission,
   RuleBuilderCreateOption,
   RuleBuilderCreateOptionItem,
   RuleBuilderDefinition,

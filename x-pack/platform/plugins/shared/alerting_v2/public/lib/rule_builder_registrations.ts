@@ -23,13 +23,15 @@ export const queueRuleBuilderRegistration = <TState>(
 
 /**
  * Hands every queued builder to the rule form registry; call before rendering any rule UI.
+ * Also registers RnA-owned built-in builders (threshold) through the same path.
  */
 export const applyRuleBuilderRegistrations = async (): Promise<void> => {
-  if (queue.length === 0) {
-    return;
-  }
+  const { registerRuleBuilder, thresholdRuleBuilderDefinition } = await import(
+    '@kbn/alerting-v2-rule-form'
+  );
 
-  const { registerRuleBuilder } = await import('@kbn/alerting-v2-rule-form');
+  registerRuleBuilder(thresholdRuleBuilderDefinition);
+
   for (const definition of queue.splice(0)) {
     registerRuleBuilder(definition);
   }
