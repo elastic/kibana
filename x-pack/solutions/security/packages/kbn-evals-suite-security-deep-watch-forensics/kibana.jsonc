@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-security-deep-watch-forensics",
+  "owner": "@elastic/security-detection-platform",
+  "group": "security",
+  "visibility": "private"
+}

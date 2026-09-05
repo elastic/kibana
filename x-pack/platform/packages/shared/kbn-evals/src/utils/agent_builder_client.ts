@@ -37,6 +37,19 @@ export interface AgentBuilderConverseParams {
    * instead of sending a new free-text message via {@link input}.
    */
   promptResponses?: Record<string, unknown>;
+  /**
+   * Runtime configuration overrides for this execution only (does not mutate the
+   * stored agent). Mirrors the converse API's `configuration_overrides`; `skillIds`
+   * replaces the stored skill list (fully restrictive only when
+   * `enableElasticCapabilities` is false). Used by evals to pin the skill under
+   * test instead of relying on unconstrained routing.
+   */
+  configurationOverrides?: {
+    instructions?: string;
+    tools?: Array<{ toolIds: string[] }>;
+    skillIds?: string[];
+    enableElasticCapabilities?: boolean;
+  };
 }
 
 export interface AgentBuilderClientResponse {
@@ -106,6 +119,7 @@ export function createAgentBuilderClient({
     input,
     conversationId,
     promptResponses,
+    configurationOverrides,
   }: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse> => {
     const call = async (): Promise<AgentBuilderClientResponse> => {
       const response = await fetch<AgentBuilderConverseApiResponse>('/api/agent_builder/converse', {
@@ -117,6 +131,32 @@ export function createAgentBuilderClient({
           // Answer pending prompts by id when provided; otherwise send the turn as
           // a normal user message.
           ...(promptResponses ? { prompts: promptResponses } : { input }),
+          // Runtime configuration overrides (camelCase params -> snake_case API).
+          ...(configurationOverrides
+            ? {
+                configuration_overrides: {
+                  ...(configurationOverrides.instructions
+                    ? { instructions: configurationOverrides.instructions }
+                    : {}),
+                  ...(configurationOverrides.tools
+                    ? {
+                        tools: configurationOverrides.tools.map(({ toolIds }) => ({
+                          tool_ids: toolIds,
+                        })),
+                      }
+                    : {}),
+                  ...(configurationOverrides.skillIds
+                    ? { skill_ids: configurationOverrides.skillIds }
+                    : {}),
+                  ...(configurationOverrides.enableElasticCapabilities !== undefined
+                    ? {
+                        enable_elastic_capabilities:
+                          configurationOverrides.enableElasticCapabilities,
+                      }
+                    : {}),
+                },
+              }
+            : {}),
           // Run the agent inline rather than via Task Manager (the server's auto-detect default).
           // Inline execution runs inside this HTTP request, so the eval worker's W3C `traceparent`
           // propagates and the agent's server-side gen_ai spans nest under the eval's trace — the

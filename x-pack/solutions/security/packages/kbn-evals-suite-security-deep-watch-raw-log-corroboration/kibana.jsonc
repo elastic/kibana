@@ -1,0 +1,6 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-security-deep-watch-raw-log-corroboration",
+  "owner": "@elastic/security-detection-platform",
+  "group": "security"
+}
