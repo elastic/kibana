@@ -26,6 +26,8 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
 
 export const NIGHTSHIFT_EBT_ELEMENTS = {
   IMPACTED_SERVICES: 'nightshiftImpactedServices',
+  INVESTIGATIONS_LIST: 'nightshiftInvestigationsList',
+  INVESTIGATION_DETAIL_FLYOUT: 'nightshiftInvestigationDetailFlyout',
   DETECTION_FLYOUT: 'nightshiftDetectionFlyout',
   DETECTION_FLYOUT_ENTITIES: 'nightshiftDetectionFlyoutEntities',
   ENTITY_FLYOUT: 'nightshiftEntityFlyout',
