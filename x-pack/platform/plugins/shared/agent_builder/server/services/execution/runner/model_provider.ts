@@ -24,7 +24,6 @@ import type {
   BoundInferenceClient,
   ChatCompletionReasoningEffort,
   ConnectorTelemetryMetadata,
-  ChatCompleteAnonymizationMetadata,
 } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
@@ -42,7 +41,7 @@ export interface CreateModelProviderOpts {
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   telemetryMetadata?: ConnectorTelemetryMetadata;
-  anonymizationMetadata?: ChatCompleteAnonymizationMetadata;
+  agentId?: string;
   maxContentLength?: number;
   reasoningLevel?: ChatCompletionReasoningEffort;
 }
@@ -60,7 +59,7 @@ export type ModelProviderFactoryFn = (
     | 'request'
     | 'defaultConnectorId'
     | 'telemetryMetadata'
-    | 'anonymizationMetadata'
+    | 'agentId'
     | 'maxContentLength'
     | 'reasoningLevel'
   >
@@ -108,7 +107,7 @@ export const createModelProvider = ({
   searchInferenceEndpoints,
   logger,
   telemetryMetadata,
-  anonymizationMetadata,
+  agentId,
   maxContentLength,
   reasoningLevel,
 }: CreateModelProviderOpts): ModelProvider => {
@@ -208,19 +207,15 @@ export const createModelProvider = ({
       },
       chatModelOptions: {
         telemetryMetadata: resolvedTelemetryMetadata,
-        ...(anonymizationMetadata ? { anonymizationMetadata } : {}),
+        ...(agentId !== undefined ? { agentId } : {}),
         ...(maxContentLength !== undefined ? { maxContentLength } : {}),
         ...(reasoning ? { reasoning } : {}),
       },
     });
 
-    const boundMetadata = {
-      connectorTelemetry: resolvedTelemetryMetadata,
-      ...(anonymizationMetadata ? { anonymization: anonymizationMetadata } : {}),
-    };
     const rawInferenceClient = inference.getClient({
       request,
-      bindTo: { connectorId, metadata: boundMetadata },
+      bindTo: { connectorId, metadata: { connectorTelemetry: resolvedTelemetryMetadata } },
       callbacks: {
         complete: [completionCallback],
       },
