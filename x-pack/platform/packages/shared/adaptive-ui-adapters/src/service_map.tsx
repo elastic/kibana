@@ -99,7 +99,7 @@ export const toServiceMapViewSpec = ({ services, connections }: ServiceMapData):
         </>
       )}
     </View>
-  ) as ViewSpec;
+  );
 };
 
 export const sampleServiceMap: ServiceMapData = {
