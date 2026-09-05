@@ -6,9 +6,11 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject, filter, map, share } from 'rxjs';
+import { BehaviorSubject, Subject, filter, map, scan, share } from 'rxjs';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser/events';
+import type { ActiveStreamState } from './active_stream_state';
+import { activeStreamReducer, initialActiveStreamState } from './active_stream_state';
 
 interface TaggedChatEvent {
   /** The conversation that produced this event. */
@@ -48,6 +50,13 @@ export class EventsService {
     return this.events$.pipe(
       filter((tagged) => tagged.conversationId === conversationId),
       map(({ event }) => event)
+    );
+  }
+
+  /** Live-only, like `getChatEvents$`; persisted history still comes from the conversation GET. */
+  getActiveStream$(conversationId: string): Observable<ActiveStreamState> {
+    return this.getChatEvents$(conversationId).pipe(
+      scan(activeStreamReducer, initialActiveStreamState)
     );
   }
 

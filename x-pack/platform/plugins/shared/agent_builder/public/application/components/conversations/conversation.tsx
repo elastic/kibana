@@ -49,8 +49,11 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
 import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
+import { useConversationRenderMode } from '../../context/conversation/conversation_render_mode_context';
+import { TimelineConnector } from './timeline/timeline_connector';
 
 export const Conversation: React.FC<{}> = () => {
+  const { renderMode } = useConversationRenderMode();
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
@@ -188,10 +191,14 @@ export const Conversation: React.FC<{}> = () => {
             css={scrollableStyles}
           >
             <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
-              <ConversationRounds
-                scrollContainerHeight={scrollContainerHeight}
-                anchoredRoundIndex={anchoredRoundIndex}
-              />
+              {renderMode === 'events' ? (
+                <TimelineConnector />
+              ) : (
+                <ConversationRounds
+                  scrollContainerHeight={scrollContainerHeight}
+                  anchoredRoundIndex={anchoredRoundIndex}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
           {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
