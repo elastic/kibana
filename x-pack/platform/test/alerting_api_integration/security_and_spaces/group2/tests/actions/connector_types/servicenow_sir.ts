@@ -690,6 +690,29 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               });
           });
         });
+
+        describe('getIncident', () => {
+          it('should fail when externalId is not provided', async () => {
+            await supertest
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'getIncident',
+                  subActionParams: {},
+                },
+              })
+              .then((resp: any) => {
+                expect(resp.body).to.eql({
+                  connector_id: simulatedActionId,
+                  status: 'error',
+                  retry: false,
+                  errorSource: TaskErrorSource.USER,
+                  message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.externalId`,
+                });
+              });
+          });
+        });
       });
 
       describe('Execution', () => {
@@ -730,8 +753,8 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 id: simulatedActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 11 }],
-                  ['execute', { equal: 11 }],
+                  ['execute-start', { equal: 12 }],
+                  ['execute', { equal: 12 }],
                 ]),
               });
             });
@@ -865,6 +888,50 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             });
 
             const executeEvent = events[3];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
+          });
+        });
+
+        describe('getIncident', () => {
+          it('should get the incident', async () => {
+            const { body: result } = await supertest
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'getIncident',
+                  subActionParams: { externalId: '123' },
+                },
+              })
+              .expect(200);
+
+            expect(proxyHaveBeenCalled).to.equal(true);
+            expect(result).to.eql({
+              status: 'ok',
+              connector_id: simulatedActionId,
+              data: {
+                sys_id: '123',
+                number: 'INC01',
+                sys_created_on: '2020-03-10 12:24:20',
+                sys_updated_on: '2020-03-10 12:24:20',
+              },
+            });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 3 }],
+                  ['execute', { gte: 3 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[5];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });
