@@ -26,7 +26,7 @@ const bulletShapeSchema = z
   })
   .strict()
   .meta({
-    id: 'gaugeShapeBullet',
+    id: 'visGaugeShapeBullet',
     title: 'Shape (Bullet)',
     description: 'Bullet gauge shape.',
   });
@@ -37,7 +37,7 @@ const circularShapeSchema = z
   })
   .strict()
   .meta({
-    id: 'gaugeShapeCircular',
+    id: 'visGaugeShapeCircular',
     title: 'Shape (Circular)',
     description: 'Circular gauge shape.',
   });
@@ -51,7 +51,7 @@ const gaugeStylingSchema = z
   })
   .strict()
   .meta({
-    id: 'gaugeStyling',
+    id: 'visGaugeStyling',
     title: 'Gauge styling',
     description: 'Visual chart styling options',
   });
@@ -161,7 +161,7 @@ export const gaugeConfigSchemaNoESQL = z
     ),
   })
   .meta({
-    id: 'gaugeNoESQL',
+    id: 'visGaugeNoESQL',
     title: 'Gauge Chart (DSL)',
     description: 'Gauge configuration using a data view.',
   });
@@ -184,13 +184,13 @@ export const gaugeConfigSchemaESQL = z
       .strict(),
   })
   .meta({
-    id: 'gaugeESQL',
+    id: 'visGaugeESQL',
     title: 'Gauge Chart (ES|QL)',
     description: 'Gauge configuration using an ES|QL query.',
   });
 
 export const gaugeConfigSchema = z.union([gaugeConfigSchemaNoESQL, gaugeConfigSchemaESQL]).meta({
-  id: 'gaugeChart',
+  id: 'visGaugeChart',
   title: 'Gauge Chart',
   description:
     'A gauge chart with a metric value and optional minimum, maximum, and goal markers, in bullet or circular shape.',

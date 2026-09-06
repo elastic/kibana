@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import { dataViewSchema, esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
 
 const anyDataSourceSchema = z.union([dataViewSchema, esqlDataSourceSchema]).meta({
-  id: 'viz_data_source',
+  id: 'visDataSource',
   title: 'Data Source configuration',
   description:
     'Defines where the visualization reads its data. Choose a data view (by reference or ad hoc) for index-pattern-based queries, or an ES|QL dataset for query-driven results.',

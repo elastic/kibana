@@ -43,7 +43,7 @@ export const valueDisplaySchema = z
   .strict()
   .optional()
   .meta({
-    id: 'valueDisplay',
+    id: 'visValueDisplay',
     description:
       'Configure the visibility and the format of the values rendered on each chart partition section',
   });

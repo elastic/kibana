@@ -20,7 +20,7 @@ import { waffleConfigSchema } from './waffle';
 export const partitionConfigSchema = z
   .union([mosaicConfigSchema, pieConfigSchema, treemapConfigSchema, waffleConfigSchema])
   .meta({
-    id: 'lensPartitionChart',
+    id: 'visPartitionChart',
     title: 'Partition Chart',
     description: 'Partition chart configuration for pie, mosaic, treemap, and waffle chart types.',
   });

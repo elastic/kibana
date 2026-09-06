@@ -70,11 +70,11 @@ const heatmapStylingSchema = z
       })
       .strict()
       .optional()
-      .meta({ id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' }),
+      .meta({ id: 'visHeatmapCells', title: 'Cells', description: 'Cells configuration' }),
   })
   .strict()
   .meta({
-    id: 'heatmapStyling',
+    id: 'visHeatmapStyling',
     title: 'Heatmap styling',
     description: 'Visual chart styling options',
   });
@@ -82,7 +82,7 @@ const heatmapStylingSchema = z
 const heatmapSharedConfigSchema = z.object({
   type: z.literal('heatmap'),
   legend: legendSchema.optional().meta({
-    id: 'heatmapLegend',
+    id: 'visHeatmapLegend',
     title: 'Legend',
     description: 'Legend configuration',
   }),
@@ -100,7 +100,7 @@ const heatmapSharedConfigSchema = z.object({
         .strict()
         .optional()
         .meta({
-          id: 'heatmapXAxis',
+          id: 'visHeatmapXAxis',
           title: 'X Axis',
           description: 'X axis configuration',
         }),
@@ -113,7 +113,7 @@ const heatmapSharedConfigSchema = z.object({
         .strict()
         .optional()
         .meta({
-          id: 'heatmapYAxis',
+          id: 'visHeatmapYAxis',
           title: 'Y Axis',
           description: 'Y axis configuration',
         }),
@@ -121,7 +121,7 @@ const heatmapSharedConfigSchema = z.object({
     .strict()
     .optional()
     .meta({
-      id: 'heatmapAxes',
+      id: 'visHeatmapAxes',
       title: 'Axes',
       description: 'Axis configuration for X and Y axes',
     }),
@@ -156,7 +156,7 @@ export const heatmapConfigSchemaNoESQL = heatmapSharedConfigSchema
     ),
   })
   .meta({
-    id: 'heatmapNoESQL',
+    id: 'visHeatmapNoESQL',
     title: 'Heatmap Chart (DSL)',
     description: 'Heatmap configuration using a data view.',
   });
@@ -169,7 +169,7 @@ export const heatmapConfigSchemaESQL = heatmapSharedConfigSchema
     metric: esqlColumnWithFormatSchema.extend(heatmapConfigMetricOptionsShape),
   })
   .meta({
-    id: 'heatmapESQL',
+    id: 'visHeatmapESQL',
     title: 'Heatmap Chart (ES|QL)',
     description: 'Heatmap configuration using an ES|QL query.',
   });
@@ -177,7 +177,7 @@ export const heatmapConfigSchemaESQL = heatmapSharedConfigSchema
 export const heatmapConfigSchema = z
   .union([heatmapConfigSchemaNoESQL, heatmapConfigSchemaESQL])
   .meta({
-    id: 'heatmapChart',
+    id: 'visHeatmapChart',
     title: 'Heatmap Chart',
     description:
       'A grid of colored cells where color intensity represents the metric value at each X/Y intersection.',

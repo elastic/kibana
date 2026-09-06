@@ -53,7 +53,7 @@ export const sharedPanelInfoSchema = z
       description: 'The description of the chart. Optional. Any string value or undefined.',
     }),
     filters: z.array(asCodeFilterSchema).max(100).optional().meta({
-      id: 'lensPanelFilters',
+      id: 'visPanelFilters',
       description: 'Filters applied to the panel',
     }),
   })
@@ -129,7 +129,7 @@ export const collapseBySchema = z
     z.literal('min'),
   ])
   .meta({
-    id: 'collapseBy',
+    id: 'visCollapseBy',
     description: 'Aggregation function used to collapse a breakdown dimension into a single value.',
   });
 
@@ -146,11 +146,11 @@ export const axisTitleSchema = z
 
 export const legendTruncateAfterLinesSchema = z.number().min(1).max(10).default(1).optional().meta({
   description: 'Number of lines before legend items are truncated.',
-  id: 'legendTruncateAfterLines',
+  id: 'visLegendTruncateAfterLines',
 });
 
 export const legendPositionSchema = positionSchema.default('right').optional().meta({
-  id: 'legendPosition',
+  id: 'visLegendPosition',
   title: 'Legend Position',
   description: 'Legend Position.',
 });

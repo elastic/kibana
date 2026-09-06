@@ -101,7 +101,7 @@ export const legacyMetricConfigSchemaNoESQL = z
     ),
   })
   .meta({
-    id: 'legacyMetricNoESQL',
+    id: 'visLegacyMetricNoESQL',
     title: 'Legacy Metric Chart (DSL)',
     description:
       'Legacy Metric configuration using a data view. Superseded by the Metric chart type.',
@@ -119,11 +119,11 @@ const esqlLegacyMetricConfig = z
     metric: esqlColumnWithFormatSchema.extend(legacyMetricConfigMetricOptionsShape),
   })
   .strict()
-  .meta({ id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' });
+  .meta({ id: 'visLegacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' });
 
 // Legacy metric is not currently supported for ES|QL datasets
 export const legacyMetricConfigSchema = legacyMetricConfigSchemaNoESQL.meta({
-  id: 'legacyMetricChart',
+  id: 'visLegacyMetricChart',
   title: 'Legacy Metric Chart',
   description:
     'A single metric value with optional coloring and formatting. Superseded by the Metric chart type.',

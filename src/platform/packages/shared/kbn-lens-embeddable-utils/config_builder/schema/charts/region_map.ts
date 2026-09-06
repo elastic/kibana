@@ -46,7 +46,7 @@ export const regionMapConfigSchemaNoESQL = z
     ),
   })
   .meta({
-    id: 'regionMapNoESQL',
+    id: 'visRegionMapNoESQL',
     title: 'Region Map (DSL)',
     description:
       'Region Map configuration using a data view, mapping metric values to geographic regions by color.',
@@ -68,7 +68,7 @@ export const regionMapConfigSchemaESQL = z
     region: esqlColumnSchema.extend(regionMapConfigRegionOptionsShape),
   })
   .meta({
-    id: 'regionMapESQL',
+    id: 'visRegionMapESQL',
     title: 'Region Map (ES|QL)',
     description:
       'Region Map configuration using an ES|QL query, mapping metric values to geographic regions by color.',
@@ -77,7 +77,7 @@ export const regionMapConfigSchemaESQL = z
 export const regionMapConfigSchema = z
   .union([regionMapConfigSchemaNoESQL, regionMapConfigSchemaESQL])
   .meta({
-    id: 'regionMapChart',
+    id: 'visRegionMapChart',
     title: 'Region Map',
     description: 'A choropleth map with geographic regions colored by the aggregated metric value.',
   });
