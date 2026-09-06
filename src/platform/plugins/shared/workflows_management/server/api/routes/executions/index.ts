@@ -16,6 +16,7 @@ import { registerGetExecutionRoute } from './get_execution';
 import { registerGetExecutionLogsRoute } from './get_execution_logs';
 import { registerGetStepExecutionRoute } from './get_step_execution';
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
+import { registerGetWorkflowExecutionHistoryRoute } from './get_workflow_execution_history';
 import { registerGetWorkflowStepExecutionsRoute } from './get_workflow_step_executions';
 import { registerResumeExecutionRoute } from './resume_execution';
 import {
@@ -34,6 +35,7 @@ export function registerExecutionRoutes(deps: RouteDependencies) {
   registerTestWorkflowRoute(deps);
   registerTestStepRoute(deps);
   registerGetWorkflowExecutionsRoute(deps);
+  registerGetWorkflowExecutionHistoryRoute(deps);
   registerSearchExecutionsRoute(deps);
   registerGetWorkflowStepExecutionsRoute(deps);
   registerGetExecutionRoute(deps);
