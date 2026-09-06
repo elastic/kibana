@@ -44,7 +44,6 @@ const VALID_FIELD_RE = /^[@\w.]+$/;
 const ENTITY_BASE_FIELDS = [
   ENTITY_ID_FIELD,
   'entity.name',
-  'entity.record_count',
   ENTITY_TYPE_FIELD,
   RISK_SCORE_NORM_FIELD,
   'asset.criticality',
@@ -242,7 +241,7 @@ const riskScoreChangeBaseQuery = (
 ): string =>
   [
     `FROM ${riskScoreIndex}`,
-    `| WHERE \`@timestamp\` >= "${yesterdayStart}" AND \`@timestamp\` < "${todayStart}"`,
+    `| WHERE TRANGE("${yesterdayStart}", "${todayStart}")`,
     `| EVAL \`entity.id\` = ${ENTITY_ID_COALESCE}`,
     `| EVAL yesterday_score = ${RISK_SCORE_COALESCE}`,
     `| STATS yesterday_score = MAX(yesterday_score) BY \`entity.id\``,
@@ -285,7 +284,7 @@ const yesterdayScoreEnrichQuery = (
 ): string =>
   [
     `FROM ${riskScoreIndex}`,
-    `| WHERE \`@timestamp\` >= "${yesterdayStart}" AND \`@timestamp\` < "${todayStart}"`,
+    `| WHERE TRANGE("${yesterdayStart}", "${todayStart}")`,
     `| EVAL entity_id = ${ENTITY_ID_COALESCE}`,
     `| EVAL score = ${RISK_SCORE_COALESCE}`,
     `| WHERE entity_id IN (${toList(entityIds)})`,
@@ -366,8 +365,10 @@ export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoute
           // filter is from the search bar and targets entity store fields — apply it only to
           // entity queries, not to alert or risk score index queries which have different schemas.
           const esqlOpts = filter ? { filter } : {};
-          const query = (q: string) => esClient.esql.query({ query: q, ...esqlOpts }).then(toRows);
-          const rawQuery = (q: string) => esClient.esql.query({ query: q }).then(toRows);
+          const query = (q: string) =>
+            esClient.esql.query({ query: q, drop_null_columns: true, ...esqlOpts }).then(toRows);
+          const rawQuery = (q: string) =>
+            esClient.esql.query({ query: q, drop_null_columns: true }).then(toRows);
 
           // Compute date window once so both data and count queries use the same day boundary.
           const window = riskDateWindow();
