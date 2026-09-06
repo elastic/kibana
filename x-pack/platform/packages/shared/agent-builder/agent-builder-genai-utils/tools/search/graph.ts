@@ -8,7 +8,7 @@
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { BaseMessage } from '@langchain/core/messages';
-import { ToolMessage } from '@langchain/core/messages';
+import { isAIMessage, ToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ModelProvider, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
@@ -23,6 +23,7 @@ import {
   createRelevanceSearchTool,
   naturalLanguageSearchToolName,
   NO_MATCHING_RESOURCE_ERROR,
+  NO_TOOL_SELECTED_ERROR,
 } from './inner_tools';
 import type { TopSnippetsConfig } from '../steps/extract_snippets';
 import { getSearchDispatcherPrompt } from './prompts';
@@ -146,7 +147,10 @@ export const createSearchToolGraph = async ({
     }
 
     const tools = getTools(state);
-    const searchModel = defaultModel.chatModel.bindTools(tools, { tool_choice: 'any' }).withConfig({
+    // Tool choice is left unforced on purpose: `tool_choice: 'any'` makes some
+    // providers hang until the request is aborted, stalling the whole run. The
+    // dispatcher prompt already asks for exactly one tool.
+    const searchModel = defaultModel.chatModel.bindTools(tools).withConfig({
       tags: ['agent-builder-search-tool'],
     });
 
@@ -157,6 +161,16 @@ export const createSearchToolGraph = async ({
         customInstructions: state.customInstructions,
       })
     );
+
+    // With unforced tool choice the dispatcher may answer in prose instead of
+    // picking a tool. End with an error rather than routing to `execute_tool`,
+    // which would invoke ToolNode without a tool call.
+    if (!isAIMessage(response) || !response.tool_calls?.length) {
+      logger.warn(
+        `Search dispatcher returned no tool call for query "${state.nlQuery}"; ending search.`
+      );
+      return { error: NO_TOOL_SELECTED_ERROR, messages: [response] };
+    }
 
     return { messages: [response] };
   };
