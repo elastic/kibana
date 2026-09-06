@@ -222,6 +222,11 @@ steps:
             gate — so recommend only what you can tie to a finding above, and
             return an empty list when the evidence justifies none.
 
+            You MUST conclude by invoking the structured-answer tool with ALL
+            required fields (isIncident, rationale, proposal, ...). A prose
+            final message is not a valid conclusion: this workflow reads only
+            the structured output, and a prose-only finish fails the run.
+
             Scoping rule for `isIncident` (binding): the verdict applies to
             {{ steps.resolve_host.output.host_name }} and to hosts named in the
             Attack Discovery context above ONLY. Telemetry on OTHER hosts —
@@ -462,6 +467,11 @@ steps:
             supersedes the one from your first pass, so carry forward the
             recommendations that still stand and add the ones these hosts
             justify. Nothing executes them.
+
+            You MUST conclude by invoking the structured-answer tool with ALL
+            required fields. A prose final message is not a valid conclusion:
+            this workflow reads only the structured output, and a prose-only
+            finish fails the run.
           schema:
             type: object
             properties:

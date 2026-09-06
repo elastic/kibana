@@ -472,6 +472,17 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
       expect(followUp).not.toContain('for the whole attack rather than');
     });
 
+    // v23: both prompts must require a terminal structured-answer tool call —
+    // prose-only finishes yield empty structured_output and fail the run.
+    it('requires the structured-answer tool invocation in both prompts', () => {
+      const first = getStep('forensic_analysis').with?.message ?? '';
+      const followUp = getStep('follow_up_analysis').with?.message ?? '';
+      for (const msg of [first, followUp]) {
+        expect(msg).toContain('structured-answer tool');
+        expect(msg).toContain('prose-only finish fails the run');
+      }
+    });
+
     it('does not name an agent-id, so projectWorkers still skips this unowned step', () => {
       // v19 names alertzero-thin-agent; that assertion belonged to the pre-v19 shape.
       expect((step() as { 'agent-id'?: string })['agent-id'] ?? 'alertzero-thin-agent').toBe(
