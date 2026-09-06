@@ -17,6 +17,7 @@ import {
   CommentsAddedTriggerId,
   CaseStatusUpdatedTriggerId,
   ExtendedFieldsUpdatedTriggerId,
+  ObservablesAddedTriggerId,
 } from '../../../common/workflows/triggers';
 import { CasesEventBus } from '../../events/event_bus';
 import { registerCasesWorkflowEventBridge } from './event_bridge';
@@ -557,6 +558,67 @@ describe('registerCasesWorkflowEventBridge', () => {
         expect.stringContaining(
           `Failed to emit workflow trigger "${ExtendedFieldsUpdatedTriggerId}"`
         )
+      );
+    });
+  });
+
+  describe('observablesAdded trigger', () => {
+    const observablesPayload = {
+      caseId: 'case-1',
+      owner: 'securitySolution' as const,
+      observableIds: ['obs-1'],
+      observableTypeKeys: ['observable-type-ipv4'],
+    };
+
+    it('forwards observablesAdded events to workflows extensions', async () => {
+      eventBus.emitObservablesAdded(request, observablesPayload);
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(
+        ObservablesAddedTriggerId,
+        observablesPayload
+      );
+    });
+
+    it('forwards multiple observable ids and type keys', async () => {
+      const multiPayload = {
+        ...observablesPayload,
+        observableIds: ['obs-1', 'obs-2'],
+        observableTypeKeys: ['observable-type-file-hash', 'observable-type-ipv4'],
+      };
+
+      eventBus.emitObservablesAdded(request, multiPayload);
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ObservablesAddedTriggerId, multiPayload);
+    });
+
+    it('does not include value or description in the forwarded payload', async () => {
+      eventBus.emitObservablesAdded(request, observablesPayload);
+
+      await flushMicrotasks();
+
+      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[0];
+      expect(payload).not.toHaveProperty('value');
+      expect(payload).not.toHaveProperty('description');
+      expect(payload).not.toHaveProperty('observables');
+    });
+
+    it('logs a warning when forwarding fails', async () => {
+      mockClient = createWorkflowsClientMock({
+        emitEvent: jest.fn().mockRejectedValue(new Error('workflows error')),
+      });
+      workflowsExtensions.getClient.mockResolvedValue(mockClient);
+      registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
+
+      eventBus.emitObservablesAdded(request, observablesPayload);
+
+      await flushMicrotasks();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`Failed to emit workflow trigger "${ObservablesAddedTriggerId}"`)
       );
     });
   });

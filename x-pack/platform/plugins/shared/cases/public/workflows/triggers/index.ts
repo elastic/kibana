@@ -32,4 +32,7 @@ export function registerCasesTriggerDefinitions(
   workflowsExtensions.registerTriggerDefinition(() =>
     import('./extended_fields_updated').then((m) => m.extendedFieldsUpdatedTriggerPublicDefinition)
   );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./observables_added').then((m) => m.observablesAddedTriggerPublicDefinition)
+  );
 }
