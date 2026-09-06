@@ -313,7 +313,7 @@ export const resolveEvalRunContext = async ({
       : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
 
   if (requiresEisCcm && !process.env.KIBANA_TESTING_AI_CONNECTORS) {
-    const cached = readCachedEisConnectors();
+    const cached = readCachedEisConnectors(log);
     if (cached) {
       process.env.KIBANA_TESTING_AI_CONNECTORS = Buffer.from(JSON.stringify(cached)).toString(
         'base64'

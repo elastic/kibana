@@ -371,7 +371,11 @@ const listConnectorIds = (base64Payload: string): Array<{ id: string; name: stri
   }
 };
 
-export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Promise<void> => {
+export const runConnectorSetup = async (
+  repoRoot: string,
+  log: ToolingLog,
+  { refreshConnectors = false }: { refreshConnectors?: boolean } = {}
+): Promise<void> => {
   if (!isTTY()) {
     throw new Error(
       'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run with a TTY to use the setup wizard.'
@@ -436,7 +440,10 @@ export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Prom
 
   log.info('');
 
-  const cachedConnectors = readCachedEisConnectors();
+  const cachedConnectors = refreshConnectors ? undefined : readCachedEisConnectors(log);
+  if (refreshConnectors) {
+    log.info('--refresh-connectors set: ignoring the EIS connector cache and re-discovering.');
+  }
   if (cachedConnectors) {
     const connectorEntries = Object.entries(cachedConnectors);
     const base64Payload = Buffer.from(JSON.stringify(cachedConnectors)).toString('base64');
@@ -445,7 +452,7 @@ export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Prom
     log.info(`Using cached EIS connectors (${connectorEntries.length} connector(s)):`);
     connectorEntries.forEach(([id]) => log.info(`  - ${id}`));
     log.info('');
-    log.info('To force re-discovery, run: node scripts/evals init');
+    log.info('To force re-discovery, run: node scripts/evals init --refresh-connectors');
     return;
   }
 
@@ -510,9 +517,14 @@ export const initCmd: Command<void> = {
   `,
   flags: {
     string: ['profile'],
+    boolean: ['refresh-connectors'],
     help: `
-      --profile <name>   Write config to config.<name>.json instead of config.json
-                          (e.g. --profile mysetup creates config.mysetup.json)
+      --profile <name>       Write config to config.<name>.json instead of config.json
+                              (e.g. --profile mysetup creates config.mysetup.json)
+      --refresh-connectors   Ignore the cached EIS connector list
+                              (~/.elastic/eis-connectors-cache.json) and re-discover
+                              from EIS. Use when models have been added/retired
+                              upstream, since a stale cache 404s at inference time.
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -520,6 +532,7 @@ export const initCmd: Command<void> = {
     const positionals = flagsReader.getPositionals();
     const configOnly = positionals.includes('config');
     const profile = flagsReader.string('profile') ?? undefined;
+    const refreshConnectors = flagsReader.boolean('refresh-connectors');
 
     const knownPositionals = new Set(['config']);
     const unknownPositionals = positionals.filter((p) => !knownPositionals.has(p));
@@ -541,7 +554,7 @@ export const initCmd: Command<void> = {
     log.info('');
     await runConfigInit(repoRoot, log, { profile });
     if (!configOnly) {
-      await runConnectorSetup(repoRoot, log);
+      await runConnectorSetup(repoRoot, log, { refreshConnectors });
     }
   },
 };
