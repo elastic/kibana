@@ -10935,7 +10935,6 @@
     "visualizations.share.shareModal.title": "共享此可视化",
     "visualizations.tonNavMenu.tryItBadgeText": "试用",
     "visualizations.topNavMenu.cancelAndReturnButtonTooltip": "完成前放弃所做的更改",
-    "visualizations.topNavMenu.cancelButtonAriaLabel": "返回到上一个应用而不保存更改",
     "visualizations.topNavMenu.cancelButtonLabel": "取消",
     "visualizations.topNavMenu.goToLensButtonAriaLabel": "使用您当前的配置前往 Lens",
     "visualizations.topNavMenu.goToLensButtonLabel": "在 Lens 中编辑可视化",

@@ -497,9 +497,6 @@ export const getTopNavConfig = (
       label: i18n.translate('visualizations.topNavMenu.exportVisualizationButtonLabel', {
         defaultMessage: 'export',
       }),
-      description: i18n.translate('visualizations.topNavMenu.exportVisualizationButtonAriaLabel', {
-        defaultMessage: 'Export Visualization',
-      }),
       testId: 'exportTopNavButton',
       run: (params) => {
         void showShareOptions(params?.triggerElement, true);
@@ -514,9 +511,6 @@ export const getTopNavConfig = (
       iconType: 'cross',
       label: i18n.translate('visualizations.topNavMenu.cancelButtonLabel', {
         defaultMessage: 'Cancel',
-      }),
-      description: i18n.translate('visualizations.topNavMenu.cancelButtonAriaLabel', {
-        defaultMessage: 'Return to the last app without saving changes',
       }),
       testId: 'visualizeCancelAndReturnButton',
       tooltipContent() {

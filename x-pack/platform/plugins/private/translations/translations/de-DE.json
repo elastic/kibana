@@ -10907,7 +10907,6 @@
     "visualizations.share.shareModal.title": "Diese Visualisierung freigeben",
     "visualizations.tonNavMenu.tryItBadgeText": "Ausprobieren",
     "visualizations.topNavMenu.cancelAndReturnButtonTooltip": "Verwerfen Sie Ihre Änderungen, bevor Sie den Vorgang abschließen",
-    "visualizations.topNavMenu.cancelButtonAriaLabel": "Kehren Sie zur letzten App zurück, ohne die Änderungen zu speichern",
     "visualizations.topNavMenu.cancelButtonLabel": "Abbrechen",
     "visualizations.topNavMenu.goToLensButtonAriaLabel": "Wechseln Sie mit Ihrer aktuellen Konfiguration zu Lens",
     "visualizations.topNavMenu.goToLensButtonLabel": "Visualisierung in Lens bearbeiten",

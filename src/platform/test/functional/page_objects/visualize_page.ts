@@ -38,14 +38,12 @@ export class VisualizePageObject extends FtrService {
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly listingTable = this.ctx.getService('listingTable');
   private readonly queryBar = this.ctx.getService('queryBar');
-  private readonly filterBar = this.ctx.getService('filterBar');
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
   private readonly appMenu = this.ctx.getPageObject('appMenu');
-  private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly toasts = this.ctx.getService('toasts');
 
   index = {
@@ -72,10 +70,13 @@ export class VisualizePageObject extends FtrService {
   }
 
   /**
+   * Clicks the AppHeader back control when it points at the Visualize library.
    * AppHeader lives in the app, so flyouts with `belowHeader` overlays intercept
-   * `appHeaderBack`. Skip the in-app back control when an overlay is open.
+   * `appHeaderBack`; the control is skipped when an overlay is open.
+   * Returns `'confirmed'` when an unsaved-changes modal had to be dismissed,
+   * `'clicked'` when the control was clicked, and `false` when it was not used.
    */
-  private async clickVisualizeLibraryBack() {
+  private async clickVisualizeLibraryBack(): Promise<'confirmed' | 'clicked' | false> {
     if (await this.find.existsByCssSelector('.euiOverlayMask', 250)) {
       return false;
     }
@@ -90,8 +91,9 @@ export class VisualizePageObject extends FtrService {
       await this.testSubjects.click('appHeaderBack');
       if (await this.testSubjects.exists('confirmModalConfirmButton')) {
         await this.testSubjects.click('confirmModalConfirmButton');
+        return 'confirmed';
       }
-      return true;
+      return 'clicked';
     } catch (error) {
       this.log.debug(`clickVisualizeLibraryBack failed: ${error}`);
       return false;
@@ -99,11 +101,15 @@ export class VisualizePageObject extends FtrService {
   }
 
   /**
-   *  Try to speed resets a bit if the Visualize library breadcrumb is available
+   * Try to speed resets a bit if the Visualize library back control or breadcrumb is available.
+   * This is only a speed-up: unless an unsaved-changes modal had to be confirmed, the caller
+   * still performs a full `navigateToApp` so state left by the previous suite (space, filters,
+   * time range, cached uiSettings) does not leak into the next one.
    */
   private async clickOnVisualizeLibraryBreadcrumb() {
-    if (await this.clickVisualizeLibraryBack()) {
-      return true;
+    const backResult = await this.clickVisualizeLibraryBack();
+    if (backResult) {
+      return backResult === 'confirmed';
     }
     // Try to navigate to the Visualize Listing page from breadcrumb if available
     const selector = '[data-test-subj="breadcrumb first"][title="Visualize library"]';
@@ -117,6 +123,7 @@ export class VisualizePageObject extends FtrService {
         return true;
       }
     }
+    return false;
   }
 
   public async gotoVisualizationLandingPage(
@@ -201,22 +208,14 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  private async clearPinnedEditorFilters() {
-    if (await this.testSubjects.exists('~filter', { timeout: 500 })) {
-      await this.filterBar.removeAllFilters();
-    }
-  }
-
   /**
-   * Starts a new visualization from a full app navigation by default so leftover
-   * `_g` state (pinned filters, time) from the previous editor session is cleared.
-   * Pass `forceRefresh: false` to reuse the in-app back control when that state
-   * should be kept.
+   * Navigation now happens without URL refresh by default
+   * so a new "forceRefresh" option has been passed in order to
+   * address those scenarios where a full refresh is required (i.e. changing default settings)
    */
   public async navigateToNewVisualization(
-    options: { forceRefresh: boolean } = { forceRefresh: true }
+    options: { forceRefresh: boolean } = { forceRefresh: false }
   ) {
-    await this.clearPinnedEditorFilters();
     await this.gotoVisualizationLandingPage(options);
     await this.header.waitUntilLoadingHasFinished();
     await this.clickNewVisualization();
@@ -224,8 +223,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async navigateToNewAggBasedVisualization() {
-    await this.clearPinnedEditorFilters();
-    await this.gotoVisualizationLandingPage({ forceRefresh: true });
+    await this.gotoVisualizationLandingPage();
     await this.header.waitUntilLoadingHasFinished();
     await this.clickNewVisualization();
     await this.clickAggBasedVisualizations();
@@ -250,20 +248,8 @@ export class VisualizePageObject extends FtrService {
     if (!(await this.hasVisType(type))) {
       throw new Error(`The '${type}' visualization type does not exist (visType-${type})`);
     }
-    await this.retry.try(async () => {
-      if (await this.testSubjects.exists(`visType-${type}`, { timeout: 1000 })) {
-        await this.testSubjects.scrollIntoView(`visType-${type}`);
-        await this.testSubjects.click(`visType-${type}`);
-      }
-      await this.header.waitUntilLoadingHasFinished();
-      const openedSourcePicker = await this.testSubjects.exists('savedObjectFinderSearchInput', {
-        timeout: 1000,
-      });
-      const leftTypeList = !(await this.testSubjects.exists(`visType-${type}`, { timeout: 500 }));
-      if (!openedSourcePicker && !leftTypeList) {
-        throw new Error(`vis type '${type}' did not open`);
-      }
-    });
+    await this.testSubjects.click(`visType-${type}`);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async clickAreaChart() {
@@ -347,7 +333,8 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
-    await this.selectSavedObjectFromFinder(indexPattern);
+    await this.testSubjects.click(`savedObjectTitle${indexPattern.split(' ').join('-')}`);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async selectVisSourceIfRequired() {
@@ -396,23 +383,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickSavedSearch(savedSearchName: string) {
-    await this.selectSavedObjectFromFinder(savedSearchName);
-  }
-
-  /**
-   * SavedObjectFinder in the create-vis wizard pages 8 rows. After other
-   * suites leave extra data views, the target can be off the first page on CI.
-   */
-  private async selectSavedObjectFromFinder(name: string) {
-    const testSubj = `savedObjectTitle${name.split(' ').join('-')}`;
-    await this.testSubjects.existOrFail('savedObjectFinderSearchInput');
-    await this.savedObjectsFinder.filterEmbeddableNames(`"${name}"`);
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(testSubj);
-      await this.testSubjects.scrollIntoView(testSubj);
-      await this.testSubjects.click(testSubj);
-    });
-    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.click(`savedObjectTitle${savedSearchName.split(' ').join('-')}`);
   }
 
   public async clickUnlinkSavedSearch() {
