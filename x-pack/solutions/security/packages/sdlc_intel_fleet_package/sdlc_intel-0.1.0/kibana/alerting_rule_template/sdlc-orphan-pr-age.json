@@ -34,26 +34,7 @@
     "alertDelay": {
       "active": 1
     },
-    "description": "Fires when a sync source has not written documents for longer than its own schedule allows. Thresholds are per-source (3h for 30m/1h workflows, 18h for 2h/6h, 30h for 12h/1d) at roughly 2.5x the interval, so one missed run is tolerated and two consecutive misses alert. A flat threshold cannot work here: the catalog workflows run every: 1d, so a 6h rule reported them stalled for 18 hours of every day and buried genuine stalls in permanent noise. Sources owned by workflows that ship disabled (Salesforce, Slack, Drive, SDH) are excluded: a source nobody enabled is not a stall, and alerting on it trains people to ignore the rule.",
-    "actions": [
-      {
-        "group": "query matched",
-        "params": {
-          "subaction": "sendMessage",
-          "subActionParams": {
-            "channel": "{{alert_slack_channel_id}}",
-            "text": ":rotating_light: SDLC-intel ingest stalled - {{context.message}} | value: {{context.value}} | {{context.date}} | rule: {{rule.name}}",
-            "message": ":warning: {{context.message}} \u2014 open PRs aging >7d: {{context.value}}. {{rule.name}}"
-          }
-        },
-        "frequency": {
-          "summary": false,
-          "notify_when": "onActiveAlert",
-          "throttle": null
-        },
-        "ref": "alert-slack-connector"
-      }
-    ]
+    "description": "Fires when a sync source has not written documents for longer than its own schedule allows. Thresholds are per-source (3h for 30m/1h workflows, 18h for 2h/6h, 30h for 12h/1d) at roughly 2.5x the interval, so one missed run is tolerated and two consecutive misses alert. A flat threshold cannot work here: the catalog workflows run every: 1d, so a 6h rule reported them stalled for 18 hours of every day and buried genuine stalls in permanent noise. Sources owned by workflows that ship disabled (Salesforce, Slack, Drive, SDH) are excluded: a source nobody enabled is not a stall, and alerting on it trains people to ignore the rule."
   },
   "coreMigrationVersion": "8.8.0",
   "typeMigrationVersion": "10.1.0",
@@ -61,8 +42,7 @@
     {
       "id": "{{alert_slack_connector_id}}",
       "name": "alert-slack-connector",
-      "type": "action",
-      "required": false
+      "type": "action"
     }
   ],
   "name": "SDLC: Aging unmerged PRs"

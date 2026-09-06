@@ -27,6 +27,7 @@ const storageSettings = {
       space: types.keyword({}),
       description: types.text({}),
       labels: types.keyword({}),
+      readonly: types.boolean({}),
       avatar_color: types.keyword({}),
       avatar_symbol: types.keyword({}),
       created_by_id: types.keyword({}),
@@ -69,6 +70,8 @@ export interface AgentProperties {
   space: string;
   description: string;
   labels?: string[];
+  /** Package-managed agents are readonly: the UI blocks edits and upgrades overwrite them. */
+  readonly?: boolean;
   avatar_color?: string;
   avatar_symbol?: string;
   created_by_id?: string;
