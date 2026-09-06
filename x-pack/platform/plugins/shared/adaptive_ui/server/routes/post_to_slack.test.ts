@@ -11,7 +11,7 @@ import { MAX_VIEW_SPEC_BYTES, adaptiveUiApiPaths } from '../../common/http_api';
 import type { KibanaPublicUrlHttp } from '../kibana_public_url';
 import { registerPostToSlackRoute } from './post_to_slack';
 
-// The real rasterizer pulls in `satori` and native `@resvg/resvg-js`; these
+// The real renderer pulls in native `@takumi-rs/core`; these
 // tests cover the route around the pipeline, not the pixels.
 jest.mock('../slack/render_png', () => ({
   renderNodePng: jest.fn().mockResolvedValue(Buffer.from('fake-png')),

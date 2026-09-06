@@ -9,8 +9,8 @@ import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/se
 import { MAX_VIEW_SPEC_BYTES, adaptiveUiApiPaths } from '../../common/http_api';
 import { registerRenderPngRoute } from './render_png';
 
-// The real rasterizer pulls in `satori` and native `@resvg/resvg-js`; these
-// tests cover the route around it, not the pixels.
+// The real renderer pulls in native `@takumi-rs/core`; these tests cover the
+// route around it, not the pixels.
 const mockRenderPNG = jest.fn();
 jest.mock('@kbn/adaptive-ui/node', () => ({
   renderPNG: (...args: unknown[]) => mockRenderPNG(...args),
@@ -81,7 +81,7 @@ describe('registerRenderPngRoute', () => {
   });
 
   it('reports a rasterizer failure as a 500', async () => {
-    mockRenderPNG.mockRejectedValue(new Error('resvg exploded'));
+    mockRenderPNG.mockRejectedValue(new Error('renderer exploded'));
 
     const { response, logger } = await callRoute(validSpec);
 
@@ -89,6 +89,6 @@ describe('registerRenderPngRoute', () => {
       statusCode: 500,
       body: { message: 'Could not render this view as a PNG.' },
     });
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('resvg exploded'));
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('renderer exploded'));
   });
 });
