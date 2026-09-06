@@ -175,7 +175,6 @@ export const GithubConnector: ConnectorSpec = {
   actions: {
     getMe: {
       isTool: true,
-      isTool: true,
     scope: 'read',
       description: 'Get the authenticated GitHub user profile.',
       input: GetMeInputSchema,
@@ -185,7 +184,6 @@ export const GithubConnector: ConnectorSpec = {
     },
 
     searchCode: {
-      isTool: true,
       isTool: true,
 
     scope: 'read',
@@ -202,7 +200,6 @@ export const GithubConnector: ConnectorSpec = {
 
     searchRepositories: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description: 'Search for GitHub repositories.',
@@ -217,7 +214,6 @@ export const GithubConnector: ConnectorSpec = {
     },
 
     searchIssues: {
-      isTool: true,
       isTool: true,
 
     scope: 'read',
@@ -236,7 +232,6 @@ export const GithubConnector: ConnectorSpec = {
 
     searchPullRequests: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description: 'Search for pull requests across GitHub repositories.',
@@ -254,7 +249,6 @@ export const GithubConnector: ConnectorSpec = {
 
     searchUsers: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description: 'Search for GitHub users.',
@@ -269,7 +263,6 @@ export const GithubConnector: ConnectorSpec = {
     },
 
     listIssues: {
-      isTool: true,
       isTool: true,
 
     scope: 'read',
@@ -288,7 +281,6 @@ export const GithubConnector: ConnectorSpec = {
 
     listPullRequests: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
@@ -305,7 +297,6 @@ export const GithubConnector: ConnectorSpec = {
     },
 
     listCommits: {
-      isTool: true,
       isTool: true,
 
     scope: 'read',
@@ -324,7 +315,6 @@ export const GithubConnector: ConnectorSpec = {
 
     listBranches: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description: 'List branches in a GitHub repository. Uses cursor-based pagination.',
@@ -340,7 +330,6 @@ export const GithubConnector: ConnectorSpec = {
     },
 
     listReleases: {
-      isTool: true,
       isTool: true,
 
     scope: 'read',
@@ -358,7 +347,6 @@ export const GithubConnector: ConnectorSpec = {
 
     listTags: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description: 'List tags in a GitHub repository. Uses cursor-based pagination.',
@@ -375,7 +363,6 @@ export const GithubConnector: ConnectorSpec = {
 
     getCommit: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description: 'Get details of a specific commit.',
@@ -391,7 +378,6 @@ export const GithubConnector: ConnectorSpec = {
 
     getLatestRelease: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description: 'Get the latest release of a GitHub repository.',
@@ -402,7 +388,6 @@ export const GithubConnector: ConnectorSpec = {
     },
 
     pullRequestRead: {
-      isTool: true,
       isTool: true,
 
     scope: 'read',
@@ -420,7 +405,6 @@ export const GithubConnector: ConnectorSpec = {
 
     getFileContents: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description: 'Get the contents of a file or directory from a GitHub repository.',
@@ -436,7 +420,6 @@ export const GithubConnector: ConnectorSpec = {
     },
 
     getIssue: {
-      isTool: true,
       isTool: true,
 
     scope: 'read',
@@ -454,7 +437,6 @@ export const GithubConnector: ConnectorSpec = {
 
     getIssueComments: {
       isTool: true,
-      isTool: true,
 
     scope: 'write',
       description: 'Get comments for a specific issue in a GitHub repository.',
@@ -471,7 +453,6 @@ export const GithubConnector: ConnectorSpec = {
 
     listTools: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description:
@@ -487,7 +468,6 @@ export const GithubConnector: ConnectorSpec = {
 
     callTool: {
       isTool: true,
-      isTool: true,
 
     scope: 'read',
       description:
@@ -499,7 +479,6 @@ export const GithubConnector: ConnectorSpec = {
     },
 
     runQueryTemplate: {
-      isTool: false,
       isTool: false,
 
     scope: 'read',
@@ -524,7 +503,6 @@ export const GithubConnector: ConnectorSpec = {
     },
 
     listQueryTemplates: {
-      isTool: false,
       isTool: false,
 
     scope: 'read',

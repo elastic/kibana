@@ -547,7 +547,6 @@ getFileMetadata: {
 
     listFilesIngest: {
       isTool: false,
-      isTool: false,
 
     scope: 'write',
       description:
@@ -625,7 +624,6 @@ getFileMetadata: {
 
     parseDriveUrlsFromText: {
       isTool: false,
-      isTool: false,
 
     scope: 'read',
       description:
@@ -649,7 +647,6 @@ getFileMetadata: {
     },
 
     parseCommaSeparatedIds: {
-      isTool: false,
       isTool: false,
 
     scope: 'read',
