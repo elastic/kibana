@@ -55,6 +55,41 @@ export const enableDeepWatch = async ({
   });
 };
 
+/**
+ * Connector actually used by the watch's `ai.agent` steps for a run.
+ *
+ * The watch resolves its own connector, so asking for one is not proof of
+ * using it: when routing regresses, every model in a sweep silently collapses
+ * onto the default connector and the matrix measures nothing. Callers assert
+ * this matches the model under test.
+ */
+export const getRunConnectorIds = async ({
+  esClient,
+  workflowExecutionId,
+}: {
+  esClient: { search: Function };
+  workflowExecutionId: string;
+}): Promise<string[]> => {
+  const res = (await esClient.search({
+    index: '.workflows-step-executions*',
+    size: 50,
+    query: {
+      bool: {
+        filter: [
+          { term: { workflowRunId: workflowExecutionId } },
+          { term: { stepType: 'ai.agent' } },
+        ],
+      },
+    },
+  })) as { hits: { hits: Array<{ _source?: Record<string, any> }> } };
+
+  const ids = res.hits.hits
+    .map((hit) => hit._source?.output?.metadata?.usage?.connectorId)
+    .filter((id: unknown): id is string => typeof id === 'string');
+
+  return Array.from(new Set(ids));
+};
+
 const isTerminal = (status: string | undefined): boolean =>
   ['completed', 'failed', 'cancelled', 'timedOut', 'timed_out'].includes(status ?? '');
 
@@ -67,12 +102,19 @@ export const runDeepWatch = async ({
   fetch,
   log,
   attackDiscoveryAlertId,
+  connectorId,
   pollIntervalMs = 5_000,
   maxWaitMs = 15 * 60_000,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   attackDiscoveryAlertId: string;
+  /**
+   * Connector the watch's `ai.agent` steps must use. Required here so an eval
+   * run always pins the model under test: without it the steps fall back to the
+   * default GenAI connector and every model in a sweep produces identical runs.
+   */
+  connectorId: string;
   pollIntervalMs?: number;
   maxWaitMs?: number;
 }): Promise<DeepWatchRunResult> => {
@@ -83,13 +125,16 @@ export const runDeepWatch = async ({
       version: WORKFLOWS_API_VERSION,
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
       body: JSON.stringify({
-        inputs: { attack_discovery_alert_id: attackDiscoveryAlertId },
+        inputs: {
+          attack_discovery_alert_id: attackDiscoveryAlertId,
+          connector_id: connectorId,
+        },
       }),
     }
   )) as { workflowExecutionId: string };
 
   log.info(
-    `Forensics Watch execution ${workflowExecutionId} started for ${attackDiscoveryAlertId}`
+    `Forensics Watch execution ${workflowExecutionId} started for ${attackDiscoveryAlertId} on connector ${connectorId}`
   );
 
   const deadline = Date.now() + maxWaitMs;

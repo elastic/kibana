@@ -16,7 +16,7 @@ import {
   selectGoldenRows,
 } from '../src/golden_dataset';
 import { setupWatchCell, teardownWatchCell } from '../src/watch_cell_setup';
-import { enableDeepWatch, runDeepWatch } from '../src/deep_watch_run';
+import { enableDeepWatch, getRunConnectorIds, runDeepWatch } from '../src/deep_watch_run';
 import { summarizeDiscrimination } from '../src/evaluators';
 import type { GateOutcome } from '../src/evaluators';
 
@@ -37,6 +37,8 @@ interface DeepWatchEvalContext {
   esClient: EsClient;
   fetch: HttpHandler;
   log: ToolingLog;
+  /** Model under test; forwarded to the watch so the sweep actually varies it. */
+  connector: { id: string };
 }
 
 /**
@@ -74,7 +76,7 @@ const scoreFromTask = (name: string, pick: (output: DeepWatchTaskOutput) => numb
 evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, () => {
   evaluate(
     'runs forensic reconstruction exactly when triage confirms an incident',
-    async ({ executorClient, esClient, fetch, log }: DeepWatchEvalContext) => {
+    async ({ executorClient, esClient, fetch, log, connector }: DeepWatchEvalContext) => {
       // Self-provision the cell: kill-chain events + one AD alert per row.
       // Seeding always covers every row so a filtered run still executes
       // against the full shared cell -- the cross-row contamination that
@@ -127,7 +129,25 @@ evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, ()
                 fetch,
                 log,
                 attackDiscoveryAlertId: row.id,
+                connectorId: connector.id,
               });
+
+              // Asking for a connector is not proof of using it. If routing
+              // regresses, every model collapses onto the default connector and
+              // a cross-model sweep silently measures one model N times, so
+              // refuse to score a run that did not use the model under test.
+              const usedConnectors = await getRunConnectorIds({
+                esClient,
+                workflowExecutionId: result.executionId,
+              });
+              const wrongConnectors = usedConnectors.filter((id) => id !== connector.id);
+              if (wrongConnectors.length > 0) {
+                throw new Error(
+                  `Model routing broken for ${row.id}: asked for ${connector.id} but the ` +
+                    `ai.agent steps used ${wrongConnectors.join(', ')}. Refusing to score a ` +
+                    `run that did not exercise the model under test.`
+                );
+              }
 
               const outcome: GateOutcome = {
                 id: row.id,
