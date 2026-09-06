@@ -10,7 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import {
@@ -482,6 +482,12 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * on the freshly-flushed step IDs.
    */
   public async flush(): Promise<void> {
+    if (isTerminalStatus(this.state.getWorkflowExecutionStatus())) {
+      await this.flushStepChanges();
+      await this.state.flushWorkflowDoc();
+      return;
+    }
+
     await Promise.all([this.state.flushWorkflowDoc(), this.flushStepChanges()]);
   }
 
