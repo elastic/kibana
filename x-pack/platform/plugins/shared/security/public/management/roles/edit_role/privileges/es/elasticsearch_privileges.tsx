@@ -290,7 +290,6 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             </EuiText>
             <DataSourcePrivileges
               role={role}
-              indexPatterns={indexPatterns}
               validator={validator}
               onChange={onChange}
               onAdd={this.addDataSourcePrivilege}

@@ -32,7 +32,6 @@ const toOption = (value: string): EuiComboBoxOptionOption => ({ label: value });
 interface Props {
   formIndex: number;
   dataSourcePrivilege: RoleDataSourcePrivilege;
-  indexPatterns: string[];
   availableDataSourcePrivileges: RoleDataSourcePrivilege['privileges'];
   onChange: (dataSourcePrivilege: RoleDataSourcePrivilege) => void;
   onDelete: () => void;
@@ -43,7 +42,6 @@ interface Props {
 export const DataSourcePrivilegeForm = ({
   formIndex,
   dataSourcePrivilege,
-  indexPatterns,
   availableDataSourcePrivileges,
   onChange,
   onDelete,
@@ -115,7 +113,7 @@ export const DataSourcePrivilegeForm = ({
                 >
                   <EuiComboBox
                     data-test-subj={`dataSourcesInput${formIndex}`}
-                    options={indexPatterns.map(toOption)}
+                    noSuggestions
                     selectedOptions={dataSourcePrivilege.names.map(toOption)}
                     onCreateOption={onCreateDataSourceOption}
                     onChange={onDataSourceChange}

@@ -19,7 +19,6 @@ import type { RoleValidator } from '../../validate_role';
 
 interface Props {
   role: Role;
-  indexPatterns: string[];
   onChange: (role: Role) => void;
   onAdd: () => void;
   validator: RoleValidator;
@@ -57,7 +56,6 @@ const updateGlobalWithDataSourcePrivileges = (
 
 export const DataSourcePrivileges = ({
   role,
-  indexPatterns,
   onChange,
   onAdd,
   validator,
@@ -118,7 +116,6 @@ export const DataSourcePrivileges = ({
           key={i}
           formIndex={i}
           validator={validator}
-          indexPatterns={indexPatterns}
           dataSourcePrivilege={dataSourcePrivilege}
           availableDataSourcePrivileges={AVAILABLE_DATA_SOURCE_PRIVILEGES}
           onChange={onDataSourcePrivilegeChange(i)}
