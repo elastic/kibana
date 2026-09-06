@@ -8,5 +8,6 @@
 export type {
   SurfaceProjectorDefinition,
   SurfaceProjection,
+  SurfaceProjectionAsset,
   SurfaceProjectionInput,
 } from './type_definition';

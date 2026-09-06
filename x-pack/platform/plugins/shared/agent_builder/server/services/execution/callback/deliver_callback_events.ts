@@ -26,6 +26,7 @@ import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import { serializeExecutionError } from '../execution_runner';
 import type { SurfaceProjectionServiceStart } from '../../surface_projection';
 import type { CallbackDeliveryService } from './callback_delivery_service';
+import type { ProjectedDelivery } from './project_round_for_surface';
 import { getSurfaceProjector, projectRoundForSurface } from './project_round_for_surface';
 
 /**
@@ -73,17 +74,18 @@ export const deliverCallbackEvents = ({
     const isTerminal = isRoundCompleteEvent(event);
     // Projection applies to the terminal reply only; see the surface-projection spike for
     // why per-message projection needs the external host to post more than once per turn.
-    const payloadEvent$ =
+    const delivery$ =
       isRoundCompleteEvent(event) && projector
         ? from(projectRoundForSurface({ execution, event, projector, logger }))
-        : of(event);
+        : of({ event } as ProjectedDelivery);
 
-    const delivery = payloadEvent$.pipe(
-      concatMap((deliveredEvent) =>
+    const delivery = delivery$.pipe(
+      concatMap(({ event: deliveredEvent, projection }) =>
         callbackDeliveryService.makeCallbackRequest({
           payload: {
             execution_id: execution.executionId,
             event: deliveredEvent,
+            ...(projection ? { projection } : {}),
             ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
           },
           transport,
