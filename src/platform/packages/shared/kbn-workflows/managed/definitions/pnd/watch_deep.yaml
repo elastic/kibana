@@ -1,14 +1,14 @@
 version: "1"
-name: Deep Watch
+name: Forensic Watch
 description: >
-  Deep Watch. Invokable investigation worker: given an attack discovery
-  alert id it triages via the alert-analysis skill and returns
-  isIncident, rationale, and proposal. On a confirmed incident it also
-  reconstructs the attack via the endpoint-forensic-analysis skill and
-  returns patient zero, an attack timeline, and the extracted IoCs.
-  Still runs standalone from an alert or manual trigger. The
-  orchestrated Attack Discovery lifecycle this watch used to carry now
-  runs on the Watch Floor (ADR-015).
+  Forensic Watch. Invokable investigation worker: given an attack
+  discovery alert id it extracts the affected host, runs
+  endpoint-forensic-analysis, and returns isIncident, rationale,
+  proposal, and the containment it recommends. Stops without forensics
+  when no host.name is extractable from the attack or alert. Still runs
+  standalone from an alert or manual trigger. The orchestrated Attack
+  Discovery lifecycle this watch used to carry now runs on the Watch
+  Floor (ADR-015).
 enabled: false
 tags:
   - watch
@@ -30,33 +30,45 @@ triggers:
             Space this run investigates in. Unset on a standalone alert
             trigger, which then uses the workflow space.
       additionalProperties: false
+# JSON Schema form, not the legacy `- name:/type:` list, because the legacy form
+# hardcodes array items to `anyOf: [string, number, boolean]`
+# (`convertLegacyFieldToJsonSchemaProperty`). `recommendedActions` carries objects,
+# so under the legacy form every element failed output validation.
 outputs:
-  - name: isIncident
-    type: boolean
-  - name: rationale
-    type: string
-  - name: proposal
-    type: string
-  # Forensic reconstruction, additive. Emitted empty on the isIncident: false path,
-  # where `reconstruct_attack` never ran. `outputs` uses the legacy input format,
-  # whose type union is string | number | boolean | choice | array — there is no
-  # `object`, so the timeline is a rendered string rather than a nested structure.
-  - name: patientZero
-    type: string
-  - name: attackTimeline
-    type: string
-  - name: iocs
-    type: array
+  properties:
+    isIncident:
+      type: boolean
+    # Why this verdict was reached: `assessed` = forensics ran;
+    # `no_host_resolved` = the host gate could not resolve an affected host, so
+    # nothing was assessed. Surfaced because a silently-false isIncident on a
+    # data-shape mismatch is indistinguishable from a genuine "not an incident"
+    # verdict — ops and evals must be able to tell them apart.
+    gate:
+      type: string
+      enum:
+        - assessed
+        - no_host_resolved
+    rationale:
+      type: string
+    proposal:
+      type: string
+    # Recommendations only. Nothing in this repo executes them: the Floor renders
+    # them on the promote gate so the analyst sees what containment the forensics
+    # justify before escalating.
+    recommendedActions:
+      type: array
+      # Deliberately only `object`, not the full action shape. The agent step's
+      # `schema` already constrains what the model emits; restating it here would
+      # fail the whole run over one missing field on a list that is advisory
+      # anyway. The UI validates each action's structure before rendering it.
+      items:
+        type: object
 consts:
-  # Liquid has no array literal, so `| default: []` yields no value rather than an
-  # empty array. A const is the only way to spell an empty-array fallback — same
-  # reason and same shape as `consts.no_rows` in rule_tuning.yaml.
-  no_iocs: []
   watch_policy:
     settingsVersion: __WATCH_SETTINGS_VERSION__
     # Persisted plumbing only; runtime autonomy is request-time from template values.
     autonomy: "__WATCH_AUTONOMY_LEVEL__"
-    mandate: Deep investigation & hunts
+    mandate: Endpoint forensics
     autonomyLevel: manual
     handoff: records
     onDemand: true
@@ -83,12 +95,10 @@ consts:
     # Capabilities projected from executable steps — see Watch Floor.
     callables: []
 steps:
-  # kibana-tjil.7 / B1. Resolve the derived investigation conversation so
-  # triage_alerts writes somewhere PND can find, not a random thread.
-  # continue so a standalone alert with no attack-discovery id still
-  # reaches triage. The fifth worker namespace (C5 / .11) is not here
-  # yet — investigationConversationId is the derived conversation this
-  # worker owns until then.
+  # Conversation ids and Attack Discovery markdown only. Host extraction
+  # is the YAML steps below so this watch can skip forensics when none
+  # is extractable. continue so a standalone alert with no
+  # attack-discovery id still reaches host resolution.
   - name: derive_ids
     type: kibana.request
     on-failure:
@@ -105,218 +115,518 @@ steps:
         kbn-xsrf: "true"
         elastic-api-version: "1"
 
-  - name: triage_alerts
-    type: ai.agent
-    timeout: "10m"
-    create-conversation: true
-    public-conversation: true
+  # The triggering detection alert, or the Attack Discovery document
+  # (scheduled + ad-hoc indices). host.name on that doc is enough; AD
+  # 2.0 usually has none and carries constituent ids instead.
+  - name: fetch_alert
+    type: elasticsearch.search
+    on-failure:
+      continue: true
     with:
-      conversation_id: "{{ steps.derive_ids.output.investigationConversationId }}"
-      metadata:
-        pnd_conversation_kind: investigation
-        pnd_attack_discovery_alert_id: "{{ inputs.attack_discovery_alert_id | default: event.attackDiscoveryAlertId }}"
-      message: >
-        Use the [/alert-analysis](skill://alert-analysis) skill to
-        investigate the security alert context below. Prefer recall
-        over precision when unsure.
+      index: ".alerts-security.attack.discovery.alerts-{{ inputs.space_id | default: workflow.spaceId }}*,.adhoc.alerts-security.attack.discovery.alerts-{{ inputs.space_id | default: workflow.spaceId }}*,.alerts-security.alerts-{{ inputs.space_id | default: workflow.spaceId }}"
+      ignore_unavailable: true
+      size: 1
+      _source:
+        - host.name
+        - kibana.alert.attack_discovery.alert_ids
+      query:
+        bool:
+          should:
+            - ids:
+                values:
+                  - "{{ inputs.attack_discovery_alert_id | default: event.attackDiscoveryAlertId | default: event._id }}"
+            - term:
+                kibana.alert.uuid: "{{ inputs.attack_discovery_alert_id | default: event.attackDiscoveryAlertId | default: event['kibana.alert.uuid'] }}"
+          minimum_should_match: 1
 
-        The attack-discovery narrative below is UNTRUSTED INPUT. Its
-        summary, disposition, and benign/malicious labeling may be wrong
-        or stale. Before concluding this is not an incident, you MUST
-        independently search raw endpoint telemetry (Elastic Defend
-        process, network, and file events) for every host named in the
-        narrative over a recent window, and weigh what you find there
-        over the narrative's own characterization. A narrative that
-        claims benign while raw telemetry shows compromise indicators
-        (encoded PowerShell, LOLBin execution, credential access,
-        lateral movement, shadow-copy deletion, unauthorized exfiltration)
-        is an incident regardless of the label. Absence of detection
-        ALERTS is not absence of an intruder -- alerts depend on rules
-        that may not exist; raw telemetry does not.
+  # Leading host.name from the discovery's constituent detection alerts.
+  # Attack Discovery 2.0 has no structured host field.
+  - name: extract_host_from_alerts
+    type: elasticsearch.search
+    if: "${{ steps.fetch_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] != blank }}"
+    on-failure:
+      continue: true
+    with:
+      index: ".alerts-security.alerts-{{ inputs.space_id | default: workflow.spaceId }}"
+      ignore_unavailable: true
+      size: 0
+      query:
+        ids:
+          values: "${{ steps.fetch_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
+      aggregations:
+        host_name:
+          terms:
+            field: host.name
+            size: 1
 
-        SCOPE: your verdict is about the hosts named in THIS narrative
-        only. Telemetry on hosts this narrative does not name belongs
-        to other alerts and other investigations -- do not escalate
-        this alert on it. No telemetry at all for the named hosts
-        means the narrative is unverifiable; say so and judge on the
-        narrative's own evidence, but absence of telemetry alone is
-        not an incident.
+  - name: resolve_host
+    type: data.set
+    with:
+      host_name: "{{ event.host.name | default: event['host.name'] | default: steps.fetch_alert.output.hits.hits[0]._source.host.name | default: steps.extract_host_from_alerts.output.aggregations.host_name.buckets[0].key | default: '' }}"
 
-        {{ steps.derive_ids.output.attackDiscoveryMarkdown }}
-
-        Alert / event context:
-        {{ event | json }}
-
-
-        Assess whether this represents a real security incident that
-        warrants escalation. End your response by stating plainly
-        (a) what you will propose for human approval, (b) the exact
-        change or action that approval authorizes, and (c) what
-        happens if it is declined. Return that same statement in
-        `proposal`.
-      schema:
-        type: object
-        properties:
-          isIncident:
-            type: boolean
-            description: >
-              True only when this represents a real security incident
-              that warrants escalation.
-          rationale:
-            type: string
-            maxLength: 4000
-            description: Why this is, or is not, a real incident
-          proposal:
-            type: string
-            maxLength: 2000
-            description: >
-              One short paragraph stating plainly (a) what you propose
-              for human approval, (b) the exact change or action
-              approval authorizes, and (c) what happens if it is
-              declined.
-        required:
-          - isIncident
-          - rationale
-          - proposal
-  # Forensic reconstruction, gated on the triage verdict. Deep Watch answers
-  # "is this real?" above; this answers "what happened, in what order, and what
-  # should I pivot on?" — via the read-only endpoint-forensic-analysis skill.
-  #
-  # Gated, not unconditional: running reconstruction on a dismissed discovery
-  # spends tokens on noise and puts cases with no ground truth into the
-  # evaluation record.
-  #
-  # `continue: true` is load-bearing. The Watch Floor reads
-  # `steps.investigate.output.isIncident` to decide whether to escalate; a failed
-  # forensic step must never fail the run out from under a true-positive verdict
-  # and read downstream as "not an incident". Reconstruction is additive
-  # evidence, never a veto.
-  - name: reconstruct_if_incident
+  - name: when_host_known
     type: if
-    condition: "steps.triage_alerts.output.structured_output.isIncident : true"
+    condition: "${{ steps.resolve_host.output.host_name != blank }}"
     steps:
-      # Same derived conversation as triage_alerts, and create-conversation is
-      # false because that step already opened it — the analyst reads one
-      # investigation thread, not two.
-      - name: reconstruct_attack
+      - name: forensic_analysis
         type: ai.agent
+        agent-id: alertzero-thin-agent
         timeout: "15m"
-        create-conversation: false
-        on-failure:
-          continue: true
+        create-conversation: true
+        public-conversation: true
         with:
           conversation_id: "{{ steps.derive_ids.output.investigationConversationId }}"
+          configuration_overrides:
+            enable_elastic_capabilities: false
+            skill_ids:
+              - endpoint-forensic-analysis
           metadata:
             pnd_conversation_kind: investigation
             pnd_attack_discovery_alert_id: "{{ inputs.attack_discovery_alert_id | default: event.attackDiscoveryAlertId }}"
           message: >
-            Use the
-            [/endpoint-forensic-analysis](skill://endpoint-forensic-analysis)
-            skill to reconstruct this confirmed incident from Elastic Defend
-            telemetry. The triage step already established that this is a real
-            incident — do not re-litigate that verdict, reconstruct what
-            happened.
+            Use the [/endpoint-forensic-analysis](skill://endpoint-forensic-analysis)
+            skill.
+
+            I have a ransomware alert on {{ steps.resolve_host.output.host_name }}.
+            Perform forensic analysis and extract all IoCs, then check if
+            other hosts are affected.
+
+            Do not execute Endpoint response actions (isolate, kill-process,
+            retrieve) and do not run osquery. This investigation is read-only
+            telemetry reconstruction.
+
+            Attack Discovery context:
             {{ steps.derive_ids.output.attackDiscoveryMarkdown }}
-            Triage assessment:
-            {{ steps.triage_alerts.output.structured_output.rationale }}
+
             Alert / event context:
             {{ event | json }}
-            Establish three things, scoped to the hosts named above:
-            (a) patient zero — the earliest compromised host, with its timestamp
-            and the delivery vector; (b) a chronological attack timeline, as an
-            ordered timestamp-labeled sequence of events, host-scoped, including
-            any lateral movement between named hosts; and (c) the indicators of
-            compromise worth pivoting on, each rendered as a single
-            "type | value | context" string.
-            Cite the index and ES|QL query behind each claim. Where telemetry
-            does not support a conclusion, say so rather than inferring it.
+
+            After the forensic reconstruction, assess whether this represents
+            a real security incident that warrants escalation. Put the
+            forensic narrative (timeline, IoCs, other affected hosts, data
+            gaps) in `rationale`. End your response by stating plainly
+            (a) what you will propose for human approval, (b) the exact
+            change or action that approval authorizes, and (c) what
+            happens if it is declined. Return that same statement in
+            `proposal`.
+
+            If the telemetry implicates other hosts whose involvement you did
+            not fully reconstruct, name them in `followUpHosts` with the
+            evidence that leaves each one unexplained. Name a host only when
+            you can cite that evidence; leave the list empty otherwise.
+
+            Finally, put the containment this reconstruction justifies in
+            `recommendedActions`, per the skill's "Recommend response actions"
+            step. Nothing executes them — a human reads them on the escalation
+            gate — so recommend only what you can tie to a finding above, and
+            return an empty list when the evidence justifies none.
+
+            Scoping rule for `isIncident` (binding): the verdict applies to
+            {{ steps.resolve_host.output.host_name }} and to hosts named in the
+            Attack Discovery context above ONLY. Telemetry on OTHER hosts —
+            including anything your queries surface in shared indices — may go
+            in `rationale` and `followUpHosts`, but must NOT by itself set
+            `isIncident` true. A host with no signal of its own never inherits
+            an incident verdict from another host's kill chain.
           schema:
             type: object
             properties:
-              patientZero:
+              isIncident:
+                type: boolean
+                description: >
+                  True only when this represents a real security incident
+                  that warrants escalation. Scoped to the host under
+                  investigation and hosts named in the Attack Discovery
+                  context — never inherited from unrelated hosts in shared
+                  telemetry.
+              rationale:
+                type: string
+                maxLength: 16000
+                description: >
+                  Forensic narrative: timeline, IoCs, other affected hosts,
+                  and why this is or is not a real incident.
+              proposal:
                 type: string
                 maxLength: 2000
                 description: >
-                  Earliest compromised host, its first-seen timestamp, and the
-                  delivery-vector hypothesis. States plainly when telemetry
-                  cannot establish it.
-              attackTimeline:
-                type: string
-                maxLength: 8000
-                description: >
-                  Chronological, timestamp-labeled, host-scoped sequence of
-                  attacker actions, including lateral movement between hosts.
-              iocs:
+                  One short paragraph stating plainly (a) what you propose
+                  for human approval, (b) the exact change or action
+                  approval authorizes, and (c) what happens if it is
+                  declined.
+              followUpHosts:
                 type: array
-                maxItems: 100
-                description: Indicators worth pivoting on.
-                # Flat strings, not objects: the workflow `outputs` contract
-                # below declares `iocs` as the legacy `array` type, whose
-                # elements validate as string | number | boolean. An array of
-                # IOC objects passes this agent schema and then fails
-                # `emit_result` output validation at runtime, so the indicator
-                # is rendered here instead of being structured and flattened
-                # later.
+                maxItems: 3
+                description: >
+                  Hosts, other than the one investigated above, carrying
+                  concrete unexplained evidence of this attack. A generally
+                  advisable next step is not a lead. Default is an empty list.
                 items:
-                  type: string
-                  maxLength: 600
-                  description: >
-                    One indicator as "type | value | context" — for example
-                    "ip | 185.220.101.42 | C2 contacted by powershell.exe on
-                    WKSTN-RECV01". Indicator kinds include hash, ip, domain,
-                    path, registry_key, and process.
+                  type: object
+                  properties:
+                    host:
+                      type: string
+                      description: The host.name to reconstruct next.
+                    reason:
+                      type: string
+                      description: >
+                        The observation that leaves this host unexplained
+                        (shared IoC, timestamp, event, or alert id).
+                  required:
+                    - host
+                    - reason
+              recommendedActions:
+                type: array
+                maxItems: 8
+                description: >
+                  Containment this reconstruction justifies, for a human to
+                  approve. Nothing here is executed. Empty when the evidence
+                  justifies none.
+                items:
+                  type: object
+                  properties:
+                    action_type:
+                      type: string
+                      description: >
+                        Scoped to what Elastic can action today. An Endpoint
+                        response action outside this list (kill-process,
+                        suspend-process, execute, get-file, upload, runscript,
+                        memory-dump) is unsupported, so recommending it would
+                        propose containment no executor accepts.
+                      enum:
+                        - isolate_host
+                        - release_host
+                        - scan_host
+                        - list_running_processes
+                        - hunt_indicator
+                        - create_case
+                        - block_indicator
+                        - revoke_user_account
+                    execution:
+                      type: string
+                      enum:
+                        - kibana_api
+                        - manual
+                      description: >
+                        kibana_api when Kibana could carry the action out on
+                        approval, manual when the analyst performs it outside
+                        Kibana.
+                    capability_ref:
+                      type: string
+                      description: >
+                        The Kibana capability that would carry the action out.
+                        Omitted on a manual action.
+                    title:
+                      type: string
+                      maxLength: 200
+                      description: Short imperative naming the action.
+                    rationale:
+                      type: string
+                      maxLength: 1000
+                      description: The finding that justifies this action.
+                    priority:
+                      type: string
+                      enum:
+                        - immediate
+                        - investigation
+                        - hardening
+                    targets:
+                      type: object
+                      description: >
+                        What the action touches. Every field is present; an
+                        empty array means the action names none of that kind.
+                      properties:
+                        hosts:
+                          type: array
+                          maxItems: 20
+                          items:
+                            type: string
+                        users:
+                          type: array
+                          maxItems: 20
+                          items:
+                            type: string
+                        ips:
+                          type: array
+                          maxItems: 20
+                          items:
+                            type: string
+                        alert_ids:
+                          type: array
+                          maxItems: 50
+                          items:
+                            type: string
+                      required:
+                        - hosts
+                        - users
+                        - ips
+                        - alert_ids
+                  required:
+                    - action_type
+                    - execution
+                    - title
+                    - rationale
+                    - priority
+                    - targets
             required:
-              - patientZero
-              - attackTimeline
-              - iocs
-  - name: record_reasoning
-    type: data.set
-    with:
-      reasoning:
-        summary: >-
-          {{ steps.triage_alerts.output.structured_output.rationale
-          | default: "Deep Watch triage completed." }}
-        sections:
-          - title: Incident
-            body: >-
-              {{ steps.triage_alerts.output.structured_output.isIncident
-              | default: "n/a" }}
-          - title: Proposal
-            body: >-
-              {{ steps.triage_alerts.output.structured_output.proposal
-              | default: "n/a" }}
-          - title: Patient zero
-            body: >-
-              {{ steps.reconstruct_attack.output.structured_output.patientZero
-              | default: "Not reconstructed." }}
-          - title: Attack timeline
-            body: >-
-              {{ steps.reconstruct_attack.output.structured_output.attackTimeline
-              | default: "Not reconstructed." }}
-          # Indicators belong in the durable record, not only in `emit_result`:
-          # an Evaluation Record that a reviewer can label has to carry the
-          # pivots the forensic step produced. Joined to one line because a
-          # section body is a string, and `join` on the empty-array fallback
-          # yields an empty string rather than dropping the section.
-          - title: Indicators of compromise
-            body: >-
-              {{ steps.reconstruct_attack.output.structured_output.iocs
-              | default: consts.no_iocs | join: "; " }}
+              - isIncident
+              - rationale
+              - proposal
+      # "Is it a host?" is answered by the data, not the model: keep only the
+      # leads that actually carry telemetry or alerts, so a hallucinated name
+      # never costs a second agent pass. Excludes the host already covered.
+      - name: verify_lead_hosts
+        type: elasticsearch.search
+        if: "${{ steps.forensic_analysis.output.structured_output.followUpHosts != blank }}"
+        on-failure:
+          continue: true
+        with:
+          index: "logs-endpoint.events.*,.alerts-security.alerts-{{ inputs.space_id | default: workflow.spaceId }}"
+          ignore_unavailable: true
+          allow_no_indices: true
+          size: 0
+          query:
+            bool:
+              filter:
+                - terms:
+                    host.name: "${{ steps.forensic_analysis.output.structured_output.followUpHosts | map: 'host' }}"
+              must_not:
+                - term:
+                    host.name: "{{ steps.resolve_host.output.host_name }}"
+          aggregations:
+            lead_hosts:
+              terms:
+                field: host.name
+                size: 3
 
-  - name: emit_result
-    type: workflow.output
-    status: completed
-    with:
-      isIncident: "${{ steps.triage_alerts.output.structured_output.isIncident }}"
-      rationale: "{{ steps.triage_alerts.output.structured_output.rationale }}"
-      proposal: "{{ steps.triage_alerts.output.structured_output.proposal }}"
-      # Empty on the isIncident: false path, and on a forensic step that failed
-      # under `continue: true`. Every fallback is a literal — an unguarded miss
-      # would render the substring the platform smoke test forbids.
-      patientZero: >-
-        {{ steps.reconstruct_attack.output.structured_output.patientZero
-        | default: "" }}
-      attackTimeline: >-
-        {{ steps.reconstruct_attack.output.structured_output.attackTimeline
-        | default: "" }}
-      iocs: "${{ steps.reconstruct_attack.output.structured_output.iocs | default: consts.no_iocs }}"
+      # One extra pass, over every confirmed lead at once. Leads this pass
+      # raises are not followed, so the investigation stays bounded at one
+      # level regardless of how much the attack sprawls.
+      - name: follow_up_analysis
+        type: ai.agent
+        agent-id: alertzero-thin-agent
+        if: "${{ steps.verify_lead_hosts.output.aggregations.lead_hosts.buckets != blank }}"
+        timeout: "10m"
+        create-conversation: true
+        public-conversation: true
+        with:
+          conversation_id: "{{ steps.derive_ids.output.investigationConversationId }}"
+          configuration_overrides:
+            enable_elastic_capabilities: false
+            skill_ids:
+              - endpoint-forensic-analysis
+          metadata:
+            pnd_conversation_kind: investigation
+            pnd_attack_discovery_alert_id: "{{ inputs.attack_discovery_alert_id | default: event.attackDiscoveryAlertId }}"
+          message: >
+            Continue this investigation with the
+            [/endpoint-forensic-analysis](skill://endpoint-forensic-analysis)
+            skill.
+
+            Your pass on {{ steps.resolve_host.output.host_name }} left these
+            hosts unexplained, and each is confirmed present in telemetry:
+            {% for bucket in steps.verify_lead_hosts.output.aggregations.lead_hosts.buckets %}
+            - {{ bucket.key }}
+            {% endfor %}
+
+            Reconstruct the timeline on each, correlate it against the IoCs you
+            already extracted, and state whether each host is part of the same
+            attack.
+
+            Do not execute Endpoint response actions (isolate, kill-process,
+            retrieve) and do not run osquery. This investigation is read-only
+            telemetry reconstruction.
+
+            Return a consolidated `rationale` covering
+            {{ steps.resolve_host.output.host_name }} and these hosts together,
+            then reassess `isIncident` and restate `proposal` for the whole
+            attack rather than for these hosts alone.
+
+            Scoping rule for `isIncident` (binding): the follow-up reassessment
+            must set `isIncident` true ONLY for evidence ON a named lead host
+            or on {{ steps.resolve_host.output.host_name }}. Consolidating
+            hosts into one narrative does NOT consolidate their verdicts: a
+            host whose own telemetry shows no attack signal stays
+            not-an-incident even when the attack narrative includes it. If a
+            lead host turns out clean, say so explicitly in `rationale` and
+            do not let the lead's presence raise the verdict.
+
+            Restate `recommendedActions` for the whole attack too: this list
+            supersedes the one from your first pass, so carry forward the
+            recommendations that still stand and add the ones these hosts
+            justify. Nothing executes them.
+          schema:
+            type: object
+            properties:
+              isIncident:
+                type: boolean
+                description: >
+                  True only when this represents a real security incident
+                  that warrants escalation.
+              rationale:
+                type: string
+                maxLength: 16000
+                description: >
+                  Consolidated forensic narrative across every host
+                  investigated: timeline, IoCs, correlation, and data gaps.
+              proposal:
+                type: string
+                maxLength: 2000
+                description: >
+                  One short paragraph stating plainly (a) what you propose
+                  for human approval, (b) the exact change or action
+                  approval authorizes, and (c) what happens if it is
+                  declined.
+              recommendedActions:
+                type: array
+                maxItems: 8
+                description: >
+                  Containment the whole attack justifies, superseding the
+                  first pass. Nothing here is executed. Empty when the
+                  evidence justifies none.
+                items:
+                  type: object
+                  properties:
+                    action_type:
+                      type: string
+                      description: >
+                        Scoped to what Elastic can action today. An Endpoint
+                        response action outside this list (kill-process,
+                        suspend-process, execute, get-file, upload, runscript,
+                        memory-dump) is unsupported, so recommending it would
+                        propose containment no executor accepts.
+                      enum:
+                        - isolate_host
+                        - release_host
+                        - scan_host
+                        - list_running_processes
+                        - hunt_indicator
+                        - create_case
+                        - block_indicator
+                        - revoke_user_account
+                    execution:
+                      type: string
+                      enum:
+                        - kibana_api
+                        - manual
+                      description: >
+                        kibana_api when Kibana could carry the action out on
+                        approval, manual when the analyst performs it outside
+                        Kibana.
+                    capability_ref:
+                      type: string
+                      description: >
+                        The Kibana capability that would carry the action out.
+                        Omitted on a manual action.
+                    title:
+                      type: string
+                      maxLength: 200
+                      description: Short imperative naming the action.
+                    rationale:
+                      type: string
+                      maxLength: 1000
+                      description: The finding that justifies this action.
+                    priority:
+                      type: string
+                      enum:
+                        - immediate
+                        - investigation
+                        - hardening
+                    targets:
+                      type: object
+                      description: >
+                        What the action touches. Every field is present; an
+                        empty array means the action names none of that kind.
+                      properties:
+                        hosts:
+                          type: array
+                          maxItems: 20
+                          items:
+                            type: string
+                        users:
+                          type: array
+                          maxItems: 20
+                          items:
+                            type: string
+                        ips:
+                          type: array
+                          maxItems: 20
+                          items:
+                            type: string
+                        alert_ids:
+                          type: array
+                          maxItems: 50
+                          items:
+                            type: string
+                      required:
+                        - hosts
+                        - users
+                        - ips
+                        - alert_ids
+                  required:
+                    - action_type
+                    - execution
+                    - title
+                    - rationale
+                    - priority
+                    - targets
+            required:
+              - isIncident
+              - rationale
+              - proposal
+
+      - name: record_reasoning
+        type: data.set
+        with:
+          reasoning:
+            summary: >-
+              {{ steps.follow_up_analysis.output.structured_output.rationale
+              | default: steps.forensic_analysis.output.structured_output.rationale
+              | default: "Forensic Watch analysis completed." }}
+            sections:
+              - title: Incident
+                body: >-
+                  {{ steps.follow_up_analysis.output.structured_output.isIncident
+                  | default: steps.forensic_analysis.output.structured_output.isIncident
+                  | default: "n/a" }}
+              - title: Proposal
+                body: >-
+                  {{ steps.follow_up_analysis.output.structured_output.proposal
+                  | default: steps.forensic_analysis.output.structured_output.proposal
+                  | default: "n/a" }}
+              - title: Follow-up hosts
+                body: >-
+                  {% for bucket in steps.verify_lead_hosts.output.aggregations.lead_hosts.buckets %}{{ bucket.key }} {% else %}None{% endfor %}
+              - title: Recommended actions
+                body: >-
+                  {{ steps.follow_up_analysis.output.structured_output.recommendedActions
+                  | default: steps.forensic_analysis.output.structured_output.recommendedActions
+                  | json }}
+
+      # The follow-up pass supersedes the first when it ran: its outputs are
+      # consolidated across every host. Floor still sees the same three
+      # outputs either way.
+      - name: emit_result
+        type: workflow.output
+        status: completed
+        with:
+          isIncident: "${{ steps.follow_up_analysis.output.structured_output.isIncident | default: steps.forensic_analysis.output.structured_output.isIncident }}"
+          gate: assessed
+          rationale: "{{ steps.follow_up_analysis.output.structured_output.rationale | default: steps.forensic_analysis.output.structured_output.rationale }}"
+          proposal: "{{ steps.follow_up_analysis.output.structured_output.proposal | default: steps.forensic_analysis.output.structured_output.proposal }}"
+          recommendedActions: "${{ steps.follow_up_analysis.output.structured_output.recommendedActions | default: steps.forensic_analysis.output.structured_output.recommendedActions }}"
+    else:
+      - name: emit_no_host
+        type: workflow.output
+        status: completed
+        with:
+          isIncident: false
+          gate: no_host_resolved
+          rationale: >
+            Forensic Watch skipped: no host.name on the triggering alert
+            or on the Attack Discovery's constituent detection alerts.
+          proposal: >
+            No forensic investigation is proposed because no affected host
+            could be identified.
+          # Explicitly empty, not absent: nothing was reconstructed, so there is
+          # nothing to contain — which is a different claim from "not assessed".
+          recommendedActions: []
