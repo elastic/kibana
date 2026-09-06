@@ -22,7 +22,7 @@ export const PND_RULE_PREVIEW_WORKFLOW = {
   id: PND_RULE_PREVIEW_WORKFLOW_ID,
   management: PND_RULE_WORKFLOW_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 5,
   yaml: RULE_PREVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -40,6 +40,6 @@ export const PND_RULE_CREATION_WORKFLOW = {
   id: PND_RULE_CREATION_WORKFLOW_ID,
   management: PND_RULE_WORKFLOW_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 4,
   yaml: RULE_CREATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;

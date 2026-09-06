@@ -57,7 +57,12 @@ export const ensureJudgeConnectorAccessible = async ({
  * behaviour contract is present, not the exact wording (the wording itself is pinned by
  * workflow_contract.test.ts against the checked-in definition).
  */
-export const REQUIRED_STEP_IDS = [DRAFT_STEP_ID, REVIEW_STEP_ID] as const;
+export const REQUIRED_PROMPT_CONTRACT = [
+  { name: 'the quality gate (Canary Tripped)', pattern: /do NOT call the tool/i },
+  { name: 'the ATT&CK mapping instruction (MITRE Accuracy)', pattern: /rule\.threat/i },
+];
+
+const REQUIRED_STEP_IDS = [DRAFT_STEP_ID, REVIEW_STEP_ID] as const;
 
 /**
  * Parses the installed workflow's step names out of its yaml without a yaml dependency:
@@ -131,6 +136,23 @@ export const assertWorkflowInstalled = async ({
         `${missing.join(', ')} (found: ${stepNames.join(', ')}). The eval client and evaluators ` +
         `address steps by id — update DRAFT_STEP_ID / REVIEW_STEP_ID in src/constants.ts when ` +
         `the managed yaml renames them.`
+    );
+  }
+
+  // Behaviour contract: the installed document must carry the quality gate and the ATT&CK
+  // mapping instruction the Canary Tripped and MITRE Accuracy evaluators score against.
+  // `versionStrategy: 'auto'` only reinstalls a changed definition when Kibana restarts, so a
+  // stack booted before a yaml bump silently serves the OLD prompt while the checkout shows the
+  // new one — the scores then measure a workflow that is not under test. Fail setup instead.
+  const missingContract = REQUIRED_PROMPT_CONTRACT.filter(
+    ({ pattern }) => !pattern.test(workflow.yaml)
+  );
+  if (missingContract.length > 0) {
+    throw new Error(
+      `Managed workflow "${RULE_CREATION_WORKFLOW_ID}" is installed but is missing ` +
+        `${missingContract.map(({ name }) => name).join(', ')}. The running stack is serving an ` +
+        `older revision than this checkout (managed definitions reinstall on Kibana start when ` +
+        `their version bumps). Restart Kibana against this build before trusting these scores.`
     );
   }
 

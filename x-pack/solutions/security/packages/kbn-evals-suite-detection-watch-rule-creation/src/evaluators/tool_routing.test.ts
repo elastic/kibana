@@ -5,65 +5,18 @@
  * 2.0.
  */
 
-import type { Client as EsClient } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { RuleCreationResult } from '../rule_creation_client';
-import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
+import { DRAFT_STEP_ID } from '../constants';
 import {
   assertToolSpansReachable,
   createToolRoutingEvaluator,
   extractConversationId,
-  toolSpanJoinClauses,
 } from './tool_routing';
 
-const log = {
-  info: jest.fn(),
-  debug: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
-} as unknown as ToolingLog;
-
-const esWith = (
-  handler: (query: string) => {
-    columns: Array<{ name: string; type: string }>;
-    values: Array<Array<number | string | null>>;
-  }
-) =>
+const result = (overrides: Record<string, unknown> = {}) =>
   ({
-    esql: { query: jest.fn(async ({ query }: { query: string }) => handler(query)) },
-  } as unknown as EsClient);
-
-const counts = (tool: number, required: number) => ({
-  columns: [
-    { name: 'tool_calls', type: 'long' },
-    { name: 'required_tool_calls', type: 'long' },
-  ],
-  values: [[tool, required]] as Array<Array<number | string | null>>,
-});
-
-const spans = (n: number) => ({
-  columns: [{ name: 'tool_spans', type: 'long' }],
-  values: [[n]] as Array<Array<number | string | null>>,
-});
-
-const result = (over: Partial<RuleCreationResult> = {}): RuleCreationResult =>
-  ({
-    rule: { name: 'r' },
-    pendingApproval: false,
-    traceId: 'trace-1',
-    workflowExecutionId: 'exec-1',
     stepExecutions: [{ stepId: DRAFT_STEP_ID, output: { conversation_id: 'conv-1' } }],
-    ...over,
-  } as unknown as RuleCreationResult);
-
-const evaluateWith = (client: EsClient, output: RuleCreationResult) =>
-  createToolRoutingEvaluator({ traceEsClient: client, log }).evaluate({
-    input: {},
-    output,
-    expected: {},
-    metadata: undefined,
+    ...overrides,
   } as never);
-
 describe('extractConversationId', () => {
   it('reads the draft step conversation id', () => {
     expect(extractConversationId(result())).toBe('conv-1');
@@ -78,106 +31,114 @@ describe('extractConversationId', () => {
   });
 });
 
-describe('toolSpanJoinClauses', () => {
-  it('tries the workflow trace id before the conversation id', () => {
-    const names = toolSpanJoinClauses({ traceId: 't', conversationId: 'c' }).map((c) => c.name);
-    expect(names).toEqual(['workflow trace id', 'gen_ai.conversation.id']);
-  });
+jest.mock('@kbn/security-evals-workflow-traces', () => ({
+  readAgentToolCallsFromTraces: jest.fn(),
+}));
 
-  it('omits keys that are absent', () => {
-    expect(toolSpanJoinClauses({ conversationId: 'c' })).toHaveLength(1);
-    expect(toolSpanJoinClauses({})).toHaveLength(0);
-  });
-});
+import { readAgentToolCallsFromTraces } from '@kbn/security-evals-workflow-traces';
+
+const mockedReader = readAgentToolCallsFromTraces as jest.MockedFunction<
+  typeof readAgentToolCallsFromTraces
+>;
 
 describe('createToolRoutingEvaluator', () => {
-  it('scores 1 when the required tool was called on the workflow trace', async () => {
-    const res = await evaluateWith(
-      esWith(() => counts(3, 1)),
-      result()
-    );
-    expect(res.score).toBe(1);
-    expect(res.explanation).toContain('workflow trace id');
-  });
-
-  it('scores 0 when tool spans exist but none are the required tool', async () => {
-    const res = await evaluateWith(
-      esWith(() => counts(4, 0)),
-      result()
-    );
-    expect(res.score).toBe(0);
-  });
-
-  it('falls back to the conversation id when the trace join finds nothing', async () => {
-    const client = esWith((q) => (q.includes('trace.id') ? counts(0, 0) : counts(2, 1)));
-    const res = await evaluateWith(client, result());
-    expect(res.score).toBe(1);
-    expect(res.explanation).toContain('gen_ai.conversation.id');
-  });
-
-  it('never scores 0 when NO tool spans are reachable — that is unmeasured, not failure', async () => {
-    const client = esWith((q) => (q.includes('STATS tool_spans') ? spans(0) : counts(0, 0)));
-    const res = await evaluateWith(client, result());
-    expect(res.score).toBeNull();
-    expect(res.label).toBe('unavailable');
-    expect(res.explanation).toContain('NO TOOL spans at all');
-  });
-
-  it('diagnoses attribute drift when the cluster has spans that do not match', async () => {
-    const client = esWith((q) => (q.includes('STATS tool_spans') ? spans(57) : counts(0, 0)));
-    const res = await evaluateWith(client, result());
-    expect(res.score).toBeNull();
-    expect(res.explanation).toContain('57');
-    expect(res.explanation).toContain('attribute drift');
-  });
-
-  it('is unavailable when the run carries no join keys at all', async () => {
-    const res = await evaluateWith(
-      esWith(() => counts(9, 9)),
-      result({ traceId: undefined, stepExecutions: [] as never })
-    );
-    expect(res.score).toBeNull();
-  });
-
-  it('queries for the tool id the workflow prompt names', async () => {
-    const seen: string[] = [];
-    const client = esWith((q) => {
-      seen.push(q);
-      return counts(1, 1);
+  const log = { info: jest.fn(), debug: jest.fn(), warning: jest.fn(), error: jest.fn() } as never;
+  const traceEsClient = {} as never;
+  const run = (payload: unknown) =>
+    createToolRoutingEvaluator({ traceEsClient, log }).evaluate({
+      input: {} as never,
+      output: payload as never,
+      expected: {} as never,
+      metadata: undefined,
     });
-    await evaluateWith(client, result());
-    expect(seen[0]).toContain(RULE_CREATION_TOOL_ID);
+
+  beforeEach(() => mockedReader.mockReset());
+
+  it('scores 1 when the agent called the required tool', async () => {
+    mockedReader.mockResolvedValue({
+      toolCallIds: ['security.create_detection_rule'],
+      unavailable: false,
+    });
+    const r = await run({
+      stepExecutions: [{ stepId: 'draft_creation', output: { conversation_id: 'c1' } }],
+    });
+    expect(r.score).toBe(1);
+  });
+
+  it('scores 0.5 when calls follow the required tool (unstable routing)', async () => {
+    mockedReader.mockResolvedValue({
+      toolCallIds: ['security.create_detection_rule', 'security.labs_search'],
+      unavailable: false,
+    });
+    const r = await run({
+      stepExecutions: [{ stepId: 'draft_creation', output: { conversation_id: 'c1' } }],
+    });
+    expect(r.score).toBe(0.5);
+  });
+
+  it('scores 0 when tools were called but not the required one', async () => {
+    mockedReader.mockResolvedValue({ toolCallIds: ['other.tool'], unavailable: false });
+    const r = await run({
+      stepExecutions: [{ stepId: 'draft_creation', output: { conversation_id: 'c1' } }],
+    });
+    expect(r.score).toBe(0);
+  });
+
+  it('never scores 0 when spans are unreachable - unmeasured is N/A', async () => {
+    mockedReader.mockResolvedValue({ toolCallIds: [], unavailable: true });
+    const r = await run({ stepExecutions: [] });
+    expect(r.score).toBeNull();
+    expect(r.label).toBe('unavailable');
+  });
+
+  it('passes the draft conversation id to the shared reader', async () => {
+    mockedReader.mockResolvedValue({ toolCallIds: [], unavailable: false });
+    await run({
+      stepExecutions: [{ stepId: 'draft_creation', output: { conversation_id: 'conv-9' } }],
+    });
+    expect(mockedReader).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationIds: 'conv-9' })
+    );
   });
 });
 
 describe('assertToolSpansReachable', () => {
-  it('passes when spans are reachable on the first key', async () => {
-    await expect(
-      assertToolSpansReachable({ traceEsClient: esWith(() => spans(4)), probe: result(), log })
-    ).resolves.toBeUndefined();
-  });
+  const log = { info: jest.fn(), debug: jest.fn(), warning: jest.fn(), error: jest.fn() } as never;
+  const traceEsClient = {} as never;
 
-  it('passes when only the conversation-id key reaches spans', async () => {
-    const client = esWith((q) => (q.includes('trace.id') ? spans(0) : spans(2)));
-    await expect(
-      assertToolSpansReachable({ traceEsClient: client, probe: result(), log })
-    ).resolves.toBeUndefined();
-  });
+  beforeEach(() => mockedReader.mockReset());
 
-  it('THROWS when no key reaches a span — arming evaluators here would be dishonest', async () => {
-    await expect(
-      assertToolSpansReachable({ traceEsClient: esWith(() => spans(0)), probe: result(), log })
-    ).rejects.toThrow(/No agent TOOL spans are reachable/);
-  });
-
-  it('skips the check when the quality gate declined the probe', async () => {
-    const client = esWith(() => spans(0));
+  it('passes when the probe conversation has tool spans', async () => {
+    mockedReader.mockResolvedValue({
+      toolCallIds: ['security.create_detection_rule'],
+      unavailable: false,
+    });
     await expect(
       assertToolSpansReachable({
-        traceEsClient: client,
-        probe: result({ skipped: true } as never),
+        traceEsClient,
+        probe: {
+          stepExecutions: [{ stepId: 'draft_creation', output: { conversation_id: 'c1' } }],
+        } as never,
         log,
       })
     ).resolves.toBeUndefined();
+  });
+
+  it('throws when no spans are reachable so setup fails loudly', async () => {
+    mockedReader.mockResolvedValue({ toolCallIds: [], unavailable: true });
+    await expect(
+      assertToolSpansReachable({ traceEsClient, probe: { stepExecutions: [] } as never, log })
+    ).rejects.toThrow(/No agent TOOL spans are reachable/);
+  });
+
+  it('skips the assertion when the quality gate declined the probe', async () => {
+    await expect(
+      assertToolSpansReachable({
+        traceEsClient,
+        probe: { skipped: true, stepExecutions: [] } as never,
+        log,
+      })
+    ).resolves.toBeUndefined();
+    expect(mockedReader).not.toHaveBeenCalled();
   });
 });

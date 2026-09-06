@@ -32,4 +32,52 @@ export const canaryDataset: RuleCreationExample[] = [
       isBrokenFixture: true,
     },
   },
+
+  // A single canary is a single point of failure: one lucky draft flips the gate verdict.
+  // Three more unwinnable shapes diversify what the gate must catch.
+  {
+    id: 'canary-empty-evidence',
+    input: {
+      technique: 'T1059',
+      gap_description: 'Suspicious command execution somewhere in the fleet.',
+      evidence: '',
+      confidence: 0.2,
+    },
+    output: {
+      mitreIds: ['T1059'],
+      language: 'esql',
+      esqlQuery: 'FROM * | LIMIT 1000',
+      isBrokenFixture: true,
+    },
+  },
+  {
+    id: 'canary-contradictory-evidence',
+    input: {
+      technique: 'T1566',
+      gap_description: 'Phishing emails delivering malware.',
+      evidence: 'Mail gateway reports zero phishing detections this quarter; no complaints filed.',
+      confidence: 0.15,
+    },
+    output: {
+      mitreIds: ['T1566'],
+      language: 'esql',
+      esqlQuery: 'FROM * | LIMIT 1000',
+      isBrokenFixture: true,
+    },
+  },
+  {
+    id: 'canary-nonexistent-technique',
+    input: {
+      technique: 'T9999',
+      gap_description: 'Detection gap for an unregistered technique id.',
+      evidence: 'Framework export lists no such technique.',
+      confidence: 0.05,
+    },
+    output: {
+      mitreIds: ['T9999'],
+      language: 'esql',
+      esqlQuery: 'FROM * | LIMIT 1000',
+      isBrokenFixture: true,
+    },
+  },
 ];
