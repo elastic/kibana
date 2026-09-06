@@ -37,6 +37,7 @@ export interface CreateModelProviderOpts {
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  agentId?: string;
   maxContentLength?: number;
 }
 
@@ -50,7 +51,7 @@ export type CreateModelProviderFactoryFn = (
 export type ModelProviderFactoryFn = (
   opts: Pick<
     CreateModelProviderOpts,
-    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength'
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'agentId' | 'maxContentLength'
   >
 ) => ModelProvider;
 
@@ -96,6 +97,7 @@ export const createModelProvider = ({
   searchInferenceEndpoints,
   logger,
   telemetryMetadata,
+  agentId,
   maxContentLength,
 }: CreateModelProviderOpts): ModelProvider => {
   const resolvedTelemetryMetadata = telemetryMetadata ?? MODEL_TELEMETRY_METADATA;
@@ -187,6 +189,7 @@ export const createModelProvider = ({
       },
       chatModelOptions: {
         telemetryMetadata: resolvedTelemetryMetadata,
+        ...(agentId !== undefined ? { agentId } : {}),
         ...(maxContentLength !== undefined ? { maxContentLength } : {}),
       },
     });
