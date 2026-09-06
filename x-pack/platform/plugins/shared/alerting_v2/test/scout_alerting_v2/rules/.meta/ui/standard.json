@@ -1,5 +1,5 @@
 {
-  "sha1": "6e39816038264a73be1084dd86deb2b6cf9e7363",
+  "sha1": "61b80aadb187b36b96b121a2a7c400b1c422be9c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -120,6 +120,19 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
         "line": 71,
+        "column": 7
+      }
+    },
+    {
+      "id": "c00a5416f5250d2-a130c3dc63aa3dc",
+      "title": "Rule tags — edit via ES|QL form removing all tags persists (does not restore the old tags)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_tags_edit.spec.ts",
+        "line": 56,
         "column": 7
       }
     },

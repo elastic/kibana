@@ -1,5 +1,5 @@
 {
-  "sha1": "c6782321469d0eab4fd44f9ea04e6441ae1a91b8",
+  "sha1": "b00a65bf6d1abe6faeb621f05bc64ebf0fd46b19",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -174,7 +174,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_conversion.spec.ts",
-        "line": 80,
+        "line": 81,
         "column": 14
       }
     },
@@ -188,7 +188,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 14
       }
     },
@@ -202,7 +202,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
-        "line": 118,
+        "line": 119,
         "column": 14
       }
     },
@@ -216,7 +216,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_table_switch.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 14
       }
     },
@@ -230,7 +230,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_toggle.spec.ts",
-        "line": 68,
+        "line": 69,
+        "column": 12
+      }
+    },
+    {
+      "id": "d423e9125ab0d47-918e80b53ac532a",
+      "title": "Lens aliased TBUCKET metric trendline enables and persists the trendline through the dimension editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_ts_toggle.spec.ts",
+        "line": 71,
         "column": 12
       }
     },
@@ -245,6 +259,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql.spec.ts",
         "line": 31,
+        "column": 14
+      }
+    },
+    {
+      "id": "254747588af9643-7fdeecc1c091f44",
+      "title": "Lens metric trendline on dashboard (ES|QL) renders trendline for a TS query with TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql.spec.ts",
+        "line": 70,
         "column": 14
       }
     },
