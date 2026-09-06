@@ -17,7 +17,7 @@
     "params": {
       "searchType": "esqlQuery",
       "esqlQuery": {
-        "esql": "FROM github-intel-project-items | WHERE entity.type == \"ISSUE\" | EVAL age_days = DATE_DIFF(\"days\", github.updated_at, NOW()) | WHERE age_days > 14 | KEEP entity.number, entity.title, age_days | LIMIT 10"
+        "esql": "FROM github-intel-project-items | WHERE entity.type == \"ISSUE\" | EVAL age_days = DATE_DIFF(\"days\", github.updated_at, NOW()) | WHERE age_days > 14 | KEEP entity.number, payload.content.title, age_days | LIMIT 10"
       },
       "timeField": "@timestamp",
       "timeWindowSize": 86400,
