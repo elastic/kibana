@@ -80,4 +80,3 @@ export {
   type DataLoadCheckpointStepInputSchema,
   type DataLoadCheckpointStepOutputSchema,
 } from './data_load_checkpoint_step';
-export * from './elasticsearch_bulk_step';

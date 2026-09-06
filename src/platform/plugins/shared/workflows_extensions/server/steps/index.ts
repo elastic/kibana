@@ -9,7 +9,6 @@
 
 import {
   dataAggregateStepDefinition,
-  elasticsearchBulkStepDefinition,
   dataConcatStepDefinition,
   dataDedupeStepDefinition,
   dataFilterStepDefinition,
@@ -25,7 +24,6 @@ import type { ServerStepRegistry } from '../step_registry/step_registry';
 
 export const registerInternalStepDefinitions = (serverStepRegistry: ServerStepRegistry) => {
   serverStepRegistry.register(dataLoadCheckpointStepDefinition);
-  serverStepRegistry.register(elasticsearchBulkStepDefinition);
   serverStepRegistry.register(dataMapStepDefinition);
   serverStepRegistry.register(dataDedupeStepDefinition);
   serverStepRegistry.register(dataFilterStepDefinition);
