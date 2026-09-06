@@ -11,7 +11,13 @@ import type {
   AttachmentVersionRef,
   ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
-import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  AttachmentType,
+  getLatestVersion,
+  resolveAttachmentVersion,
+} from '@kbn/agent-builder-common/attachments';
+
+export { resolveAttachmentVersion };
 import {
   renderAttachmentElement,
   type RenderAttachmentElementAttributes,
@@ -20,43 +26,6 @@ import type { AttachmentsService } from '../../../../../../services';
 import { createTagParser } from './utils';
 import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
 import { AttachmentLoadingSkeleton } from '../attachments/attachment_loading_skeleton';
-
-interface ResolveAttachmentVersionParams {
-  explicitVersion: string | number | undefined;
-  attachmentId: string;
-  attachmentRefs: AttachmentVersionRef[] | undefined;
-  attachment: VersionedAttachment;
-}
-
-/**
- * Resolves the version to use for an attachment.
- * Priority:
- * 1. Explicit version from tag attributes
- * 2. Version from cumulative attachment refs (highest version seen up to this round)
- * 3. Latest available version as fallback
- */
-export const resolveAttachmentVersion = ({
-  explicitVersion,
-  attachmentId,
-  attachmentRefs,
-  attachment,
-}: ResolveAttachmentVersionParams): number | undefined => {
-  if (explicitVersion !== undefined) {
-    const parsed =
-      typeof explicitVersion === 'string' ? Number.parseInt(explicitVersion, 10) : explicitVersion;
-    if (Number.isInteger(parsed) && parsed > 0) {
-      return parsed;
-    }
-  }
-
-  const ref = attachmentRefs?.find((r) => r.attachment_id === attachmentId);
-  if (ref) {
-    return ref.version;
-  }
-
-  // Final fallback: use the latest version
-  return attachment.versions.at(-1)?.version;
-};
 
 /**
  * Parser for <render_attachment> tags in markdown.

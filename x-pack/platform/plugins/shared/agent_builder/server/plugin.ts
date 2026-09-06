@@ -263,6 +263,9 @@ export class AgentBuilderPlugin
       renderers: {
         register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
       },
+      surfaceProjection: {
+        register: serviceSetups.surfaceProjection.register.bind(serviceSetups.surfaceProjection),
+      },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
