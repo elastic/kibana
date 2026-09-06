@@ -203,6 +203,7 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   create_agent_assets: {
     onTransition: stepInstallAgentAssets,
+  stepInstallSkillAssets,
     nextState: INSTALL_STATES.CREATE_WORKFLOW_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },

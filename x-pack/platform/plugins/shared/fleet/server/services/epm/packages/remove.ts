@@ -258,6 +258,9 @@ export async function deleteKibanaAssets({
   const agentAssets = installedObjects.filter(
     (asset) => asset.type === KibanaSavedObjectType.agent
   );
+  const skillAssets = installedObjects.filter(
+    (asset) => asset.type === KibanaSavedObjectType.skill
+  );
   const savedObjectAssets = installedObjects.filter(
     (asset) =>
       asset.type !== KibanaSavedObjectType.workflow && asset.type !== KibanaSavedObjectType.agent
@@ -296,6 +299,20 @@ export async function deleteKibanaAssets({
     );
   }
 
+  if (skillAssets.length > 0 && agentBuilderApi) {
+    logger.debug(`Deleting ${skillAssets.length} skill assets via agentBuilder`);
+    for (const asset of skillAssets) {
+      try {
+        await agentBuilderApi.deletePackageManagedSkill(asset.id, spaceId);
+      } catch (err) {
+        logger.warn(`Failed to delete skill asset ${asset.id}: ${err}`);
+      }
+    }
+  } else if (skillAssets.length > 0) {
+    logger.debug(
+      `Skipping deletion of ${skillAssets.length} skill assets: agentBuilder unavailable`
+    );
+  }
   if (savedObjectAssets.length === 0) {
     return;
   }
