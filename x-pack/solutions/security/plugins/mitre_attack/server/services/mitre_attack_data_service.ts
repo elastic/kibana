@@ -9,8 +9,8 @@ import { chunk } from 'lodash';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { loadMitreArtifact } from '@kbn/security-mitre-attack-server';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../saved_objects';
-import { buildSoId, summarizeEntityCounts } from './utils';
+import { MITRE_ATTACK_ENTITY_SO_TYPE, buildSoId } from '@kbn/security-mitre-attack-common';
+import { summarizeEntityCounts } from './utils';
 
 const BULK_CREATE_BATCH_SIZE = 500;
 

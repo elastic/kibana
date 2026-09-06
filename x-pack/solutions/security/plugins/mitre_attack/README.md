@@ -56,6 +56,25 @@ public start(core: CoreStart, plugins: { mitreAttack?: MitreAttackServerStart })
 }
 ```
 
+`getMitreDataClient` is only present when `managedSourceEnabled` is `true`, so callers should treat its absence as "the managed source is off" rather than as an error.
+
+In `setup()`, the plugin registers a `mitreAttack` request handler context via `core.http.registerRouteHandlerContext`. The context exposes `getMitreDataClient()`, which returns the `MitreAttackDataClient` built during `start()`, or `undefined` when the client has not yet been initialized. Route handlers resolve the client lazily per request by awaiting `context.mitreAttack`.
+
+## Internal API route
+
+`GET /internal/mitre/entities` (version `1`) returns all indexed MITRE ATT&CK entities grouped by type, with the `description` field omitted for compactness.
+
+| Query parameter | Type | Default | Notes |
+|---|---|---|---|
+| `framework` | `'enterprise'` | `'enterprise'` | Currently the only supported value |
+| `framework_version` | string ≤ 32 chars | latest indexed | Pin to a specific version |
+| `types` | comma-separated or array of `'tactic'`, `'technique'`, `'subtechnique'` (max 3) | all | Filter by entity type |
+| `status` | `'active'` \| `'all'` | `'active'` | `'all'` includes revoked and deprecated entities |
+
+**Authorization:** requires the `securitySolution` Kibana privilege.
+
+**404 when flag off:** the route is only registered when `managedSourceEnabled: true`. Requests when the flag is off receive a 404 rather than a 403, because the route does not exist at all. A request that arrives after the flag is on but before `start()` has finished returns 503, signalling that the client is not yet ready and the caller should retry.
+
 ## Saved Object mappings
 
 The type uses `dynamic: false` and maps only the fields that are queried, sorted or aggregated on. Unmapped attributes such as `reference` and `superseded_by_id` are still stored in `_source` and returned by reads, they just cannot be used in a query.
