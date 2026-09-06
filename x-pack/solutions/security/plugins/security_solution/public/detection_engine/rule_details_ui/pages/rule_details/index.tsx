@@ -447,21 +447,39 @@ export const RuleDetailsPage = connector(
       [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
     );
 
-    const isBuildingBlockTypeNotNull = rule?.building_block_type != null;
-    // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
-    useEffect(() => {
-      setShowBuildingBlockAlerts(isBuildingBlockTypeNotNull);
-    }, [isBuildingBlockTypeNotNull, setShowBuildingBlockAlerts]);
-
+    const isBuildingBlockRule = rule?.building_block_type != null;
+    const [areAlertFiltersInitialized, setAreAlertFiltersInitialized] = useState(false);
     const ruleRuleId = rule?.rule_id ?? '';
+    useEffect(() => {
+      setAreAlertFiltersInitialized(false);
+    }, [ruleRuleId]);
+
+    useEffect(() => {
+      if (rule != null && !areAlertFiltersInitialized) {
+        setShowBuildingBlockAlerts(isBuildingBlockRule);
+      }
+    }, [rule, isBuildingBlockRule, setShowBuildingBlockAlerts, areAlertFiltersInitialized]);
+
+    useEffect(() => {
+      if (
+        rule != null &&
+        !areAlertFiltersInitialized &&
+        showBuildingBlockAlerts === isBuildingBlockRule
+      ) {
+        setAreAlertFiltersInitialized(true);
+      }
+    }, [rule, isBuildingBlockRule, showBuildingBlockAlerts, areAlertFiltersInitialized]);
+    const shouldShowBuildingBlockAlerts = areAlertFiltersInitialized
+      ? showBuildingBlockAlerts
+      : isBuildingBlockRule || showBuildingBlockAlerts;
     const alertDefaultFilters = useMemo(
       () => [
         ...buildAlertsFilter(ruleRuleId ?? ''),
-        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+        ...buildShowBuildingBlockFilter(shouldShowBuildingBlockAlerts),
         ...buildAlertStatusFilter(filterGroup),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
       ],
-      [ruleRuleId, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+      [ruleRuleId, shouldShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
     );
 
     const alertMergedFilters = useMemo(
@@ -908,7 +926,7 @@ export const RuleDetailsPage = connector(
                           />
                           <EuiSpacer />
                         </Display>
-                        {ruleId != null && (
+                        {ruleId != null && rule != null && (
                           <GroupedAlertsTable
                             accordionButtonContent={defaultGroupTitleRenderers}
                             accordionExtraActionGroupStats={accordionExtraActionGroupStats}
