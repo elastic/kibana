@@ -1,0 +1,235 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-okta.system-default",
+    "id": "euid-okta-doc-a",
+    "index": ".ds-logs-okta.system-default-2024.09.01-000001",
+    "source": {
+      "@timestamp": "2024-09-01T10:00:00.000Z",
+      "data_stream": {
+        "dataset": "okta.system",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "user.account.update_profile",
+        "agent_id_status": "verified",
+        "category": [
+          "iam"
+        ],
+        "dataset": "okta.system",
+        "id": "euid-okta-event-a",
+        "ingested": "2024-09-01T10:00:05Z",
+        "kind": "event",
+        "outcome": "success",
+        "type": [
+          "user",
+          "change"
+        ]
+      },
+      "host": {
+        "target": {
+          "id": "okta-demo-host-1",
+          "name": "okta-demo-host-1"
+        }
+      },
+      "okta": {
+        "actor": {
+          "alternate_id": "alice@example.com",
+          "display_name": "Alice Anderson",
+          "id": "00u1alice0000000000",
+          "type": "User"
+        },
+        "outcome": {
+          "result": "SUCCESS"
+        },
+        "target": {
+          "alternate_id": "okta-demo-host-1",
+          "display_name": "Okta Demo Host 1",
+          "id": "okta-demo-host-1",
+          "type": "Device"
+        },
+        "uuid": "aaaaaaaa-0000-0000-0000-00000000000a"
+      },
+      "related": {
+        "entity": [
+          "alice@example.com",
+          "okta-demo-host-1"
+        ],
+        "ip": [
+          "10.0.0.41"
+        ],
+        "user": [
+          "alice@example.com"
+        ]
+      },
+      "source": {
+        "ip": "10.0.0.41"
+      },
+      "user": {
+        "email": "alice@example.com",
+        "id": "00u1alice0000000000",
+        "name": "alice@example.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-okta.system-default",
+    "id": "euid-okta-doc-b",
+    "index": ".ds-logs-okta.system-default-2024.09.01-000001",
+    "source": {
+      "@timestamp": "2024-09-01T11:00:00.000Z",
+      "data_stream": {
+        "dataset": "okta.system",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "user.session.start",
+        "agent_id_status": "verified",
+        "category": [
+          "iam"
+        ],
+        "dataset": "okta.system",
+        "id": "euid-okta-event-b",
+        "ingested": "2024-09-01T11:00:05Z",
+        "kind": "event",
+        "outcome": "success",
+        "type": [
+          "user",
+          "change"
+        ]
+      },
+      "host": {
+        "target": {
+          "id": "okta-demo-host-1",
+          "name": "okta-demo-host-1"
+        }
+      },
+      "okta": {
+        "actor": {
+          "alternate_id": "alice@example.com",
+          "display_name": "Alice Anderson",
+          "type": "User"
+        },
+        "outcome": {
+          "result": "SUCCESS"
+        },
+        "target": {
+          "alternate_id": "okta-demo-host-1",
+          "display_name": "Okta Demo Host 1",
+          "id": "okta-demo-host-1",
+          "type": "Device"
+        },
+        "uuid": "bbbbbbbb-0000-0000-0000-00000000000b"
+      },
+      "related": {
+        "entity": [
+          "alice@example.com",
+          "okta-demo-host-1"
+        ],
+        "ip": [
+          "10.0.0.42"
+        ],
+        "user": [
+          "alice@example.com"
+        ]
+      },
+      "source": {
+        "ip": "10.0.0.42"
+      },
+      "user": {
+        "name": "alice@example.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-okta.system-default",
+    "id": "euid-okta-doc-c",
+    "index": ".ds-logs-okta.system-default-2024.09.01-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "data_stream": {
+        "dataset": "okta.system",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "user.account.update_profile",
+        "agent_id_status": "verified",
+        "category": [
+          "iam"
+        ],
+        "dataset": "okta.system",
+        "id": "euid-okta-event-c",
+        "ingested": "2024-09-01T12:00:05Z",
+        "kind": "event",
+        "outcome": "success",
+        "type": [
+          "user",
+          "change"
+        ]
+      },
+      "host": {
+        "target": {
+          "id": "okta-demo-host-1",
+          "name": "okta-demo-host-1"
+        }
+      },
+      "okta": {
+        "actor": {
+          "alternate_id": "bob@example.com",
+          "display_name": "Bob Brown",
+          "id": "00u1bob00000000000",
+          "type": "User"
+        },
+        "outcome": {
+          "result": "SUCCESS"
+        },
+        "target": {
+          "alternate_id": "okta-demo-host-1",
+          "display_name": "Okta Demo Host 1",
+          "id": "okta-demo-host-1",
+          "type": "Device"
+        },
+        "uuid": "cccccccc-0000-0000-0000-00000000000c"
+      },
+      "related": {
+        "entity": [
+          "bob@example.com",
+          "okta-demo-host-1"
+        ],
+        "ip": [
+          "10.0.0.43"
+        ],
+        "user": [
+          "bob@example.com"
+        ]
+      },
+      "source": {
+        "ip": "10.0.0.43"
+      },
+      "user": {
+        "email": "bob@example.com",
+        "name": "alice@example.com"
+      }
+    }
+  }
+}

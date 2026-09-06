@@ -22,9 +22,15 @@ import {
 import type { EntityItem } from '../types';
 import {
   getEntityExpandItems,
-  fieldForRole,
+  getEntityFilterSpec,
+  toggleEntityFilterSpec,
+  isEntityFilterSpecActive,
+  getRelatedEventsFilter,
 } from '../../../../popovers/node_expand/get_entity_expand_items';
-import type { EntityFilterActions } from '../../../../popovers/node_expand/get_entity_expand_items';
+import type {
+  EntityFilterActions,
+  EuidFilterApi,
+} from '../../../../popovers/node_expand/get_entity_expand_items';
 import {
   emitFilterToggle,
   emitIsOneOfFilterToggle,
@@ -33,7 +39,6 @@ import {
   isEntityRelationshipExpandedForScope,
   emitPinnedEuidToggle,
 } from '../../../../filters/filter_store';
-import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../../../common/constants';
 
 const actionsButtonAriaLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.actionsButton.ariaLabel',
@@ -60,6 +65,12 @@ export interface EntityActionsButtonProps {
     entityId: string;
     entityName: string | undefined;
   }) => void;
+  /**
+   * EUID API used to narrow entity filters to the highest-ranking identity fields.
+   * Async-hydrated by the consumer; until it resolves, filters fall back to the
+   * unnarrowed sourceFields.
+   */
+  euidApi?: EuidFilterApi;
 }
 
 /**
@@ -73,6 +84,7 @@ export const EntityActionsButton = ({
   scopeId,
   isInitialEntity = false,
   onShowEntity,
+  euidApi,
 }: EntityActionsButtonProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -81,72 +93,49 @@ export const EntityActionsButton = ({
   const sourceFields = (item.entity.sourceFields ?? {}) as Record<string, string | string[]>;
   const engineType = item.entity.engine_type;
 
-  const getRelatedFieldAndValues = ():
-    | { field: typeof RELATED_USER | typeof RELATED_HOST | typeof RELATED_ENTITY; values: string[] }
-    | undefined => {
-    if (engineType === 'user') {
-      const values = Object.entries(sourceFields)
-        .filter(([field]) => field.startsWith('user.'))
-        .flatMap(([, value]) => ([] as string[]).concat(value));
-      return { field: RELATED_USER, values };
-    }
-    if (engineType === 'host') {
-      const values = Object.entries(sourceFields)
-        .filter(([field]) => field.startsWith('host.'))
-        .flatMap(([, value]) => ([] as string[]).concat(value));
-      return { field: RELATED_HOST, values };
-    }
-    const entityFieldValues = Object.entries(sourceFields)
-      .filter(([field]) => field.startsWith('entity.'))
-      .flatMap(([, value]) => ([] as string[]).concat(value));
-    // Include item.id for backward compatibility with older data that may not have entity.* fields
-    const values = entityFieldValues.includes(item.id)
-      ? entityFieldValues
-      : [...entityFieldValues, item.id];
-    return { field: RELATED_ENTITY, values };
-  };
+  // Entity filters come from the Entity Store's EUID logic as a boolean KQL expression
+  // (ranked identity field + higher-ranked-field guards + namespace clause), falling back to
+  // the identity sourceFields until the EUID API's lazy chunk has loaded.
+  const specByRole = {
+    actor: getEntityFilterSpec(item.id, sourceFields, euidApi, 'actor'),
+    target: getEntityFilterSpec(item.id, sourceFields, euidApi, 'target'),
+  } as const;
+  const filterKey = (role: 'actor' | 'target') => `${item.id}|${role}`;
 
   const entityFilterActions: EntityFilterActions = {
     toggleEntityFilter: (role, action) => {
-      for (const [field, value] of Object.entries(sourceFields)) {
-        // Flatten string | string[] to string[] so each value gets its own OR'd phrase filter
-        for (const v of ([] as string[]).concat(value)) {
-          emitFilterToggle(scopeId, fieldForRole(field, role), v, action);
-        }
-      }
+      const spec = specByRole[role];
+      if (!spec) return;
+      toggleEntityFilterSpec(scopeId, filterKey(role), spec, role, action);
+
       if (action === 'show') {
         emitPinnedEuidToggle(scopeId, item.id, 'show');
       } else {
-        // Only unpin when no entity filters remain active for either role
-        const hasRemainingFilters = (['actor', 'target'] as const).some((r) =>
-          Object.entries(sourceFields).some(([field, value]) =>
-            ([] as string[])
-              .concat(value)
-              .some((v) => isFilterActiveForScope(scopeId, fieldForRole(field, r), v))
-          )
-        );
+        // Only unpin when no entity filter remains active for either role
+        const hasRemainingFilters = (['actor', 'target'] as const).some((r) => {
+          const roleSpec = specByRole[r];
+          return roleSpec != null && isEntityFilterSpecActive(scopeId, filterKey(r), roleSpec, r);
+        });
         if (!hasRemainingFilters) {
           emitPinnedEuidToggle(scopeId, item.id, 'hide');
         }
       }
     },
-    isEntityFilterActive: (role) =>
-      Object.entries(sourceFields).some(([field, value]) =>
-        ([] as string[])
-          .concat(value)
-          .some((v) => isFilterActiveForScope(scopeId, fieldForRole(field, role), v))
-      ),
+    isEntityFilterActive: (role) => {
+      const spec = specByRole[role];
+      return spec != null && isEntityFilterSpecActive(scopeId, filterKey(role), spec, role);
+    },
     toggleRelatedEvents: (action) => {
-      const related = getRelatedFieldAndValues();
+      const related = getRelatedEventsFilter(item.id, sourceFields, engineType);
       if (!related) return;
       if (related.values.length === 1) {
         emitFilterToggle(scopeId, related.field, related.values[0], action);
-      } else if (related.values.length > 1) {
+      } else {
         emitIsOneOfFilterToggle(scopeId, related.field, related.values, action);
       }
     },
     isRelatedEventsActive: () => {
-      const related = getRelatedFieldAndValues();
+      const related = getRelatedEventsFilter(item.id, sourceFields, engineType);
       if (!related) return false;
       return isFilterActiveForScope(scopeId, related.field, related.values);
     },

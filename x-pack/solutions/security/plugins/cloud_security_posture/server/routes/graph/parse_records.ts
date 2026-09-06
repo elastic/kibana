@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { Logger } from '@kbn/core/server';
-import { castArray, omit } from 'lodash';
+import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
@@ -24,7 +24,6 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
 import { ENTITY_RELATIONSHIP_LABELS } from '@kbn/cloud-security-posture-common/constants';
-import { GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
 import {
   type EventEdge,
   type EventEsqlRow,
@@ -235,17 +234,16 @@ const createEntityNode = (
     ? parseDocumentsData(logger, docData)
     : undefined;
 
+  // The `all` bucket (event.module / event.dataset / data_stream.dataset) is kept: the client
+  // feeds sourceFields to the Entity Store's EUID filter builder, which derives the entity's
+  // namespace from those fields. Without them the emitted filter matches the same identity in
+  // every namespace — e.g. `user.email: alice@example.com` would match the gcp, okta and
+  // entra_id entities alike, which are three distinct entities.
   documentsData?.forEach((doc) => {
-    if (doc.entity?.sourceFields) {
-      const currentlySupportedSourceFields = omit(
-        doc.entity.sourceFields,
-        GRAPH_ACTOR_EUID_SOURCE_FIELDS.all
-      );
+    if (doc.entity?.sourceFields && EXPAND_DOT_NOTATION) {
       (doc as Writable<typeof doc>).entity = {
         ...doc.entity,
-        sourceFields: EXPAND_DOT_NOTATION
-          ? expandDotNotation(currentlySupportedSourceFields)
-          : currentlySupportedSourceFields,
+        sourceFields: expandDotNotation(doc.entity.sourceFields),
       };
     }
   });

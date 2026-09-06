@@ -6,13 +6,26 @@
  */
 
 import {
+  getEuidDslFilterBasedOnDocument,
+  getEuidNamespaceSourceFields,
+} from '@kbn/entity-store/common/domain/euid';
+import {
   getSourceFieldsFromNode,
   getEntityTypeFromNodeId,
   getEntityExpandItems,
   fieldForRole,
+  getEntityFilterSpec,
+  getRelatedEventsFilter,
 } from './get_entity_expand_items';
-import type { EntityFilterActions } from './get_entity_expand_items';
+import type { EntityFilterActions, EuidFilterApi } from './get_entity_expand_items';
 import type { NodeViewModel } from '../../types';
+
+// Exercise the real Entity Store EUID logic rather than a stub, so these tests fail if the
+// entity definitions' ranking or namespace evaluation changes.
+const euidApi: EuidFilterApi = {
+  dsl: { getEuidFilterBasedOnDocument: getEuidDslFilterBasedOnDocument },
+  getEuidNamespaceSourceFields,
+};
 
 describe('getSourceFieldsFromNode', () => {
   it('returns sourceFields from the first document entity', () => {
@@ -250,5 +263,274 @@ describe('getEntityExpandItems entity filter actions', () => {
     // [entity details only — no separator]
     expect(items).toHaveLength(1);
     expect(items[0]).toMatchObject({ type: 'item' });
+  });
+});
+
+describe('getEntityFilterSpec', () => {
+  const GCP_NAMESPACE_FIELDS = {
+    'event.module': 'gcp',
+    'data_stream.dataset': 'gcp.audit',
+  };
+
+  it('builds DSL with the highest-ranking identity field and the namespace clause', () => {
+    const spec = getEntityFilterSpec(
+      'user:multi-actor-1@example.com@gcp',
+      {
+        'user.name': ['Multi Actor 1', 'Multi Actor 2'],
+        'user.email': 'multi-actor-1@example.com',
+        'user.id': ['multi-actor-1@example.com', 'multi-actor-2@example.com'],
+        ...GCP_NAMESPACE_FIELDS,
+      },
+      euidApi,
+      'actor'
+    );
+
+    // user.email outranks user.id / user.name, and the namespace clause keeps the filter from
+    // matching the same email in the okta / entra_id namespaces (different entities).
+    //
+    // The `prefix` clause below is the Entity Store's real output, not a stale fixture: it
+    // reverses the `firstChunkOfField` namespace source, and this assertion runs against the
+    // live builder. Translating it into a filter-bar-compatible operator happens downstream in
+    // search_filters; `namespaceSourceValues` carries the raw value needed to do that, and holds
+    // only prefix-matched fields — `event.module` is matched exactly and needs no replacement.
+    expect(spec).toEqual({
+      kind: 'dsl',
+      namespaceSourceValues: { 'data_stream.dataset': GCP_NAMESPACE_FIELDS['data_stream.dataset'] },
+      dsl: {
+        bool: {
+          filter: [
+            { term: { 'user.email': 'multi-actor-1@example.com' } },
+            {
+              bool: {
+                should: [
+                  { term: { 'event.module': 'gcp' } },
+                  { prefix: { 'data_stream.dataset': 'gcp' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('takes namespaceSourceValues from the entity store prefix-matched fields, not a hardcoded list', () => {
+    // Guards the alignment between this package and the entity definitions: if a namespace
+    // source switches to/from `firstChunkOfField`, `prefixMatchFields` changes and the values we
+    // carry must follow automatically.
+    const { prefixMatchFields, exactMatchFields } = getEuidNamespaceSourceFields('user');
+    expect(prefixMatchFields.length).toBeGreaterThan(0);
+
+    const spec = getEntityFilterSpec(
+      'user:alice@example.com@gcp',
+      { 'user.email': 'alice@example.com', ...GCP_NAMESPACE_FIELDS },
+      euidApi,
+      'actor'
+    );
+    const { namespaceSourceValues } = spec as {
+      kind: 'dsl';
+      namespaceSourceValues: Record<string, string | string[]>;
+    };
+
+    // Every carried key is prefix-matched; exact-matched sources are deliberately absent since
+    // the DSL already expresses them as term clauses that translate directly to `is` filters.
+    expect(Object.keys(namespaceSourceValues)).toEqual(
+      Object.keys(GCP_NAMESPACE_FIELDS).filter((field) => prefixMatchFields.includes(field))
+    );
+    for (const field of exactMatchFields) {
+      expect(namespaceSourceValues).not.toHaveProperty(field);
+    }
+  });
+
+  it('adds exclusion guards when the entity resolved at a lower ranking position', () => {
+    const spec = getEntityFilterSpec(
+      'user:alice@example.com@gcp',
+      { 'user.id': 'alice@example.com', 'user.name': 'Alice', ...GCP_NAMESPACE_FIELDS },
+      euidApi,
+      'actor'
+    );
+
+    // Without the `must_not exists user.email` guard this would also match documents whose
+    // user.email resolves them to a different entity.
+    expect(spec?.kind).toBe('dsl');
+    const dsl = (spec as { kind: 'dsl'; dsl: { bool: { filter: unknown[]; must: unknown[] } } })
+      .dsl;
+    expect(dsl.bool.filter).toEqual(
+      expect.arrayContaining([{ term: { 'user.id': 'alice@example.com' } }])
+    );
+    expect(JSON.stringify(dsl.bool.must)).toContain('user.email');
+    expect(JSON.stringify(dsl.bool.must)).toContain('must_not');
+  });
+
+  it('rewrites identity fields to the target namespace for the target role', () => {
+    const spec = getEntityFilterSpec(
+      'user:multi-actor-1@example.com@gcp',
+      { 'user.email': 'multi-actor-1@example.com', ...GCP_NAMESPACE_FIELDS },
+      euidApi,
+      'target'
+    );
+
+    const serialized = JSON.stringify(spec);
+    // Identity fields move to `.target.`; namespace source fields describe the event and stay put.
+    expect(serialized).toContain('user.target.email');
+    expect(serialized).toContain('"event.module"');
+    expect(serialized).not.toContain('event.target.module');
+    expect(serialized).not.toContain('data_stream.target.dataset');
+  });
+
+  it('builds DSL for host, service and generic entities', () => {
+    expect(
+      getEntityFilterSpec('host:h1', { 'host.id': 'HW-1', 'host.name': 'web-1' }, euidApi, 'actor')
+    ).toEqual({
+      kind: 'dsl',
+      namespaceSourceValues: {},
+      dsl: { bool: { filter: [{ term: { 'host.id': 'HW-1' } }] } },
+    });
+
+    expect(
+      getEntityFilterSpec('service:svc-1', { 'service.name': 'svc-1' }, euidApi, 'actor')
+    ).toEqual({
+      kind: 'dsl',
+      namespaceSourceValues: {},
+      dsl: { bool: { filter: [{ term: { 'service.name': 'svc-1' } }] } },
+    });
+
+    expect(
+      getEntityFilterSpec(
+        'projects/p/buckets/b1',
+        { 'entity.id': 'projects/p/buckets/b1' },
+        euidApi,
+        'actor'
+      )
+    ).toEqual({
+      kind: 'dsl',
+      namespaceSourceValues: {},
+      dsl: { bool: { filter: [{ term: { 'entity.id': 'projects/p/buckets/b1' } }] } },
+    });
+  });
+
+  it('falls back to identity sourceFields when the euid api has not hydrated', () => {
+    const spec = getEntityFilterSpec(
+      'user:multi-actor-1@example.com@gcp',
+      {
+        'user.email': 'multi-actor-1@example.com',
+        'user.id': 'multi-actor-1@example.com',
+        ...GCP_NAMESPACE_FIELDS,
+      },
+      undefined,
+      'actor'
+    );
+
+    // Namespace source fields are excluded: `event.module: gcp` would match every GCP event.
+    expect(spec).toEqual({
+      kind: 'fields',
+      fields: {
+        'user.email': 'multi-actor-1@example.com',
+        'user.id': 'multi-actor-1@example.com',
+      },
+    });
+  });
+
+  it('falls back to identity sourceFields for an unknown euid prefix', () => {
+    const spec = getEntityFilterSpec(
+      'wat:something',
+      { 'user.email': 'a@b.com' },
+      euidApi,
+      'actor'
+    );
+
+    expect(spec).toEqual({ kind: 'fields', fields: { 'user.email': 'a@b.com' } });
+  });
+
+  it('returns undefined when there are no sourceFields', () => {
+    expect(getEntityFilterSpec('user:a@b.com@gcp', undefined, euidApi, 'actor')).toBeUndefined();
+    expect(getEntityFilterSpec('user:a@b.com@gcp', {}, euidApi, 'actor')).toBeUndefined();
+  });
+
+  it('returns undefined when only namespace source fields are present', () => {
+    // Nothing identity-bearing to filter on, so emit no filter rather than one matching
+    // every event in the dataset.
+    expect(
+      getEntityFilterSpec('user:a@b.com@gcp', { ...GCP_NAMESPACE_FIELDS }, undefined, 'actor')
+    ).toBeUndefined();
+  });
+});
+
+describe('getRelatedEventsFilter', () => {
+  it('uses related.user with user.* values for an enriched user entity', () => {
+    const result = getRelatedEventsFilter(
+      'user:admin@example.com@gcp',
+      { 'user.id': 'admin@example.com', 'user.name': 'Admin' },
+      'user'
+    );
+
+    expect(result).toEqual({
+      field: 'related.user',
+      values: ['admin@example.com', 'Admin'],
+    });
+  });
+
+  it('uses related.hosts with host.* values for an enriched host entity', () => {
+    const result = getRelatedEventsFilter(
+      'host:h1',
+      { 'host.id': 'h1', 'host.name': 'web-1' },
+      'host'
+    );
+
+    expect(result).toEqual({ field: 'related.hosts', values: ['h1', 'web-1'] });
+  });
+
+  it('uses related.entity with service.* values for a service entity', () => {
+    const result = getRelatedEventsFilter(
+      'service:TargetMultiService1',
+      { 'service.name': 'TargetMultiService1' },
+      'service'
+    );
+
+    expect(result).toEqual({ field: 'related.entity', values: ['TargetMultiService1'] });
+  });
+
+  it('uses related.entity with entity.* values for a generic entity', () => {
+    const result = getRelatedEventsFilter(
+      'projects/p/buckets/b1',
+      { 'entity.id': 'projects/p/buckets/b1' },
+      'generic'
+    );
+
+    expect(result).toEqual({ field: 'related.entity', values: ['projects/p/buckets/b1'] });
+  });
+
+  it('derives the type from the euid prefix when engine_type is absent (unenriched entity)', () => {
+    // Previously fell through to a generic branch that filtered on the calculated EUID, which
+    // appears in no event field and so matched nothing.
+    const result = getRelatedEventsFilter('user:admin-user1@example.com@gcp', {
+      'user.id': ['admin-user1@example.com', 'admin-user2@example.com'],
+    });
+
+    expect(result).toEqual({
+      field: 'related.user',
+      values: ['admin-user1@example.com', 'admin-user2@example.com'],
+    });
+  });
+
+  it('never emits the node id (calculated EUID) as a filter value', () => {
+    const nodeId = 'service:TargetMultiService1';
+    const result = getRelatedEventsFilter(nodeId, { 'service.name': 'TargetMultiService1' });
+
+    expect(result?.values).not.toContain(nodeId);
+  });
+
+  it('returns undefined when no values are available rather than an unmatchable filter', () => {
+    expect(getRelatedEventsFilter('user:a@b.com@gcp', {})).toBeUndefined();
+    expect(getRelatedEventsFilter('user:a@b.com@gcp', undefined)).toBeUndefined();
+    // Only fields of other prefixes present.
+    expect(getRelatedEventsFilter('host:h1', { 'user.id': 'a@b.com' }, 'host')).toBeUndefined();
+  });
+
+  it('ignores empty-string values', () => {
+    expect(
+      getRelatedEventsFilter('user:a@b.com@gcp', { 'user.id': ['', 'a@b.com'] }, 'user')
+    ).toEqual({ field: 'related.user', values: ['a@b.com'] });
   });
 });

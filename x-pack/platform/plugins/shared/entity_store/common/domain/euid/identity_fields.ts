@@ -8,7 +8,7 @@
 import type { EntityType } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { isEuidField } from './commons';
+import { isEuidField, getSourceFieldNames } from './commons';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). Derived from euidRanking.
@@ -19,6 +19,22 @@ export interface IdentitySourceFields {
    * This can be used to extract the ID fields from the document.
    */
   identitySourceFields: string[];
+}
+
+export interface NamespaceSourceFields {
+  /**
+   * Source fields matched with an exact term query (e.g. `event.module`).
+   * These are declared as `{ field: '...' }` in `fieldEvaluations[].sources`.
+   */
+  exactMatchFields: string[];
+  /**
+   * Source fields matched with a prefix query because the entity store takes only the first chunk
+   * before a delimiter (e.g. `data_stream.dataset` split on `.` gives `gcp` from `gcp.audit`).
+   * Declared as `{ firstChunkOfField: '...', splitBy: '.' }` in `fieldEvaluations[].sources`.
+   * When building Kibana filters, replace prefix clauses on these fields with exact phrase filters
+   * using the raw observed values from the document.
+   */
+  prefixMatchFields: string[];
 }
 
 /**
@@ -55,4 +71,31 @@ export function getEuidSourceFields(entityType: EntityType): IdentitySourceField
     requiresOneOf: identitySourceFields,
     identitySourceFields,
   };
+}
+
+/**
+ * Returns the namespace source fields for a given entity type, split by how they are matched.
+ *
+ * The entity store derives `entity.namespace` from a `fieldEvaluations` entry whose `sources`
+ * list may contain plain fields (`{ field }`, matched with a term query) and prefix-chunked fields
+ * (`{ firstChunkOfField, splitBy }`, matched with a prefix query). This distinction matters when
+ * translating EUID DSL into Kibana filter operators: Kibana has no "starts with" operator, so
+ * callers should replace prefix clauses on `prefixMatchFields` with exact phrase filters built from
+ * the raw observed field values (e.g. `data_stream.dataset: "gcp.audit"` instead of a prefix on
+ * `"gcp"`).
+ *
+ * Only the `sources` array of each field evaluation is considered — condition-based branches
+ * (`whenClauses` with `condition:`) are not included because they never produce prefix clauses
+ * in the DSL.
+ *
+ * @param entityType - The entity type (e.g. 'host', 'user', 'service', 'generic')
+ * @returns exactMatchFields and prefixMatchFields from the entity's fieldEvaluations sources
+ */
+export function getEuidNamespaceSourceFields(entityType: EntityType): NamespaceSourceFields {
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  if (isSingleFieldIdentity(identityField)) {
+    return { exactMatchFields: [], prefixMatchFields: [] };
+  }
+  const allSources = (identityField.fieldEvaluations ?? []).flatMap((fe) => fe.sources);
+  return getSourceFieldNames(allSources);
 }

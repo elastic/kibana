@@ -25,6 +25,11 @@ import {
   addFilter,
   containsFilter,
   removeFilter,
+  buildNamespaceSourceFilters,
+  buildEntityDslFilter,
+  addEntityFilter,
+  containsEntityFilter,
+  removeEntityFilter,
 } from './search_filters';
 
 const dataViewId = 'test-data-view';
@@ -640,6 +645,331 @@ describe('search_filters', () => {
 
         expect(newFilters).toHaveLength(1);
         expect(newFilters[0]).toEqual(otherFilter);
+      });
+    });
+  });
+
+  describe('buildNamespaceSourceFilters', () => {
+    it('emits a single phrase filter for a single observed value', () => {
+      const filters = buildNamespaceSourceFilters('data_stream.dataset', 'gcp.audit', 'logs-*');
+      expect(filters).toHaveLength(1);
+      expect(filters[0].meta.type).toBe('phrase');
+      expect(filters[0].query).toEqual({ match_phrase: { 'data_stream.dataset': 'gcp.audit' } });
+    });
+
+    it('emits a phrases filter for multiple observed values', () => {
+      const filters = buildNamespaceSourceFilters(
+        'data_stream.dataset',
+        ['gcp.audit', 'gcp.firewall'],
+        'logs-*'
+      );
+      expect(filters).toHaveLength(1);
+      expect(filters[0].meta.type).toBe('phrases');
+    });
+
+    it('returns empty array when all values are empty strings', () => {
+      expect(buildNamespaceSourceFilters('data_stream.dataset', '')).toHaveLength(0);
+      expect(buildNamespaceSourceFilters('data_stream.dataset', ['', ''])).toHaveLength(0);
+    });
+  });
+
+  describe('buildEntityDslFilter with namespace source values', () => {
+    // The shape the Entity Store's `getEuidDslFilterBasedOnDocument` really returns for a GCP
+    // user resolved at ranking position 1 (user.id, no user.email). The `prefix` clause is part
+    // of that contract — `data_stream.dataset` is a `firstChunkOfField` source, so the builder
+    // reverses the namespace by prefix. Translating it away is this module's job, not the
+    // Entity Store's, so the fixture keeps it.
+    const GCP_DSL = {
+      bool: {
+        filter: [
+          { term: { 'user.id': 'alice@example.com' } },
+          {
+            bool: {
+              should: [
+                { term: { 'event.module': 'gcp' } },
+                { prefix: { 'data_stream.dataset': 'gcp' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        must: [{ bool: { must_not: [{ exists: { field: 'user.email' } }] } }],
+      },
+    };
+
+    const entityId = 'user:alice@example.com@gcp';
+
+    /** Sub-filters of the top-level AND, which is what the filter bar renders as chips. */
+    const andParams = (filter: Filter | undefined): Filter[] => filter?.meta.params as Filter[];
+
+    it('wraps the whole expression in an AND owned by the entity id', () => {
+      const filter = buildEntityDslFilter(entityId, GCP_DSL, dataViewId, {
+        'data_stream.dataset': 'gcp.audit',
+      });
+
+      expect(filter?.meta).toMatchObject({
+        type: FILTERS.COMBINED,
+        relation: BooleanRelation.AND,
+        controlledBy: `${CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER}:${entityId}`,
+        index: dataViewId,
+      });
+    });
+
+    it('never puts the entity id anywhere the filter bar renders', () => {
+      // The entity id is an internal `<euid>|<role>` handle. In `key` it left single-clause
+      // filters with a non-field key and no chip rendered at all; in `alias` it replaced the
+      // chip label with the raw handle. Neither is user-facing text.
+      const roleScopedId = `${entityId}|actor`;
+      const filter = buildEntityDslFilter(roleScopedId, GCP_DSL, dataViewId, {
+        'data_stream.dataset': 'gcp.audit',
+      });
+
+      expect(filter?.meta.alias).toBeUndefined();
+      expect(filter?.meta.key).not.toBe(roleScopedId);
+    });
+
+    it('keeps the field name in meta.key for a single-clause identity so the chip renders', () => {
+      // Single-field identities (generic, service) collapse to one leaf filter whose `key` is the
+      // field the bar draws the chip from — it must survive.
+      const genericId = 'projects/your-project-id/buckets/euid-demo-bucket';
+      const filter = buildEntityDslFilter(
+        genericId,
+        { bool: { filter: [{ term: { 'entity.target.id': genericId } }] } },
+        dataViewId
+      );
+
+      expect(filter).toMatchObject({
+        meta: {
+          type: 'phrase',
+          key: 'entity.target.id',
+          field: 'entity.target.id',
+          controlledBy: `${CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER}:${genericId}`,
+        },
+        query: { match_phrase: { 'entity.target.id': genericId } },
+      });
+      expect(filter?.meta.alias).toBeUndefined();
+    });
+
+    it('finds and removes a single-clause entity filter by its entity id', () => {
+      const genericId = 'projects/your-project-id/buckets/euid-demo-bucket';
+      const added = addEntityFilter(dataViewId, [], genericId, {
+        bool: { filter: [{ term: { 'entity.target.id': genericId } }] },
+      });
+
+      expect(containsEntityFilter(added, genericId)).toBe(true);
+      expect(removeEntityFilter(added, genericId)).toHaveLength(0);
+    });
+
+    describe('combining several entity filters', () => {
+      // Clicking "show this entity's actions" on an actor and then "show actions done to this
+      // entity" on a target is additive: the analyst wants both sets of events. Emitting them as
+      // sibling top-level filters ANDs them, which returns their intersection — usually empty,
+      // since one event rarely satisfies an actor identity clause and a target identity clause
+      // at once.
+      const targetId = 'projects/your-project-id/buckets/euid-demo-bucket|target';
+      const targetDsl = {
+        bool: { filter: [{ term: { 'entity.target.id': 'projects/p/buckets/b1' } }] },
+      };
+
+      const addBoth = () => {
+        const afterActor = addEntityFilter(dataViewId, [], entityId, GCP_DSL, {
+          'data_stream.dataset': 'gcp.audit',
+        });
+        return addEntityFilter(dataViewId, afterActor, targetId, targetDsl);
+      };
+
+      it('ORs a second entity filter with the first instead of ANDing them', () => {
+        const filters = addBoth();
+
+        expect(filters).toHaveLength(1);
+        expect(filters[0].meta).toMatchObject({
+          type: FILTERS.COMBINED,
+          relation: BooleanRelation.OR,
+        });
+        expect(filters[0].meta.params).toHaveLength(2);
+      });
+
+      it('keeps both entity filters findable once nested in the OR', () => {
+        const filters = addBoth();
+
+        expect(containsEntityFilter(filters, entityId)).toBe(true);
+        expect(containsEntityFilter(filters, targetId)).toBe(true);
+      });
+
+      it('unwraps the OR when one of the two is removed', () => {
+        const remaining = removeEntityFilter(addBoth(), entityId);
+
+        expect(remaining).toHaveLength(1);
+        expect(isCombinedFilter(remaining[0])).toBe(false);
+        expect(containsEntityFilter(remaining, targetId)).toBe(true);
+        expect(containsEntityFilter(remaining, entityId)).toBe(false);
+      });
+
+      it('drops the filter entirely when both are removed', () => {
+        const filters = addBoth();
+
+        expect(removeEntityFilter(removeEntityFilter(filters, entityId), targetId)).toHaveLength(0);
+      });
+
+      it('replaces rather than duplicates when the same entity is toggled twice', () => {
+        const filters = addBoth();
+        const readded = addEntityFilter(dataViewId, filters, targetId, targetDsl);
+
+        expect(readded[0].meta.params).toHaveLength(2);
+      });
+    });
+
+    it('renders the identity clause as a phrase filter and the guard as a negated exists', () => {
+      const filter = buildEntityDslFilter(entityId, GCP_DSL, dataViewId, {
+        'data_stream.dataset': 'gcp.audit',
+      });
+
+      const [identity, , guard] = andParams(filter);
+
+      expect(identity).toMatchObject({
+        meta: { type: 'phrase', key: 'user.id', negate: false },
+        query: { match_phrase: { 'user.id': 'alice@example.com' } },
+      });
+      expect(guard).toMatchObject({
+        meta: { type: 'exists', key: 'user.email', negate: true },
+        query: { exists: { field: 'user.email' } },
+      });
+    });
+
+    it('replaces the prefix clause with an exact phrase filter on the observed dataset', () => {
+      const filter = buildEntityDslFilter(entityId, GCP_DSL, dataViewId, {
+        'data_stream.dataset': 'gcp.audit',
+      });
+      const [, namespaceArm] = andParams(filter);
+
+      // The namespace disjunction survives as an OR of two ordinary phrase filters — both
+      // expressible with the filter bar's `is` operator.
+      expect(namespaceArm.meta).toMatchObject({
+        type: FILTERS.COMBINED,
+        relation: BooleanRelation.OR,
+      });
+
+      const orParams = namespaceArm.meta.params as Filter[];
+      expect(orParams).toHaveLength(2);
+      expect(orParams[0]).toMatchObject({
+        meta: { type: 'phrase', key: 'event.module' },
+        query: { match_phrase: { 'event.module': 'gcp' } },
+      });
+      expect(orParams[1]).toMatchObject({
+        meta: { type: 'phrase', key: 'data_stream.dataset' },
+        query: { match_phrase: { 'data_stream.dataset': 'gcp.audit' } },
+      });
+    });
+
+    it('uses an is-one-of (phrases) filter when several dataset values were observed', () => {
+      const filter = buildEntityDslFilter(entityId, GCP_DSL, dataViewId, {
+        'data_stream.dataset': ['gcp.audit', 'gcp.firewall'],
+      });
+      const [, namespaceArm] = andParams(filter);
+      const orParams = namespaceArm.meta.params as Filter[];
+
+      expect(orParams[1]).toMatchObject({
+        meta: {
+          type: 'phrases',
+          key: 'data_stream.dataset',
+          params: ['gcp.audit', 'gcp.firewall'],
+        },
+        query: {
+          bool: {
+            should: [
+              { match_phrase: { 'data_stream.dataset': 'gcp.audit' } },
+              { match_phrase: { 'data_stream.dataset': 'gcp.firewall' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      });
+    });
+
+    it('drops the prefix clause when the dataset was not observed, collapsing the OR', () => {
+      const filter = buildEntityDslFilter(entityId, GCP_DSL, dataViewId);
+      const params = andParams(filter);
+
+      // With only `event.module` left in the disjunction there is nothing to OR, so it is
+      // emitted as a plain sibling phrase filter rather than a single-entry combined filter.
+      expect(params).toHaveLength(3);
+      expect(params[1]).toMatchObject({
+        meta: { type: 'phrase', key: 'event.module' },
+        query: { match_phrase: { 'event.module': 'gcp' } },
+      });
+      expect(JSON.stringify(filter)).not.toContain('data_stream.dataset');
+    });
+
+    it('never emits a clause the filter bar cannot represent', () => {
+      const withObserved = buildEntityDslFilter(entityId, GCP_DSL, dataViewId, {
+        'data_stream.dataset': 'gcp.audit',
+      });
+      const withoutObserved = buildEntityDslFilter(entityId, GCP_DSL, dataViewId);
+
+      // `prefix` has no counterpart among is / is one of / exists, so it must never survive
+      // translation regardless of whether an observed value was available to replace it.
+      for (const filter of [withObserved, withoutObserved]) {
+        expect(JSON.stringify(filter)).not.toContain('"prefix"');
+      }
+    });
+
+    describe('an entity type with several prefix arms for one field', () => {
+      // Okta's namespace evaluation lists both `okta` and `entityanalytics_okta` as source values,
+      // so the builder emits a prefix arm for each against the same field. Okta documents carry no
+      // `event.module`, which makes the substituted `data_stream.dataset` arm the only thing
+      // holding the namespace clause up.
+      const OKTA_DSL = {
+        bool: {
+          filter: [
+            { term: { 'user.name': 'alice@example.com' } },
+            {
+              bool: {
+                should: [
+                  { term: { 'event.module': 'okta' } },
+                  { prefix: { 'data_stream.dataset': 'okta' } },
+                  { term: { 'event.module': 'entityanalytics_okta' } },
+                  { prefix: { 'data_stream.dataset': 'entityanalytics_okta' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      };
+
+      const oktaId = 'user:alice@example.com@okta';
+      const observed = { 'data_stream.dataset': 'entityanalytics_okta.user' };
+
+      const namespaceArm = (filter: Filter | undefined) =>
+        (filter?.meta.params as Filter[])[1].meta.params as Filter[];
+
+      it('substitutes the observed value only into the arm whose prefix it matches', () => {
+        const arms = namespaceArm(buildEntityDslFilter(oktaId, OKTA_DSL, dataViewId, observed));
+
+        // `entityanalytics_okta.user` does not start with `okta`, so that arm must be dropped
+        // rather than take a value it would never have matched.
+        const datasetArms = arms.filter((a) => a.meta.key === 'data_stream.dataset');
+        expect(datasetArms).toHaveLength(1);
+        expect(datasetArms[0].query).toEqual({
+          match_phrase: { 'data_stream.dataset': 'entityanalytics_okta.user' },
+        });
+      });
+
+      it('does not emit the same clause twice when arms collapse onto one value', () => {
+        const arms = namespaceArm(buildEntityDslFilter(oktaId, OKTA_DSL, dataViewId, observed));
+        const rendered = arms.map((a) => JSON.stringify(a.query));
+
+        expect(new Set(rendered).size).toBe(rendered.length);
+      });
+
+      it('keeps the namespace clause matchable, which dropping every prefix would not', () => {
+        const withObserved = buildEntityDslFilter(oktaId, OKTA_DSL, dataViewId, observed);
+        const withoutObserved = buildEntityDslFilter(oktaId, OKTA_DSL, dataViewId);
+
+        // Without substitution the disjunction is only `event.module` phrases, and no Okta
+        // document has that field — the filter would return nothing at all.
+        expect(JSON.stringify(withObserved)).toContain('entityanalytics_okta.user');
+        expect(JSON.stringify(withoutObserved)).not.toContain('data_stream.dataset');
       });
     });
   });

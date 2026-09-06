@@ -114,47 +114,45 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
       await expandedFlyoutGraph.toggleSearchBar();
 
+      // Entity filters come from the Entity Store's EUID logic, so they carry more than the bare
+      // identity field: a namespace disjunction (so the same id in another namespace is a
+      // different entity) and, when the entity resolved below the top ranking position, guards
+      // excluding the higher-ranked fields it fell through. `admin@example.com` has no
+      // `user.email`, so it resolves via `user.id` and picks up the `NOT user.email` guard.
+      const NAMESPACE = '(event.module: gcp OR data_stream.dataset: gcp.audit)';
+      const ACTOR = `user.id: admin@example.com AND ${NAMESPACE} AND NOT user.email: exists`;
+      const TARGET = `user.target.id: admin@example.com AND ${NAMESPACE} AND NOT user.target.email: exists`;
+      const RELATED = 'related.user: admin@example.com';
+      const ACTION = 'event.action: google.iam.admin.v1.CreateRole';
+
+      // A filter rendered on its own shows no outer parentheses, but once it becomes one arm of
+      // an OR the UI wraps every arm that is itself a conjunction, to make precedence explicit.
+      // Single-clause arms (related.user, event.action) are left bare.
+      const orOf = (...arms: string[]) =>
+        arms.map((arm) => (arm.includes(' AND ') ? `(${arm})` : arm)).join(' OR ');
+
+      // The chip label already spells out the whole expression, so asserting it is enough;
+      // reopening the filter editor to read the same string back adds no coverage.
+      const expectFilter = async (expected: string) =>
+        expandedFlyoutGraph.expectFilterTextEquals(0, expected);
+
       // Show actions by entity
       await expandedFlyoutGraph.showActionsByEntity('user:admin@example.com@gcp');
-      await expandedFlyoutGraph.expectFilterTextEquals(0, 'user.id: admin@example.com');
-      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'user.id: admin@example.com');
+      await expectFilter(ACTOR);
 
       // Show actions on entity
       await expandedFlyoutGraph.showActionsOnEntity('user:admin@example.com@gcp');
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com'
-      );
-
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com'
-      );
+      await expectFilter(orOf(ACTOR, TARGET));
 
       // Explore related entities
       await expandedFlyoutGraph.exploreRelatedEntities('user:admin@example.com@gcp');
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
+      await expectFilter(orOf(ACTOR, TARGET, RELATED));
 
       // Show events with the same action
       await expandedFlyoutGraph.showEventsOfSameAction(
         'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(0)'
       );
-
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp OR event.action: google.iam.admin.v1.CreateRole'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp OR event.action: google.iam.admin.v1.CreateRole'
-      );
+      await expectFilter(orOf(ACTOR, TARGET, RELATED, ACTION));
 
       await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
@@ -162,25 +160,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.hideEventsOfSameAction(
         'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(0)'
       );
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
+      await expectFilter(orOf(ACTOR, TARGET, RELATED));
 
       // Hide actions on entity
       await expandedFlyoutGraph.hideActionsOnEntity('user:admin@example.com@gcp');
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
+      await expectFilter(orOf(ACTOR, RELATED));
 
       // Clear filters
       await expandedFlyoutGraph.clearAllFilters();
@@ -485,7 +469,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v2.latest.*',
-            expectedCount: 46,
+            expectedCount: 49,
           });
         });
 
@@ -496,6 +480,104 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         });
 
         runEnrichmentTests();
+
+        describe('EUID ranking arms (Okta)', () => {
+          // Okta is the interesting integration for namespace handling. The Entity Store derives
+          // the `okta` namespace from two sources (`event.module` exactly, `data_stream.dataset`
+          // by its first chunk) across two accepted values (`okta`, `entityanalytics_okta`), and
+          // the filter reconstructs every combination — it describes which documents *could*
+          // resolve to this namespace, not which fields this one document happened to carry. So
+          // the `event.module` arms appear even though no Okta document sets that field; they are
+          // OR'd, never match here, and would match a different Okta integration that does set it.
+          //
+          // The `data_stream.dataset` arms are prefixes, which Kibana's filter bar cannot express
+          // (there is no "starts with" operator), so the graph substitutes the observed value.
+          // Only the arm whose prefix the value satisfies is kept: `okta.system` replaces the
+          // `okta*` arm, and the `entityanalytics_okta*` arm is dropped rather than taking a value
+          // it would never have matched.
+          //
+          // The three documents (see es_archives/logs_okta_system):
+          //   doc A  user.email alice@example.com  -> user:alice@example.com@okta  (ranking pos 0)
+          //   doc B  user.name  alice@example.com  -> user:alice@example.com@okta  (ranking pos 3)
+          //   doc C  user.email bob@example.com    -> user:bob@example.com@okta
+          // A and B are the SAME entity reached through different ranking arms. C shares B's
+          // login-shaped `user.name` but resolves elsewhere because it has an email.
+          const NAMESPACE =
+            '(event.module: okta OR data_stream.dataset: okta.system OR event.module: entityanalytics_okta)';
+          const ALICE = 'user:alice@example.com@okta';
+
+          before(async () => {
+            await esArchiver.load(
+              'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_okta_system'
+            );
+          });
+
+          after(async () => {
+            await esArchiver.unload(
+              'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_okta_system'
+            );
+          });
+
+          it('filters on the ranking arm that resolved the opened document, not every identity field', async () => {
+            await networkEventsPage.navigateToNetworkEventsPage(
+              `${networkEventsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${networkEventsPage.getFlyoutFilter(
+                'euid-okta-doc-a',
+                'logs-okta.system-default'
+              )}`
+            );
+            await networkEventsPage.waitForListToHaveEvents();
+
+            await networkEventsPage.flyout.expandVisualizations();
+            await networkEventsPage.flyout.assertGraphPreviewVisible();
+
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+            await expandedFlyoutGraph.showSearchBar();
+
+            // Doc A resolved at ranking position 0, so only `user.email` is filtered on and no
+            // exclusion guards are needed. Crucially the namespace arm is an exact phrase on
+            // data_stream.dataset — a prefix clause could not be rendered as a filter chip.
+            await expandedFlyoutGraph.showActionsByEntity(ALICE);
+            await expandedFlyoutGraph.expectFilterTextEquals(
+              0,
+              `user.email: alice@example.com AND ${NAMESPACE}`
+            );
+          });
+
+          it('guards the arms it fell through, so a look-alike sharing user.name is excluded', async () => {
+            await networkEventsPage.navigateToNetworkEventsPage(
+              `${networkEventsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${networkEventsPage.getFlyoutFilter(
+                'euid-okta-doc-b',
+                'logs-okta.system-default'
+              )}`
+            );
+            await networkEventsPage.waitForListToHaveEvents();
+
+            await networkEventsPage.flyout.expandVisualizations();
+            await networkEventsPage.flyout.assertGraphPreviewVisible();
+
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+            await expandedFlyoutGraph.showSearchBar();
+
+            // Doc B has no email and no id, so it resolves at ranking position 3 (`user.name`) and
+            // the filter carries guards for every higher-ranked field it skipped. Those guards are
+            // what keep doc C out: C shares this exact `user.name` but has a `user.email`, so it
+            // resolves to a different entity and `NOT user.email: exists` excludes it.
+
+            await expandedFlyoutGraph.showActionsByEntity(ALICE);
+            await expandedFlyoutGraph.expectFilterTextEquals(
+              0,
+              `user.name: alice@example.com AND ${NAMESPACE} AND NOT user.email: exists AND NOT user.id: exists AND NOT user.domain: exists`
+            );
+          });
+        });
 
         describe('Entity Relationships', () => {
           it('expanded flyout - event with service target and entity relationships', async () => {

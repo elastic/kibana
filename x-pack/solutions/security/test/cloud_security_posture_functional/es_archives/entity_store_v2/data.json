@@ -2039,3 +2039,148 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "euid-okta-alice",
+    "index": ".entities.v2.latest.default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T11:00:00.000Z",
+      "cloud": {
+        "provider": "okta"
+      },
+      "data_stream": {
+        "dataset": "okta.system"
+      },
+      "entity": {
+        "confidence": "high",
+        "EngineMetadata": {
+          "Type": "user",
+          "UntypedId": "alice@example.com@okta"
+        },
+        "id": "user:alice@example.com@okta",
+        "lifecycle": {
+          "first_seen": "2024-09-01T10:00:00.000Z",
+          "last_seen": "2024-09-01T11:00:00.000Z"
+        },
+        "name": "alice@example.com",
+        "namespace": "okta",
+        "source": "okta",
+        "sub_type": "Okta User",
+        "type": "Identity"
+      },
+      "event": {
+        "category": "iam",
+        "dataset": "okta.system",
+        "kind": "event",
+        "outcome": "success",
+        "type": [
+          "change",
+          "user"
+        ]
+      },
+      "user": {
+        "name": "alice@example.com",
+        "email": "alice@example.com",
+        "id": "00u1alice0000000000"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "euid-okta-bob",
+    "index": ".entities.v2.latest.default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "cloud": {
+        "provider": "okta"
+      },
+      "data_stream": {
+        "dataset": "okta.system"
+      },
+      "entity": {
+        "confidence": "high",
+        "EngineMetadata": {
+          "Type": "user",
+          "UntypedId": "bob@example.com@okta"
+        },
+        "id": "user:bob@example.com@okta",
+        "lifecycle": {
+          "first_seen": "2024-09-01T12:00:00.000Z",
+          "last_seen": "2024-09-01T12:00:00.000Z"
+        },
+        "name": "bob@example.com",
+        "namespace": "okta",
+        "source": "okta",
+        "sub_type": "Okta User",
+        "type": "Identity"
+      },
+      "event": {
+        "category": "iam",
+        "dataset": "okta.system",
+        "kind": "event",
+        "outcome": "success",
+        "type": [
+          "change",
+          "user"
+        ]
+      },
+      "user": {
+        "name": "alice@example.com",
+        "email": "bob@example.com",
+        "id": "00u1bob00000000000"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "euid-okta-host-1",
+    "index": ".entities.v2.latest.default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "cloud": {
+        "provider": "okta"
+      },
+      "data_stream": {
+        "dataset": "okta.system"
+      },
+      "entity": {
+        "confidence": "high",
+        "EngineMetadata": {
+          "Type": "host",
+          "UntypedId": "okta-demo-host-1"
+        },
+        "id": "host:okta-demo-host-1",
+        "lifecycle": {
+          "first_seen": "2024-09-01T10:00:00.000Z",
+          "last_seen": "2024-09-01T12:00:00.000Z"
+        },
+        "name": "okta-demo-host-1",
+        "source": "okta",
+        "sub_type": "Okta Device",
+        "type": "Host"
+      },
+      "event": {
+        "category": "iam",
+        "dataset": "okta.system",
+        "kind": "event",
+        "outcome": "success",
+        "type": [
+          "change",
+          "user"
+        ]
+      },
+      "host": {
+        "id": "okta-demo-host-1",
+        "name": "okta-demo-host-1"
+      }
+    }
+  }
+}
