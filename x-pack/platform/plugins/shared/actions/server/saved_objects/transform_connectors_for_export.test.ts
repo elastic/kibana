@@ -228,6 +228,8 @@ describe('transform connector for export', () => {
         attributes: {
           ...connector.attributes,
           secrets: {},
+          apiKey: null,
+          uiamApiKey: null,
         },
       }))
     );
@@ -251,8 +253,47 @@ describe('transform connector for export', () => {
           ...connector.attributes,
           secrets: {},
           isMissingSecrets: true,
+          apiKey: null,
+          uiamApiKey: null,
         },
       }))
     );
+  });
+
+  it('clears last-saver identity fields on export', () => {
+    actionTypeRegistry.get.mockReturnValue(connectorType);
+    const connector = {
+      id: 'inbound-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.inboundWebhook',
+        name: 'inbound',
+        isMissingSecrets: false,
+        config: {},
+        secrets: 'asbqw4tqbef',
+        apiKey: 'encrypted-api-key',
+        uiamApiKey: 'encrypted-uiam-key',
+        uiamApiKeyExternal: false,
+      },
+      references: [],
+    };
+
+    expect(transformConnectorsForExport([connector], actionTypeRegistry)).toEqual([
+      {
+        ...connector,
+        attributes: {
+          actionTypeId: '.inboundWebhook',
+          name: 'inbound',
+          isMissingSecrets: false,
+          config: {},
+          secrets: {},
+          apiKey: null,
+          uiamApiKey: null,
+        },
+      },
+    ]);
+    expect(
+      transformConnectorsForExport([connector], actionTypeRegistry)[0].attributes
+    ).not.toHaveProperty('uiamApiKeyExternal');
   });
 });

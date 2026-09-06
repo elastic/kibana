@@ -27,6 +27,8 @@ import { z as z4 } from '@kbn/zod/v4';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 import { generateConfigSchema } from '../../../../lib/single_file_connectors/generate_config_schema';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -1297,12 +1299,20 @@ describe('create()', () => {
       throw new Error('Expected .inboundWebhook spec');
     }
 
+    const securityService = securityServiceMock.createStart();
     const inboundContext: ActionsClientContext = {
       ...mockContext,
       spaceId: 'default',
+      securityService,
     };
 
     beforeEach(() => {
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity mock-saved-object-id',
+        api_key: 'es-secret',
+      });
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(
         getConnectorType({
           id: '.inboundWebhook',
@@ -1340,5 +1350,103 @@ describe('create()', () => {
       expect(result).not.toHaveProperty('secrets');
       expect(saved.config.ingestTokenHash).toBeUndefined();
     });
+
+    test('stores a last-saver API key and leaves spoke secrets unchanged', async () => {
+      await create({
+        context: inboundContext,
+        action: {
+          name: 'Sales ingress',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        apiKey?: string;
+        uiamApiKey?: string;
+        secrets: Record<string, unknown>;
+      };
+
+      expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.uiamApiKey).toBeUndefined();
+      expect(saved.secrets).toEqual({});
+      expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+    });
+
+    test('does not return last-saver identity on the public create result', async () => {
+      const result = await create({
+        context: inboundContext,
+        action: {
+          name: 'Sales ingress',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(result).not.toHaveProperty('apiKey');
+      expect(result).not.toHaveProperty('uiamApiKey');
+      expect(result).not.toHaveProperty('secrets');
+    });
+
+    test('ignores a client-supplied apiKey', async () => {
+      await create({
+        context: inboundContext,
+        action: {
+          name: 'Sales ingress',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          secrets: {},
+          apiKey: 'from-client',
+        } as never,
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        apiKey?: string;
+      };
+      expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+    });
+
+    test('returns 400 when encryption is unavailable', async () => {
+      await expect(
+        create({
+          context: { ...inboundContext, isESOCanEncrypt: false },
+          action: {
+            name: 'Sales ingress',
+            actionTypeId: '.inboundWebhook',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('encrypted saved objects are not available');
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
+  test('does not mint last-saver identity for non-inbound connectors', async () => {
+    const securityService = securityServiceMock.createStart();
+    unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes, options) => ({
+      id: options?.id ?? '1',
+      type: 'action',
+      attributes,
+      references: [],
+    }));
+
+    await create({
+      context: { ...mockContext, securityService },
+      action: {
+        name: 'my name',
+        actionTypeId: 'my-connector-type',
+        config: {},
+        secrets: {},
+      },
+    });
+
+    const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+      apiKey?: string;
+    };
+    expect(saved.apiKey).toBeUndefined();
+    expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
   });
 });

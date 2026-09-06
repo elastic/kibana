@@ -54,6 +54,8 @@ import { getConnectorType } from '../fixtures';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
 import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
 import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { encodeApiKey } from '../inbound/event_identity/encode_api_key';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -104,6 +106,7 @@ let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let authTypeRegistry: AuthTypeRegistry;
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
+const securityService = securityServiceMock.createStart();
 
 const actionTypeIdFromSavedObjectMock = (actionTypeId = 'my-connector-type') => {
   return {
@@ -156,6 +159,7 @@ beforeEach(() => {
     encryptedSavedObjectsClient,
     isESOCanEncrypt,
     getAxiosInstanceWithAuth,
+    securityService,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -2237,6 +2241,49 @@ describe('delete()', () => {
         "2",
       ]
     `);
+  });
+
+  test('invalidates the last-saver API key before deleting an inbound connector', async () => {
+    const expectedResult = Symbol();
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+    unsecuredSavedObjectsClient.get.mockReset();
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'inbound-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.inboundWebhook',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: 'inbound-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.inboundWebhook',
+        name: 'ingress',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+        apiKey: encodeApiKey('old-id', 'old-secret'),
+      },
+      references: [],
+    } as never);
+    securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+      invalidated_api_keys: ['old-id'],
+      previously_invalidated_api_keys: [],
+      error_count: 0,
+    });
+
+    const result = await actionsClient.delete({ id: 'inbound-1' });
+
+    expect(result).toEqual(expectedResult);
+    expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+      ids: ['old-id'],
+    });
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', 'inbound-1');
   });
 });
 

@@ -98,6 +98,7 @@ const decryptedInbound = {
     config: { ingestTokenHash: storedHash },
     secrets: {},
     authMode: 'shared',
+    apiKey: 'stored-last-saver-key',
   },
   references: [],
   version: '1',
@@ -148,7 +149,9 @@ describe('rotateInboundIngress', () => {
     expect(result.ingestToken).toEqual(expect.any(String));
     const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
       config: { ingestTokenHash: string };
+      apiKey?: string;
     };
+    expect(saved.apiKey).toBe('stored-last-saver-key');
     expect(saved.config.ingestTokenHash).not.toBe(storedHash);
     expect(saved.config.ingestTokenHash).toBe(
       computeIngestTokenHash({

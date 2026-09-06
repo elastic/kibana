@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { asSpaceId } from '@kbn/core-spaces-common';
 import type {
   ConnectorEventEmitter,
   PluginSetupContract as ActionsPluginSetupContract,
@@ -27,7 +25,7 @@ export function resetConnectorEventEmitFailureCountForTests(): void {
 
 /**
  * Registers the Phase 1 Workflows emitter on the Actions inbound hub.
- * Builds a momentary space-scoped fake request for getClient.
+ * Forwards the ingest-built last-saver request; never invents a space-only request.
  */
 export function registerWorkflowsConnectorEventEmitter({
   actions,
@@ -37,7 +35,15 @@ export function registerWorkflowsConnectorEventEmitter({
   getWorkflowsExtensionsStart: () => Promise<WorkflowsExtensionsServerPluginStart | undefined>;
 }): void {
   const emitter: ConnectorEventEmitter = {
-    emit: async ({ eventId, payload, spaceId, connectorId, connectorTypeId, correlationKey }) => {
+    emit: async ({
+      eventId,
+      payload,
+      spaceId,
+      connectorId,
+      connectorTypeId,
+      correlationKey,
+      request,
+    }) => {
       const workflowsExtensions = await getWorkflowsExtensionsStart();
       if (!workflowsExtensions) {
         emitFailureCount += 1;
@@ -46,11 +52,12 @@ export function registerWorkflowsConnectorEventEmitter({
         );
       }
 
-      // Momentary attribution request — space only.
-      const fakeRequest = kibanaRequestFactory({
-        headers: {},
-        spaceId: asSpaceId(spaceId),
-      });
+      if (!request.headers.authorization) {
+        emitFailureCount += 1;
+        throw new Error(
+          `Connector event emit requires an authenticated request; dropping event ${eventId} for connector ${connectorId} space ${spaceId}`
+        );
+      }
 
       const enriched: Record<string, unknown> = {
         ...payload,
@@ -61,7 +68,7 @@ export function registerWorkflowsConnectorEventEmitter({
       };
 
       try {
-        const client = await workflowsExtensions.getClient(fakeRequest);
+        const client = await workflowsExtensions.getClient(request);
         await client.emitEvent(eventId, enriched);
       } catch (error) {
         emitFailureCount += 1;

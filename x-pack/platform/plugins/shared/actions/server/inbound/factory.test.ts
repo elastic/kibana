@@ -55,6 +55,7 @@ describe('createInboundEventsClient (factory)', () => {
         emitConnectorEvents,
         inMemoryConnectors: [],
         getUnsecuredSavedObjectsClient: expect.any(Function),
+        getDecryptedConnectorAttributes: expect.any(Function),
       })
     );
 

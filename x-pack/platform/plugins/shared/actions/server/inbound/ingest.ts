@@ -15,7 +15,8 @@ import {
 } from '@kbn/connector-specs';
 
 import type { IngestEventsRequestQuery } from '../../common/routes/events/apis/ingest';
-import type { InMemoryConnector } from '../types';
+import type { InMemoryConnector, RawAction } from '../types';
+import { resolveConnectorEventScheduleRequest } from './event_identity';
 import {
   INBOUND_EVENTS_DISABLED_MESSAGE,
   INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
@@ -56,6 +57,7 @@ export interface IngestInboundEventParams extends IngestInboundEventInput {
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   logger: Logger;
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
+  getDecryptedConnectorAttributes: (connectorId: string, spaceId: string) => Promise<RawAction>;
   inMemoryConnectors: InMemoryConnector[];
 }
 
@@ -82,6 +84,7 @@ export async function ingestInboundEvent({
   emitConnectorEvents,
   logger,
   getUnsecuredSavedObjectsClient,
+  getDecryptedConnectorAttributes,
   inMemoryConnectors,
 }: IngestInboundEventParams): Promise<IngestInboundEventResult> {
   const connectorTypeId = normalizeConnectorTypeId(connectorTypeIdParam);
@@ -241,6 +244,36 @@ export async function ingestInboundEvent({
       };
     }
 
+    if (result.events.length === 0) {
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'accepted',
+      });
+      return { status: 'accepted', body: { ok: true } };
+    }
+
+    let scheduleRequest;
+    try {
+      const attributes = await getDecryptedConnectorAttributes(connectorId, spaceId);
+      scheduleRequest = resolveConnectorEventScheduleRequest(attributes, spaceId);
+    } catch (error) {
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'identity_missing',
+        detail: `decrypt_failed ${error instanceof Error ? error.message : String(error)}`,
+      });
+      return { status: 'accepted', body: { ok: true } };
+    }
+
+    if (!scheduleRequest) {
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'identity_missing',
+        detail: 'missing_api_key',
+      });
+      return { status: 'accepted', body: { ok: true } };
+    }
+
     let emitFailures = 0;
     const emitFailureDetails: string[] = [];
     for (const event of result.events) {
@@ -252,6 +285,7 @@ export async function ingestInboundEvent({
           connectorId,
           connectorTypeId,
           correlationKey: event.correlationKey,
+          request: scheduleRequest,
         });
         // HTTP stays 202; ingest logs a single emit_partial outcome.
         if (!emitResult.ok) {

@@ -7,8 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
-import { isUndefined, omitBy } from 'lodash';
+import { isUndefined, omit, omitBy } from 'lodash';
 import type { Connector } from '../../types';
 import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
@@ -21,6 +22,12 @@ import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { preserveInboundIngressHashIfNeeded } from '../../../../inbound/ensure_connector_ingress_credentials';
+import {
+  invalidateStoredConnectorEventIdentity,
+  loadPreviousConnectorEventIdentity,
+  mintInboundEventIdentityAttributes,
+  toRawActionIdentityAttributes,
+} from '../../../../inbound/event_identity';
 
 const getAuthTypeId = (
   secrets?: Record<string, unknown>,
@@ -169,17 +176,32 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     storedConfig,
   });
 
+  const previousIdentity = connectorTypeHasInboundEvents(actionTypeId)
+    ? await loadPreviousConnectorEventIdentity(context, id)
+    : undefined;
+  const identityAttributes = await mintInboundEventIdentityAttributes(context, {
+    connectorId: id,
+    actionTypeId,
+  });
+
+  const attributesWithoutIdentity = omit(attributes, [
+    'apiKey',
+    'uiamApiKey',
+    'uiamApiKeyExternal',
+  ]);
+
   const result = await tryCatch(
     async () =>
       await context.unsecuredSavedObjectsClient.create<RawAction>(
         'action',
         {
-          ...attributes,
+          ...attributesWithoutIdentity,
           actionTypeId,
           name,
           isMissingSecrets: false,
           config: configWithIngress,
           secrets: validatedActionTypeSecrets,
+          ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
         },
         omitBy(
           {
@@ -192,6 +214,12 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
         )
       )
   );
+
+  if (result instanceof Error) {
+    await invalidateStoredConnectorEventIdentity(context, id, identityAttributes);
+  } else {
+    await invalidateStoredConnectorEventIdentity(context, id, previousIdentity);
+  }
 
   const wasSuccessful = !(result instanceof Error);
   const label = `connectorId: "${id}"; type: ${actionTypeId}`;

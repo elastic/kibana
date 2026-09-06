@@ -116,6 +116,10 @@ function isWorkflowSourcedChainContext(context: EventChainContext | undefined): 
   return context !== undefined;
 }
 
+function isConnectorSourcedEvent(payload: Record<string, unknown>): boolean {
+  return typeof payload.connectorId === 'string' && payload.connectorId.length > 0;
+}
+
 function getMatchingTriggerOn(
   workflow: WorkflowDetailDto,
   triggerId: string,
@@ -246,7 +250,17 @@ export class TriggerEventHandler {
     }
 
     let scheduleStats: TriggerEventScheduleStats;
-    if (this.config.enabled && workflows.length > 0) {
+    if (
+      this.config.enabled &&
+      workflows.length > 0 &&
+      isConnectorSourcedEvent(payload) &&
+      !request.headers?.authorization
+    ) {
+      this.logger.warn(
+        `Skipping schedule for connector event ${triggerId}: request has no Authorization header`
+      );
+      scheduleStats = createEmptyTriggerScheduleStats();
+    } else if (this.config.enabled && workflows.length > 0) {
       const eventParams: ScheduleEventParams = {
         payload,
         timestamp,
