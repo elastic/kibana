@@ -121,7 +121,7 @@ Reporting settings already split across several YAML files included from `report
 
 ### 6. applies_to
 
-This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symmetry rule. Details and examples: [yaml-schema.md](references/yaml-schema.md). Canonical authoring contract: [docs-builder#4014](https://github.com/elastic/docs-builder/pull/4014) (`applies_to` in settings YAML). After that PR merges, use the [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md#settings-yaml) section.
+This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symmetry rule. Details and examples: [yaml-schema.md](references/yaml-schema.md). Canonical authoring contract: [docs-builder#4047](https://github.com/elastic/docs-builder/pull/4047) (`applies_to` in settings YAML). After that PR merges, use the [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md#settings-yaml) section.
 
 - **`stack`** is the only key that carries lifecycle and version:
   - Omit the version if the setting was added before 9.0: `stack: ga` or `stack: preview`. That means all 9.0+ versions.
@@ -203,5 +203,5 @@ Skip this when the reference entry is enough.
 - YAML field reference and `applies_to` rules: [yaml-schema.md](references/yaml-schema.md)
 - File and group map: [file-map.md](references/file-map.md)
 - Copy-paste entries: [examples.md](examples.md)
-- Schema source: [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md). Settings `applies_to` contract: [docs-builder#4014](https://github.com/elastic/docs-builder/pull/4014)
+- Schema source: [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md). Settings `applies_to` contract: [docs-builder#4047](https://github.com/elastic/docs-builder/pull/4047)
 - Badge rendering: [applies-to badge reference](https://elastic.github.io/docs-builder/syntax/applies/#badge-rendering-reference)
