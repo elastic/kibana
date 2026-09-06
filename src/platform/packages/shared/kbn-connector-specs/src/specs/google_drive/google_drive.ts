@@ -15,9 +15,20 @@ import {
   getEstimatedBase64OutputBytes,
 } from '../../connector_utils';
 import type { ConnectorSpec } from '../../connector_spec';
+import { UISchemas } from '../../connector_spec';
 import { parseCommaSeparatedIds, parseDriveUrlsFromText } from './google_drive_helpers';
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
+
+/**
+ * Resolve the Google Drive API base URL. Defaults to the public Drive v3 API; an
+ * optional `baseUrl` config override lets deployments point the connector at a
+ * gateway, egress proxy, or contract-mock endpoint without code changes.
+ */
+function driveApiBase(ctx: { config?: Record<string, unknown> }): string {
+  const override = ((ctx?.config?.baseUrl as string | undefined) ?? '').trim();
+  return override ? override.replace(/\/+$/, '') : GOOGLE_DRIVE_API_BASE;
+}
 const DEFAULT_PAGE_SIZE = 250;
 const MAX_PAGE_SIZE = 1000;
 const DEFAULT_FOLDER_ID = 'root';
@@ -148,6 +159,25 @@ export const GoogleDriveConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
+  schema: lazySchema(() =>
+    z.object({
+      baseUrl: UISchemas.url()
+        .default(GOOGLE_DRIVE_API_BASE)
+        .describe('Google Drive API base URL')
+        .meta({
+          widget: 'text',
+          placeholder: GOOGLE_DRIVE_API_BASE,
+          label: i18n.translate('connectorSpecs.googleDrive.config.baseUrl.label', {
+            defaultMessage: 'Google Drive API URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.googleDrive.config.baseUrl.helpText', {
+            defaultMessage:
+              'Base URL for the Google Drive v3 API. Override to route through a gateway or egress proxy.',
+          }),
+        }),
+    })
+  ),
+
   auth: {
     types: [
       {
@@ -266,7 +296,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
         }
 
         try {
-          const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files`, {
+          const response = await ctx.client.get(`${driveApiBase(ctx)}/files`, {
             params,
           });
 
@@ -346,7 +376,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
         }
 
         try {
-          const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files`, {
+          const response = await ctx.client.get(`${driveApiBase(ctx)}/files`, {
             params,
           });
 
@@ -401,7 +431,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
         try {
           // First, get file metadata to determine if it's a Google Workspace document
           const metadataResponse = await ctx.client.get(
-            `${GOOGLE_DRIVE_API_BASE}/files/${typedInput.fileId}`,
+            `${driveApiBase(ctx)}/files/${typedInput.fileId}`,
             {
               params: {
                 fields: 'id, name, mimeType, size',
@@ -424,7 +454,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
               typedInput.responseType
             );
             contentResponse = await ctx.client.get(
-              `${GOOGLE_DRIVE_API_BASE}/files/${typedInput.fileId}/export`,
+              `${driveApiBase(ctx)}/files/${typedInput.fileId}/export`,
               {
                 params: {
                   mimeType: resolvedMimeType,
@@ -437,7 +467,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             // fall back to base64 for binary types even when text was requested.
             useTextResponse &&= !!fileMetadata.mimeType?.startsWith('text/');
             contentResponse = await ctx.client.get(
-              `${GOOGLE_DRIVE_API_BASE}/files/${typedInput.fileId}`,
+              `${driveApiBase(ctx)}/files/${typedInput.fileId}`,
               {
                 params: {
                   alt: 'media',
@@ -526,7 +556,7 @@ getFileMetadata: {
           const results = await Promise.all(
             typedInput.fileIds.map(async (fileId) => {
               try {
-                const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files/${fileId}`, {
+                const response = await ctx.client.get(`${driveApiBase(ctx)}/files/${fileId}`, {
                   params: { fields: metadataFields, supportsAllDrives: true },
                 });
                 return stripFileContent(response.data as Record<string, unknown>) as never;
@@ -598,7 +628,7 @@ getFileMetadata: {
         const q = `${folderClause} and trashed=false${modifiedClause}`;
 
         try {
-          const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files`, {
+          const response = await ctx.client.get(`${driveApiBase(ctx)}/files`, {
             params: buildSharedDriveListParams({
               q,
               pageSize: typedInput.pageSize,
@@ -708,7 +738,7 @@ getFileMetadata: {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Google Drive test handler');
-      await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {
+      await ctx.client.get(`${driveApiBase(ctx)}/about`, {
         params: { fields: 'user' },
       });
       return {};
