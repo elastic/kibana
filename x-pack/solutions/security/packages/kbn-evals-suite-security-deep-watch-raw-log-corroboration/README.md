@@ -1,8 +1,12 @@
-# Deep Watch Raw Log Corroboration Eval Suite
+# Forensics Watch Raw Log Corroboration Eval Suite
 
-Evaluates the Raw Log Corroboration Worker — a Deep Watch Worker that takes an
+Evaluates the Raw Log Corroboration Worker — a Forensics Watch Worker that takes an
 investigation narrative built from alerts and pivots into raw telemetry to
 either corroborate or identify gaps.
+
+_Forensics Watch was formerly **Deep Watch** (AlertZero decision D25). Per that
+decision the rename is prose-only: package name, suite id (`security-deep-watch-raw-log-corroboration`),
+and directory slugs intentionally keep their historical naming._
 
 ## Scenarios
 
