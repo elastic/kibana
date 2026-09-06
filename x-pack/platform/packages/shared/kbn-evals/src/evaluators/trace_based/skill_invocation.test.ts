@@ -40,7 +40,7 @@ describe('createSkillInvocationEvaluator', () => {
     jest.useRealTimers();
   });
 
-  it('should build a query filtering by skill name in the filestore.read parameters', async () => {
+  it('should build a query filtering by skill name in the load_skill and filestore.read parameters', async () => {
     const evaluator = createSkillInvocationEvaluator({
       traceEsClient: mockEsClient,
       log: mockLog,
@@ -62,6 +62,7 @@ describe('createSkillInvocationEvaluator', () => {
     expect(calledQuery).toContain(`trace.id == "${VALID_TRACE_ID}"`);
     expect(calledQuery).toContain('total_spans = COUNT(*)');
     expect(calledQuery).toContain('attributes.elastic.inference.span.kind == "TOOL"');
+    expect(calledQuery).toContain('attributes.gen_ai.tool.name == "load_skill"');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');
     expect(calledQuery).toContain('*/data-exploration/SKILL.md*');
   });
