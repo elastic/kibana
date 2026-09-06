@@ -58,6 +58,7 @@ import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
 import type {
   SignificantEventsPluginSetupDependencies,
+  SignificantEventsPluginStart,
   SignificantEventsPluginStartDependencies,
   SignificantEventsServer,
 } from './types';
@@ -109,7 +110,7 @@ export class SignificantEventsPlugin
   implements
     Plugin<
       void,
-      void,
+      SignificantEventsPluginStart,
       SignificantEventsPluginSetupDependencies,
       SignificantEventsPluginStartDependencies
     >
@@ -398,7 +399,10 @@ export class SignificantEventsPlugin
     });
   }
 
-  public start(core: CoreStart, plugins: SignificantEventsPluginStartDependencies): void {
+  public start(
+    core: CoreStart,
+    plugins: SignificantEventsPluginStartDependencies
+  ): SignificantEventsPluginStart {
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = this.server.cloud?.isServerlessEnabled ?? false;
@@ -584,6 +588,17 @@ export class SignificantEventsPlugin
           this.logger.error(`Failed to register significant events memory skills: ${err.message}`);
         });
     }
+
+    return {
+      getEventById: async (request, eventId) => {
+        if (!this.getScopedClients) {
+          return undefined;
+        }
+        const { getEventClient } = await this.getScopedClients({ request });
+        const { hits } = await getEventClient().findByEventId(eventId);
+        return hits.at(-1);
+      },
+    };
   }
 
   /**

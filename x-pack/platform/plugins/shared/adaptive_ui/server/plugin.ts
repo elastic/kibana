@@ -44,9 +44,23 @@ export class AdaptiveUiPlugin
       const [, { actions }] = await coreSetup.getStartServices();
       return actions;
     };
+    const getSignificantEvents = async () => {
+      const [, { significantEvents }] = await coreSetup.getStartServices();
+      return significantEvents;
+    };
+    const getNightshiftInvestigations = async () => {
+      const [, { nightshiftInvestigations }] = await coreSetup.getStartServices();
+      return nightshiftInvestigations;
+    };
 
     registerAdaptiveUiViewAttachment(agentBuilder);
-    registerAdaptiveUiTools(agentBuilder, { registry, getActions, http: coreSetup.http });
+    registerAdaptiveUiTools(agentBuilder, {
+      registry,
+      getActions,
+      http: coreSetup.http,
+      getSignificantEvents,
+      getNightshiftInvestigations,
+    });
     agentBuilder.renderers.register(viewRendererTypeDefinition);
 
     this.logger.debug('Adaptive UI attachment, tools, and view renderer registered.');

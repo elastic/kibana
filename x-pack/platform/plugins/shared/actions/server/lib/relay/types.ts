@@ -72,6 +72,8 @@ export interface RelayTriggerInput {
   message: string;
   /** Timestamp of the message to reply to, when posting into an existing thread. */
   threadTs?: string;
+  /** Slack Block Kit blocks. `message` stays the notification fallback. */
+  blocks?: unknown[];
 }
 
 export interface RelayTriggerResponse {

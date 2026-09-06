@@ -26,4 +26,5 @@ export const adaptiveUiTools = {
 /** Ids of the code-owned views in the Adaptive UI registry. */
 export const registeredViewIds = {
   significantEvent: 'streams.significantEvent',
+  investigation: 'nightshift.investigation',
 } as const;

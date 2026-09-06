@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
@@ -57,6 +59,10 @@ export interface SignificantEventsPluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   streams: StreamsPluginSetup;
+}
+
+export interface SignificantEventsPluginStart {
+  getEventById: (request: KibanaRequest, eventId: string) => Promise<SignificantEvent | undefined>;
 }
 
 export interface SignificantEventsPluginStartDependencies {
