@@ -445,7 +445,7 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
     it('routes empty agent output to a distinct agent_no_structured_output gate', () => {
       const guard = getStep('when_structured_output');
       expect(guard.type).toBe('if');
-      expect(String(guard.condition)).toContain('structured_output.isIncident != blank');
+      expect(String(guard.condition)).toContain('structured_output.isIncident : true');
       expect(getStep('emit_no_structured_output').with?.gate).toBe('agent_no_structured_output');
     });
 

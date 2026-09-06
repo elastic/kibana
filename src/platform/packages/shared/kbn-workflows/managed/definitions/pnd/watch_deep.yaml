@@ -632,7 +632,11 @@ steps:
         # readable as an assessed verdict. Distinguish it explicitly: evals
         # and ops treat agent_no_structured_output as a harness error,
         # never as "not an incident".
-        condition: "${{ steps.follow_up_analysis.output.structured_output.isIncident != blank or steps.forensic_analysis.output.structured_output.isIncident != blank }}"
+        condition: >-
+          steps.follow_up_analysis.output.structured_output.isIncident : true
+          or steps.forensic_analysis.output.structured_output.isIncident : true
+          or steps.follow_up_analysis.output.structured_output.isIncident : false
+          or steps.forensic_analysis.output.structured_output.isIncident : false
         steps:
           - name: emit_result
             type: workflow.output
