@@ -2,7 +2,8 @@ version: "1"
 name: Detection Rule Tuning Worker
 description: >
   Harvests rules whose alerts analysts closed as false positives, diagnoses each one,
-  and applies an approved query change.
+  and applies the approved tuning change: a rule exception, a narrowed query,
+  alert suppression, a risk score adjustment, or a rule disable.
 enabled: true
 tags:
   - security
@@ -39,10 +40,9 @@ consts:
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
   # Written onto every alert that reached a decision, and filtered out by the harvest,
-  # so a later sweep cannot rediagnose the same alerts into the same proposal.
+  # so a later sweep cannot rediagnose the same alerts into the same proposal. The
+  # mark steps below spell the tag lists inline: setAlertTags validates them statically.
   reviewed_tag: detection-watch:tuning-reviewed
-  dismissed_tag: detection-watch:tuning-dismissed
-  applied_tag: detection-watch:tuning-applied
   dismissed_tags:
     - detection-watch:tuning-reviewed
     - detection-watch:tuning-dismissed
@@ -103,33 +103,81 @@ steps:
             rule_id "{{ foreach.item.3 }}" ({{ foreach.item.1 }}).
 
             {{ foreach.item.2 }} alerts from this rule were closed as false positives
-            during the last {{ inputs.lookback_hours }} hours. Return one structured
-            tuning proposal.
+            during the last {{ inputs.lookback_hours }} hours. These are confirmed
+            analyst dispositions — not suspected noise.
 
-            This pipeline backtests and applies query changes directly, so prefer
-            change_type "query": narrow the KQL to exclude the confirmed benign
-            pattern while keeping detection coverage. Pick exception, suppression, or
-            threshold only when narrowing the query is genuinely unsafe for this rule,
-            since those stay manual analyst actions. This rule has type
-            "{{ steps.fetch_rule.output.type }}", so propose a query change only when
-            that type is "query".
+            After investigating, return one structured tuning proposal using the schema.
+            Choose exactly one change_type in this order of preference:
+
+            exception  — The rule logic is correct but fires on a known-good entity.
+              Use the entity breakdown above to identify the tightest conditions.
+              Populate exception_entries; each entry is one field condition the step
+              will AND together. Supported operators:
+                is / is_not              → single value string
+                is_one_of / is_not_one_of → values array
+                matches / does_not_match  → glob pattern string (* and ?)
+                exists / does_not_exist   → no value needed
+
+            query  — The query is too broad and FPs share a pattern not worth
+              excepting individually. Only valid for rule type "query". Populate
+              proposed_query with the full narrowed KQL in the same language.
+
+            suppression  — The same entity is generating repeated duplicate alerts.
+              Populate suppression_group_by with 1–3 field names to group by. Prefer
+              this over exception only when the entity itself is legitimately active
+              but the alert volume is the problem (e.g. a known scanner host).
+
+            risk_score  — The rule has real detection value but the alerts are
+              low-priority noise. Populate proposed_risk_score (0–100) and
+              proposed_severity (low / medium / high / critical).
+
+            disable  — Last resort. The rule has no detection value or is fully
+              redundant with another active rule.
+
+            manual  — None of the above is safe to apply automatically. Use summary
+              to describe the recommended manual change.
           schema:
             type: object
             properties:
               change_type:
                 type: string
-                enum: [exception, suppression, query, threshold]
+                enum: [exception, query, suppression, risk_score, disable, manual]
               summary:
                 type: string
-              current_query:
-                type: string
+              exception_entries:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    operator:
+                      type: string
+                      enum: [is, is_not, is_one_of, is_not_one_of, matches, does_not_match, exists, does_not_exist]
+                    value:
+                      type: string
+                    values:
+                      type: array
+                      items:
+                        type: string
+                  required: [field, operator]
               proposed_query:
                 type: string
-              exception_condition:
+              suppression_group_by:
+                type: array
+                items:
+                  type: string
+                minItems: 1
+                maxItems: 3
+              proposed_risk_score:
+                type: integer
+                minimum: 0
+                maximum: 100
+              proposed_severity:
                 type: string
-              rekey_required:
-                type: boolean
-            required: [change_type, summary, current_query, proposed_query, exception_condition, rekey_required]
+                enum: [low, medium, high, critical]
+            required: [change_type, summary]
 
       # Both previews end at the last false positive, not at now, so the rule's own
       # `from` lookback covers the events analysts judged. Anchoring at now would
@@ -197,9 +245,16 @@ steps:
 
             {{ steps.diagnose_rule.output.structured_output.summary }}
 
+            {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
+            Proposed exception:
+            {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
+            - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
+            {% endfor %}
+            Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
+            {% endif %}
             {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
             Current query:
-            {{ steps.diagnose_rule.output.structured_output.current_query }}
+            {{ steps.fetch_rule.output.query }}
 
             Proposed query:
             {{ steps.diagnose_rule.output.structured_output.proposed_query }}
@@ -213,32 +268,187 @@ steps:
             {% if steps.preview_proposed_query.output.error_text != '' %}
             Proposed query preview errors: {{ steps.preview_proposed_query.output.error_text }}
             {% endif %}
-            {% else %}
-            {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
-            Proposed exception:
-            {{ steps.diagnose_rule.output.structured_output.exception_condition }}
+            Approving replaces the rule query. It can be edited back in the Detection Rules UI.
             {% endif %}
-            Apply this {{ steps.diagnose_rule.output.structured_output.change_type }}
-            proposal manually in the Detection Rules UI. Approving records the handoff;
-            it does not change the rule.
+            {% if steps.diagnose_rule.output.structured_output.change_type == "suppression" %}
+            Proposed alert suppression, grouped by:
+            {% for field in steps.diagnose_rule.output.structured_output.suppression_group_by %}
+            - {{ field }}
+            {% endfor %}
+            Approving enables alert suppression on the rule. Suppression cannot be removed
+            automatically; undo it manually in the Detection Rules UI.
+            {% endif %}
+            {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
+            Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
+            Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
+            Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
+            {% endif %}
+            {% if steps.diagnose_rule.output.structured_output.change_type == "disable" %}
+            This proposal disables the rule entirely. This is a last resort — only approve
+            if you are confident the rule provides no detection value or is fully redundant.
+            Approving disables the rule. It can be re-enabled in the Detection Rules UI.
+            {% endif %}
+            {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
+            No automated change can be applied safely. Approving records the handoff;
+            apply the recommended change manually in the Detection Rules UI.
             {% endif %}
 
             {% if steps.diagnose_rule.output.conversation_id %}
             Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
             {% endif %}
 
+      # Decided once so the apply and hand-off branches stay exact complements.
+      - name: classify_proposal
+        type: data.set
+        with:
+          can_apply_query: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+              and steps.diagnose_rule.output.structured_output.proposed_query != ''
+              and steps.fetch_rule.output.type == 'query'
+              and steps.preview_proposed_query.output.succeeded == true
+              and steps.preview_proposed_query.output.is_aborted == false }}
+          can_apply_exception: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
+              and steps.diagnose_rule.output.structured_output.exception_entries != null }}
+          can_apply_suppression: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'suppression'
+              and steps.diagnose_rule.output.structured_output.suppression_group_by != null }}
+          can_apply_risk_score: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
+              and steps.diagnose_rule.output.structured_output.proposed_risk_score != null
+              and steps.diagnose_rule.output.structured_output.proposed_severity != null }}
+          can_apply_disable: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'disable' }}
+
       - name: apply_query_tuning
         type: security.patchRule
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
-            and steps.diagnose_rule.output.structured_output.proposed_query != ''
-            and steps.fetch_rule.output.type == 'query'
-            and steps.preview_proposed_query.output.succeeded == true
-            and steps.preview_proposed_query.output.is_aborted == false }}
+            and steps.classify_proposal.output.can_apply_query == true }}
+        on-failure:
+          continue: true
         with:
           patch:
             id: "{{ foreach.item.0 }}"
             query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+
+      # Each approval creates its own item. A rule only returns here on new false
+      # positives, so a later proposal is a different pattern, not a duplicate.
+      - name: apply_exception_tuning
+        type: security.createRuleException
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_exception == true }}
+        on-failure:
+          continue: true
+        with:
+          rule_id: "{{ foreach.item.0 }}"
+          name: "Tuning: {{ foreach.item.1 }}"
+          description: "Added by the rule tuning workflow."
+          entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+
+      - name: apply_suppression_tuning
+        type: kibana.request
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_suppression == true }}
+        on-failure:
+          continue: true
+        with:
+          method: PATCH
+          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ foreach.item.0 }}"
+            alert_suppression:
+              group_by: "${{ steps.diagnose_rule.output.structured_output.suppression_group_by }}"
+
+      - name: apply_risk_score_tuning
+        type: kibana.request
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_risk_score == true }}
+        on-failure:
+          continue: true
+        with:
+          method: PATCH
+          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            id: "{{ foreach.item.0 }}"
+            risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
+            severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
+
+      - name: apply_disable_tuning
+        type: security.disableRule
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_disable == true }}
+        on-failure:
+          continue: true
+        with:
+          ids: ["{{ foreach.item.0 }}"]
+
+      - name: record_manual_tuning
+        type: data.set
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_query == false
+            and steps.classify_proposal.output.can_apply_exception == false
+            and steps.classify_proposal.output.can_apply_suppression == false
+            and steps.classify_proposal.output.can_apply_risk_score == false
+            and steps.classify_proposal.output.can_apply_disable == false }}
+        with:
+          rule_id: "{{ foreach.item.0 }}"
+          note: Apply the approved proposal in the Detection Rules UI.
+
+      # Each error check is paired with the gate that ran its apply step: a skipped
+      # step leaves no execution record, so `steps.<name>.error` would otherwise
+      # resolve to that step's result from an earlier iteration of the loop.
+      - name: classify_apply_failures
+        type: data.set
+        with:
+          query_failed: >-
+            ${{ steps.review_tuning.output.response.approved == true
+              and steps.classify_proposal.output.can_apply_query == true
+              and steps.apply_query_tuning.error != null }}
+          exception_failed: >-
+            ${{ steps.review_tuning.output.response.approved == true
+              and steps.classify_proposal.output.can_apply_exception == true
+              and steps.apply_exception_tuning.error != null }}
+          suppression_failed: >-
+            ${{ steps.review_tuning.output.response.approved == true
+              and steps.classify_proposal.output.can_apply_suppression == true
+              and steps.apply_suppression_tuning.error != null }}
+          risk_score_failed: >-
+            ${{ steps.review_tuning.output.response.approved == true
+              and steps.classify_proposal.output.can_apply_risk_score == true
+              and steps.apply_risk_score_tuning.error != null }}
+          disable_failed: >-
+            ${{ steps.review_tuning.output.response.approved == true
+              and steps.classify_proposal.output.can_apply_disable == true
+              and steps.apply_disable_tuning.error != null }}
+
+      # An approved proposal whose apply step errored must not vanish silently.
+      - name: record_failed_apply
+        type: data.set
+        if: >-
+          ${{ steps.classify_apply_failures.output.query_failed == true
+            or steps.classify_apply_failures.output.exception_failed == true
+            or steps.classify_apply_failures.output.suppression_failed == true
+            or steps.classify_apply_failures.output.risk_score_failed == true
+            or steps.classify_apply_failures.output.disable_failed == true }}
+        with:
+          rule_id: "{{ foreach.item.0 }}"
+          note: >-
+            The approved tuning change failed to apply automatically. Apply it in the
+            Detection Rules UI.
 
       # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
       # harvest's KEEP projects: the alert_ids multivalue.
@@ -248,15 +458,25 @@ steps:
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add: "${{ consts.dismissed_tags }}"
+          tags_to_remove: []
         on-failure:
           continue: true
 
+      # Alerts behind a failed apply stay untagged on purpose: the change never landed,
+      # so the next sweep re-harvests them and proposes it again.
       - name: mark_alerts_applied
         type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == true }}"
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_apply_failures.output.query_failed != true
+            and steps.classify_apply_failures.output.exception_failed != true
+            and steps.classify_apply_failures.output.suppression_failed != true
+            and steps.classify_apply_failures.output.risk_score_failed != true
+            and steps.classify_apply_failures.output.disable_failed != true }}
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add: "${{ consts.applied_tags }}"
+          tags_to_remove: []
         on-failure:
           continue: true
 
