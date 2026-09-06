@@ -966,6 +966,52 @@ export default ({ getService }: FtrProviderContext) => {
             'User is not authorized to create/update isolate response action'
           );
         });
+
+        it('should update an existing suspend-process response action', async () => {
+          const rule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              rule_id: uuidV4(),
+              response_actions: [
+                {
+                  action_type_id: '.endpoint',
+                  params: {
+                    command: 'suspend-process',
+                    comment: 'Suspend host',
+                    config: { field: '', overwrite: true },
+                  },
+                },
+              ],
+            })
+          );
+
+          const updatedResponseActions = [
+            {
+              action_type_id: '.endpoint' as const,
+              params: {
+                command: 'suspend-process' as const,
+                comment: 'Example suspend process description',
+                config: { field: 'process.entity_id', overwrite: false },
+              },
+            },
+          ];
+          const updateSuspendProcessPayload: RuleUpdateProps = {
+            ...rule,
+            response_actions: updatedResponseActions,
+          };
+          delete updateSuspendProcessPayload.rule_id;
+
+          const { body } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .on('error', createSupertestErrorLogger(log))
+            .send(updateSuspendProcessPayload)
+            .expect(200);
+
+          expect(body.response_actions).to.eql(updatedResponseActions);
+        });
       });
     });
   });

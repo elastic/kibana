@@ -52,6 +52,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     });
 
     loadTestFile(require.resolve('./agent_type_support'));
+    loadTestFile(require.resolve('./actions_list_types'));
     loadTestFile(require.resolve('./execute'));
   });
 }

@@ -802,6 +802,29 @@ export default ({ getService }: FtrProviderContext) => {
             status_code: 403,
           });
         });
+
+        it('should persist a process response action with a custom field', async () => {
+          const responseActions = [
+            {
+              action_type_id: '.endpoint',
+              params: {
+                command: 'suspend-process',
+                comment: 'example1',
+                config: { field: 'process.entity_id', overwrite: false },
+              },
+            },
+          ];
+
+          const { body } = await supertest
+            .patch(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .on('error', createSupertestErrorLogger(log))
+            .send({ id: ruleToUpdate.id, response_actions: responseActions })
+            .expect(200);
+
+          expect(body.response_actions).to.eql(responseActions);
+        });
       });
     });
 
