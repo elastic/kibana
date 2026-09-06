@@ -10927,7 +10927,6 @@
     "visualizations.topNavMenu.saveVisualizationObjectType": "Visualisierung",
     "visualizations.topNavMenu.saveVisualizationToLibraryButtonLabel": "In der Bibliothek speichern",
     "visualizations.topNavMenu.shareVisualizationButtonAriaLabel": "Visualisierung freigeben",
-    "visualizations.topNavMenu.shareVisualizationButtonLabel": "teilen",
     "visualizations.topNavMenu.updatePanel": "Aktualisieren Sie das Panel auf {originatingAppName}",
     "visualizations.visualizationLoadingFailedErrorMessage": "Die Visualisierung konnte nicht geladen werden",
     "visualizations.visualizationTypeInvalidMessage": "Ungültiger Visualisierungstyp „{visType}“",

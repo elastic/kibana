@@ -27,9 +27,34 @@ export class InspectorService extends FtrService {
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly browser = this.ctx.getService('browser');
 
+  private async revealInspectorButton(): Promise<boolean> {
+    if (await this.testSubjects.exists('openInspectorButton', { timeout: 1000 })) {
+      return false;
+    }
+    if (!(await this.testSubjects.exists('app-menu-overflow-button', { timeout: 1000 }))) {
+      return false;
+    }
+    await this.testSubjects.click('app-menu-overflow-button');
+    await this.testSubjects.existOrFail('openInspectorButton', { timeout: 5000 });
+    return true;
+  }
+
+  private async closeOverflowIfOpen(): Promise<void> {
+    if (await this.testSubjects.exists('app-menu-popover', { timeout: 250 })) {
+      await this.testSubjects.click('app-menu-overflow-button');
+      await this.testSubjects.missingOrFail('app-menu-popover', { timeout: 2000 });
+    }
+  }
+
   private async getIsEnabled(): Promise<boolean> {
-    const ariaDisabled = await this.testSubjects.getAttribute('openInspectorButton', 'disabled');
-    return ariaDisabled !== 'true';
+    await this.revealInspectorButton();
+    try {
+      const ariaDisabled = await this.testSubjects.getAttribute('openInspectorButton', 'disabled');
+      return ariaDisabled !== 'true';
+    } finally {
+      // Leave the overflow closed so later clicks are not intercepted by the popover.
+      await this.closeOverflowIfOpen();
+    }
   }
 
   /**
@@ -61,8 +86,10 @@ export class InspectorService extends FtrService {
     const isOpen = await this.testSubjects.exists('inspectorPanel');
     if (!isOpen) {
       await this.retry.try(async () => {
-        if (await this.testSubjects.exists('app-menu-overflow-button')) {
-          await this.testSubjects.click('app-menu-overflow-button');
+        if (!(await this.testSubjects.exists(openButton, { timeout: 1000 }))) {
+          if (await this.testSubjects.exists('app-menu-overflow-button', { timeout: 1000 })) {
+            await this.testSubjects.click('app-menu-overflow-button');
+          }
         }
         await this.testSubjects.click(openButton);
         await this.testSubjects.exists('inspectorPanel');

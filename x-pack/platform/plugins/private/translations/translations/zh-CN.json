@@ -10955,7 +10955,6 @@
     "visualizations.topNavMenu.saveVisualizationObjectType": "可视化",
     "visualizations.topNavMenu.saveVisualizationToLibraryButtonLabel": "保存到库",
     "visualizations.topNavMenu.shareVisualizationButtonAriaLabel": "共享可视化",
-    "visualizations.topNavMenu.shareVisualizationButtonLabel": "共享",
     "visualizations.topNavMenu.updatePanel": "更新 {originatingAppName} 中的面板",
     "visualizations.visualizationLoadingFailedErrorMessage": "无法加载可视化",
     "visualizations.visualizationTypeInvalidMessage": "无效的可视化类型“{visType}”",

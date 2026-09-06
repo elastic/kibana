@@ -18,7 +18,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { VisualizeApp } from './app';
 import type { VisualizeServices } from './types';
-import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
+import { addHelpMenuToAppChrome } from './utils';
 
 export const renderApp = (
   { element, onAppLeave }: AppMountParameters,
@@ -26,10 +26,6 @@ export const renderApp = (
 ) => {
   // add help link to visualize docs into app chrome menu
   addHelpMenuToAppChrome(services.chrome, services.docLinks);
-  // add readonly badge if saving restricted
-  if (!services.visualizeCapabilities.save) {
-    addBadgeToAppChrome(services.chrome);
-  }
 
   const app = (
     <KibanaRenderContextProvider {...services.core}>

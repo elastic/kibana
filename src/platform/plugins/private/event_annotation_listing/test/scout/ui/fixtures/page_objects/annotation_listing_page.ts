@@ -30,7 +30,7 @@ export class AnnotationListingPage {
 
   constructor(private readonly page: ScoutPage) {
     this.contentList = new ContentListWrapper(page);
-    this.tabbedPageHeader = this.page.testSubj.locator('top-nav');
+    this.tabbedPageHeader = this.page.testSubj.locator('appHeader');
     this.emptyPromptCreateButton = this.page.locator('button', {
       hasText: 'Create annotation in Lens',
     });

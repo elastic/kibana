@@ -28,6 +28,7 @@ import {
   VisualizeNoMatch,
   VisualizeByValueEditor,
 } from './components';
+import { getReadOnlyChromeBadge } from './utils';
 
 const visAppStyles = {
   wrapperLoading: css({
@@ -95,10 +96,12 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
     services: {
       data: { query, dataViews },
       core,
+      chrome,
       kbnUrlStateStorage,
       dataViewEditor,
       noDataPage,
       share,
+      visualizeCapabilities,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -110,6 +113,15 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       setShowNoDataPage(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!visualizeCapabilities.save) {
+      chrome.setBadge(getReadOnlyChromeBadge());
+    }
+    return () => {
+      chrome.setBadge();
+    };
+  }, [chrome, visualizeCapabilities.save]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
