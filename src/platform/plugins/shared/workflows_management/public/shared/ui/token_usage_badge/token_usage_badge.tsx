@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+import { EuiBadge, EuiPopover } from '@elastic/eui';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowTokenUsage } from '@kbn/workflows';
+import { TokenUsageBreakdown } from './token_usage_breakdown';
 
 interface TokenUsageBadgeProps {
   usage?: WorkflowTokenUsage;
   /**
    * When true, render only the compact total (e.g. `25K`) without the
-   * " tokens" suffix. Use in tight layouts like the step execution tree where
-   * the full label would crowd out the step name; the full breakdown is still
-   * available in the tooltip.
+   * " tokens" suffix. Use in tight layouts like the step execution tree.
    */
   compact?: boolean;
+  /** When > 1, breakdown footer shows "{n} model calls" instead of model line. */
+  callCount?: number;
+  model?: string;
+  connectorName?: string;
   'data-test-subj'?: string;
 }
 
@@ -32,23 +35,23 @@ const compactNumberFormatter = new Intl.NumberFormat(undefined, {
 const fullNumberFormatter = new Intl.NumberFormat();
 
 /**
- * Compact badge showing total LLM token usage, with a tooltip breaking the
- * total down into input / output tokens. Renders `null` when no usage is
- * reported, so callers can drop it in unconditionally.
+ * Compact badge showing total LLM token usage. Hover/focus opens a popover
+ * with the shared TokenUsageBreakdown. Renders `null` when no usage is reported.
  */
 export const TokenUsageBadge = React.memo<TokenUsageBadgeProps>(
-  ({ usage, compact = false, 'data-test-subj': dataTestSubj = 'workflowTokenUsageBadge' }) => {
-    if (!usage) {
+  ({
+    usage,
+    compact = false,
+    callCount,
+    model,
+    connectorName,
+    'data-test-subj': dataTestSubj = 'workflowTokenUsageBadge',
+  }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    if (!usage || usage.totalTokens <= 0) {
       return null;
     }
-
-    const tooltipContent = i18n.translate('workflowsManagement.tokenUsage.breakdownTooltip', {
-      defaultMessage: 'Input: {input} · Output: {output}',
-      values: {
-        input: fullNumberFormatter.format(usage.inputTokens),
-        output: fullNumberFormatter.format(usage.outputTokens),
-      },
-    });
 
     const total = compactNumberFormatter.format(usage.totalTokens);
     const label = compact
@@ -58,18 +61,49 @@ export const TokenUsageBadge = React.memo<TokenUsageBadgeProps>(
           values: { total },
         });
 
+    const ariaLabel = i18n.translate('workflowsManagement.tokenUsage.ariaLabel', {
+      defaultMessage: 'AI token usage: {total} total',
+      values: { total: fullNumberFormatter.format(usage.totalTokens) },
+    });
+
     return (
-      <EuiToolTip content={tooltipContent}>
-        <EuiBadge
-          color="hollow"
-          iconType="sparkles"
-          title=""
-          tabIndex={0}
-          data-test-subj={dataTestSubj}
-        >
-          {label}
-        </EuiBadge>
-      </EuiToolTip>
+      <EuiPopover
+        aria-label={ariaLabel}
+        isOpen={isOpen}
+        closePopover={() => setIsOpen(false)}
+        ownFocus={false}
+        anchorPosition="downCenter"
+        panelPaddingSize="s"
+        button={
+          <EuiBadge
+            color="hollow"
+            iconType="sparkles"
+            title=""
+            tabIndex={0}
+            aria-label={ariaLabel}
+            data-test-subj={dataTestSubj}
+            onMouseEnter={() => setIsOpen(true)}
+            onMouseLeave={() => setIsOpen(false)}
+            onFocus={() => setIsOpen(true)}
+            onBlur={() => setIsOpen(false)}
+            css={{ cursor: 'default' }}
+          >
+            {label}
+          </EuiBadge>
+        }
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
+      >
+        <div data-test-subj={`${dataTestSubj}-popover`}>
+          <TokenUsageBreakdown
+            usage={usage}
+            callCount={callCount}
+            model={model}
+            connectorName={connectorName}
+            data-test-subj="workflowTokenUsageBreakdown"
+          />
+        </div>
+      </EuiPopover>
     );
   }
 );

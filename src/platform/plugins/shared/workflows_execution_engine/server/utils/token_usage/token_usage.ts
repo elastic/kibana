@@ -38,14 +38,26 @@ export const extractTokenUsage = (output: unknown): WorkflowTokenUsage | undefin
     return undefined;
   }
 
-  const usage = (metadata as { usage?: unknown }).usage;
+  // `ai.prompt` (LangChain ChatOpenAI) reports `metadata.tokenUsage` with
+  // promptTokens/completionTokens; other producers use `metadata.usage` with
+  // inputTokens/outputTokens. Accept either shape.
+  const meta = metadata as {
+    usage?: unknown;
+    tokenUsage?: unknown;
+  };
+  const usage = meta.usage ?? meta.tokenUsage;
   if (usage == null || typeof usage !== 'object') {
     return undefined;
   }
 
-  const inputTokens = toFiniteNumber((usage as { inputTokens?: unknown }).inputTokens);
-  const outputTokens = toFiniteNumber((usage as { outputTokens?: unknown }).outputTokens);
-  const cachedTokens = toFiniteNumber((usage as { cachedTokens?: unknown }).cachedTokens);
+  const u = usage as Record<string, unknown>;
+  const inputTokens = toFiniteNumber(
+    u.inputTokens ?? u.input_tokens ?? u.promptTokens ?? u.prompt_tokens
+  );
+  const outputTokens = toFiniteNumber(
+    u.outputTokens ?? u.output_tokens ?? u.completionTokens ?? u.completion_tokens
+  );
+  const cachedTokens = toFiniteNumber(u.cachedTokens ?? u.cached_tokens);
 
   // A step reported usage only if at least one of the token fields is a valid
   // number. Otherwise treat it as "no usage" so we don't tag the step.

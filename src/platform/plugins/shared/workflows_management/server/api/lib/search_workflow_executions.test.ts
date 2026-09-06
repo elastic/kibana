@@ -155,6 +155,27 @@ describe('searchWorkflowExecutions', () => {
   });
 
   describe('search options', () => {
+    it('should sort by createdAt then mapped id, not _id', async () => {
+      mockWorkflowDataClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 0 },
+          hits: [],
+        },
+      } as any);
+
+      await searchWorkflowExecutions({
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        logger: mockLogger,
+        query: { term: { workflowId: 'workflow-1' } },
+      });
+
+      expect(mockWorkflowDataClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ createdAt: 'desc' }, { id: 'desc' }],
+        })
+      );
+    });
+
     it('should request only list metadata fields from Elasticsearch', async () => {
       mockWorkflowDataClient.search.mockResolvedValue({
         hits: {

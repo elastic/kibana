@@ -99,7 +99,9 @@ export const getStepIconType = (type: string): IconType => {
       break;
     case 'foreach-iteration':
     case 'while-iteration':
-      iconType = 'tokenNumber';
+      // Outline-style list icon — matches other tree-row EuiIcons (size m via StepIcon).
+      // Avoid tokenNumber: filled token glyphs read too small next to logo/outline icons.
+      iconType = 'list';
       break;
     case 'merge':
       iconType = HardcodedIcons.merge;

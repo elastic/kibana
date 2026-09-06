@@ -193,6 +193,7 @@ export function WorkflowsPage() {
         title={i18n.translate('workflows.pageTitle', { defaultMessage: 'Workflows' })}
         menu={appMenu}
         docLink={WORKFLOWS_DOCUMENTATION_URL}
+        spacing="compact"
       />
       <EuiPageTemplate.Section restrictWidth={false}>
         {shouldShowFilters ? (

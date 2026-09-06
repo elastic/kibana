@@ -119,9 +119,14 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     const { width: containerWidth } = useResizeObserver(containerRef.current);
     const { curPageIndex, pageSize, changePageIndex, changePageSize } = usePager({
-      initialPageSize: 20,
+      initialPageSize: 10,
       totalItems: filteredRecords.length,
     });
+
+    // Reset to first page whenever the search filter changes
+    useEffect(() => {
+      changePageIndex(0);
+    }, [searchTerm, changePageIndex]);
 
     // Reset to page 0 when the data prop changes (e.g. switching between execution steps
     // that have different row counts) so stale page indices don't go out of bounds.
@@ -212,7 +217,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     const pagination: EuiDataGridProps['pagination'] = useMemo(
       () => ({
-        pageSizeOptions: [20, 50, 100, 200],
+        pageSizeOptions: [10, 25, 50, 100],
         pageIndex: curPageIndex,
         pageSize,
         onChangeItemsPerPage: changePageSize,

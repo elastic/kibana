@@ -45,8 +45,7 @@ export function useFormattedDate(
 ): string | undefined {
   const uiSettings = useKibana().services.settings.client;
   const dateFormatSetting: string = uiSettings.get('dateFormat');
-  const timezoneSetting: string = uiSettings.get('dateFormat:tz');
-  const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
+  const usableTimezoneSetting = resolveKibanaTimeZone(uiSettings.get('dateFormat:tz'));
 
   if (!timestamp) return undefined;
 
@@ -68,8 +67,7 @@ export function useFormattedDate(
 export function useFormattedDateTime(date: Date): string | undefined {
   const uiSettings = useKibana().services.settings.client;
   const dateFormatSetting: string = uiSettings.get('dateFormat');
-  const timezoneSetting: string = uiSettings.get('dateFormat:tz');
-  const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
+  const usableTimezoneSetting = resolveKibanaTimeZone(uiSettings.get('dateFormat:tz'));
 
   if (!date) {
     return undefined;
@@ -87,8 +85,7 @@ export function useFormattedDateTime(date: Date): string | undefined {
 export function useGetFormattedDateTime(): (date: Date) => string | undefined {
   const uiSettings = useKibana().services.settings.client;
   const dateFormatSetting: string = uiSettings.get('dateFormat');
-  const timezoneSetting: string = uiSettings.get('dateFormat:tz');
-  const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
+  const usableTimezoneSetting = resolveKibanaTimeZone(uiSettings.get('dateFormat:tz'));
 
   return useCallback(
     (date: Date) => {
@@ -106,4 +103,105 @@ export function useGetFormattedDateTime(): (date: Date) => string | undefined {
     },
     [dateFormatSetting, usableTimezoneSetting]
   );
+}
+
+/** Resolved IANA zone for Kibana `dateFormat:tz` ("Browser" → local guess). */
+export function resolveKibanaTimeZone(timezoneSetting: string | undefined): string {
+  if (!timezoneSetting || timezoneSetting === 'Browser') {
+    return moment.tz.guess();
+  }
+  return timezoneSetting;
+}
+
+export function useKibanaTimeZone(): string {
+  const uiSettings = useKibana().services.settings.client;
+  return resolveKibanaTimeZone(uiSettings.get('dateFormat:tz'));
+}
+
+const TOOLTIP_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+const HEADER_FORMAT = 'MMM D, YYYY @ HH:mm:ss';
+const STARTED_TIME_FORMAT = 'HH:mm';
+const STARTED_OLDER_FORMAT = 'MMM D HH:mm';
+
+export type ExecutionTimestampVariant = 'tooltip' | 'started' | 'header';
+
+/**
+ * Shared execution-timestamp formatter.
+ *
+ * - `tooltip`: `Aug 24, 2026 @ 18:26:58.239 PDT` (ms + short zone)
+ * - `header`: `Aug 24, 2026 @ 18:26:58` (no ms, no zone)
+ * - `started`: `18:26` today, `Yesterday 22:04`, or `Aug 17 14:03`
+ */
+export function formatExecutionTimestamp(
+  value: Date | string | null | undefined,
+  variant: ExecutionTimestampVariant,
+  options: { timeZoneSetting?: string; now?: Date } = {}
+): string | null {
+  const date = toValidDate(value);
+  if (!date) {
+    return null;
+  }
+
+  const zone = resolveKibanaTimeZone(options.timeZoneSetting);
+  const m = moment.tz(date, zone);
+
+  if (variant === 'tooltip') {
+    return `${m.format(TOOLTIP_FORMAT)} ${formatZoneAbbreviation(date, zone)}`;
+  }
+
+  if (variant === 'header') {
+    return m.format(HEADER_FORMAT);
+  }
+
+  const now = options.now ?? new Date();
+  const today = moment.tz(now, zone);
+  if (m.isSame(today, 'day')) {
+    return m.format(STARTED_TIME_FORMAT);
+  }
+  if (m.isSame(today.clone().subtract(1, 'day'), 'day')) {
+    return i18n.translate('workflows.workflowExecutionList.started.yesterday', {
+      defaultMessage: 'Yesterday {time}',
+      values: { time: m.format(STARTED_TIME_FORMAT) },
+    });
+  }
+  return m.format(STARTED_OLDER_FORMAT);
+}
+
+function toValidDate(value: Date | string | null | undefined): Date | null {
+  if (value == null || value === '') {
+    return null;
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * Short zone designator (`PDT`, `UTC`), or `GMT±offset` when the zone has no abbreviation.
+ * Never returns an IANA id or a parenthesized offset.
+ */
+function formatZoneAbbreviation(at: Date, timeZone: string): string {
+  if (timeZone === 'UTC' || timeZone === 'Etc/UTC') {
+    return 'UTC';
+  }
+
+  const m = moment.tz(at, timeZone);
+  const abbr = m.format('z');
+  const looksLikeOffset = /^[+-]\d/.test(abbr);
+  const looksLikeIana = abbr.includes('/');
+  if (abbr && !looksLikeOffset && !looksLikeIana) {
+    return abbr;
+  }
+
+  return formatGmtOffset(m.format('Z'));
+}
+
+/** `+05:30` → `GMT+5:30`; `-07:00` → `GMT-7`. */
+function formatGmtOffset(offset: string): string {
+  const match = offset.match(/^([+-])(\d{2}):(\d{2})$/);
+  if (!match) {
+    return `GMT${offset}`;
+  }
+  const [, sign, hours, minutes] = match;
+  const h = Number(hours);
+  return minutes === '00' ? `GMT${sign}${h}` : `GMT${sign}${h}:${minutes}`;
 }

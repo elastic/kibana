@@ -21,6 +21,17 @@ describe('extractTokenUsage', () => {
     ).toEqual({ inputTokens: 100, outputTokens: 50, cachedTokens: 25, totalTokens: 150 });
   });
 
+  it('extracts LangChain tokenUsage.promptTokens from output.metadata', () => {
+    expect(
+      extractTokenUsage({
+        content: 'ok',
+        metadata: {
+          tokenUsage: { promptTokens: 124, completionTokens: 86, totalTokens: 210 },
+        },
+      })
+    ).toEqual({ inputTokens: 124, outputTokens: 86, totalTokens: 210 });
+  });
+
   it('recomputes totalTokens from input + output (ignores reported total)', () => {
     expect(
       extractTokenUsage({

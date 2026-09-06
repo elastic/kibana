@@ -132,7 +132,12 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
       data-test-subj="workflowLibraryCatalogBrowserPage"
       restrictWidth={false}
     >
-      <AppHeader title={libraryPageTitle} badges={headerBadges} menu={headerMenu} />
+      <AppHeader
+        title={libraryPageTitle}
+        badges={headerBadges}
+        menu={headerMenu}
+        spacing="compact"
+      />
       <EuiPageTemplate.Section paddingSize="m" grow>
         <CatalogBrowser onSelect={handleSelect} />
       </EuiPageTemplate.Section>

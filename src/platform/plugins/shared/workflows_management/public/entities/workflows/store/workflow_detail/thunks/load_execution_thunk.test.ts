@@ -72,7 +72,7 @@ describe('loadExecutionThunk', () => {
 
     expect(mockGetExecution).toHaveBeenCalledWith('exec-1', {
       includeInput: false,
-      includeOutput: false,
+      includeOutput: true,
     });
     expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
     expect(result.payload).toEqual(mockExecution);

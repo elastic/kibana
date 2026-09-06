@@ -39,12 +39,12 @@ const getExecutionStatusColorsMap = (
 ): Record<ExecutionStatus, ExecutionStatusColors> => {
   return {
     [ExecutionStatus.COMPLETED]: {
-      color: euiTheme.colors.vis.euiColorVisSuccess0,
+      color: euiTheme.colors.textSuccess,
       backgroundColor: euiTheme.colors.backgroundBaseSuccess,
       tokenColor: 'euiColorVis0' as const,
     },
     [ExecutionStatus.FAILED]: {
-      color: euiTheme.colors.danger,
+      color: euiTheme.colors.textDanger,
       backgroundColor: euiTheme.colors.backgroundBaseDanger,
       tokenColor: 'euiColorVis6' as const,
     },
@@ -84,7 +84,7 @@ const getExecutionStatusColorsMap = (
       tokenColor: 'gray',
     },
     [ExecutionStatus.TIMED_OUT]: {
-      color: euiTheme.colors.danger,
+      color: euiTheme.colors.textDanger,
       backgroundColor: euiTheme.colors.backgroundBaseDanger,
       tokenColor: 'euiColorVis6' as const,
     },

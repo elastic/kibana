@@ -199,7 +199,7 @@ describe('buildStepExecutionsTree', () => {
           stepType: 'foreach-iteration',
           executionIndex: 0,
           stepExecutionId: undefined,
-          status: ExecutionStatus.SKIPPED,
+          status: null,
         })
       );
       expect(result[0].children[testCase].children).toHaveLength(1);
@@ -539,7 +539,7 @@ describe('buildStepExecutionsTree', () => {
             stepType: 'foreach-iteration',
             executionIndex: 0,
             stepExecutionId: undefined,
-            status: 'skipped',
+            status: null,
             children: [
               {
                 stepId: 'if-1',
@@ -556,7 +556,7 @@ describe('buildStepExecutionsTree', () => {
             stepType: 'foreach-iteration',
             executionIndex: 0,
             stepExecutionId: undefined,
-            status: 'skipped',
+            status: null,
             children: [
               {
                 stepId: 'action-1',
@@ -610,7 +610,7 @@ describe('buildStepExecutionsTree', () => {
         stepType: 'foreach-iteration',
         executionIndex: 0,
         stepExecutionId: undefined,
-        status: ExecutionStatus.SKIPPED,
+        status: null,
         children: [
           {
             stepId: 'action-1',
@@ -817,6 +817,119 @@ describe('buildStepExecutionsTree', () => {
     });
   });
 
+  describe('with retry attempts', () => {
+    it('transforms multi-attempt wrappers into a step parent with attempt children', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-retry-1',
+          stepId: 'http_call',
+          stepType: 'kibana.request',
+          status: ExecutionStatus.FAILED,
+          stepExecutionIndex: 0,
+          globalExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'http_call',
+              nestedScopes: [
+                {
+                  nodeId: 'enterRetry_http_call',
+                  nodeType: 'enter-retry',
+                  scopeId: '1-attempt',
+                },
+              ],
+            },
+          ],
+        }),
+        createStepExecution({
+          id: 'exec-retry-2',
+          stepId: 'http_call',
+          stepType: 'kibana.request',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 1,
+          globalExecutionIndex: 1,
+          scopeStack: [
+            {
+              stepId: 'http_call',
+              nestedScopes: [
+                {
+                  nodeId: 'enterRetry_http_call',
+                  nodeType: 'enter-retry',
+                  scopeId: '2-attempt',
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions);
+      const retryParent = result.find((n) => n.retryAttemptCount != null);
+      expect(retryParent).toBeDefined();
+      expect(retryParent).toMatchObject({
+        stepId: 'http_call',
+        stepType: 'kibana.request',
+        status: ExecutionStatus.COMPLETED,
+        retryAttemptCount: 2,
+        retryRecovered: true,
+        stepExecutionId: null,
+      });
+      // No wrapper ancestor — parent is the step itself.
+      expect(result.filter((n) => n.stepId === 'http_call')).toHaveLength(1);
+      expect(retryParent!.children).toHaveLength(2);
+      expect(retryParent!.children[0]).toMatchObject({
+        attemptNumber: 1,
+        isFinalAttempt: false,
+        isRetryAttempt: true,
+        status: ExecutionStatus.FAILED,
+        stepExecutionId: 'exec-retry-1',
+      });
+      expect(retryParent!.children[1]).toMatchObject({
+        attemptNumber: 2,
+        isFinalAttempt: true,
+        isRetryAttempt: true,
+        status: ExecutionStatus.COMPLETED,
+        stepExecutionId: 'exec-retry-2',
+      });
+    });
+
+    it('hoists a single successful attempt to a plain step with no retry chrome', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-once',
+          stepId: 'http_call',
+          stepType: 'kibana.request',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'http_call',
+              nestedScopes: [
+                {
+                  nodeId: 'enterRetry_http_call',
+                  nodeType: 'enter-retry',
+                  scopeId: '1-attempt',
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        stepId: 'http_call',
+        stepType: 'kibana.request',
+        stepExecutionId: 'exec-once',
+        status: ExecutionStatus.COMPLETED,
+        children: [],
+      });
+      expect(result[0].retryAttemptCount).toBeUndefined();
+      expect(result[0].isRetryAttempt).toBeUndefined();
+      expect(result[0].attemptNumber).toBeUndefined();
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle undefined optional fields gracefully', () => {
       const stepExecutions: WorkflowStepExecutionDto[] = [
@@ -885,7 +998,7 @@ describe('buildStepExecutionsTree', () => {
       expect(result[1].stepId).toBe('foreach-1');
       expect(result[1].children).toHaveLength(1);
       expect(result[1].children[0].stepId).toBe('0');
-      expect(result[1].children[0].status).toBe(ExecutionStatus.SKIPPED);
+      expect(result[1].children[0].status).toBeNull();
     });
   });
 
