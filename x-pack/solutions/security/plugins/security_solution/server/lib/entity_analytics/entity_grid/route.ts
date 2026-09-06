@@ -39,6 +39,21 @@ const COMPUTED_SORT_FIELDS = new Set([LAST_SEEN_ALERT_FIELD, RISK_SCORE_CHANGE_F
 // Only allow field names composed of safe characters to prevent ES|QL injection.
 const VALID_FIELD_RE = /^[@\w.]+$/;
 
+// Fields returned in every page response (entity store has hundreds of fields; select only what
+// the grid displays to avoid transferring the full denormalized document).
+const ENTITY_BASE_FIELDS = [
+  ENTITY_ID_FIELD,
+  'entity.name',
+  'entity.record_count',
+  ENTITY_TYPE_FIELD,
+  RISK_SCORE_NORM_FIELD,
+  'asset.criticality',
+  'entity.source',
+  'entity.attributes.watchlists',
+  'entity.lifecycle.first_seen',
+  '@timestamp',
+] as const;
+
 // ── types ────────────────────────────────────────────────────────────────────
 
 interface EsqlResponse {
@@ -66,6 +81,13 @@ interface RiskDateWindow {
 
 const esc = (s: string) => `"${s.replace(/"/g, '\\"')}"`;
 const toList = (items: readonly string[]) => items.map(esc).join(', ');
+// Backtick-quote field names that contain @ or whitespace (e.g. `@timestamp`).
+const keepField = (f: string) => (/[@\s]/.test(f) ? `\`${f}\`` : f);
+// KEEP clause limiting to base entity fields plus any extra (e.g. the sort field).
+const keepClause = (...extra: string[]): string => {
+  const fields = [...new Set([...ENTITY_BASE_FIELDS, ...extra])];
+  return `| KEEP ${fields.map(keepField).join(', ')}`;
+};
 const indent = (s: string) =>
   s
     .split('\n')
@@ -131,6 +153,7 @@ const nativeEntityDataQuery = (
   [
     `FROM ${entityAlias}`,
     `| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`,
+    keepClause(field),
     ...(cursor ? [cursorClause(cursor)] : []),
     `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
     `| LIMIT ${pageSize + 1}`,
@@ -146,7 +169,11 @@ const nativeEntityCountQuery = (entityAlias: string): string =>
 const alertLeg = (index: string, field: string, cutoff: string, nameFilter?: string): string =>
   [
     `FROM ${index}`,
-    `| WHERE \`@timestamp\` >= "${cutoff}"${nameFilter ? ` AND ${field} IN (${nameFilter})` : ''}`,
+    // IS NOT NULL lets Lucene skip alerts that don't reference this entity type (e.g. skip
+    // user/service-only alerts when scanning the host.name leg).
+    `| WHERE \`@timestamp\` >= "${cutoff}" AND ${field} IS NOT NULL${
+      nameFilter ? ` AND ${field} IN (${nameFilter})` : ''
+    }`,
     `| STATS ${LAST_SEEN_ALERT_FIELD} = MAX(\`@timestamp\`) BY ${field}`,
     `| RENAME ${field} AS entity_name`,
   ].join('\n');
@@ -185,6 +212,7 @@ const lastSeenAlertDataQuery = (
     `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(
       ALLOWED_ENTITY_TYPES
     )})`,
+    keepClause(LAST_SEEN_ALERT_FIELD),
     ...(cursor ? [cursorClause(cursor)] : []),
   ].join('\n');
   return `FROM (\n${indent(inner)}\n)\n${sortSuffix(LAST_SEEN_ALERT_FIELD, dir, pageSize)}`;
@@ -223,6 +251,7 @@ const riskScoreChangeBaseQuery = (
       ALLOWED_ENTITY_TYPES
     )}) AND ${RISK_SCORE_NORM_FIELD} IS NOT NULL`,
     `| EVAL ${RISK_SCORE_CHANGE_FIELD} = ${RISK_SCORE_NORM_FIELD} - yesterday_score`,
+    keepClause(RISK_SCORE_CHANGE_FIELD),
   ].join('\n');
 
 const riskScoreChangeDataQuery = (
