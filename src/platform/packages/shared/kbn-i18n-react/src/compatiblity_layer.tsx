@@ -17,6 +17,21 @@ export interface FormattedRelativeProps {
   value: Date | number | string;
   updateIntervalInSeconds?: number;
 }
+
+/**
+ * Units supported by react-intl's `updateIntervalInSeconds`. Passing this prop
+ * with a unit longer than 'hour' causes react-intl to throw:
+ * "Cannot schedule update with unit longer than hour"
+ */
+const INCREMENTABLE_UNITS: ReadonlyArray<Intl.RelativeTimeFormatUnit> = [
+  'second',
+  'seconds',
+  'minute',
+  'minutes',
+  'hour',
+  'hours',
+];
+
 /**
  * Mimic `FormattedRelative` previous behavior from formatJS v2
  */
@@ -32,7 +47,9 @@ export const FormattedRelative = ({
       value={value}
       numeric="auto"
       unit={unit}
-      updateIntervalInSeconds={updateIntervalInSeconds}
+      updateIntervalInSeconds={
+        INCREMENTABLE_UNITS.includes(unit) ? updateIntervalInSeconds : undefined
+      }
     />
   );
 };
