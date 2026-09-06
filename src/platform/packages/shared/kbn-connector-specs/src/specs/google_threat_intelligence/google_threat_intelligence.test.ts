@@ -55,7 +55,7 @@ describe('GoogleThreatIntelligenceConnector', () => {
   });
 
   describe('metadata and configuration', () => {
-    it('exposes the new connector only to Agent Builder', () => {
+    it('exposes the connector to Agent Builder and Workflows', () => {
       expect(GoogleThreatIntelligenceConnector.metadata.supportedFeatureIds).toEqual([
         'agentBuilder',
         'workflows',
@@ -621,7 +621,8 @@ describe('GoogleThreatIntelligenceConnector', () => {
       ).toBe(false);
     });
 
-    it('accepts limit at its boundary values (0 and 40)', () => {
+    it('defaults the limit to 1 and accepts boundary values 0 and 40', () => {
+      expect(GetFileBehavioursInputSchema.parse({ fileHash: SHA256_HASH }).limit).toBe(1);
       expect(
         GetFileBehavioursInputSchema.safeParse({ fileHash: SHA256_HASH, limit: 0 }).success
       ).toBe(true);
@@ -643,18 +644,23 @@ describe('GoogleThreatIntelligenceConnector', () => {
       };
       mockClient.get.mockResolvedValue({ data: apiResponse });
 
-      const result = await handler(mockContext, { fileHash: SHA256_HASH });
+      const input = GetFileBehavioursInputSchema.parse({ fileHash: SHA256_HASH });
+      const result = await handler(mockContext, input);
 
-      const call = mockClient.get.mock.calls[0];
-      expect(call[0]).toBe(`https://www.virustotal.com/api/v3/files/${SHA256_HASH}/behaviours`);
-      expect(call[1]).toMatchObject({ headers: { 'x-tool': 'Elastic' } });
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `https://www.virustotal.com/api/v3/files/${SHA256_HASH}/behaviours`,
+        {
+          headers: { 'x-tool': 'Elastic' },
+          params: { limit: 1, cursor: undefined },
+        }
+      );
       expect(result).toEqual(apiResponse);
     });
 
     it('resolves with an empty collection for a hash known to GTI but never sandboxed', async () => {
       mockClient.get.mockResolvedValue({ data: { data: [], meta: { count: 0 } } });
 
-      const result = await handler(mockContext, { fileHash: SHA256_HASH });
+      const result = await handler(mockContext, { fileHash: SHA256_HASH, limit: 1 });
 
       expect(result).toEqual({ data: [], meta: { count: 0 } });
     });
@@ -667,7 +673,7 @@ describe('GoogleThreatIntelligenceConnector', () => {
         },
       });
 
-      await expect(handler(mockContext, { fileHash: SHA256_HASH })).rejects.toThrow(
+      await expect(handler(mockContext, { fileHash: SHA256_HASH, limit: 1 })).rejects.toThrow(
         `GTI API error (404): File "${SHA256_HASH}" not found`
       );
     });
@@ -737,6 +743,11 @@ describe('GoogleThreatIntelligenceConnector', () => {
 
   describe('scanUrl', () => {
     const handler = GoogleThreatIntelligenceConnector.actions.scanUrl.handler;
+
+    it('marks public and private scans as write operations', () => {
+      expect(GoogleThreatIntelligenceConnector.actions.scanUrl.scope).toBe('write');
+      expect(GoogleThreatIntelligenceConnector.actions.scanPrivateUrl.scope).toBe('write');
+    });
 
     it('rejects a malformed URL at the schema level, before the handler runs', () => {
       expect(ScanUrlInputSchema.safeParse({ url: 'not-a-url' }).success).toBe(false);

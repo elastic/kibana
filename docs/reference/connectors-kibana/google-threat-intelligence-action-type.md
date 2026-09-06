@@ -138,7 +138,7 @@ Get File Relationship
 Get File Behaviours
 :   Get sandbox detonation reports for a file by hash. Each report covers one sandbox run: the process tree, files, registry keys, and network activity it touched, plus the verdict.
     - **File hash** (required): SHA-256, SHA-1, or MD5 hash identifying the file.
-    - **Limit** (optional): Maximum number of behavior reports to retrieve. Minimum 0, maximum 40. Defaults to 10.
+    - **Limit** (optional): Maximum number of behavior reports to retrieve. Minimum 0, maximum 40. Defaults to 1 to reduce the response size.
     - **Cursor** (optional): Continuation cursor from a previous response.
 
 Get File MITRE ATT&CK Techniques

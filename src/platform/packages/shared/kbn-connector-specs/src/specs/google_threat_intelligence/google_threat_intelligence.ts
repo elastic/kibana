@@ -231,6 +231,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
   actions: {
     searchCollections: {
       isTool: true,
+      scope: 'read',
       description:
         'Search and filter GTI threat objects, including actors, campaigns, malware families, toolkits, vulnerabilities, reports, IOC collections, and profiles. Returns object IDs for use with getCollection and relationship actions.',
       input: SearchCollectionsInputSchema,
@@ -245,6 +246,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getCollection: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full GTI threat object for an ID returned by searchCollections. Supports threat actors, campaigns, malware families, toolkits, vulnerabilities, reports, IOC collections, and country or industry profiles.',
       input: GetCollectionInputSchema,
@@ -254,6 +256,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getRelatedObjects: {
       isTool: true,
+      scope: 'read',
       description:
         'Get objects in a named relationship of a GTI collection, such as files or associations. Use relationship names provided by the collection object and page through results with the returned cursor.',
       input: GetRelatedObjectsInputSchema,
@@ -267,6 +270,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     searchCollectionIocs: {
       isTool: true,
+      scope: 'read',
       description:
         'Search IOCs associated with a threat actor, campaign, malware family, toolkit, report, vulnerability, or IOC collection using a GTI intelligence query. Returns files by default; add an entity modifier to search domains, IP addresses, or URLs.',
       input: SearchCollectionIocsInputSchema,
@@ -283,6 +287,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getIocStream: {
       isTool: true,
+      scope: 'read',
       description:
         'Get recent files, URLs, domains, and IP addresses from the GTI IOC stream. Filter by date, origin, entity, source, or notification tag; notifications are retained for 30 days.',
       input: GetIocStreamInputSchema,
@@ -298,6 +303,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     advancedSearch: {
       isTool: true,
+      scope: 'read',
       description:
         'Search the GTI corpus for files, URLs, domains, or IP addresses with an intelligence query. Returns full objects by default or compact descriptors when requested.',
       input: AdvancedSearchInputSchema,
@@ -313,6 +319,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getReportMitreAttackTechniques: {
       isTool: true,
+      scope: 'read',
       description:
         'Get MITRE ATT&CK tactics and techniques associated with a GTI report. Filter by ATT&CK matrix and whether each technique was linked by analysts or observed in related IOCs.',
       input: GetReportMitreAttackTechniquesInputSchema,
@@ -324,6 +331,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getIpReport: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the GTI reputation and detection report for an IPv4 or IPv6 address. Returns the GTI assessment, last analysis statistics, network ownership and geolocation where available, WHOIS data, and any tags GTI has applied.',
       input: GetIpReportInputSchema,
@@ -333,6 +341,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getIpRelationship: {
       isTool: true,
+      scope: 'read',
       description:
         'Get objects related to an IPv4 or IPv6 address, such as communicating files, hosted URLs, or historical DNS resolutions. Use a relationship name published for IP address objects and page through results with the returned cursor.',
       input: GetIpRelationshipInputSchema,
@@ -348,6 +357,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getDomainReport: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the GTI reputation and detection report for a domain name. Returns the GTI assessment, last analysis statistics, categorization, WHOIS data, and any tags GTI has applied.',
       input: GetDomainReportInputSchema,
@@ -357,6 +367,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getDomainRelationship: {
       isTool: true,
+      scope: 'read',
       description:
         'Get objects related to a domain name, such as DNS resolutions, subdomains, or communicating files. Use a relationship name published for domain objects and page through results with the returned cursor.',
       input: GetDomainRelationshipInputSchema,
@@ -370,6 +381,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getUrlReport: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the GTI reputation and detection report for a URL, including the GTI assessment, last analysis statistics, categorization, and the final resolved destination after any redirects. Supply the URL in its natural form; the action derives the identifier GTI uses internally.',
       input: GetUrlReportInputSchema,
@@ -379,6 +391,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getUrlRelationship: {
       isTool: true,
+      scope: 'read',
       description:
         'Get objects related to a URL, such as downloaded files, contacted domains and IP addresses, or redirect targets. Use a relationship name published for URL objects and supply the URL in its natural form, the same as for getUrlReport.',
       input: GetUrlRelationshipInputSchema,
@@ -391,6 +404,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getFileReport: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the GTI reputation and detection report for a file by SHA-256, SHA-1, or MD5 hash. Returns the GTI assessment, last analysis statistics, file type metadata, and popular threat classification, not the sandbox detonation reports getFileBehaviours returns.',
       input: GetFileReportInputSchema,
@@ -400,6 +414,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getFileRelationship: {
       isTool: true,
+      scope: 'read',
       description:
         'Get objects related to a file by SHA-256, SHA-1, or MD5 hash, such as domains and IP addresses contacted during detonation, dropped files, or similar files. Use a relationship name published for file objects and page through results with the returned cursor.',
       input: GetFileRelationshipInputSchema,
@@ -413,6 +428,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getFileBehaviours: {
       isTool: true,
+      scope: 'read',
       description:
         'Get sandbox detonation reports for a file by SHA-256, SHA-1, or MD5 hash. Each report covers one sandbox run: the process tree, files, registry keys, and network activity it touched, plus the verdict.',
       input: GetFileBehavioursInputSchema,
@@ -425,6 +441,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getFileMitreAttackTechniques: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the MITRE ATT&CK tactics and techniques observed for a file by hash (SHA-256, SHA-1, or ' +
         'MD5), grouped by the sandbox that observed them. Each technique lists the signatures that ' +
@@ -436,6 +453,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     scanUrl: {
       isTool: true,
+      scope: 'write',
       description:
         'Submit a URL to GTI for a fresh public analysis. Returns an analysis identifier; poll getAnalysis until it completes, then pass the URL identifier it reports to getUrlScanReport.',
       input: ScanUrlInputSchema,
@@ -444,6 +462,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getAnalysis: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the status and statistics of a public URL analysis submitted by scanUrl. The response also carries the URL identifier, at meta.url_info.id, needed by getUrlScanReport once the analysis completes.',
       input: GetAnalysisInputSchema,
@@ -453,6 +472,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getUrlScanReport: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the GTI reputation and detection report for a URL submitted through scanUrl, using the URL identifier from getAnalysis rather than the URL itself. Wraps the same endpoint as getUrlReport, kept separate because its input is an identifier rather than a URL to derive one from.',
       input: GetUrlScanReportInputSchema,
@@ -462,6 +482,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     scanPrivateUrl: {
       isTool: true,
+      scope: 'write',
       description:
         'Submit a URL to GTI for a private analysis, sharing neither the URL nor the resulting analysis with the wider GTI community. Returns an analysis identifier; poll getPrivateAnalysis until it completes, then pass the URL identifier it reports to getPrivateUrlReport.',
       input: ScanPrivateUrlInputSchema,
@@ -471,6 +492,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getPrivateAnalysis: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the status and statistics of a private URL analysis submitted by scanPrivateUrl. The response also carries the URL identifier, at meta.url_info.id, needed by getPrivateUrlReport once the analysis completes.',
       input: GetPrivateAnalysisInputSchema,
@@ -480,6 +502,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
 
     getPrivateUrlReport: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the GTI reputation and detection report for a URL submitted through scanPrivateUrl, using the URL identifier from getPrivateAnalysis rather than the URL itself.',
       input: GetPrivateUrlReportInputSchema,
