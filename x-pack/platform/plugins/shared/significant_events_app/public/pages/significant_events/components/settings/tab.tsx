@@ -63,6 +63,7 @@ import {
 } from './significant_events_tuning_config_editor';
 import { AppsSection } from './apps_section';
 import { MaintenanceSection } from './maintenance_section';
+import { StaleEventCleanupSection } from './stale_event_cleanup_section';
 
 const clampNumber = (value: string, min: number, max: number) => {
   const parsed = Number(value);
@@ -295,6 +296,10 @@ export function SettingsTab() {
         </>
       )}
       <MaintenanceSection canManage={canManageStreams} />
+
+      <EuiSpacer />
+
+      <StaleEventCleanupSection canManage={canManageStreams} />
 
       <EuiSpacer />
 

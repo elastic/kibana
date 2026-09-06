@@ -5,6 +5,7 @@
   },
   "include": ["server/**/*", "public/**/*", "common/**/*"],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/security-plugin",
     "@kbn/licensing-plugin",

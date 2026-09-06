@@ -133,6 +133,48 @@ describe('generateExecutorFunction', () => {
       );
     });
 
+    it('passes the Relay client in the handler context for relay-authenticated executions', async () => {
+      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        getRelayClient: () => relay,
+        networkSettings: mockNetwork,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await executor({ ...opts, secrets: { authType: 'relay', tenantKey: 'tenant-A' } });
+
+      expect(mockHandler).toHaveBeenCalledWith(expect.objectContaining({ relay }), {});
+    });
+
+    it('leaves the Relay client undefined for non-relay auth types even when one is configured', async () => {
+      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        getRelayClient: () => relay,
+        networkSettings: mockNetwork,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await executor({ ...opts, secrets: { authType: 'bearer', token: 'secret' } });
+
+      expect(mockHandler.mock.calls[0][0]).toHaveProperty('relay', undefined);
+    });
+
+    it('leaves the Relay client undefined when no Relay is configured', async () => {
+      const executor = makeExecutor();
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockHandler.mock.calls[0][0]).toHaveProperty('relay', undefined);
+    });
+
     it('returns empty object as data when handler returns null', async () => {
       mockHandler.mockResolvedValue(null);
 

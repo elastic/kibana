@@ -77,7 +77,8 @@ export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
    */
   stability: StabilityLevel;
   /**
-   * When true, YAML must include a non-empty `connector-id` on this trigger.
+   * When true, YAML must include a non-empty `connector-id` on this trigger,
+   * which is matched to `event.connectorId` at runtime.
    * Only connector-event–derived triggers set this.
    */
   requiresConnectorId?: boolean;
