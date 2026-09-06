@@ -15,6 +15,7 @@
  */
 
 import { tags, selectEvaluators, getToolCallSteps, type Example } from '@kbn/evals';
+import { getNarrativeText, countDistinctClaims } from '../src/narrative_claims';
 import { evaluate as base } from '../src/evaluate';
 import { SCENARIOS } from '../src/dataset';
 import { SKILL_ID, TOOL_IDS } from '../src/constants';
@@ -102,16 +103,26 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
               (id as string).includes('generate_esql') || (id as string).includes('execute_esql')
           );
 
-        // Corroboration quality
-        const responseText = JSON.stringify(response);
-        const corroboratedCount = (responseText.match(/corroborat/gi) || []).length;
-        const gapCount = (responseText.match(/gap/gi) || []).length;
+        // Corroboration quality. Count narrative claims in the model's own
+        // message text only — NOT over the full response envelope, whose tool
+        // outputs (ES|QL result payloads) can contain hundreds of incidental
+        // substring matches and inflate the count. Gap claims are deduplicated
+        // case-insensitively so repeated headings/boilerplate don't count as
+        // distinct identified gaps.
+        const narrativeText = getNarrativeText(response);
+        const corroboratedCount = countDistinctClaims(narrativeText, /corroborat\w*/gi);
+        const gapCount = countDistinctClaims(narrativeText, /gap\w*/gi);
 
         // Groundedness
         const hasQueryReferences =
-          responseText.includes('logs-') ||
-          responseText.includes('ES|QL') ||
-          responseText.includes('query');
+          narrativeText.includes('logs-') ||
+          narrativeText.includes('ES|QL') ||
+          narrativeText.includes('query') ||
+          // Tool inputs are still valid grounding evidence even when the final
+          // narrative summarizes without naming indices.
+          [...toolIds].some(
+            (id) => (id as string).includes('generate_esql') || (id as string).includes('execute_esql')
+          );
 
         const success = skillInvoked && searchToolCalled && hasQueryReferences;
 
