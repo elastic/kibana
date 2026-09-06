@@ -22,6 +22,7 @@ const recoverableErrorCodes = [
   ErrCodes.toolNotFound,
   ErrCodes.toolValidationError,
   ErrCodes.emptyResponse,
+  ErrCodes.schemaViolation,
 ];
 
 /**

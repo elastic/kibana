@@ -1,0 +1,32 @@
+name: SDLC Coverage Analysis
+description: Runs Agent Builder analysis on ingested PR data to identify coverage gaps
+default_enabled: true
+steps:
+  - id: load-checkpoint
+    elasticsearch.search:
+      index: .etl-checkpoints
+      query:
+        match:
+          _id: sdlc-pr-ingest
+
+  - id: query-recent-prs
+    elasticsearch.esql.query:
+      query: |
+        FROM sdlc-prs
+        | WHERE updatedAt > NOW() - ${REPLACE_WITH_VAR_analysis_window_days}d
+        | STATS count = COUNT(*), avg_additions = AVG(additions), avg_deletions = AVG(deletions) BY state
+
+  - id: analyze
+    ai.agent:
+      agent_id: "${REPLACE_WITH_FLEET_AGENT_sdlc-coverage-analysis}"
+      input:
+        pr_stats: "${query-recent-prs}"
+        window_days: "${REPLACE_WITH_VAR_analysis_window_days}"
+
+  - id: materialize-results
+    elasticsearch.esql.materialize:
+      query: |
+        FROM sdlc-prs
+        | WHERE updatedAt > NOW() - ${REPLACE_WITH_VAR_analysis_window_days}d
+        | STATS total = COUNT(*), merged = SUM(CASE(state == "MERGED", 1, 0)), open = SUM(CASE(state == "OPEN", 1, 0))
+      target_index: sdlc-coverage-summary

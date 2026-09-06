@@ -10,7 +10,6 @@ import React, { useCallback, useState } from 'react';
 import { EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import { SuppressChromeBackButton } from '@kbn/app-header';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { isMac } from '@kbn/shared-ux-utility';
 
@@ -68,7 +67,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <>
-      <SuppressChromeBackButton />
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
       <KibanaPageTemplate
         paddingSize="none"

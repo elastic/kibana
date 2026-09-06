@@ -1,0 +1,30 @@
+{
+  "attributes": {
+    "columns": [
+      "epic_title",
+      "repo",
+      "issue_number",
+      "issue_title",
+      "issue_status",
+      "pr_count",
+      "has_pr"
+    ],
+    "description": "Epic child tickets grouped by repository",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [["epic_title", "asc"]],
+    "title": "SDLC epic tickets by repo",
+    "version": 1
+  },
+  "id": "sdlc-intel-epic-tickets-search",
+  "references": [
+    {
+      "id": "sdlc-epic-tickets-by-repo-view",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

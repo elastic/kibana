@@ -63,3 +63,4 @@ reselect-v4
 @swc/plugin-emotion
 graphql
 @cfworker/json-schema
+react-router-dom-v5-compat

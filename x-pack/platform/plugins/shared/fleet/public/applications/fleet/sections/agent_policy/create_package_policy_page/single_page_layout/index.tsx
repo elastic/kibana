@@ -752,7 +752,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       headingElement: 'h2',
       status: !pkgName ? 'disabled' : undefined,
     },
-    ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS && !addIntegrationFlyoutProps
+    // FLEET-013: Hide agent policy step for Kibana-only integrations (inputs: [])
+    ...(!addIntegrationFlyoutProps &&
+    selectedSetupTechnology !== SetupTechnology.AGENTLESS &&
+    !(
+      integrationInfo &&
+      'inputs' in integrationInfo &&
+      integrationInfo.inputs &&
+      integrationInfo.inputs.length === 0
+    )
       ? [
           {
             title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {

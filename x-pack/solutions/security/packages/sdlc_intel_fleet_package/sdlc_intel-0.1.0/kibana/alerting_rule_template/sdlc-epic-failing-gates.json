@@ -1,0 +1,29 @@
+{
+  "id": "sdlc-epic-failing-gates",
+  "type": "alerting_rule_template",
+  "attributes": {
+    "name": "SDLC epics with failing phase gates",
+    "tags": ["SDLC Intelligence", "planning", "gates"],
+    "ruleTypeId": ".es-query",
+    "schedule": {
+      "interval": "24h"
+    },
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM sdlc-epic-phases | WHERE rollup.gates_passed_pct < 100 | STATS failing_epics = COUNT(*)"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 7,
+      "timeWindowUnit": "d",
+      "size": 0,
+      "thresholdComparator": ">",
+      "threshold": [0]
+    },
+    "alertDelay": {
+      "active": 1
+    }
+  },
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.1.0"
+}

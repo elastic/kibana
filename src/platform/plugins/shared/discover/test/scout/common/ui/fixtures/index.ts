@@ -24,8 +24,28 @@ import {
 import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
 import { UnifiedFieldList } from '@kbn/unified-field-list/test/scout/ui/fixtures/page_objects';
 import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
+import type {
+  DiscoverSessionApiClassicTab,
+  DiscoverSessionApiData,
+  DiscoverSessionApiEsqlTab,
+} from '../../../../../server/api/schema';
+import {
+  DISCOVER_SESSION_API_BASE_PATH,
+  DISCOVER_SESSION_API_VERSION,
+} from '../../../../../common/constants';
 import { LookupIndexEditor } from './page_objects';
 import * as testData from './constants';
+
+type DiscoverSessionCreateClassicTab = Partial<DiscoverSessionApiClassicTab> &
+  Pick<DiscoverSessionApiClassicTab, 'data_source' | 'id' | 'label'>;
+
+type DiscoverSessionCreateEsqlTab = Partial<DiscoverSessionApiEsqlTab> &
+  Pick<DiscoverSessionApiEsqlTab, 'data_source' | 'id' | 'label'>;
+
+type DiscoverSessionCreateData = Omit<DiscoverSessionApiData, 'description' | 'tabs'> & {
+  description?: DiscoverSessionApiData['description'];
+  tabs: Array<DiscoverSessionCreateClassicTab | DiscoverSessionCreateEsqlTab>;
+};
 
 export interface DiscoverScoutSpace extends ScoutSpaceParallelFixture {
   setupDiscoverDefaults: (options?: {
@@ -34,6 +54,7 @@ export interface DiscoverScoutSpace extends ScoutSpaceParallelFixture {
   }) => Promise<void>;
   teardownDiscoverDefaults: () => Promise<void>;
   getDataViewId: (title: string) => string;
+  createDiscoverSession: (data: DiscoverSessionCreateData) => Promise<string>;
 }
 
 export type DiscoverWorkerFixtures = ScoutParallelWorkerFixtures & {
@@ -67,7 +88,7 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
     await use(extendWithDiscoverPageObjects(pageObjects, page));
   },
   discoverScoutSpace: [
-    async ({ scoutSpace }, use) => {
+    async ({ kbnClient, scoutSpace }, use) => {
       const dataViewIds = new Map<string, string>();
       const loadSavedObjects = async (path: string) => {
         const imported = await scoutSpace.savedObjects.load(path);
@@ -99,6 +120,24 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
         },
         getDataViewId: (title) => {
           return dataViewIds.get(title) ?? title;
+        },
+        createDiscoverSession: async (data) => {
+          const response = await kbnClient.request<{ id: string }>({
+            method: 'POST',
+            path: `/s/${scoutSpace.id}${DISCOVER_SESSION_API_BASE_PATH}`,
+            headers: {
+              'kbn-xsrf': 'some-xsrf-token',
+              'x-elastic-internal-origin': 'kibana',
+              'elastic-api-version': DISCOVER_SESSION_API_VERSION,
+            },
+            body: data,
+          });
+
+          if (response.status !== 201) {
+            throw new Error(`Failed to create Discover session: ${response.status}`);
+          }
+
+          return response.data.id;
         },
       };
 

@@ -1,0 +1,13 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{\"lag_hours\":{\"type\":\"double\",\"script\":{\"source\":\"if (doc[\\\"last_run_at\\\"].size() == 0) { emit(0); } else { emit((System.currentTimeMillis() - doc[\\\"last_run_at\\\"].value.toInstant().toEpochMilli()) / 3600000.0); }\"}}}",
+    "timeFieldName": "@timestamp",
+    "title": "*-intel-sync-state"
+  },
+  "id": "sdlc-ingest-health-view",
+  "type": "index-pattern",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.0.0"
+}

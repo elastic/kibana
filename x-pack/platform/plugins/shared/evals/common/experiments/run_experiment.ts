@@ -85,12 +85,6 @@ export interface SaveAsWorkflowResponse {
   name: string;
 }
 
-/** An LLM evaluator paired with the display label of the connector it judges with. */
-export interface LaunchedExperimentJudge {
-  evaluator_name: string;
-  judge_label: string;
-}
-
 export interface LaunchedExperimentConfig {
   name?: string;
   /** Display label of the chosen task target (e.g. "Agent Builder agent (converse)"). */
@@ -99,8 +93,6 @@ export interface LaunchedExperimentConfig {
   connector_names: string[];
   dataset_names: string[];
   evaluator_names: string[];
-  /** Only LLM evaluators appear here. Code evaluators invoke no model. */
-  evaluator_judges?: LaunchedExperimentJudge[];
   repetitions?: number;
   concurrency?: number;
 }

@@ -9,8 +9,10 @@ import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { appContextService } from '../../services';
+import { createFleetInternalRequest } from '../../services/security';
 
 import { TASK_TIMEOUT, TASK_TITLE, TASK_TYPE, type SetupTaskParams } from './utils';
 import { runBackportPackagePolicyInputId } from './run_backport_package_policy_input_id';
@@ -30,11 +32,14 @@ export function registerSetupTasks(taskManager: TaskManagerSetupContract) {
       createTaskRunner: ({
         taskInstance,
         signal,
+        fakeRequest,
       }: {
         taskInstance: ConcreteTaskInstance;
         signal: AbortSignal;
+        fakeRequest?: KibanaRequest;
       }) => {
         const logger = appContextService.getLogger();
+        const request = fakeRequest ?? createFleetInternalRequest();
 
         return {
           run: async () => {
@@ -56,11 +61,13 @@ export function registerSetupTasks(taskManager: TaskManagerSetupContract) {
                 await runUpgradePackageInstallVersion({
                   signal,
                   logger,
+                  request,
                 });
               } else if (taskParams.type === 'reinstallPackagesForGlobalAssetUpdate') {
                 await runReinstallPackagesForGlobalAssetUpdate({
                   signal,
                   logger,
+                  request,
                 });
               } else {
                 throw new Error(`Unknown setup operation: ${taskParams.type}`);

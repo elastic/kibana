@@ -40,9 +40,6 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
         includeSavedObjectNames: false,
       },
     },
-    serviceAccounts: {
-      isEnabled: () => false,
-    },
     // No security delegate registered, so there are no user profiles to bind.
     fakeRequestEnricher: () => undefined,
   };

@@ -1,0 +1,23 @@
+- version: 0.1.0
+  changes:
+    - description: Add agentic PR missing-related-issue workflow, findings index, and Security detection rule.
+      type: enhancement
+      link: https://github.com/elastic/kibana/pull/0
+    - description: Populate links.closing_issues and write closes relationships from PR graph enrich.
+      type: bugfix
+      link: https://github.com/elastic/kibana/pull/0
+    - description: Point project item pipeline at github-intel-project-items (Lens cannot query ES|QL views).
+      type: bugfix
+      link: https://github.com/elastic/kibana/pull/0
+    - description: Point ingest health dashboard at *-intel-sync-state with lag_hours runtime field.
+      type: bugfix
+      link: https://github.com/elastic/kibana/pull/0
+    - description: Point GitHub sync overview at github-intel-raw-project-pages (Lens cannot query ES|QL views).
+      type: bugfix
+      link: https://github.com/elastic/kibana/pull/0
+    - description: Fix Lens count metrics to use ___records___ instead of display name Records.
+      type: bugfix
+      link: https://github.com/elastic/kibana/pull/0
+    - description: Initial release with executive roadmap, phase pipeline, and team dimension dashboards.
+      type: enhancement
+      link: https://github.com/elastic/kibana/pull/0

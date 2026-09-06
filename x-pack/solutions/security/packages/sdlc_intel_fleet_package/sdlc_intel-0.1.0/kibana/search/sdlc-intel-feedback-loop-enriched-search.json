@@ -1,0 +1,34 @@
+{
+  "attributes": {
+    "columns": [
+      "case_number",
+      "case_status",
+      "product_area",
+      "sdh_issue_url",
+      "sdh_repo",
+      "linked_to_sdh",
+      "product_issue_url",
+      "product_repo",
+      "product_issue_number",
+      "linked_to_product",
+      "last_modified_at"
+    ],
+    "description": "Case → SDH → product issue three-hop feedback loop from sdlc-feedback-loop-enriched-view.",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [["last_modified_at", "desc"]],
+    "title": "SDLC Feedback loop enriched",
+    "version": 1
+  },
+  "id": "sdlc-intel-feedback-loop-enriched-search",
+  "references": [
+    {
+      "id": "sdlc-feedback-loop-enriched-view",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

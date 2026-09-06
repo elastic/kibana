@@ -535,7 +535,7 @@ describe('WorkflowContextManager', () => {
 
     it('should return startedAt', () => {
       const context = testContainer.underTest.getContext();
-      expect(context.execution.startedAt).toEqual(new Date('2023-01-01T00:00:00Z'));
+      expect(context.execution.startedAt).toEqual('2023-01-01T00:00:00.000Z');
     });
 
     describe('isTestRun flag', () => {
@@ -582,7 +582,7 @@ describe('WorkflowContextManager', () => {
         const context = testContainer.underTest.getContext();
         expect(context.execution.id).toBe('mocked-execution-id');
         expect(context.execution.isTestRun).toBe(true);
-        expect(context.execution.startedAt).toEqual(new Date('2024-01-01T00:00:00Z'));
+        expect(context.execution.startedAt).toEqual('2024-01-01T00:00:00.000Z');
       });
     });
   });
@@ -1576,7 +1576,7 @@ describe('WorkflowContextManager', () => {
             execution: {
               id: 'exec-123',
               isTestRun: false,
-              startedAt: new Date('2023-01-01T00:00:00.000Z'),
+              startedAt: '2023-01-01T00:00:00.000Z',
               url: 'http://localhost:5601/s/space-789/app/workflows/workflow-456?executionId=exec-123&tab=executions',
               executedBy: 'unknown',
               triggeredBy: undefined,

@@ -1,0 +1,14 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "sdlc-salesforce-feedback-view",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "sdlc-salesforce-feedback-view"
+  },
+  "id": "sdlc-salesforce-feedback-view",
+  "type": "index-pattern"
+}

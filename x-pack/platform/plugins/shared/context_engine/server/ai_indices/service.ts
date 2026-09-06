@@ -8,11 +8,9 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import pRetry from 'p-retry';
 import {
   AI_INDEX_DATA_STREAM_PREFIX as DATA_STREAM_PREFIX,
   AI_INDEX_INDEX_PREFIX as INDEX_PREFIX,
-  MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDICES,
 } from '../../common/constants';
 import type {
@@ -45,34 +43,6 @@ const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem =
   date_created: document.date_created,
   date_modified: document.date_modified,
 });
-
-const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
-
-type AiIndexAutomationTarget = Pick<AiIndexDocument, 'managed' | 'automations'>;
-
-const assertAiIndexAcceptsAutomation = (
-  aiIndexId: string,
-  index: AiIndexAutomationTarget,
-  automation?: { type: 'workflow'; value: string }
-): { alreadyAttached: boolean } => {
-  if (index.managed) {
-    throw new AiIndexManagedError(aiIndexId);
-  }
-
-  const alreadyAttached =
-    automation !== undefined &&
-    index.automations.some(
-      (entry) => entry.type === automation.type && entry.value === automation.value
-    );
-
-  if (!alreadyAttached && index.automations.length >= MAX_AI_INDEX_AUTOMATIONS) {
-    throw new Error(
-      `AI index "${aiIndexId}" already has the maximum number of automations (${MAX_AI_INDEX_AUTOMATIONS}).`
-    );
-  }
-
-  return { alreadyAttached };
-};
 
 /**
  * Manages the AI index registry stored in the hidden
@@ -220,66 +190,6 @@ export class AiIndexService {
       throw new AiIndexNotFoundError(aiIndexId);
     }
     return toAiIndexItem(aiIndexId, existing.document);
-  }
-
-  /**
-   * Fail-fast validation before expensive side effects.
-   */
-  async assertCanAcceptAutomation(
-    aiIndexId: string,
-    automation?: { type: 'workflow'; value: string }
-  ): Promise<void> {
-    const existing = await this.findDocument(aiIndexId);
-    if (!existing) {
-      throw new AiIndexNotFoundError(aiIndexId);
-    }
-
-    assertAiIndexAcceptsAutomation(aiIndexId, existing.document, automation);
-  }
-
-  /**
-   * Appends a workflow automation to an AI index, retrying on concurrent writes.
-   */
-  async addAutomation(
-    aiIndexId: string,
-    automation: { type: 'workflow'; value: string }
-  ): Promise<'attached' | 'already_attached'> {
-    return pRetry(
-      async () => {
-        const existing = await this.findDocument(aiIndexId);
-        if (!existing) {
-          throw new AiIndexNotFoundError(aiIndexId);
-        }
-
-        const { alreadyAttached } = assertAiIndexAcceptsAutomation(
-          aiIndexId,
-          existing.document,
-          automation
-        );
-        if (alreadyAttached) {
-          return 'already_attached';
-        }
-
-        await this.writeDocument(
-          aiIndexId,
-          {
-            ...existing.document,
-            automations: [...existing.document.automations, automation],
-          },
-          existing
-        );
-
-        return 'attached';
-      },
-      {
-        retries: ADD_AUTOMATION_CONFLICT_RETRIES,
-        onFailedAttempt: (error) => {
-          if (!(error instanceof AiIndexConflictError)) {
-            throw error;
-          }
-        },
-      }
-    );
   }
 
   async list(): Promise<AiIndexHttpItem[]> {

@@ -706,28 +706,28 @@ describe('StepExecutionRuntime', () => {
     // `details`, so `toSerializableObject` never writes them to ES — neither on the step
     // execution nor on the workflow execution. The recovered response body therefore only ever
     // reaches ES through the (capped) `message`, not as a structured field.
-    it('persists status in details but never the body/headers of a KibanaApiCallError', () => {
+    it('persists status and retryAfterMs in details but never the body/headers of a KibanaApiCallError', () => {
       const error = new KibanaApiCallError({
-        status: 500,
-        headers: { 'x-trace-id': 'trace-secret' },
+        status: 429,
+        headers: { 'retry-after': '47', 'x-trace-id': 'trace-secret' },
         body: { secret: 'do-not-persist', updated: [{ id: 'rule-1' }] },
-        message: 'HTTP 500: {"secret":"do-not-persist"}',
+        message: 'HTTP 429: {"secret":"do-not-persist"}',
       });
 
       underTest.failStep(error);
 
       const expectedSerializedError = {
         type: 'KibanaApiCallError',
-        message: 'HTTP 500: {"secret":"do-not-persist"}',
-        details: { status: 500 },
+        message: 'HTTP 429: {"secret":"do-not-persist"}',
+        details: { status: 429, retryAfterMs: 47000 },
       };
 
-      // Persisted on the step execution: type + message + details:{status}; no body/headers.
+      // Persisted on the step execution: type + message + details:{status, retryAfterMs}; no body/headers.
       const [persistedStep] = (workflowExecutionState.upsertStep as jest.Mock).mock.calls.at(
         -1
       ) as [EsWorkflowStepExecution];
       expect(persistedStep.error).toEqual(expectedSerializedError);
-      expect(persistedStep.error?.details).toEqual({ status: 500 });
+      expect(persistedStep.error?.details).toEqual({ status: 429, retryAfterMs: 47000 });
       expect(persistedStep.error?.details).not.toHaveProperty('body');
       expect(persistedStep.error?.details).not.toHaveProperty('headers');
       // The raw body/headers must not leak into `details` (the only structured field persisted to ES).

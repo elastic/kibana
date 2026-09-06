@@ -8,6 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { createMemoryTools } from '../../tools/memory';
 import type { MemoryToolsOptions } from '../../tools/memory';
+import { toInlineMemoryTools } from './to_inline_tools';
 import description from './memory_consolidation.description.text';
 import content from './memory_consolidation.skill.md.text';
 
@@ -19,5 +20,5 @@ export const createMemoryConsolidationSkill = (options: MemoryToolsOptions) =>
     excludeFromElasticCapabilities: true,
     description,
     content,
-    getInlineTools: () => createMemoryTools(options),
+    getInlineTools: () => toInlineMemoryTools(createMemoryTools(options)),
   });

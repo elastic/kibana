@@ -126,8 +126,6 @@ export const getUserFromRequest = async ({
   esClient: ElasticsearchClient;
 }): Promise<CurrentUser> => {
   const authUser = security.authc.getCurrentUser(request);
-  const isAdmin = await isAdminFromRequest({ esClient });
-
   if (authUser?.username) {
     return {
       id: await toStableUserId({
@@ -135,7 +133,6 @@ export const getUserFromRequest = async ({
         resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
       }),
       username: authUser.username,
-      isAdmin,
     };
   }
 
@@ -143,7 +140,6 @@ export const getUserFromRequest = async ({
   return {
     id: authUser?.profile_uid,
     username: authResponse.username,
-    isAdmin,
   };
 };
 

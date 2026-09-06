@@ -36,14 +36,6 @@ jest.mock('../../hooks/use_has_slos');
 jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_fetch_slo_templates');
 jest.mock('../../hooks/use_fetch_slo_template_tags');
-jest.mock('@elastic/eui-illustrations', () => ({
-  monitoringLogs: {
-    id: 'monitoringLogs',
-    title: 'Monitoring logs',
-    light: '<svg></svg>',
-    dark: '<svg></svg>',
-  },
-}));
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);

@@ -101,13 +101,13 @@ export class ExternalInferencePage {
   public async openRowActionsFor(inferenceId: string) {
     const row = this.page.testSubj.locator(`endpointRow-${inferenceId}`);
     await row.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
-    await this.page.testSubj.waitForSelector('inference-endpoints-action-edit-endpoint-label', {
+    await this.page.testSubj.waitForSelector('inference-endpoints-action-view-endpoint-label', {
       state: 'visible',
     });
   }
 
-  public get editEndpointAction(): Locator {
-    return this.page.testSubj.locator('inference-endpoints-action-edit-endpoint-label');
+  public get viewEndpointAction(): Locator {
+    return this.page.testSubj.locator('inference-endpoints-action-view-endpoint-label');
   }
 
   public get copyEndpointIdAction(): Locator {

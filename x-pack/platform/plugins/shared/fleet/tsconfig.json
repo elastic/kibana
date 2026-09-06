@@ -22,6 +22,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-http-server-utils",
     "@kbn/tracing-utils",
     // add references to other TypeScript projects the plugin depends on
 
@@ -137,6 +138,7 @@
     "@kbn/scout",
     "@kbn/reporting-common",
     "@kbn/reporting-plugin",
+    "@kbn/workflows-management-plugin",
     "@kbn/user-profile-components",
     "@kbn/css-utils",
     "@kbn/rison",
@@ -148,6 +150,8 @@
     "@kbn/human-readable-id",
     "@kbn/elastic-agent-condition-language",
     "@kbn/app-header",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common"
   ]
 }

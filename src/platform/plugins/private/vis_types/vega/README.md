@@ -5,7 +5,7 @@ Dashboard supports a dedicated by-value `vega` panel. Its stored config holds a 
 exactly, so comments and formatting round-trip.
 
 Add or edit a panel from Dashboard's **Add panel** menu. Editing does not run the spec's queries as
-you type: **Run Preview** renders the current spec on the panel, **Apply and close** commits it to the
+you type: **Preview** renders the current spec on the panel, **Apply and close** commits it to the
 dashboard, and any other close — Cancel, Esc, or click-away — reverts, removing a new panel or
 restoring an existing panel's prior spec.
 

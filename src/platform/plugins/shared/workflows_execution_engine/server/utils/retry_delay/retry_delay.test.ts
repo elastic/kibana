@@ -136,3 +136,69 @@ describe('computeRetryDelayMs', () => {
     });
   });
 });
+
+describe('server Retry-After hint', () => {
+  it('honours the hint when respect-retry-after is true (fixed strategy)', () => {
+    expect(computeRetryDelayMs({ delay: '5s', 'respect-retry-after': true }, 0, 47000)).toBe(47000);
+  });
+
+  it('honours the hint when respect-retry-after is true (exponential strategy)', () => {
+    expect(
+      computeRetryDelayMs(
+        { delay: '1s', strategy: 'exponential', 'respect-retry-after': true },
+        2,
+        47000
+      )
+    ).toBe(47000);
+  });
+
+  it('ignores the hint when respect-retry-after is false', () => {
+    expect(computeRetryDelayMs({ delay: '5s', 'respect-retry-after': false }, 0, 47000)).toBe(5000);
+  });
+
+  it('ignores the hint when respect-retry-after is absent', () => {
+    expect(computeRetryDelayMs({ delay: '5s' }, 0, 47000)).toBe(5000);
+  });
+
+  it('clamps the hint to max-delay when configured', () => {
+    expect(
+      computeRetryDelayMs(
+        {
+          delay: '1s',
+          strategy: 'exponential',
+          'max-delay': '5s',
+          'respect-retry-after': true,
+        },
+        10,
+        60000
+      )
+    ).toBe(5000);
+  });
+
+  it('clamps the hint to a hard ceiling when max-delay is absent', () => {
+    expect(
+      computeRetryDelayMs(
+        { delay: '1s', strategy: 'exponential', 'respect-retry-after': true },
+        0,
+        2 * 60 * 60 * 1000
+      )
+    ).toBe(60 * 60 * 1000);
+  });
+
+  it('does not apply jitter on top of a server hint', () => {
+    for (let i = 0; i < 30; i++) {
+      expect(
+        computeRetryDelayMs(
+          {
+            delay: '1s',
+            strategy: 'exponential',
+            jitter: true,
+            'respect-retry-after': true,
+          },
+          2,
+          12345
+        )
+      ).toBe(12345);
+    }
+  });
+});

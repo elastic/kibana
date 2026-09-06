@@ -53,11 +53,13 @@ import { FleetError, PackageRemovalError } from '../../../errors';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
 import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
+import { deleteIndexAliases } from '../elasticsearch/index_alias/remove';
 import type { PackageSpecConditions } from '../../../../common';
 
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
+import { createFleetInternalRequest } from '../../security';
 
 const MAX_ASSETS_TO_DELETE = 1000;
 
@@ -250,6 +252,54 @@ export async function deleteKibanaAssets({
     logger.debug(`Deleting Kibana assets in namespace: ${namespace}`);
   }
 
+  const workflowAssets = installedObjects.filter(
+    (asset) => asset.type === KibanaSavedObjectType.workflow
+  );
+  const agentAssets = installedObjects.filter(
+    (asset) => asset.type === KibanaSavedObjectType.agent
+  );
+  const savedObjectAssets = installedObjects.filter(
+    (asset) =>
+      asset.type !== KibanaSavedObjectType.workflow && asset.type !== KibanaSavedObjectType.agent
+  );
+
+  const workflowsApi = appContextService.getWorkflowsManagementSetup()?.management;
+  if (workflowAssets.length > 0 && workflowsApi) {
+    const workflowIds = workflowAssets.map((asset) => asset.id);
+    logger.debug(`Deleting ${workflowIds.length} workflow assets via workflowsManagement`);
+    try {
+      await workflowsApi.deleteWorkflows(workflowIds, spaceId, createFleetInternalRequest(), {
+        force: true,
+      });
+    } catch (err) {
+      logger.warn(`Failed to delete workflow assets: ${err}`);
+    }
+  } else if (workflowAssets.length > 0) {
+    logger.debug(
+      `Skipping deletion of ${workflowAssets.length} workflow assets: workflowsManagement unavailable`
+    );
+  }
+
+  const agentBuilderApi = appContextService.getAgentBuilderSetup()?.management;
+  if (agentAssets.length > 0 && agentBuilderApi) {
+    logger.debug(`Deleting ${agentAssets.length} agent assets via agentBuilder`);
+    for (const asset of agentAssets) {
+      try {
+        await agentBuilderApi.deletePackageManagedAgent(asset.id, spaceId);
+      } catch (err) {
+        logger.warn(`Failed to delete agent asset ${asset.id}: ${err}`);
+      }
+    }
+  } else if (agentAssets.length > 0) {
+    logger.debug(
+      `Skipping deletion of ${agentAssets.length} agent assets: agentBuilder unavailable`
+    );
+  }
+
+  if (savedObjectAssets.length === 0) {
+    return;
+  }
+
   const minKibana = packageSpecConditions?.kibana?.version
     ? minVersion(packageSpecConditions.kibana.version)
     : null;
@@ -259,10 +309,10 @@ export async function deleteKibanaAssets({
   // and delete the assets directly. Otherwise, we need to resolve the assets
   // which might create high memory pressure if a package has a lot of assets.
   if (minKibana && minKibana.major >= 8) {
-    await bulkDeleteSavedObjects(installedObjects, namespace, savedObjectsClient, logger);
+    await bulkDeleteSavedObjects(savedObjectAssets, namespace, savedObjectsClient, logger);
   } else {
     const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
-      installedObjects,
+      savedObjectAssets,
       { namespace }
     );
 
@@ -334,6 +384,8 @@ export const deleteESAsset = async (
     return deleteMlModel(esClient, [id]);
   } else if (assetType === ElasticsearchAssetType.esqlView) {
     return deleteEsqlViews(esClient, [id]);
+  } else if (assetType === ElasticsearchAssetType.indexAlias) {
+    return deleteIndexAliases(esClient, [id]);
   }
 };
 
@@ -604,6 +656,16 @@ export function cleanupEsqlViews(
     .filter((asset) => asset.type === ElasticsearchAssetType.esqlView)
     .map((asset) => asset.id);
   return deleteEsqlViews(esClient, idsToDelete);
+}
+
+export function cleanupIndexAliases(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+) {
+  const idsToDelete = installedObjects
+    .filter((asset) => asset.type === ElasticsearchAssetType.indexAlias)
+    .map((asset) => asset.id);
+  return deleteIndexAliases(esClient, idsToDelete);
 }
 
 /**

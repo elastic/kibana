@@ -110,16 +110,6 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
 
   const interactivityDisabled = !manager.deps.interactivity.enabled;
 
-  const toolHandlerExecutionParams: ToolHandlerExecutionParams<TParams> = {
-    toolId: tool.id,
-    toolCallId,
-    source,
-    toolParams: toolParams as TParams,
-    onEvent: toolExecutionParams.onEvent ?? (() => undefined),
-  };
-
-  let toolHandlerContext: ToolHandlerContext | undefined;
-
   // only perform pre-call confirmation prompt when the agent is calling the tool
   if (tool.confirmation && source === 'agent') {
     if (tool.confirmation.askUser === 'once' || tool.confirmation.askUser === 'always') {
@@ -148,17 +138,9 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       }
 
       if (confirmStatus === ConfirmationStatus.unprompted) {
-        let definition;
-        if (tool.confirmation.getConfirmation) {
-          toolHandlerContext = await createToolHandlerContext({
-            toolExecutionParams: toolHandlerExecutionParams,
-            manager,
-          });
-          definition = await tool.confirmation.getConfirmation({
-            toolParams,
-            context: toolHandlerContext,
-          });
-        }
+        const definition = tool.confirmation.getConfirmation
+          ? await tool.confirmation.getConfirmation({ toolParams })
+          : undefined;
         return {
           prompt: createToolConfirmationPrompt({ confirmationId, tool, definition }),
         };
@@ -167,8 +149,14 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   }
 
   const startTime = Date.now();
-  toolHandlerContext ??= await createToolHandlerContext({
-    toolExecutionParams: toolHandlerExecutionParams,
+  const toolHandlerContext = await createToolHandlerContext<TParams>({
+    toolExecutionParams: {
+      toolId: tool.id,
+      toolCallId,
+      source,
+      toolParams: toolParams as TParams,
+      onEvent: toolExecutionParams.onEvent ?? (() => undefined),
+    },
     manager,
   });
 

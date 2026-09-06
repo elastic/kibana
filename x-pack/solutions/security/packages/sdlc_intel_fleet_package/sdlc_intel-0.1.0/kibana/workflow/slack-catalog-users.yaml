@@ -1,0 +1,133 @@
+version: '1'
+name: SDLC Slack catalog users
+description: >
+  Catalog workflow. Pages Slack workspace users via slack2.listUsersIngest and upserts
+  slack-intel-people with cursor checkpoints in slack-intel-sync-state.
+enabled: false
+tags:
+  - sdlc
+  - slack
+  - catalog
+  - ingest
+  - people
+
+consts:
+  slackConnectorId: REPLACE_WITH_SLACK_CONNECTOR_ID
+  syncStateIndex: slack-intel-sync-state
+  peopleIndex: slack-intel-people
+  syncSource: slack-catalog-users
+  entityType: slack_user
+  pageSize: 200
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-slack-catalog-users
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      ignore_unavailable: true
+      allow_no_indices: true
+      query:
+        term:
+          sync.source: '{{ consts.syncSource }}'
+
+  - name: init_cursor
+    type: data.set
+    with:
+      cursor: '{{ steps.read_checkpoint.output.hits.hits.0._source.cursor }}'
+      pagesFetched: 0
+
+  - name: paginate_users
+    type: while
+    condition: 'steps.fetch_users.output.hasMore : true'
+    max-iterations: 15
+    steps:
+      - name: fetch_users
+        type: slack2.listUsersIngest
+        connector-id: '{{ consts.slackConnectorId }}'
+        with:
+          limit: ${{ consts.pageSize }}
+          cursor: '{{ variables.cursor }}'
+
+      - name: build_bulk_ops
+        type: data.set
+        with:
+          operations: |-
+            {% assign items = steps.fetch_users.output.users %}
+            [
+            {%- for node in items -%}
+              {
+                "id": "{{ node.id }}",
+                "@timestamp": "{{ execution.startedAt }}",
+                "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                "person": {
+                  "id": "{{ node.id }}",
+                  "login": "{{ node.name }}",
+                  "name": "{{ node.realName }}",
+                  "email": "{{ node.email }}"
+                },
+                "payload": {{ node | json }}
+              }  {% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+            ]
+
+      - name: bulk_index_page
+        type: elasticsearch.bulk
+        with:
+          index: '{{ consts.peopleIndex }}'
+          id_field: id
+          operations: '${{ steps.build_bulk_ops.output.operations | json_parse }}'
+
+      - name: advance_cursor
+        type: data.set
+        with:
+          cursor: '{{ steps.fetch_users.output.nextCursor }}'
+          pagesFetched: '{{ variables.pagesFetched | plus: 1 }}'
+
+      - name: checkpoint_page
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          id: '{{ consts.syncSource }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity_type: '{{ consts.entityType }}'
+            cursor: '{{ variables.cursor }}'
+            last_run_at: '{{ execution.startedAt }}'
+            last_run_status: in_progress
+            stats:
+              pages_fetched: '{{ variables.pagesFetched }}'
+              has_more: '{{ steps.fetch_users.output.hasMore }}'
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        cursor: '{{ variables.cursor }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          pages_fetched: '{{ variables.pagesFetched }}'
+          has_more: '{{ steps.fetch_users.output.hasMore }}'

@@ -1,0 +1,9 @@
+- name: source
+  type: keyword
+  description: Sync source identifier (sync.source from the ingest workflows).
+- name: doc_count_total
+  type: long
+  description: Total documents currently present for this source.
+- name: last_write
+  type: date
+  description: Most recent "@timestamp" written by this source.

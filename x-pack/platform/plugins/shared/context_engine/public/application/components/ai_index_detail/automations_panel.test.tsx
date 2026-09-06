@@ -15,18 +15,12 @@ import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { AiIndexAutomation, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { UseAutomationsEditorResult } from '../../hooks/use_automations_editor';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
-import type { UseSuggestAutomationResult } from '../../hooks/use_suggest_automation';
-import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { AutomationsPanel } from './automations_panel';
 
 jest.mock('../../hooks/use_automations_editor', () => ({
   useAutomationsEditor: jest.fn(),
-}));
-
-jest.mock('../../hooks/use_suggest_automation', () => ({
-  useSuggestAutomation: jest.fn(),
 }));
 
 jest.mock('../../hooks/use_workflow_summaries', () => ({
@@ -41,7 +35,6 @@ jest.mock('@kbn/workflows-ui', () => ({
 }));
 
 const mockUseAutomationsEditor = jest.mocked(useAutomationsEditor);
-const mockUseSuggestAutomation = jest.mocked(useSuggestAutomation);
 const mockUseWorkflowSummaries = jest.mocked(useWorkflowSummaries);
 
 const editorResult = (
@@ -58,14 +51,6 @@ const editorResult = (
   removeAutomation: jest.fn(),
   save: jest.fn().mockResolvedValue(undefined),
   createAndAttach: jest.fn().mockResolvedValue(undefined),
-  ...overrides,
-});
-
-const suggestResult = (
-  overrides: Partial<UseSuggestAutomationResult> = {}
-): UseSuggestAutomationResult => ({
-  canSuggest: false,
-  suggestAutomation: jest.fn(),
   ...overrides,
 });
 
@@ -119,7 +104,6 @@ const oneAutomation: AiIndexAutomation[] = [{ type: 'workflow', value: 'wf-1' }]
 describe('AutomationsPanel', () => {
   beforeEach(() => {
     mockUseAutomationsEditor.mockReturnValue(editorResult());
-    mockUseSuggestAutomation.mockReturnValue(suggestResult());
     mockUseWorkflowSummaries.mockReturnValue(summariesResult());
   });
 
@@ -175,24 +159,6 @@ describe('AutomationsPanel', () => {
     renderPanel();
 
     expect(screen.getByTestId('contextCreateAutomationButton')).toBeInTheDocument();
-  });
-
-  it('shows the suggest automation control when agent builder is available', () => {
-    const suggestAutomation = jest.fn();
-    mockUseSuggestAutomation.mockReturnValue(
-      suggestResult({ canSuggest: true, suggestAutomation })
-    );
-
-    renderPanel();
-
-    fireEvent.click(screen.getByTestId('contextSuggestAutomationButton'));
-    expect(suggestAutomation).toHaveBeenCalledTimes(1);
-  });
-
-  it('hides the suggest automation control when agent builder is unavailable', () => {
-    renderPanel();
-
-    expect(screen.queryByTestId('contextSuggestAutomationButton')).not.toBeInTheDocument();
   });
 
   it('opens the created workflow in the Workflows app', async () => {

@@ -104,14 +104,16 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
       packageInstallContext,
     });
 
-    await stepCreateAlertingAssets({
-      logger,
-      savedObjectsClient: spaceScopedClient,
-      packageInstallContext,
-      spaceId: spaceToInstallId,
-      request,
-      installAsAdditionalSpace,
-    });
+    if (packageInstallContext.packageInfo?.create_alerting_rules) {
+      await stepCreateAlertingAssets({
+        logger,
+        savedObjectsClient: spaceScopedClient,
+        packageInstallContext,
+        spaceId: spaceToInstallId,
+        request,
+        installAsAdditionalSpace,
+      });
+    }
   }
 
   return response.ok({ body: { success: true } });

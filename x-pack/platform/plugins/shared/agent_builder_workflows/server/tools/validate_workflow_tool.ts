@@ -88,13 +88,6 @@ export function registerValidateWorkflowTool(
   agentBuilder.tools.register({
     id: workflowTools.validateWorkflow,
     type: ToolType.builtin,
-    annotations: {
-      title: 'Validate Workflow',
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: false,
-    },
     description: `Validate a workflow YAML string against all validation rules.
 Use this tool AFTER generating or modifying workflow YAML and BEFORE proposing changes to the user.
 It checks YAML syntax, schema conformance, step name uniqueness, and Liquid template syntax.

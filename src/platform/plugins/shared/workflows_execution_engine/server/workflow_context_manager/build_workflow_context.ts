@@ -20,12 +20,23 @@ import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 export type WorkflowExecutionForInputRendering = Partial<EsWorkflowExecution> &
   Pick<EsWorkflowExecution, 'id' | 'workflowId' | 'spaceId' | 'createdAt'>;
 
+function toIsoTimestamp(value: string | Date | undefined | null): string {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? new Date().toISOString() : value.toISOString();
+  }
+  if (value == null || value === '') {
+    return new Date().toISOString();
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+}
+
 export function buildInputDefaultRenderContext(
   workflowExecution: WorkflowExecutionForInputRendering,
   coreStart?: CoreStart,
   dependencies?: ContextDependencies
 ): WorkflowContext {
-  const startedAt = workflowExecution.startedAt ?? workflowExecution.createdAt;
+  const startedAt = toIsoTimestamp(workflowExecution.startedAt ?? workflowExecution.createdAt);
   const kibanaUrl = getKibanaUrl(coreStart, dependencies?.cloudSetup);
   const executionUrl = buildWorkflowExecutionUrl(
     kibanaUrl,
@@ -47,7 +58,9 @@ export function buildInputDefaultRenderContext(
     execution: {
       id: workflowExecution.id,
       isTestRun: !!workflowExecution.isTestRun,
-      startedAt: new Date(startedAt),
+      // ISO 8601 so bare Liquid `{{ execution.startedAt }}` is ES-date-safe
+      // (Date.toString() is not parseable by strict_date_optional_time).
+      startedAt,
       url: executionUrl,
       executedBy: workflowExecution.executedBy ?? 'unknown',
       triggeredBy: workflowExecution.triggeredBy,
@@ -65,7 +78,7 @@ export function buildInputDefaultRenderContext(
     event: workflowExecution.context?.event,
     inputs: workflowExecution.context?.inputs as Record<string, unknown> | undefined,
     output: workflowExecution.context?.output,
-    now: new Date(),
+    now: new Date().toISOString(),
     parent:
       parentWorkflowId && parentWorkflowExecutionId
         ? {

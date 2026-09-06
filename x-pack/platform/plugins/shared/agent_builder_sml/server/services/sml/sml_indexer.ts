@@ -335,6 +335,11 @@ class SmlIndexerImpl implements SmlIndexer {
     if (entry.tags !== undefined) {
       document.tags = entry.tags;
     }
+    document.discovery_labels = [
+      { value: entry.title, kind: 'title' },
+      { value: entry.type, kind: 'type' },
+      ...(entry.discovery_labels ?? []),
+    ];
     if (entry.extended_attrs !== undefined) {
       document.extended_attrs = entry.extended_attrs;
     }

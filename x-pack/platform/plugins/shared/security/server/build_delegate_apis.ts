@@ -32,7 +32,7 @@ export const buildSecurityApi = ({
   getAuthc: () => InternalAuthenticationServiceStart;
   getSession: () => Pick<Session, 'getSID'>;
   audit: AuditServiceSetup;
-  config: { uiam?: { enabled: boolean }; serviceAccounts?: { enabled: boolean } };
+  config: { uiam?: { enabled: boolean } };
   logger: Logger;
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
@@ -86,9 +86,6 @@ export const buildSecurityApi = ({
         enabled: audit.withoutRequest.enabled,
         includeSavedObjectNames: audit.withoutRequest.includeSavedObjectNames,
       },
-    },
-    serviceAccounts: {
-      isEnabled: () => config.serviceAccounts?.enabled === true,
     },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, internalTools, TODOS_UPDATED_UI_EVENT } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 
@@ -62,7 +62,7 @@ export const createTodoTool = ({
   todoStateManager,
 }: {
   todoStateManager: TodoStateManager;
-}): InternalBuiltinToolDefinition<typeof todoWriteSchema> => ({
+}): BuiltinToolDefinition<typeof todoWriteSchema> => ({
   id: internalTools.writeTodos,
   type: ToolType.builtin,
   description: toolDescription,

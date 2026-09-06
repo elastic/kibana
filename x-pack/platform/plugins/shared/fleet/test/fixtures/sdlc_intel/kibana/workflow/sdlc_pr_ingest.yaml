@@ -1,0 +1,44 @@
+name: SDLC PR Ingest
+description: Ingests pull request data from GitHub via GraphQL and indexes to ES
+default_enabled: true
+steps:
+  - id: fetch-prs
+    connector.github.runQuery:
+      connector_id: "${REPLACE_WITH_VAR_github_connector_id}"
+      query: |
+        query($cursor: String) {
+          repository(name: "kibana", owner: "elastic") {
+            pullRequests(first: 100, after: $cursor, orderBy: {field: UPDATED_AT, direction: DESC}) {
+              nodes {
+                id
+                number
+                title
+                state
+                author { login }
+                createdAt
+                updatedAt
+                mergedAt
+                additions
+                deletions
+                changedFiles
+              }
+              pageInfo { endCursor hasNextPage }
+            }
+          }
+        }
+      variables:
+        cursor: null
+
+  - id: save-checkpoint
+    elasticsearch.index:
+      index: .etl-checkpoints
+      id: sdlc-pr-ingest
+      document:
+        cursor: "${fetch-prs.endCursor}"
+        updated_at: "now"
+
+  - id: bulk-index-prs
+    elasticsearch.bulk:
+      id_field: id
+      operations: "${fetch-prs.nodes}"
+      index: sdlc-prs

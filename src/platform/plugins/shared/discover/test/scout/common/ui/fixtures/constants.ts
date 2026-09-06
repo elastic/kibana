@@ -71,38 +71,6 @@ export const NO_TIME_FIELD_DATA_VIEW = 'without-timefield';
 export const DISCOVER_ESQL_COLUMNS_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/discover_esql_columns';
 
-/**
- * Dashboard with a Lens ES|QL panel driven by an `esqlControl` options-list
- * control ({@link ESQL_CONTROLS_DASHBOARD_ID} / {@link ESQL_CONTROLS_CONTROL_ID}).
- */
-export const ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE =
-  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls';
-
-/**
- * ID of the ES|QL control in {@link ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE}. Lives
- * inside the dashboard's `controlGroupInput`, so it survives the saved-object
- * import even though the dashboard itself gets a fresh ID.
- */
-export const ESQL_CONTROLS_CONTROL_ID = 'esql-control-1';
-
-/**
- * Discover session ("ESQL control unlink test") with a `geo.dest` ES|QL control
- * pre-selected to `AE`.
- */
-export const SESSION_WITH_CONTROL_KBN_ARCHIVE =
-  'src/platform/test/functional/fixtures/kbn_archiver/discover/session_with_control';
-
-/** Title of the only saved search in {@link SESSION_WITH_CONTROL_KBN_ARCHIVE}. */
-export const SESSION_WITH_CONTROL_TITLE = 'ESQL control unlink test';
-
-/**
- * Dashboard holding {@link SESSION_WITH_CONTROL_TITLE} as an unlinked **by-value**
- * `discover_session` panel plus the matching `esql_control` panel. Replaces the
- * UI-driven "add from library, then unlink" setup the FTR suite used.
- */
-export const ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE =
-  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls_by_value';
-
 export const DEFAULT_DATA_VIEW = 'logstash-*';
 
 export const SAVED_SEARCH_TITLE = 'A Saved Search';

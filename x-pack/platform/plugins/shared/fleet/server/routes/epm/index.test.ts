@@ -191,6 +191,8 @@ describe('schema validation', () => {
     };
     const assets: AssetsGroupedByServiceByType = {
       kibana: {
+        workflow: [],
+        agent: [],
         alerting_rule_template: [],
         slo_template: [],
         dashboard: [],
@@ -217,6 +219,7 @@ describe('schema validation', () => {
         ml_model: [],
         knowledge_base: [],
         esql_view: [],
+        index_alias: [],
       },
     };
     packageInfo = {

@@ -1,0 +1,143 @@
+{
+  "index_patterns": [
+    "github-intel-sync-state"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "sdlc_intel_retention"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "entity_type": {
+          "type": "keyword"
+        },
+        "org": {
+          "properties": {
+            "login": {
+              "type": "keyword"
+            }
+          }
+        },
+        "project": {
+          "properties": {
+            "number": {
+              "type": "integer"
+            }
+          }
+        },
+        "cursor": {
+          "type": "keyword"
+        },
+        "watermark": {
+          "type": "date"
+        },
+        "last_run_at": {
+          "type": "date"
+        },
+        "last_run_status": {
+          "type": "keyword"
+        },
+        "stats": {
+          "type": "object",
+          "enabled": true,
+          "properties": {
+            "batch_size": {
+              "type": "long"
+            },
+            "entries_projected": {
+              "type": "long"
+            },
+            "epics_processed": {
+              "type": "long"
+            },
+            "epics_projected": {
+              "type": "long"
+            },
+            "issue_count": {
+              "type": "long"
+            },
+            "issues_processed": {
+              "type": "long"
+            },
+            "items_processed": {
+              "type": "long"
+            },
+            "links_from_product_url": {
+              "type": "long"
+            },
+            "pages_fetched": {
+              "type": "long"
+            },
+            "project_items_linked": {
+              "type": "long"
+            },
+            "projects_processed": {
+              "type": "long"
+            },
+            "prs_processed": {
+              "type": "long"
+            },
+            "pull_requests_processed": {
+              "type": "long"
+            },
+            "rate_limit_remaining": {
+              "type": "long"
+            },
+            "views_indexed": {
+              "type": "long"
+            },
+            "project_id": {
+              "type": "keyword"
+            },
+            "project_title": {
+              "type": "keyword"
+            },
+            "sdh_label": {
+              "type": "keyword"
+            },
+            "search_query": {
+              "type": "keyword"
+            },
+            "team_name": {
+              "type": "keyword"
+            },
+            "team_slug": {
+              "type": "keyword"
+            },
+            "has_next_page": {
+              "type": "boolean"
+            },
+            "last_issue_updated_at": {
+              "type": "date"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

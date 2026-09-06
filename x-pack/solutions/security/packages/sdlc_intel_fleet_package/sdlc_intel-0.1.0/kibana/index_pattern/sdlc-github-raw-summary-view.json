@@ -1,0 +1,13 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "@timestamp",
+    "title": "github-intel-raw-project-pages"
+  },
+  "id": "sdlc-github-raw-summary-view",
+  "type": "index-pattern",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.0.0"
+}

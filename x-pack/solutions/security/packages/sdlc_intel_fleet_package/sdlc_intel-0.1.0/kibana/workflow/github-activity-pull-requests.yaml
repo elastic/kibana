@@ -1,0 +1,243 @@
+version: '1'
+name: SDLC GitHub activity pull requests (GraphQL)
+description: >
+  Tier-2 incremental workflow. Org-wide GitHub pull request search (activity.searchPullRequests)
+  for PRs updated since the last successful run watermark. Upserts github-intel-pull-requests and
+  maintains cursor + watermark in github-intel-sync-state.
+enabled: true
+tags:
+  - sdlc
+  - github
+  - activity
+  - ingest
+  - graphql
+  - pull-requests
+
+# BACKFILL: temporarily set pageSize/pagesPerRun/max-iterations high (e.g. 10/50/50) and initialWatermark to the desired horizon, run manually until caught up, then restore incremental values. At defaults (10x10) each run ingests ~100 items.
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  pullRequestsIndex: github-intel-pull-requests
+  syncSource: github-activity-pull-requests
+  entityType: pull_request
+  pageSize: 10
+  pagesPerRun: 10
+  initialWatermark: '2024-01-01T00:00:00Z'
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-github-activity-pull-requests
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30m
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      ignore_unavailable: true
+      allow_no_indices: true
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      cursor: '${{ steps.read_checkpoint.output.hits.hits[0]._source.cursor ?? "" }}'
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      pagesFetched: 0
+      lastIssueUpdatedAt: ''
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: build_search_query
+    type: data.set
+    with:
+      searchQuery: 'org:{{ consts.orgLogin }} is:pr sort:updated-asc updated:>{{ variables.watermark }}'
+
+  - name: paginate_pull_requests
+    type: while
+    condition: 'steps.fetch_pull_requests.output.pageInfo.hasNextPage : true'
+    max-iterations: 10
+    steps:
+      - name: fetch_pull_requests
+        type: github.runQueryTemplate
+        connector-id: '{{ consts.githubConnectorId }}'
+        with:
+          templateId: activity.searchPullRequests
+          variables:
+            query: '{{ variables.searchQuery }}'
+          first: '{{ consts.pageSize }}'
+          after: '{{ variables.cursor }}'
+
+      - name: backoff_if_needed
+        type: wait
+        if: '{{ steps.fetch_pull_requests.output.shouldBackoff }}'
+        with:
+          duration: 60s
+
+      - name: build_bulk_ops
+        type: data.set
+        with:
+          operations: |-
+            {% assign items = steps.fetch_pull_requests.output.data.search.nodes %}
+            [
+            {%- for node in items -%}
+              {
+                "id": "{{ node.id }}",
+                "@timestamp": "{{ execution.startedAt }}",
+                "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                "entity": {"type": "pull_request", "id": "{{ node.id }}", "url": "{{ node.url }}", "number": "{{ node.number }}"},
+                "org": {"login": "{{ consts.orgLogin }}"},
+                "repository": {"name": "{{ node.repository.name }}", "full_name": "{{ node.repository.nameWithOwner }}"},
+                "github": {"created_at": "{{ node.createdAt }}", "updated_at": "{{ node.updatedAt }}", "state": "{{ node.state }}"},
+                "people": {"author": "{{ node.author.login }}"},
+                "pull_request": {"title": {{ node.title | json }}, "draft": "{{ node.isDraft }}", "merged_at": "{{ node.mergedAt }}"},
+                "payload": {{ node | json }}
+              }  {% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+            ]
+
+      - name: bulk_index_page
+        type: elasticsearch.bulk
+        with:
+          index: '{{ consts.pullRequestsIndex }}'
+          id_field: id
+          operations: '${{ steps.build_bulk_ops.output.operations | json_parse }}'
+
+      - name: advance_cursor
+        type: data.set
+        with:
+          cursor: '{{ steps.fetch_pull_requests.output.pageInfo.endCursor }}'
+          pagesFetched: '{{ variables.pagesFetched | plus: 1 }}'
+
+      - name: resolve_stats_last_updated
+        type: data.set
+        with:
+          statsLastUpdatedAt: '${{ variables.lastIssueUpdatedAt }}'
+
+      - name: fallback_stats_last_updated
+        type: data.set
+        if: '${{ variables.lastIssueUpdatedAt == null or variables.lastIssueUpdatedAt == "" }}'
+        with:
+          statsLastUpdatedAt: '${{ variables.watermark }}'
+
+      - name: write_page_checkpoint
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity_type: '{{ consts.entityType }}'
+            org:
+              login: '{{ consts.orgLogin }}'
+            cursor: '{{ variables.cursor }}'
+            watermark: '{{ variables.watermark }}'
+            last_run_at: '{{ execution.startedAt }}'
+            last_run_status: in_progress
+            stats:
+              pages_fetched: '{{ variables.pagesFetched }}'
+              has_next_page: '{{ steps.fetch_pull_requests.output.pageInfo.hasNextPage }}'
+              search_query: '{{ variables.searchQuery }}'
+              last_issue_updated_at: '${{ variables.statsLastUpdatedAt }}'
+              rate_limit_remaining: '{{ steps.fetch_pull_requests.output.rateLimit.remaining }}'
+
+      - name: checkpoint_page
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity_type: '{{ consts.entityType }}'
+            org:
+              login: '{{ consts.orgLogin }}'
+            cursor: '{{ variables.cursor }}'
+            watermark: '{{ variables.watermark }}'
+            last_run_at: '{{ execution.startedAt }}'
+            last_run_status: in_progress
+            stats:
+              pages_fetched: '{{ variables.pagesFetched }}'
+              has_next_page: '{{ steps.fetch_pull_requests.output.pageInfo.hasNextPage }}'
+              search_query: '{{ variables.searchQuery }}'
+              last_issue_updated_at: '${{ variables.statsLastUpdatedAt }}'
+              rate_limit_remaining: '{{ steps.fetch_pull_requests.output.rateLimit.remaining }}'
+  - name: finalize_window
+    type: if
+    condition: 'variables.pagesFetched : {{ consts.pagesPerRun }}'
+    steps:
+      - name: slide_search_window
+        type: data.set
+        if: '${{ variables.lastIssueUpdatedAt != "" }}'
+        with:
+          watermark: '${{ variables.lastIssueUpdatedAt }}'
+          cursor: ''
+    else:
+      - name: mark_caught_up
+        type: data.set
+        with:
+          watermark: '${{ variables.runStartedAt }}'
+          cursor: ''
+
+  - name: resolve_final_stats_last_updated
+    type: data.set
+    with:
+      statsLastUpdatedAt: '${{ variables.lastIssueUpdatedAt }}'
+
+  - name: fallback_final_stats_last_updated
+    type: data.set
+    if: '${{ variables.lastIssueUpdatedAt == null or variables.lastIssueUpdatedAt == "" }}'
+    with:
+      statsLastUpdatedAt: '${{ variables.watermark }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        cursor: '{{ variables.cursor }}'
+        watermark: '{{ variables.watermark }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          pages_fetched: '{{ variables.pagesFetched }}'
+          has_next_page: '{{ steps.fetch_pull_requests.output.pageInfo.hasNextPage }}'
+          search_query: '{{ variables.searchQuery }}'
+          last_issue_updated_at: '${{ variables.statsLastUpdatedAt }}'
+          rate_limit_remaining: '{{ steps.fetch_pull_requests.output.rateLimit.remaining }}'

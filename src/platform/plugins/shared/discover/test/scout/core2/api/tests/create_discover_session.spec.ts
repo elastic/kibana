@@ -9,10 +9,9 @@
 
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { COMMON_HEADERS, DISCOVER_SESSION_API_BASE_PATH } from '../fixtures/constants';
 
-const createRequestBody = (title: string): DiscoverSessionApiDataInput => ({
+const createRequestBody = (title: string) => ({
   title,
   tags: ['tag-1', 'tag-2'],
   tabs: [

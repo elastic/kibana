@@ -1,0 +1,55 @@
+# Derives per-source last-write time so alerts can assert DOC MOVEMENT,
+# not just workflow exit status.
+#
+# WHY THIS EXISTS: sdlc-sync-health keys off execution status. Two real
+# bugs (org-members, project-items) reported "completed" while writing
+# ZERO docs - invisible to a status-only rule.
+#
+# WHY BATCH, NOT CONTINUOUS: a continuous transform with sync.time.field
+# only reprocesses buckets receiving NEW data, so a source that STOPS
+# writing is never revisited - structurally unable to detect a stall.
+# This is recomputed on a schedule instead (see docs/ingest_freshness.md).
+#
+# WHY EXPLICIT SOURCES: a bare sdlc-* wildcard sweeps in scratch and
+# DERIVED indices (e.g. semantic copies), inventing phantom sources.
+source:
+  index:
+    - "github-intel-*"
+    # Exclude DERIVED indices that carry a sync.source field but are not ingest
+    # sources. github-intel-lookup-teams is a lookup-mode projection whose
+    # sync.source is mapped as `text` (fielddata disabled) -> terms agg throws
+    # and the whole transform goes health:red while still reporting state:started.
+    - "-github-intel-lookup-*"
+    - "sdlc-epic-phases"
+    - "sdlc-team-dimension"
+    - "sdlc-release-calendar"
+    - "sdlc-pr-missing-related-issue"
+dest:
+  index: "vp-freshness-build"
+  aliases:
+    - alias: "vp-ingest-freshness"
+      move_on_creation: true
+pivot:
+  group_by:
+    source:
+      terms:
+        field: sync.source
+  aggregations:
+    doc_count_total:
+      value_count:
+        field: sync.source
+    last_write:
+      max:
+        field: "@timestamp"
+_meta:
+  managed: true
+  package:
+    name: sdlc_intel
+  # Fleet installs transforms as kibana_system by default, which has no read
+  # privilege on github-intel-* / sdlc-* (they are not Fleet-managed datastreams).
+  # The transform then installs DEFERRED and never starts: "indexed: 0" forever.
+  # false => Fleet mints an API key from the INSTALLING user and passes it as
+  # es-secondary-authorization, so the transform runs with privileges that can
+  # actually read the source indices. Deferred installs are resumable via
+  # POST /api/fleet/epm/packages/sdlc_intel/0.1.0/transforms/authorize
+  run_as_kibana_system: false

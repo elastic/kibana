@@ -17,11 +17,11 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
   createVisPanelResolver,
+  createCustomContentTemplateResolver,
   executeDashboardOperations,
   getErrorMessage,
   hasValidCreateMetadataOperations,

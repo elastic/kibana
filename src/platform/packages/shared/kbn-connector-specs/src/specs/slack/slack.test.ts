@@ -1654,4 +1654,125 @@ describe('Slack', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
+
+  describe('listUsersIngest', () => {
+    it('returns compact users and nextCursor', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          members: [
+            {
+              id: 'U1',
+              name: 'alice',
+              real_name: 'Alice',
+              profile: { email: 'alice@example.com' },
+            },
+            { id: 'U2', name: 'bot', is_bot: true },
+          ],
+          response_metadata: { next_cursor: 'cursor-1' },
+        },
+        headers: {},
+      });
+
+      const result = await Slack.actions.listUsersIngest.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.list', {
+        params: { limit: 200 },
+      });
+      expect(result).toEqual({
+        ok: true,
+        users: [
+          {
+            id: 'U1',
+            name: 'alice',
+            realName: 'Alice',
+            email: 'alice@example.com',
+            displayName: undefined,
+          },
+        ],
+        nextCursor: 'cursor-1',
+        hasMore: true,
+      });
+      expect(Slack.actions.listUsersIngest.isTool).toBe(false);
+    });
+  });
+
+  describe('getChannelHistory', () => {
+    it('returns messages and pagination metadata', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          messages: [{ ts: '123.456', user: 'U1', text: 'hello' }],
+          has_more: false,
+          response_metadata: {},
+        },
+        headers: {},
+      });
+
+      const result = await Slack.actions.getChannelHistory.handler(mockContext, {
+        channel: 'C123',
+        oldest: '100.000',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.history', {
+        params: {
+          channel: 'C123',
+          limit: 200,
+          inclusive: false,
+          oldest: '100.000',
+        },
+      });
+      expect(result).toEqual({
+        ok: true,
+        channel: 'C123',
+        messages: [{ ts: '123.456', user: 'U1', text: 'hello' }],
+        nextCursor: undefined,
+        hasMore: false,
+      });
+      expect(Slack.actions.getChannelHistory.isTool).toBe(false);
+    });
+  });
+
+  describe('getConversationReplies', () => {
+    it('returns thread replies and pagination metadata', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          messages: [
+            { ts: '123.456', user: 'U1', text: 'parent' },
+            { ts: '123.457', user: 'U2', text: 'reply' },
+          ],
+          has_more: false,
+          response_metadata: {},
+        },
+        headers: {},
+      });
+
+      const result = await Slack.actions.getConversationReplies.handler(mockContext, {
+        channel: 'C123',
+        ts: '123.456',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.replies', {
+        params: {
+          channel: 'C123',
+          ts: '123.456',
+          limit: 200,
+          inclusive: false,
+        },
+      });
+      expect(result).toEqual({
+        ok: true,
+        channel: 'C123',
+        threadTs: '123.456',
+        messages: [
+          { ts: '123.456', user: 'U1', text: 'parent' },
+          { ts: '123.457', user: 'U2', text: 'reply' },
+        ],
+        nextCursor: undefined,
+        hasMore: false,
+      });
+      expect(Slack.actions.getConversationReplies.isTool).toBe(false);
+    });
+  });
 });

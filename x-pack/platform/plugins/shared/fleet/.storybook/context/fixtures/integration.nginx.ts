@@ -57,6 +57,8 @@ export const item: GetInfoResponse['item'] = {
   ],
   assets: {
     kibana: {
+      workflow: [],
+      agent: [],
       alerting_rule_template: [],
       slo_template: [],
       dashboard: [
@@ -304,6 +306,7 @@ export const item: GetInfoResponse['item'] = {
       ml_model: [],
       knowledge_base: [],
       esql_view: [],
+      index_alias: [],
     },
   },
   policy_templates: [

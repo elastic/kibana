@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/search-types'
   - '@kbn/custom-content-common'
-  - '@kbn/custom-content-server'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'

@@ -40,7 +40,7 @@
     "KBN_DIR": "${containerWorkspaceFolder}"
   },
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:4": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest",
       "dockerDashComposeVersion": "latest"
     },

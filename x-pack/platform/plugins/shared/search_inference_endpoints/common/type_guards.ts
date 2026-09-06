@@ -14,7 +14,6 @@ import type {
   InferenceEndpointWithDisplayNameMetadata,
   InferenceEndpointWithDisplayCreatorMetadata,
   ReasoningEffortLevel,
-  RegionPolicyConflictAttributes,
 } from './types';
 
 const KIBANA_CONNECTOR_HEURISTIC = 'kibana-connector';
@@ -97,29 +96,3 @@ const REASONING_EFFORT_LEVELS: readonly string[] = [
 export function isReasoningEffortLevel(value: unknown): value is ReasoningEffortLevel {
   return typeof value === 'string' && REASONING_EFFORT_LEVELS.includes(value);
 }
-
-const isConflictRef = (value: unknown): value is string | string[] => {
-  if (typeof value === 'string') return true;
-  if (!Array.isArray(value)) return false;
-  return value.every((item) => typeof item === 'string');
-};
-
-const isOptionalConflictRef = (field: unknown): boolean => {
-  if (field === undefined) return true;
-  return isConflictRef(field);
-};
-
-export const isRegionPolicyConflictAttributes = (
-  value: unknown
-): value is RegionPolicyConflictAttributes => {
-  if (value === null || typeof value !== 'object') return false;
-  if (!('denied_endpoint_ids' in value)) return false;
-  if (!isConflictRef(value.denied_endpoint_ids)) return false;
-  if ('referencing_pipelines' in value && !isOptionalConflictRef(value.referencing_pipelines)) {
-    return false;
-  }
-  if ('referencing_indexes' in value && !isOptionalConflictRef(value.referencing_indexes)) {
-    return false;
-  }
-  return true;
-};

@@ -14,6 +14,8 @@ import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import { slackRelay } from './relay';
 import {
   SlackCreateConversationInputSchema,
+  SlackGetChannelHistoryInputSchema,
+  SlackGetConversationRepliesInputSchema,
   SlackGetConversationHistoryInputSchema,
   SlackGetConversationInfoInputSchema,
   SlackGetFileInfoInputSchema,
@@ -31,10 +33,13 @@ import {
   type SlackAssistantSearchContextResponse,
   type SlackAuthTestResponse,
   type SlackConversationsHistoryResponse,
+  type SlackConversationsRepliesResponse,
+  type SlackGetConversationRepliesInput,
   type SlackConversationsListParams,
   type SlackConversationsListResponse,
   type SlackCreateConversationInput,
   type SlackErrorFields,
+  type SlackGetChannelHistoryInput,
   type SlackFile,
   type SlackFilesInfoResponse,
   type SlackFilesListResponse,
@@ -50,6 +55,7 @@ import {
   type SlackResolveChannelIdInput,
   type SlackSearchMessagesInput,
   type SlackSendMessageInput,
+  type SlackUsersListResponse,
   type SlackWhoAmIInput,
 } from './types';
 
@@ -518,6 +524,179 @@ export const Slack: ConnectorSpec = {
           source: 'conversations.list',
           pagesFetched,
           nextCursor: cursor,
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/users.list
+    // Ingest-oriented variant of listUsers (isTool: false). Kept separate from the
+    // agent-facing listUsers action, matching the listFiles / listFilesIngest pattern.
+    listUsersIngest: {
+      isTool: false,
+      description:
+        'List workspace users with cursor pagination for ingest workflows. Returns compact user records and nextCursor.',
+      input: SlackListUsersInputSchema,
+      handler: async (ctx, input: SlackListUsersInput) => {
+        const typedInput = SlackListUsersInputSchema.parse(input);
+        const params: Record<string, string | number> = {
+          limit: typedInput.limit,
+        };
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
+
+        const response = await slackRequestWithRateLimitRetry<SlackUsersListResponse>({
+          ctx,
+          action: 'listUsersIngest',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${SLACK_API_BASE}/users.list`, {
+              params,
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'listUsersIngest',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        const members = (response.data.members ?? []).filter((member) => {
+          if (typedInput.includeDeleted) {
+            return true;
+          }
+          return !member.deleted && !member.is_bot;
+        });
+
+        return {
+          ok: true,
+          users: members.map((member) => ({
+            id: member.id,
+            name: member.name,
+            realName: member.real_name,
+            email: member.profile?.email,
+            displayName: member.profile?.display_name,
+          })),
+          nextCursor: response.data.response_metadata?.next_cursor,
+          hasMore: Boolean(response.data.response_metadata?.next_cursor),
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/conversations.history
+    getChannelHistory: {
+      isTool: false,
+      description:
+        'Fetch channel message history with cursor pagination for ingest workflows. Use oldest for incremental sync checkpoints.',
+      input: SlackGetChannelHistoryInputSchema,
+      handler: async (ctx, input: SlackGetChannelHistoryInput) => {
+        const typedInput = SlackGetChannelHistoryInputSchema.parse(input);
+        const params: Record<string, string | number | boolean> = {
+          channel: typedInput.channel,
+          limit: typedInput.limit,
+          inclusive: typedInput.inclusive,
+        };
+        if (typedInput.oldest) {
+          params.oldest = typedInput.oldest;
+        }
+        if (typedInput.latest) {
+          params.latest = typedInput.latest;
+        }
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
+
+        const response = await slackRequestWithRateLimitRetry<SlackConversationsHistoryResponse>({
+          ctx,
+          action: 'getChannelHistory',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${SLACK_API_BASE}/conversations.history`, {
+              params,
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'getChannelHistory',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        return {
+          ok: true,
+          channel: typedInput.channel,
+          messages: response.data.messages ?? [],
+          nextCursor: response.data.response_metadata?.next_cursor,
+          hasMore: Boolean(response.data.response_metadata?.next_cursor || response.data.has_more),
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/conversations.replies
+    getConversationReplies: {
+      isTool: false,
+      description:
+        'Fetch thread replies for a Slack message. Use after getChannelHistory to ingest thread context.',
+      input: SlackGetConversationRepliesInputSchema,
+      handler: async (ctx, input: SlackGetConversationRepliesInput) => {
+        const typedInput = SlackGetConversationRepliesInputSchema.parse(input);
+        const params: Record<string, string | number | boolean> = {
+          channel: typedInput.channel,
+          ts: typedInput.ts,
+          limit: typedInput.limit,
+          inclusive: typedInput.inclusive,
+        };
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
+
+        const response = await slackRequestWithRateLimitRetry<SlackConversationsRepliesResponse>({
+          ctx,
+          action: 'getConversationReplies',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${SLACK_API_BASE}/conversations.replies`, {
+              params,
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'getConversationReplies',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        return {
+          ok: true,
+          channel: typedInput.channel,
+          threadTs: typedInput.ts,
+          messages: response.data.messages ?? [],
+          nextCursor: response.data.response_metadata?.next_cursor,
+          hasMore: Boolean(response.data.response_metadata?.next_cursor || response.data.has_more),
         };
       },
     },

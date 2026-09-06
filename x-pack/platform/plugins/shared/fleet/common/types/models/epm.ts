@@ -76,6 +76,8 @@ export enum KibanaAssetType {
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
+  workflow = 'workflow',
+  agent = 'agent',
 }
 
 /*
@@ -98,6 +100,8 @@ export enum KibanaSavedObjectType {
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
   alert = 'alert',
+  workflow = 'workflow',
+  agent = 'agent',
 }
 
 export enum ElasticsearchAssetType {
@@ -111,6 +115,7 @@ export enum ElasticsearchAssetType {
   mlModel = 'ml_model',
   knowledgeBase = 'knowledge_base',
   esqlView = 'esql_view',
+  indexAlias = 'index_alias',
 }
 
 export type FleetElasticsearchAssetType = Exclude<
@@ -783,13 +788,17 @@ export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
   INSTALL_PRECHECK = 'install_precheck',
   INSTALL_ESQL_VIEWS = 'install_esql_views',
+  INSTALL_INDEX_ALIASES = 'install_index_aliases',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
   CREATE_ALERTING_ASSETS = 'create_alerting_assets',
+  CREATE_AGENT_ASSETS = 'create_agent_assets',
+  CREATE_WORKFLOW_ASSETS = 'create_workflow_assets',
   INSTALL_ML_MODEL = 'install_ml_model',
   INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
   REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',
   UPDATE_CURRENT_WRITE_INDICES = 'update_current_write_indices',
+  CREATE_INDICES = 'create_indices',
   INSTALL_TRANSFORMS = 'install_transforms',
   DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',

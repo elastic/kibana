@@ -22,8 +22,6 @@ import {
   CONFIG_MODELS,
   CONFIG_DATASETS,
   CONFIG_EVALUATORS,
-  CONFIG_JUDGE_MODEL,
-  CONFIG_JUDGE_MODELS,
   CONFIG_REPETITIONS,
   CONFIG_CONCURRENCY,
 } from './translations';
@@ -48,20 +46,6 @@ export const LaunchedConfigSummary: React.FC<{ config: LaunchedExperimentConfig 
   }
   if (config.evaluator_names.length > 0) {
     items.push({ title: CONFIG_EVALUATORS, description: config.evaluator_names.join(', ') });
-  }
-  // Evaluators can each judge with their own connector, so name them individually once
-  // they disagree; a shared judge reads better as a single value.
-  const judges = config.evaluator_judges ?? [];
-  const distinctJudgeLabels = Array.from(new Set(judges.map(({ judge_label: label }) => label)));
-  if (distinctJudgeLabels.length === 1) {
-    items.push({ title: CONFIG_JUDGE_MODEL, description: distinctJudgeLabels[0] });
-  } else if (distinctJudgeLabels.length > 1) {
-    items.push({
-      title: CONFIG_JUDGE_MODELS,
-      description: judges
-        .map(({ evaluator_name: name, judge_label: label }) => `${name}: ${label}`)
-        .join(', '),
-    });
   }
   if (typeof config.repetitions === 'number') {
     items.push({ title: CONFIG_REPETITIONS, description: String(config.repetitions) });

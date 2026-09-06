@@ -1,0 +1,10 @@
+{
+  "attributes": {
+    "color": "#006BB4",
+    "description": "SDLC Intelligence dashboards",
+    "name": "SDLC Intelligence"
+  },
+  "id": "sdlc-intel-tag",
+  "references": [],
+  "type": "tag"
+}

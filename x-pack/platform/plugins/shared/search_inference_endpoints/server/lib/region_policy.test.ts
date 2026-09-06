@@ -48,12 +48,11 @@ describe('region_policy lib', () => {
   });
 
   describe('putRegionPolicy', () => {
-    const body = {
-      allowed_regions: [{ csp: 'aws', region: 'eu-west-1' }],
-      fallback_region: { csp: 'aws', region: 'us-east-1' },
-    };
-
     it('calls PUT /_inference/_region_policy with the provided body', async () => {
+      const body = {
+        allowed_regions: [{ csp: 'aws', region: 'eu-west-1' }],
+        fallback_region: { csp: 'aws', region: 'us-east-1' },
+      };
       const response = {
         region_policy: body,
         created_at: '2026-01-10T11:23:00Z',
@@ -69,37 +68,6 @@ describe('region_policy lib', () => {
         body: { region_policy: body },
       });
       expect(result).toEqual(response);
-    });
-
-    it('adds force=true on the ES querystring only when force is true', async () => {
-      mockClient.transport.request.mockResolvedValue({
-        region_policy: body,
-        created_at: '2026-01-10T11:23:00Z',
-      });
-
-      await putRegionPolicy(mockClient, body, true);
-
-      expect(mockClient.transport.request).toHaveBeenCalledWith({
-        method: 'PUT',
-        path: '/_inference/_region_policy',
-        body: { region_policy: body },
-        querystring: { force: true },
-      });
-    });
-
-    it('omits the querystring when force is false', async () => {
-      mockClient.transport.request.mockResolvedValue({
-        region_policy: body,
-        created_at: '2026-01-10T11:23:00Z',
-      });
-
-      await putRegionPolicy(mockClient, body, false);
-
-      expect(mockClient.transport.request).toHaveBeenCalledWith({
-        method: 'PUT',
-        path: '/_inference/_region_policy',
-        body: { region_policy: body },
-      });
     });
 
     it('propagates errors from the ES client', async () => {

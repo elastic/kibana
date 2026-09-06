@@ -1,0 +1,37 @@
+name: sdlc-project-items-enriched-view
+query: |
+  FROM github-intel-project-items
+  | EVAL
+      org_login = org.login,
+      project_number = project.number,
+      project_title = project.title,
+      ticket_type = CASE(hierarchy.ticket_type == "", null, hierarchy.ticket_type),
+      epic = CASE(hierarchy.epic == "", null, hierarchy.epic),
+      parent_issue = CASE(hierarchy.parent_issue == "", null, hierarchy.parent_issue),
+      issue_number = entity.number,
+      issue_url = entity.url,
+      repo = COALESCE(repository.full_name, payload.content.repository.nameWithOwner),
+      issue_title = payload.content.title,
+      project_team = CASE(team_attribution.engineering_team == "", null, team_attribution.engineering_team),
+      product_initiative = CASE(roadmap.initiative == "", null, roadmap.initiative),
+      roadmap_stage = CASE(roadmap.stage == "", null, roadmap.stage),
+      release_milestone = CASE(roadmap.release_milestone == "", null, roadmap.release_milestone)
+  | EVAL
+      is_epic = ticket_type == "Epic"
+  | KEEP
+      @timestamp,
+      org_login,
+      project_number,
+      project_title,
+      ticket_type,
+      epic,
+      parent_issue,
+      project_team,
+      product_initiative,
+      roadmap_stage,
+      release_milestone,
+      issue_number,
+      issue_title,
+      issue_url,
+      repo,
+      is_epic

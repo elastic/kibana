@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType, internalTools, createBadRequestError } from '@kbn/agent-builder-common';
 import type { ConversationTemplate, MetadataFieldValue } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 
 // Bound string and array sizes to prevent unbounded-input DoS.
@@ -59,7 +59,7 @@ export const createSetConversationMetadataTool = ({
 }: {
   updateConversationMetadata: (updates: Record<string, MetadataFieldValue>) => Promise<unknown>;
   template: ConversationTemplate;
-}): InternalBuiltinToolDefinition<typeof setConversationMetadataSchema> => ({
+}): BuiltinToolDefinition<typeof setConversationMetadataSchema> => ({
   id: internalTools.setConversationMetadata,
   type: ToolType.builtin,
   description: toolDescription,

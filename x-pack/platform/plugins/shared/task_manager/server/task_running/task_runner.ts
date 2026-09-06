@@ -51,7 +51,6 @@ import type {
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
-import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
 import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
@@ -109,7 +108,6 @@ export interface Updatable {
     options: { validate: boolean; doc: ConcreteTaskInstance }
   ): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
-  get(id: string): Promise<ConcreteTaskInstance>;
 }
 
 type Opts = {
@@ -733,7 +731,6 @@ export class TaskManagerRunner implements TaskRunner {
       const label = `${this.taskType}:${this.instance.task.id}`;
 
       let shouldUpdateTask: boolean = false;
-      const originalTask = this.instance.task;
       let partialTask: PartialConcreteTaskInstance = {
         id: this.instance.task.id,
         version: this.instance.task.version,
@@ -797,18 +794,10 @@ export class TaskManagerRunner implements TaskRunner {
             error.error?.type === 'version_conflict_engine_exception';
 
           if ((this.isExpired || this.isCancelled) && isVersionConflict) {
-            this.logger.warn(
+            this.logger.debug(
               `Skipping the update of expired/cancelled task ${label} because it was reclaimed by another Kibana while running.`,
               { tags: [this.id, this.taskType] }
             );
-          } else if (isVersionConflict) {
-            await resolveTaskDocumentConflicts({
-              taskId: this.id,
-              partialTask,
-              originalTask,
-              bufferedTaskStore: this.bufferedTaskStore,
-              logger: this.logger,
-            });
           } else {
             throw error;
           }

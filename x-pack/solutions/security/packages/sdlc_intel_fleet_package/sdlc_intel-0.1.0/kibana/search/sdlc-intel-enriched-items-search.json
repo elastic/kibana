@@ -1,0 +1,29 @@
+{
+  "attributes": {
+    "columns": [
+      "project_number",
+      "ticket_type",
+      "project_team",
+      "roadmap_stage",
+      "issue_title",
+      "is_epic"
+    ],
+    "description": "Project items from github-intel-project-items with flattened hierarchy/roadmap/team fields",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"ticket_type:* or project_team:* or roadmap_stage:*\"},\"version\":true}"
+    },
+    "sort": [["project_number", "asc"]],
+    "title": "SDLC enriched project items",
+    "version": 1
+  },
+  "id": "sdlc-intel-enriched-items-search",
+  "references": [
+    {
+      "id": "sdlc-project-items-enriched-view",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

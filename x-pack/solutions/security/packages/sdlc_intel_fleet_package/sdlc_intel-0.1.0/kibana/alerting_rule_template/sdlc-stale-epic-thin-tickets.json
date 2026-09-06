@@ -1,0 +1,29 @@
+{
+  "id": "sdlc-stale-epic-thin-tickets",
+  "type": "alerting_rule_template",
+  "attributes": {
+    "name": "SDLC epics with fewer than 3 child tickets",
+    "tags": ["SDLC Intelligence", "planning", "coverage"],
+    "ruleTypeId": ".es-query",
+    "schedule": {
+      "interval": "24h"
+    },
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM sdlc-epic-phases | WHERE phases.p4_tickets.total < 3 | STATS thin_epics = COUNT(*)"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 7,
+      "timeWindowUnit": "d",
+      "size": 0,
+      "thresholdComparator": ">",
+      "threshold": [0]
+    },
+    "alertDelay": {
+      "active": 1
+    }
+  },
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.1.0"
+}

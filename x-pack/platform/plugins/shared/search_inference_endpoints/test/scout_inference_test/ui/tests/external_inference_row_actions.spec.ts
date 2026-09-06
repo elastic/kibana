@@ -26,13 +26,13 @@ test.describe(
       await unmockInferenceEndpoints(page);
     });
 
-    test('opens the edit inference flyout from the edit endpoint row action', async ({
+    test('opens the edit inference flyout from the view endpoint row action', async ({
       pageObjects,
     }) => {
       const { externalInference } = pageObjects;
 
       await externalInference.openRowActionsFor('openai-chat-completion-01');
-      await externalInference.editEndpointAction.click();
+      await externalInference.viewEndpointAction.click();
       await expect(externalInference.inferenceFlyout).toBeVisible();
     });
 

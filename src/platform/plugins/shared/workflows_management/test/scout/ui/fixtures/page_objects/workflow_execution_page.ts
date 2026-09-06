@@ -186,11 +186,6 @@ export class WorkflowExecutionPage {
     await workflowStepExecutionDetails
       .locator(`button[data-test-subj="workflowStepTab_${type}"]`)
       .click();
-    // The view-mode toggle lives inside the data viewer, which mounts only once the
-    // step's execution data has finished loading; wait for it before clicking.
-    await workflowStepExecutionDetails
-      .locator('[data-test-subj="workflowJsonDataViewer"]')
-      .waitFor({ state: 'visible' });
     await workflowStepExecutionDetails
       .locator('button[data-test-subj="workflowViewMode_json"]')
       .click();

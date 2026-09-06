@@ -28,7 +28,6 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { regionKey, isPolicyMode } from '../../utils/eis_utils';
 import { useManageRegionsState } from './use_manage_regions_state';
 import { ConfirmRegionChangeModal } from './confirm_region_change_modal';
-import { ConfirmRegionSelectionModal } from './confirm_region_selection_modal';
 import { ConfirmDeleteRegionPolicyModal } from './confirm_delete_region_policy_modal';
 import { GeoTabContent } from './geo_tab_content';
 import { RegionsTabContent } from './regions_tab_content';
@@ -55,8 +54,6 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     isCallOutDismissed,
     showConfirmation,
     showDeleteConfirmation,
-    conflictArtifacts,
-    isRedesignEnabled,
     useCustomPolicy,
     setActiveTab,
     setUseCustomPolicy,
@@ -111,8 +108,6 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     : handleCancelConfirmation;
   const showTabContent = useCustomPolicy || isLoading;
   const showCallOut = useCustomPolicy && !isCallOutDismissed;
-  const showRedesignConfirmation = showConfirmation && isRedesignEnabled;
-  const showLegacyConfirmation = showConfirmation && !isRedesignEnabled;
 
   return (
     <>
@@ -225,18 +220,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         </EuiModalFooter>
       </EuiModal>
 
-      {showRedesignConfirmation && (
-        <ConfirmRegionSelectionModal
-          mode={activeTab}
-          selectedRegions={filteredRegions}
-          selectedGeos={[...geoTab.checkedGeos]}
-          conflictArtifacts={conflictArtifacts}
-          onConfirm={handleConfirmSave}
-          onCancel={handleCancelConfirmation}
-          isSaving={isSaving}
-        />
-      )}
-      {showLegacyConfirmation && (
+      {showConfirmation && (
         <ConfirmRegionChangeModal
           mode={activeTab}
           selectedRegions={filteredRegions}

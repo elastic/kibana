@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { listApisForTarget, targetSchema } from '../../api';
 import type { ApiSummary } from '../../api';
@@ -33,7 +33,7 @@ const discoverSchema = z.object({
     ),
 });
 
-export const createDiscoverApisTool = (): InternalBuiltinToolDefinition<typeof discoverSchema> => {
+export const createDiscoverApisTool = (): BuiltinToolDefinition<typeof discoverSchema> => {
   return {
     id: internalTools.discoverApis,
     type: ToolType.builtin,

@@ -115,35 +115,6 @@ describe('Region Policy Routes', () => {
       );
     });
 
-    it('forwards force=true to Elasticsearch as a querystring', async () => {
-      mockEsClient.transport.request.mockResolvedValue(mockPolicy);
-
-      const requestBody = {
-        allowed_regions: [{ csp: 'aws', region: 'us-east-1' }],
-      };
-      await mockRouter.callRoute({ body: requestBody, query: { force: true } });
-
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'PUT',
-        path: '/_inference/_region_policy',
-        body: { region_policy: requestBody },
-        querystring: { force: true },
-      });
-    });
-
-    it('accepts an omitted force query parameter', () => {
-      mockRouter.shouldValidate({
-        body: { allowed_geos: ['eu'] },
-      });
-    });
-
-    it('rejects a non-boolean force query parameter', () => {
-      mockRouter.shouldThrow({
-        body: { allowed_geos: ['eu'] },
-        query: { force: 'yes' },
-      });
-    });
-
     it('validates that allowed_regions is an array of {csp, region} objects', () => {
       mockRouter.shouldThrow({ body: { allowed_regions: ['not-an-object'] } });
     });

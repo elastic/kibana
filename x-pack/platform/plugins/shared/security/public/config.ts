@@ -15,5 +15,4 @@ export interface ConfigType {
   };
   roleManagementEnabled: boolean | undefined;
   uiam?: { enabled: boolean };
-  serviceAccounts?: { enabled: boolean };
 }

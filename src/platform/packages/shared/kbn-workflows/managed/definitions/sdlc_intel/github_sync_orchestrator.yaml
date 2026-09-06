@@ -1,0 +1,103 @@
+version: "1"
+name: "SDLC GitHub sync orchestrator"
+enabled: true
+description: "Runs the SDLC GitHub ingest pipeline every 4 hours for all org Project V2 boards (with optional filters). Supports resume after partial runs."
+tags:
+  - security
+  - sdlc
+  - github-intel
+settings:
+  timeout: "4h"
+consts:
+  org_login: elastic
+  # GitHub (.github) connector ID or display name from Stack Management.
+  github_connector_id: "test-ingest"
+  # Optional filters. Leave project_numbers empty to sync every org Project V2 board.
+  project_numbers: []
+  exclude_project_numbers: []
+  title_includes: []
+  title_excludes: []
+triggers:
+  - type: scheduled
+    with:
+      every: 4h
+  - type: manual
+    inputs:
+      - name: skipGithubProjectsSync
+        type: boolean
+        default: false
+        description: "Skip project ingest and run org catalog + epic phases only."
+      - name: skipGithubOrgCatalogSync
+        type: boolean
+        default: false
+        description: "Skip teams/repos ingest and run epic phases from existing github-intel-* data."
+      - name: skipSyncedProjects
+        type: boolean
+        default: false
+        description: "When syncing projects, skip boards already present in github-intel-projects or marked completed in github-intel-sync-state."
+steps:
+  - name: init
+    type: data.set
+    with:
+      skipGithubProjectsSync: "${{ inputs.skipGithubProjectsSync | default: false }}"
+      skipGithubOrgCatalogSync: "${{ inputs.skipGithubOrgCatalogSync | default: false }}"
+      skipSyncedProjects: "${{ inputs.skipSyncedProjects | default: false }}"
+
+  - name: sync_github_projects
+    type: if
+    condition: "${{ variables.skipGithubProjectsSync == false }}"
+    steps:
+      - name: list_github_projects
+        type: sdlc.listGithubProjectsToSync
+        with:
+          orgLogin: "{{ consts.org_login }}"
+          projectNumbers: []
+          excludeProjectNumbers: []
+          titleIncludes: []
+          titleExcludes: []
+          githubConnectorId: "{{ consts.github_connector_id }}"
+          skipSyncedProjects: "${{ variables.skipSyncedProjects }}"
+
+      - name: sync_github_projects_loop
+        type: foreach
+        foreach: "${{ steps.list_github_projects.output.projectNumbers }}"
+        iteration-on-failure:
+          continue: true
+        iteration-timeout: "45m"
+        steps:
+          - name: sync_github_project
+            type: sdlc.syncGithubProjects
+            with:
+              orgLogin: "{{ consts.org_login }}"
+              projectNumbers: ["${{ foreach.item }}"]
+              githubConnectorId: "{{ consts.github_connector_id }}"
+              skipSyncedProjects: false
+              resumePartialSync: true
+
+  - name: sync_github_org_catalog
+    type: if
+    condition: "${{ variables.skipGithubOrgCatalogSync == false }}"
+    steps:
+      - name: sync_org_catalog
+        type: sdlc.syncGithubOrgCatalog
+        on-failure:
+          continue: true
+        with:
+          orgLogin: "{{ consts.org_login }}"
+          githubConnectorId: "{{ consts.github_connector_id }}"
+
+  - name: build_relationships
+    type: sdlc.buildRelationships
+    with:
+      projectNumbers: []
+      includeOrgCatalog: true
+
+  - name: build_epic_phases
+    type: sdlc.buildEpicPhases
+    with:
+      projectNumbers: []
+
+  - name: log_complete
+    type: console
+    with:
+      message: "SDLC GitHub sync complete. skipProjectsSync={{ variables.skipGithubProjectsSync }}, skipOrgCatalogSync={{ variables.skipGithubOrgCatalogSync }}, orgCatalog={{ steps.sync_org_catalog.output.processed }}, relationships={{ steps.build_relationships.output.processed }}, epic phases={{ steps.build_epic_phases.output.processed }}"

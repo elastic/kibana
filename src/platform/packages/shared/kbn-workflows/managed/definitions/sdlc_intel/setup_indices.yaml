@@ -1,0 +1,25 @@
+version: "1"
+name: "SDLC setup indices"
+enabled: true
+description: "One-time admin setup: creates github-intel-* and sdlc-* indices and seeds team-dimension reference data."
+tags:
+  - security
+  - sdlc
+settings:
+  timeout: "30m"
+triggers:
+  - type: manual
+steps:
+  - name: setup_indices
+    type: sdlc.setupIndices
+
+  - name: seed_reference_data
+    type: sdlc.seedReferenceData
+
+  - name: seed_workflows_executive_demo
+    type: sdlc.seedWorkflowsExecutiveDemo
+
+  - name: log_complete
+    type: console
+    with:
+      message: "SDLC indices ready. created={{ steps.setup_indices.output.created }}, team dimension seeded={{ steps.seed_reference_data.output.updated }}, workflows demo seeded={{ steps.seed_workflows_executive_demo.output.updated }}"

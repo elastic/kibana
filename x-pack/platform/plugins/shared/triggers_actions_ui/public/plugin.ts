@@ -359,7 +359,7 @@ export class Plugin
           return renderRulesPageApp({
             ...coreStart,
             actions: plugins.actions,
-            security: { ...coreStart.security, ...pluginsStart.security },
+            security: pluginsStart.security,
             cloud: plugins.cloud,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
@@ -465,7 +465,7 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
-            security: { ...coreStart.security, ...pluginsStart.security },
+            security: pluginsStart.security,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             dataViewEditor: pluginsStart.dataViewEditor,

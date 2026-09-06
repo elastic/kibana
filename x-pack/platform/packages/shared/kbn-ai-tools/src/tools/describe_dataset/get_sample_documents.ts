@@ -56,7 +56,7 @@ interface GetSampleDocumentsEsqlParams {
    * internal date-range filter.
    */
   dslFilter?: QueryDslQueryContainer | QueryDslQueryContainer[];
-  abortSignal: AbortSignal;
+  requestTimeout: number;
 }
 
 interface GetSampleDocumentsEsqlResponse {
@@ -166,7 +166,7 @@ export async function getSampleDocumentsEsql({
   whereCondition,
   unmappedFields,
   dslFilter,
-  abortSignal,
+  requestTimeout,
 }: GetSampleDocumentsEsqlParams): Promise<GetSampleDocumentsEsqlResponse> {
   const indices = Array.isArray(index) ? index : [index];
   const extraDslClauses = dslFilter ? castArray(dslFilter) : [];
@@ -174,8 +174,12 @@ export async function getSampleDocumentsEsql({
     bool: { filter: [...dateRangeQuery(start, end), ...extraDslClauses] },
   };
 
+  // One deadline for every request this call makes (count + sample can be two
+  // sequential requests), so `requestTimeout` bounds the whole call rather than
+  // resetting on each individual request.
+  const signal = AbortSignal.timeout(requestTimeout);
   const runQuery = (params: { query: string; filter: typeof filter; drop_null_columns: true }) =>
-    esClient.esql.query(params, { signal: abortSignal }) as unknown as Promise<ESQLSearchResponse>;
+    esClient.esql.query(params, { signal }) as unknown as Promise<ESQLSearchResponse>;
 
   const whereExpression = buildWhereExpression({ kql, whereCondition });
   const printQuery = (query: ComposerQuery) => {

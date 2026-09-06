@@ -13,6 +13,7 @@ import type {
 import type { KibanaRequest } from '@kbn/core/server';
 
 import { appContextService } from '../../services';
+import { createFleetInternalRequest } from '../../services/security';
 
 import { type BulkUpgradeTaskParams, _runBulkUpgradeTask } from './run_bulk_upgrade';
 import { type BulkUninstallTaskParams, _runBulkUninstallTask } from './run_bulk_uninstall';
@@ -63,7 +64,7 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
                   signal,
                   logger,
                   taskParams: taskParams as BulkUpgradeTaskParams,
-                  request: fakeRequest!,
+                  request: fakeRequest ?? createFleetInternalRequest(),
                 });
               } else if (taskParams.type === 'bulk_rollback') {
                 results = await _runBulkRollbackTask({

@@ -30,21 +30,42 @@ export interface RetryDelayConfig {
   'max-delay'?: string;
   /** Add jitter to delay. Default: false. */
   jitter?: boolean;
+  /** Honour a server-supplied Retry-After / rate-limit reset over the computed delay. Default: false. */
+  'respect-retry-after'?: boolean;
 }
 
 const DEFAULT_EXPONENTIAL_MULTIPLIER = 2;
 const DEFAULT_EXPONENTIAL_INITIAL_DELAY = '1s';
+
+// Hard ceiling for a server-supplied retry hint when no user-configured max-delay is present.
+// This prevents a hostile or misconfigured server from parking a workflow indefinitely.
+// Value chosen to match the common one-hour default used by other Kibana retry policies.
+const DEFAULT_RETRY_AFTER_MAX_MS = 60 * 60 * 1000;
 
 /**
  * Computes the delay in milliseconds before the next retry attempt.
  *
  * @param config - Retry delay configuration (strategy, delay, multiplier, max-delay, jitter).
  * @param attempt - Zero-based index of the attempt that just failed (0 = first failure, 1 = second failure, etc.).
+ * @param retryAfterMs - Optional server-supplied hint in milliseconds. When config has
+ *   `respect-retry-after: true` and this value is provided, it wins over the computed delay.
  * @returns Delay in milliseconds. Returns 0 when no delay is configured or delay would be 0.
  */
-export function computeRetryDelayMs(config: RetryDelayConfig, attempt: number): number {
+export function computeRetryDelayMs(
+  config: RetryDelayConfig,
+  attempt: number,
+  retryAfterMs?: number
+): number {
   const strategy = config.strategy ?? 'fixed';
   const hasDelay = config.delay != null && config.delay.length > 0;
+
+  // Server hint takes precedence when opted in, but is still clamped.
+  if (config['respect-retry-after'] && retryAfterMs != null) {
+    const maxMs = config['max-delay']
+      ? parseDurationMemoized(config['max-delay'])
+      : DEFAULT_RETRY_AFTER_MAX_MS;
+    return Math.max(0, Math.min(retryAfterMs, maxMs));
+  }
 
   if (strategy === 'fixed') {
     if (!hasDelay || !config.delay) {

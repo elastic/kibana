@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { getSampleDocumentsEsql, DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '@kbn/ai-tools';
 import { esql } from '@elastic/esql';
 import { getStreamSamplingSource } from '@kbn/streams-schema';
 import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/significant-events-schema';
@@ -63,7 +63,7 @@ export const errorLogsGenerator: ComputedFeatureGenerator = {
 Use the \`properties.samples\` array to see actual error log entries.
 This is useful for understanding error patterns, identifying recurring issues, and diagnosing problems in the system.`,
 
-  generate: async ({ stream, start, end, esClient, signal }) => {
+  generate: async ({ stream, start, end, esClient }) => {
     const { hits } = await getSampleDocumentsEsql({
       esClient,
       index: getStreamSamplingSource(stream),
@@ -71,7 +71,7 @@ This is useful for understanding error patterns, identifying recurring issues, a
       end,
       sampleSize: SAMPLE_SIZE,
       whereCondition: ERROR_WHERE_CONDITION,
-      abortSignal: signal,
+      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
     });
 
     return {

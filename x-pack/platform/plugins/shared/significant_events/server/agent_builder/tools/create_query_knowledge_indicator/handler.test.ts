@@ -13,7 +13,6 @@ jest.mock('uuid', () => ({
 }));
 
 jest.mock('../../../lib/significant_events/validate_esql_query', () => ({
-  ...jest.requireActual('../../../lib/significant_events/validate_esql_query'),
   validateEsqlQueryForStreamOrThrow: jest.fn(),
 }));
 
@@ -88,27 +87,6 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
         id: 'generated-query-id',
       })
     );
-  });
-
-  it('rejects an over-broad multi-word full-text predicate', async () => {
-    const kiClient = {
-      upsertQuery: jest.fn().mockResolvedValue(undefined),
-    };
-
-    await expect(
-      createQueryKnowledgeIndicatorToolHandler({
-        kiClient: kiClient as never,
-        definition: definition as never,
-        queryInput: {
-          title: 'Over-broad',
-          description: 'ORed terms',
-          esql: { query: 'FROM logs.test, logs.test.* | WHERE message : "request failed"' },
-        },
-        logger,
-      })
-    ).rejects.toThrow('MATCH_PHRASE');
-
-    expect(kiClient.upsertQuery).not.toHaveBeenCalled();
   });
 
   it('throws when query upsert fails', async () => {

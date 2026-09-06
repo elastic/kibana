@@ -98,6 +98,12 @@ export const AssetTitleMap: Record<
   osquery_saved_query: i18n.translate('xpack.fleet.epm.assetTitles.osquerySavedQuery', {
     defaultMessage: 'Osquery saved queries',
   }),
+  workflow: i18n.translate('xpack.fleet.epm.assetTitles.workflows', {
+    defaultMessage: 'Workflows',
+  }),
+  agent: i18n.translate('xpack.fleet.epm.assetTitles.agents', {
+    defaultMessage: 'Agents',
+  }),
 
   // ES
   ilm_policy: i18n.translate('xpack.fleet.epm.assetTitles.ilmPolicies', {
@@ -135,6 +141,9 @@ export const AssetTitleMap: Record<
   }),
   esql_view: i18n.translate('xpack.fleet.epm.assetTitles.esqlViews', {
     defaultMessage: 'ES|QL views',
+  }),
+  index_alias: i18n.translate('xpack.fleet.epm.assetTitles.indexAliases', {
+    defaultMessage: 'Index aliases',
   }),
 };
 

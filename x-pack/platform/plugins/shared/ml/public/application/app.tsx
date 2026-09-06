@@ -97,7 +97,7 @@ export const App: FC<AppProps> = ({
       observabilityAIAssistant: deps.observabilityAIAssistant,
       savedObjectsManagement: deps.savedObjectsManagement,
       savedSearch: deps.savedSearch,
-      security: { ...coreStart.security, ...deps.security },
+      security: deps.security,
       share: deps.share,
       storage: localStorage,
       triggersActionsUi: deps.triggersActionsUi,

@@ -122,7 +122,17 @@ export const processStructuredAnswerResponse = (
   response: unknown
 ): StructuredAnswerAction | AgentErrorAction => {
   try {
-    if (response && typeof response === 'object') {
+    if (response === null || response === undefined) {
+      return errorAction(
+        createAgentExecutionError(
+          'agent returned an invalid structured response',
+          AgentExecutionErrorCode.emptyResponse,
+          {}
+        )
+      );
+    }
+
+    if (typeof response === 'object') {
       // A structured response with no fields (e.g. the model emitted an empty
       // tool call `{}`) is not a usable answer. Treat it as an empty response,
       // mirroring processResearchResponse above, so the answer agent retries
@@ -136,15 +146,9 @@ export const processStructuredAnswerResponse = (
           )
         );
       }
-      return structuredAnswerAction(response);
     }
-    return errorAction(
-      createAgentExecutionError(
-        'agent returned an invalid structured response',
-        AgentExecutionErrorCode.emptyResponse,
-        {}
-      )
-    );
+
+    return structuredAnswerAction(response);
   } catch (error) {
     return errorAction(
       createAgentExecutionError(

@@ -32,7 +32,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
 import { useEvaluationExperiments } from '../../hooks/use_evals_api';
 import { NewExperimentFlyout } from '../../components/new_experiment_flyout/new_experiment_flyout';
-import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import { resolvePrUrl } from '../../utils/pr_url';
 import { CopyableDetail } from './copyable_detail';
 import { LinkDetail } from './link_detail';
@@ -69,7 +68,7 @@ const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({
       button={
         <EuiToolTip content={i18n.ROW_DETAILS_ARIA} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="ellipsis"
+            iconType="boxesVertical"
             color="text"
             aria-label={i18n.ROW_DETAILS_ARIA}
             onClick={(event: React.MouseEvent) => {
@@ -195,7 +194,7 @@ export const ExperimentsListPage: React.FC = () => {
         name: i18n.COLUMN_NAME,
         sortable: true,
         truncateText: true,
-        width: '28%',
+        width: '200px',
         render: (_name: string | null | undefined, item: EvaluationExperimentSummary) => {
           const isSuiteRun = !!item.suite_id;
           const displayName = isSuiteRun
@@ -226,7 +225,7 @@ export const ExperimentsListPage: React.FC = () => {
       {
         field: 'experiment_count',
         name: i18n.COLUMN_EXPERIMENTS,
-        width: '11%',
+        width: '150px',
         render: (count: number | undefined) => {
           const c = count ?? 1;
           return (
@@ -240,23 +239,19 @@ export const ExperimentsListPage: React.FC = () => {
         field: 'timestamp',
         name: i18n.COLUMN_TIMESTAMP,
         sortable: true,
-        width: '15%',
         render: (timestamp: string) => (timestamp ? new Date(timestamp).toLocaleString() : '-'),
       },
       {
         field: 'task_model',
         name: i18n.COLUMN_TASK_MODEL,
-        width: '19%',
         render: (model: EvaluationExperimentSummary['task_model']) =>
           model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
       },
       {
-        field: 'evaluator_models',
+        field: 'evaluator_model',
         name: i18n.COLUMN_EVALUATOR_MODEL,
-        width: '19%',
-        render: (models: EvaluationExperimentSummary['evaluator_models']) => (
-          <EvaluatorModelsBadge models={models} />
-        ),
+        render: (model: EvaluationExperimentSummary['evaluator_model']) =>
+          model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-',
       },
       {
         field: 'total_repetitions',

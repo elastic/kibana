@@ -1,0 +1,28 @@
+name: sdlc_intel
+title: SDLC Intelligence
+version: 0.1.0
+description: >
+  SDLC visibility integration — ingests GitHub PR/commit data via workflow ETL,
+  runs Agent Builder analysis agents, and surfaces coverage/bottleneck insights.
+categories:
+  - observability
+  - devops
+conditions:
+  kibana:
+    version: "^9.6.0"
+policy_templates:
+  - name: sdlc_intel
+    title: SDLC Intelligence
+    description: Kibana-only integration — no Elastic Agent required
+    inputs: []
+    deployment_modes:
+      default: agentless
+vars:
+  - name: github_connector_id
+    type: text
+    required: true
+    description: Connector ID for the GitHub inference connector
+  - name: analysis_window_days
+    type: text
+    default: "30"
+    description: Number of days to look back for SDLC analysis

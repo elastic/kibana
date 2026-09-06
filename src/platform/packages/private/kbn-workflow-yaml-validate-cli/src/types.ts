@@ -36,6 +36,7 @@ export type IssueSource =
   | 'metadata'
   | 'step-name'
   | 'graph'
+  | 'stock-step'
   | 'liquid'
   | 'liquidjs-expression'
   | 'managed-placeholder';

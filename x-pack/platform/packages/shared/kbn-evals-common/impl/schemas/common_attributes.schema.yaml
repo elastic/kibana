@@ -262,16 +262,9 @@ components:
           $ref: '#/components/schemas/Direction'
         model:
           $ref: '#/components/schemas/Model'
-        kind:
-          type: string
-          enum:
-            - llm
-            - code
-          description: >-
-            Whether the evaluator invoked a model. Absent on documents written
-            before per-evaluator attribution was introduced.
       required:
         - name
+        - model
 
     ScoreMetadata:
       type: object
@@ -320,11 +313,6 @@ components:
           minimum: 0
           default: 0
           description: Number of unique examples evaluated in this dataset
-        evaluator_model:
-          $ref: '#/components/schemas/Model'
-          description: >-
-            Model this evaluator judged with. Absent for code evaluators, which
-            invoke no model.
         stats:
           type: object
           properties:

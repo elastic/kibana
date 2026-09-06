@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { Installation } from '../../../types';
@@ -21,10 +25,12 @@ export async function reinstallPackageForInstallation({
   soClient,
   esClient,
   installation,
+  request,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   installation: Installation;
+  request?: KibanaRequest;
 }) {
   if (installation.install_source === 'upload' || installation.install_source === 'bundled') {
     // If there is a matching bundled package
@@ -50,6 +56,7 @@ export async function reinstallPackageForInstallation({
     }),
     esClient,
     spaceId: installation.installed_kibana_space_id || DEFAULT_SPACE_ID,
+    request,
     // Force install the package will update the index template and the datastream write indices
     force: true,
   });

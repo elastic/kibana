@@ -15,7 +15,6 @@ export type {
   JsonValue,
   Serializable,
   SerializableRecord,
-  AsSerializableRecord,
 } from './src/serializable';
 
 /**

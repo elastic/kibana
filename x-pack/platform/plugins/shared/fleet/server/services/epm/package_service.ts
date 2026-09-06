@@ -98,6 +98,7 @@ export interface PackageClient {
     keepFailedInstallation?: boolean;
     useStreaming?: boolean;
     automaticInstall?: boolean;
+    request?: KibanaRequest;
   }): Promise<InstallResult>;
 
   installCustomIntegration(options: {
@@ -249,6 +250,7 @@ class PackageClientImpl implements PackageClient {
     keepFailedInstallation?: boolean;
     useStreaming?: boolean;
     automaticInstall?: boolean;
+    request?: KibanaRequest;
   }): Promise<InstallResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
@@ -260,6 +262,7 @@ class PackageClientImpl implements PackageClient {
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
+      request,
     } = options;
 
     // If pkgVersion isn't specified, find the latest package version
@@ -279,6 +282,7 @@ class PackageClientImpl implements PackageClient {
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
+      request,
     });
   }
 

@@ -9,6 +9,7 @@
 
 import { ExecutionError } from '@kbn/workflows/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
+import { getRetryAfterMsFromHeaders } from '../utils';
 
 export const DEFAULT_MAX_STEP_SIZE = '10mb';
 
@@ -17,19 +18,25 @@ export const DEFAULT_MAX_STEP_SIZE = '10mb';
  *
  * Behaves like {@link ExecutionError.fromError} for everything except {@link KibanaApiCallError},
  * which is enriched so an **uncaught** `callKibanaApi` failure persists a well-formed structured
- * error (`type: 'KibanaApiCallError'`, `details: { status }`) instead of a flat `{ type, message }`.
+ * error (`type: 'KibanaApiCallError'`, `details: { status, retryAfterMs? }`) instead of a flat
+ * `{ type, message }`.
  *
- * Safety: only the safe scalar `status` is lifted into `details`; the potentially large/sensitive
- * `body` and `headers` are intentionally left off, so they are never written to ES.
+ * Safety: only safe scalars are lifted into `details` (`status` and an optional `retryAfterMs`
+ * parsed from response headers). The potentially large/sensitive `body` and `headers` are
+ * intentionally left off, so they are never written to ES.
  * `KibanaApiCallError` is deliberately a plain `Error` (not an `ExecutionError`) to avoid a class
  * init import cycle through the extensions server barrel — this is where the structured mapping lives.
  */
 export function toExecutionError(error: Error): ExecutionError {
   if (error instanceof KibanaApiCallError) {
+    const retryAfterMs = getRetryAfterMsFromHeaders(error.headers);
     return new ExecutionError({
       type: 'KibanaApiCallError',
       message: error.message,
-      details: { status: error.status },
+      details: {
+        status: error.status,
+        ...(retryAfterMs !== undefined ? { retryAfterMs } : {}),
+      },
     });
   }
   return ExecutionError.fromError(error);

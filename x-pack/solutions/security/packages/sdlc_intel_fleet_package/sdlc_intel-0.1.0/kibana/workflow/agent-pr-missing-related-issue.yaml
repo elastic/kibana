@@ -1,0 +1,318 @@
+version: '1'
+name: SDLC agent PR missing related issue
+description: >
+  Agentic development workflow. Scans open non-draft pull requests for missing GitHub
+  closing-issue links (no closes / closes_issue relationship and no links.closing_issues),
+  indexes findings to sdlc-pr-missing-related-issue for the Security detection rule, then
+  runs an agent summary into sdlc-agent-insights. Read-only toward GitHub (NFR-003).
+  Run github-activity-pull-requests and github-enrich-pull-requests-graph first.
+enabled: true
+tags:
+  - sdlc
+  - agent
+  - development
+  - pull-request
+  - related-issue
+  - alerting
+
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  aiConnectorId: REPLACE_WITH_AI_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  pullRequestsIndex: github-intel-pull-requests
+  relationshipsIndex: github-intel-relationships
+  findingsIndex: sdlc-pr-missing-related-issue
+  insightsIndex: sdlc-agent-insights
+  syncSource: agent-pr-missing-related-issue
+  entityType: pr_missing_related_issue
+  batchSize: 50
+  initialWatermark: '2024-01-01T00:00:00Z'
+
+settings:
+  timeout: 45m
+  concurrency:
+    key: sdlc-agent-pr-missing-related-issue
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          default: REPLACE_WITH_AI_CONNECTOR_ID
+          description: Inference connector ID for the missing-related-issue agent.
+      additionalProperties: false
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      ignore_unavailable: true
+      allow_no_indices: true
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      pullRequestsProcessed: 0
+      findingsIndexed: 0
+      lastUpdatedAt: ''
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: load_open_prs_batch
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.pullRequestsIndex }}'
+      ignore_unavailable: true
+      allow_no_indices: true
+      size: '{{ consts.batchSize }}'
+      sort:
+        - github.updated_at:
+            order: asc
+        - entity.id:
+            order: asc
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+            - term:
+                github.state: OPEN
+            - range:
+                github.updated_at:
+                  gt: '{{ variables.watermark }}'
+          must_not:
+            - term:
+                pull_request.draft:
+                  value: true
+
+  - name: scan_pull_requests
+    type: foreach
+    foreach: '${{ steps.load_open_prs_batch.output.hits.hits | json }}'
+    iteration-on-failure:
+      continue: true
+    steps:
+      - name: set_pr_context
+        type: data.set
+        with:
+          prEntityId: '${{ foreach.item._source.entity.id }}'
+          prUrl: '${{ foreach.item._source.entity.url }}'
+          prNumber: '${{ foreach.item._source.entity.number }}'
+          prTitle: '${{ foreach.item._source.pull_request.title }}'
+          prRepoName: '${{ foreach.item._source.repository.name }}'
+          prRepoFullName: '${{ foreach.item._source.repository.full_name }}'
+          prAuthor: '${{ foreach.item._source.people.author }}'
+          prState: '${{ foreach.item._source.github.state }}'
+          prUpdatedAt: '${{ foreach.item._source.github.updated_at }}'
+          prCreatedAt: '${{ foreach.item._source.github.created_at }}'
+          closingIssuesLinks: '${{ foreach.item._source.links.closing_issues }}'
+
+      - name: find_closes_edges
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.relationshipsIndex }}'
+          ignore_unavailable: true
+          allow_no_indices: true
+          size: 1
+          query:
+            bool:
+              must:
+                - term:
+                    from: '${{ variables.prUrl }}'
+                - terms:
+                    relation:
+                      - closes
+                      - closes_issue
+
+      - name: index_missing_related_issue
+        type: elasticsearch.index
+        if: '${{ steps.find_closes_edges.output.hits.hits.size == 0 and (variables.closingIssuesLinks == null or variables.closingIssuesLinks.size == 0) }}'
+        with:
+          index: '{{ consts.findingsIndex }}'
+          id: '${{ variables.prEntityId }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            event:
+              kind: event
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            org:
+              login: '{{ consts.orgLogin }}'
+            entity:
+              type: pull_request
+              id: '${{ variables.prEntityId }}'
+              url: '${{ variables.prUrl }}'
+              number: '${{ variables.prNumber }}'
+            repository:
+              name: '${{ variables.prRepoName }}'
+              full_name: '${{ variables.prRepoFullName }}'
+            github:
+              state: '${{ variables.prState }}'
+              created_at: '${{ variables.prCreatedAt }}'
+              updated_at: '${{ variables.prUpdatedAt }}'
+            people:
+              author: '${{ variables.prAuthor }}'
+            pull_request:
+              title: '${{ variables.prTitle }}'
+              draft: false
+            sdlc:
+              finding:
+                type: pr_missing_related_issue
+                severity: medium
+                reason: Open pull request has no GitHub closing-issue link (Fixes/Closes)
+
+      - name: count_finding
+        type: data.set
+        if: '${{ steps.find_closes_edges.output.hits.hits.size == 0 and (variables.closingIssuesLinks == null or variables.closingIssuesLinks.size == 0) }}'
+        with:
+          findingsIndexed: '${{ variables.findingsIndexed | plus: 1 }}'
+
+      - name: track_batch_progress
+        type: data.set
+        with:
+          lastUpdatedAt: '${{ variables.prUpdatedAt }}'
+          pullRequestsProcessed: '${{ variables.pullRequestsProcessed | plus: 1 }}'
+
+  - name: finalize_watermark
+    type: if
+    condition: '${{ variables.pullRequestsProcessed >= consts.batchSize }}'
+    steps:
+      - name: use_last_updated_watermark
+        type: data.set
+        with:
+          watermark: '${{ variables.lastUpdatedAt }}'
+    else:
+      - name: finalize_if_any_processed
+        type: if
+        condition: '${{ variables.pullRequestsProcessed > 0 }}'
+        steps:
+          - name: use_run_started_watermark
+            type: data.set
+            with:
+              watermark: '${{ variables.runStartedAt }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        watermark: '{{ variables.watermark }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          pull_requests_processed: '{{ variables.pullRequestsProcessed }}'
+          findings_indexed: '{{ variables.findingsIndexed }}'
+          batch_size: '{{ consts.batchSize }}'
+
+  - name: run_missing_issue_agent
+    type: ai.agent
+    agent-id: REPLACE_WITH_FLEET_AGENT_sdlc-pr-missing-related-issue
+    connector-id: REPLACE_WITH_AI_CONNECTOR_ID
+    create-conversation: true
+    with:
+      message: |
+        Summarize SDLC pull requests missing a related GitHub issue link.
+
+        This run indexed {{ variables.findingsIndexed }} finding document(s) into
+        sdlc-pr-missing-related-issue (open non-draft PRs without closes / closes_issue
+        edges and without links.closing_issues).
+
+        Tasks:
+        1. Query sdlc-pr-missing-related-issue with ES|QL for recent findings.
+        2. Rank by repository concentration and recency.
+        3. Return structured findings only — no GitHub writes.
+      schema:
+        type: object
+        properties:
+          summary:
+            type: string
+          status:
+            type: string
+            enum: [actionsRequired, healthy, noData]
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+          findings:
+            type: array
+            items:
+              type: object
+              properties:
+                category:
+                  type: string
+                severity:
+                  type: string
+                title:
+                  type: string
+                detail:
+                  type: string
+                entity_url:
+                  type: string
+                recommended_action:
+                  type: string
+              required:
+                - category
+                - severity
+                - title
+                - detail
+          scope_claim:
+            type: object
+        required:
+          - summary
+          - status
+          - findings
+          - scope_claim
+
+  - name: persist_missing_issue_analysis
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.insightsIndex }}'
+      id: '{{ consts.syncSource }}-{{ execution.id }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        workflow:
+          execution_id: '{{ execution.id }}'
+          name: SDLC agent PR missing related issue
+          source: '{{ consts.syncSource }}'
+        analysis:
+          type: pr_missing_related_issue
+          status: '${{ steps.run_missing_issue_agent.output.status }}'
+          summary: '${{ steps.run_missing_issue_agent.output.summary }}'
+          confidence: '${{ steps.run_missing_issue_agent.output.confidence ?? 0.7 }}'
+        findings: '${{ steps.run_missing_issue_agent.output.findings | json }}'
+        scope_claim: '${{ steps.run_missing_issue_agent.output.scope_claim | json }}'
+        payload: '${{ steps.run_missing_issue_agent.output }}'
+        stats:
+          pull_requests_processed: '{{ variables.pullRequestsProcessed }}'
+          findings_indexed: '{{ variables.findingsIndexed }}'

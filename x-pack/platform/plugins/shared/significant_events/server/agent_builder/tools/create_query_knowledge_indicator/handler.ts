@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import {
-  deriveQueryType,
-  findOverBroadMatchPredicates,
-  renderOverBroadMatchError,
-  type Streams,
-} from '@kbn/streams-schema';
+import { deriveQueryType, type Streams } from '@kbn/streams-schema';
 import { type StreamQuery } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
-import {
-  EsqlQueryValidationError,
-  validateEsqlQueryForStreamOrThrow,
-} from '../../../lib/significant_events/validate_esql_query';
+import { validateEsqlQueryForStreamOrThrow } from '../../../lib/significant_events/validate_esql_query';
 
 export interface QueryInput {
   id?: string;
@@ -49,11 +41,6 @@ export async function createQueryKnowledgeIndicatorToolHandler({
     esqlQuery: queryInput.esql.query,
     stream: definition,
   });
-
-  const overBroad = findOverBroadMatchPredicates(queryInput.esql.query);
-  if (overBroad.length > 0) {
-    throw new EsqlQueryValidationError(renderOverBroadMatchError(overBroad));
-  }
 
   const query: StreamQuery = {
     id: queryInput.id ?? uuidv4(),

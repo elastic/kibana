@@ -45,28 +45,26 @@ describe('update_stream tool', () => {
     };
 
     it('confirmation title reflects query stream creation when changes.query is set', async () => {
-      const { tool, context } = setup();
+      const { tool } = setup();
 
       const confirmation = await tool.confirmation!.getConfirmation!({
         toolParams: {
           name: 'logs.ecs.errors',
           changes: { query: { esql: 'FROM logs.ecs' } },
         },
-        context,
       });
 
       expect(confirmation.title).toBe('Create or update query stream "logs.ecs.errors"');
     });
 
     it('confirmation title is the generic update title for ingest changes', async () => {
-      const { tool, context } = setup();
+      const { tool } = setup();
 
       const confirmation = await tool.confirmation!.getConfirmation!({
         toolParams: {
           name: 'logs.ecs.nginx',
           changes: { description: 'updated' },
         },
-        context,
       });
 
       expect(confirmation.title).toBe('Update stream "logs.ecs.nginx"');

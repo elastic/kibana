@@ -165,6 +165,7 @@ describe('AutoInstallContentPackagesTask', () => {
         pkgName: 'kubernetes_otel',
         pkgVersion: '1.1.0',
         useStreaming: true,
+        request: expect.anything(),
         automaticInstall: true,
       });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(2);
@@ -186,6 +187,7 @@ describe('AutoInstallContentPackagesTask', () => {
         pkgName: 'kubernetes_otel',
         pkgVersion: '1.1.0',
         useStreaming: true,
+        request: expect.anything(),
         automaticInstall: true,
       });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
@@ -219,6 +221,7 @@ describe('AutoInstallContentPackagesTask', () => {
         pkgName: 'kubernetes_otel',
         pkgVersion: '1.1.0',
         useStreaming: true,
+        request: expect.anything(),
         automaticInstall: true,
       });
     });
@@ -265,6 +268,7 @@ describe('AutoInstallContentPackagesTask', () => {
         pkgName: 'test_package',
         pkgVersion: '1.1.0',
         useStreaming: true,
+        request: expect.anything(),
         automaticInstall: true,
       });
       expect(packageClientMock.installPackage).not.toHaveBeenCalledWith(
@@ -316,6 +320,7 @@ describe('AutoInstallContentPackagesTask', () => {
         pkgName: 'test_package',
         pkgVersion: '1.1.0',
         useStreaming: true,
+        request: expect.anything(),
         automaticInstall: true,
       });
       expect(packageClientMock.installPackage).not.toHaveBeenCalledWith(

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getSigEventsLogPatternsEsql, type LogPatternEsqlEntry } from '@kbn/ai-tools';
+import {
+  getSigEventsLogPatternsEsql,
+  DEFAULT_ESQL_QUERY_TIMEOUT_MS,
+  type LogPatternEsqlEntry,
+} from '@kbn/ai-tools';
 import { getStreamSamplingSource } from '@kbn/streams-schema';
 import { LOG_PATTERNS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
@@ -46,12 +50,12 @@ Each pattern includes: field (source field name), pattern (the significant token
 Use \`pattern\` tokens for keyword/AND queries; use \`sample\` as the basis for phrase queries since variable parts between tokens are omitted and the token string is not a verbatim phrase.
 This is useful for understanding the types of logs in the stream and identifying anomalies or trends.`,
 
-  generate: async ({ stream, start, end, esClient, logger, signal }) => {
+  generate: async ({ stream, start, end, esClient, logger }) => {
     const tracedClient = createTracedEsClient({
       client: esClient,
       logger,
       plugin: 'streams',
-      abortSignal: signal,
+      abortSignal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
     });
 
     const patterns = await getSigEventsLogPatternsEsql({

@@ -1,0 +1,26 @@
+name: sdlc-epic-tickets-by-repo-view
+query: |
+  FROM github-intel-epic-tickets
+  | EVAL
+      epic_id = epic.id,
+      epic_url = epic.url,
+      epic_title = epic.title,
+      repo = issue.repo,
+      issue_ref = issue.ref,
+      issue_number = issue.number,
+      issue_title = issue.title,
+      issue_status = issue.status,
+      pr_count = delivery.pr_count,
+      has_pr = delivery.has_pr
+  | KEEP
+      @timestamp,
+      epic_id,
+      epic_url,
+      epic_title,
+      repo,
+      issue_ref,
+      issue_number,
+      issue_title,
+      issue_status,
+      pr_count,
+      has_pr

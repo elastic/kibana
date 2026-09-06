@@ -147,6 +147,10 @@ toc:
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
+  - folder: fleet
+  - folder: agent-builder
+  - folder: connectors
+  - folder: workflows
   - file: kibana-plugins.md
   - file: commands.md
     children:

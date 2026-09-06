@@ -53,6 +53,7 @@ export const MlAppHeader: FC<MlAppHeaderProps> = ({
         {...secondaryContent}
         spacing="bleed"
         docLink={docLink}
+        sticky={false}
       />
       <EuiSpacer size="m" />
     </>

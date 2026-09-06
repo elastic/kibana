@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/core-spaces-common'
   - '@kbn/i18n'
+  - '@kbn/logging'
 tags:
   - plugin
   - prod

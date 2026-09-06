@@ -89,34 +89,16 @@ export interface ComputedFeatureGenerationResult {
   errors: Array<{ feature: string; error: string }>;
 }
 
-export const DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS = 60_000;
-
-/** `signal` is absent here — it is built from `requestSignal` and `timeoutMs`. */
-export interface GenerateAllComputedFeaturesOptions
-  extends Omit<ComputedFeatureGeneratorOptions, 'signal'> {
-  requestSignal?: AbortSignal;
-  timeoutMs?: number;
-}
-
 /**
- * Generates all computed features by running every registered generator against
- * one shared abort signal (request signal combined with a timeout).
+ * Generates all computed features by running every registered generator.
  *
  * Best-effort: a rejected generator is logged and skipped so one failure doesn't
  * lose the others; `undefined` results (skips) are dropped too. Throws only when
  * failures leave zero features — a skip is not a failure.
  */
-export async function generateAllComputedFeatures({
-  requestSignal,
-  timeoutMs = DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS,
-  ...baseOptions
-}: GenerateAllComputedFeaturesOptions): Promise<ComputedFeatureGenerationResult> {
-  const signal = AbortSignal.any([
-    ...(requestSignal ? [requestSignal] : []),
-    AbortSignal.timeout(timeoutMs),
-  ]);
-  const options: ComputedFeatureGeneratorOptions = { ...baseOptions, signal };
-
+export async function generateAllComputedFeatures(
+  options: ComputedFeatureGeneratorOptions
+): Promise<ComputedFeatureGenerationResult> {
   const allGenerators = registry.getAll();
   const results = await Promise.allSettled(
     allGenerators.map((generator) => generator.generate(options))

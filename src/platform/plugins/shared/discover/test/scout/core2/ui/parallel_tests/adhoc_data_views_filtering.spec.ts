@@ -8,7 +8,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { spaceTest, tags } from '../fixtures';
 
 // Discover is a platform feature available across all deployment types.
@@ -32,27 +31,24 @@ spaceTest.describe(
 
     spaceTest(
       'supports query and filtering on ad hoc data view',
-      async ({ apiServices, discoverScoutSpace, pageObjects }) => {
+      async ({ discoverScoutSpace, pageObjects }) => {
         const { discover, filterBar, queryBar } = pageObjects;
 
         await spaceTest.step('creates ad hoc data view', async () => {
-          await apiServices.discover.create(
-            {
-              title: 'logstash-adhoc-query-test',
-              tabs: [
-                {
-                  id: 'main',
-                  label: 'Untitled',
-                  data_source: {
-                    type: 'data_view_spec',
-                    index_pattern: 'logstash*',
-                    time_field: '@timestamp',
-                  },
+          await discoverScoutSpace.createDiscoverSession({
+            title: 'logstash-adhoc-query-test',
+            tabs: [
+              {
+                id: 'main',
+                label: 'Untitled',
+                data_source: {
+                  type: 'data_view_spec',
+                  index_pattern: 'logstash*',
+                  time_field: '@timestamp',
                 },
-              ],
-            } satisfies DiscoverSessionApiDataInput,
-            discoverScoutSpace.id
-          );
+              },
+            ],
+          });
           await discover.loadSavedSearch('logstash-adhoc-query-test');
         });
 
@@ -88,36 +84,33 @@ spaceTest.describe(
 
     spaceTest(
       'preserves runtime field column in saved search after navigating through context view',
-      async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
+      async ({ discoverScoutSpace, page, pageObjects }) => {
         const { discover, dashboard, dataGrid } = pageObjects;
 
         await spaceTest.step(
           'creates ad hoc data view with runtime field and saves search',
           async () => {
-            await apiServices.discover.create(
-              {
-                title: 'logst-ctx-runtimefield',
-                tabs: [
-                  {
-                    id: 'main',
-                    label: 'Untitled',
-                    data_source: {
-                      type: 'data_view_spec',
-                      index_pattern: 'logst*',
-                      time_field: '@timestamp',
-                      field_settings: {
-                        '_bytes-runtimefield': {
-                          type: 'keyword',
-                          script: 'emit(doc["bytes"].value.toString())',
-                        },
+            await discoverScoutSpace.createDiscoverSession({
+              title: 'logst-ctx-runtimefield',
+              tabs: [
+                {
+                  id: 'main',
+                  label: 'Untitled',
+                  data_source: {
+                    type: 'data_view_spec',
+                    index_pattern: 'logst*',
+                    time_field: '@timestamp',
+                    field_settings: {
+                      '_bytes-runtimefield': {
+                        type: 'keyword',
+                        script: 'emit(doc["bytes"].value.toString())',
                       },
                     },
-                    column_order: ['_bytes-runtimefield'],
                   },
-                ],
-              } satisfies DiscoverSessionApiDataInput,
-              discoverScoutSpace.id
-            );
+                  column_order: ['_bytes-runtimefield'],
+                },
+              ],
+            });
           }
         );
 
@@ -153,28 +146,25 @@ spaceTest.describe(
 
     spaceTest(
       'shows toast notifications for invalid filter references after data view update',
-      async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
+      async ({ discoverScoutSpace, page, pageObjects }) => {
         const { discover, filterBar, toasts } = pageObjects;
         let prevId: string;
 
         await spaceTest.step('creates ad hoc data view and adds filters', async () => {
-          await apiServices.discover.create(
-            {
-              title: 'logstas-filter-toast-test',
-              tabs: [
-                {
-                  id: 'main',
-                  label: 'Untitled',
-                  data_source: {
-                    type: 'data_view_spec',
-                    index_pattern: 'logstash*',
-                    time_field: '@timestamp',
-                  },
+          await discoverScoutSpace.createDiscoverSession({
+            title: 'logstas-filter-toast-test',
+            tabs: [
+              {
+                id: 'main',
+                label: 'Untitled',
+                data_source: {
+                  type: 'data_view_spec',
+                  index_pattern: 'logstash*',
+                  time_field: '@timestamp',
                 },
-              ],
-            } satisfies DiscoverSessionApiDataInput,
-            discoverScoutSpace.id
-          );
+              },
+            ],
+          });
           await discover.loadSavedSearch('logstas-filter-toast-test');
 
           await filterBar.addFilter({
