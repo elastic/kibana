@@ -39,7 +39,7 @@ const idField = z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH);
  * typeKey/value) is derived server-side from the case at activity-write time so that
  * client-supplied label text cannot spoof the activity log.
  */
-const CaseWorkflowRunOriginSchema = z.discriminatedUnion('type', [
+export const CaseWorkflowRunOriginSchema = z.discriminatedUnion('type', [
   z
     .object({
       type: z.literal(CASE_WORKFLOW_ORIGIN_TYPE),
@@ -109,6 +109,7 @@ export type RunCaseWorkflowRequest = z.infer<typeof RunCaseWorkflowRequestSchema
 export const RunCaseWorkflowResponseSchema = z
   .object({
     workflowExecutionId: z.string(),
+    activityStatus: z.enum(['succeeded', 'failed']),
   })
   .strict();
 

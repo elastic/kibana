@@ -10,9 +10,30 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { DocumentResponse, RunCaseWorkflowRequest } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
-import { createCasesClientMock } from '../../client/mocks';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { createCasesClientMock, createCasesClientMockArgs } from '../../client/mocks';
 import type { CasesRequestHandlerContext } from '../../types';
 import { CasesWorkflowRunService } from './service';
+
+jest.mock('../../client/client', () => ({
+  ...jest.requireActual('../../client/client'),
+  getCasesClientInternalArgs: jest.fn(),
+}));
+
+jest.mock('../../client/cases/ensure_authorized_to_run_workflow', () => ({
+  ...jest.requireActual('../../client/cases/ensure_authorized_to_run_workflow'),
+  ensureAuthorizedToRunWorkflow: jest.fn(),
+}));
+
+import { getCasesClientInternalArgs } from '../../client/client';
+import { ensureAuthorizedToRunWorkflow } from '../../client/cases/ensure_authorized_to_run_workflow';
+
+const mockGetCasesClientInternalArgs = getCasesClientInternalArgs as jest.MockedFunction<
+  typeof getCasesClientInternalArgs
+>;
+const mockEnsureAuthorizedToRunWorkflow = ensureAuthorizedToRunWorkflow as jest.MockedFunction<
+  typeof ensureAuthorizedToRunWorkflow
+>;
 
 describe('CasesWorkflowRunService', () => {
   const request = httpServerMock.createKibanaRequest();
@@ -21,7 +42,7 @@ describe('CasesWorkflowRunService', () => {
   const auditLogger = audit.asScoped(request);
   const auditLog = auditLogger.log as jest.MockedFunction<typeof auditLogger.log>;
   const casesClient = createCasesClientMock();
-
+  const clientArgs = createCasesClientMockArgs();
   let workflowsAvailable = true;
   let licenseValid = true;
   const license = {
@@ -39,16 +60,14 @@ describe('CasesWorkflowRunService', () => {
     getWorkflow: jest.fn(),
     runWorkflowWithAlertPreprocessing: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
-  const ensureAuthorizedToRunWorkflow = jest.fn();
-  const getWorkflowRunAuthorizer = jest.fn(async () => ({ ensureAuthorizedToRunWorkflow }));
   const service = new CasesWorkflowRunService({
     management,
     logger,
     audit,
-    getWorkflowRunAuthorizer,
   });
   const theCase = {
     id: 'case-1',
+    owner: SECURITY_SOLUTION_OWNER,
     observables: [],
   } as unknown as Case;
   const createAttachedAlerts = (
@@ -79,8 +98,18 @@ describe('CasesWorkflowRunService', () => {
     jest.clearAllMocks();
     workflowsAvailable = true;
     licenseValid = true;
-    ensureAuthorizedToRunWorkflow.mockResolvedValue(undefined);
+    // getCasesClientInternalArgs returns our test clientArgs so the module-private functions
+    // run against the same service mocks the rest of the test controls.
+    mockGetCasesClientInternalArgs.mockReturnValue(clientArgs as never);
+    // Default: authorization succeeds for case-1 with the security solution owner.
+    mockEnsureAuthorizedToRunWorkflow.mockResolvedValue([
+      { id: 'case-1', owner: SECURITY_SOLUTION_OWNER },
+    ]);
     casesClient.cases.get.mockResolvedValue(theCase);
+    clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({});
+    clientArgs.services.userActionService.creator.bulkCreateUserAction.mockResolvedValue(
+      undefined as never
+    );
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([]);
     management.getWorkflow.mockResolvedValue({
       id: 'workflow-1',
@@ -94,16 +123,16 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('starts the workflow with server-owned metadata', async () => {
-    await expect(run()).resolves.toEqual({ workflowExecutionId: 'execution-1' });
-
-    expect(ensureAuthorizedToRunWorkflow).toHaveBeenCalledWith({
-      ids: ['case-1'],
+    await expect(run()).resolves.toEqual({
+      workflowExecutionId: 'execution-1',
+      activityStatus: 'succeeded',
     });
-    expect(casesClient.cases.get).toHaveBeenCalledWith({ id: 'case-1' });
+
+    expect(mockEnsureAuthorizedToRunWorkflow).toHaveBeenCalledWith({ ids: ['case-1'] }, clientArgs);
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
-    expect(ensureAuthorizedToRunWorkflow.mock.invocationCallOrder[0]).toBeLessThan(
-      management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]
-    );
+    expect(
+      (mockEnsureAuthorizedToRunWorkflow as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan(management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]);
     expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
       workflow: expect.objectContaining({ id: 'workflow-1', name: 'Investigate case' }),
       spaceId: 'default',
@@ -121,6 +150,31 @@ describe('CasesWorkflowRunService', () => {
         origin: defaultBody.origin,
       },
     });
+    // preflightWorkflowExecution runs before the workflow to enforce the user-action limit.
+    expect(
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal
+    ).toHaveBeenCalledWith({
+      caseIds: ['case-1'],
+    });
+    // recordWorkflowExecution persists the activity log entry after a successful run.
+    expect(clientArgs.services.userActionService.creator.bulkCreateUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userActions: [
+          expect.objectContaining({
+            caseId: 'case-1',
+            owner: SECURITY_SOLUTION_OWNER,
+            payload: {
+              workflow: {
+                id: 'workflow-1',
+                name: 'Investigate case',
+                executionId: 'execution-1',
+              },
+              origin: { type: 'cases.case', id: 'case-1' },
+            },
+          }),
+        ],
+      })
+    );
     expect(auditLog).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({
@@ -132,6 +186,25 @@ describe('CasesWorkflowRunService', () => {
         }),
       })
     );
+  });
+
+  it('records activity with the owner from the authorized entities (no extra getCases)', async () => {
+    // The owner for the activity log comes from the entities returned by
+    // ensureAuthorizedToRunWorkflow (which already fetched the cases for authorization).
+    // recordWorkflowExecution must reuse those entities and must NOT issue a second getCases.
+    mockEnsureAuthorizedToRunWorkflow.mockResolvedValue([
+      { id: 'case-1', owner: 'owner-from-authz' },
+    ]);
+
+    await run();
+
+    expect(clientArgs.services.userActionService.creator.bulkCreateUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userActions: [expect.objectContaining({ owner: 'owner-from-authz' })],
+      })
+    );
+    // The authz step fetched the cases; recordWorkflowExecution must NOT fetch them again.
+    expect(clientArgs.services.caseService.getCases).not.toHaveBeenCalled();
   });
 
   it('passes alert preprocessing context with event intact', async () => {
@@ -152,7 +225,10 @@ describe('CasesWorkflowRunService', () => {
       workflowExecutionId: 'execution-1',
     });
 
-    await expect(run(body)).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+    await expect(run(body)).resolves.toEqual({
+      workflowExecutionId: 'execution-1',
+      activityStatus: 'succeeded',
+    });
 
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalledWith({
       caseId: 'case-1',
@@ -181,7 +257,15 @@ describe('CasesWorkflowRunService', () => {
     };
 
     it('fires exactly one workflow execution for N cases with server-owned event.caseIds', async () => {
-      await expect(run(bulkBody)).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+      mockEnsureAuthorizedToRunWorkflow.mockResolvedValue([
+        { id: 'case-a', owner: SECURITY_SOLUTION_OWNER },
+        { id: 'case-b', owner: SECURITY_SOLUTION_OWNER },
+        { id: 'case-c', owner: SECURITY_SOLUTION_OWNER },
+      ]);
+      await expect(run(bulkBody)).resolves.toEqual({
+        workflowExecutionId: 'execution-1',
+        activityStatus: 'succeeded',
+      });
       expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledTimes(1);
       expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -203,12 +287,52 @@ describe('CasesWorkflowRunService', () => {
     it('is also legal when exactly one case is selected (list-surface single-select)', async () => {
       await expect(run({ caseIds: ['case-1'], inputs: {} })).resolves.toEqual({
         workflowExecutionId: 'execution-1',
+        activityStatus: 'succeeded',
       });
       // No case fetch when origin is absent.
       expect(casesClient.cases.get).not.toHaveBeenCalled();
     });
 
+    it('passes all caseIds to preflightWorkflowExecution', async () => {
+      mockEnsureAuthorizedToRunWorkflow.mockResolvedValue([
+        { id: 'case-a', owner: SECURITY_SOLUTION_OWNER },
+        { id: 'case-b', owner: SECURITY_SOLUTION_OWNER },
+        { id: 'case-c', owner: SECURITY_SOLUTION_OWNER },
+      ]);
+      await run(bulkBody);
+      expect(
+        clientArgs.services.userActionService.getMultipleCasesUserActionsTotal
+      ).toHaveBeenCalledWith({
+        caseIds: ['case-a', 'case-b', 'case-c'],
+      });
+    });
+
+    it('records activity for all authorized cases', async () => {
+      mockEnsureAuthorizedToRunWorkflow.mockResolvedValue([
+        { id: 'case-a', owner: SECURITY_SOLUTION_OWNER },
+        { id: 'case-b', owner: SECURITY_SOLUTION_OWNER },
+        { id: 'case-c', owner: SECURITY_SOLUTION_OWNER },
+      ]);
+      await run(bulkBody);
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUserAction
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userActions: expect.arrayContaining(
+            ['case-a', 'case-b', 'case-c'].map((caseId) =>
+              expect.objectContaining({ caseId, owner: SECURITY_SOLUTION_OWNER })
+            )
+          ),
+        })
+      );
+    });
+
     it('emits one audit event per case on success', async () => {
+      mockEnsureAuthorizedToRunWorkflow.mockResolvedValue([
+        { id: 'case-a', owner: SECURITY_SOLUTION_OWNER },
+        { id: 'case-b', owner: SECURITY_SOLUTION_OWNER },
+        { id: 'case-c', owner: SECURITY_SOLUTION_OWNER },
+      ]);
       await run(bulkBody);
       expect(auditLog).toHaveBeenCalledTimes(3);
       for (const id of ['case-a', 'case-b', 'case-c']) {
@@ -222,6 +346,11 @@ describe('CasesWorkflowRunService', () => {
     });
 
     it('emits one audit event per case on failure', async () => {
+      mockEnsureAuthorizedToRunWorkflow.mockResolvedValue([
+        { id: 'case-a', owner: SECURITY_SOLUTION_OWNER },
+        { id: 'case-b', owner: SECURITY_SOLUTION_OWNER },
+        { id: 'case-c', owner: SECURITY_SOLUTION_OWNER },
+      ]);
       management.runWorkflowWithAlertPreprocessing.mockRejectedValue(new Error('execution failed'));
       await expect(run(bulkBody)).rejects.toThrow('execution failed');
       expect(auditLog).toHaveBeenCalledTimes(3);
@@ -238,7 +367,7 @@ describe('CasesWorkflowRunService', () => {
     // SECURITY REGRESSION TEST: a user authorized on case-a but not case-b must NOT be able
     // to start a workflow that acts on case-b.
     it('refuses to start the workflow when the caller is not authorized on all cases', async () => {
-      ensureAuthorizedToRunWorkflow.mockRejectedValue(new Error('Unauthorized: case-b'));
+      mockEnsureAuthorizedToRunWorkflow.mockRejectedValue(new Error('Unauthorized: case-b'));
 
       await expect(run(bulkBody)).rejects.toThrow('Unauthorized: case-b');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -336,8 +465,17 @@ describe('CasesWorkflowRunService', () => {
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
+  it('rejects execution when preflight fails (user-action limit reached)', async () => {
+    clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockRejectedValue(
+      new Error('User action limit reached')
+    );
+
+    await expect(run()).rejects.toThrow('User action limit reached');
+    expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+  });
+
   it('rejects execution when the case update is unauthorized', async () => {
-    ensureAuthorizedToRunWorkflow.mockRejectedValue(new Error('not authorized'));
+    mockEnsureAuthorizedToRunWorkflow.mockRejectedValue(new Error('not authorized'));
 
     await expect(run()).rejects.toThrow('not authorized');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -373,7 +511,7 @@ describe('CasesWorkflowRunService', () => {
         inputs: { event: { observables: [{ id: 'observable-1' }] } },
         origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'observable-1' },
       })
-    ).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+    ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
   });
 
   it('rejects alert inputs for a case origin when alerts are not attached', async () => {
@@ -495,7 +633,7 @@ describe('CasesWorkflowRunService', () => {
         },
         origin: { type: 'cases.alerts', caseId: 'case-1' },
       })
-    ).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+    ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
   });
 
   it('rejects a missing workflow', async () => {
@@ -529,6 +667,18 @@ describe('CasesWorkflowRunService', () => {
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
+  it('returns activityStatus: failed when recordWorkflowExecution throws, without rethrowing', async () => {
+    clientArgs.services.userActionService.creator.bulkCreateUserAction.mockRejectedValue(
+      new Error('activity recording failed')
+    );
+
+    await expect(run()).resolves.toEqual({
+      workflowExecutionId: 'execution-1',
+      activityStatus: 'failed',
+    });
+    expect(logger.error).toHaveBeenCalled();
+  });
+
   it('audits execution failures', async () => {
     management.runWorkflowWithAlertPreprocessing.mockRejectedValue(new Error('execution failed'));
 
@@ -549,7 +699,10 @@ describe('CasesWorkflowRunService', () => {
       throw new Error('audit failed');
     });
 
-    await expect(run()).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+    await expect(run()).resolves.toEqual({
+      workflowExecutionId: 'execution-1',
+      activityStatus: 'succeeded',
+    });
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('Failed to write Cases workflow audit event')
     );

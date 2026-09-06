@@ -1926,6 +1926,61 @@ export const PayloadUserComment = lazySchema(() =>
 );
 export type PayloadUserComment = z.infer<typeof PayloadUserComment>;
 
+/**
+ * The payload for a workflow user action, recorded when a user runs a workflow from a case.
+ */
+export const PayloadWorkflow = lazySchema(() =>
+  z.object({
+    /**
+     * Identifies the workflow that was run.
+     */
+    workflow: z
+      .object({
+        /**
+         * The workflow ID.
+         */
+        id: z.string(),
+        /**
+         * The workflow name at the time the run was triggered.
+         */
+        name: z.string(),
+        /**
+         * The execution ID returned by the Workflows engine.
+         */
+        executionId: z.string(),
+      })
+      .optional(),
+    /**
+     * The context from which the workflow was triggered.
+     */
+    origin: z
+      .object({
+        /**
+         * The origin type.
+         */
+        type: z.enum(['cases.case', 'cases.observable', 'cases.alert', 'cases.alerts']),
+        /**
+         * The primary identifier of the case, observable, or alert from which the workflow was triggered (`caseId`, `observableId`, or `alertId`).
+         */
+        id: z.string(),
+        /**
+         * For alert origins, the Elasticsearch index the alert lives in.
+         */
+        index: z.string().optional(),
+        /**
+         * For observable origins, the observable type key.
+         */
+        typeKey: z.string().optional(),
+        /**
+         * For observable origins, the observable value.
+         */
+        value: z.string().optional(),
+      })
+      .optional(),
+  })
+);
+export type PayloadWorkflow = z.infer<typeof PayloadWorkflow>;
+
 export const UserActionsFindResponseProperties = lazySchema(() =>
   z.object({
     action: Actions,
@@ -1953,6 +2008,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
       PayloadTags,
       PayloadTitle,
       PayloadUserComment,
+      PayloadWorkflow,
     ]),
     version: z.string(),
     /**
@@ -1975,6 +2031,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
       'status',
       'tags',
       'title',
+      'workflow',
     ]),
   })
 );
