@@ -176,6 +176,7 @@ export const SalesforceConnector: ConnectorSpec = {
 
     soqlIngest: {
       isTool: false,
+      scope: 'read',
       description:
         'Paginated SOQL query for ingest workflows. Returns compact records plus nextRecordsUrl and hasMore for while-loop pagination.',
       input: lazySchema(() =>

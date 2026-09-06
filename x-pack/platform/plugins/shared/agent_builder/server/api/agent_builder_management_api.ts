@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   AgentCreateRequest,
   AgentUpdateRequest,
@@ -13,7 +13,6 @@ import type {
   PersistedSkillUpdateRequest,
 } from '@kbn/agent-builder-common';
 import { skillIndexName } from '../services/skills/persisted/client/storage';
-import { KibanaRequest } from '@kbn/core/server';
 
 function fakeSkillRequest(): KibanaRequest {
   return KibanaRequest.asInternal({

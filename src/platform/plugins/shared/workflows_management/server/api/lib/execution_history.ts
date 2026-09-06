@@ -27,7 +27,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  */
 export const aggregateExecutionHistory = (
   workflowId: string,
-  executions: WorkflowExecutionListDto['executions'],
+  executions: WorkflowExecutionListDto['results'],
   days = 30
 ): ExecutionHistorySummary => {
   const now = Date.now();

@@ -547,6 +547,9 @@ getFileMetadata: {
 
     listFilesIngest: {
       isTool: false,
+      isTool: false,
+
+    scope: 'write',
       description:
         'Paginated shared-drive folder listing for ingest workflows. Lists file metadata in a team folder with modifiedTime watermark support.',
       input: lazySchema(() =>
@@ -622,6 +625,9 @@ getFileMetadata: {
 
     parseDriveUrlsFromText: {
       isTool: false,
+      isTool: false,
+
+    scope: 'read',
       description:
         'Extract Google Drive file IDs and URLs from free text (for example GitHub issue bodies referencing docs.google.com links).',
       input: lazySchema(() =>
@@ -644,6 +650,9 @@ getFileMetadata: {
 
     parseCommaSeparatedIds: {
       isTool: false,
+      isTool: false,
+
+    scope: 'read',
       description:
         'Split comma-separated manifest values (for example roadmap folder IDs) into items for foreach workflows.',
       input: lazySchema(() =>

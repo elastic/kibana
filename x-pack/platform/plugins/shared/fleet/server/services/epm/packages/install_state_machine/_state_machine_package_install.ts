@@ -202,8 +202,10 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
     onPostTransition: updateLatestExecutedState,
   },
   create_agent_assets: {
-    onTransition: stepInstallAgentAssets,
-  stepInstallSkillAssets,
+    onTransition: async (context) => {
+      await stepInstallAgentAssets(context);
+      await stepInstallSkillAssets(context);
+    },
     nextState: INSTALL_STATES.CREATE_WORKFLOW_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },

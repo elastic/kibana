@@ -78,6 +78,7 @@ export enum KibanaAssetType {
   tag = 'tag',
   workflow = 'workflow',
   agent = 'agent',
+  skill = 'skill',
 }
 
 /*
@@ -102,6 +103,7 @@ export enum KibanaSavedObjectType {
   alert = 'alert',
   workflow = 'workflow',
   agent = 'agent',
+  skill = 'skill',
 }
 
 export enum ElasticsearchAssetType {

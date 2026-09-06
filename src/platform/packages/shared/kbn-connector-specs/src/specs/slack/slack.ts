@@ -533,6 +533,7 @@ export const Slack: ConnectorSpec = {
     // agent-facing listUsers action, matching the listFiles / listFilesIngest pattern.
     listUsersIngest: {
       isTool: false,
+      scope: 'read',
       description:
         'List workspace users with cursor pagination for ingest workflows. Returns compact user records and nextCursor.',
       input: SlackListUsersInputSchema,
@@ -594,6 +595,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.history
     getChannelHistory: {
       isTool: false,
+      scope: 'read',
       description:
         'Fetch channel message history with cursor pagination for ingest workflows. Use oldest for incremental sync checkpoints.',
       input: SlackGetChannelHistoryInputSchema,
@@ -651,6 +653,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.replies
     getConversationReplies: {
       isTool: false,
+      scope: 'read',
       description:
         'Fetch thread replies for a Slack message. Use after getChannelHistory to ingest thread context.',
       input: SlackGetConversationRepliesInputSchema,

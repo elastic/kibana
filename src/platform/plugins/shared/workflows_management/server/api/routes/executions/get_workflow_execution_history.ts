@@ -14,7 +14,7 @@ import {
 } from '../utils/route_security';
 import { workflowIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
-import { aggregateExecutionHistory } from '../../../lib/execution_history';
+import { aggregateExecutionHistory } from '../../lib/execution_history';
 
 /**
  * WF-007: workflow execution history aggregation endpoint for ops dashboards.
@@ -71,7 +71,7 @@ export function registerGetWorkflowExecutionHistoryRoute({ router, api, spaces }
           );
           const summary = aggregateExecutionHistory(
             workflowId,
-            list.executions ?? [],
+            list.results ?? [],
             days
           );
           return response.ok({ body: summary });
