@@ -557,7 +557,13 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
       }
 
       const assetType = getPathParts(entry.path).type as KibanaAssetType;
-      if (assetType === KibanaAssetType.workflow || assetType === KibanaAssetType.agent) {
+      // Non-JSON asset types (markdown-backed) are installed by their own steps and must
+      // never reach JSON.parse below.
+      if (
+        assetType === KibanaAssetType.workflow ||
+        assetType === KibanaAssetType.agent ||
+        assetType === KibanaAssetType.skill
+      ) {
         return;
       }
 
