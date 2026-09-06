@@ -1,0 +1,74 @@
+version: "1"
+name: Continuous Threat Hunt - Proposal Gate
+description: >
+  Fire-and-forget Worker. Started by the Worker's start_proposal_gates route
+  handler right after package_report creates a report's Proposal(s) (one
+  execution per Proposal; package_report itself never starts this). Waits
+  for a human disposition (approve / modify / dismiss) and records it. Runs
+  outside any parallel branch, so it can wait indefinitely on human input,
+  unlike the Worker's report branches.
+enabled: true
+tags: []
+triggers:
+  - type: manual
+inputs:
+  additionalProperties: false
+  properties:
+    proposal_id:
+      description: Conversation id of the created Proposal to gate.
+      type: string
+    investigation_id:
+      description: >-
+        Conversation id of the parent Investigation, used to check for other
+        still-open Proposals when this one is disposed.
+      type: string
+  required:
+    - proposal_id
+    - investigation_id
+steps:
+  - name: await_disposition
+    type: waitForInput
+    timeout: 30d
+    with:
+      message: "Hunt Watch Proposal {{ inputs.proposal_id }} is awaiting disposition."
+      schema:
+        type: object
+        properties:
+          decision:
+            type: string
+            enum: [approve, modify, dismiss]
+        required:
+          - decision
+
+  - name: record_disposition
+    type: kibana.request
+    with:
+      request:
+        method: POST
+        # TODO(follow-up): route does not exist yet. No proposals-disposition
+        # POST handler exists in pnd's routes today.
+        path: /internal/pnd/proposals/{{ inputs.proposal_id }}/disposition
+        body:
+          decision: "{{ steps.await_disposition.output.response.decision }}"
+          responded_by: "{{ steps.await_disposition.output.respondedBy }}"
+
+  - name: check_remaining_open_proposals
+    type: kibana.request
+    with:
+      request:
+        method: GET
+        # TODO(follow-up): route does not exist yet. No open-proposal-count
+        # route exists in pnd's investigations routes today.
+        path: /internal/pnd/investigations/{{ inputs.investigation_id }}/open_proposal_count
+
+  # Gates resolve independently, so re-check here rather than deciding
+  # up front in packaging.
+  - name: dismiss_investigation_if_none_open
+    type: kibana.request
+    if: "${{ steps.check_remaining_open_proposals.output.count == 0 }}"
+    with:
+      request:
+        method: POST
+        # TODO(follow-up): route does not exist yet, see
+        # check_remaining_open_proposals above.
+        path: /internal/pnd/investigations/{{ inputs.investigation_id }}/dismiss

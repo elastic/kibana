@@ -13,7 +13,7 @@ import {
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -70,7 +70,7 @@ const floorWorkers: Worker[] = [
 ];
 
 const darkWorker = createWorker({
-  id: SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  id: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   name: 'Continuous Threat Hunt',
   watchIds: [SYSTEM_SECURITY_WATCH_DARK_ID],
 });
@@ -135,7 +135,7 @@ describe('WatchDetailPage', () => {
     ).toBeInTheDocument();
     expect(
       screen.queryByTestId(
-        `pndWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
+        `pndWatchWorkerSection-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
       )
     ).not.toBeInTheDocument();
 
@@ -154,7 +154,7 @@ describe('WatchDetailPage', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_DARK_ID, [darkWorker, ...floorWorkers]);
 
     const section = screen.getByTestId(
-      `pndWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
+      `pndWatchWorkerSection-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
     );
     expect(section).toBeInTheDocument();
     expect(
@@ -162,7 +162,7 @@ describe('WatchDetailPage', () => {
     ).not.toBeInTheDocument();
     expect(
       within(section).getByTestId(
-        `pndWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
+        `pndWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
       )
     ).toBeInTheDocument();
     expect(within(section).getByTestId('pndAutonomySlider')).toBeInTheDocument();

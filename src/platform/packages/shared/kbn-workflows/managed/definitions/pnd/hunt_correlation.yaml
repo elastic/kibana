@@ -1,0 +1,74 @@
+version: "1"
+name: Continuous Threat Hunt - Correlation
+description: >
+  Untagged child workflow invoked by continuous_threat_hunt after hunt.
+  Correlates this report's hunt findings against other open Investigations
+  by shared anchors (IOC hashes, entity ids) and actors, then appends a
+  correlation event with related Proposal ids + a score matrix. Doesn't
+  touch Proposals directly — packaging reads this event to decide create vs.
+  dismiss.
+enabled: true
+tags: []
+triggers:
+  - type: manual
+inputs:
+  additionalProperties: false
+  properties:
+    report_id:
+      description: Threat report id (hunt:report:{report_id}).
+      type: string
+    investigation_id:
+      description: Conversation id of the report's Investigation.
+      type: string
+  required:
+    - report_id
+    - investigation_id
+steps:
+  # This report's own hunt findings, appended earlier in the same branch.
+  - name: get_hunt_findings
+    type: kibana.request
+    with:
+      request:
+        method: GET
+        # TODO(follow-up): route does not exist yet. pnd's investigations
+        # routes today are GET-only for list/get, but there is no per-kind
+        # events filter route.
+        path: /internal/pnd/investigations/{{ inputs.investigation_id }}/events?kind=hunt
+
+  # Other open Investigations/alerts sharing this report's IOC set hash.
+  - name: search_by_anchors
+    type: elasticsearch.search
+    with:
+      index: ".alerts-security.alerts-*"
+      size: 50
+      query:
+        bool:
+          filter:
+            - terms:
+                threat.indicator.ioc_set_hash: "{{ steps.get_hunt_findings.output.ioc_set_hash | json }}"
+
+  # Other open Investigations/alerts sharing this report's affected entities.
+  - name: search_by_actors
+    type: elasticsearch.search
+    with:
+      index: ".alerts-security.alerts-*"
+      size: 50
+      query:
+        bool:
+          filter:
+            - terms:
+                related.entity: "{{ steps.get_hunt_findings.output.affected_entities | json }}"
+
+  # Related Proposal ids + a technique x entity score matrix for packaging.
+  - name: append_correlation_event
+    type: kibana.request
+    with:
+      request:
+        method: POST
+        # TODO(follow-up): route does not exist yet, see get_hunt_findings above.
+        path: /internal/pnd/investigations/{{ inputs.investigation_id }}/events
+        body:
+          kind: correlation
+          report_id: "{{ inputs.report_id }}"
+          anchor_matches: "{{ steps.search_by_anchors.output.hits.hits | json }}"
+          actor_matches: "{{ steps.search_by_actors.output.hits.hits | json }}"

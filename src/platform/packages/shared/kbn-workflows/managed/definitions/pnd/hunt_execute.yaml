@@ -1,0 +1,95 @@
+version: "1"
+name: Continuous Threat Hunt - Hunt
+description: >
+  Untagged child workflow invoked by continuous_threat_hunt. Runs
+  hunt_coordinator (an internal service): Tier 1 deterministic lookup always,
+  Tier 2 LLM corroboration when Tier 1 finds candidates. Appends findings,
+  writes the SSE payload on a corroborated hit, and records hunt feedback.
+  Does not touch Proposals; packaging owns that.
+enabled: true
+tags: []
+triggers:
+  - type: manual
+inputs:
+  additionalProperties: false
+  properties:
+    report_id:
+      description: Threat report id this hunt pass runs against (hunt:report:{report_id}).
+      type: string
+    investigation_id:
+      description: Conversation id of the report's Investigation.
+      type: string
+    inference_endpoint_id:
+      description: >
+        Inference endpoint id for Tier 2 (from continuous_threat_hunt settings).
+        Empty string degrades to Tier 1 only.
+      type: string
+    tier2_when:
+      description: When to run Tier 2 (on_hits | always), from continuous_threat_hunt settings.
+      type: string
+  required:
+    - report_id
+    - investigation_id
+steps:
+  # Always runs Tier 1; gates Tier 2 on whether Tier 1 found candidates.
+  # TODO(follow-up): route does not exist yet. TI supply lives under
+  # security_solution's THREAT_INTEL_API_BASE (/internal/threat_intel), not
+  # under /internal/pnd.
+  - name: run_hunt_coordinator
+    type: kibana.request
+    with:
+      request:
+        method: POST
+        path: /internal/threat_intel/hunt_coordinator
+        body:
+          report_id: "{{ inputs.report_id }}"
+          inference_endpoint_id: "{{ inputs.inference_endpoint_id }}"
+          tier2_when: "{{ inputs.tier2_when }}"
+
+  # Tier 1 event = whole hunt_for_threat result bundle, one per run (not per
+  # IOC hit). Tier 2 event = corroboration output, when present. Always
+  # appended, hit or not.
+  - name: append_hunt_events
+    type: kibana.request
+    with:
+      request:
+        method: POST
+        # TODO(follow-up): route does not exist yet. pnd's investigations
+        # routes today are GET-only; there is no POST events/sse handler.
+        path: /internal/pnd/investigations/{{ inputs.investigation_id }}/events
+        body:
+          kind: hunt
+          report_id: "{{ inputs.report_id }}"
+          tier1: "{{ steps.run_hunt_coordinator.output.tier1 | json }}"
+          tier2: "{{ steps.run_hunt_coordinator.output.tier2 | default: null | json }}"
+
+  # Written on a corroborated hit. Fills a Proposal's metadata once one is
+  # created after correlation (title, severity, entities, evidence, etc).
+  - name: write_sse_payload
+    type: kibana.request
+    if: "${{ steps.run_hunt_coordinator.output.corroborated_hit == true }}"
+    with:
+      request:
+        method: POST
+        # TODO(follow-up): route does not exist yet, see append_hunt_events above.
+        path: /internal/pnd/investigations/{{ inputs.investigation_id }}/sse
+        body:
+          report_id: "{{ inputs.report_id }}"
+          sse: "{{ steps.run_hunt_coordinator.output.sse | json }}"
+
+  # Writes last_hunted_at, rank score, status, and run id to the shared
+  # threat-report store.
+  # TODO(follow-up): route does not exist yet. TI supply lives under
+  # security_solution's THREAT_INTEL_API_BASE (/internal/threat_intel), not
+  # under /internal/pnd.
+  - name: write_hunt_feedback
+    type: kibana.request
+    with:
+      request:
+        method: POST
+        path: /internal/threat_intel/reports/{{ inputs.report_id }}/hunt_feedback
+        body:
+          last_hunted_at: "{{ execution.startedAt }}"
+          corroborated_rank_score: "{{ steps.run_hunt_coordinator.output.corroborated_rank_score }}"
+          last_hunt_status: "{{ steps.run_hunt_coordinator.output.status }}"
+          last_hunt_run_id: "{{ execution.id }}"

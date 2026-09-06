@@ -6,7 +6,7 @@
  */
 
 import {
-  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerSettings,
 } from '@kbn/pnd-common';
@@ -31,7 +31,7 @@ describe('createWorkerSettingsRegistration', () => {
 
   it('does not silently strip projected keys', () => {
     const registration = createWorkerSettingsRegistration(
-      SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID
+      SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
     );
     const projected = registration.toSettings(registration.createDefaultValues());
     const parsed = WorkerSettings.parse(projected);

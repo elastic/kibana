@@ -116,7 +116,7 @@ Managed Worker definitions:
 
 - `system-security-floor-alert-triage`
 - `system-security-floor-attack-discovery`
-- `system-security-dark-continuous-threat-hunt`
+- `system-security-hunt-continuous-threat-hunt`
 - `system-security-detection-rule-tuning`
 - `system-security-detection-rule-creation`
 
