@@ -4,7 +4,7 @@
     "outDir": "target/types",
     "types": ["jest", "node"]
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "persona_matrix.config.json"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agent-builder-common",

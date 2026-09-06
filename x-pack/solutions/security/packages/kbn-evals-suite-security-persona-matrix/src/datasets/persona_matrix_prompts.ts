@@ -39,6 +39,11 @@ export interface PersonaMatrixExample {
     expectedSkill?: string;
     expectedTools?: string[];
     /**
+     * Whether the declared tool sequence is a rankable contract. "probe" is
+     * intentionally open-ended and returns N/A from the trajectory evaluator.
+     */
+    pathContract?: 'rankable' | 'candidate' | 'probe';
+    /**
      * Additional registered skill ids that also satisfy the skill assertion.
      * Scored as a union with `expectedSkill`: loading any one of them passes.
      */
@@ -89,11 +94,16 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'than dismissal, citing entity risk context and any Security Labs research on the technique.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
+      // security.entity_risk_score is force-disabled under
+      // agentBuilder:experimentalFeatures (skills), which this suite always
+      // enables; the entity-risk context for point-in-time triage comes from
+      // security.get_entity's profile instead.
       expectedTools: [
         'attachments.read',
         'security.alerts',
-        'security.entity_risk_score',
+        'security.get_entity',
         'security.security_labs_search',
       ],
       severity: 'high',
@@ -118,8 +128,11 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'using entity risk scoring to justify the disposition rather than treating each alert in isolation.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
-      expectedTools: ['security.alerts', 'security.entity_risk_score'],
+      // entity_risk_score is unavailable under the skills flag (see above);
+      // disposition risk context comes from the get_entity profile.
+      expectedTools: ['security.alerts', 'security.get_entity'],
       severity: 'high',
       tags: ['triage', 'host-queue'],
     },
@@ -141,12 +154,11 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'technique/malware family to ground the false-positive-vs-true-positive call in external evidence.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
-      expectedTools: [
-        'security.alerts',
-        'security.security_labs_search',
-        'security.entity_risk_score',
-      ],
+      // entity_risk_score is unavailable under the skills flag (see above);
+      // the baseline-vs-pattern risk check comes from the get_entity profile.
+      expectedTools: ['security.alerts', 'security.security_labs_search', 'security.get_entity'],
       severity: 'medium',
       tags: ['triage', 'noise'],
     },
@@ -238,8 +250,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'summarizes recent risk-contributing activity for srv-win-defend-01.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'entity-analytics',
-      expectedTools: ['security.get_entity', 'security.entity_risk_score'],
+      // security.entity_risk_score is force-disabled whenever
+      // agentBuilder:experimentalFeatures (skills) is on — which the persona
+      // matrix always runs with — so it can never be invoked here. Risk data
+      // comes from get_entity plus, for the "unusual behavior tied to it"
+      // phrasing, the risk score history tool.
+      expectedTools: ['security.get_entity', 'security.get_entity_risk_score_history'],
       severity: 'medium',
       tags: ['entity', 'host-profile'],
     },
@@ -259,6 +277,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'entity, then looks up that entity in detail to produce a profile.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'entity-analytics',
       expectedTools: ['security.search_entities', 'security.get_entity'],
       severity: 'medium',
@@ -282,8 +301,12 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'generic answer.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'entity-analytics',
-      expectedTools: ['security.get_entity', 'security.entity_risk_score'],
+      // Same skills-precedence constraint as entity-analytics-a: risk history
+      // comes from get_entity_risk_score_history, which stays available under
+      // the experimental-features flag that the suite needs for skills.
+      expectedTools: ['security.get_entity', 'security.get_entity_risk_score_history'],
       severity: 'medium',
       tags: ['entity', 'history'],
     },
@@ -316,11 +339,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'recommendation with the IOCs called out.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
       expectedTools: [
         'attachments.read',
         'security.security_labs_search',
-        'security.entity_risk_score',
+        // entity_risk_score is unavailable under the skills flag (see
+        // alert-analysis-a); the risk signal comes from the get_entity profile.
+        'security.get_entity',
       ],
       severity: 'critical',
       tags: ['multi-step', 'orchestration'],
@@ -346,6 +372,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'each step taken.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
       allowSkills: ['cases-management'],
       expectedTools: ['security.security_labs_search', 'platform.core.cases'],
@@ -372,13 +399,16 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'the hunt confirms a true positive — explicitly stating when it does not escalate.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
       allowSkills: ['threat-hunting'],
       expectedTools: [
         'security.alerts',
         'platform.core.generate_esql',
         'platform.core.execute_esql',
-        'security.entity_risk_score',
+        // entity_risk_score is unavailable under the skills flag (see
+        // alert-analysis-a); the risk signal comes from the get_entity profile.
+        'security.get_entity',
       ],
       severity: 'critical',
       tags: ['multi-step', 'conditional-escalation'],
@@ -400,6 +430,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'load events across hosts, then reports which hosts/processes show the pattern (or that none do).',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'threat-hunting',
       expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
       severity: 'high',
@@ -422,6 +453,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'telemetry for the named IOAs, and narrates each query and its result as it builds the picture.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'threat-hunting',
       expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
       severity: 'high',
@@ -445,6 +477,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'a specific IOC upfront.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'threat-hunting',
       expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
       severity: 'medium',

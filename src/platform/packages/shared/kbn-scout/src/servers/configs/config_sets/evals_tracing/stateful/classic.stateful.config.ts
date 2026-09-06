@@ -97,6 +97,15 @@ const { TRACING_EXPORTERS: tracingExporters } = process.env;
 if (tracingExporters) {
   JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
 }
+// Agent Builder maintains its own tracer provider (register_tracing.ts) whose
+// spans back the trace-based evaluators. It always exports to the LOCAL ES via
+// ElasticsearchOtlpExporter; entries here are APPENDED, so setting this adds a
+// remote destination (e.g. the golden cluster) without losing local fidelity.
+const { AGENT_BUILDER_TRACING_EXPORTERS: agentBuilderTracingExporters } = process.env;
+if (agentBuilderTracingExporters) {
+  JSON.parse(agentBuilderTracingExporters); // validate parseable JSON; throws early if malformed
+}
+
 const isCi = Boolean(process.env.CI);
 const shouldEnableTracing = Boolean(tracingExporters) || !isCi;
 const exporters = tracingExporters ?? defaultExporters;
@@ -141,6 +150,9 @@ export const servers: ScoutServerConfig = {
             '--telemetry.tracing.enabled=true',
             '--telemetry.tracing.sample_rate=1',
             `--telemetry.tracing.exporters=${exporters}`,
+            ...(agentBuilderTracingExporters
+              ? [`--xpack.agentBuilder.tracing.exporters=${agentBuilderTracingExporters}`]
+              : []),
           ]
         : []),
     ],
