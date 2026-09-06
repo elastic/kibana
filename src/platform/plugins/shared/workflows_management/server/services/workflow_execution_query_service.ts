@@ -792,7 +792,11 @@ export class WorkflowExecutionQueryService {
     }
   }
 
-  /** Returns the claimable HITL wait step currently blocking the run. */
+  /**
+   * Returns the HITL wait step currently blocking the run, whether or not it
+   * has already been claimed, so the atomic `markStepAsResponded` write stays
+   * the single first-writer-wins arbiter for concurrent resumes.
+   */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
       const response = (await this.deps.stepExecutionsDataClient.search({
@@ -804,10 +808,7 @@ export class WorkflowExecutionQueryService {
               { terms: { stepType: ['waitForInput', 'waitForApproval'] } },
               { term: { status: 'waiting_for_input' } },
             ],
-            must_not: [
-              { exists: { field: 'finishedAt' } },
-              { exists: { field: 'hitl.respondedAt' } },
-            ],
+            must_not: [{ exists: { field: 'finishedAt' } }],
           },
         },
         _source: ['id'],
