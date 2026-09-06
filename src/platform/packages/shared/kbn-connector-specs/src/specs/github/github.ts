@@ -516,6 +516,7 @@ export const GithubConnector: ConnectorSpec = {
   },
 
   test: {
+    enabled: true,
     description: i18n.translate('connectorSpecs.github.test.description', {
       defaultMessage:
         'Verifies MCP connectivity and GitHub GraphQL API access for ingest workflows.',
@@ -529,7 +530,6 @@ export const GithubConnector: ConnectorSpec = {
       const { login } = await executeGraphQLViewer({ ctx });
 
       return {
-        ok: true,
         message: i18n.translate('connectorSpecs.github.test.successMessage', {
           defaultMessage:
             'Connected to GitHub MCP ({mcpToolCount} tools) and GraphQL API (viewer: {login}).',

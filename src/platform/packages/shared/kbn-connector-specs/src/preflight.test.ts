@@ -34,11 +34,13 @@ const mockConnector: ConnectorSpec = {
   actions: {
     listIssues: {
       isTool: false,
+      scope: "read",
       input: z.object({}),
       handler: jest.fn().mockResolvedValue({}),
     },
     createIssue: {
       isTool: true,
+      scope: "read",
       input: z.object({}),
       handler: jest.fn().mockResolvedValue({}),
     },

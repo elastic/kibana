@@ -13,8 +13,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   {
     id: 'orgCatalog.repos',
     description: 'List repositories for a GitHub organization with cursor pagination.',
-    pageInfoPath: 'organization.repositories',
-    query: `
+    resultPath: 'organization.repositories',
+    document: `
       query OrgCatalogRepos($org: String!, $first: Int!, $after: String) {
         organization(login: $org) {
           repositories(first: $first, after: $after, orderBy: { field: PUSHED_AT, direction: DESC }) {
@@ -64,8 +64,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   {
     id: 'orgCatalog.teams',
     description: 'List teams for a GitHub organization with cursor pagination.',
-    pageInfoPath: 'organization.teams',
-    query: `
+    resultPath: 'organization.teams',
+    document: `
       query OrgCatalogTeams($org: String!, $first: Int!, $after: String) {
         organization(login: $org) {
           teams(first: $first, after: $after) {
@@ -99,8 +99,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   {
     id: 'orgCatalog.teamMembers',
     description: 'List members of a GitHub organization team with cursor pagination.',
-    pageInfoPath: 'organization.team.members',
-    query: `
+    resultPath: 'organization.team.members',
+    document: `
       query OrgCatalogTeamMembers($org: String!, $teamSlug: String!, $first: Int!, $after: String) {
         organization(login: $org) {
           team(slug: $teamSlug) {
@@ -126,8 +126,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   {
     id: 'orgCatalog.members',
     description: 'List members of a GitHub organization with role information.',
-    pageInfoPath: 'organization.membersWithRole',
-    query: `
+    resultPath: 'organization.membersWithRole',
+    document: `
       query OrgCatalogMembers($org: String!, $first: Int!, $after: String) {
         organization(login: $org) {
           membersWithRole(first: $first, after: $after) {
@@ -154,8 +154,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   {
     id: 'orgCatalog.projects',
     description: 'List GitHub Projects v2 for an organization with cursor pagination.',
-    pageInfoPath: 'organization.projectsV2',
-    query: `
+    resultPath: 'organization.projectsV2',
+    document: `
       query OrgCatalogProjects($org: String!, $first: Int!, $after: String) {
         organization(login: $org) {
           projectsV2(first: $first, after: $after) {
@@ -183,8 +183,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
     id: 'orgCatalog.projectViews',
     description:
       'List saved views for a GitHub Project v2 by project node id. Pass projectId from orgCatalog.projects.',
-    pageInfoPath: 'node.views',
-    query: `
+    resultPath: 'node.views',
+    document: `
       query OrgCatalogProjectViews($projectId: ID!, $first: Int!, $after: String) {
         node(id: $projectId) {
           ... on ProjectV2 {
@@ -212,8 +212,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
     id: 'orgCatalog.projectItems',
     description:
       'List items for a GitHub Project v2 by project node id with cursor pagination. Pass projectId from orgCatalog.projects.',
-    pageInfoPath: 'node.items',
-    query: `
+    resultPath: 'node.items',
+    document: `
       query OrgCatalogProjectItems($projectId: ID!, $first: Int!, $after: String) {
         node(id: $projectId) {
           ... on ProjectV2 {
@@ -359,8 +359,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
     id: 'activity.searchIssues',
     description:
       'Search issues org-wide. Pass a GitHub search query (e.g. "org:elastic updated:>2026-06-01 -is:pr").',
-    pageInfoPath: 'search',
-    query: `
+    resultPath: 'search',
+    document: `
       query ActivitySearchIssues($query: String!, $first: Int!, $after: String) {
         search(type: ISSUE, query: $query, first: $first, after: $after) {
           issueCount
@@ -403,8 +403,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
     id: 'activity.searchPullRequests',
     description:
       'Search pull requests org-wide. Pass a GitHub search query (e.g. "org:elastic is:pr updated:>2026-06-01").',
-    pageInfoPath: 'search',
-    query: `
+    resultPath: 'search',
+    document: `
       query ActivitySearchPullRequests($query: String!, $first: Int!, $after: String) {
         search(type: ISSUE, query: $query, first: $first, after: $after) {
           issueCount
@@ -453,7 +453,7 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
     id: 'graph.issueGraph',
     description:
       'Fetch an issue with parent issue, sub-issues, and comments for linkage enrichment.',
-    query: `
+    document: `
       query GraphIssue($owner: String!, $repo: String!, $number: Int!) {
         repository(owner: $owner, name: $repo) {
           issue(number: $number) {
@@ -506,7 +506,7 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   {
     id: 'graph.pullRequestGraph',
     description: 'Fetch a pull request with reviews, review threads, and linked closing issues.',
-    query: `
+    document: `
       query GraphPullRequest($owner: String!, $repo: String!, $number: Int!) {
         repository(owner: $owner, name: $repo) {
           pullRequest(number: $number) {

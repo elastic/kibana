@@ -11,7 +11,6 @@ import { isError } from 'lodash';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ActionContext } from '../../../connector_spec';
 import type {
-  GitHubGraphQLPageInfo,
   GitHubGraphQLRateLimit,
   GitHubGraphQLRequestBody,
   GitHubGraphQLResponseBody,

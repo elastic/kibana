@@ -481,14 +481,12 @@ describe('GithubConnector', () => {
         throw new Error('test handler not defined');
       }
       const result = (await GithubConnector.test.handler(mockContext)) as {
-        ok: boolean;
         mcpToolCount: number;
         graphqlViewer: string;
       };
 
       expect(mockListTools).toHaveBeenCalled();
       expect(mockExecuteGraphQLViewer).toHaveBeenCalledWith({ ctx: mockContext });
-      expect(result.ok).toBe(true);
       expect(result.mcpToolCount).toBe(2);
       expect(result.graphqlViewer).toBe('elastic-bot');
     });

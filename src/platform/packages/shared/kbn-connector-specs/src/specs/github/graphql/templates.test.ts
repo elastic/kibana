@@ -31,25 +31,25 @@ describe('github graphql templates', () => {
 
   it('returns a template by id', () => {
     const template = getGitHubQueryTemplate('orgCatalog.repos');
-    expect(template.pageInfoPath).toBe('organization.repositories');
-    expect(template.query).toContain('OrgCatalogRepos');
+    expect(template.resultPath).toBe('organization.repositories');
+    expect(template.document).toContain('OrgCatalogRepos');
   });
 
   it('queries org member role on OrganizationMemberEdge, not User', () => {
     const template = getGitHubQueryTemplate('orgCatalog.members');
-    expect(template.pageInfoPath).toBe('organization.membersWithRole');
-    expect(template.query).toContain('membersWithRole');
-    expect(template.query).toMatch(/edges\s*\{[\s\S]*role[\s\S]*node\s*\{/);
-    expect(template.query).not.toMatch(/nodes\s*\{[\s\S]*role/);
-    expect(template.query).not.toMatch(/user\s*\{/);
+    expect(template.resultPath).toBe('organization.membersWithRole');
+    expect(template.document).toContain('membersWithRole');
+    expect(template.document).toMatch(/edges\s*\{[\s\S]*role[\s\S]*node\s*\{/);
+    expect(template.document).not.toMatch(/nodes\s*\{[\s\S]*role/);
+    expect(template.document).not.toMatch(/user\s*\{/);
   });
 
   it('loads project item field names for users, milestones, and iterations', () => {
     const template = getGitHubQueryTemplate('orgCatalog.projectItems');
-    expect(template.query).toContain('fieldValues(first: 50)');
-    expect(template.query).toContain('ProjectV2ItemFieldUserValue');
-    expect(template.query).toContain('ProjectV2ItemFieldMilestoneValue');
-    expect(template.query).toContain('ProjectV2ItemFieldIterationValue');
+    expect(template.document).toContain('fieldValues(first: 50)');
+    expect(template.document).toContain('ProjectV2ItemFieldUserValue');
+    expect(template.document).toContain('ProjectV2ItemFieldMilestoneValue');
+    expect(template.document).toContain('ProjectV2ItemFieldIterationValue');
   });
 
   it('throws for unknown template ids', () => {
