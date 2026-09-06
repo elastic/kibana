@@ -63,8 +63,11 @@ export function httpHandlerFromKbnClient({
 
     const finalHeaders = Object.keys(nextHeaders).length ? nextHeaders : undefined;
 
-    const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '0') || 0;
-    const retryStatuses = new Set([429, 503, 504]);
+    const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '3') || 0;
+    // 500 is retryable because reasoning models (e.g. GLM 5.2, Gemini 3.7 Flash)
+    // can cause Kibana's converse endpoint to return HTTP 500 "Request timed out"
+    // when the model takes longer than the internal request timeout.
+    const retryStatuses = new Set([429, 500, 503, 504]);
 
     async function sleep(ms: number) {
       await new Promise((r) => setTimeout(r, ms));

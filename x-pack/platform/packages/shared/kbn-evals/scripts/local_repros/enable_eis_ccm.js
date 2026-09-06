@@ -128,14 +128,58 @@ async function main() {
     'content-type': 'application/json',
   };
 
+  // Wait for the .ccm-inference index shard to be active before attempting
+  // the PUT. On a freshly booted ES cluster the index is created lazily and
+  // its primary shard may not be assigned yet, causing the PUT to fail with
+  // HTTP 500 ("no_shard_available_action_exception") or 503.
+  process.stdout.write('Waiting for .ccm-inference index to be ready...\n');
+  for (let idxAttempt = 1; idxAttempt <= 30; idxAttempt++) {
+    try {
+      const idxResp = await fetchJson({
+        method: 'GET',
+        url: `${esUrl}/_cat/indices/.ccm-inference?h=status`,
+        headers: { authorization: auth },
+      });
+      const idxStatus = String(idxResp).trim();
+      if (idxStatus.includes('green') || idxStatus.includes('yellow')) {
+        process.stdout.write(`.ccm-inference index ready (status=${idxStatus})\n`);
+        break;
+      }
+    } catch {
+      // Index may not exist yet — try creating it explicitly
+    }
+    if (idxAttempt === 30) {
+      process.stdout.write(`.ccm-inference not ready after 30 attempts; trying PUT anyway\n`);
+    } else {
+      process.stdout.write(`Waiting for .ccm-inference (${idxAttempt}/30)...\n`);
+      await sleep(10_000);
+    }
+  }
+
+  // Enable CCM with retry — the PUT _inference/_ccm can fail with 503 when
+  // the .ccm-inference index shard is still initializing even after the
+  // index appears in _cat/indices.
   process.stdout.write(`Enabling CCM on ${esUrl}\n`);
-  await fetchJson({
-    method: 'PUT',
-    url: `${esUrl}/_inference/_ccm`,
-    headers,
-    body: { api_key: apiKey },
-  });
-  process.stdout.write('CCM enabled.\n');
+  const maxCcmAttempts = 10;
+  for (let ccmAttempt = 1; ccmAttempt <= maxCcmAttempts; ccmAttempt++) {
+    try {
+      await fetchJson({
+        method: 'PUT',
+        url: `${esUrl}/_inference/_ccm`,
+        headers,
+        body: { api_key: apiKey },
+      });
+      process.stdout.write('CCM enabled.\n');
+      break;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      process.stdout.write(`CCM attempt ${ccmAttempt}/${maxCcmAttempts} failed: ${msg}\n`);
+      if (ccmAttempt === maxCcmAttempts) {
+        throw err;
+      }
+      await sleep(5_000);
+    }
+  }
 
   process.stdout.write('Waiting for EIS chat_completion endpoints...\n');
   for (let attempt = 1; attempt <= retries; attempt++) {

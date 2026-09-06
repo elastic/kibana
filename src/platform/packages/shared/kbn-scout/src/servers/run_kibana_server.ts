@@ -33,6 +33,21 @@ export function getExtraKbnOpts(installDir: string | undefined, isServerless: bo
 
   return [
     '--dev',
+    // Long eval runs must not be restarted by the dev file watcher: a mid-run
+    // restart can fail to come back up and kills every in-flight request.
+    ...(process.env.SCOUT_KBN_NO_WATCH === '1' ? ['--no-watch'] : []),
+    ...(process.env.SCOUT_KBN_TRACING_UI === '1'
+      ? [
+          '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
+          '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',
+          '--uiSettings.overrides.agentBuilder:tracing:includeLlmResponses=true',
+          '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
+          '--uiSettings.overrides.agentBuilder:tracing:includeSystemPrompt=true',
+          '--uiSettings.overrides.agentBuilder:tracing:includeRealNames=true',
+          '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
+          '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true',
+        ]
+      : []),
     '--no-dev-config',
     '--no-dev-credentials',
     isServerless

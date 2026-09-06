@@ -1,0 +1,27 @@
+{
+  "source": "manual",
+  "recipe": {
+    "name": "Kibana",
+    "kind": "node",
+    "bootstrap": [
+      "yarn kbn bootstrap"
+    ],
+    "build": [
+      "node scripts/build_kibana_platform_plugins.js"
+    ],
+    "test": [
+      "bash scripts/kbn-verify.sh"
+    ],
+    "start": "echo 'Kibana start skipped — use yarn start separately'",
+    "port": null,
+    "readinessPath": "/",
+    "evidence": [
+      "Manual override for Kibana-native verification",
+      "Uses yarn kbn bootstrap instead of yarn install",
+      "Uses scripts/kbn-verify.sh which auto-detects changed files from git diff",
+      "Scopes type_check to changed packages only (not whole repo)",
+      "Scopes eslint to changed files only (never runs whole-repo lint)",
+      "Runs JS syntax check on changed .js files"
+    ]
+  }
+}
