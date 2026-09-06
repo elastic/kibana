@@ -1,0 +1,15 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "jsx": "react",
+    "types": ["jest", "node", "react"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "kbn_references": [
+    "@kbn/adaptive-ui",
+    "@kbn/alerting-v2-schemas",
+    "@kbn/agent-builder-common"
+  ],
+  "exclude": ["target/**/*"]
+}

@@ -11,12 +11,10 @@ import {
   significantEventFixture,
   significantEventSpec,
   type SignificantEventInput,
-} from '../../common/adapters/sig_event';
+} from '@kbn/adaptive-ui-adapters';
 import { registeredViewIds } from '../../common/constants';
 
-// The `SignificantEvent` → `ViewSpec` mapping is isomorphic (plain builders), so
-// it lives in `common/adapters/sig_event.ts` where both this registered view and
-// the `platform.sig_event` attachment adapter share it.
+// Shared with the `platform.sig_event` attachment adapter in `@kbn/adaptive-ui-adapters`.
 export {
   buildSignificantEventSpec,
   significantEventFixture,

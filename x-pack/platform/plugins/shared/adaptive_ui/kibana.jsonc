@@ -18,7 +18,6 @@
       "agentBuilder"
     ],
     "requiredBundles": [],
-    "optionalPlugins": [],
-    "extraPublicDirs": []
+    "optionalPlugins": []
   }
 }
