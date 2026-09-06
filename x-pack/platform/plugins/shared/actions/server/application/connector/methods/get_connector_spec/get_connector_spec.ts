@@ -52,6 +52,12 @@ export async function getConnectorSpecAsJsonSchema({
       metadata: serialized.metadata,
       schema: serialized.schema,
       isTestable: Boolean(spec.test.enabled),
+      actions: Object.entries(spec.actions).map(([name, def]) => ({
+        name,
+        isTool: Boolean(def.isTool),
+        ...(def.description !== undefined ? { description: def.description } : {}),
+        ...(def.scope !== undefined ? { scope: def.scope } : {}),
+      })),
     };
   } catch (error) {
     throw new Error(

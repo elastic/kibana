@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isSelectedActionEnabled } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import type { ConnectorInstance, ConnectorTypeInfo } from '@kbn/workflows';
@@ -75,6 +76,12 @@ export function getConnectorInstancesForType(
         if (taskType) {
           instances = instances.filter(({ config }) => config?.taskType === taskType);
         }
+      }
+      // Filter out instances where this sub-action is not permitted
+      if (subAction) {
+        instances = instances.filter(({ config }) =>
+          isSelectedActionEnabled(subAction, config?.selectedActions)
+        );
       }
 
       // Return the connector instances for the specific action type ID

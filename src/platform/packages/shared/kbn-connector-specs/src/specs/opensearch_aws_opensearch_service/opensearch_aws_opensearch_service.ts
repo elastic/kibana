@@ -284,7 +284,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     createMonitor: {
       // Not a tool: creates new detection logic (an admin-style operation), workflow steps only.
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description:
         'Create a new OpenSearch Alerting monitor (query-level, bucket-level, or doc-level) to stand up detection, e.g. as part of an automated onboarding workflow. See the "inputs" and "triggers" parameter descriptions for the exact shape each monitor type expects.',

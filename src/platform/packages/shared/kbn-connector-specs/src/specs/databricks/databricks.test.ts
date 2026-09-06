@@ -213,8 +213,8 @@ describe('Databricks', () => {
   });
 
   describe('listTools action', () => {
-    it('is not exposed as a tool (workflow-only)', () => {
-      expect(Databricks.actions.listTools.isTool).toBe(false);
+    it('is exposed as a tool', () => {
+      expect(Databricks.actions.listTools.isTool).toBe(true);
     });
 
     it('returns the list of available tools', async () => {
@@ -229,8 +229,8 @@ describe('Databricks', () => {
   });
 
   describe('callTool action', () => {
-    it('is not exposed as a tool (workflow-only)', () => {
-      expect(Databricks.actions.callTool.isTool).toBe(false);
+    it('is exposed as a tool', () => {
+      expect(Databricks.actions.callTool.isTool).toBe(true);
     });
 
     it('calls the named tool with provided arguments', async () => {

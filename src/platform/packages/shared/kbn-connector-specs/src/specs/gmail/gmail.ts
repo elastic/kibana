@@ -450,7 +450,7 @@ export const GmailConnector: ConnectorSpec = {
       // the receiving MTA, and carries the user's identity to third parties.
       // Workflow steps only, so a human authored the send step.
       // Requires OAuth 2.0 authorization code auth with gmail.modify scope.
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description:
         "Send an email from the authenticated user's Gmail account. Irreversible once accepted by the receiving mail server. Supports plain text and HTML bodies. No attachments in v1. Not available with Elastic managed authentication.",
@@ -488,7 +488,7 @@ export const GmailConnector: ConnectorSpec = {
       // Deliberately not a tool: same rationale as sendMessage — outbound email
       // is irreversible and leaves the organisation.
       // Requires OAuth 2.0 authorization code auth with gmail.modify scope.
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description:
         'Send a reply to an existing Gmail message, preserving the thread. The handler fetches the original message to extract threading headers (In-Reply-To, References) and to determine the default reply-to address from Reply-To or From. Pass "to" explicitly to override the recipient. Not available with Elastic managed authentication.',

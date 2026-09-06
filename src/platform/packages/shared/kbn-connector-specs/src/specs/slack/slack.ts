@@ -987,7 +987,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/conversations.create
     createConversation: {
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description:
         'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
@@ -1042,7 +1042,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/conversations.invite
     inviteToConversation: {
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,

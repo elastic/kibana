@@ -30,6 +30,16 @@ import { z } from '@kbn/zod/v4';
 // Import the singleton instance of StepSchemas
 import { stepSchemas } from './step_schemas';
 
+// Lazily loaded — same boundary as getConnectorSchemas() to avoid eagerly pulling
+// @kbn/connector-specs at startup (see #264175).
+let _connectorSpecsModule: typeof import('@kbn/connector-specs') | null = null;
+function getConnectorSpecsModule(): typeof import('@kbn/connector-specs') {
+  if (_connectorSpecsModule === null) {
+    _connectorSpecsModule = require('@kbn/connector-specs');
+  }
+  return _connectorSpecsModule as typeof import('@kbn/connector-specs');
+}
+
 // Defers ~16 MB of zod-schema heap until the first workflow edit/execute call.
 // connector_action_schema.ts eagerly builds Maps of Zod schemas from
 // stack_connectors_schema/* and @kbn/connector-specs; keeping it behind a
@@ -208,6 +218,18 @@ function convertDynamicConnectorsToContractsInternal(
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
         connectorType.subActions.forEach((subAction) => {
+          const hasPermittedInstance =
+            connectorType.instances.length === 0 ||
+            connectorType.instances.some(({ config }) =>
+              getConnectorSpecsModule().isSelectedActionEnabled(
+                subAction.name,
+                config?.selectedActions
+              )
+            );
+          if (!hasPermittedInstance) {
+            return;
+          }
+
           // Create type name: actionTypeId.subActionName (e.g., "inference.completion")
           const subActionType = `${connectorTypeName}.${subAction.name}`;
 

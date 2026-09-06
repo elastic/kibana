@@ -158,7 +158,7 @@ describe('BigQuery', () => {
   });
 
   describe('executeQuery', () => {
-    it('should be workflow-only and allow dry runs', async () => {
+    it('should be agent-accessible (HITL recommended before execution) and allow dry runs', async () => {
       mockClient.post.mockResolvedValue({
         data: {
           jobComplete: true,
@@ -166,7 +166,7 @@ describe('BigQuery', () => {
         },
       });
 
-      expect(BigQuery.actions.executeQuery.isTool).toBe(false);
+      expect(BigQuery.actions.executeQuery.isTool).toBe(true);
 
       const result = await BigQuery.actions.executeQuery.handler(mockContext, {
         query: 'CREATE TEMP TABLE t AS SELECT 1',

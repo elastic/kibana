@@ -6,7 +6,11 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import {
+  filterActionsBySelection,
+  getConnectorSpec,
+  type SelectedActions,
+} from '@kbn/connector-specs';
 import type { ConnectorItem, ConnectorSubAction, OAuthStatus } from '../../common/http_api/tools';
 
 export const getTechnicalPreviewWarning = (featureName: string) => {
@@ -29,12 +33,17 @@ export const getSSEResponseHeaders = (): Record<string, string> => ({
   'X-Accel-Buffering': 'no',
 });
 
-export const getConnectorSubActions = (actionTypeId: string): ConnectorSubAction[] => {
+export const getConnectorSubActions = (
+  actionTypeId: string,
+  selectedActions?: SelectedActions
+): ConnectorSubAction[] => {
   const spec = getConnectorSpec(actionTypeId);
   if (!spec) return [];
-  return Object.entries(spec.actions)
-    .filter(([name]) => isToolAction(spec, name))
-    .map(([name, action]) => ({ name, description: action.description }));
+
+  return filterActionsBySelection(spec.actions, selectedActions).map(([name, action]) => ({
+    name,
+    description: action.description,
+  }));
 };
 
 export const toConnectorItem = (
@@ -43,6 +52,7 @@ export const toConnectorItem = (
     oauthStatus?: OAuthStatus;
   }
 ): ConnectorItem => {
+  const selectedActions = connector.config?.selectedActions as SelectedActions;
   return {
     id: connector.id,
     name: connector.name,
@@ -55,6 +65,6 @@ export const toConnectorItem = (
     config: connector.config,
     authMode: connector.authMode,
     oauthStatus: options?.oauthStatus,
-    subActions: getConnectorSubActions(connector.actionTypeId),
+    subActions: getConnectorSubActions(connector.actionTypeId, selectedActions),
   };
 };

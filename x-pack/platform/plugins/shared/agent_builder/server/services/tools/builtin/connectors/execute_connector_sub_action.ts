@@ -12,7 +12,12 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import {
+  getConnectorSpec,
+  isSelectedActionEnabled,
+  isToolAction,
+  type SelectedActions,
+} from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
 const connectorIdValidationMessage =
@@ -96,9 +101,11 @@ export const createExecuteConnectorSubActionTool = ({
 
     // Resolve the connector type from the connector ID
     let connectorType: string;
+    let selectedActions: SelectedActions;
     try {
       const connector = await actionsClient.get({ id: connectorId });
       connectorType = connector.actionTypeId;
+      selectedActions = connector.config?.selectedActions as SelectedActions;
     } catch (error) {
       return {
         results: [
@@ -125,14 +132,28 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
-    // Validate that the sub-action is marked as a tool in the connector spec
+    // Reject workflow-only actions — isTool: false actions are not callable by agents.
     if (!isToolAction(spec, subAction)) {
       return {
         results: [
           createErrorResult({
             message:
-              `Sub-action '${subAction}' is not available as a tool on connector type '${connectorType}'. ` +
-              'Read the connector attachment to find the correct sub-action names.',
+              `Sub-action '${subAction}' is not available as an agent tool for connector '${connectorId}'. ` +
+              'It can only be called from a workflow.',
+            metadata: { connectorId, connectorType, subAction },
+          }),
+        ],
+      };
+    }
+
+    // Enforce instance allowlist / recommended-mode rules.
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+      return {
+        results: [
+          createErrorResult({
+            message:
+              `Sub-action '${subAction}' is not enabled for connector '${connectorId}'. ` +
+              'Read the connector attachment to find the allowed sub-action names.',
             metadata: { connectorId, connectorType, subAction },
           }),
         ],

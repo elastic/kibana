@@ -115,6 +115,23 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result.metadata).toHaveProperty('displayName');
     expect(result.metadata).toHaveProperty('supportedFeatureIds');
     expect(result).toHaveProperty('schema');
+    expect(result).toHaveProperty('actions');
+    expect(Array.isArray(result.actions)).toBe(true);
+  });
+
+  it('returns actions with name and isTool fields', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.pagerduty_mcp',
+      configurationUtilities,
+    });
+    expect(result.actions.length).toBeGreaterThan(0);
+    for (const action of result.actions) {
+      expect(action).toHaveProperty('name');
+      expect(typeof action.name).toBe('string');
+      expect(action).toHaveProperty('isTool');
+      expect(typeof action.isTool).toBe('boolean');
+    }
   });
 
   it('returns isTestable true when the spec opts in to testing', async () => {
