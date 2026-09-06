@@ -1,6 +1,6 @@
 # Examples
 
-Copy the nearest sibling in the target file. These snippets show the usual shape only.
+Copy the nearest sibling in the target file. These snippets show the usual shape only. If this setting's source defines a default, keep the `default` field even when the sibling omits it.
 
 ## New kibana.yml setting (self-managed, not on Cloud)
 
@@ -24,7 +24,7 @@ This setting is new in the product, so `stack` includes a version.
 
 ## Existing setting that was missing from the docs
 
-If the key already existed in the product and you are only adding the YAML, omit the version. That means all versions.
+If the key already existed in the product before 9.0 and you are only adding the YAML, omit the version. That means all 9.0+ versions.
 
 ```yaml
       - setting: xpack.example.legacy
@@ -195,7 +195,7 @@ GA, then deprecated. Keep the old key. Add `deprecation_details` when the replac
 
 ## Removal
 
-Keep the YAML entry. Do not delete it. Append `removed` and the version on `stack`. Keep the same deployment `ga` or `unavailable` values.
+If the setting existed on Stack, keep the YAML entry. Do not delete it. Append `removed` and the version on `stack`. This example is the usual case: the setting leaves Stack and serverless.
 
 ```yaml
         applies_to:
@@ -204,35 +204,51 @@ Keep the YAML entry. Do not delete it. Append `removed` and the version on `stac
           ece: ga
           eck: ga
           self: ga
-          serverless: ga
+          serverless: unavailable
         deprecation_details: "Use `example:newKey` instead."
 ```
 
-## Per-version default in the description
+If the setting existed only on serverless and is removed, delete the YAML entry. Serverless has no version history.
+
+## Previous default in a gated note
+
+Keep `default` as the current product value at HEAD. Put the previous value in a gated `note`. Do not list old defaults in the description, and do not omit `default`.
+
+```yaml
+        default: false
+        note: |
+          :applies_to: stack: ga 9.2-9.3
+          In these versions, this setting defaults to `true`.
+```
+
+## Version-scoped behavior in the description
+
+Use inline tags in the description for version-scoped behavior that is not the `default` field.
 
 ```yaml
         description: |
-          The UI theme that the {{kib}} UI should use.
+          Shows the example control in the editor.
 
-          The default value depends on your version:
-
-          * {applies_to}`stack: ga 9.5+` Defaults to `system`.
-          * {applies_to}`stack: ga 9.0-9.4` Defaults to `disabled`.
-        datatype: enum
-        options:
-          - option: enabled
-          - option: disabled
-          - option: system
+          {applies_to}`stack: ga 9.5+` The control is also available in Discover.
+        datatype: bool
+        default: true
 ```
 
 ## Gated note
 
-Put `:applies_to:` on the first line of `note`, `tip`, `warning`, or `important`. Do not add a `:::{note}` wrapper.
+Put `:applies_to:` on the first line of `note`, `tip`, `warning`, or `important`. Do not add a `:::{note}` wrapper. Use this for a previous default, and for extra admonition prose such as a version-scoped caveat. Use inline `{applies_to}` in the description for other version-scoped behavior.
+
+```yaml
+        default: 500MB
+        note: |
+          :applies_to: stack: ga 9.0-9.3
+          In these versions, this setting defaults to `100MB`.
+```
 
 ```yaml
         note: |
-          :applies_to: stack: ga 9.2-9.4
-          In these versions, this setting defaults to `true`.
+          :applies_to: stack: ga 9.6+
+          From this version, you can no longer turn the example feature on or off with this setting.
 ```
 
 ```yaml

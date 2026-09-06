@@ -22,11 +22,13 @@ This skill covers the docs YAML only.
 | **Stack Management → Advanced Settings → Space Settings** | `uiSettings.register()` (default `scope: 'namespace'`) | `docs/reference/advanced-settings-space.yml` | [Advanced settings](https://www.elastic.co/docs/reference/kibana/advanced-settings) |
 | **Advanced Settings → Global Settings** | `uiSettings.registerGlobal()` or `scope: 'global'` | `docs/reference/advanced-settings-global.yml` | Same page, **Change the global settings** |
 
-If you are unsure, search the implementation:
+If you are unsure, search the implementation on this checkout:
 
 ```bash
-git grep -n -- '<setting.key>' origin/main -- '*.ts' '*.tsx'
+git grep -n -- '<setting.key>' HEAD -- '*.ts' '*.tsx'
 ```
+
+If this branch does not add or change the setting, also grep Elastic `main`. If `origin` is `elastic/kibana`, that ref is `origin/main`. If you work from a fork, that ref is `upstream/main`.
 
 Look for `schema.object({` / `configPath` (`kibana.yml`) versus `uiSettings.register` / `registerGlobal` (Advanced Settings).
 
@@ -42,7 +44,7 @@ Copy this checklist and complete it in order:
 Task progress:
 - [ ] 1. Classify kibana.yml vs space vs global
 - [ ] 2. Find the YAML file (grep, then [file-map.md](references/file-map.md))
-- [ ] 3. Verify key, default, type, and availability from origin/main
+- [ ] 3. Verify key, default, type, and availability from the upstream origin/main, or from the current branch if that's where the setting itself is being added, modified, or removed
 - [ ] 4. Edit the YAML entry
 - [ ] 5. Update host Markdown, toc.yml, or Cloud include only if needed
 - [ ] 6. Tag applies_to (stack history + all deployment keys + serverless)
@@ -59,7 +61,7 @@ Use the table above. If the PR adds both a config-schema field and a `uiSettings
 Grep the existing YAML before you create a file:
 
 ```bash
-git grep -n -- '<prefix-or-key>' origin/main -- docs/reference
+git grep -n -- '<prefix-or-key>' HEAD -- docs/reference
 ```
 
 If a matching group already exists, add the entry there. Match the surrounding entries. See [file-map.md](references/file-map.md) for prefixes, groups, and when a new YAML file is warranted.
@@ -77,7 +79,7 @@ Do not copy defaults, types, or availability from the issue body or PR title.
 | Availability | `offeringBasedSchema`, `schema.contextRef('serverless')`, Cloud support | Serverless allowlist: start at `src/platform/packages/shared/serverless/settings/common/index.ts`. Also `technicalPreview` / `experimental` / `deprecation` |
 | UI category / group | n/a | `category` array. YAML `group` title. |
 
-Fetch `origin/main` first. Read the implementation at HEAD, not only the original PR diff.
+If this branch adds, changes, or removes the setting, read the implementation on this branch. Otherwise read Elastic `main`. If `origin` is your fork, fetch `upstream/main`. If `origin` is `elastic/kibana`, fetch `origin/main`. Do not rely on the issue body, the PR title, or an old local branch.
 
 The `setting` value must match the runtime key. Quote keys that contain a colon, for example `"dateFormat:tz"`.
 
@@ -85,7 +87,9 @@ The `name` i18n string is the UI label. It is not the YAML `setting` key.
 
 ### 4. Edit the YAML
 
-Follow [yaml-schema.md](references/yaml-schema.md). Copy the nearest sibling entry and change only what this setting needs. If the product removes the setting, keep the YAML entry and update `applies_to`. Do not delete it.
+Follow [yaml-schema.md](references/yaml-schema.md). Copy the nearest sibling entry and change only what this setting needs. If the product removes a setting that existed on Stack, keep the YAML entry and update `applies_to`. Do not delete it. If the setting existed only on serverless and is removed, delete the YAML entry.
+
+Do not copy a missing `default` from a sibling that lists old defaults in the description. If this setting's source defines a default, keep the `default` field.
 
 Required on every setting:
 
@@ -94,6 +98,8 @@ Required on every setting:
 - `applies_to`
 
 Include `datatype` and `default` when the source defines them. Include `id` when the key would produce an ugly or colliding anchor.
+
+`default` is the current product value at HEAD. Never omit it to encode an earlier value. Put a previous default in a gated `note`. See [yaml-schema.md](references/yaml-schema.md#the-default-field).
 
 The `description` is user-facing. Lead with what the setting does for the reader. Follow [Description style](references/yaml-schema.md#description-style).
 
@@ -115,15 +121,15 @@ Reporting settings already split across several YAML files included from `report
 
 ### 6. applies_to
 
-This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symmetry rule. It also does not allow deleting a preview-only setting when that setting is removed. Details and examples: [yaml-schema.md](references/yaml-schema.md).
+This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symmetry rule. Details and examples: [yaml-schema.md](references/yaml-schema.md). Canonical authoring contract: [docs-builder#4014](https://github.com/elastic/docs-builder/pull/4014) (`applies_to` in settings YAML). After that PR merges, use the [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md#settings-yaml) section.
 
 - **`stack`** is the only key that carries lifecycle and version:
-  - No version means all versions: `stack: ga` or `stack: preview`.
+  - Omit the version if the setting was added before 9.0: `stack: ga` or `stack: preview`. That means all 9.0+ versions.
   - A new setting should include a version, for example `stack: ga 9.5+`.
-  - Omit the version only if the setting already existed in the product and was missing from the docs.
+  - Omit the version only if the setting already existed in the product before 9.0 and was missing from the docs.
   - If you add a version that is not released yet, keep it. Docs show Planned until it ships. Do not omit a version to avoid Planned.
 - **`stack` accepts multiple values.** Append a new lifecycle. Do not replace the old one. Example: `stack: preview 9.0-9.2, ga 9.3+`.
-- **Do not delete a removed setting.** Keep the YAML entry so users on earlier versions can still find it. Append `removed` and the version: `stack: ga 9.0-9.3, removed 9.4+`.
+- **If the setting existed on Stack, keep a removed entry.** Users on earlier versions still need to find it. Append `removed` and the version: `stack: ga 9.0-9.3, removed 9.4+`. If the setting existed only on serverless and is removed, delete the YAML entry. Serverless has no version history.
 - **Deployment keys** (`ech`, `ece`, `eck`, `self`) only name where the setting is supported. Always list all four:
   - Write `<key>: ga` if that deployment supports it, even when `stack` is `preview` or `removed`.
   - Write `<key>: unavailable` if that deployment does not support it. docs-builder does not render that badge.
@@ -133,14 +139,14 @@ This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symm
   - Do not infer support from the published Cloud settings page. That page is generated from this YAML.
   - Do not copy the stack lifecycle onto deployments.
   - Do not write a version on those keys.
-- **`serverless`:** write `serverless: ga` when the setting exists on every serverless project. Write `serverless: unavailable` when it exists on none. Do not put a version on `serverless`.
+- **`serverless`:** write `serverless: ga` when the setting exists on every serverless project. Write `serverless: unavailable` when it exists on none. Do not put a version on `serverless`. Never write `preview`, `experimental`, `deprecated`, or `removed` on `serverless` or on nested project keys.
   - For Advanced Settings, check `src/platform/packages/shared/serverless/settings/common/index.ts`. That file lists settings on every serverless project. If the ID is there, write `serverless: ga`.
   - If the ID is not in `common`, grep the project files in that folder: `observability_project`, `security_project`, `search_project`, and `vectordb_project`. Ignore `workplace_ai_project`. That project type never shipped, and docs-builder has no `workplace_ai` key.
   - Those files use ID constants such as `DATE_FORMAT_ID`, not the YAML key. Resolve the constant in `src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts`.
   - If the ID is only on some projects, nest those project keys under `serverless`. Map `observability_project` to `observability`, `security_project` to `security`, `search_project` to `elasticsearch`, and `vectordb_project` to `vectordb`. Write `ga` on the keys that match. Do not write a scalar `serverless: ga`.
   - If the ID is not on any of those four lists, write `serverless: unavailable`.
   - For `kibana.yml`, keep using `offeringBasedSchema` or `schema.contextRef('serverless')`. Write a scalar `serverless: ga` or `serverless: unavailable`.
-- **Gated notes:** To scope a `note`, `tip`, `warning`, or `important` to a version or deployment, put `:applies_to:` on the first line of that field. Do not wrap the field in `:::{note}`.
+- **Gated notes:** To scope a `note`, `tip`, `warning`, or `important` to a version or deployment, put `:applies_to:` on the first line of that field. Do not wrap the field in `:::{note}`. Use a gated note for a previous default, and for extra admonition prose. Use inline `{applies_to}` in the description for other version-scoped behavior. Keep `default` as the current HEAD value.
 
 Tag `stack` at the minor. Do not put version numbers in the description next to a badge.
 
@@ -178,14 +184,15 @@ Skip this when the reference entry is enough.
 - [ ] Entry is in the YAML that matches kibana.yml vs space vs global
 - [ ] `setting` matches the runtime key at HEAD
 - [ ] Description says what the setting does for the user. It does not describe the code
-- [ ] Default and datatype match the schema or `uiSettings` registration
-- [ ] `stack` has no version only when the setting applies to all versions
-- [ ] New settings include a version, unless the key already existed and was missing from the docs
+- [ ] Default and datatype match the schema or `uiSettings` registration at HEAD
+- [ ] `default` is present when the source defines a value. An earlier default is in a gated `note`, not in place of `default`
+- [ ] `stack` has no version only when the setting was added before 9.0
+- [ ] New settings include a version, unless the key already existed before 9.0 and was missing from the docs
 - [ ] Deployment keys are always listed. Use `ga` or `unavailable`
 - [ ] For Advanced Settings, `serverless` matches `common/index.ts` or the nested project keys from the project allowlists
 - [ ] If you add a version that is not released yet, keep it. Do not strip it to avoid Planned
 - [ ] Lifecycle changes append on `stack` (for example `preview 9.0-9.2, ga 9.3+`). They do not replace the previous value
-- [ ] Removed settings stay in the YAML with `removed` and a version on `stack`
+- [ ] Removed Stack settings stay in the YAML with `removed` and a version on `stack`. A serverless-only setting that is removed is deleted from the YAML
 - [ ] `ech: ga` only if the Elastic Cloud Hosted user-settings allowlist includes the key
 - [ ] Cloud page include exists only if the entry has `ech: ga`
 - [ ] If a note is version- or deployment-scoped, `:applies_to:` is the first line of that field
@@ -196,5 +203,5 @@ Skip this when the reference entry is enough.
 - YAML field reference and `applies_to` rules: [yaml-schema.md](references/yaml-schema.md)
 - File and group map: [file-map.md](references/file-map.md)
 - Copy-paste entries: [examples.md](examples.md)
-- Schema source: [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md)
+- Schema source: [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md). Settings `applies_to` contract: [docs-builder#4014](https://github.com/elastic/docs-builder/pull/4014)
 - Badge rendering: [applies-to badge reference](https://elastic.github.io/docs-builder/syntax/applies/#badge-rendering-reference)

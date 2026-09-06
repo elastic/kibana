@@ -3,7 +3,7 @@
 Find the file by grep first. This map is a hint, not a complete inventory.
 
 ```bash
-git grep -n -- '<prefix-or-key>' origin/main -- docs/reference
+git grep -n -- '<prefix-or-key>' HEAD -- docs/reference
 ```
 
 ## kibana.yml YAML

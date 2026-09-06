@@ -51,11 +51,11 @@ groups:
 | `description` | Markdown. Links, substitutions, inline `{applies_to}`, admonitions, and dropdowns are allowed. |
 | `id` | HTML anchor. Set it when the generated slug would collide or stay unreadable. |
 | `datatype` | Shown as **Datatype**. See mapping below. |
-| `default` | Shown as **Default**. Match source. Quote strings that YAML would otherwise mistype. |
+| `default` | Shown as **Default**. The current product value at HEAD. Quote strings that YAML would otherwise mistype. Never omit this field to encode an older value. |
 | `options` | Enum values: `option` plus optional `description`. |
 | `applies_to` | Availability. Required for new entries. |
 | `note`, `tip`, `warning`, `important` | Admonitions on the setting. To gate one to a version or deployment, put `:applies_to:` on the first line of the field. |
-| `deprecation_details` | Extra deprecation prose. Pair with `applies_to` lifecycle `deprecated`. |
+| `deprecation_details` | Extra deprecation prose. Pair with `applies_to` lifecycle `deprecated` or `removed`. |
 | `example` | Markdown sample, usually `kibana.yml`. |
 | `settings` | Nested child settings. Children inherit `applies_to` unless they override it. Nested keys often look like `"[n].url"`. |
 
@@ -80,13 +80,15 @@ Do not invent a datatype the file never uses.
 
 ## applies_to in settings YAML
 
+The canonical authoring contract lives in docs-builder. Until [docs-builder#4014](https://github.com/elastic/docs-builder/pull/4014) merges, use that PR. After merge, use [applies_to in settings YAML](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md#settings-yaml). This skill keeps the rules an agent needs to tag Kibana YAML.
+
 This is a settings-YAML particularity. Do not apply the usual `docs-applies-to-tagging` rule that stack and deployment keys must share the same lifecycle.
 
 | Key | What it means here | Write |
 |---|---|---|
-| `stack` | Lifecycle and optional version history for Elastic Stack | No version means all versions: `ga`, `preview`. A new setting should include a version: `ga 9.4+`. Multiple values are allowed: `preview 9.0-9.2, ga 9.3+`, `ga 9.0-9.3, removed 9.4+` |
+| `stack` | Lifecycle and optional version history for Elastic Stack | Omit the version if the setting was added before 9.0: `ga` or `preview`. A new setting should include a version: `ga 9.4+`. Multiple values are allowed: `preview 9.0-9.2, ga 9.3+`, `ga 9.0-9.3, removed 9.4+` |
 | `ech`, `ece`, `eck`, `self` | Supported on that deployment, or not | Always list all four. `ga` if supported. `unavailable` if not. Never a version. Never `preview`, `experimental`, `deprecated`, or `removed` |
-| `serverless` | Supported on serverless, or not | Always list it. `ga` if every serverless project supports it. `unavailable` if none do. Never a version. For Advanced Settings, check `src/platform/packages/shared/serverless/settings/`. If the ID is only on some projects, nest `elasticsearch`, `observability`, `security`, or `vectordb` under `serverless`. Do not nest `workplace_ai` |
+| `serverless` | Supported on serverless, or not | Always list it. `ga` if every serverless project supports it. `unavailable` if none do. Never a version. Never `preview`, `experimental`, `deprecated`, or `removed`. For Advanced Settings, check `src/platform/packages/shared/serverless/settings/`. If the ID is only on some projects, nest `elasticsearch`, `observability`, `security`, or `vectordb` under `serverless`. Do not nest `workplace_ai` |
 
 `ga` on a deployment key is a support flag. It does not mean the setting is generally available. If `stack` is `preview` and the Elastic Cloud Hosted user-settings allowlist includes the key, write `ech: ga`.
 
@@ -183,11 +185,11 @@ applies_to:
 
 ### When to put a version on stack
 
-No version means the setting applies to all versions: `stack: ga` or `stack: preview`.
+No version means the setting applies to all 9.0+ versions and it was added before 9.0: `stack: ga` or `stack: preview`.
 
 A new setting should include a version: `stack: ga 9.5+` or `stack: preview 9.5+`.
 
-Omit the version only if the setting already existed in the product and was missing from the docs.
+Omit the version only if the setting already existed in the product before 9.0 and was missing from the docs.
 
 If that minor is not released yet, still write the version. The docs show Planned until it ships. That is automated rendering. Do not omit the version to hide Planned.
 
@@ -204,20 +206,36 @@ Rules: [badge rendering reference](https://elastic.github.io/docs-builder/syntax
 | Then removed | `stack: ga 9.0-9.3, deprecated 9.4-9.5, removed 9.6+` |
 | Preview, then removed | `stack: preview 9.0-9.2, removed 9.3+` |
 
-When you remove a setting from the product, keep the YAML entry. Users on earlier versions still need to find the key. Append `removed` and the version on `stack`. Keep the same deployment `ga` or `unavailable` values the setting already had. Do not write `removed` on `ech`, `ece`, `eck`, or `self`. Older files may still say `ech: removed`. Do not copy that for new work.
+When you remove a setting that existed on Stack, keep the YAML entry. Users on earlier versions still need to find the key. Append `removed` and the version on `stack`. Keep the same deployment `ga` or `unavailable` values the setting already had. Do not write `removed` on `ech`, `ece`, `eck`, or `self`. Older files may still say `ech: removed`. Do not copy that for new work.
 
-If the setting leaves serverless, write `serverless: unavailable`. Serverless has no version history on these keys.
+If the setting leaves serverless and it still exists on Elastic Stack, write `serverless: unavailable`. Serverless has no version history on these keys.
+
+If the setting existed only on serverless and is removed, delete the YAML entry.
+
+### The `default` field
+
+`default` is the current product value at HEAD. Match `schema.*({ defaultValue })` or the uiSettings `value`. Include it when the source defines it.
+
+Do not omit `default` to encode history. Do not replace it with description bullets. A sibling that lists old defaults in the description is not a template for this field.
+
+When an earlier minor used a different default, keep `default` as the HEAD value. Put the previous value in a gated `note`. Do not write the version in the note body. The `:applies_to:` range carries the version.
+
+```yaml
+        default: 500MB
+        note: |
+          :applies_to: stack: ga 9.0-9.3
+          In these versions, this setting defaults to `100MB`.
+```
 
 ### Inline badges in descriptions
 
-Use inline tags for per-version defaults inside the description, not for the entry's overall availability:
+Use inline tags in the description for version-scoped behavior that is not the `default` field. Do not use this pattern to replace `default`.
 
 ```yaml
 description: |
-  The default value depends on your version:
+  Shows the example control in the editor.
 
-  * {applies_to}`stack: ga 9.5+` Defaults to `system`.
-  * {applies_to}`stack: ga 9.0-9.4` Defaults to `disabled`.
+  {applies_to}`stack: ga 9.5+` The control is also available in Discover.
 ```
 
 ### Gated notes
@@ -226,11 +244,12 @@ The `note`, `tip`, `warning`, and `important` fields already render as admonitio
 
 To show a badge on that admonition, put `:applies_to:` on the first line of the field. The next line is the note body.
 
-Version-scoped:
+Previous default (keep `default` as the current value):
 
 ```yaml
+        default: false
         note: |
-          :applies_to: stack: ga 9.2-9.4
+          :applies_to: stack: ga 9.2-9.3
           In these versions, this setting defaults to `true`.
 ```
 
@@ -250,7 +269,15 @@ More than one key:
           Setting this value too high may cause timeouts.
 ```
 
-If `:applies_to:` is not the first line, the badge does not attach to the note. Use a gated note for extra admonition prose. Use inline `{applies_to}` in the description for per-version defaults.
+Version-scoped caveat that is not a previous default:
+
+```yaml
+        note: |
+          :applies_to: stack: ga 9.6+
+          From this version, you can no longer turn the example feature on or off with this setting.
+```
+
+If `:applies_to:` is not the first line, the badge does not attach to the note. Use a gated note for a previous default, and for extra admonition prose such as a version-scoped caveat. Use inline `{applies_to}` in the description for other version-scoped behavior. Do not put a previous default in the description.
 
 ### Version syntax
 
@@ -278,7 +305,7 @@ Do not:
 - Restate the key as the whole description, for example "The `xpack.example.enabled` setting enables the example feature."
 - Copy the PR title, issue wording, or i18n `name` string as the description.
 - Name TypeScript symbols, test IDs, or plugin IDs.
-- Repeat `datatype` or `default` in the prose. Those render as their own fields.
+- Repeat `datatype` or the current `default` in the description. Those render as their own fields. Put a previous default in a gated `note`. If values differ per version, say that in a gated note or with inline `{applies_to}`, not by restating the rendered **Default** or **Datatype** field.
 - Put version numbers in the description next to a badge.
 
 Keep one idea per sentence. Use the active voice. Verify every claim against the implementation at HEAD.
