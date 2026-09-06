@@ -29,6 +29,8 @@ snapshots.js
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/libyara/wasm/dist/**
 
 # package overrides
+# Vendored @elastic/adaptive-ui-host-kibana build output (see adaptive-ui/scripts/sync_dist.mjs).
+/src/platform/packages/shared/adaptive-ui/vendor
 /packages/kbn-eslint-config
 /packages/kbn-plugin-generator/template
 /packages/kbn-generate/templates
