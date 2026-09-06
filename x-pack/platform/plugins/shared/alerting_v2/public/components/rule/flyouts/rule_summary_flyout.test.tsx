@@ -177,9 +177,9 @@ describe('RuleSummaryFlyout', () => {
 
       const expectedOrder = [
         'viewRuleDetails-rule-1',
+        'runRule-rule-1',
         'editRule-rule-1',
         'cloneRule-rule-1',
-        'runRule-rule-1',
         'toggleEnabledRule-rule-1',
         'updateRuleApiKey-rule-1',
         'deleteRule-rule-1',
@@ -192,8 +192,8 @@ describe('RuleSummaryFlyout', () => {
         .filter((testId) => expectedOrder.includes(testId ?? ''));
       expect(renderedOrder).toEqual(expectedOrder);
 
-      // Three dividers separate the four groups (read / edit-clone / run-disable-apiKey / delete).
-      expect(panel?.querySelectorAll('hr')).toHaveLength(3);
+      // Two dividers: after Clone, and after Update API key.
+      expect(panel?.querySelectorAll('hr')).toHaveLength(2);
     });
 
     it('omits the update API key action when onUpdateApiKey is not provided', () => {
@@ -225,12 +225,14 @@ describe('RuleSummaryFlyout', () => {
       const changeHistory = screen.getByTestId('viewChangeHistoryRule-rule-1');
       expect(changeHistory).toBeInTheDocument();
 
-      // View change history sits in the first (read) group, right after View details.
+      // View change history sits in the second group, after Clone and before Delete.
       const panel = changeHistory.closest('.euiContextMenuPanel');
       const readGroup = [
         'viewRuleDetails-rule-1',
-        'viewChangeHistoryRule-rule-1',
         'editRule-rule-1',
+        'cloneRule-rule-1',
+        'viewChangeHistoryRule-rule-1',
+        'deleteRule-rule-1',
       ];
       const renderedOrder = Array.from(panel?.querySelectorAll('[data-test-subj]') ?? [])
         .map((element) => element.getAttribute('data-test-subj'))

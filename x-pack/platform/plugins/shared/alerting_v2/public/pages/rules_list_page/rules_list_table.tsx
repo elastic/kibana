@@ -464,9 +464,20 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           defaultMessage: 'No rules found.',
         });
 
+  // Single wrapper is required: ContentList lays out its children with a column
+  // gap, and a fragment would flatten Showing/Spacer/HR/Table into separate
+  // gapped siblings (extra space under the search bar).
+  // min-height matches EuiButtonEmpty xs so bulk actions don't grow the row.
   return (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+    <div>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
+        responsive={false}
+        css={css`
+          min-height: ${euiTheme.size.l};
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiText size="xs" data-test-subj="rulesListShowingLabel">
             <FormattedMessage
@@ -528,6 +539,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         })}
         data-test-subj="rulesListTable"
       />
-    </>
+    </div>
   );
 };
