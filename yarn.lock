@@ -6854,7 +6854,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-security-forensics-watch@link:x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch":
+"@kbn/evals-suite-security-esql-generation-regression@link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression":
   version "0.0.0"
   uid ""
 
@@ -6862,7 +6862,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-security-esql-generation-regression@link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression":
+"@kbn/evals-suite-security-forensics-watch@link:x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch":
   version "0.0.0"
   uid ""
 
