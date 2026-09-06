@@ -136,9 +136,10 @@ const cursorClause = ({
 
 // Always NULLS LAST so entities without data appear at the bottom regardless of sort direction.
 const sortSuffix = (field: string, dir: SortDir, pageSize: number): string =>
-  `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC\n| LIMIT ${
-    pageSize + 1
-  }`;
+  [
+    `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
+    `| LIMIT ${pageSize + 1}`,
+  ].join('\n');
 
 // ── query builders: native entity sort ───────────────────────────────────────
 
@@ -159,9 +160,11 @@ const nativeEntityDataQuery = (
   ].join('\n');
 
 const nativeEntityCountQuery = (entityAlias: string): string =>
-  `FROM ${entityAlias}\n| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(
-    ALLOWED_ENTITY_TYPES
-  )})\n| STATS total = COUNT(*)`;
+  [
+    `FROM ${entityAlias}`,
+    `| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`,
+    `| STATS total = COUNT(*)`,
+  ].join('\n');
 
 // ── query builders: last_seen_alert sort ──────────────────────────────────────
 
@@ -184,9 +187,13 @@ const alertUnionQuery = (alertsIndex: string, nameFilter?: string): string => {
   // independently — a request straddling a 30-day boundary could see a one-doc discrepancy.
   // Low-impact (30d window), but fix by computing cutoff once per request like riskDateWindow().
   const cutoff = new Date(Date.now() - ALERT_LOOKBACK_DAYS * 86_400_000).toISOString();
-  const union = ALERT_ENTITY_FIELDS.map((f) => alertLeg(alertsIndex, f, cutoff, nameFilter))
-    .map((leg, i) => (i === 0 ? `FROM (\n${indent(leg)}\n)` : `(\n${indent(leg)}\n)`))
-    .join(',\n');
+  const [firstLeg, ...restLegs] = ALERT_ENTITY_FIELDS.map((f) =>
+    alertLeg(alertsIndex, f, cutoff, nameFilter)
+  );
+  const union = [
+    `FROM (\n${indent(firstLeg)}\n)`,
+    ...restLegs.map((leg) => `(\n${indent(leg)}\n)`),
+  ].join(',\n');
   return [
     union,
     `| STATS ${LAST_SEEN_ALERT_FIELD} = MAX(${LAST_SEEN_ALERT_FIELD}) BY entity_name`,
@@ -214,7 +221,9 @@ const lastSeenAlertDataQuery = (
     keepClause(LAST_SEEN_ALERT_FIELD),
     ...(cursor ? [cursorClause(cursor)] : []),
   ].join('\n');
-  return `FROM (\n${indent(inner)}\n)\n${sortSuffix(LAST_SEEN_ALERT_FIELD, dir, pageSize)}`;
+  return [`FROM (`, indent(inner), `)`, sortSuffix(LAST_SEEN_ALERT_FIELD, dir, pageSize)].join(
+    '\n'
+  );
 };
 
 const lastSeenAlertCountQuery = (alertsIndex: string, entityAlias: string): string =>
@@ -272,7 +281,9 @@ const riskScoreChangeCountQuery = (
   entityAlias: string,
   window: RiskDateWindow
 ): string =>
-  `${riskScoreChangeBaseQuery(riskScoreIndex, entityAlias, window)}\n| STATS total = COUNT(*)`;
+  [riskScoreChangeBaseQuery(riskScoreIndex, entityAlias, window), `| STATS total = COUNT(*)`].join(
+    '\n'
+  );
 
 // ── query builders: per-page enrichment ──────────────────────────────────────
 
@@ -281,18 +292,18 @@ const yesterdayScoreEnrichQuery = (
   riskScoreIndex: string,
   entityIds: string[],
   { yesterdayStart, todayStart }: RiskDateWindow
-): string =>
-  [
+): string => {
+  const ids = toList(entityIds);
+  return [
     `FROM ${riskScoreIndex}`,
     `| WHERE TRANGE("${yesterdayStart}", "${todayStart}")`,
     // Pre-filter using indexed name fields so Lucene skips unrelated risk docs before EVAL.
-    `| WHERE host.name IN (${toList(entityIds)}) OR user.name IN (${toList(
-      entityIds
-    )}) OR service.name IN (${toList(entityIds)})`,
+    `| WHERE host.name IN (${ids}) OR user.name IN (${ids}) OR service.name IN (${ids})`,
     `| EVAL entity_id = ${ENTITY_ID_COALESCE}, score = ${RISK_SCORE_COALESCE}`,
-    `| WHERE entity_id IN (${toList(entityIds)})`,
+    `| WHERE entity_id IN (${ids})`,
     `| STATS yesterday_score = MAX(score) BY entity_id`,
   ].join('\n');
+};
 
 // ── route helpers ─────────────────────────────────────────────────────────────
 
@@ -474,10 +485,7 @@ export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoute
             window
           );
 
-          const [[...allRows], [countRow]] = await Promise.all([
-            query(dataQuery),
-            query(countQuery),
-          ]);
+          const [allRows, [countRow]] = await Promise.all([query(dataQuery), query(countQuery)]);
           const hasNextPage = allRows.length > pageSize;
           const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
           const total = (countRow?.total as number) ?? 0;
