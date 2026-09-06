@@ -16,7 +16,12 @@ import {
   selectGoldenRows,
 } from '../src/golden_dataset';
 import { setupWatchCell, teardownWatchCell } from '../src/watch_cell_setup';
-import { enableDeepWatch, getRunConnectorIds, runDeepWatch } from '../src/deep_watch_run';
+import {
+  enableDeepWatch,
+  getRunConnectorIds,
+  resolveRuntimeConnectorId,
+  runDeepWatch,
+} from '../src/deep_watch_run';
 import { summarizeDiscrimination } from '../src/evaluators';
 import type { GateOutcome } from '../src/evaluators';
 
@@ -140,12 +145,29 @@ evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, ()
                 esClient,
                 workflowExecutionId: result.executionId,
               });
-              const wrongConnectors = usedConnectors.filter((id) => id !== connector.id);
+              // The step records the runtime connector instance
+              // (`.anthropic-...-chat_completion`), not the Kibana connector id
+              // (`eis-anthropic-...`), so compare in the runtime namespace.
+              const expectedRuntimeId = await resolveRuntimeConnectorId({
+                fetch,
+                connectorId: connector.id,
+              });
+              const wrongConnectors = usedConnectors.filter(
+                (id) => id !== connector.id && id !== expectedRuntimeId
+              );
+              if (usedConnectors.length === 0) {
+                throw new Error(
+                  `Model routing unverifiable for ${row.id}: no ai.agent step recorded a ` +
+                    `connector for execution ${result.executionId}. Refusing to score a run ` +
+                    `whose model cannot be confirmed.`
+                );
+              }
               if (wrongConnectors.length > 0) {
                 throw new Error(
-                  `Model routing broken for ${row.id}: asked for ${connector.id} but the ` +
-                    `ai.agent steps used ${wrongConnectors.join(', ')}. Refusing to score a ` +
-                    `run that did not exercise the model under test.`
+                  `Model routing broken for ${row.id}: asked for ${connector.id} ` +
+                    `(runtime ${expectedRuntimeId ?? 'unknown'}) but the ai.agent steps used ` +
+                    `${wrongConnectors.join(', ')}. Refusing to score a run that did not ` +
+                    `exercise the model under test.`
                 );
               }
 

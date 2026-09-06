@@ -90,6 +90,32 @@ export const getRunConnectorIds = async ({
   return Array.from(new Set(ids));
 };
 
+/**
+ * Resolve the runtime connector id a Kibana connector actually reports.
+ *
+ * The evals fixture identifies a model by its Kibana connector id
+ * (`eis-anthropic-claude-5-sonnet`), but the agent step records the *action
+ * type* instance it executed through (`.anthropic-claude-5-sonnet-chat_completion`).
+ * Comparing the two namespaces directly marks every correctly-routed run as
+ * broken, so map the requested connector to its runtime id via the connectors
+ * API before comparing.
+ */
+export const resolveRuntimeConnectorId = async ({
+  fetch,
+  connectorId,
+}: {
+  fetch: HttpHandler;
+  connectorId: string;
+}): Promise<string | undefined> => {
+  const connectors = (await fetch('/api/actions/connectors', { method: 'GET' })) as Array<{
+    id: string;
+    connector_type_id?: string;
+    config?: { defaultModel?: string };
+  }>;
+  const match = connectors.find((c) => c.id === connectorId);
+  return match?.config?.defaultModel ?? match?.connector_type_id;
+};
+
 const isTerminal = (status: string | undefined): boolean =>
   ['completed', 'failed', 'cancelled', 'timedOut', 'timed_out'].includes(status ?? '');
 
