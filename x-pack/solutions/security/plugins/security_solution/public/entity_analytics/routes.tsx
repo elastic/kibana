@@ -26,7 +26,6 @@ import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
-import { EntityAnalyticsNewPage } from './pages/foo';
 import { EntityAnalyticsTestPage } from './pages/entity_analytics_test_page';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
@@ -181,7 +180,6 @@ EntityAnalyticsOverviewContainer.displayName = 'EntityAnalyticsOverviewContainer
 const EntityAnalyticsHomePageWrapper = () => (
   <PluginTemplateWrapper>
     <EntityAnalyticsHomePage />
-    {/* <EntityAnalyticsNewPage /> */}
   </PluginTemplateWrapper>
 );
 

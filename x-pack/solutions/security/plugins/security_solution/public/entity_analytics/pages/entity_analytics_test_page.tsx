@@ -7,14 +7,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
-import {
-  EuiDataGrid,
-  EuiDataGridColumn,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGrid, EuiLoadingSpinner, EuiSpacer, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
@@ -56,8 +50,18 @@ const GRID_COLUMNS: EuiDataGridColumn[] = [
   { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 180 },
   { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120, isSortable: false },
   { id: 'case_count', displayAsText: 'Cases', initialWidth: 100, isSortable: false },
-  { id: 'entity.attributes.watchlists', displayAsText: 'Watchlists', initialWidth: 200, isSortable: false },
-  { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 180, isSortable: false },
+  {
+    id: 'entity.attributes.watchlists',
+    displayAsText: 'Watchlists',
+    initialWidth: 200,
+    isSortable: false,
+  },
+  {
+    id: 'entity.lifecycle.first_seen',
+    displayAsText: 'First seen',
+    initialWidth: 180,
+    isSortable: false,
+  },
   { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
 ];
 
@@ -68,7 +72,9 @@ interface EntityGridResponse {
 }
 
 const pageWrapperOverride = css`
-  [data-test-subj='pageContainer'].securityPageWrapper { padding-inline: 0 !important; }
+  [data-test-subj='pageContainer'].securityPageWrapper {
+    padding-inline: 0 !important;
+  }
   [data-test-subj='pageContainer'].securityPageWrapper > [class*='euiPageSection__content'] {
     padding-block: 0 !important;
   }
@@ -179,25 +185,40 @@ export const EntityAnalyticsTestPage: React.FC = () => {
   const [visibleColumns, setVisibleColumns] = useState(GRID_COLUMNS.map((c) => c.id));
 
   const renderCellValue = useCallback(
-    ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+    (props: { rowIndex: number; columnId: string }) => {
+      const { rowIndex, columnId } = props;
       const relativeIndex = rowIndex - pageIndex * pageSize;
       const value = rows[relativeIndex]?.[columnId];
-      if (value == null) return <>—</>;
-      if (columnId === 'last_seen_alert' || columnId === '@timestamp' || columnId === 'entity.lifecycle.first_seen') {
+      if (value == null) return <>{'—'}</>;
+      if (
+        columnId === 'last_seen_alert' ||
+        columnId === '@timestamp' ||
+        columnId === 'entity.lifecycle.first_seen'
+      ) {
         const m = moment(value as string);
         return <>{m.isValid() ? m.fromNow() : String(value)}</>;
       }
       if (columnId === 'risk_score_change') {
         const delta = value as number;
         if (delta > 0)
-          return <EuiTextColor color="danger">↑ +{delta.toFixed(1)}</EuiTextColor>;
+          return (
+            <EuiTextColor color="danger">
+              {'↑ +'}
+              {delta.toFixed(1)}
+            </EuiTextColor>
+          );
         if (delta < 0)
-          return <EuiTextColor color="success">↓ {delta.toFixed(1)}</EuiTextColor>;
-        return <>→ 0.0</>;
+          return (
+            <EuiTextColor color="success">
+              {'↓ '}
+              {delta.toFixed(1)}
+            </EuiTextColor>
+          );
+        return <>{'→ 0.0'}</>;
       }
       if (columnId === 'entity.attributes.watchlists') {
         const ids = value as string[];
-        if (!Array.isArray(ids) || ids.length === 0) return <>—</>;
+        if (!Array.isArray(ids) || ids.length === 0) return <>{'—'}</>;
         return <>{ids.map((id) => watchlistNames.get(id) ?? id).join(', ')}</>;
       }
       return <>{String(value)}</>;
@@ -265,7 +286,11 @@ export const EntityAnalyticsTestPage: React.FC = () => {
             height: 100%;
           `}
         >
-          <div css={css`padding-inline: ${euiTheme.size.base};`}>
+          <div
+            css={css`
+              padding-inline: ${euiTheme.size.base};
+            `}
+          >
             <SiemSearchBar dataView={dataView} id={InputsModelId.global} hideDatePicker />
           </div>
 
