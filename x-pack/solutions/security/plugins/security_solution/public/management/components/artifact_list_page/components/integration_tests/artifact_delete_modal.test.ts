@@ -115,9 +115,7 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
     );
   });
 
-  // FIXME:PT investigate test failure
-  // (I don't understand why its failing... All assertions are successful -- HELP!)
-  it.skip('should show error toast if deletion failed', async () => {
+  it('should show error toast if deletion failed', async () => {
     const { cancelButton, submitButton, mockedApi, user, coreStart, renderResult } =
       await setupTest();
 
@@ -129,11 +127,11 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
 
     await waitFor(() => {
       expect(mockedApi.responseProvider.trustedAppDelete).toHaveBeenCalled();
+      expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        expect.stringMatching(/^Unable to remove .*\. Reason: oh oh/)
+      );
     });
 
-    expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      expect.stringMatching(/^Unable to remove .*\. Reason: oh oh/)
-    );
     expect(renderResult.getByTestId('testPage-deleteModal')).toBeTruthy();
     expect(cancelButton).toBeEnabled();
     expect(submitButton).toBeEnabled();

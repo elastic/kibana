@@ -15,7 +15,7 @@ import {
 import { errors, type DiagnosticResult } from '@elastic/elasticsearch';
 import { isPlainObject } from 'lodash';
 import { EndpointError } from '../../../common/endpoint/errors';
-import { NotFoundError } from '../errors';
+import { EndpointAuthorizationError, NotFoundError } from '../errors';
 
 /**
  * Will wrap the given Error with `EndpointError`, which will help getting a good picture of where in
@@ -32,6 +32,7 @@ export const wrapErrorIfNeeded = <E extends EndpointError = EndpointError>(
 
   let debug: EndpointError['debug'];
   let message = `${messagePrefix ? `${messagePrefix}: ` : ''}${error.message}`;
+  let esAuthorizationFailure = false;
 
   try {
     // Process known error Types and retrieve additional data not normally output to logs
@@ -49,6 +50,10 @@ export const wrapErrorIfNeeded = <E extends EndpointError = EndpointError>(
           body: esError.body,
         },
       };
+
+      esAuthorizationFailure =
+        esError.body?.error?.type === 'security_exception' &&
+        (esError.meta?.statusCode ?? esError.body?.status) === 403;
 
       // Since this is an elasticsearch client error, lets build a better error message
       // that is based on the Elasticsearch error response body
@@ -112,6 +117,12 @@ export const wrapErrorIfNeeded = <E extends EndpointError = EndpointError>(
     error instanceof PackagePolicyNotFoundError
   ) {
     return new NotFoundError(message, error) as E;
+  }
+
+  // Reported as a `403` rather than falling through to a generic `500`, which would also expose the
+  // internal index names from the Elasticsearch response in the HTTP response body.
+  if (esAuthorizationFailure) {
+    return new EndpointAuthorizationError(error) as E;
   }
 
   const err = new EndpointError(message, error) as E;

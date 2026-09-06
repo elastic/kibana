@@ -16,6 +16,15 @@ export type {
   IdentifyInferredFeaturesResult,
 } from './identify_inferred_features';
 
+export {
+  MAX_INFERENCE_DOCUMENTS_BYTES,
+  MAX_INFERENCE_DOCUMENT_BYTES,
+  MAX_INFERENCE_DOCUMENT_FIELDS,
+  MAX_INFERENCE_FIELD_NAME_LENGTH,
+  prepareInferredSampling,
+} from './prepare_inferred_sampling';
+export type { PrepareInferredSamplingResult } from './prepare_inferred_sampling';
+
 export { identifyComputedFeatures } from './identify_computed_features';
 export type {
   IdentifyComputedFeaturesOptions,

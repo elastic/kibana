@@ -92,9 +92,17 @@ user you could not find one. Search for existing SVG/PNG files in:
 
 AI agents rely on descriptions to choose the right action and construct valid inputs. Every action and parameter must have high-quality descriptive text.
 
-### `isTool` and action descriptions
+### `isTool`, `scope`, and action descriptions
 
 Actions should set `isTool: true` to be discoverable by AI agents in Agent Builder. This is the default for most actions. Use `isTool: false` only for actions that should not be invoked autonomously (e.g. destructive or admin-only operations).
+
+Every `isTool: true` action **must** also have an explicit `scope` field — never omit it. Classify each action:
+
+- `scope: 'read'` — pure reads; no external state modified (GET-only, searches, listings, downloads)
+- `scope: 'write'` — creates or appends new data without touching existing state (send message, create resource, add comment)
+- `scope: 'destroy'` — overwrites, updates, or deletes existing state (resolve/update/delete anything, patch a record); also use for generic escape-hatch actions (`request`, `callTool`, `callRestApi`) since they can do anything
+
+When uncertain, prefer `'destroy'` over `'write'` — it's safer to over-classify. See the `scope` section in [reference/connector-patterns.md](reference/connector-patterns.md) for the full table and examples.
 
 Every entry MUST have a `description` field (plain string, NOT `i18n.translate()`) that explains:
 - What the action does
@@ -156,6 +164,8 @@ docs say the vendor expects — not just that the handler resolves without throw
 
 Before treating the connector as done, re-read the whole diff once, end to end, specifically hunting for:
 
+- Any `isTool: true` action missing a `scope` field — every tool action must have one
+- A `scope` that looks wrong: a "get"/"list"/"search" action marked `write` or `destroy`, or an update/delete/patch action marked `read`
 - Handlers still typed with implicit `any` (missing the `input: XInput` annotation)
 - `test.enabled` missing or set to `false`
 - Leftover schemas/constants from earlier iterations that are no longer referenced anywhere

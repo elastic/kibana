@@ -9,7 +9,9 @@ import type { CustomTaskInstance, SyncTaskRunResult } from './sync_private_locat
 import {
   SyncPrivateLocationMonitorsTask,
   runSynPrivateLocationMonitorsTaskSoon,
+  resetSyncPrivateCleanUpState,
   DEFAULT_TASK_SCHEDULE,
+  DEFAULT_MAX_CLEANUP_RETRIES,
 } from './sync_private_locations_monitors_task';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -457,13 +459,16 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(syncSpy).not.toHaveBeenCalled();
-      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      // `schedule`, not `ensureScheduled`: a fixed id let a pending instance from
+      // an earlier cleanup swallow this request, so the recreate never happened.
+      expect(mockTaskManagerStart.ensureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerStart.schedule).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: 'Synthetics:Sync-Private-Location-Monitors:pl-1',
           taskType: 'Synthetics:Sync-Private-Location-Monitors',
           state: { privateLocationId: 'pl-1' },
         })
       );
+      expect(mockTaskManagerStart.schedule.mock.calls[0][0]).not.toHaveProperty('id');
       expect(result.error).toBeUndefined();
     });
 
@@ -489,18 +494,12 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       const result = await task.runTask({ taskInstance });
 
-      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledTimes(2);
-      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'Synthetics:Sync-Private-Location-Monitors:pl-1',
-          state: { privateLocationId: 'pl-1' },
-        })
+      expect(mockTaskManagerStart.schedule).toHaveBeenCalledTimes(2);
+      expect(mockTaskManagerStart.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({ state: { privateLocationId: 'pl-1' } })
       );
-      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'Synthetics:Sync-Private-Location-Monitors:pl-2',
-          state: { privateLocationId: 'pl-2' },
-        })
+      expect(mockTaskManagerStart.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({ state: { privateLocationId: 'pl-2' } })
       );
       expect(result.error).toBeUndefined();
     });
@@ -518,7 +517,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      mockTaskManagerStart.ensureScheduled.mockRejectedValueOnce(new Error('schedule failed'));
+      mockTaskManagerStart.schedule.mockRejectedValueOnce(new Error('schedule failed'));
 
       const result = await task.runTask({ taskInstance });
 
@@ -614,7 +613,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       // maxCleanUpRetries must actually run out, otherwise the task re-scans every
       // monitor and re-schedules a full per-location sync on every interval forever
       expect(state.hasAlreadyDoneCleanup).toBe(true);
-      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledTimes(3);
+      expect(mockTaskManagerStart.schedule).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -886,6 +885,23 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.performCleanupSync).toBe(true);
     });
 
+    it('should not charge the retry budget for a pass that deleted policies', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
+        (async function* () {
+          yield ['monitor1-loc1', 'unexpected-policy'];
+        })()
+      );
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 3 };
+
+      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
+
+      expect(result.performCleanupSync).toBe(true);
+      // Deleting policies is progress. Charging it drained the budget during
+      // ordinary churn, and the next cleanup -- including one requested through
+      // the API -- was then skipped while still reporting success.
+      expect(state.maxCleanUpRetries).toBe(3);
+    });
+
     it('should not mark cleanup done when a follow-up sync is required', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {
@@ -944,7 +960,12 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       expect(exhausted.performCleanupSync).toBe(false);
       expect(state.hasAlreadyDoneCleanup).toBe(true);
-      expect(state.maxCleanUpRetries).toBe(3);
+      // the spent budget is left on the state so the exhaustion stays visible;
+      // only an explicit cleanup request restores it
+      expect(state.maxCleanUpRetries).toBe(0);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('max retries have been reached')
+      );
     });
 
     it('should set performCleanupSync true if expected policies are missing', async () => {
@@ -978,9 +999,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
       expect(result.performCleanupSync).toBe(false);
       expect(state.hasAlreadyDoneCleanup).toBe(true);
-      expect(state.maxCleanUpRetries).toBe(3);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached'
+      expect(state.maxCleanUpRetries).toBe(0);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('max retries have been reached')
       );
     });
 
@@ -994,9 +1015,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       // Call again to reach 0
       await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
       expect(state.hasAlreadyDoneCleanup).toBe(true);
-      expect(state.maxCleanUpRetries).toBe(3);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached'
+      expect(state.maxCleanUpRetries).toBe(0);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('max retries have been reached')
       );
     });
   });
@@ -1077,11 +1098,15 @@ describe('runSynPrivateLocationMonitorsTaskSoon', () => {
     );
   });
 
-  it('should log an error if scheduling fails', async () => {
+  it('should log and rethrow if scheduling fails', async () => {
     const error = new Error('Failed to run soon');
     mockTaskManagerStart.runSoon.mockRejectedValue(error);
 
-    await runSynPrivateLocationMonitorsTaskSoon({ server: mockServerSetup as any, retries: 0 });
+    // rethrown so an HTTP caller cannot be told the sync was scheduled when it
+    // was not; fire-and-forget callers attach their own `catch`
+    await expect(
+      runSynPrivateLocationMonitorsTaskSoon({ server: mockServerSetup as any, retries: 0 })
+    ).rejects.toThrow('Failed to run soon');
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       `Error scheduling Synthetics sync private location monitors task: ${error.message}`,
@@ -1089,5 +1114,60 @@ describe('runSynPrivateLocationMonitorsTaskSoon', () => {
         error,
       }
     );
+  });
+});
+
+describe('resetSyncPrivateCleanUpState', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockTaskManagerStart.runSoon.mockResolvedValue({ id: 'x' } as any);
+  });
+
+  const appliedState = (prevState: Record<string, unknown>) => {
+    const stateMapFn = mockTaskManagerStart.bulkUpdateState.mock.calls[0][1];
+    return stateMapFn(prevState, 'Synthetics:Sync-Private-Location-Monitors-single-instance');
+  };
+
+  it('restores the retry budget when cleanup is requested', async () => {
+    await resetSyncPrivateCleanUpState({
+      server: mockServerSetup as any,
+      hasAlreadyDoneCleanup: false,
+    });
+
+    // The budget is shared with the periodic runs. Without restoring it here an
+    // explicit request could inherit a budget those runs had already spent, and
+    // cleanup would be skipped outright while this call reported success.
+    expect(appliedState({ hasAlreadyDoneCleanup: true, maxCleanUpRetries: 0 })).toEqual(
+      expect.objectContaining({
+        hasAlreadyDoneCleanup: false,
+        maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES,
+      })
+    );
+    expect(mockTaskManagerStart.runSoon).toHaveBeenCalledWith(
+      'Synthetics:Sync-Private-Location-Monitors-single-instance'
+    );
+  });
+
+  it('leaves the retry budget alone when cleanup is being marked done', async () => {
+    await resetSyncPrivateCleanUpState({
+      server: mockServerSetup as any,
+      hasAlreadyDoneCleanup: true,
+    });
+
+    expect(appliedState({ hasAlreadyDoneCleanup: false, maxCleanUpRetries: 1 })).toEqual(
+      expect.objectContaining({ hasAlreadyDoneCleanup: true, maxCleanUpRetries: 1 })
+    );
+  });
+
+  it('propagates a scheduling failure', async () => {
+    mockTaskManagerStart.runSoon.mockRejectedValue(new Error('already running'));
+
+    await expect(
+      resetSyncPrivateCleanUpState({
+        server: mockServerSetup as any,
+        hasAlreadyDoneCleanup: false,
+        retries: 0,
+      })
+    ).rejects.toThrow('already running');
   });
 });

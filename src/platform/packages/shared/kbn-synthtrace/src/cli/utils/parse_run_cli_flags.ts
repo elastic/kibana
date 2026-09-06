@@ -72,6 +72,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
   infra_k8s_containers:
     'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_k8s_containers.ts',
   infra_k8s_pods: 'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_k8s_pods.ts',
+  infra_metrics_explorer_negative_domain:
+    'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_metrics_explorer_negative_domain.ts',
   kafka_topics: 'x-pack/solutions/observability/plugins/apm/test/scenarios/kafka_topics.ts',
   kubernetes_logs: 'x-pack/platform/plugins/shared/streams/test/scenarios/kubernetes_logs.ts',
   low_throughput: 'x-pack/solutions/observability/plugins/apm/test/scenarios/low_throughput.ts',

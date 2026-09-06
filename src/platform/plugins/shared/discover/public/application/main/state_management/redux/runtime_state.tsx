@@ -144,6 +144,30 @@ export const selectCurrentProfileStateDefinition = (
     .getContexts().dataSourceContext.profileState;
 };
 
+export const selectCurrentTabType = (runtimeStateManager: RuntimeStateManager, tabId: string) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId)
+    .scopedProfilesManager$.getValue()
+    .getContexts().dataSourceContext.tabType;
+};
+
+/** Uses the resolved tab type when available, otherwise the inherited type. */
+export const selectTabTypeForPersistence = ({
+  runtimeStateManager,
+  tabState,
+}: {
+  runtimeStateManager: RuntimeStateManager;
+  tabState: TabState;
+}) => {
+  const scopedProfilesManager = selectTabRuntimeState(
+    runtimeStateManager,
+    tabState.id
+  ).scopedProfilesManager$.getValue();
+
+  return scopedProfilesManager.hasResolvedDataSourceProfile()
+    ? selectCurrentTabType(runtimeStateManager, tabState.id)
+    : tabState.initialInternalState?.tabType;
+};
+
 export const selectCurrentProfileUrlState = ({
   runtimeStateManager,
   tabId,
@@ -254,9 +278,11 @@ export const selectTabRuntimeInternalState = ({
     globalState,
     services,
   });
+  const tabType = selectTabTypeForPersistence({ runtimeStateManager, tabState });
 
   return {
     serializedSearchSource: searchSource.getSerializedFields(),
+    ...(tabType ? { tabType } : {}),
     ...(dataRequestParams.isSearchSessionRestored
       ? { searchSessionId: dataRequestParams.searchSessionId }
       : {}),

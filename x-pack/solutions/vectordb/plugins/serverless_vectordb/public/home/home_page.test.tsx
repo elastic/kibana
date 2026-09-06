@@ -72,12 +72,18 @@ describe('HomePage', () => {
   const navigateToApp = jest.fn();
   const isInTrial = jest.fn();
 
-  const mockServices = ({ cloud = { isInTrial } }: { cloud?: object | null } = {}) => {
+  const mockServices = ({
+    cloud = { isInTrial },
+    canMonitorAllIndices = true,
+  }: { cloud?: object | null; canMonitorAllIndices?: boolean } = {}) => {
     mockUseKibana.mockReturnValue({
       services: {
         cloud,
-        application: { navigateToApp },
-        docLinks: { links: { enterpriseSearch: { vectorDatabaseGetStarted: DOCS_URL } } },
+        application: {
+          navigateToApp,
+          capabilities: { vectordbIndexStats: { canMonitorAllIndices } },
+        },
+        docLinks: { links: { enterpriseSearch: { vectorDatabaseFullTextSearch: DOCS_URL } } },
       },
     });
   };
@@ -145,6 +151,34 @@ describe('HomePage', () => {
       render(<HomePage />);
 
       expect(screen.queryByTestId('trialUsageBadge')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('the vectors stat', () => {
+    it('is shown to a caller that can monitor every index', () => {
+      render(<HomePage />);
+
+      expect(screen.getByTestId('homePageDataCard-vectors')).toBeInTheDocument();
+    });
+
+    it('is hidden from a caller that cannot monitor every index', () => {
+      mockServices({ canMonitorAllIndices: false });
+
+      render(<HomePage />);
+
+      expect(screen.queryByTestId('homePageDataCard-vectors')).not.toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
+    });
+
+    it('is still shown when the caller may see the count but it could not be computed', () => {
+      mockUseDeploymentStats.mockReturnValue({
+        stats: { ...stats, vectorCount: null },
+        isLoading: false,
+      });
+
+      render(<HomePage />);
+
+      expect(screen.getByTestId('homePageDataCard-vectors')).toBeInTheDocument();
     });
   });
 

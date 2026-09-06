@@ -34,6 +34,8 @@ import { registerRemoteConfigsRoutes } from './remotes/register_routes';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
 import { registerIngestScoresRoute } from './scores/ingest_scores';
+import { registerIngestOnlineScoresRoute } from './online_scores/ingest_online_scores';
+import { registerListOnlineScoresRoute } from './online_scores/list_online_scores';
 import { registerListEvaluatorsRoute } from './evaluators/list_evaluators';
 import { registerCreateEvaluatorRoute } from './evaluators/create_evaluator';
 import { registerGetEvaluatorRoute } from './evaluators/get_evaluator';
@@ -75,6 +77,8 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetTracingProjectsRoute(dependencies);
   registerGetProjectTracesRoute(dependencies);
   registerIngestScoresRoute(dependencies);
+  registerIngestOnlineScoresRoute(dependencies);
+  registerListOnlineScoresRoute(dependencies);
   registerListDatasetsRoute(dependencies);
   registerCreateDatasetRoute(dependencies);
   // Registered before the `{datasetId}` route it would otherwise read as an id.

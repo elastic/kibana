@@ -28,11 +28,16 @@ const grantKey = async (context: RulesClientContext, name: string): Promise<Reso
   return { createdAPIKey, isAuthTypeApiKey: false };
 };
 
+export interface ResolveRuleAPIKeyOptions {
+  apiKeyOwnership?: RuleApiKeyOwnership;
+  cloneApiKey?: boolean;
+}
+
 export const resolveRuleAPIKey = async (
   context: RulesClientContext,
   name: string,
   enabled: boolean,
-  apiKeyOwnership?: RuleApiKeyOwnership
+  { apiKeyOwnership, cloneApiKey }: ResolveRuleAPIKeyOptions = {}
 ): Promise<ResolvedAPIKey> => {
   if (!enabled) {
     return { createdAPIKey: null, isAuthTypeApiKey: false };
@@ -43,7 +48,12 @@ export const resolveRuleAPIKey = async (
   }
 
   const isApiKeyAuth = context.isAuthenticationTypeAPIKey();
+  const callerKeyIsBorrowed = Boolean(cloneApiKey) && !apiKeyOwnership && isApiKeyAuth;
   const frameworkManaged = apiKeyOwnership?.apiKeyCreatedByUser === false;
+
+  if (callerKeyIsBorrowed) {
+    return cloneKey(context, name);
+  }
 
   if (frameworkManaged) {
     return isApiKeyAuth ? cloneKey(context, name) : grantKey(context, name);

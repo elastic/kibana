@@ -61,6 +61,27 @@ export const ConfigSchema = schema.object({
       defaultValue: true,
     }),
   }),
+  initialSolutionSetup: offeringBasedSchema({
+    serverless: schema.object({
+      enabled: schema.boolean({
+        defaultValue: false,
+        validate: (rawValue) => {
+          if (rawValue) {
+            return 'Initial solution setup is unavailable on serverless';
+          }
+        },
+      }),
+    }),
+    traditional: schema.object({
+      enabled: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.boolean(),
+        schema.literal(false),
+        { defaultValue: schema.contextRef('dev') }
+      ),
+    }),
+  }),
   defaultSolution: schema.maybe(schema.oneOf(solutionSchemaLiterals)),
 });
 

@@ -214,6 +214,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
 
     listFunctions: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           maxItems: z
@@ -260,6 +261,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
 
     getFunction: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           functionName: z.string().min(1).describe('Lambda function name or ARN'),
