@@ -48,30 +48,34 @@ describe('EsqlPreviewSection', () => {
     expect(screen.getByText('Preview data')).toBeInTheDocument();
   });
 
-  it('shows the time picker hint on mount when the query has no time field', async () => {
+  it('shows the time filter hint on mount when the query has no time field', async () => {
     mockGetESQLTimeField.mockResolvedValue(undefined);
 
     render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
     await act(async () => {});
 
-    expect(screen.getByText(/connect to the dashboard time picker/i)).toBeInTheDocument();
+    expect(screen.getByText(/connect the query to the dashboard time filter/i)).toBeInTheDocument();
   });
 
-  it('does not flash the time picker hint while detection is still pending', () => {
+  it('does not flash the time filter hint while detection is still pending', () => {
     mockGetESQLTimeField.mockReturnValue(new Promise(() => {}));
 
     render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
 
-    expect(screen.queryByText(/connect to the dashboard time picker/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/connect the query to the dashboard time filter/i)
+    ).not.toBeInTheDocument();
   });
 
-  it('does not show the time picker hint on mount when a time field is detected', async () => {
+  it('does not show the time filter hint on mount when a time field is detected', async () => {
     mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
     render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
     await act(async () => {});
 
-    expect(screen.queryByText(/connect to the dashboard time picker/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/connect the query to the dashboard time filter/i)
+    ).not.toBeInTheDocument();
   });
 
   it('shows the hint after clicking preview when the query has no time field', async () => {
@@ -81,7 +85,7 @@ describe('EsqlPreviewSection', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Preview data' }));
     await act(async () => {});
 
-    expect(screen.getByText(/connect to the dashboard time picker/i)).toBeInTheDocument();
+    expect(screen.getByText(/connect the query to the dashboard time filter/i)).toBeInTheDocument();
   });
 
   it('shows the error callout when esqlDataError is provided', () => {

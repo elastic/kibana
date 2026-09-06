@@ -172,7 +172,7 @@ export const EsqlPreviewSection = ({
               <EuiText size="xs" color="subdued">
                 {i18n.translate('xpack.customContent.editFlyout.esqlSection.timePickerHint', {
                   defaultMessage:
-                    'To connect to the dashboard time picker, add a WHERE clause with named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
+                    'To connect the query to the dashboard time filter, add a WHERE clause with the named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
                 })}
               </EuiText>
             </EuiFlexItem>
