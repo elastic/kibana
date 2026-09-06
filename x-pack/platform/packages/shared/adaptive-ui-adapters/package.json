@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/adaptive-ui-adapters",
+  "description": "Pure data → ViewSpec adapters for Adaptive UI attachment and registered-view payloads.",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "sideEffects": false
+}

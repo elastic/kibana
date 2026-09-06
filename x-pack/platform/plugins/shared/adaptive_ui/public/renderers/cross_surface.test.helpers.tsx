@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { renderMarkdown, renderSlack, renderText, type ViewSpec } from '@kbn/adaptive-ui';
 import { AdaptiveViewContainer } from './view_renderer';
 
+// The adapter marks its shadow host with this rather than a `data-test-subj`.
 const SHADOW_HOST_SELECTOR = '[data-render-isolation="shadow"]';
 
 export interface CrossSurfaceRenders {
