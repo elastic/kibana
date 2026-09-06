@@ -8,7 +8,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import { EuiDataGrid, EuiLoadingSpinner, EuiSpacer, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiLoadingSpinner,
+  EuiProgress,
+  EuiSpacer,
+  EuiTextColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
@@ -296,6 +303,8 @@ export const EntityAnalyticsTestPage: React.FC = () => {
 
           <EuiSpacer size="m" />
 
+          {isFetching && <EuiProgress size="xs" color="accent" position="fixed" />}
+
           <EuiDataGrid
             aria-label="Entity analytics ES|QL grid"
             columns={GRID_COLUMNS}
@@ -304,7 +313,6 @@ export const EntityAnalyticsTestPage: React.FC = () => {
             renderCellValue={renderCellValue}
             sorting={sorting}
             pagination={pagination}
-            loading={isFetching}
           />
         </div>
       </SecuritySolutionPageWrapper>
