@@ -217,8 +217,21 @@ export function httpHandlerFromKbnClient({
           parseRetryAfterMsFromMessage(error.message);
 
         // Exponential backoff (1s, 2s, 4s, ...) with jitter, but never sooner than retry-after.
+        //
+        // Cap the growth, not the patience: an uncapped 2^attempt reaches 8.5
+        // minutes by attempt 6, but a floor that is too eager is worse. Measured
+        // 2026-09-06 on sweep-1788696599-g53: Kibana went unreachable and
+        // examples 3 and 4 burned all four attempts inside SEVEN SECONDS
+        // (1s + 2s + 4s), losing two examples of a shard whose examples cost
+        // ~5 minutes each. The endpoint answered 200 again minutes later, so the
+        // outage outlived the retry window by orders of magnitude. Retry patience
+        // must be proportional to the cost of the work it protects, so hold a
+        // floor of 30s once the cheap early attempts are exhausted.
         const baseBackoffMs = 1000 * Math.pow(2, attempt);
-        const baseDelayMs = retryAfterMs ? Math.max(baseBackoffMs, retryAfterMs) : baseBackoffMs;
+        const patientBackoffMs = attempt >= 2 ? Math.max(baseBackoffMs, 30_000) : baseBackoffMs;
+        const baseDelayMs = retryAfterMs
+          ? Math.max(patientBackoffMs, retryAfterMs)
+          : patientBackoffMs;
         const jitterMs = Math.floor(
           Math.random() * Math.min(1000, Math.max(100, baseDelayMs * 0.15))
         );

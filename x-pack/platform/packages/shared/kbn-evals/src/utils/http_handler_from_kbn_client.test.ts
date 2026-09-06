@@ -182,4 +182,55 @@ describe('httpHandlerFromKbnClient transport retries', () => {
     expect(result).toEqual({ ok: true });
     expect(calls).toBe(2);
   });
+
+  /**
+   * Regression gate for the too-eager retry window. On sweep-1788696599-g53
+   * (2026-09-06) Kibana went unreachable and two examples burned all four
+   * attempts in SEVEN SECONDS (1s + 2s + 4s), losing work that costs ~5
+   * minutes per example while the endpoint recovered minutes later. Retry
+   * patience must be proportional to the cost of the work it protects.
+   */
+  it('waits at least 30s once the cheap early attempts are exhausted', async () => {
+    process.env.KBN_EVALS_HTTP_RETRIES = '4';
+    const delays: number[] = [];
+    const realSetTimeout = global.setTimeout;
+    const spy = jest.spyOn(global, 'setTimeout').mockImplementation(((
+      fn: () => void,
+      ms?: number
+    ) => {
+      // Record backoff sleeps, then fire immediately so the test stays fast.
+      // The request timeout uses a multi-minute bound; only short sleeps are
+      // backoff. Firing it would abort the request under test, so leave the
+      // timeout handle pending instead.
+      if (typeof ms === 'number' && ms < 1_000_000) {
+        delays.push(ms);
+        return realSetTimeout(fn, 0);
+      }
+      return realSetTimeout(() => {}, 0);
+    }) as never);
+
+    try {
+      const request = jest
+        .fn()
+        .mockRejectedValue(makeError('request failed -- Status: N/A, Cause: fetch failed'));
+
+      const handler = httpHandlerFromKbnClient({ kbnClient: kbnClient(request), log });
+      await expect(
+        handler('/api/agent_builder/converse', { method: 'POST' })
+      ).rejects.toBeDefined();
+
+      // Attempts 0 and 1 stay cheap; from attempt 2 the floor holds at 30s.
+      expect(delays.length).toBe(4);
+      expect(delays[0]).toBeLessThan(2_000);
+      expect(delays[1]).toBeLessThan(3_000);
+      expect(delays[2]).toBeGreaterThanOrEqual(30_000);
+      expect(delays[3]).toBeGreaterThanOrEqual(30_000);
+
+      // The whole window must outlast a real outage, not seven seconds.
+      const total = delays.reduce((a, b) => a + b, 0);
+      expect(total).toBeGreaterThan(60_000);
+    } finally {
+      spy.mockRestore();
+    }
+  });
 });
