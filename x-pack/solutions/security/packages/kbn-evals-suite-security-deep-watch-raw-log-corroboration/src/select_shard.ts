@@ -40,9 +40,7 @@ export function selectShard<T>(examples: readonly T[], spec: string | undefined)
   const total = match ? Number(match[2]) : NaN;
 
   if (!match || total < 1 || index < 1 || index > total) {
-    throw new Error(
-      `EVAL_SHARD must be "<index>/<total>" with 1 <= index <= total, got "${spec}"`
-    );
+    throw new Error(`EVAL_SHARD must be "<index>/<total>" with 1 <= index <= total, got "${spec}"`);
   }
 
   return examples.filter((_, position) => position % total === index - 1);
