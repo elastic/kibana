@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { useRef } from 'react';
 import {
   EuiBadge,
@@ -51,6 +52,8 @@ interface AttachmentHeaderProps {
   /** Optional badges rendered alongside the title. */
   badges?: HeaderBadge[];
   actionButtons?: ActionButton[];
+  /** Control contributed by the registered share provider, rendered beside the action buttons. */
+  shareSlot?: ReactNode;
   onClose?: () => void;
   onClosePreview?: () => void;
   /**
@@ -74,6 +77,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   subtitle,
   badges,
   actionButtons,
+  shareSlot,
   onClose,
   onClosePreview,
   previewBadgeState = 'none',
@@ -128,8 +132,12 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   const hasCloseButton = Boolean(onClose);
   const hasActionButtons = actionButtons && actionButtons.length > 0;
+  const isPreviewing = previewBadgeState === 'previewing';
+  // The share slot follows the action buttons: hidden while previewing, where
+  // the header replaces every action with "Close preview".
+  const hasShareSlot = Boolean(shareSlot) && !isPreviewing;
 
-  if (!hasCloseButton && !hasActionButtons) {
+  if (!hasCloseButton && !hasActionButtons && !hasShareSlot) {
     return null;
   }
 
@@ -213,12 +221,13 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
           {/* End: action buttons + close button */}
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              {previewBadgeState !== 'previewing' && hasActionButtons && (
+              {!isPreviewing && hasActionButtons && (
                 <EuiFlexItem grow={false}>
                   <AttachmentActions buttons={actionButtons} iconOnly={isCompact} />
                 </EuiFlexItem>
               )}
-              {previewBadgeState === 'previewing' && (
+              {hasShareSlot && <EuiFlexItem grow={false}>{shareSlot}</EuiFlexItem>}
+              {isPreviewing && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={onClosePreview}>
                     {CLOSE_PREVIEW_LABEL}

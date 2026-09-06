@@ -10,6 +10,7 @@ import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 export interface KibanaPublicUrlHttp {
   basePath: {
     readonly publicBaseUrl?: string;
+    readonly serverBasePath?: string;
     prepend: (path: string) => string;
   };
   getServerInfo: () => { protocol: string; hostname: string; port: number };
