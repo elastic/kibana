@@ -107,13 +107,42 @@ export const resolveRuntimeConnectorId = async ({
   fetch: HttpHandler;
   connectorId: string;
 }): Promise<string | undefined> => {
-  const connectors = (await fetch('/api/actions/connectors', { method: 'GET' })) as Array<{
+  const connectorsResponse = (await fetch('/api/actions/connectors', {
+    method: 'GET',
+    headers: { 'elastic-api-version': '2023-10-31' },
+  })) as unknown;
+  // The eval fixture hands back Kibana's HttpHandler, not global fetch, so
+  // tolerate both the bare array and a wrapped body rather than assuming.
+  const connectors = (Array.isArray(connectorsResponse)
+    ? connectorsResponse
+    : (connectorsResponse as { data?: unknown[]; body?: unknown[] })?.data ??
+      (connectorsResponse as { body?: unknown[] })?.body ??
+      []) as Array<{
     id: string;
     connector_type_id?: string;
-    config?: { defaultModel?: string };
+    config?: { inferenceId?: string; defaultModel?: string };
   }>;
   const match = connectors.find((c) => c.id === connectorId);
-  return match?.config?.defaultModel ?? match?.connector_type_id;
+  // `.inference` connectors (EIS) execute through their inference endpoint, and
+  // that endpoint id -- not `connector_type_id`, which is just `.inference` --
+  // is what the agent step records as the connector it used.
+  if (!match) {
+    throw new Error(
+      `Cannot verify model routing: connector ${connectorId} was not returned by ` +
+        `/api/actions/connectors (saw ${connectors.length}: ` +
+        `${connectors.map((c) => c.id).slice(0, 5).join(', ')}...). ` +
+        `Refusing to guess the runtime id.`
+    );
+  }
+  const runtimeId = match.config?.inferenceId ?? match.config?.defaultModel;
+  if (!runtimeId) {
+    throw new Error(
+      `Cannot verify model routing: connector ${connectorId} exposes no ` +
+        `config.inferenceId or config.defaultModel (type ${match.connector_type_id}). ` +
+        `Refusing to guess the runtime id.`
+    );
+  }
+  return runtimeId;
 };
 
 const isTerminal = (status: string | undefined): boolean =>
