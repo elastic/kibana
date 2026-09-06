@@ -10,7 +10,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { EvalsExecutorClient, Evaluator } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import { evaluate, tags } from '../src/evaluate';
-import { DEEP_WATCH_GOLDEN_ROWS, DEEP_WATCH_ROW_BY_ID } from '../src/golden_dataset';
+import {
+  DEEP_WATCH_GOLDEN_ROWS,
+  DEEP_WATCH_ROW_BY_ID,
+  selectGoldenRows,
+} from '../src/golden_dataset';
 import { setupWatchCell, teardownWatchCell } from '../src/watch_cell_setup';
 import { enableDeepWatch, runDeepWatch } from '../src/deep_watch_run';
 import { summarizeDiscrimination } from '../src/evaluators';
@@ -20,8 +24,8 @@ interface DeepWatchTaskOutput extends Record<string, unknown> {
   executionId: string;
   status: string;
   isIncident: boolean;
-  forensicsRan: boolean;
-  gateCorrect: number;
+  gate: string;
+  verdictCorrect: number;
   triageCorrect: number;
   validContract: number;
   cleanFallbacks: number;
@@ -72,10 +76,21 @@ evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, ()
     'runs forensic reconstruction exactly when triage confirms an incident',
     async ({ executorClient, esClient, fetch, log }: DeepWatchEvalContext) => {
       // Self-provision the cell: kill-chain events + one AD alert per row.
+      // Seeding always covers every row so a filtered run still executes
+      // against the full shared cell -- the cross-row contamination that
+      // dw-002 exists to catch only appears when the other hosts are present.
       await setupWatchCell({ esClient, log, rows: DEEP_WATCH_GOLDEN_ROWS });
       try {
         await enableDeepWatch({ fetch, log });
         const outcomes: GateOutcome[] = [];
+        const selectedRows = selectGoldenRows();
+        if (selectedRows.length !== DEEP_WATCH_GOLDEN_ROWS.length) {
+          log.warning(
+            `DEEP_WATCH_ROWS is narrowing this run to ${selectedRows
+              .map((r) => r.id)
+              .join(', ')} -- a filtered run is a debug probe, not a suite pass.`
+          );
+        }
 
         await executorClient.runExperiment(
           {
@@ -83,15 +98,14 @@ evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, ()
               {
                 name: 'security: deep-watch-forensic-gate-discrimination',
                 description:
-                  'Runs the managed Deep Watch end-to-end against labeled Attack Discovery ' +
-                  'narratives and grades whether the gated forensic reconstruction step fired ' +
-                  'in the correct direction. Includes a negative row (must skip) and a row ' +
-                  'whose benign narrative is contradicted by seeded telemetry.',
-                examples: DEEP_WATCH_GOLDEN_ROWS.map((row) => ({
+                  'Runs the managed Forensics Watch end-to-end against labeled Attack Discovery ' +
+                  'narratives and grades whether the verdict came out in the correct ' +
+                  'direction. Includes a negative row (must close) and a row whose benign ' +
+                  'narrative is contradicted by seeded telemetry.',
+                examples: selectedRows.map((row) => ({
                   input: { attackDiscoveryAlertId: row.id },
                   output: {
                     isIncident: row.expectedIncident,
-                    forensicsRan: row.expectForensics,
                   },
                   metadata: {
                     goldenId: row.id,
@@ -118,9 +132,8 @@ evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, ()
               const outcome: GateOutcome = {
                 id: row.id,
                 expectedIncident: row.expectedIncident,
-                expectForensics: row.expectForensics,
                 actualIncident: result.output.isIncident === true,
-                actualForensics: result.forensicsRan,
+                gate: result.output.gate ?? 'unknown',
               };
               outcomes.push(outcome);
               if (result.output.gate === 'agent_no_structured_output') {
@@ -133,7 +146,7 @@ evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, ()
               }
 
               const {
-                gateCorrectness,
+                verdictCorrectness,
                 triageCorrectness,
                 validOutputContract,
                 cleanSkipFallbacks,
@@ -143,8 +156,8 @@ evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, ()
                 executionId: result.executionId,
                 status: result.status,
                 isIncident: outcome.actualIncident,
-                forensicsRan: outcome.actualForensics,
-                gateCorrect: gateCorrectness(outcome),
+                gate: outcome.gate,
+                verdictCorrect: verdictCorrectness(outcome),
                 triageCorrect: triageCorrectness(outcome),
                 validContract: validOutputContract(result.output),
                 cleanFallbacks: cleanSkipFallbacks(result.output),
@@ -152,7 +165,7 @@ evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, ()
             },
           },
           [
-            scoreFromTask('gate_correctness', (output) => output.gateCorrect),
+            scoreFromTask('verdict_correctness', (output) => output.verdictCorrect),
             scoreFromTask('triage_correctness', (output) => output.triageCorrect),
             scoreFromTask('valid_output_contract', (output) => output.validContract),
             scoreFromTask('clean_skip_fallbacks', (output) => output.cleanFallbacks),
@@ -160,12 +173,19 @@ evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, ()
         );
 
         const report = summarizeDiscrimination(outcomes);
-        log.info(`Deep Watch gate discrimination: ${JSON.stringify(report)}`);
+        log.info(`Forensics Watch verdict discrimination: ${JSON.stringify(report)}`);
+        if (report.harnessErrors > 0) {
+          throw new Error(
+            `${report.harnessErrors} row(s) produced no verdict (harness error). Scores are not ` +
+              'trustworthy until every row is assessed: an unassessed row must never be read ' +
+              'as a correct close.'
+          );
+        }
         if (!report.discriminates) {
           throw new Error(
-            `Gate did not discriminate: ${report.truePositives}/${report.positives} correct opens, ` +
+            `Watch did not discriminate: ${report.truePositives}/${report.positives} correct opens, ` +
               `${report.trueNegatives}/${report.negatives} correct closes. A suite that only ever ` +
-              'observes one direction cannot distinguish a working gate from one wired open.'
+              'observes one direction cannot distinguish a working watch from one wired open.'
           );
         }
       } finally {

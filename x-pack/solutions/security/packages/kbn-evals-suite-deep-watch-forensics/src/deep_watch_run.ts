@@ -23,47 +23,14 @@ export interface DeepWatchOutput {
   rationale?: string;
   proposal?: string;
   recommendedActions?: unknown[];
-  patientZero?: string;
-  attackTimeline?: string;
-  iocs?: string[];
 }
 
 export interface DeepWatchRunResult {
   executionId: string;
   status: string;
   output: DeepWatchOutput;
-  /**
-   * True when the gated forensic step produced content. Derived from the output
-   * contract rather than the step log: a skipped gate leaves every forensic
-   * field at its documented empty fallback.
-   */
-  forensicsRan: boolean;
 }
 
-/**
- * A skipped forensic step leaves `patientZero`/`attackTimeline` as empty strings
- * and `iocs` as an empty array (the `consts.no_iocs` fallback). Any non-empty
- * forensic field means the gate opened.
- */
-/**
- * A skipped forensic step leaves the emitted narrative fields empty (the
- * `consts` fallbacks). Any non-empty forensic field means the gate opened and
- * the agent produced a real assessment. Detects the v20+ output contract
- * (rationale/proposal/recommendedActions); patientZero/attackTimeline/iocs are
- * the v18 fields, kept for backward compatibility with archived runs.
- */
-export const didForensicsRun = (output: DeepWatchOutput): boolean => {
-  const hasText = (value: string | undefined): boolean =>
-    typeof value === 'string' && value.trim().length > 0;
-  return (
-    hasText(output.rationale) ||
-    hasText(output.proposal) ||
-    (Array.isArray(output.recommendedActions) && output.recommendedActions.length > 0) ||
-    hasText(output.patientZero) ||
-    hasText(output.attackTimeline) ||
-    (Array.isArray(output.iocs) && output.iocs.length > 0)
-  );
-};
 
 /**
  * Enable the managed Forensics Watch.
@@ -161,6 +128,5 @@ export const runDeepWatch = async ({
     executionId: workflowExecutionId,
     status: status ?? 'unknown',
     output,
-    forensicsRan: didForensicsRun(output),
   };
 };

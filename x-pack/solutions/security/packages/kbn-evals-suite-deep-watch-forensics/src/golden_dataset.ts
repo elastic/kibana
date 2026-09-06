@@ -6,20 +6,16 @@
  */
 
 /**
- * Golden dataset for Deep Watch gate discrimination.
+ * Golden dataset for Forensics Watch verdict discrimination.
  *
- * Every row pairs an Attack Discovery narrative with the ground truth for two
- * separable questions:
- *   1. `expectedIncident` -- should triage escalate?
- *   2. `expectForensics`  -- should the gated forensic step run?
+ * Each row pairs an Attack Discovery narrative with one ground-truth label:
+ * `expectedIncident` -- should this escalate?
  *
- * The second is a function of the first, which is the invariant under test: the
- * `reconstruct_if_incident` gate must open on true and stay shut on false.
- *
- * Rows deliberately include a case where the narrative claims "benign" but the
- * seeded telemetry contradicts it. A suite containing only clean positives
- * cannot distinguish a working gate from a gate wired permanently open --
- * that is the discrimination requirement in the AlertZero gate test plan.
+ * The suite's headline metric requires observing BOTH directions: at least one
+ * row the watch correctly opens AND at least one it correctly closes. An
+ * all-positive dataset cannot distinguish a working watch from one wired
+ * permanently open, so `dw-002` (the only negative) carries the entire closed
+ * path and must never be removed without a replacement negative.
  */
 export interface DeepWatchGoldenRow {
   /** Stable golden id; also the Attack Discovery `_id` seeded for the row. */
@@ -30,10 +26,13 @@ export interface DeepWatchGoldenRow {
   title: string;
   summary: string;
   details: string;
-  /** Ground truth: does this warrant escalation? */
+  /**
+   * Ground truth: does this warrant escalation? Under the telemetry-first
+   * architecture this single label IS the gate -- the forensic agent runs on
+   * every row, so a separate "must forensics execute?" label would describe
+   * nothing observable.
+   */
   expectedIncident: boolean;
-  /** Ground truth: must the gated forensic step execute? */
-  expectForensics: boolean;
   /** `happy` = clean signal, `contradiction` = narrative fights the evidence. */
   rowType: 'happy' | 'contradiction';
 }
@@ -47,8 +46,8 @@ export const DEEP_WATCH_GOLDEN_ROWS: DeepWatchGoldenRow[] = [
   {
     id: 'dw-001-ransomware-kill-chain',
     description:
-      'Full ransomware kill chain on a host with corroborating telemetry. Triage must ' +
-      'escalate and the forensic step must run.',
+      'Full ransomware kill chain on a host with corroborating telemetry. The watch ' +
+      'must return isIncident=true.',
     host: COMPROMISED_HOST,
     title: `Ransomware kill chain: ${COMPROMISED_HOST} to SRV-DC01`,
     summary:
@@ -60,14 +59,13 @@ export const DEEP_WATCH_GOLDEN_ROWS: DeepWatchGoldenRow[] = [
       'established outbound TLS to 185.220.101.42:443, credentials were harvested, and ' +
       'SMB writes reached SRV-DC01. vssadmin.exe deleted volume shadow copies.',
     expectedIncident: true,
-    expectForensics: true,
     rowType: 'happy',
   },
   {
     id: 'dw-002-benign-patch-window',
     description:
-      'Routine patching on a host with no telemetry to contradict it. Triage must NOT ' +
-      'escalate and the forensic step must be skipped.',
+      'Routine patching on a host with no telemetry to contradict it. The watch must ' +
+      'return isIncident=false -- the only row that exercises the closed path.',
     host: QUIET_HOST,
     title: `Scheduled Windows Update maintenance on ${QUIET_HOST}`,
     summary:
@@ -80,7 +78,6 @@ export const DEEP_WATCH_GOLDEN_ROWS: DeepWatchGoldenRow[] = [
       'the Windows Update service during the scheduled patch window. Parent processes ' +
       'are expected. No egress to untrusted destinations. No shadow copy deletion.',
     expectedIncident: false,
-    expectForensics: false,
     rowType: 'happy',
   },
   {
@@ -88,7 +85,7 @@ export const DEEP_WATCH_GOLDEN_ROWS: DeepWatchGoldenRow[] = [
     description:
       'A benign "maintenance" narrative pointed at the COMPROMISED host. The telemetry ' +
       'contradicts the summary, so triage should escalate on evidence rather than ' +
-      'trusting the label -- and forensics must then run.',
+      'trusting the label.',
     host: COMPROMISED_HOST,
     title: `Scheduled Windows Update maintenance on ${COMPROMISED_HOST}`,
     summary:
@@ -98,9 +95,40 @@ export const DEEP_WATCH_GOLDEN_ROWS: DeepWatchGoldenRow[] = [
       '## Routine maintenance\n' +
       'Reported as expected administrative activity during the Tuesday patch window.',
     expectedIncident: true,
-    expectForensics: true,
     rowType: 'contradiction',
   },
 ];
+
+/**
+ * Rows selected for this run. `DEEP_WATCH_ROWS` (comma-separated golden ids or
+ * id prefixes) narrows the dataset for fast single-row probing during
+ * debugging -- a full three-row cell run costs ~9 minutes of live agent time,
+ * most of it spent re-confirming rows that already pass.
+ *
+ * The filter is debug-only and deliberately loud: a filtered run cannot satisfy
+ * the discrimination requirement unless the selection still contains both a
+ * positive and a negative row, so it can never be mistaken for a green suite.
+ */
+export const selectGoldenRows = (
+  rows: DeepWatchGoldenRow[] = DEEP_WATCH_GOLDEN_ROWS,
+  selector: string | undefined = process.env.DEEP_WATCH_ROWS
+): DeepWatchGoldenRow[] => {
+  if (!selector || selector.trim() === '') {
+    return rows;
+  }
+  const wanted = selector
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter((entry) => entry !== '');
+  const selected = rows.filter((row) => wanted.some((entry) => row.id.startsWith(entry)));
+  if (selected.length === 0) {
+    throw new Error(
+      `DEEP_WATCH_ROWS="${selector}" matched no golden rows. Known ids: ${rows
+        .map((r) => r.id)
+        .join(', ')}`
+    );
+  }
+  return selected;
+};
 
 export const DEEP_WATCH_ROW_BY_ID = new Map(DEEP_WATCH_GOLDEN_ROWS.map((r) => [r.id, r]));

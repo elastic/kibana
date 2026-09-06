@@ -10,33 +10,48 @@ import type { DeepWatchOutput } from './deep_watch_run';
 export interface GateOutcome {
   id: string;
   expectedIncident: boolean;
-  expectForensics: boolean;
   actualIncident: boolean;
-  actualForensics: boolean;
+  /**
+   * The workflow's own observable outcome: `assessed`, `no_host_resolved`, or
+   * `agent_no_structured_output`. Only `assessed` rows carry a real verdict.
+   */
+  gate: string;
 }
 
+/** A row is a scoreable verdict only when the watch actually assessed it. */
+export const isAssessed = (outcome: GateOutcome): boolean => outcome.gate === 'assessed';
+
 /**
- * Per-row gate correctness: did the forensic step run exactly when it should
- * have? Scored separately from triage accuracy because a gate can be correct
- * while the verdict is wrong, and vice versa -- collapsing them hides which
- * half regressed.
+ * Per-row verdict correctness against the golden label.
+ *
+ * This replaced `gateCorrectness`, which asked "did the forensic step run when
+ * it should have?". Under the telemetry-first architecture the forensic agent
+ * runs on every row by design, so that question no longer distinguishes
+ * anything -- the verdict IS the gate. A detector that cannot be false is not a
+ * measurement.
  */
-export const gateCorrectness = (outcome: GateOutcome): number =>
-  outcome.actualForensics === outcome.expectForensics ? 1 : 0;
+export const verdictCorrectness = (outcome: GateOutcome): number =>
+  isAssessed(outcome) && outcome.actualIncident === outcome.expectedIncident ? 1 : 0;
 
 /** Per-row triage correctness against the golden label. */
 export const triageCorrectness = (outcome: GateOutcome): number =>
   outcome.actualIncident === outcome.expectedIncident ? 1 : 0;
 
 export interface DiscriminationReport {
-  /** Rows whose ground truth says forensics must run. */
+  /** Rows whose ground truth says this is an incident. */
   positives: number;
-  /** Rows whose ground truth says forensics must be skipped. */
+  /** Rows whose ground truth says this is benign. */
   negatives: number;
-  /** Positives where the gate correctly opened. */
+  /** Positives the watch correctly opened (isIncident true). */
   truePositives: number;
-  /** Negatives where the gate correctly stayed shut. */
+  /** Negatives the watch correctly closed (isIncident false). */
   trueNegatives: number;
+  /**
+   * Rows that never produced a verdict (harness errors). Excluded from
+   * true-positive/negative counts so a broken run can never be scored as a
+   * correct close, and surfaced so it cannot be silently ignored.
+   */
+  harnessErrors: number;
   /**
    * True only when the gate was observed BOTH opening and closing correctly.
    * A suite that never exercises the closed path cannot distinguish a working
@@ -55,33 +70,37 @@ export interface DiscriminationReport {
  * green this suite exists to prevent.
  */
 export const summarizeDiscrimination = (outcomes: GateOutcome[]): DiscriminationReport => {
-  const positives = outcomes.filter((o) => o.expectForensics);
-  const negatives = outcomes.filter((o) => !o.expectForensics);
-  const truePositives = positives.filter((o) => o.actualForensics).length;
-  const trueNegatives = negatives.filter((o) => !o.actualForensics).length;
+  // Only assessed rows carry a verdict. A row that failed to produce structured
+  // output is a harness error: counting it as "not an incident" would let a
+  // broken agent masquerade as a correct close -- the exact false green this
+  // suite exists to prevent.
+  const assessed = outcomes.filter(isAssessed);
+  const harnessErrors = outcomes.length - assessed.length;
+  const positives = assessed.filter((o) => o.expectedIncident);
+  const negatives = assessed.filter((o) => !o.expectedIncident);
+  const truePositives = positives.filter((o) => o.actualIncident).length;
+  const trueNegatives = negatives.filter((o) => !o.actualIncident).length;
   const correct = truePositives + trueNegatives;
   return {
     positives: positives.length,
     negatives: negatives.length,
     truePositives,
     trueNegatives,
-    discriminates: truePositives > 0 && trueNegatives > 0,
+    harnessErrors,
+    discriminates: truePositives > 0 && trueNegatives > 0 && harnessErrors === 0,
+    // Accuracy is over ALL rows, not just assessed ones: dividing by the
+    // survivors would inflate the score exactly when the harness is failing.
     accuracy: outcomes.length === 0 ? 0 : correct / outcomes.length,
   };
 };
 
 /**
- * Output-contract validity. The workflow's `outputs` block only permits scalar
- * array elements, so an `iocs` array containing objects is a contract
- * violation that fails the run at `emit_result` -- worth grading explicitly
- * because unit tests asserting the wrong shape will not catch it.
+ * Output-contract validity: an emitted verdict must carry the fields it claims
+ * to have assessed, and `agent_no_structured_output` is never a contract pass.
  */
 export const validOutputContract = (output: DeepWatchOutput): number => {
-  if (output.iocs != null) {
-    if (!Array.isArray(output.iocs)) {
-      return 0;
-    }
-    if (output.iocs.some((entry) => typeof entry !== 'string')) {
+  if (output.recommendedActions != null) {
+    if (!Array.isArray(output.recommendedActions)) {
       return 0;
     }
   }
@@ -107,19 +126,13 @@ export const validOutputContract = (output: DeepWatchOutput): number => {
 };
 
 /**
- * On a skipped-forensics run every forensic field must be at its documented
- * empty fallback. Catches a regression where a missing Liquid default renders
- * the literal template string instead of an empty value.
+ * Liquid-leak guard. The emitted narrative fields are built from
+ * `{{ ... | default: ... }}` chains; a malformed chain renders the literal
+ * template text instead of a value. That leaked text is non-empty, so it reads
+ * as a populated field and would otherwise pass every other check.
  */
 export const cleanSkipFallbacks = (output: DeepWatchOutput): number => {
-  const fields = [output.patientZero ?? '', output.attackTimeline ?? ''];
-  // Checked BEFORE `didForensicsRun`: a leaked `{{ ... }}` expression is
-  // non-empty text, so it reads as "forensics ran" and would otherwise
-  // short-circuit this check into a pass -- the precise false green this
-  // evaluator exists to catch.
+  const fields = [output.rationale ?? '', output.proposal ?? ''];
   const leaked = fields.some((value) => value.includes('{{') || value.includes('steps.'));
-  if (leaked) {
-    return 0;
-  }
-  return 1;
+  return leaked ? 0 : 1;
 };
