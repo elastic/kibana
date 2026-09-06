@@ -54,7 +54,10 @@ export const parseFleetAgentYaml = (yamlContent: string, agentId: string): Agent
     id: agentId,
     name: parsed.name,
     description: parsed.description,
-    labels: parsed.labels,
+    // AB-004: package-managed governance metadata — UI shows the managed badge
+    // and warns/blocks instruction edits; upgrades overwrite (createOrUpdate).
+    labels: [...new Set([...(parsed.labels ?? []), 'managed_by_package', `fleet-package:${agentId.split('-').slice(0, 3).join('-')}`])],
+    readonly: true,
     avatar_color: parsed.avatar_color,
     avatar_symbol: parsed.avatar_symbol,
     configuration: parsed.configuration,

@@ -25,6 +25,12 @@ export type AgentCreateRequest = Omit<
    */
   type?: string;
   access_control?: Pick<AgentAccessControl, 'access_mode'>;
+  /**
+   * AB-004: when true the agent is created readonly (package-managed).
+   * Fleet package installs set this so UI edits warn/block, mirroring the
+   * managed workflow pattern. Ignored on update paths.
+   */
+  readonly?: boolean;
 };
 
 export type AgentUpdateRequest = Partial<

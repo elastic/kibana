@@ -52,7 +52,7 @@ export class AgentBuilderManagementApi {
       return registry.update(params.id, update);
     }
 
-    return registry.create(params);
+    return registry.create(params); // AB-004: params may carry readonly=true (fleet package agent)
   }
 
   public async deleteAgent(agentId: string, request: KibanaRequest): Promise<boolean> {

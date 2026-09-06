@@ -48,3 +48,33 @@ steps:
     expect(result).not.toContain('REPLACE_WITH_FLEET_AGENT_sdlc-coverage-analysis');
   });
 });
+
+describe('AB-006 fleet agent id namespace (collision policy)', () => {
+  it('derives deterministic ids in the fleet-* namespace regardless of fileName case', () => {
+    const a = getFleetPackageAgentId({ pkgName: 'sdlc_intel', spaceId: 'default', fileName: 'sdlc-coverage-analysis.yaml' });
+    const b = getFleetPackageAgentId({ pkgName: 'sdlc_intel', spaceId: 'default', fileName: 'SDLC-COVERAGE-ANALYSIS.yaml' });
+    expect(a).toBe(b);
+    expect(a.startsWith('fleet-')).toBe(true);
+  });
+
+  it('different packages never collide (namespace includes pkgName)', () => {
+    const a = getFleetPackageAgentId({ pkgName: 'sdlc_intel', spaceId: 'default', fileName: 'analyst.yaml' });
+    const b = getFleetPackageAgentId({ pkgName: 'other_pkg', spaceId: 'default', fileName: 'analyst.yaml' });
+    expect(a).not.toBe(b);
+  });
+
+  it('parseFleetAgentYaml stamps managed_by_package label and readonly (AB-004)', () => {
+    const yaml = `
+name: Test agent
+description: tests things
+labels: [custom]
+configuration:
+  tools:
+    - tool_ids: [platform.core.integration_knowledge]
+`;
+    const req = parseFleetAgentYaml(yaml, 'fleet-default-test-agent');
+    expect(req.labels).toContain('managed_by_package');
+    expect(req.labels).toContain('custom');
+    expect(req.readonly).toBe(true);
+  });
+});
