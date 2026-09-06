@@ -59,6 +59,9 @@ export class AgentBuilderManagementApi {
         name: params.name,
         description: params.description,
         labels: params.labels,
+        // AB-004: carry the managed flag on upgrades too, otherwise a reinstall
+        // silently downgrades a package agent to an editable user agent.
+        readonly: params.readonly,
         avatar_color: params.avatar_color,
         avatar_symbol: params.avatar_symbol,
         configuration: params.configuration,

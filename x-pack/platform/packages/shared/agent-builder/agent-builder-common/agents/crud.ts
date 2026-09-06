@@ -28,7 +28,7 @@ export type AgentCreateRequest = Omit<
   /**
    * AB-004: when true the agent is created readonly (package-managed).
    * Fleet package installs set this so UI edits warn/block, mirroring the
-   * managed workflow pattern. Ignored on update paths.
+   * managed workflow pattern. Carried on update so package upgrades keep it.
    */
   readonly?: boolean;
 };
@@ -38,6 +38,11 @@ export type AgentUpdateRequest = Partial<
 > & {
   access_control?: Pick<AgentAccessControl, 'access_mode'>;
   configuration?: Partial<AgentConfiguration>;
+  /**
+   * AB-004: package upgrades re-assert the managed flag; a reinstall must not
+   * silently downgrade a package agent to an editable user agent.
+   */
+  readonly?: boolean;
 };
 
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;
