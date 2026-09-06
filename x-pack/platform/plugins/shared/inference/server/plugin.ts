@@ -47,6 +47,8 @@ import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
+import type { WorkflowAnonymizationProvider } from './workflow_anonymization_provider';
+import type { WorkflowAnonymizationOptions } from './inference_client/workflow_anonymization_options';
 
 const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   let parsed: unknown = value;
@@ -90,6 +92,31 @@ export const resolveReplacementsEncryptionKey = async ({
   return policyService.getReplacementsEncryptionKey(namespace);
 };
 
+export const resolveWorkflowAnonymizationOptions = ({
+  enabled,
+  failureMode,
+  preLLMTimeoutMs,
+  provider,
+  logger,
+}: {
+  enabled: boolean;
+  failureMode: WorkflowAnonymizationOptions['failureMode'];
+  preLLMTimeoutMs: number;
+  provider?: WorkflowAnonymizationProvider;
+  logger: Pick<Logger, 'error'>;
+}): WorkflowAnonymizationOptions | undefined => {
+  if (!enabled) {
+    return undefined;
+  }
+  if (!provider?.supportsSynchronousExecution) {
+    logger.error(
+      'Workflow-driven inference anonymization is configured but synchronous workflow support is unavailable; retaining legacy anonymization'
+    );
+    return undefined;
+  }
+  return { provider, failureMode, preLLMTimeoutMs };
+};
+
 export class InferencePlugin
   implements
     Plugin<
@@ -104,6 +131,7 @@ export class InferencePlugin
   private regexWorker?: RegexWorkerService;
   private endpointIdCache: InferenceEndpointIdCache;
   private tokenUsageLogger: TokenUsageLogger;
+  private workflowAnonymizationProvider?: WorkflowAnonymizationProvider;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
@@ -124,7 +152,18 @@ export class InferencePlugin
       logger: this.logger,
     });
 
-    return {};
+    return {
+      registerWorkflowAnonymizationProvider: (provider) => {
+        if (this.workflowAnonymizationProvider) {
+          throw new Error('A workflow anonymization provider is already registered');
+        }
+        this.workflowAnonymizationProvider = provider;
+      },
+      anonymizationConfig: {
+        triggerCacheTtlMs: this.config.anonymization.triggerCacheTtlSeconds * 1000,
+        workflowDrivenEnabled: this.config.anonymization.workflowDriven,
+      },
+    };
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
@@ -154,8 +193,20 @@ export class InferencePlugin
       );
     }
 
+    if (this.config.anonymization.workflowDriven && !this.config.anonymization.encryptionKey) {
+      this.logger.warn(
+        'xpack.inference.anonymization.encryptionKey is not configured; tokens will be derived from the session ID alone and are not server-hardened. Configure this key for HMAC-backed tokens.'
+      );
+    }
+
+    const workerConfig = this.config.workers.anonymization;
+    const effectiveWorkerConfig =
+      this.config.anonymization.workflowDriven && workerConfig.minThreads < workerConfig.maxThreads
+        ? { ...workerConfig, minThreads: workerConfig.maxThreads }
+        : workerConfig;
+
     this.regexWorker = new RegexWorkerService(
-      this.config.workers.anonymization,
+      effectiveWorkerConfig,
       this.logger.get('regex_worker')
     );
 
@@ -220,7 +271,9 @@ export class InferencePlugin
         })(),
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
         anonymization: {
-          saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
+          saltPromise: this.config.anonymization.encryptionKey
+            ? Promise.resolve(this.config.anonymization.encryptionKey)
+            : undefined,
           resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
             if (!anonymizationEnabled || !policyService || !target) {
               return undefined;
