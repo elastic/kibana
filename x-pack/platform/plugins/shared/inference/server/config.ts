@@ -11,7 +11,7 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   anonymization: schema.object({
     workflowDriven: schema.boolean({ defaultValue: false }),
-    encryptionKey: schema.maybe(schema.string()),
+    encryptionKey: schema.maybe(schema.string({ sensitive: true })),
     failureMode: schema.oneOf([schema.literal('block'), schema.literal('allow_unsafe')], {
       defaultValue: 'block',
     }),
