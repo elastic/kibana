@@ -8,16 +8,18 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { RuleStateStatus } from '../../types/rule_state';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import {
+  createMockRule,
   createMockServices,
   createTestQueryClient,
   createQueryClientWrapper,
 } from '../../hooks/test_utils';
 import { AlertEpisodeDetailsFlyout } from './details_flyout';
 
-jest.mock('../../hooks/use_fetch_rule');
+jest.mock('../../agent_builder/episode_add_to_chat_button', () => ({
+  EpisodeAddToChatButton: () => <div data-test-subj="episodeAddToChatButtonStub" />,
+}));
 
 jest.mock('./details_header_section', () => ({
   AlertEpisodeDetailsHeaderSection: () => <div data-test-subj="headerSectionStub" />,
@@ -35,21 +37,21 @@ jest.mock('./runbook_section', () => ({
   AlertEpisodeRunbookSection: () => <div data-test-subj="runbookSectionStub" />,
 }));
 
-const mockUseFetchRule = jest.mocked(useFetchRule);
-
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
 const Wrapper = createQueryClientWrapper(createTestQueryClient());
 
-const loadedRuleState = {
-  status: RuleStateStatus.loaded,
-  ruleId: 'rule-1',
-  rule: { id: 'rule-1', metadata: { name: 'Rule A' } },
-} as const;
+const mockEpisode = {
+  'episode.id': 'ep-1',
+  'rule.id': 'rule-1',
+  group_hash: 'gh-1',
+} as AlertEpisode;
+
+const mockRule = createMockRule();
 
 const baseProps = {
-  episodeId: 'ep-1',
-  groupHash: 'gh-1',
+  episode: mockEpisode,
+  rule: mockRule,
   onClose: jest.fn(),
   services: mockServices,
 };
@@ -57,9 +59,6 @@ const baseProps = {
 describe('AlertEpisodeDetailsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFetchRule.mockReturnValue({
-      ruleState: loadedRuleState,
-    } as ReturnType<typeof useFetchRule>);
   });
 
   it('renders header, overview tab body by default, and footer button with the right href', () => {
@@ -78,24 +77,20 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByTestId('relatedSectionStub')).toBeInTheDocument();
   });
 
-  it('switches to metadata tab when the rule is loaded', () => {
+  it('switches to metadata tab when the rule is present', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
     expect(screen.getByTestId('metadataSectionStub')).toBeInTheDocument();
   });
 
-  it('switches to runbook tab when the rule is loaded', () => {
+  it('switches to runbook tab when the rule is present', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabRunbook'));
     expect(screen.getByTestId('runbookSectionStub')).toBeInTheDocument();
   });
 
-  it('hides metadata and runbook tabs when the rule is not loaded', () => {
-    mockUseFetchRule.mockReturnValue({
-      ruleState: { status: RuleStateStatus.not_found, ruleId: 'rule-1' },
-    } as ReturnType<typeof useFetchRule>);
-
-    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+  it('hides metadata and runbook tabs when the rule is missing', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} rule={undefined} />, { wrapper: Wrapper });
 
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutTabMetadata')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutTabRunbook')).not.toBeInTheDocument();
@@ -115,21 +110,10 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('renders footer extra next to the view details button', () => {
-    const renderFooterExtra = jest.fn(() => <div data-test-subj="footerExtraStub" />);
+  it('renders the add to chat button next to the view details button', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
-    render(<AlertEpisodeDetailsFlyout {...baseProps} renderFooterExtra={renderFooterExtra} />, {
-      wrapper: Wrapper,
-    });
-
-    expect(screen.getByTestId('footerExtraStub')).toBeInTheDocument();
+    expect(screen.getByTestId('episodeAddToChatButtonStub')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeFlyoutViewDetailsButton')).toBeInTheDocument();
-    expect(renderFooterExtra).toHaveBeenCalledWith(
-      expect.objectContaining({
-        episode: undefined,
-        ruleName: 'Rule A',
-        groupingFields: undefined,
-      })
-    );
   });
 });

@@ -54,7 +54,6 @@ import {
   EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
-import { EpisodeAddToChatButton } from '../../agent_builder/episode_add_to_chat_button';
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
@@ -380,32 +379,28 @@ export const AlertEpisodesListPage = () => {
   );
 
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
-    (hit) => (
-      <AlertEpisodeDetailsFlyout
-        episodeId={hit.flattened['episode.id'] as string}
-        groupHash={hit.flattened.group_hash as string | undefined}
-        onClose={closeFlyout}
-        actions={episodeActions}
-        renderFooterExtra={({ episode, ruleName, groupingFields }) => (
-          <EpisodeAddToChatButton
-            episode={episode}
-            ruleName={ruleName}
-            groupingFields={groupingFields}
-          />
-        )}
-        services={{
-          data: services.data,
-          http: services.http,
-          expressions: services.expressions,
-          userProfile: services.userProfile,
-          spaces: services.spaces,
-          uiSettings: services.uiSettings,
-          unifiedDocViewer: services.unifiedDocViewer,
-          dataViews: services.dataViews,
-        }}
-      />
-    ),
-    [closeFlyout, episodeActions, services]
+    (hit) => {
+      const episode = dataTableRecordToEpisode(hit);
+      return (
+        <AlertEpisodeDetailsFlyout
+          episode={episode}
+          rule={rulesCache[episode['rule.id']]}
+          onClose={closeFlyout}
+          actions={episodeActions}
+          services={{
+            data: services.data,
+            http: services.http,
+            expressions: services.expressions,
+            userProfile: services.userProfile,
+            spaces: services.spaces,
+            uiSettings: services.uiSettings,
+            unifiedDocViewer: services.unifiedDocViewer,
+            dataViews: services.dataViews,
+          }}
+        />
+      );
+    },
+    [closeFlyout, episodeActions, rulesCache, services]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(

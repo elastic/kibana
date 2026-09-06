@@ -26,12 +26,10 @@ import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
-import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
+import { useEpisode } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
-import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { useEpisodeFlapping } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
@@ -95,18 +93,18 @@ export function EpisodeDetailsPage() {
   const canReadExecutionHistory = useService(UserCapabilities).canRead('executionHistory');
 
   const {
-    data: episode,
+    episode,
+    ruleState,
+    ruleName: episodeRuleName,
+    groupingFields,
     isLoading: isLoadingEpisode,
     isError: isEpisodeError,
-  } = useFetchEpisodeQuery({
+  } = useEpisode({
     episodeId,
-    services: { data, spaces },
+    services: { data, spaces, http },
   });
 
-  const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
-
-  const { ruleState } = useFetchRule({ id: ruleId, http });
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({
     episodeIds: episodeId ? [episodeId] : [],
@@ -127,14 +125,7 @@ export function EpisodeDetailsPage() {
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
-
-  const episodeData = parseEpisodeDataJson(episode?.episode_data);
-  const episodeDataRuleName =
-    typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
-  const loadedRuleName = showRuleDependentUi ? ruleState.rule.metadata.name : undefined;
-  const episodeRuleName = loadedRuleName ?? episodeDataRuleName;
   const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
-  const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
 
   useEpisodeAutoAttach(episode, {
     ruleName: episodeRuleName,
