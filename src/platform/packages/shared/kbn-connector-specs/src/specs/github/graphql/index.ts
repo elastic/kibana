@@ -8,15 +8,15 @@
  */
 
 export {
-  executeGitHubGraphQL,
-  extractPageInfo,
+  executeRunQueryTemplate,
+  executeGraphQLViewer,
   resolveGraphQLApiUrl,
+  shouldBackoffForRateLimit,
+  unwrapTemplateResult,
+  GitHubRateLimitError,
+  isGitHubRateLimitError,
 } from './github_graphql_client';
-export {
-  getGitHubQueryTemplate,
-  listGitHubQueryTemplates,
-  GITHUB_QUERY_TEMPLATES,
-} from './templates';
+export { getTemplate, listTemplates, GITHUB_QUERY_TEMPLATES } from './catalog';
 export { validateReadOnlyGraphQLQuery } from './validate_read_only_query';
 export type {
   GitHubGraphQLPageInfo,
