@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/es-query'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/investigation-output'
 tags:
   - plugin
   - prod
