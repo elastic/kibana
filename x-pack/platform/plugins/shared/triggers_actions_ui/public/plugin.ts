@@ -16,7 +16,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { from, map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import type { ReactElement } from 'react';
+import type { ComponentType, ReactElement } from 'react';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
@@ -115,6 +115,13 @@ import type { UntrackAlertsModalProps } from './application/sections/common/comp
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
+import { getClassicRulesPageLazy } from './common/get_classic_rules_page';
+import type {
+  ClassicRulesPagePluginsStart,
+  ClassicRulesPageProps,
+} from './application/classic_rules_page';
+
+export type { ClassicRulesPageProps } from './application/classic_rules_page';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -175,6 +182,11 @@ export interface TriggersAndActionsUIPublicPluginStart {
    * Returns the formatter function if the rule type has one registered, undefined otherwise.
    */
   getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
+  /**
+   * Classic (v1) Rules page, for hosts that mount it outside Stack Management.
+   * Returns a stable component identity across calls — do not recreate it per render.
+   */
+  getClassicRulesPage: () => ComponentType<ClassicRulesPageProps>;
 }
 
 interface PluginsSetup {
@@ -225,6 +237,8 @@ export class Plugin
   private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
   private readonly isServerless: boolean;
+  private cloud?: CloudSetup;
+  private actionsSetup?: ActionsPublicPluginSetup;
 
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -238,6 +252,8 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
     const isServerless = this.isServerless;
+    this.cloud = plugins.cloud;
+    this.actionsSetup = plugins.actions;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
@@ -512,6 +528,17 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    const ClassicRulesPage = getClassicRulesPageLazy({
+      actions: this.actionsSetup,
+      connectorServices: this.connectorServices,
+      security: plugins.security,
+      cloud: this.cloud,
+      actionTypeRegistry: this.actionTypeRegistry,
+      ruleTypeRegistry: this.ruleTypeRegistry,
+      isServerless: this.isServerless,
+      pluginsStart: plugins as ClassicRulesPagePluginsStart,
+    });
+
     const createAlertRuleAction = async () => {
       const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
         coreStart: core,
@@ -648,6 +675,7 @@ export class Plugin
         }
         return this.ruleTypeRegistry.get(ruleTypeId).format;
       },
+      getClassicRulesPage: () => ClassicRulesPage,
     };
   }
 

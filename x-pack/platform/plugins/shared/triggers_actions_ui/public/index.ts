@@ -128,6 +128,7 @@ export { useSubAction } from './application/hooks';
 export type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
+  ClassicRulesPageProps,
 } from './plugin';
 export { Plugin } from './plugin';
 
