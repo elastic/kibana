@@ -77,6 +77,7 @@ interface ParsedOnFailure {
 
 interface ParsedStep {
   condition?: string;
+  'connector-id'?: string;
   else?: ParsedStep[];
   if?: string;
   name: string;
@@ -210,9 +211,32 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
 
     expect(Object.keys(inputs?.properties ?? {}).sort()).toEqual([
       'attack_discovery_alert_id',
+      'connector_id',
       'space_id',
     ]);
     expect(inputs?.additionalProperties).toBe(false);
+  });
+
+  it('routes every ai.agent step through the connector_id input', () => {
+    // Without this the model under test is never applied: ai.agent falls back to
+    // the default GenAI connector, so a cross-model sweep silently runs a single
+    // model N times and reports it as N distinct models.
+    const agentSteps = allSteps.filter(({ type }) => type === 'ai.agent');
+
+    expect(agentSteps.length).toBeGreaterThan(0);
+    for (const step of agentSteps) {
+      expect(step['connector-id']).toBe('{{ inputs.connector_id }}');
+    }
+  });
+
+  it('keeps connector_id optional so production uses the default connector', () => {
+    // A blank render normalizes to undefined in the step
+    // (normalizeOptionalConnectorOrInferenceParam), so leaving the input unset
+    // must not pin an explicit empty connector id.
+    const inputs = parsed.triggers?.find(({ type }) => type === 'manual')?.inputs;
+
+    expect(inputs?.required ?? []).not.toContain('connector_id');
+    expect(inputs?.properties?.connector_id?.type).toBe('string');
   });
 
   it('does not require those inputs, so a standalone alert run is not rejected', () => {

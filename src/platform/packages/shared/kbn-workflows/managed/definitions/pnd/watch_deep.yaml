@@ -34,6 +34,13 @@ triggers:
           description: >
             Space this run investigates in. Unset on a standalone alert
             trigger, which then uses the workflow space.
+        connector_id:
+          type: string
+          description: >
+            Optional LLM connector id for the ai.agent steps. Unset in
+            production, where the steps fall through to the default GenAI
+            connector; set by evaluation harnesses to pin the model under
+            test so a cross-model sweep actually varies the model.
       additionalProperties: false
 # JSON Schema form, not the legacy `- name:/type:` list, because the legacy form
 # hardcodes array items to `anyOf: [string, number, boolean]`
@@ -177,6 +184,7 @@ steps:
       - name: forensic_analysis
         type: ai.agent
         agent-id: alertzero-thin-agent
+        connector-id: "{{ inputs.connector_id }}"
         timeout: "15m"
         create-conversation: true
         public-conversation: true
@@ -415,6 +423,7 @@ steps:
       - name: follow_up_analysis
         type: ai.agent
         agent-id: alertzero-thin-agent
+        connector-id: "{{ inputs.connector_id }}"
         if: "${{ steps.verify_lead_hosts.output.aggregations.lead_hosts.buckets != blank }}"
         timeout: "10m"
         create-conversation: true
