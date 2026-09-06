@@ -2639,6 +2639,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/buildkite/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/censys/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/databricks/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/dropbox/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/elasticsearch/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/figma/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/firecrawl/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cloud_functions/** @elastic/workflows-eng
