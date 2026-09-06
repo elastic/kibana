@@ -382,33 +382,33 @@
       ]
     },
     {
-      "id": "security-deep-watch-forensics",
-      "name": "Security Deep Watch Forensics",
+      "id": "security-forensics-watch",
+      "name": "Security Forensics Watch",
       "slackChannel": "#security-generative-ai-evals",
-      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-forensics/playwright.config.ts",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch/playwright.config.ts",
       "serverConfigSet": "evals_tracing",
       "tags": [
         "security",
-        "deep-watch",
+        "forensics-watch",
         "pnd"
       ],
       "ciLabels": [
-        "evals:security-deep-watch-forensics"
+        "evals:security-forensics-watch"
       ]
     },
     {
-      "id": "security-deep-watch-raw-log-corroboration",
-      "name": "Security Deep Watch Raw Log Corroboration",
+      "id": "security-forensics-watch-raw-log-corroboration",
+      "name": "Security Forensics Watch Raw Log Corroboration",
       "slackChannel": "#security-generative-ai-evals",
-      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-raw-log-corroboration/playwright.config.ts",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch-raw-log-corroboration/playwright.config.ts",
       "serverConfigSet": "evals_tracing",
       "tags": [
         "security",
-        "deep-watch",
+        "forensics-watch",
         "pnd"
       ],
       "ciLabels": [
-        "evals:security-deep-watch-raw-log-corroboration"
+        "evals:security-forensics-watch-raw-log-corroboration"
       ]
     },
     {

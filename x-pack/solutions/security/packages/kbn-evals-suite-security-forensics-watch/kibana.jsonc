@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-security-forensics-watch",
+  "owner": "@elastic/security-detection-platform",
+  "group": "security",
+  "visibility": "private"
+}
