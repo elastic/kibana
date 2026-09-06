@@ -294,6 +294,116 @@ describe('LogsExtractionClient', () => {
       expect(queries.some((q) => q.includes('-logs-proxy-*'))).toBe(true);
     });
 
+    it('excludes internal ES|QL views on origin and every remote cluster without naming linked projects', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*,$.alert-actions'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+
+      await client.extractLogs('user');
+
+      const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
+      expect(queries.some((q) => q.includes('-$.*'))).toBe(true);
+      expect(queries.some((q) => q.includes('*:-$.*'))).toBe(true);
+      expect(queries.every((q) => !q.includes('kayak-f86d55'))).toBe(true);
+    });
+
+    it('retries the probe after a remote-view error and reuses those exclusions for extraction', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+        ],
+        values: [['2024-01-02T10:00:00.000Z', 'hash1']],
+      };
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+      const remoteViewError = {
+        message:
+          'ES|QL queries with remote views are not supported. Matched [kayak-f86d55:logs-security-summary]. Remove them from the query pattern or exclude them with [kayak-f86d55:-logs-security-summary] if matched by a wildcard.',
+        meta: {
+          body: {
+            error: {
+              type: 'remote_resource_not_supported_exception',
+              reason:
+                'ES|QL queries with remote views are not supported. Matched [kayak-f86d55:logs-security-summary].',
+              'es.esql.view.names': ['kayak-f86d55:logs-security-summary'],
+            },
+          },
+        },
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery
+        .mockRejectedValueOnce(remoteViewError)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2024-01-02T10:00:00.000Z'))
+        .mockResolvedValueOnce(mockEsqlResponse)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: [], values: [] });
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      // probe fail, probe retry, extraction, terminal empty probe, sweep extraction
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(5);
+
+      const probeRetryQuery = mockExecuteEsqlQuery.mock.calls[1][0].query;
+      const extractionQuery = mockExecuteEsqlQuery.mock.calls[2][0].query;
+      expect(probeRetryQuery).toContain('*:-logs-security-summary');
+      expect(extractionQuery).toContain('*:-logs-security-summary');
+      expect(extractionQuery).toContain('kayak-f86d55:-logs-security-summary');
+    });
+
+    it('propagates extraction error when the probe succeeded but extraction hits a remote view not seen by the probe', async () => {
+      // The probe accumulates remote-resource exclusions into indexPatterns; by the time
+      // extraction runs those exclusions are already present. A remote view error on extraction
+      // therefore represents a view the probe did not encounter (race condition), and it
+      // propagates as a failure rather than being silently retried.
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+      const remoteViewError = {
+        message: 'remote_resource_not_supported_exception',
+        meta: {
+          body: {
+            error: {
+              type: 'remote_resource_not_supported_exception',
+              reason: 'ES|QL queries with remote views are not supported.',
+              'es.esql.view.names': ['booking-aa11:custom-view'],
+            },
+          },
+        },
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2024-01-02T10:00:00.000Z'))
+        .mockRejectedValueOnce(remoteViewError);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(false);
+    });
+
     it('should handle empty results from ESQL query', async () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
@@ -1511,6 +1621,25 @@ describe('LogsExtractionClient', () => {
       expect(remoteIndexPatterns).not.toContain('metrics-*');
     });
 
+    it('drops internal ES|QL view includes from local and remote pattern lists', async () => {
+      const mockDataView = {
+        getIndexPattern: jest
+          .fn()
+          .mockReturnValue(
+            'logs-*,$.alert-actions,kayak-f86d55:$.rule-events,remote_cluster:logs-*'
+          ),
+      };
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+
+      const { localIndexPatterns, remoteIndexPatterns } =
+        await client.getLocalAndRemoteIndexPatterns();
+
+      expect(localIndexPatterns).toContain('logs-*');
+      expect(localIndexPatterns).not.toContain('$.alert-actions');
+      expect(remoteIndexPatterns).toContain('remote_cluster:logs-*');
+      expect(remoteIndexPatterns).not.toContain('kayak-f86d55:$.rule-events');
+    });
+
     it('should exclude alerts index from both local and remote', async () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*,.alerts-security.alerts-default'),
@@ -1586,6 +1715,8 @@ describe('LogsExtractionClient', () => {
       expect(indexPatterns).not.toContain('-remote_cluster:logs-debug-*');
       // remote includes are also not returned
       expect(indexPatterns).not.toContain('remote_cluster:logs-*');
+      // View exclusions are query-only (`*:-\$.*` is not a privilege target)
+      expect(indexPatterns).not.toContain('*:-$.*');
     });
   });
 
