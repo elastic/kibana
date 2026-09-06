@@ -10,7 +10,6 @@ import type {
   AgentCreateRequest,
   AgentUpdateRequest,
   PersistedSkillCreateRequest,
-  PersistedSkillUpdateRequest,
 } from '@kbn/agent-builder-common';
 import { skillIndexName } from '../services/skills/persisted/client/storage';
 

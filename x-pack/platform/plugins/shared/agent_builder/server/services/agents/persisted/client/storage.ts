@@ -70,7 +70,7 @@ export interface AgentProperties {
   space: string;
   description: string;
   labels?: string[];
-  /** Package-managed agents are readonly: the UI blocks edits and upgrades overwrite them. */
+  /** True when the agent is installed and owned by a package; blocks user edits. */
   readonly?: boolean;
   avatar_color?: string;
   avatar_symbol?: string;

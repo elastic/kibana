@@ -9,11 +9,15 @@ import type { AgentDefinition } from '@kbn/agent-builder-common';
 import type { AgentDefinitionWithPermissions } from '../../../../common/http_api/agents';
 import type { AgentRef } from '../../../../common/http_api/tools';
 
-export type PersistedAgentDefinition = Omit<AgentDefinition, 'readonly'>;
+// AB-004: persisted agents are user-editable by default, but package-installed
+// agents persist readonly=true, so the flag is optional rather than omitted.
+export type PersistedAgentDefinition = Omit<AgentDefinition, 'readonly'> & {
+  readonly?: boolean;
+};
 export type PersistedAgentDefinitionWithPermissions = Omit<
   AgentDefinitionWithPermissions,
   'readonly'
->;
+> & { readonly?: boolean };
 
 export interface AgentsUsingToolsResult {
   agents: AgentRef[];
