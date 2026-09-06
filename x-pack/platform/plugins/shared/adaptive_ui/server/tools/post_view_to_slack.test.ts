@@ -10,8 +10,8 @@ import { ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE, adaptiveUiTools } from '../../common/
 import type { KibanaPublicUrlHttp } from '../kibana_public_url';
 import { postViewToSlackTool, type PostViewToSlackDeps } from './post_view_to_slack';
 
-// The real rasterizer pulls in `satori` and native `@resvg/resvg-js`; these
-// tests cover the orchestration around it, not the pixels.
+// The real renderer pulls in native `@takumi-rs/core`; these tests cover the
+// orchestration around it, not the pixels.
 jest.mock('../slack/render_png', () => ({
   renderNodePng: jest.fn().mockResolvedValue(Buffer.from('fake-png')),
 }));
