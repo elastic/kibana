@@ -78,7 +78,7 @@ Four of the five are pure browser work. `renderText`, `renderMarkdown`, and `ren
 
 HTML uses `renderHTML(spec, { css: 'separate' })` — `HTMLRenderResult` carries `html`, `css`, and `body` — and assembles a standalone document — doctype, charset, `<title>` from `spec.title`, stylesheet in a head `<style>`. The shadow root and its `:host { all: initial }` reset are a host-page isolation concern and have no counterpart in a downloaded file.
 
-PNG is the exception. `renderPNG` lives in [`@kbn/adaptive-ui/node`](../../src/platform/packages/shared/adaptive-ui/node.ts) because it pulls in `satori` and the native `@resvg/resvg-js`, so it needs a route.
+PNG is the exception. `renderPNG` lives in [`@kbn/adaptive-ui/node`](../../src/platform/packages/shared/adaptive-ui/node.ts) because it pulls in the native `@takumi-rs/core` binding, so it needs a route.
 
 ### Why PNG is a route, and what it takes
 
@@ -92,7 +92,7 @@ Posting the spec also gets fidelity for free: the browser holds the exact spec o
 
 Guard the handler the way [`post_view_to_slack.ts`](../../x-pack/platform/plugins/shared/adaptive_ui/server/tools/post_view_to_slack.ts) does — `parseViewSpec`, then `validateView` — and bound the request body, so an oversized spec cannot turn the rasterizer into a compute sink.
 
-**Payload headroom.** Every adapter in `adapterGallery` serializes to between 309 B (`esql`) and 2.8 KB (`platform.sig_event`); `nightshift.investigation`, the chart-heavy one, is 2.1 KB. Against `server.maxPayload`'s 1 MB default that is ~370× headroom, so the platform limit is not the binding constraint — a route-level `body: { maxBytes }` around 256 KB is, and it should be set deliberately with an error that names the limit. Specs are agent-authored, so a pathological table could in principle grow; the guard turns that into a legible 413 rather than a rasterizer stall. POST is also the only option: a spec of this size does not survive a URL. Import the rasterizer lazily, following [`render_png.ts`](../../x-pack/platform/plugins/shared/adaptive_ui/server/slack/render_png.ts): a Kibana that never exports a PNG should never load satori or the native binding.
+**Payload headroom.** Every adapter in `adapterGallery` serializes to between 309 B (`esql`) and 2.8 KB (`platform.sig_event`); `nightshift.investigation`, the chart-heavy one, is 2.1 KB. Against `server.maxPayload`'s 1 MB default that is ~370× headroom, so the platform limit is not the binding constraint — a route-level `body: { maxBytes }` around 256 KB is, and it should be set deliberately with an error that names the limit. Specs are agent-authored, so a pathological table could in principle grow; the guard turns that into a legible 413 rather than a renderer stall. POST is also the only option: a spec of this size does not survive a URL. Import the renderer lazily, following [`render_png.ts`](../../x-pack/platform/plugins/shared/adaptive_ui/server/slack/render_png.ts): a Kibana that never exports a PNG should never load the native binding.
 
 **Fidelity.** The PNG is the SVG surface's render of the spec, not a capture of the HTML surface in the shadow root, so the two can diverge. That gap is Adaptive UI's, and it is the same gap that already applies to every chart uploaded to Slack; the place to close it is the SVG surface upstream in `adaptive-ui-poc`, not a rasterizing workaround in Kibana.
 
@@ -140,7 +140,7 @@ Landed on this branch, with three departures from the plan above worth recording
 ## Risks / follow-ups
 
 - **PNG fidelity.** The SVG and HTML surfaces can diverge. Worth capturing a side-by-side against a chart-heavy spec early and filing upstream if the gap is material.
-- **Serverless.** `renderPNG` depends on the native `@resvg/resvg-js` binding. Slack chart upload already relies on it, so this adds no new constraint, but PNG export inherits whatever that dependency's Serverless story is.
+- **Serverless.** `renderPNG` depends on the native `@takumi-rs/core` binding, whose platform builds ship as optional dependencies (all eight are in `yarn.lock`). Slack chart upload already relies on it, so this adds no new constraint, but PNG export inherits whatever that dependency's Serverless story is.
 - **Canvas parity.** The provider receives `isCanvas`, but whether the flyout should expose the same menu — or a wider one, given more room — is unresolved.
 - **Inert HTML.** The pack's progressive enhancements arrive as injected script text, which a standalone download does not carry, so interactive primitives land static. Acceptable for an export; worth saying so in the menu copy if it surprises anyone.
 - **Provider cardinality.** A single provider is right today. If a second consumer ever wants to contribute share destinations, this becomes a list and needs an ordering rule.

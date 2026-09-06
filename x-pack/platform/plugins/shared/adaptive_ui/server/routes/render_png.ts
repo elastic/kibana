@@ -44,8 +44,8 @@ export const registerRenderPngRoute = ({
         });
       }
 
-      // `@kbn/adaptive-ui/node` pulls in satori and the native `@resvg/resvg-js`
-      // binding; a Kibana that never exports a PNG should never load them.
+      // `@kbn/adaptive-ui/node` pulls in the native `@takumi-rs/core` binding;
+      // a Kibana that never exports a PNG should never load it.
       const { renderPNG } = await import('@kbn/adaptive-ui/node');
 
       try {

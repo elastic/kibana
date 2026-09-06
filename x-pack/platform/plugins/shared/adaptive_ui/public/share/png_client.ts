@@ -9,7 +9,7 @@ import type { HttpStart } from '@kbn/core/public';
 import type { ViewSpec } from '@kbn/adaptive-ui';
 import { adaptiveUiApiPaths } from '../../common/http_api';
 
-/** Rasterizes a spec through the server route, which owns satori and resvg. */
+/** Rasterizes a spec through the server route, which owns the native renderer. */
 export const fetchViewPng = async (http: HttpStart, spec: ViewSpec): Promise<Blob> => {
   const { response } = await http.post(adaptiveUiApiPaths.renderPng, {
     body: JSON.stringify({ spec }),
