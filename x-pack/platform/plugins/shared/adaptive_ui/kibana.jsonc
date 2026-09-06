@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/adaptive-ui-plugin",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "adaptiveUi",
+    "configPath": [
+      "xpack",
+      "adaptiveUi"
+    ],
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "agentBuilder"
+    ],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

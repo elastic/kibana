@@ -207,6 +207,7 @@
     "@kbn/actions-types": "link:src/platform/packages/shared/kbn-actions-types",
     "@kbn/actions-utils": "link:src/platform/packages/shared/kbn-actions-utils",
     "@kbn/adaptive-ui": "link:src/platform/packages/shared/adaptive-ui",
+    "@kbn/adaptive-ui-plugin": "link:x-pack/platform/plugins/shared/adaptive_ui",
     "@kbn/advanced-settings-plugin": "link:src/platform/plugins/private/advanced_settings",
     "@kbn/agent-builder-browser": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-browser",
     "@kbn/agent-builder-common": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-common",

@@ -123,6 +123,11 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
   `${internalNamespaces.workflows}.workflow_execute_step`,
+
+  // Adaptive UI
+  'render_view',
+  'get_authoring_context',
+  'request_registered_view',
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -360,6 +365,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',
+
+  // Platform – Adaptive UI
+  'platform.adaptiveUi.view',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];
