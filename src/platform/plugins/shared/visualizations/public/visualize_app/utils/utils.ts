@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
@@ -31,17 +32,15 @@ export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksSt
   });
 };
 
-export const addBadgeToAppChrome = (chrome: ChromeStart) => {
-  chrome.setBadge({
-    text: i18n.translate('visualizations.badge.readOnly.text', {
-      defaultMessage: 'Read only',
-    }),
-    tooltip: i18n.translate('visualizations.badge.readOnly.tooltip', {
-      defaultMessage: 'Unable to save visualizations to the library',
-    }),
-    iconType: 'readOnly',
-  });
-};
+export const getReadOnlyBadge = (): AppHeaderBadge => ({
+  label: i18n.translate('visualizations.badge.readOnly.text', {
+    defaultMessage: 'Read only',
+  }),
+  tooltip: i18n.translate('visualizations.badge.readOnly.tooltip', {
+    defaultMessage: 'Unable to save visualizations to the library',
+  }),
+  color: 'hollow',
+});
 
 export const getDefaultQuery = ({ data }: VisualizeServices) => {
   return data.query.queryString.getDefaultQuery();

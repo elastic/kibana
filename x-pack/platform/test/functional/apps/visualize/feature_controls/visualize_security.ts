@@ -13,8 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const securityService = getService('security');
   const config = getService('config');
-  const { appMenu, common, error, visualize, header, security } = getPageObjects([
-    'appMenu',
+  const { common, error, visualize, header, security } = getPageObjects([
     'common',
     'error',
     'visualize',
@@ -240,7 +239,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await appMenu.existOrFail('shareTopNavButton');
+        await testSubjects.moveMouseTo('appHeader');
+        await testSubjects.existOrFail('~shareTopNavButton');
         await testSubjects.missingOrFail('visualizeSaveButton', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -338,7 +338,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await appMenu.existOrFail('shareTopNavButton');
+        await testSubjects.moveMouseTo('appHeader');
+        await testSubjects.existOrFail('~shareTopNavButton');
         await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
       });
 

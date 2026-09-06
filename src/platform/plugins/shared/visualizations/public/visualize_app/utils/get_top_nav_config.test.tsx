@@ -62,6 +62,9 @@ describe('showPublicUrlSwitch', () => {
   });
 });
 
+const getMenuItemIds = (result: ReturnType<typeof getTopNavConfig>) =>
+  result.menu.items?.map(({ id }) => id) ?? [];
+
 describe('getTopNavConfig', () => {
   const stateContainerGetStateMock = jest.fn(() => visualizeAppStateStub);
   const stateContainer = {
@@ -74,6 +77,7 @@ describe('getTopNavConfig', () => {
   } as unknown as VisualizeAppStateContainer;
   const mockServices = createVisualizeServicesMock();
   const share = sharePluginMock.createStartContract();
+  share.availableIntegrations = jest.fn().mockReturnValue([]);
   const services = {
     ...mockServices,
     visualizeCapabilities: {
@@ -84,6 +88,21 @@ describe('getTopNavConfig', () => {
     },
     share,
   };
+
+  const defaultParams = {
+    hasUnsavedChanges: false,
+    setHasUnsavedChanges: jest.fn(),
+    hasUnappliedChanges: false,
+    openInspector: jest.fn(),
+    setOriginatingApp: jest.fn(),
+    stateContainer,
+    visualizationIdFromUrl: undefined,
+    stateTransfer: {
+      ...createEmbeddableStateTransferMock(),
+      getAppNameFromId: jest.fn((appId: string) => appId),
+    },
+  };
+
   test('returns correct links if the save visualize capabilities are set to false', () => {
     const vis = {
       savedVis: {
@@ -105,65 +124,20 @@ describe('getTopNavConfig', () => {
         save: false,
       },
     };
-    const topNavLinks = getTopNavConfig(
+    const result = getTopNavConfig(
       {
-        hasUnsavedChanges: false,
-        setHasUnsavedChanges: jest.fn(),
-        hasUnappliedChanges: false,
-        onOpenInspector: jest.fn(),
+        ...defaultParams,
         originatingApp: 'dashboards',
-        setOriginatingApp: jest.fn(),
         visInstance: vis,
-        stateContainer,
-        visualizationIdFromUrl: undefined,
-        stateTransfer: createEmbeddableStateTransferMock(),
       } as unknown as TopNavConfigParams,
       novisSaveServices as unknown as VisualizeServices
     );
 
-    expect(topNavLinks).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "description": "Open Inspector for visualization",
-          "disableButton": [Function],
-          "id": "inspector",
-          "label": "inspect",
-          "run": undefined,
-          "testId": "openInspectorButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Share Visualization",
-          "disableButton": false,
-          "iconOnly": true,
-          "iconType": "share",
-          "id": "share",
-          "label": "share",
-          "run": [Function],
-          "testId": "shareTopNavButton",
-        },
-        Object {
-          "description": "Return to the last app without saving changes",
-          "emphasize": false,
-          "id": "cancel",
-          "label": "Cancel",
-          "run": [Function],
-          "testId": "visualizeCancelAndReturnButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Finish editing visualization and return to the last app",
-          "disableButton": false,
-          "emphasize": true,
-          "iconType": "checkCircleFill",
-          "id": "saveAndReturn",
-          "label": "Save and return",
-          "run": [Function],
-          "testId": "visualizesaveAndReturnButton",
-          "tooltip": [Function],
-        },
-      ]
-    `);
+    expect(getMenuItemIds(result)).toEqual(['inspector', 'cancel']);
+    expect(result.menu.primaryActionItem?.id).toBe('saveAndReturn');
+    expect(result.menu.primaryActionItem?.testId).toBe('visualizesaveAndReturnButton');
+    expect(result.share?.isDisabled).toBe(false);
+    expect(result.back.label).toBeDefined();
   });
   test('returns correct links that include when export integrations are available', () => {
     const vis = {
@@ -198,23 +172,16 @@ describe('getTopNavConfig', () => {
       return [];
     });
 
-    const topNavLinks = getTopNavConfig(
+    const result = getTopNavConfig(
       {
-        hasUnsavedChanges: false,
-        setHasUnsavedChanges: jest.fn(),
-        hasUnappliedChanges: false,
-        onOpenInspector: jest.fn(),
+        ...defaultParams,
         originatingApp: 'dashboards',
-        setOriginatingApp: jest.fn(),
         visInstance: vis,
-        stateContainer,
-        visualizationIdFromUrl: undefined,
-        stateTransfer: createEmbeddableStateTransferMock(),
       } as unknown as TopNavConfigParams,
       services
     );
 
-    expect(topNavLinks.find(({ id }) => id === 'export')).toBeDefined();
+    expect(getMenuItemIds(result)).toContain('export');
 
     // revert mock implementation
     availableExportIntegrationsSpy.mockRestore();
@@ -234,56 +201,20 @@ describe('getTopNavConfig', () => {
         },
       },
     } as VisualizeEditorVisInstance;
-    const topNavLinks = getTopNavConfig(
+    const result = getTopNavConfig(
       {
-        hasUnsavedChanges: false,
-        setHasUnsavedChanges: jest.fn(),
-        hasUnappliedChanges: false,
-        onOpenInspector: jest.fn(),
+        ...defaultParams,
         originatingApp: undefined,
-        setOriginatingApp: jest.fn(),
         visInstance: vis,
-        stateContainer,
-        visualizationIdFromUrl: undefined,
-        stateTransfer: createEmbeddableStateTransferMock(),
       } as unknown as TopNavConfigParams,
       services as unknown as VisualizeServices
     );
 
-    expect(topNavLinks).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "description": "Open Inspector for visualization",
-          "disableButton": [Function],
-          "id": "inspector",
-          "label": "inspect",
-          "run": undefined,
-          "testId": "openInspectorButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Share Visualization",
-          "disableButton": false,
-          "iconOnly": true,
-          "iconType": "share",
-          "id": "share",
-          "label": "share",
-          "run": [Function],
-          "testId": "shareTopNavButton",
-        },
-        Object {
-          "description": "Save Visualization",
-          "disableButton": false,
-          "emphasize": true,
-          "iconType": "save",
-          "id": "save",
-          "label": "Save",
-          "run": [Function],
-          "testId": "visualizeSaveButton",
-          "tooltip": [Function],
-        },
-      ]
-    `);
+    expect(getMenuItemIds(result)).toEqual(['inspector']);
+    expect(result.menu.primaryActionItem?.id).toBe('save');
+    expect(result.menu.primaryActionItem?.testId).toBe('visualizeSaveButton');
+    expect(result.share?.isDisabled).toBe(false);
+    expect(result.back.label).toBe('Visualize library');
   });
 
   test('navigates to origin app and path on cancel', async () => {
@@ -302,29 +233,24 @@ describe('getTopNavConfig', () => {
       },
     } as VisualizeEditorVisInstance;
     const mockNavigateToApp = jest.fn();
-    const topNavLinks = getTopNavConfig(
+    const result = getTopNavConfig(
       {
-        hasUnsavedChanges: false,
-        setHasUnsavedChanges: jest.fn(),
-        hasUnappliedChanges: false,
-        onOpenInspector: jest.fn(),
+        ...defaultParams,
         originatingApp: 'testApp',
         originatingPath: '/testPath',
-        setOriginatingApp: jest.fn(),
         visInstance: vis,
-        stateContainer,
-        visualizationIdFromUrl: undefined,
-        stateTransfer: createEmbeddableStateTransferMock(),
       } as unknown as TopNavConfigParams,
       {
         ...services,
-        application: { navigateToApp: mockNavigateToApp },
+        application: {
+          navigateToApp: mockNavigateToApp,
+          getUrlForApp: jest.fn(() => '/app/testApp/testPath'),
+        },
       } as unknown as VisualizeServices
     );
 
-    const executionFunction = topNavLinks.find(({ id }) => id === 'cancel')?.run;
-    const mockAnchorElement = document.createElement('div');
-    await executionFunction?.(mockAnchorElement);
+    const executionFunction = result.menu.items?.find(({ id }) => id === 'cancel')?.run;
+    await executionFunction?.();
     expect(mockNavigateToApp).toHaveBeenCalledWith('testApp', { path: '/testPath' });
   });
 
@@ -343,76 +269,19 @@ describe('getTopNavConfig', () => {
         },
       },
     } as VisualizeEditorVisInstance;
-    const topNavLinks = getTopNavConfig(
+    const result = getTopNavConfig(
       {
-        hasUnsavedChanges: false,
-        setHasUnsavedChanges: jest.fn(),
-        hasUnappliedChanges: false,
-        onOpenInspector: jest.fn(),
+        ...defaultParams,
         originatingApp: 'dashboards',
-        setOriginatingApp: jest.fn(),
         visInstance: vis,
-        stateContainer,
-        visualizationIdFromUrl: undefined,
-        stateTransfer: createEmbeddableStateTransferMock(),
       } as unknown as TopNavConfigParams,
       services as unknown as VisualizeServices
     );
 
-    expect(topNavLinks).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "description": "Open Inspector for visualization",
-          "disableButton": [Function],
-          "id": "inspector",
-          "label": "inspect",
-          "run": undefined,
-          "testId": "openInspectorButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Share Visualization",
-          "disableButton": false,
-          "iconOnly": true,
-          "iconType": "share",
-          "id": "share",
-          "label": "share",
-          "run": [Function],
-          "testId": "shareTopNavButton",
-        },
-        Object {
-          "description": "Return to the last app without saving changes",
-          "emphasize": false,
-          "id": "cancel",
-          "label": "Cancel",
-          "run": [Function],
-          "testId": "visualizeCancelAndReturnButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Save Visualization",
-          "disableButton": false,
-          "emphasize": false,
-          "iconType": undefined,
-          "id": "save",
-          "label": "Save as",
-          "run": [Function],
-          "testId": "visualizeSaveButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Finish editing visualization and return to the last app",
-          "disableButton": false,
-          "emphasize": true,
-          "iconType": "checkCircleFill",
-          "id": "saveAndReturn",
-          "label": "Save and return",
-          "run": [Function],
-          "testId": "visualizesaveAndReturnButton",
-          "tooltip": [Function],
-        },
-      ]
-    `);
+    expect(getMenuItemIds(result)).toEqual(['inspector', 'cancel', 'save']);
+    expect(result.menu.items?.find(({ id }) => id === 'save')?.label).toBe('Save as');
+    expect(result.menu.primaryActionItem?.id).toBe('saveAndReturn');
+    expect(result.share?.isDisabled).toBe(false);
   });
 
   test('returns correct links for by value visualization', () => {
@@ -430,76 +299,19 @@ describe('getTopNavConfig', () => {
         },
       },
     } as VisualizeEditorVisInstance;
-    const topNavLinks = getTopNavConfig(
+    const result = getTopNavConfig(
       {
-        hasUnsavedChanges: false,
-        setHasUnsavedChanges: jest.fn(),
-        hasUnappliedChanges: false,
-        onOpenInspector: jest.fn(),
+        ...defaultParams,
         originatingApp: 'dashboards',
-        setOriginatingApp: jest.fn(),
         visInstance: vis,
-        stateContainer,
-        visualizationIdFromUrl: undefined,
-        stateTransfer: createEmbeddableStateTransferMock(),
       } as unknown as TopNavConfigParams,
       services as unknown as VisualizeServices
     );
 
-    expect(topNavLinks).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "description": "Open Inspector for visualization",
-          "disableButton": [Function],
-          "id": "inspector",
-          "label": "inspect",
-          "run": undefined,
-          "testId": "openInspectorButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Share Visualization",
-          "disableButton": true,
-          "iconOnly": true,
-          "iconType": "share",
-          "id": "share",
-          "label": "share",
-          "run": [Function],
-          "testId": "shareTopNavButton",
-        },
-        Object {
-          "description": "Return to the last app without saving changes",
-          "emphasize": false,
-          "id": "cancel",
-          "label": "Cancel",
-          "run": [Function],
-          "testId": "visualizeCancelAndReturnButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Save Visualization",
-          "disableButton": false,
-          "emphasize": false,
-          "iconType": undefined,
-          "id": "save",
-          "label": "Save to library",
-          "run": [Function],
-          "testId": "visualizeSaveButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Finish editing visualization and return to the last app",
-          "disableButton": false,
-          "emphasize": true,
-          "iconType": "checkCircleFill",
-          "id": "saveAndReturn",
-          "label": "Save and return",
-          "run": [Function],
-          "testId": "visualizesaveAndReturnButton",
-          "tooltip": [Function],
-        },
-      ]
-    `);
+    expect(getMenuItemIds(result)).toEqual(['inspector', 'cancel', 'save']);
+    expect(result.menu.items?.find(({ id }) => id === 'save')?.label).toBe('Save to library');
+    expect(result.menu.primaryActionItem?.id).toBe('saveAndReturn');
+    expect(result.share?.isDisabled).toBe(true);
   });
 
   test('returns correct for visualization that allows editing in Lens editor', () => {
@@ -517,86 +329,21 @@ describe('getTopNavConfig', () => {
         },
       },
     } as VisualizeEditorVisInstance;
-    const topNavLinks = getTopNavConfig(
+    const result = getTopNavConfig(
       {
-        hasUnsavedChanges: false,
-        setHasUnsavedChanges: jest.fn(),
-        hasUnappliedChanges: false,
-        onOpenInspector: jest.fn(),
+        ...defaultParams,
         originatingApp: 'dashboards',
-        setOriginatingApp: jest.fn(),
         visInstance: vis,
-        stateContainer,
-        visualizationIdFromUrl: undefined,
-        stateTransfer: createEmbeddableStateTransferMock(),
         displayEditInLensItem: true,
         hideLensBadge: false,
       } as unknown as TopNavConfigParams,
       services as unknown as VisualizeServices
     );
 
-    expect(topNavLinks).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "className": "visNavItem__goToLens",
-          "description": "Go to Lens with your current configuration",
-          "emphasize": false,
-          "id": "goToLens",
-          "label": "Edit visualization in Lens",
-          "run": [Function],
-          "testId": "visualizeEditInLensButton",
-        },
-        Object {
-          "description": "Open Inspector for visualization",
-          "disableButton": [Function],
-          "id": "inspector",
-          "label": "inspect",
-          "run": undefined,
-          "testId": "openInspectorButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Share Visualization",
-          "disableButton": false,
-          "iconOnly": true,
-          "iconType": "share",
-          "id": "share",
-          "label": "share",
-          "run": [Function],
-          "testId": "shareTopNavButton",
-        },
-        Object {
-          "description": "Return to the last app without saving changes",
-          "emphasize": false,
-          "id": "cancel",
-          "label": "Cancel",
-          "run": [Function],
-          "testId": "visualizeCancelAndReturnButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Save Visualization",
-          "disableButton": false,
-          "emphasize": false,
-          "iconType": undefined,
-          "id": "save",
-          "label": "Save as",
-          "run": [Function],
-          "testId": "visualizeSaveButton",
-          "tooltip": [Function],
-        },
-        Object {
-          "description": "Finish editing visualization and return to the last app",
-          "disableButton": false,
-          "emphasize": true,
-          "iconType": "checkCircleFill",
-          "id": "saveAndReturn",
-          "label": "Save and return",
-          "run": [Function],
-          "testId": "visualizesaveAndReturnButton",
-          "tooltip": [Function],
-        },
-      ]
-    `);
+    expect(getMenuItemIds(result)).toEqual(['goToLens', 'inspector', 'cancel', 'save']);
+    expect(result.menu.items?.find(({ id }) => id === 'goToLens')?.testId).toBe(
+      'visualizeEditInLensButton'
+    );
+    expect(result.menu.primaryActionItem?.id).toBe('saveAndReturn');
   });
 });
