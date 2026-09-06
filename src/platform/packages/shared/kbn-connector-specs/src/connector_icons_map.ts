@@ -377,4 +377,9 @@ export const ConnectorIconsMap: Map<
     '.urlscan_io',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
   ],
+
+  [
+    '.google_gke',
+    lazy(() => import(/* webpackChunkName: "connectorIconGoogleGke" */ './specs/google_gke/icon')),
+  ],
 ]);
