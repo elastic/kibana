@@ -21,6 +21,8 @@ import type TestAgent from 'supertest/lib/agent';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
+import { CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import type { ValidateCustomYaraSignatureResponse } from '@kbn/security-solution-plugin/common/api/endpoint/custom_yara_signatures';
 import {
   MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
   MAXIMUM_RULE_IDENTIFIER_LENGTH,
@@ -1129,87 +1131,91 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/Too small/));
           });
 
-          it(`should accept item on [${customYaraSignatureApiCall.method}] if rule value is ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
-            const body = customYaraSignatureApiCall.getBody();
+          describe('YARA rule content byte length', () => {
+            it(`should accept item on [${customYaraSignatureApiCall.method}] if rule value is ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
+              const body = customYaraSignatureApiCall.getBody();
 
-            (body.entries[0] as EntryMatch).value =
-              dummyRuleWithComment +
-              'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length);
+              (body.entries[0] as EntryMatch).value =
+                dummyRuleWithComment +
+                'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length);
 
-            await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
-              customYaraSignatureApiCall.path
-            )
-              .set('kbn-xsrf', 'true')
-              .send(body)
-              .expect(200);
-          });
+              await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                customYaraSignatureApiCall.path
+              )
+                .set('kbn-xsrf', 'true')
+                .send(body)
+                .expect(200);
+            });
 
-          it(`should error on [${customYaraSignatureApiCall.method}] if rule value is more than ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
-            const body = customYaraSignatureApiCall.getBody();
+            it(`should error on [${customYaraSignatureApiCall.method}] if rule value is more than ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
+              const body = customYaraSignatureApiCall.getBody();
 
-            (body.entries[0] as EntryMatch).value =
-              dummyRuleWithComment +
-              'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length + 1);
+              (body.entries[0] as EntryMatch).value =
+                dummyRuleWithComment +
+                'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length + 1);
 
-            await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
-              customYaraSignatureApiCall.path
-            )
-              .set('kbn-xsrf', 'true')
-              .send(body)
-              .expect(400)
-              .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/must not exceed 32766 bytes/));
-          });
+              await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                customYaraSignatureApiCall.path
+              )
+                .set('kbn-xsrf', 'true')
+                .send(body)
+                .expect(400)
+                .expect(anEndpointArtifactError)
+                .expect(anErrorMessageWith(/must not exceed 32766 bytes/));
+            });
 
-          it(`should accept item on [${customYaraSignatureApiCall.method}] if rule value is at the byte limit using multi-byte characters`, async () => {
-            const body = customYaraSignatureApiCall.getBody();
-            const euroSign = '€'; // takes up 3 bytes
-            const valueAtByteLimit =
-              dummyRuleWithComment +
-              euroSign.repeat(
-                (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
-                  Buffer.byteLength(euroSign)
+            it(`should accept item on [${customYaraSignatureApiCall.method}] if rule value is at the byte limit using multi-byte characters`, async () => {
+              const body = customYaraSignatureApiCall.getBody();
+              const euroSign = '€'; // takes up 3 bytes
+              const valueAtByteLimit =
+                dummyRuleWithComment +
+                euroSign.repeat(
+                  (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
+                    Buffer.byteLength(euroSign)
+                );
+
+              expect(Buffer.byteLength(valueAtByteLimit, 'utf8')).to.be(
+                MAX_YARA_RULE_CONTENT_BYTE_LENGTH
+              );
+              expect(valueAtByteLimit.length).to.be.lessThan(MAX_YARA_RULE_CONTENT_BYTE_LENGTH);
+
+              (body.entries[0] as EntryMatch).value = valueAtByteLimit;
+              await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                customYaraSignatureApiCall.path
+              )
+                .set('kbn-xsrf', 'true')
+                .send(body)
+                .expect(200);
+            });
+
+            it(`should error on [${customYaraSignatureApiCall.method}] if rule value exceeds the byte limit using multi-byte characters`, async () => {
+              const body = customYaraSignatureApiCall.getBody();
+              const euroSign = '€';
+              const valueOverByteLimit =
+                dummyRuleWithComment +
+                euroSign.repeat(
+                  (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
+                    Buffer.byteLength(euroSign)
+                ) +
+                'a'; // plus one byte
+
+              expect(Buffer.byteLength(valueOverByteLimit, 'utf8')).to.be.greaterThan(
+                MAX_YARA_RULE_CONTENT_BYTE_LENGTH
+              );
+              expect(valueOverByteLimit.length).to.be.lessThan(
+                MAX_YARA_RULE_CONTENT_BYTE_LENGTH + 1
               );
 
-            expect(Buffer.byteLength(valueAtByteLimit, 'utf8')).to.be(
-              MAX_YARA_RULE_CONTENT_BYTE_LENGTH
-            );
-            expect(valueAtByteLimit.length).to.be.lessThan(MAX_YARA_RULE_CONTENT_BYTE_LENGTH);
-
-            (body.entries[0] as EntryMatch).value = valueAtByteLimit;
-            await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
-              customYaraSignatureApiCall.path
-            )
-              .set('kbn-xsrf', 'true')
-              .send(body)
-              .expect(200);
-          });
-
-          it(`should error on [${customYaraSignatureApiCall.method}] if rule value exceeds the byte limit using multi-byte characters`, async () => {
-            const body = customYaraSignatureApiCall.getBody();
-            const euroSign = '€';
-            const valueOverByteLimit =
-              dummyRuleWithComment +
-              euroSign.repeat(
-                (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
-                  Buffer.byteLength(euroSign)
-              ) +
-              'a'; // plus one byte
-
-            expect(Buffer.byteLength(valueOverByteLimit, 'utf8')).to.be.greaterThan(
-              MAX_YARA_RULE_CONTENT_BYTE_LENGTH
-            );
-            expect(valueOverByteLimit.length).to.be.lessThan(MAX_YARA_RULE_CONTENT_BYTE_LENGTH + 1);
-
-            (body.entries[0] as EntryMatch).value = valueOverByteLimit;
-            await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
-              customYaraSignatureApiCall.path
-            )
-              .set('kbn-xsrf', 'true')
-              .send(body)
-              .expect(400)
-              .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/must not exceed 32766 bytes/));
+              (body.entries[0] as EntryMatch).value = valueOverByteLimit;
+              await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                customYaraSignatureApiCall.path
+              )
+                .set('kbn-xsrf', 'true')
+                .send(body)
+                .expect(400)
+                .expect(anEndpointArtifactError)
+                .expect(anErrorMessageWith(/must not exceed 32766 bytes/));
+            });
           });
 
           it(`should error on [${customYaraSignatureApiCall.method}] if more than one entry`, async () => {
@@ -1317,6 +1323,273 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(403);
           });
         }
+      });
+    });
+
+    describe('validate YARA rules internal API', () => {
+      const dummyRuleWithComment = 'rule dummy { condition: false }  // ';
+
+      const callApi = (agent: TestAgent, body: object) =>
+        agent
+          .post(CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE)
+          .set({
+            'kbn-xsrf': 'true',
+            'Elastic-Api-Version': '1',
+            'x-elastic-internal-origin': 'kibana',
+          })
+          .send(body);
+
+      describe('syntax validation, errors, warnings', () => {
+        it('should return 200 with empty diagnostics for a valid rule', async () => {
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: 'rule rule1 { condition: true }',
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql({
+                errors: [],
+                error_count: 0,
+                warnings: [],
+                warning_count: 0,
+              });
+            });
+        });
+
+        it('should return 200 with errors for invalid syntax (not 400)', async () => {
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: `
+            rule rule1 { condition: cheese }
+          `,
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql({
+                errors: [
+                  {
+                    severity: 'error',
+                    line: 2,
+                    message: 'undefined identifier "cheese"',
+                  },
+                ],
+                error_count: 1,
+                warnings: [],
+                warning_count: 0,
+              });
+            });
+        });
+
+        it('should return 200 with warnings and no errors for a warning-only rule', async () => {
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: 'rule T { strings: $a = "x" condition: $a }',
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql({
+                errors: [],
+                error_count: 0,
+                warnings: [
+                  {
+                    severity: 'warning',
+                    line: 1,
+                    message: 'string "$a" may slow down scanning',
+                  },
+                ],
+                warning_count: 1,
+              });
+            });
+        });
+
+        it('should return 200 with both errors and warnings for multiple rules', async () => {
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: `
+            // invalid
+            rule rule1 { condition: cheese }
+
+            // only warning
+            rule rule2 { strings: $a = "x" condition: $a }
+          `,
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql({
+                errors: [
+                  {
+                    severity: 'error',
+                    line: 3,
+                    message: 'undefined identifier "cheese"',
+                  },
+                ],
+                error_count: 1,
+                warnings: [
+                  {
+                    severity: 'warning',
+                    line: 6,
+                    message: 'string "$a" may slow down scanning',
+                  },
+                ],
+                warning_count: 1,
+              });
+            });
+        });
+      });
+
+      describe('YARA rule content byte length', () => {
+        const emptyDiagnostics: ValidateCustomYaraSignatureResponse = {
+          errors: [],
+          error_count: 0,
+          warnings: [],
+          warning_count: 0,
+        };
+        const oversizeDiagnostic = (gotBytes: number): ValidateCustomYaraSignatureResponse => ({
+          errors: [
+            {
+              severity: 'error',
+              line: 0,
+              message: `YARA rule content must not exceed ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes (got ${gotBytes} bytes)`,
+            },
+          ],
+          error_count: 1,
+          warnings: [],
+          warning_count: 0,
+        });
+
+        it(`should return 200 with empty diagnostics if yara_rule is ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
+          const yaraRule =
+            dummyRuleWithComment +
+            'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length);
+
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: yaraRule,
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql(emptyDiagnostics);
+            });
+        });
+
+        it(`should return 200 with a line-0 error if yara_rule is more than ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
+          const yaraRule =
+            dummyRuleWithComment +
+            'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length + 1);
+
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: yaraRule,
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql(oversizeDiagnostic(MAX_YARA_RULE_CONTENT_BYTE_LENGTH + 1));
+            });
+        });
+
+        it(`should return 200 with empty diagnostics if yara_rule is at the byte limit using multi-byte characters`, async () => {
+          const euroSign = '€'; // takes up 3 bytes
+          const yaraRule =
+            dummyRuleWithComment +
+            euroSign.repeat(
+              (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
+                Buffer.byteLength(euroSign)
+            );
+
+          expect(Buffer.byteLength(yaraRule, 'utf8')).to.be(MAX_YARA_RULE_CONTENT_BYTE_LENGTH);
+          expect(yaraRule.length).to.be.lessThan(MAX_YARA_RULE_CONTENT_BYTE_LENGTH);
+
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: yaraRule,
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql(emptyDiagnostics);
+            });
+        });
+
+        it(`should return 200 with a line-0 error if yara_rule exceeds the byte limit using multi-byte characters`, async () => {
+          const euroSign = '€';
+          const yaraRule =
+            dummyRuleWithComment +
+            euroSign.repeat(
+              (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
+                Buffer.byteLength(euroSign)
+            ) +
+            'a'; // plus one byte
+
+          expect(Buffer.byteLength(yaraRule, 'utf8')).to.be.greaterThan(
+            MAX_YARA_RULE_CONTENT_BYTE_LENGTH
+          );
+          expect(yaraRule.length).to.be.lessThan(MAX_YARA_RULE_CONTENT_BYTE_LENGTH + 1);
+
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: yaraRule,
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql(oversizeDiagnostic(Buffer.byteLength(yaraRule, 'utf8')));
+            });
+        });
+      });
+
+      describe('os_types validation', () => {
+        it('should return 200 with an error when meta.os does not match os_types', async () => {
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: 'rule rule1 { meta: os = "Linux" condition: true }',
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql({
+                errors: [
+                  {
+                    severity: 'error',
+                    line: 1,
+                    message:
+                      '"meta.os" value "Linux" is different from "os_types" value "windows" on rule "rule1". Set meta.os to the same OSes (using "Windows", "Linux" and/or "MacOS") or drop the meta.os field',
+                  },
+                ],
+                error_count: 1,
+                warnings: [],
+                warning_count: 0,
+              });
+            });
+        });
+
+        it('should return 400 when os_types is empty', async () => {
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: 'rule rule1 { condition: true }',
+            os_types: [],
+          }).expect(400);
+        });
+
+        it('should return 400 when os_types contains an invalid OS', async () => {
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: 'rule rule1 { condition: true }',
+            os_types: ['android'],
+          })
+            .expect(400)
+            .expect(anErrorMessageWith(/os_types/));
+        });
+      });
+
+      describe('privileges', () => {
+        it('should return 403 for a user with only Custom YARA signatures read privilege', async () => {
+          await callApi(readAccessTestAgent, {
+            yara_rule: 'rule rule1 { condition: true }',
+            os_types: ['windows'],
+          }).expect(403);
+        });
+
+        it('should return 403 for a user with no Custom YARA signatures privilege', async () => {
+          await callApi(noAccessTestAgent, {
+            yara_rule: 'rule rule1 { condition: true }',
+            os_types: ['windows'],
+          }).expect(403);
+        });
       });
     });
   });

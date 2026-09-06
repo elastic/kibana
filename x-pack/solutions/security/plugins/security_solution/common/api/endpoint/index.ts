@@ -33,3 +33,5 @@ export * from './policy';
 export * from './suggestions';
 
 export * from './scripts_library';
+
+export * from './custom_yara_signatures';

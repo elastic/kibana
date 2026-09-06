@@ -138,6 +138,9 @@ export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';
 /** Endpoint Exceptions routes */
 export const ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/endpoint_exceptions_per_policy_opt_in`;
 
+/** Custom YARA signatures */
+export const CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/custom_yara_signatures/_validate`;
+
 /** Search strategy keys */
 export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePoliciesStatsStrategy';
 
