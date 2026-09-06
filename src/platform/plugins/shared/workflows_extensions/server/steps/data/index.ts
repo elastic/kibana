@@ -19,3 +19,4 @@ export * from './data_parse_json_step';
 export * from './data_stringify_json_step';
 
 export * from './data_load_checkpoint_step';
+export * from './elasticsearch_bulk_step';
