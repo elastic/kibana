@@ -45,6 +45,7 @@ export class VisualizePageObject extends FtrService {
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
   private readonly appMenu = this.ctx.getPageObject('appMenu');
+  private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly toasts = this.ctx.getService('toasts');
 
   index = {
@@ -249,8 +250,20 @@ export class VisualizePageObject extends FtrService {
     if (!(await this.hasVisType(type))) {
       throw new Error(`The '${type}' visualization type does not exist (visType-${type})`);
     }
-    await this.testSubjects.click(`visType-${type}`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.retry.try(async () => {
+      if (await this.testSubjects.exists(`visType-${type}`, { timeout: 1000 })) {
+        await this.testSubjects.scrollIntoView(`visType-${type}`);
+        await this.testSubjects.click(`visType-${type}`);
+      }
+      await this.header.waitUntilLoadingHasFinished();
+      const openedSourcePicker = await this.testSubjects.exists('savedObjectFinderSearchInput', {
+        timeout: 1000,
+      });
+      const leftTypeList = !(await this.testSubjects.exists(`visType-${type}`, { timeout: 500 }));
+      if (!openedSourcePicker && !leftTypeList) {
+        throw new Error(`vis type '${type}' did not open`);
+      }
+    });
   }
 
   public async clickAreaChart() {
@@ -334,8 +347,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
-    await this.testSubjects.click(`savedObjectTitle${indexPattern.split(' ').join('-')}`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.selectSavedObjectFromFinder(indexPattern);
   }
 
   public async selectVisSourceIfRequired() {
@@ -384,7 +396,22 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickSavedSearch(savedSearchName: string) {
-    await this.testSubjects.click(`savedObjectTitle${savedSearchName.split(' ').join('-')}`);
+    await this.selectSavedObjectFromFinder(savedSearchName);
+  }
+
+  /**
+   * SavedObjectFinder in the create-vis wizard pages 8 rows. After other
+   * suites leave extra data views, the target can be off the first page on CI.
+   */
+  private async selectSavedObjectFromFinder(name: string) {
+    const testSubj = `savedObjectTitle${name.split(' ').join('-')}`;
+    await this.testSubjects.existOrFail('savedObjectFinderSearchInput');
+    await this.savedObjectsFinder.filterEmbeddableNames(`"${name}"`);
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(testSubj);
+      await this.testSubjects.scrollIntoView(testSubj);
+      await this.testSubjects.click(testSubj);
+    });
     await this.header.waitUntilLoadingHasFinished();
   }
 

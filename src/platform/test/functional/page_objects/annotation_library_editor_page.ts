@@ -21,21 +21,45 @@ export class AnnotationEditorPageObject extends FtrService {
     description?: string;
     dataView?: string;
   }) {
+    await this.testSubjects.existOrFail('annotationGroupTitle');
+
     if (metadata.title) {
-      await this.testSubjects.setValue('annotationGroupTitle', metadata.title);
+      await this.setFlyoutFieldValue('annotationGroupTitle', metadata.title);
     }
 
     if (metadata.description) {
-      await this.testSubjects.setValue('annotationGroupDescription', metadata.description);
+      await this.setFlyoutFieldValue('annotationGroupDescription', metadata.description);
     }
 
     if (metadata.dataView) {
-      await this.testSubjects.setValue('annotationDataViewSelection', metadata.dataView);
+      const dataView = metadata.dataView;
+      await this.retry.try(async () => {
+        await this.testSubjects.scrollIntoView('annotationDataViewSelection');
+        await this.testSubjects.setValue('annotationDataViewSelection', dataView);
+      });
     }
   }
 
+  /**
+   * Flyout fields can sit under the header on CI (1280x800); a raw click then
+   * hits `euiFormRow__labelWrapper` instead of the input.
+   */
+  private async setFlyoutFieldValue(testSubj: string, value: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.scrollIntoView(testSubj);
+      await this.testSubjects.setValue(testSubj, value, { clearWithKeyboard: true });
+      const current = await this.testSubjects.getAttribute(testSubj, 'value');
+      if (current !== value) {
+        throw new Error(`Expected ${testSubj} to be "${value}" but was "${current}"`);
+      }
+    });
+  }
+
   public async saveGroup() {
-    await this.testSubjects.click('saveAnnotationGroup');
+    await this.retry.try(async () => {
+      await this.testSubjects.scrollIntoView('saveAnnotationGroup');
+      await this.testSubjects.click('saveAnnotationGroup');
+    });
   }
 
   public async getAnnotationCount() {
@@ -52,7 +76,12 @@ export class AnnotationEditorPageObject extends FtrService {
     lineThickness: number;
     color: string;
   }) {
-    await this.testSubjects.click('lnsXY_annotation_query');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('lnsXY_annotation_query');
+      await this.testSubjects.scrollIntoView('lnsXY_annotation_query');
+      await this.testSubjects.click('lnsXY_annotation_query');
+      await this.testSubjects.existOrFail('annotation-query-based-query-input');
+    });
 
     const queryInput = await this.testSubjects.find('annotation-query-based-query-input');
     await queryInput.type(config.query);
