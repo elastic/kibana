@@ -438,18 +438,25 @@ steps:
             telemetry reconstruction.
 
             Return a consolidated `rationale` covering
-            {{ steps.resolve_host.output.host_name }} and these hosts together,
-            then reassess `isIncident` and restate `proposal` for the whole
-            attack rather than for these hosts alone.
+            {{ steps.resolve_host.output.host_name }} and these hosts together.
+            `isIncident` is NOT reassessed for the whole attack: it remains
+            scoped, per the binding rule below, and your `proposal` states
+            what the scoped verdict justifies.
 
-            Scoping rule for `isIncident` (binding): the follow-up reassessment
-            must set `isIncident` true ONLY for evidence ON a named lead host
-            or on {{ steps.resolve_host.output.host_name }}. Consolidating
-            hosts into one narrative does NOT consolidate their verdicts: a
-            host whose own telemetry shows no attack signal stays
-            not-an-incident even when the attack narrative includes it. If a
-            lead host turns out clean, say so explicitly in `rationale` and
-            do not let the lead's presence raise the verdict.
+            Scoping rule for `isIncident` (binding, overrides any other
+            instruction in this message): `isIncident` is true ONLY when the
+            evidence ON {{ steps.resolve_host.output.host_name }} — the host
+            this investigation was opened for — warrants escalation. Evidence
+            found on other hosts NEVER raises it: report that evidence in
+            `rationale` and, if it justifies action, in `recommendedActions`
+            and `followUpHosts` instead. A host whose own telemetry shows no
+            attack signal stays not-an-incident even when the consolidated
+            narrative includes it. Consolidating hosts into one narrative does
+            NOT consolidate their verdicts: there is exactly one incident
+            verdict here and it belongs to
+            {{ steps.resolve_host.output.host_name }}. If the investigated
+            host's own telemetry shows no attack signal, `isIncident` is
+            false — no matter what any other host shows.
 
             Restate `recommendedActions` for the whole attack too: this list
             supersedes the one from your first pass, so carry forward the
@@ -461,8 +468,11 @@ steps:
               isIncident:
                 type: boolean
                 description: >
-                  True only when this represents a real security incident
-                  that warrants escalation.
+                  True only when the evidence on the investigated host
+                  ({{ steps.resolve_host.output.host_name }}) warrants
+                  escalation. Never raised by evidence found on other hosts
+                  in the consolidated narrative — that evidence goes in
+                  rationale / followUpHosts / recommendedActions instead.
               rationale:
                 type: string
                 maxLength: 16000

@@ -458,13 +458,18 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
         ['forensic_analysis', first],
         ['follow_up_analysis', followUp],
       ] as const) {
-        expect(msg).toContain(`Scoping rule for \`isIncident\` (binding)`);
-        expect(msg).toMatch(/never inherits|stays\s+not-an-incident/);
+        expect(msg).toMatch(/Scoping rule for `isIncident` \(binding/);
+        expect(msg).toMatch(/never inherits|stays\s+not-an-incident|NEVER raises/);
         expect(msg).not.toHaveLength(0);
         expect(label).not.toHaveLength(0);
       }
       expect(first).toContain('hosts named in the Attack Discovery context');
-      expect(followUp).toMatch(/do not let the lead.s presence raise the verdict/);
+      expect(followUp).toMatch(/do not let the lead.s presence raise the verdict|belongs to/);
+      // v22: the consolidation instruction must no longer tell the model to
+      // reassess isIncident for the whole attack — that phrasing produced the
+      // dw-002 false positive (consolidated verdict inherited the kill chain).
+      expect(followUp).not.toContain('reassess `isIncident`');
+      expect(followUp).not.toContain('for the whole attack rather than');
     });
 
     it('does not name an agent-id, so projectWorkers still skips this unowned step', () => {
