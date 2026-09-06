@@ -22,6 +22,7 @@ export interface DeepWatchOutput {
   gate?: string;
   rationale?: string;
   proposal?: string;
+  recommendedActions?: unknown[];
   patientZero?: string;
   attackTimeline?: string;
   iocs?: string[];
@@ -44,10 +45,20 @@ export interface DeepWatchRunResult {
  * and `iocs` as an empty array (the `consts.no_iocs` fallback). Any non-empty
  * forensic field means the gate opened.
  */
+/**
+ * A skipped forensic step leaves the emitted narrative fields empty (the
+ * `consts` fallbacks). Any non-empty forensic field means the gate opened and
+ * the agent produced a real assessment. Detects the v20+ output contract
+ * (rationale/proposal/recommendedActions); patientZero/attackTimeline/iocs are
+ * the v18 fields, kept for backward compatibility with archived runs.
+ */
 export const didForensicsRun = (output: DeepWatchOutput): boolean => {
   const hasText = (value: string | undefined): boolean =>
     typeof value === 'string' && value.trim().length > 0;
   return (
+    hasText(output.rationale) ||
+    hasText(output.proposal) ||
+    (Array.isArray(output.recommendedActions) && output.recommendedActions.length > 0) ||
     hasText(output.patientZero) ||
     hasText(output.attackTimeline) ||
     (Array.isArray(output.iocs) && output.iocs.length > 0)
