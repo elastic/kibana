@@ -215,6 +215,7 @@ Gotchas:
   actions: {
     searchMessageGroups: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Sublime Security message groups (campaign-like clusters of deduplicated email). ' +
         'Filter by sender, domain, recipient, mailbox, attachment SHA-256, Attack Score verdict, rule severity, review state, or time window. ' +
@@ -279,6 +280,7 @@ Gotchas:
 
     getMessageGroup: {
       isTool: true,
+      scope: 'read',
       description:
         'Get one Sublime Security message group by its canonical ID, including flagged rules, review state, ' +
         'user report count, link click count, and up to 50 member messages with sender, subject, and read/forward/reply telemetry. ' +
@@ -303,6 +305,7 @@ Gotchas:
 
     getMessage: {
       isTool: true,
+      scope: 'read',
       description:
         'Get metadata for a single message by its ID: subject, sender, recipients, mailbox, timestamps ' +
         '(created, read, forwarded, replied), and whether it landed in spam. ' +
@@ -347,6 +350,7 @@ Gotchas:
 
     getAttackScore: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the Sublime Attack Score for a message: a 0-100 machine-learning score, a verdict ' +
         '(malicious, suspicious, spam, graymail, likely_benign, or unknown), a graymail score, and the ranked top signals explaining the verdict. ' +
@@ -381,6 +385,7 @@ Gotchas:
 
     getAsaVerdict: {
       isTool: true,
+      scope: 'read',
       description:
         "Get the verdict from Sublime's Autonomous Security Analyst (ASA) for a message: " +
         'malicious, spam, graymail, likely_benign, benign, or unknown. ' +
@@ -406,6 +411,7 @@ Gotchas:
 
     listMailboxes: {
       isTool: true,
+      scope: 'read',
       description:
         'List the mailboxes protected by Sublime Security, with active state and subscription health. ' +
         'The orientation tool: use it to discover which mailboxes Sublime covers or to resolve a mailbox email before filtering searches.',
@@ -451,6 +457,7 @@ Gotchas:
     quarantineMessageGroups: {
       // Deliberately not a tool: destructive mailbox mutation, workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Quarantine one or more message groups: removes the messages from user mailboxes and holds them, ' +
         'and also quarantines late-arriving copies of the same messages. Optionally records a classification, report label, and review comment. ' +
@@ -473,6 +480,7 @@ Gotchas:
     trashMessageGroups: {
       // Deliberately not a tool: destructive mailbox mutation, workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Move all messages in one or more message groups to trash in the affected mailboxes, ' +
         'and keep auto-trashing late-arriving copies of the same messages. ' +
@@ -496,6 +504,7 @@ Gotchas:
     restoreMessageGroups: {
       // Deliberately not a tool: mailbox mutation (the undo), workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Restore one or more previously quarantined or trashed message groups back to user mailboxes, ' +
         'and turn off automatic trashing of late-arriving copies. ' +
@@ -518,6 +527,7 @@ Gotchas:
 
     getTask: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the status of an asynchronous Sublime task by ID: pending, started, succeeded, failed, or retrying, plus an error message when failed. ' +
         'Quarantine, trash, and restore return a task_id; poll this until the state is succeeded or failed before reporting the outcome.',

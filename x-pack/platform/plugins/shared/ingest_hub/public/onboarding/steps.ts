@@ -31,9 +31,9 @@ export const ONBOARDING_STEPS: OnboardingStepConfig[] = [
     }),
   },
   {
-    id: 'deploy-and-detect',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.deployment.title', {
-      defaultMessage: 'Deploy and Detect',
+    id: 'detect-and-review',
+    title: i18n.translate('xpack.ingestHub.onboarding.steps.detectAndReview.title', {
+      defaultMessage: 'Detect & Review',
     }),
   },
 ];

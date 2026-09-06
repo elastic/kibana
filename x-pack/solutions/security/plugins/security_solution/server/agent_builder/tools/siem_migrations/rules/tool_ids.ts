@@ -31,3 +31,15 @@ export const SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID = securityTool(
 export const SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID = securityTool(
   'siem_migration.get_rule_migration_translation_stats'
 );
+export const SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID = securityTool(
+  'siem_migration.get_missing_rule_migration_resources'
+);
+export const SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID = securityTool(
+  'siem_migration.stop_rule_migration'
+);
+export const SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID = securityTool(
+  'siem_migration.update_rule_migration'
+);
+export const SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID = securityTool(
+  'siem_migration.delete_rule_migration'
+);

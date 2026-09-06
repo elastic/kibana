@@ -17,20 +17,31 @@ import { createScopedModel, resolveConnectorId, resolveIncludeDatasets } from '.
 const MAX_NL_INSTRUCTION_LENGTH = 2000;
 
 /**
- * Wraps the editor's current buffer as additional context for {@link generateEsql} when
- * the request is not a completion: the user has typed something but is asking for a fresh query.
+ * Builds additional context for {@link generateEsql} when the request is not a completion.
+ * Always includes index-selection guidance so that the index discovery LLM prioritizes
+ * explicitly named sources (e.g. "logstash", "nginx") over incidental field-name matches.
  */
 const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
-  if (!currentQuery) return '';
-  return [
-    'The user is in the ES|QL editor. Below is their current query.',
-    'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
-    'If the request is for a new or unrelated query, you may produce a full replacement.',
-    '',
-    '<current_query>',
-    currentQuery,
-    '</current_query>',
-  ].join('\n');
+  const parts: string[] = [
+    'Index selection guidance:',
+    '- If the instruction explicitly names a technology, product, or data source (e.g. "logstash", "nginx", "apache", "metrics"), prefer indices whose names contain that keyword over indices that merely have matching field names.',
+    '- Treat a bare word like "logstash" as an explicit index name hint: prefer indices whose names start with or contain that word.',
+  ];
+
+  if (currentQuery) {
+    parts.push(
+      '',
+      'The user is in the ES|QL editor. Below is their current query.',
+      'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
+      'If the request is for a new or unrelated query, you may produce a full replacement.',
+      '',
+      '<current_query>',
+      currentQuery,
+      '</current_query>'
+    );
+  }
+
+  return parts.join('\n');
 };
 
 export const registerNLtoESQLRoute = (

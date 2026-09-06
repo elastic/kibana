@@ -8,7 +8,11 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, home } = getPageObjects(['common', 'home']);
+  const { common, home, navigationalSearch } = getPageObjects([
+    'common',
+    'home',
+    'navigationalSearch',
+  ]);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -59,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('passes with searchbox open', async () => {
-      await testSubjects.click('nav-search-popover');
+      await navigationalSearch.ensureSearchOpen();
       await a11y.testAppSnapshot();
     });
   });

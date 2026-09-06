@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { formatSecrets, normalizeSecrets } from '../../../synthetics_service/utils';
 import type { AgentPolicyInfo } from '../../../../common/types';
 import type {
@@ -72,8 +73,9 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
   };
 };
 
-// This should be called when changing the label of a private location because the label is also stored
-// in the locations array of monitors attributes
+// Label and sharding edits must rewrite this location's monitors: the label is
+// stored on each monitor's locations array, and toggling isAgentSharding
+// restamps (or clears) per-monitor `${agent.id}` package-policy conditions.
 export const updatePrivateLocationMonitors = async ({
   locationId,
   newLocationLabel,
@@ -120,5 +122,15 @@ export const updatePrivateLocationMonitors = async ({
     }),
   ]);
 
-  return Promise.all(promises.flat());
+  const results = await Promise.all(promises.flat());
+  if (
+    results.some((result) => result?.failedConfigs && Object.keys(result.failedConfigs).length > 0)
+  ) {
+    throw new Error(
+      i18n.translate('xpack.synthetics.editPrivateLocation.monitorRewriteFailed', {
+        defaultMessage: 'Failed to update monitors for this private location.',
+      })
+    );
+  }
+  return results;
 };

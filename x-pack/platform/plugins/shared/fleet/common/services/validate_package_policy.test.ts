@@ -2218,11 +2218,47 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toEqual(null);
     });
 
-    it('should not return an error message if the package is not input type', () => {
+    it('should return an error message for integration packages with invalid dataset', () => {
       const res = validatePackagePolicyConfig(
         {
           type: 'text',
           value: { dataset: 'Test', package: 'log' },
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        parse,
+        'integration'
+      );
+
+      expect(res).toEqual(['Dataset must be lowercase']);
+    });
+
+    it('should return an error message for integration packages with hyphens in dataset', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset: 'gew-audit-logs', package: 'aws_logs' },
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        parse,
+        'integration'
+      );
+
+      expect(res).toEqual(['Dataset contains invalid characters']);
+    });
+
+    it('should not return an error message for integration packages with valid dataset', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset: 'aws_logs.audit', package: 'aws_logs' },
         },
         {
           name: 'data_stream.dataset',

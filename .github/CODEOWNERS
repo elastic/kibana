@@ -507,7 +507,7 @@ src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery 
 src/platform/packages/shared/deeplinks/context-engine @elastic/context-eng
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/evals @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/deeplinks/fleet @elastic/fleet
+src/platform/packages/shared/deeplinks/fleet @elastic/streams-ui
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
 src/platform/packages/shared/deeplinks/ml @elastic/search-ml-ux
 src/platform/packages/shared/deeplinks/observability @elastic/observability-ui
@@ -628,6 +628,7 @@ src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic
 src/platform/packages/shared/kbn-lens-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-lens-common-2 @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/kibana-visualizations
+src/platform/packages/shared/kbn-lens-test-helpers @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-licensing-types @elastic/kibana-core
 src/platform/packages/shared/kbn-lock-manager @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
@@ -750,7 +751,7 @@ src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-yaml @elastic/workflows-eng
 src/platform/packages/shared/kbn-workspaces @elastic/kibana-core
 src/platform/packages/shared/kbn-xstate-utils @elastic/streams-ui
-src/platform/packages/shared/kbn-yaml-loader @elastic/fleet
+src/platform/packages/shared/kbn-yaml-loader @elastic/streams-ui
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-engineering
 src/platform/packages/shared/navigation-customization-components @elastic/appex-sharedux
@@ -872,7 +873,7 @@ src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/controls @elastic/kibana-presentation
 src/platform/plugins/shared/cps @elastic/kibana-core @elastic/kibana-presentation
-src/platform/plugins/shared/custom_integrations @elastic/fleet
+src/platform/plugins/shared/custom_integrations @elastic/streams-ui
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 src/platform/plugins/shared/dashboard_markdown @elastic/kibana-presentation
 src/platform/plugins/shared/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
@@ -1072,7 +1073,7 @@ x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-data-forge @elastic/actionable-obs-team
 x-pack/platform/packages/shared/kbn-data-lifecycle-phases @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-dissect-heuristics @elastic/streams-ui
-x-pack/platform/packages/shared/kbn-elastic-agent-condition-language @elastic/fleet
+x-pack/platform/packages/shared/kbn-elastic-agent-condition-language @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-threat-hunting
@@ -1129,6 +1130,7 @@ x-pack/platform/packages/shared/ml/common-types @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/data-visualizer-server-schemas @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/error_utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/ml-cps @elastic/search-ml-ux
+x-pack/platform/packages/shared/ml/ml-cps-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/response_stream @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/search-ml-ux
@@ -1241,8 +1243,8 @@ x-pack/platform/plugins/shared/evals_skills @elastic/nightshift-context-and-rese
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/features @elastic/kibana-core
 x-pack/platform/plugins/shared/fields_metadata @elastic/streams-ui
-x-pack/platform/plugins/shared/fleet @elastic/fleet
-x-pack/platform/plugins/shared/fleet/cypress @elastic/fleet
+x-pack/platform/plugins/shared/fleet @elastic/streams-ui
+x-pack/platform/plugins/shared/fleet/cypress @elastic/streams-ui
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/inbox @elastic/security-genai-research-and-development
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
@@ -1401,6 +1403,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow @elas
 x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder @elastic/security-genai-research-and-development
+x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/security-entity-analytics
@@ -1446,6 +1449,7 @@ x-pack/solutions/security/plugins/elastic_assistant @elastic/security-threat-hun
 x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engineering
+x-pack/solutions/security/plugins/mitre_attack @elastic/security-detection-engineering
 x-pack/solutions/security/plugins/pnd @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
@@ -1608,6 +1612,8 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
 /src/platform/plugins/shared/discover/common/context_awareness/profile_state_definitions/metrics_grid_profile_state.ts @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/common/context_awareness/profile_state_definitions/metrics_grid_profile_state.test.ts @elastic/obs-signals-metrics-team
+/src/platform/plugins/shared/discover/common/context_awareness/profile_state_transforms/metrics_grid_saved_state_transform.ts @elastic/obs-signals-metrics-team
+/src/platform/plugins/shared/discover/common/context_awareness/profile_state_transforms/metrics_grid_saved_state_transform.test.ts @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/metrics_data_source_profile @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs_data_source_profile @elastic/kibana-data-discovery @elastic/kibana-core
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/patterns_data_source_profile @elastic/search-ml-ux
@@ -1884,7 +1890,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team @elastic/kibana-data-discovery
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/api_integration/apis/logs_shared @elastic/obs-signals-logs-team
-/src/platform/test/functional/apps/discover/observability/logs @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_alerts @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_analysis @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/common/log_analysis @elastic/obs-signals-logs-team
@@ -2013,13 +2018,10 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
-/src/platform/test/functional/apps/discover/observability @elastic/obs-signals-logs-team
 
 # obs-exploration-team
 /x-pack/solutions/observability/plugins/apm/public/components/shared/links/discover_links @elastic/obs-signals-traces-team
-/x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
-/src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-signals-logs-team
 /src/platform/plugins/shared/discover/test/scout/metrics_experience/ @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/test/scout/traces_experience/ @elastic/obs-signals-traces-team
 /src/platform/plugins/shared/discover/test/scout/logs_experience/ @elastic/obs-signals-logs-team
@@ -2322,7 +2324,6 @@ x-pack/platform/test/plugin_api_integration/*.ts @elastic/kibana-core @elastic/r
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/licensed_feature_usage @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kibana-core
-/x-pack/platform/test/functional/page_objects/navigational_search.ts @elastic/kibana-core
 /x-pack/platform/test/stack_functional_integration/apps/savedobjects_upgrade_testing @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/status_page.ts @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/share_saved_objects_to_space_page.ts @elastic/kibana-core
@@ -2366,6 +2367,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /src/platform/test/functional/page_objects/app_menu.ts @elastic/appex-sharedux
 /src/platform/test/functional/page_objects/export_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
+/x-pack/platform/test/functional/page_objects/navigational_search.ts @elastic/appex-sharedux
 /src/platform/test/functional/fixtures/es_archiver/deprecations_service @elastic/kibana-core
 /src/platform/test/health_gateway @elastic/kibana-core
 /src/platform/test/api_integration/apis/saved_objects* @elastic/kibana-core
@@ -2652,6 +2654,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elas
 src/platform/packages/shared/kbn-connector-specs/src/specs/graphql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/inbound_webhook/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/nightshift-context-and-research-team
@@ -3375,12 +3378,15 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_rule_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/patch_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/create_rule_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/patch_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/create_rule_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/patch_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/utils/bulk_rule_action* @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_rule_exception_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_exception_list_item_step @elastic/security-detection-engineering
@@ -3465,6 +3471,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/scripts/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/ai4soc @elastic/security-defend-workflows
