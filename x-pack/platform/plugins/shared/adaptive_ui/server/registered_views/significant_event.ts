@@ -7,36 +7,45 @@
 
 import { defineView } from '@kbn/adaptive-ui';
 import {
-  buildSignificantEventSpec,
-  significantEventFixture,
-  significantEventSpec,
-  type SignificantEventInput,
+  toSignificantEventAttachmentViewSpec,
+  type SignificantEventAttachmentInput,
 } from '@kbn/adaptive-ui-adapters';
 import { registeredViewIds } from '../../common/constants';
 
-// Shared with the `platform.sig_event` attachment adapter in `@kbn/adaptive-ui-adapters`.
-export {
-  buildSignificantEventSpec,
-  significantEventFixture,
-  significantEventSpec,
-  type SignificantEventInput,
+export { toSignificantEventAttachmentViewSpec, type SignificantEventAttachmentInput };
+
+const isLiveEventInput = (input: unknown): input is SignificantEventAttachmentInput => {
+  if (input == null || typeof input !== 'object') {
+    return false;
+  }
+  const candidate = input as Partial<SignificantEventAttachmentInput>;
+  return (
+    typeof candidate.event_id === 'string' &&
+    candidate.event_id.length > 0 &&
+    typeof candidate.title === 'string' &&
+    typeof candidate.summary === 'string' &&
+    typeof candidate.status === 'string' &&
+    typeof candidate.severity === 'string' &&
+    typeof candidate.confidence === 'number'
+  );
 };
 
 export const significantEventView = defineView({
   id: registeredViewIds.significantEvent,
   title: 'Significant Event',
   description:
-    'Renders a Streams Significant Event — root cause, ranked remediations, and supporting evidence — as a card. Use when asked to show or summarize a significant event/incident.',
+    'Renders a live Streams Significant Event as a card. Pass `event_id`; this looks up that event. It does not accept a field overlay and does not fall back to sample data.',
   answers: [
     'Show me the significant event',
-    'What is the root cause of this incident?',
+    'What is going on with this incident?',
     'Summarize the significant event',
-    'What should we do about the dropped payments?',
   ],
   build: ({ input }) => {
-    const overrides = (input ?? {}) as Partial<SignificantEventInput>;
-    return Object.keys(overrides).length === 0
-      ? significantEventSpec
-      : buildSignificantEventSpec({ ...significantEventFixture, ...overrides });
+    if (!isLiveEventInput(input)) {
+      throw new Error(
+        'streams.significantEvent requires a live significant event payload (event_id, title, summary, status, severity, confidence). Pass event_id to request_registered_view; do not omit input or overlay sample fields.'
+      );
+    }
+    return toSignificantEventAttachmentViewSpec(input);
   },
 });

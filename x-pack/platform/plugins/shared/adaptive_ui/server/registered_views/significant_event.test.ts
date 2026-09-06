@@ -6,45 +6,40 @@
  */
 
 import { validateView } from '@kbn/adaptive-ui';
-import {
-  buildSignificantEventSpec,
-  significantEventFixture,
-  significantEventSpec,
-} from './significant_event';
+import { createAdaptiveUiViewRegistry } from '.';
+import { registeredViewIds } from '../../common/constants';
 
-describe('buildSignificantEventSpec', () => {
-  it('builds a valid ViewSpec from the fixture', () => {
-    expect(validateView(significantEventSpec)).toEqual(expect.objectContaining({ valid: true }));
-  });
+const liveEvent = {
+  event_id: 'evt-003',
+  event_uuid: 'evt-003-v1',
+  title: 'Elasticsearch cluster — disk watermark write throttling',
+  summary: 'Disk usage crossed the 85% high watermark.',
+  status: 'open',
+  severity: '80-critical',
+  confidence: 0.91,
+  stream_names: ['logs.elasticsearch'],
+  symptom_hypothesis: 'ILM retention misconfiguration left long-lived indices active.',
+};
 
-  it('renders the title and the severity-derived assessment stats', () => {
-    expect(significantEventSpec.title).toBe(significantEventFixture.title);
-
-    const stats = significantEventSpec.body.find((node) => node.type === 'statGroup');
-    expect(stats).toEqual(
-      expect.objectContaining({
-        stats: [
-          expect.objectContaining({ label: 'Criticality', value: '92' }),
-          expect.objectContaining({ label: 'Confidence', value: '88%' }),
-          // criticality 92 -> "Critical".
-          expect.objectContaining({ label: 'Severity', value: 'Critical', tone: 'danger' }),
-          expect.objectContaining({ label: 'Status', value: 'Promoted', tone: 'warning' }),
-        ],
-      })
+describe('streams.significantEvent registered view', () => {
+  it('builds a live event card from the canonical payload', async () => {
+    const registry = createAdaptiveUiViewRegistry();
+    const response = await registry.request(
+      registeredViewIds.significantEvent,
+      undefined,
+      liveEvent
     );
+    expect(response.validation.valid).toBe(true);
+    expect(validateView(response.spec)).toEqual(expect.objectContaining({ valid: true }));
+    expect(response.spec.title).toBe(liveEvent.title);
+    expect(JSON.stringify(response.spec)).toContain('View in Nightshift');
+    expect(JSON.stringify(response.spec)).not.toContain('payment-service');
   });
 
-  it('omits optional sections when their inputs are empty', () => {
-    const spec = buildSignificantEventSpec({
-      ...significantEventFixture,
-      evidences: [],
-      cause_kis: [],
-      recommendations: [],
-      stream_names: [],
-      rule_names: [],
-    });
-    expect(validateView(spec)).toEqual(expect.objectContaining({ valid: true }));
-    expect(spec.body.some((node) => node.type === 'table')).toBe(false);
-    expect(spec.body.some((node) => node.type === 'descriptionList')).toBe(false);
+  it('rejects a partial overlay instead of filling from sample data', async () => {
+    const registry = createAdaptiveUiViewRegistry();
+    await expect(
+      registry.request(registeredViewIds.significantEvent, undefined, { event_id: 'evt-003' })
+    ).rejects.toThrow(/live significant event/);
   });
 });
