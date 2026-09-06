@@ -132,6 +132,12 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
 
         const { events$ } = await executionService.executeAgent({
           mode: AgentExecutionMode.conversation,
+          // Workflow steps run unattended (scheduled tasks, no human to answer
+          // a question). Without this, conversation mode defaults to
+          // interactive:true, the agent gets ask_user_question, and a
+          // clarification request ends the run via handleToolInterrupt with
+          // no structured output — the step silently loses its verdict.
+          interactive: { enabled: false },
           request,
           abortSignal: context.abortSignal,
           metadata,
