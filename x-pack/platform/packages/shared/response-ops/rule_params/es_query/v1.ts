@@ -161,6 +161,20 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.never(),
     { meta: { description: 'The query definition in Elasticsearch Query Language.' } }
   ),
+  includeEsqlResults: schema.maybe(
+    schema.conditional(
+      schema.siblingRef('searchType'),
+      schema.literal('esqlQuery'),
+      schema.boolean(),
+      schema.never(),
+      {
+        meta: {
+          description:
+            'Indicates whether ES|QL result rows are stored in the alert document for workflows.',
+        },
+      }
+    )
+  ),
   sourceFields: schema.maybe(
     schema.arrayOf(
       schema.object({

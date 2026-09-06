@@ -24,6 +24,13 @@ properties:
       esql:
         description: The query definition, which uses Elasticsearch Query Language.
         type: string
+  includeEsqlResults:
+    type: boolean
+    default: false
+    description: >
+      Indicates whether ES|QL result rows are stored in each alert document and
+      made available to workflows. Results are limited to 100 rows or 256 KiB of
+      serialized data per rule execution, with truncation metadata included in the alert.
   excludeHitsFromPreviousRun:
     $ref: 'excludehitsfrompreviousrun.yaml'
   groupBy:

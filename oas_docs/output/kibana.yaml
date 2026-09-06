@@ -102875,6 +102875,19 @@ components:
               default: all
               description: Indicates whether the aggregation is applied over all documents (`all`), grouped by row (`row`), or split into groups (`top`) using a grouping field (`termField`) where only the top groups (up to `termSize` number of groups) are checked. If grouping is used, an alert will be created for each group when it exceeds the threshold.
               type: string
+            includeEsqlResults:
+              anyOf:
+                - items: {}
+                  type: array
+                - type: boolean
+                - type: number
+                - type: object
+                - type: string
+              description: Indicates whether ES|QL result rows are stored in the alert document for workflows.
+              nullable: true
+              oneOf:
+                - type: boolean
+                - not: {}
             index:
               anyOf:
                 - items: {}
@@ -102999,6 +103012,7 @@ components:
             - esQuery
             - index
             - esqlQuery
+            - includeEsqlResults
           title: ES Query Rule Params
           type: object
         rule_type_id:

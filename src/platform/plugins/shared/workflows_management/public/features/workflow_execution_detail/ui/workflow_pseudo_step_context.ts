@@ -15,12 +15,47 @@ import {
   isFailedBeforeSteps,
   isValidWorkflowDocumentVersion,
 } from '@kbn/workflows';
+import type { AlertRuleLinkInfo } from '../../../../common/types/alert_types';
 
 export type TriggerType = 'alert' | 'scheduled' | 'manual' | 'document' | 'event';
 
 export interface TriggerContextFromExecution {
   triggerType: TriggerType;
   input: JsonValue;
+}
+
+export function getAlertRuleLinkInfo(
+  workflowExecution: WorkflowExecutionDto
+): AlertRuleLinkInfo | undefined {
+  const triggerContext = buildTriggerContextFromExecution(
+    workflowExecution.context as Record<string, unknown> | undefined | null,
+    workflowExecution.triggeredBy
+  );
+  if (
+    triggerContext?.triggerType !== 'alert' ||
+    !triggerContext.input ||
+    typeof triggerContext.input !== 'object' ||
+    Array.isArray(triggerContext.input)
+  ) {
+    return undefined;
+  }
+
+  const event = triggerContext.input as Record<string, unknown>;
+  const rule = event.rule;
+  if (!rule || typeof rule !== 'object' || Array.isArray(rule)) {
+    return undefined;
+  }
+
+  const { id, name } = rule as Record<string, unknown>;
+  if (typeof id !== 'string' || typeof name !== 'string') {
+    return undefined;
+  }
+
+  return {
+    id,
+    name,
+    ...(typeof event.ruleUrl === 'string' ? { ruleUrl: event.ruleUrl } : {}),
+  };
 }
 
 export function buildTriggerContextFromExecution(

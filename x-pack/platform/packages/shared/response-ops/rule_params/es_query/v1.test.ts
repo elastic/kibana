@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateParams } from './v1';
+import { EsQueryRuleParamsSchema, validateParams } from './v1';
 
 describe('validateParams', () => {
   describe('esqlQuery', () => {
@@ -163,4 +163,28 @@ describe('validateParams', () => {
       }
     });
   }
+});
+
+describe('EsQueryRuleParamsSchema', () => {
+  const esqlParams = {
+    searchType: 'esqlQuery',
+    esqlQuery: { esql: 'FROM test' },
+    size: 100,
+    timeWindowSize: 5,
+    timeWindowUnit: 'm',
+    threshold: [0],
+    thresholdComparator: '>',
+    timeField: '@timestamp',
+  };
+
+  it('accepts omitting the ES|QL results opt-in', () => {
+    expect(EsQueryRuleParamsSchema.validate(esqlParams).includeEsqlResults).toBeUndefined();
+  });
+
+  it('accepts opting in to include ES|QL results', () => {
+    expect(
+      EsQueryRuleParamsSchema.validate({ ...esqlParams, includeEsqlResults: true })
+        .includeEsqlResults
+    ).toBe(true);
+  });
 });

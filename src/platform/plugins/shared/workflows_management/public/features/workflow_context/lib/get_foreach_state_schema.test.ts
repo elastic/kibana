@@ -8,7 +8,9 @@
  */
 
 import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
+import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
 import { z } from '@kbn/zod/v4';
 import {
   FOREACH_ITEM_SCHEMA_DESC,
@@ -71,6 +73,29 @@ describe('getForeachStateSchema', () => {
         items: z.array(itemSchema),
       })
     );
+  });
+
+  it('should infer dynamic ES|QL result fields from an alert event collection', () => {
+    const stepContext = DynamicStepContextSchema.extend({
+      event: AlertEventSchema.optional(),
+    });
+    const collectionPath = 'event.alerts[0].kibana.alert.esql.results';
+
+    const itemSchema = getForeachItemSchema(stepContext, collectionPath);
+
+    expect(itemSchema).toBeInstanceOf(z.ZodRecord);
+    expect(getForeachCollectionDiagnostic(itemSchema, collectionPath)).toBeNull();
+    expect(getSchemaAtPath(itemSchema, 'host_name').schema).toBeInstanceOf(z.ZodUnion);
+  });
+
+  it('should preserve unknown typing for other alert fields', () => {
+    const stepContext = DynamicStepContextSchema.extend({
+      event: AlertEventSchema.optional(),
+    });
+
+    expect(
+      getSchemaAtPath(stepContext, 'event.alerts[0].kibana.alert.rule.name').schema
+    ).toBeInstanceOf(z.ZodUnknown);
   });
 
   it('should return an unknown schema with a description if inferred type is not an array', () => {

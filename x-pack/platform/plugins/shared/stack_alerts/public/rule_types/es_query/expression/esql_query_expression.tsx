@@ -16,6 +16,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiRadioGroup,
+  EuiCheckbox,
 } from '@elastic/eui';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -43,7 +44,13 @@ import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
-import { transformToEsqlTable, getEsqlQueryHits, ALERT_ID_SUGGESTED_MAX } from '../../../../common';
+import {
+  transformToEsqlTable,
+  getEsqlQueryHits,
+  ALERT_ID_SUGGESTED_MAX,
+  ESQL_RESULTS_MAX_ROWS_PER_EXECUTION,
+  ESQL_RESULTS_MAX_BYTES_PER_EXECUTION,
+} from '../../../../common';
 
 export const getTimeFilter = (timeField: string, window: string) => {
   const timeWindow = parseDuration(window);
@@ -118,7 +125,8 @@ export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data, dataViews }) => {
   const { http, isServerless, uiSettings } = useTriggerUiActionServices();
-  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
+  const { esqlQuery, includeEsqlResults, timeWindowSize, timeWindowUnit, timeField, groupBy } =
+    ruleParams;
   const isEdit = !!metadata?.isEdit;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -137,6 +145,7 @@ export const EsqlQueryExpression: React.FC<
     groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
     termSize: DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
+    includeEsqlResults: includeEsqlResults ?? false,
     // The sourceFields param is ignored
     sourceFields: [],
   });
@@ -335,6 +344,35 @@ export const EsqlQueryExpression: React.FC<
         hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
         showTable
       />
+      <EuiSpacer />
+      <EuiFormRow
+        fullWidth
+        helpText={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.includeEsqlResultsHelpText"
+            defaultMessage="Stores result data on each alert for workflows. Results are limited to {maxRows} rows or {maxKibibytes} KiB per rule execution and include truncation metadata when a limit is reached."
+            values={{
+              maxRows: ESQL_RESULTS_MAX_ROWS_PER_EXECUTION,
+              maxKibibytes: ESQL_RESULTS_MAX_BYTES_PER_EXECUTION / 1024,
+            }}
+          />
+        }
+      >
+        <EuiCheckbox
+          id="includeEsqlResults"
+          data-test-subj="includeEsqlResultsCheckbox"
+          checked={currentRuleParams.includeEsqlResults ?? false}
+          onChange={(event) => {
+            setParam('includeEsqlResults', event.target.checked);
+          }}
+          label={
+            <FormattedMessage
+              id="xpack.stackAlerts.esQuery.ui.includeEsqlResultsLabel"
+              defaultMessage="Include ES|QL results in alert payload"
+            />
+          }
+        />
+      </EuiFormRow>
       <EuiSpacer />
       <EuiFormRow
         id="timeField"

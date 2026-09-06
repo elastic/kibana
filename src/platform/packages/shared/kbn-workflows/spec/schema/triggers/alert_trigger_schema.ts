@@ -16,11 +16,25 @@ export type AlertRuleTrigger = z.infer<typeof AlertRuleTriggerSchema>;
 
 // Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
 // Once a Zod-compatible version is available, we should import and use it instead.
+const EsqlResultRowSchema = z.record(z.string(), z.union([z.string(), z.null()]));
+const KibanaAlertSchema = z
+  .object({
+    esql: z
+      .object({
+        results: z.array(EsqlResultRowSchema).optional(),
+        results_total_count: z.number().optional(),
+        results_stored_count: z.number().optional(),
+        results_truncated: z.boolean().optional(),
+      })
+      .optional(),
+  })
+  .and(z.record(z.string(), z.unknown()));
+
 export const AlertSchema = z.object({
   _id: z.string(),
   _index: z.string(),
   kibana: z.object({
-    alert: z.unknown(),
+    alert: KibanaAlertSchema,
   }),
   '@timestamp': z.string(),
 });
@@ -41,6 +55,7 @@ export const RuleSchema = z.object({
 export const AlertEventSchema = z.object({
   alerts: z.array(z.union([AlertSchema, z.unknown()])),
   rule: RuleSchema,
+  ruleUrl: z.string().optional(),
   params: z.unknown(),
   spaceId: z.string().describe('The space where the event was emitted.'),
 });

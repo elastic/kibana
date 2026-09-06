@@ -7,7 +7,7 @@
 
 export { getComparatorScript, getHumanReadableComparator } from './comparator';
 
-export type { EsqlTable } from './es_query';
+export type { EsqlResultRow, EsqlTable } from './es_query';
 export {
   rowToDocument,
   transformToEsqlTable,
@@ -16,4 +16,6 @@ export {
   ALERT_ID_SUGGESTED_MAX,
   ES_QUERY_MAX_HITS_PER_EXECUTION,
   ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+  ESQL_RESULTS_MAX_ROWS_PER_EXECUTION,
+  ESQL_RESULTS_MAX_BYTES_PER_EXECUTION,
 } from './es_query';
