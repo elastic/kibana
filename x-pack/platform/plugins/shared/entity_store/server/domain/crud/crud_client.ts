@@ -27,10 +27,16 @@ import {
   EntityStoreNotInstalledError,
 } from '../errors';
 import { buildEntityListSourceFilter } from '../../../common/domain/definitions/entity_list_source';
+import { getEntityCreationCandidate } from '../../../common/domain/definitions/creatable_from_single_document';
+import type { EntityCreationRejectionReason } from '../../../common/domain/definitions/creatable_from_single_document';
+import type { EntityCreatedBy } from '../../../common/domain/definitions/common_fields';
 import { validateAndTransformDoc } from './utils';
+import { buildEntityFromSource } from './entity_from_source';
 import { runWithSpan } from '../../telemetry/traces';
 import {
   searchEntitiesV2,
+  searchEntitiesV2Batch,
+  type SearchEntitiesV2BatchItemResult,
   type SearchEntitiesV2Inspect,
   type SearchEntitiesV2Params,
   type SearchEntitiesV2Result,
@@ -38,6 +44,17 @@ import {
 import { type WorkflowEmitTarget, WorkflowEventPublisher } from './workflow_event_publisher';
 
 const RETRY_ON_CONFLICT = 3;
+
+// `fields` is merged last, so reserve builder-owned paths to prevent caller overrides.
+const RESERVED_CREATE_FROM_SOURCE_FIELDS: ReadonlySet<string> = new Set([
+  'entity.id',
+  'entity.created_by',
+  'entity.EngineMetadata.Type',
+  'entity.EngineMetadata.UntypedId',
+  'entity.name',
+  'entity.lifecycle.first_seen',
+  'entity.lifecycle.last_seen',
+]);
 
 interface CRUDClientDependencies {
   logger: Logger;
@@ -71,6 +88,9 @@ export interface ListEntitiesResult {
   inspect?: SearchEntitiesV2Inspect;
 }
 
+export type ListEntitiesBatchParams = SearchEntitiesV2Params;
+export type ListEntitiesBatchItemResult = SearchEntitiesV2BatchItemResult;
+
 export interface BulkObject {
   type: EntityType;
   doc: Entity;
@@ -88,8 +108,44 @@ interface BulkUpdateEntityParams {
   force?: boolean;
 }
 
-// EntityUpdateClient is the maintainer-safe CRUD surface: all CRUD methods
-// except create/delete.
+export interface CreateEntityFromSourceRequest {
+  type: EntityType;
+  /** Source document used to derive identity and evaluate creation policy. */
+  source: unknown;
+  /** EUID already used to key related data; must match the source-derived EUID to prevent orphans. */
+  expectedEntityId: string;
+  /** Provenance stamp written to `entity.created_by`. */
+  createdBy: EntityCreatedBy;
+  /** Upper bound on the entity's true first-seen; omit when unknown. */
+  firstSeen?: string;
+  /** Additional dot-path fields to merge onto the created doc (e.g. `entity.risk.calculated_score`). */
+  fields?: Record<string, unknown>;
+}
+
+export type CreateEntityFromSourceRejectionReason =
+  | EntityCreationRejectionReason
+  | 'euid_mismatch'
+  | 'reserved_field'
+  | 'bulk_create_failed';
+
+export interface CreateEntityFromSourceOutcome {
+  /** The request's `expectedEntityId`, including when `reason` is `euid_mismatch`. */
+  euid: string;
+  reason: CreateEntityFromSourceRejectionReason;
+}
+
+export interface CreateEntitiesFromSourceResult {
+  created: string[];
+  /** EUIDs rejected by bulk create because the entity already exists. */
+  alreadyExists: string[];
+  /** Policy rejections made before the bulk request. */
+  skipped: CreateEntityFromSourceOutcome[];
+  /** Request-validation and non-conflict bulk failures. */
+  failed: CreateEntityFromSourceOutcome[];
+}
+
+// Maintainer-safe surface; createEntitiesFromSource remains available because it enforces
+// per-type policy and create-only writes.
 export type EntityUpdateClient = Omit<CRUDClient, 'createEntity' | 'deleteEntity'>;
 
 export class CRUDClient {
@@ -176,6 +232,26 @@ export class CRUDClient {
       writable: true,
     });
 
+    const baseCreateEntitiesFromSource = this.createEntitiesFromSource.bind(this);
+    const tracedCreateEntitiesFromSource = (
+      requests: CreateEntityFromSourceRequest[]
+    ): Promise<CreateEntitiesFromSourceResult> =>
+      runWithSpan({
+        name: 'entityStore.crud.create_entities_from_source',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'create_entities_from_source',
+          'entity_store.requests.count': requests.length,
+        },
+        cb: () => baseCreateEntitiesFromSource(requests),
+      });
+
+    Object.defineProperty(this, 'createEntitiesFromSource', {
+      value: tracedCreateEntitiesFromSource,
+      configurable: true,
+      writable: true,
+    });
+
     const baseDeleteEntity = this.deleteEntity.bind(this);
     const tracedDeleteEntity = (id: string): Promise<void> =>
       runWithSpan({
@@ -207,6 +283,26 @@ export class CRUDClient {
 
     Object.defineProperty(this, 'listEntities', {
       value: tracedListEntities,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseListEntitiesBatch = this.listEntitiesBatch.bind(this);
+    const tracedListEntitiesBatch = (
+      paramsList: ListEntitiesBatchParams[]
+    ): Promise<ListEntitiesBatchItemResult[]> =>
+      runWithSpan({
+        name: 'entityStore.crud.list_entities_batch',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'list_entities_batch',
+          'entity_store.crud.batch_size': paramsList.length,
+        },
+        cb: () => baseListEntitiesBatch(paramsList),
+      });
+
+    Object.defineProperty(this, 'listEntitiesBatch', {
+      value: tracedListEntitiesBatch,
       configurable: true,
       writable: true,
     });
@@ -426,6 +522,106 @@ export class CRUDClient {
     }
   }
 
+  /** Bulk-creates policy-accepted entities without overwriting or waiting for refresh; request-level failures throw and per-item outcomes are returned. */
+  public async createEntitiesFromSource(
+    requests: CreateEntityFromSourceRequest[]
+  ): Promise<CreateEntitiesFromSourceResult> {
+    await this.assertInstalled();
+
+    const result: CreateEntitiesFromSourceResult = {
+      created: [],
+      alreadyExists: [],
+      skipped: [],
+      failed: [],
+    };
+    const operations: Array<BulkOperationContainer | Entity> = [];
+    const euids: string[] = [];
+
+    for (const request of requests) {
+      const reservedField = request.fields
+        ? Object.keys(request.fields).find((field) => RESERVED_CREATE_FROM_SOURCE_FIELDS.has(field))
+        : undefined;
+      if (reservedField) {
+        this.logger.warn(
+          `createEntitiesFromSource: rejecting request for "${request.expectedEntityId}": ` +
+            `\`fields\` supplied reserved path "${reservedField}"`
+        );
+        result.failed.push({ euid: request.expectedEntityId, reason: 'reserved_field' });
+        continue;
+      }
+
+      const candidate = getEntityCreationCandidate(request.type, request.source);
+      if (!candidate.accepted) {
+        result.skipped.push({ euid: request.expectedEntityId, reason: candidate.reason });
+        continue;
+      }
+
+      if (candidate.euid !== request.expectedEntityId) {
+        this.logger.warn(
+          `createEntitiesFromSource: EUID derived from source ("${candidate.euid}") does not ` +
+            `match expected EUID ("${request.expectedEntityId}"); rejecting to avoid creating an ` +
+            `unrelated entity`
+        );
+        result.failed.push({ euid: request.expectedEntityId, reason: 'euid_mismatch' });
+        continue;
+      }
+
+      const doc = buildEntityFromSource({
+        entityType: request.type,
+        candidate,
+        source: request.source,
+        createdBy: request.createdBy,
+        firstSeen: request.firstSeen,
+        fields: request.fields,
+      });
+
+      const valid = validateAndTransformDoc(
+        'create',
+        request.type,
+        this.namespace,
+        doc,
+        request.expectedEntityId,
+        true
+      );
+
+      operations.push({ create: { _id: hashEuid(valid.id) } }, valid.doc as Entity);
+      euids.push(valid.id);
+    }
+
+    if (operations.length === 0) {
+      return result;
+    }
+
+    this.logger.debug(`createEntitiesFromSource: attempting to create ${euids.length} entities`);
+    const resp = await this.esClient.bulk({
+      index: await resolveLatestEntitiesIndexName(this.esClient, this.namespace),
+      operations,
+      refresh: false,
+    });
+
+    if (!resp.errors) {
+      result.created.push(...euids);
+      return result;
+    }
+
+    resp.items.forEach((item, i) => {
+      const outcome = Object.values(item)[0] as { status: number; error?: { type?: string } };
+      const euidValue = euids[i];
+      if (outcome.status === 409 || outcome.error?.type === 'version_conflict_engine_exception') {
+        result.alreadyExists.push(euidValue);
+      } else if (outcome.error) {
+        this.logger.warn(
+          `createEntitiesFromSource: failed to create entity ${euidValue}: ${outcome.error.type}`
+        );
+        result.failed.push({ euid: euidValue, reason: 'bulk_create_failed' });
+      } else {
+        result.created.push(euidValue);
+      }
+    });
+
+    return result;
+  }
+
   public async deleteEntity(id: string): Promise<void> {
     try {
       this.logger.debug(`Deleting Entity ID ${id}`);
@@ -511,5 +707,20 @@ export class CRUDClient {
       nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
       ...(entityFields ? { fields: entityFields } : {}),
     };
+  }
+
+  // Runs several page-mode queries as one ES `_msearch` request instead of N
+  // separate listEntities calls, resolving the index name once for all of them.
+  // One query's failure surfaces as `{ error }` at its position instead of
+  // rejecting the others.
+  public async listEntitiesBatch(
+    paramsList: ListEntitiesBatchParams[]
+  ): Promise<ListEntitiesBatchItemResult[]> {
+    this.logger.debug(`Listing entities (batch mode, ${paramsList.length} queries)`);
+    return searchEntitiesV2Batch({
+      esClient: this.esClient,
+      namespace: this.namespace,
+      queries: paramsList,
+    });
   }
 }

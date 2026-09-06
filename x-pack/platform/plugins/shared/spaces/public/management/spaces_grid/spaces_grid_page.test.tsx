@@ -8,6 +8,7 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import {
   httpServiceMock,
   notificationServiceMock,
@@ -64,9 +65,16 @@ const spacesGridCommonProps = {
   isServerless: false,
 };
 
+const mountGrid = (ui: React.ReactElement) =>
+  mountWithIntl(<MockAppHeaderProvider>{ui}</MockAppHeaderProvider>);
+
 describe('SpacesGridPage', () => {
   const getUrlForApp = (appId: string) => appId;
   const history = scopedHistoryMock.create();
+
+  beforeEach(() => {
+    history.createHref.mockImplementation(({ pathname } = { pathname: '/' }) => pathname ?? '/');
+  });
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -185,7 +193,7 @@ describe('SpacesGridPage', () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -293,7 +301,7 @@ describe('SpacesGridPage', () => {
     const current = await spacesManagerWithCurrent.getActiveSpace();
     expect(current.id).toBe('test-2');
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManagerWithCurrent}
         getFeatures={featuresStart.getFeatures}
@@ -336,7 +344,7 @@ describe('SpacesGridPage', () => {
     const current = await spacesManager.getActiveSpace();
     expect(current.id).toBe('custom-2');
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -368,7 +376,7 @@ describe('SpacesGridPage', () => {
     const current = await spacesManager.getActiveSpace();
     expect(current.id).toBe('custom-2');
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -399,7 +407,7 @@ describe('SpacesGridPage', () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -429,7 +437,7 @@ describe('SpacesGridPage', () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}

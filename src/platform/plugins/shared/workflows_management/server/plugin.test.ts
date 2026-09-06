@@ -9,24 +9,36 @@
 
 jest.mock('./api/routes', () => ({ defineRoutes: jest.fn() }));
 jest.mock('./api/workflows_management_api', () => ({
-  WorkflowsManagementApi: jest.fn().mockImplementation(() => ({})),
+  WorkflowsManagementApi: jest.fn().mockImplementation(() => ({
+    setAuditLog: jest.fn(),
+  })),
 }));
 jest.mock('./api/workflows_management_service');
+jest.mock('@kbn/workflows-execution-engine/server', () => ({
+  registerHitlLifecycleAuditor: jest.fn(() => jest.fn()),
+}));
 
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
 import { WorkflowsService } from './api/workflows_management_service';
 import { WorkflowsPlugin } from './plugin';
 
 const MockedWorkflowsService = WorkflowsService as jest.MockedClass<typeof WorkflowsService>;
+const mockRegisterHitlLifecycleAuditor = registerHitlLifecycleAuditor as jest.MockedFunction<
+  typeof registerHitlLifecycleAuditor
+>;
 
 describe('WorkflowsPlugin', () => {
   const setStopping = jest.fn();
   const cleanupUnregisteredOrphans = jest.fn().mockResolvedValue(undefined);
+  const unregisterHitlLifecycleAuditor = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRegisterHitlLifecycleAuditor.mockReturnValue(unregisterHitlLifecycleAuditor);
     MockedWorkflowsService.mockImplementation(
       () =>
         ({
@@ -65,6 +77,7 @@ describe('WorkflowsPlugin', () => {
 
     expect(start).toEqual({});
     expect(setStopping).toHaveBeenCalledWith(false);
+    expect(mockRegisterHitlLifecycleAuditor).toHaveBeenCalled();
   });
 
   it('marks the workflows service as stopping on stop()', () => {
@@ -94,5 +107,64 @@ describe('WorkflowsPlugin', () => {
     plugin.stop();
 
     expect(setStopping).toHaveBeenCalledWith(true);
+    expect(unregisterHitlLifecycleAuditor).toHaveBeenCalled();
+  });
+
+  it('does not register connector-event triggers when inbound events are disabled', () => {
+    const actions = actionsMock.createSetup();
+    (
+      actions.getActionsConfigurationUtilities().isInboundEventsEnabled as jest.Mock
+    ).mockReturnValue(false);
+    const workflowsExtensions = workflowsExtensionsMock.createSetup();
+    const plugin = new WorkflowsPlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        logging: { console: false },
+        available: true,
+        library: { ttlMs: 600_000 },
+      })
+    );
+
+    plugin.setup(coreMock.createSetup(), {
+      actions,
+      spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+      workflowsExtensions,
+    });
+
+    const connectorEventRegistrations =
+      workflowsExtensions.registerTriggerDefinition.mock.calls.filter(
+        ([definition]) => definition.id === 'inboundWebhook.received'
+      );
+    expect(connectorEventRegistrations).toHaveLength(0);
+  });
+
+  it('registers inboundWebhook.received when inbound events are enabled', () => {
+    const actions = actionsMock.createSetup();
+    (
+      actions.getActionsConfigurationUtilities().isInboundEventsEnabled as jest.Mock
+    ).mockReturnValue(true);
+    const workflowsExtensions = workflowsExtensionsMock.createSetup();
+    const plugin = new WorkflowsPlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        logging: { console: false },
+        available: true,
+        library: { ttlMs: 600_000 },
+      })
+    );
+
+    plugin.setup(coreMock.createSetup(), {
+      actions,
+      spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+      workflowsExtensions,
+    });
+
+    expect(workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'inboundWebhook.received',
+        stability: 'tech_preview',
+        requiresConnectorId: true,
+      })
+    );
   });
 });

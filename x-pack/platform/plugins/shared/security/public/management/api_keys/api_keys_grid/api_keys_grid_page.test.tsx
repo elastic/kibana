@@ -7,8 +7,12 @@
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
+import type { MemoryHistory } from 'history';
 import React from 'react';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { APIKeysGridPage } from './api_keys_grid_page';
@@ -127,6 +131,19 @@ describe('APIKeysGridPage', () => {
     consoleWarnMock.mockRestore();
   });
 
+  const renderApiKeysPage = (
+    history: MemoryHistory = createMemoryHistory({ initialEntries: ['/'] })
+  ) =>
+    render(
+      coreStart.rendering.addContext(
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        </MockAppHeaderProvider>
+      )
+    );
+
   it('loads and displays API keys', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
@@ -137,24 +154,73 @@ describe('APIKeysGridPage', () => {
       },
     };
 
-    const { findByText, queryByTestId, getByText } = render(
-      coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <APIKeysGridPage />
-        </Providers>
-      )
-    );
+    const { findByText, findByTestId, queryByTestId, getByText, getByTestId } =
+      renderApiKeysPage(history);
 
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
     expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
 
-    expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
-
     await findByText(/first-api-key/);
+    expect(await findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
+    expect(await findByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+      'Allow external services to access the Elastic Stack on behalf of a user.'
+    );
+    expect(await findByTestId('apiKeysCreateTableButton')).toBeInTheDocument();
 
     const secondKey = getByText(/second-api-key/).closest('td');
     const secondKeyEuiLink = secondKey!.querySelector('button');
     expect(secondKeyEuiLink).not.toBeNull();
     expect(secondKeyEuiLink!.getAttribute('data-test-subj')).toBe('apiKeyRowName-second-api-key');
+  });
+
+  it('has a documentation link in the app header', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      api_keys: {
+        save: true,
+      },
+    };
+
+    const { findByTestId } = renderApiKeysPage(history);
+
+    await findByTestId(APP_HEADER_TEST_SUBJECTS.title);
+    await openAppMenuOverflow();
+    const docLink = await findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation);
+    expect(docLink).toHaveAttribute('href', coreStart.docLinks.links.management.apiKeys);
+    expect(docLink).toHaveAttribute('target', '_blank');
+  });
+
+  it('keeps the header and shows a loading body while API keys load', () => {
+    coreStart.http.post.mockReturnValue(new Promise(() => {}));
+    authc.getCurrentUser.mockReturnValue(new Promise(() => {}));
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      api_keys: { save: true },
+    };
+
+    const { getByTestId } = renderApiKeysPage();
+
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
+    expect(getByTestId('sectionLoading')).toBeInTheDocument();
+  });
+
+  it('opens the create flyout before the list has loaded', async () => {
+    coreStart.http.post.mockReturnValue(new Promise(() => {}));
+    coreStart.http.get.mockResolvedValue([]);
+    authc.getCurrentUser.mockReturnValue(new Promise(() => {}));
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      api_keys: { save: true },
+    };
+
+    const { findByTestId, getByTestId } = renderApiKeysPage(
+      createMemoryHistory({ initialEntries: ['/create'] })
+    );
+
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
+    expect(await findByTestId('apiKeyFlyout')).toBeInTheDocument();
   });
 
   it('displays callout when API keys are disabled', async () => {
@@ -171,16 +237,12 @@ describe('APIKeysGridPage', () => {
       },
     };
 
-    const { findByText } = render(
-      coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <APIKeysGridPage />
-        </Providers>
-      )
-    );
+    const { findByText, queryByTestId, getByTestId } = renderApiKeysPage(history);
 
-    expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
+    expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
     await findByText(/API keys are disabled/);
+    expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
   });
 
   it('displays error when user does not have required permissions', async () => {
@@ -197,16 +259,12 @@ describe('APIKeysGridPage', () => {
       },
     };
 
-    const { findByText } = render(
-      coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <APIKeysGridPage />
-        </Providers>
-      )
-    );
+    const { findByText, queryByTestId, getByTestId } = renderApiKeysPage(history);
 
-    expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
+    expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
     await findByText(/You do not have permission to manage API keys/);
+    expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
   });
 
   it('displays error when fetching API keys fails', async () => {
@@ -226,16 +284,12 @@ describe('APIKeysGridPage', () => {
       },
     };
 
-    const { findByText } = render(
-      coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <APIKeysGridPage />
-        </Providers>
-      )
-    );
+    const { findByText, queryByTestId, getByTestId } = renderApiKeysPage(history);
 
-    expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
+    expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
     await findByText(/Could not load API keys/);
+    expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
   });
 
   describe('Read Only View', () => {
@@ -261,17 +315,43 @@ describe('APIKeysGridPage', () => {
         },
       };
 
-      const { findByText, queryByText } = render(
-        coreStart.rendering.addContext(
-          <Providers services={coreStart} authc={authc} history={history}>
-            <APIKeysGridPage />
-          </Providers>
-        )
-      );
-      expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
+      const { findByText, queryByText, queryByTestId, getByTestId } = renderApiKeysPage(history);
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
       expect(await findByText('You do not have permission to create API keys')).toBeInTheDocument();
       expect(queryByText('Create API key')).not.toBeInTheDocument();
+      expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
+      expect(queryByTestId('apiKeysCreatePromptButton')).not.toBeInTheDocument();
     });
+  });
+
+  it('keeps the app header mounted on the empty prompt and creates from there', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      api_keys: {
+        save: true,
+      },
+    };
+
+    coreStart.http.post.mockResolvedValue({
+      apiKeys: [],
+      canManageCrossClusterApiKeys: true,
+      canManageApiKeys: true,
+      canManageOwnApiKeys: true,
+      total: 0,
+      aggregations: {},
+      aggregationTotal: 0,
+    });
+
+    const { findByTestId, queryByTestId, getByTestId } = renderApiKeysPage(history);
+
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
+    expect(await findByTestId('apiKeysEmptyPromptTitle')).toHaveTextContent(
+      'Create your first API key'
+    );
+    expect(await findByTestId('apiKeysCreatePromptButton')).toBeInTheDocument();
+    expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
   });
 
   describe('Auto-select type filter', () => {
@@ -308,13 +388,7 @@ describe('APIKeysGridPage', () => {
       };
       coreStart.http.post.mockResolvedValue(crossClusterOnlyResponse);
 
-      render(
-        coreStart.rendering.addContext(
-          <Providers services={coreStart} authc={authc} history={history}>
-            <APIKeysGridPage />
-          </Providers>
-        )
-      );
+      renderApiKeysPage(history);
 
       // Initial load returns 0 REST keys → auto-select fires → second query with cross-cluster filter
       await waitFor(() => expect(coreStart.http.post).toHaveBeenCalledTimes(2));
@@ -332,13 +406,7 @@ describe('APIKeysGridPage', () => {
       };
       // beforeEach mock returns two REST keys — no override needed
 
-      const { findByText } = render(
-        coreStart.rendering.addContext(
-          <Providers services={coreStart} authc={authc} history={history}>
-            <APIKeysGridPage />
-          </Providers>
-        )
-      );
+      const { findByText } = renderApiKeysPage(history);
 
       await findByText(/first-api-key/);
       // Only the initial query; auto-select guard exits early because loadedApiKeys.length > 0
@@ -402,13 +470,7 @@ describe('APIKeysGridPage', () => {
         };
       });
 
-      const { findByTestId, findByText } = render(
-        coreStart.rendering.addContext(
-          <Providers services={coreStart} authc={authc} history={history}>
-            <APIKeysGridPage />
-          </Providers>
-        )
-      );
+      const { findByTestId, findByText } = renderApiKeysPage(history);
 
       // Wait for initial load so state.value is set before the flyout can render
       await findByText(/first-api-key/);
@@ -443,13 +505,7 @@ describe('APIKeysGridPage', () => {
         },
       };
 
-      const { findByTestId } = render(
-        coreStart.rendering.addContext(
-          <Providers services={coreStart} authc={authc} history={history}>
-            <APIKeysGridPage />
-          </Providers>
-        )
-      );
+      const { findByTestId } = renderApiKeysPage(history);
 
       const previousButton = await findByTestId('apiKeysTablePreviousPageButton');
       expect(previousButton).toBeDisabled();
@@ -466,13 +522,7 @@ describe('APIKeysGridPage', () => {
       };
 
       // Mock returns 2 items which is less than page size (25)
-      const { findByTestId } = render(
-        coreStart.rendering.addContext(
-          <Providers services={coreStart} authc={authc} history={history}>
-            <APIKeysGridPage />
-          </Providers>
-        )
-      );
+      const { findByTestId } = renderApiKeysPage(history);
 
       const nextButton = await findByTestId('apiKeysTableNextPageButton');
       expect(nextButton).toBeDisabled();
@@ -520,13 +570,7 @@ describe('APIKeysGridPage', () => {
         },
       });
 
-      const { findByTestId } = render(
-        coreStart.rendering.addContext(
-          <Providers services={coreStart} authc={authc} history={history}>
-            <APIKeysGridPage />
-          </Providers>
-        )
-      );
+      const { findByTestId } = renderApiKeysPage(history);
 
       const nextButton = await findByTestId('apiKeysTableNextPageButton');
       expect(nextButton).not.toBeDisabled();
@@ -542,13 +586,7 @@ describe('APIKeysGridPage', () => {
         },
       };
 
-      const { findByTestId } = render(
-        coreStart.rendering.addContext(
-          <Providers services={coreStart} authc={authc} history={history}>
-            <APIKeysGridPage />
-          </Providers>
-        )
-      );
+      const { findByTestId } = renderApiKeysPage(history);
 
       // Wait for initial load
       await findByTestId('apiKeysTableRefreshButton');

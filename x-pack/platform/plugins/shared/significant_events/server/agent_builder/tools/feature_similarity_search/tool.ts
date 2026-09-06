@@ -9,16 +9,17 @@ import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-com
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import {
-  INFERRED_FEATURE_TYPES,
-  MAX_ID_LENGTH,
-  MAX_TEXT_LENGTH,
-} from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { searchFeatureSimilarity } from '../../../lib/significant_events/features/feature_similarity_search';
+import {
+  FEATURE_SIMILARITY_TOOL_DESCRIPTION,
+  MAX_SEARCH_CANDIDATES,
+  featureCandidateSchema,
+  searchFeaturesForCandidates,
+} from '../../../lib/significant_events/features/feature_similarity_search';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 
 export const SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID =
@@ -26,13 +27,10 @@ export const SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID =
 
 const featureSimilaritySearchSchema = z.object({
   stream_name: z.string().max(MAX_ID_LENGTH).describe('Stream containing the known KI features.'),
-  candidate_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .describe('Stable ID intended for the candidate feature.'),
-  title: z.string().max(MAX_TEXT_LENGTH).describe('Candidate feature title.'),
-  description: z.string().max(MAX_TEXT_LENGTH).describe('Candidate feature description.'),
-  type: z.enum(INFERRED_FEATURE_TYPES).describe('Candidate feature type.'),
+  candidates: z
+    .array(featureCandidateSchema)
+    .max(MAX_SEARCH_CANDIDATES)
+    .describe('Candidate features to check in one call. Results are grouped by candidate_id.'),
 });
 
 export const createFeatureSimilaritySearchTool = ({
@@ -47,9 +45,7 @@ export const createFeatureSimilaritySearchTool = ({
   const toolDefinition: BuiltinToolDefinition<typeof featureSimilaritySearchSchema> = {
     id: SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Search known feature Knowledge Indicators by meaning for a candidate feature. ' +
-      'Returns at most five same-type possible matches in semantic relevance order.',
+    description: FEATURE_SIMILARITY_TOOL_DESCRIPTION,
     annotations: {
       title: 'Search Similar Feature Knowledge Indicators',
       readOnlyHint: true,
@@ -60,7 +56,7 @@ export const createFeatureSimilaritySearchTool = ({
     schema: featureSimilaritySearchSchema,
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
-    handler: async ({ stream_name: streamName, ...args }, context) => {
+    handler: async ({ stream_name: streamName, candidates }, context) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
         await assertSignificantEventsAccess({
@@ -69,10 +65,11 @@ export const createFeatureSimilaritySearchTool = ({
         });
         await scopedClients.streamsClient.getStream(streamName);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-        const result = await searchFeatureSimilarity({ kiClient, streamName, args });
+
+        const groups = await searchFeaturesForCandidates({ kiClient, streamName, candidates });
 
         return {
-          results: [{ type: ToolResultType.other, data: result }],
+          results: groups.map((group) => ({ type: ToolResultType.other, data: group })),
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
