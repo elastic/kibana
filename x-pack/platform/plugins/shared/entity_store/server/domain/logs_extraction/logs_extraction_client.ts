@@ -194,14 +194,6 @@ export class LogsExtractionClient {
           },
           error: null,
         });
-        // TODO CURSOR-TEST temporary local instrumentation, do not commit
-        if (type === 'user') {
-          this.logger.info(
-            `==================== [CURSOR-TEST] run COMPLETE (success): all cursors cleared, lastExecutionTimestamp=${
-              lastSearchTimestamp || 'now'
-            }, entities this run=${count}`
-          );
-        }
       }
 
       return operationResult;
@@ -550,21 +542,7 @@ export class LogsExtractionClient {
           logsPageCursorEnd = resumeSliceEnd;
           entityPagination = resumeEntityPagination;
           lastLogsPages = false;
-          // TODO CURSOR-TEST temporary local instrumentation, do not commit
-          if (type === 'user') {
-            this.logger.info(
-              `==================== [CURSOR-TEST] probe SKIPPED (resume): reusing pinned sliceEnd=${resumeSliceEnd.timestampCursor} idCursor=${resumeEntityPagination?.idCursor} windowFrom=${fromDateISO}`
-            );
-          }
         } else {
-          // TODO CURSOR-TEST temporary local instrumentation, do not commit
-          if (type === 'user') {
-            this.logger.info(
-              `==================== [CURSOR-TEST] probe EXECUTED: sliceStart=${
-                logsPageCursorStart?.timestampCursor ?? fromDateISO
-              } windowTo=${toDateISO}`
-            );
-          }
           const probe = await this.runLogPaginationCursorProbeForNextPage({
             indexPatterns,
             type,
@@ -640,12 +618,6 @@ export class LogsExtractionClient {
 
         state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd);
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
-        // TODO CURSOR-TEST temporary local instrumentation, do not commit
-        if (type === 'user') {
-          this.logger.info(
-            `==================== [CURSOR-TEST] slice COMPLETE: checkpoint advanced to ${state.checkpointTimestamp}, paginationId=${state.paginationId}, sliceEnd=${state.sliceEndTimestamp}`
-          );
-        }
         isFirstRunInThisCycle = false;
 
         const windowLogCapEnabled = maxLogsPerWindow > 0;
@@ -868,18 +840,6 @@ export class LogsExtractionClient {
           sliceEndTimestamp: logsPageCursorEnd.timestampCursor,
         };
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
-        // TODO CURSOR-TEST temporary local instrumentation, do not commit
-        if (type === 'user') {
-          this.logger.info(
-            `==================== [CURSOR-TEST] mid-slice persist: checkpoint=${state.checkpointTimestamp} paginationId=${state.paginationId} sliceEnd=${state.sliceEndTimestamp} (entities ingested so far this slice: ${addedToTotalCount})`
-          );
-          if (!opts?.specificWindow && Math.random() < 0.5) {
-            this.logger.error(
-              `==================== [CURSOR-TEST] FAKE ABORT: simulated crash AFTER ${addedToTotalCount} entities were ingested and the cursor above was persisted. Next run must resume from paginationId=${state.paginationId} sliceEnd=${state.sliceEndTimestamp}`
-            );
-            throw new Error('[CURSOR-TEST] simulated mid-slice crash');
-          }
-        }
       }
     } while (pagination);
 
