@@ -334,16 +334,36 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     [graphDirection, handleHideControlsMenuChange, hideControlsMenu, setGraphDirection]
   );
 
-  // Keep the graph mounted for a moment after switching to YAML so the
-  // cross-fade animation can play out before unmounting it.
+  // Keep the graph mounted until its fade-out finishes. Mount it hidden first
+  // so the CSS opacity transition actually runs (mounting at opacity 1 pops).
   const [renderGraph, setRenderGraph] = useState(showGraph);
+  const [graphOpaque, setGraphOpaque] = useState(showGraph);
   useEffect(() => {
+    let cancelled = false;
+    let raf1 = 0;
+    let raf2 = 0;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
     if (showGraph) {
       setRenderGraph(true);
-      return;
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
+          if (!cancelled) setGraphOpaque(true);
+        });
+      });
+    } else {
+      setGraphOpaque(false);
+      timeout = setTimeout(() => {
+        if (!cancelled) setRenderGraph(false);
+      }, GRAPH_FADE_DURATION_MS + 40);
     }
-    const t = setTimeout(() => setRenderGraph(false), GRAPH_FADE_DURATION_MS + 40);
-    return () => clearTimeout(t);
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      if (timeout) clearTimeout(timeout);
+    };
   }, [showGraph]);
 
   return (
@@ -353,13 +373,14 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           {/*
            * Two peer layers, both absolutely positioned inside the
            * position:relative yamlEditor flex item:
-           *  - Layer 1 (YAML): always mounted so validation keeps running.
-           *  - Layer 2 (Graph): mounted while renderGraph is true; kept alive
-           *    for GRAPH_FADE_DURATION_MS + 40ms after switching back to YAML so the cross-fade plays out.
+           *  - Layer 1 (YAML): always mounted (and always opaque) so validation
+           *    keeps running and the graph can fade over/reveal it.
+           *  - Layer 2 (Graph): mounted while renderGraph is true; fades in on
+           *    top of YAML and is kept alive until the fade-out finishes.
            * The bottom bar floats (position:absolute) and overlays both layers.
            */}
           <div
-            css={[styles.editorLayer, showGraph ? styles.layerHidden : styles.layerVisible]}
+            css={[styles.editorLayer, styles.yamlLayer]}
             {...(showGraph ? { inert: '' } : {})}
           >
             <React.Suspense fallback={<EuiLoadingSpinner />}>
@@ -376,7 +397,11 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           </div>
           {isVisualEditorEnabled && renderGraph && (
             <div
-              css={[styles.editorLayer, showGraph ? styles.layerVisible : styles.layerHidden]}
+              css={[
+                styles.editorLayer,
+                styles.graphLayer,
+                graphOpaque ? styles.layerVisible : styles.layerHidden,
+              ]}
               {...(showGraph ? {} : { inert: '' })}
             >
               <React.Suspense fallback={<EuiLoadingSpinner />}>
@@ -428,8 +453,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 });
 WorkflowDetailEditor.displayName = 'WorkflowDetailEditor';
 
-/** Duration of the YAML↔graph cross-fade. Keep in sync with the setTimeout in renderGraph. */
-const GRAPH_FADE_DURATION_MS = 220;
+/** Duration of the YAML↔graph fade. Keep in sync with the setTimeout in renderGraph. */
+const GRAPH_FADE_DURATION_MS = 350;
 
 const componentStyles = {
   yamlEditor: css({
@@ -444,16 +469,25 @@ const componentStyles = {
     // display:flex so the YAML editor's internal flex:1 root stretches to fill
     display: 'flex',
     flexDirection: 'column',
-    transition: `opacity ${GRAPH_FADE_DURATION_MS}ms ease, transform ${GRAPH_FADE_DURATION_MS}ms ease`,
+    transition: `opacity ${GRAPH_FADE_DURATION_MS}ms ease-in-out`,
+    '@media (prefers-reduced-motion: reduce)': {
+      transition: 'none',
+    },
   }),
+  yamlLayer: css({
+    zIndex: 0,
+  }),
+  graphLayer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      zIndex: 1,
+      background: euiTheme.colors.backgroundBaseSubdued,
+    }),
   layerVisible: css({
     opacity: 1,
-    transform: 'scale(1)',
     pointerEvents: 'auto',
   }),
   layerHidden: css({
     opacity: 0,
-    transform: 'scale(0.985)',
     pointerEvents: 'none',
   }),
   readOnlyBadge: ({ euiTheme }: UseEuiTheme) =>

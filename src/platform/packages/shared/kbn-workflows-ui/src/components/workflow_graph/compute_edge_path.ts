@@ -11,14 +11,13 @@ import { getSmoothStepPath, Position } from '@xyflow/react';
 import { STRAIGHT_X_THRESHOLD } from '@kbn/dag-layout';
 import type { EdgeBranchType } from '@kbn/workflows';
 
-const CORNER_RADIUS = 4;
+const CORNER_RADIUS = 16;
 // Vertical (TB) / horizontal (LR) stub at each endpoint so multiple edges
 // leaving (or entering) the same node visually share a trunk before they
-// split. The source stub is shorter than the target stub so branching edges
-// (`if` / `parallel`) bend tight under the source instead of leaving a
-// large gap to the divergence point.
-const TRUNK_LENGTH_FROM_SOURCE = 9;
-const TRUNK_LENGTH_TO_TARGET = 14;
+// split. Stubs must be at least CORNER_RADIUS so the rounded corners
+// have room to render instead of clamping to a short segment.
+const TRUNK_LENGTH_FROM_SOURCE = 24;
+const TRUNK_LENGTH_TO_TARGET = 24;
 
 // Vertical offset from the source for branch labels (TB layout). Anchoring
 // labels at a fixed Y instead of the source/target midpoint keeps sibling
@@ -28,16 +27,21 @@ const TB_LABEL_Y_OFFSET = 30;
 
 // Fork single-bus routing: distance from the source handle to the shared
 // horizontal bus (TB) or vertical bus (LR). Used for all branching edges
-// (switch case/default, if-then, if-else). Labels are anchored at a further
-// fixed offset below/right of the bus so all branch labels sit on an aligned
-// row (TB) / column (LR) regardless of sibling node heights.
-const FORK_BUS_TRUNK = 20;
-const FORK_BUS_LABEL_OFFSET = 20;
+// (switch case/default, if-then, if-else). Labels sit on the straight drop
+// after the bus corner (see FORK_BUS_LABEL_OFFSET) so sibling pills align
+// and the 16px corners stay fully visible.
+const FORK_BUS_TRUNK = 24;
+
+// Distance from the bus to the label center, along the drop. Must clear
+// CORNER_RADIUS plus half the pill (~10px line-height 20) plus a short
+// straight so the rounded corner is not covered. Same offset for every
+// sibling keeps true/false (and switch cases) on one row (TB) / column (LR).
+const FORK_BUS_LABEL_OFFSET = CORNER_RADIUS + 18;
 
 // Merge single-bus routing: distance from the shared horizontal bus (TB) or
 // vertical bus (LR) to the target handle. Mirrors FORK_BUS_TRUNK so the
 // fan-in and fan-out bus trunks are the same length.
-const MERGE_BUS_TRUNK = 20;
+const MERGE_BUS_TRUNK = 24;
 
 const EPS = 0.5;
 
@@ -114,7 +118,14 @@ export function buildRoundedOrthogonalPath(
       // Collinear / zero-length neighbour — skip the curve, just draw to curr.
       d += ` L ${curr.x} ${curr.y}`;
     } else {
-      const radius = Math.min(r, lenIn / 2, lenOut / 2);
+      // Endpoint segments have only one corner, so they can use their full
+      // length. Interior segments are shared by two corners and are halved
+      // so the curves do not overlap.
+      const isFirstCorner = i === 1;
+      const isLastCorner = i === points.length - 2;
+      const maxIn = isFirstCorner ? lenIn : lenIn / 2;
+      const maxOut = isLastCorner ? lenOut : lenOut / 2;
+      const radius = Math.min(r, maxIn, maxOut);
       const inDirX = (curr.x - prev.x) / lenIn;
       const inDirY = (curr.y - prev.y) / lenIn;
       const outDirX = (next.x - curr.x) / lenOut;
@@ -161,9 +172,9 @@ export function buildRoundedOrthogonalPath(
  * Build the SVG path for a fork-edge single-bus routing. All branch edges of
  * one fork node (switch case/default, if-then, if-else) share the same
  * sourceX/sourceY, so their trunks and bus line (busY or busX) are identical —
- * they naturally overlay into one visible trunk + one bus. Labels sit at a
- * fixed offset below/right of the bus so all branch labels align on one row
- * (TB) / one column (LR) regardless of how deep each branch target sits.
+ * they naturally overlay into one visible trunk + one bus. Labels sit on the
+ * straight drop after the bus corner so sibling branch labels align on one
+ * row (TB) / column (LR) and the rounded corners stay fully visible.
  *
  * TB shape: source → trunk down → bus horizontal → drop vertical → target.
  * LR shape: source → trunk right → bus vertical → drop horizontal → target.
@@ -269,19 +280,19 @@ export const computeEdgePath = ({
   // if-then, and if-else. All branch edges of one fork node share the same
   // sourceX/sourceY, so their trunks and bus line overlap into one visible
   // trunk + one continuous bus. Each edge then drops straight from the bus to
-  // its own target. Labels sit at a fixed offset below the bus (TB) / right of
-  // the bus (LR) so all branch labels align on one row/column regardless of
-  // how deep each branch target sits.
+  // its own target. Labels sit on that drop, past the rounded corner, so
+  // sibling branch labels align on one row/column and the corners stay visible.
   const isForkEdge = branchType === 'switch' || branchType === 'then' || branchType === 'else';
   const isLR = sourcePosition === Position.Right || sourcePosition === Position.Left;
   const forkGap = isLR ? targetX - sourceX : targetY - sourceY;
   const useFork = isForkEdge && forkGap > FORK_BUS_TRUNK;
 
-  // Single-bus routing for tagged merge (fan-in) edges: edges that participate
-  // in a fan-in that includes a synthetic placeholder lane. All such edges share
-  // the same targetX/targetY, so their buses and trunks overlap into one visible
-  // bus + one trunk — the symmetric inverse of the fork bus. Fork and merge are
-  // disjoint: fork edges carry a branchType, merge edges don't.
+  // Single-bus routing for tagged merge (fan-in) edges: any target with two
+  // or more incoming edges (two triggers joining the first step, if/else
+  // join, bypass-lane join). All such edges share the same targetX/targetY,
+  // so their buses and trunks overlap into one visible bus + one trunk — the
+  // symmetric inverse of the fork bus. Fork and merge are disjoint: fork
+  // edges carry a branchType, merge edges don't.
   const isMergeEdge = isMerge === true;
   const mergeGap = isLR ? targetX - sourceX : targetY - sourceY;
   const useMerge = isMergeEdge && mergeGap > MERGE_BUS_TRUNK;
@@ -424,6 +435,9 @@ export const computeEdgePath = ({
   }
 
   // Smooth-step fallback: no dagre waypoints, not fork/merge bus.
+  // xyflow's getBend() takes min(segment/2, borderRadius). Its default
+  // offset is 20px, which would clamp a 16px radius down to 10px. Offset
+  // of 2× radius gives each end stub enough length for the full corner.
   const [path, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,
@@ -432,6 +446,7 @@ export const computeEdgePath = ({
     targetY,
     targetPosition,
     borderRadius: CORNER_RADIUS,
+    offset: CORNER_RADIUS * 2,
   });
   return { path, labelX, labelY };
 };

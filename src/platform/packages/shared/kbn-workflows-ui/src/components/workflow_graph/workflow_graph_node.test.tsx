@@ -121,7 +121,7 @@ describe('WorkflowGraphNode', () => {
     renderNode({
       step: { retry: { 'max-attempts': 3 } },
     });
-    expect(screen.getByTestId('workflowGraphNodeRetryBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowGraphNodeRetryBadge')).toHaveTextContent('3');
   });
 
   it('renders the retry badge from on-failure.retry', () => {
@@ -203,20 +203,31 @@ describe('WorkflowGraphNode', () => {
 describe('resolveNodeColors', () => {
   const theme = {
     colors: {
-      backgroundLightPrimary: 'step-outer-bg',
-      borderBaseSubdued: 'step-inner-border',
-      primary: 'primary-color',
-      backgroundLightAccent: 'trigger-outer-bg',
-      backgroundBaseAccent: 'trigger-icon-bg',
-      borderBaseAccent: 'trigger-inner-border',
-      accent: 'accent-color',
+      backgroundBaseAccent: 'accent-bg',
+      borderBaseAccent: 'accent-border',
+      textAccent: 'accent-text',
+      backgroundBaseAccentSecondary: 'flow-bg',
+      borderBaseAccentSecondary: 'flow-border',
+      textAccentSecondary: 'flow-text',
+      backgroundBaseWarning: 'data-bg',
+      borderBaseWarning: 'data-border',
+      textWarning: 'data-text',
+      backgroundBasePrimary: 'code-bg',
+      borderBasePrimary: 'code-border',
+      textPrimary: 'code-text',
+      backgroundBaseSubdued: 'neutral-bg',
+      borderBaseSubdued: 'neutral-border',
+      textSubdued: 'neutral-text',
       backgroundBaseSuccess: 'success-bg',
+      borderBaseSuccess: 'success-border',
+      textSuccess: 'success-text',
+      backgroundBaseDanger: 'danger-bg',
+      borderBaseDanger: 'danger-border',
+      textDanger: 'danger-text',
+      borderBasePlain: 'plain-border',
+      textHeading: 'heading-color',
       success: 'success-color',
       danger: 'danger-color',
-      backgroundBaseDanger: 'danger-bg',
-      backgroundBaseWarning: 'warning-bg',
-      textWarning: 'warning-text',
-      textHeading: 'heading-color',
     },
   } as any;
 
@@ -225,114 +236,63 @@ describe('resolveNodeColors', () => {
   const success = { isRunning: false, isSuccess: true, isFailed: false };
   const failed = { isRunning: false, isSuccess: false, isFailed: true };
 
-  describe('borderColor', () => {
-    it('uses family tint for idle unselected step', () => {
-      const { borderColor } = resolveNodeColors(theme, false, idle, false);
-      expect(borderColor).toBe('step-outer-bg');
-    });
-
-    it('uses running border regardless of selection state', () => {
-      expect(resolveNodeColors(theme, false, running, false).borderColor).toBe('primary-color');
-      expect(resolveNodeColors(theme, false, running, true).borderColor).toBe('primary-color');
-    });
-
-    it('uses selection border for selected idle node', () => {
-      const { borderColor } = resolveNodeColors(theme, false, idle, true);
-      expect(borderColor).toBe('primary-color'); // palette.selectedBorder
-    });
-
-    it('uses success color for selected completed node', () => {
-      const { borderColor } = resolveNodeColors(theme, false, success, true);
-      expect(borderColor).toBe('success-color');
-    });
-
-    it('uses fail color for selected failed node', () => {
-      const { borderColor } = resolveNodeColors(theme, false, failed, true);
-      expect(borderColor).toBe('danger-color');
-    });
-
-    it('uses family tint for unselected completed node', () => {
-      // Status reads from icon area/border/color; outer border stays neutral.
-      const { borderColor } = resolveNodeColors(theme, false, success, false);
-      expect(borderColor).toBe('step-outer-bg');
-    });
+  it('uses a plain panel border when idle', () => {
+    expect(resolveNodeColors(theme, 'http', false, idle).panelBorder).toBe('plain-border');
+    expect(resolveNodeColors(theme, 'manual', true, idle).panelBorder).toBe('plain-border');
   });
 
-  describe('iconAreaBg / innerBoxBorder / iconColor', () => {
-    it('applies success tokens when completed', () => {
-      const { iconAreaBg, innerBoxBorder, iconColor } = resolveNodeColors(
-        theme,
-        false,
-        success,
-        false
-      );
-      expect(iconAreaBg).toBe('success-bg');
-      expect(innerBoxBorder).toBe('success-color');
-      expect(iconColor).toBe('success-color');
-    });
-
-    it('applies danger tokens when failed', () => {
-      const { iconAreaBg, innerBoxBorder, iconColor } = resolveNodeColors(
-        theme,
-        false,
-        failed,
-        false
-      );
-      expect(iconAreaBg).toBe('danger-bg');
-      expect(innerBoxBorder).toBe('danger-color');
-      expect(iconColor).toBe('danger-color');
-    });
-
-    it('uses palette defaults when idle, regardless of selection', () => {
-      const { iconAreaBg, innerBoxBorder, iconColor } = resolveNodeColors(theme, false, idle, true);
-      expect(iconAreaBg).toBe('step-outer-bg'); // palette.iconAreaBg
-      expect(innerBoxBorder).toBe('step-inner-border'); // palette.innerBoxBorder
-      expect(iconColor).toBe('primary-color'); // palette.iconColor
-    });
+  it('uses the success color token for the panel border on success', () => {
+    expect(resolveNodeColors(theme, 'http', false, success).panelBorder).toBe('success-color');
+    expect(resolveNodeColors(theme, 'elasticsearch.search', false, success).panelBorder).toBe(
+      'success-color'
+    );
   });
 
-  describe('trigger node', () => {
-    it('uses trigger palette colors', () => {
-      const { palette } = resolveNodeColors(theme, true, idle, false);
-      expect(palette.outerBorder).toBe('trigger-outer-bg');
-      expect(palette.iconAreaBg).toBe('trigger-icon-bg');
-      expect(palette.innerBoxBorder).toBe('trigger-inner-border');
-      expect(palette.iconColor).toBe('accent-color');
-    });
-
-    it('sets forceTriggerPinkFill when idle', () => {
-      const { forceTriggerPinkFill } = resolveNodeColors(theme, true, idle, false);
-      expect(forceTriggerPinkFill).toBe(true);
-    });
-
-    it('clears forceTriggerPinkFill when completed', () => {
-      const { forceTriggerPinkFill } = resolveNodeColors(theme, true, success, false);
-      expect(forceTriggerPinkFill).toBe(false);
-    });
-
-    it('clears forceTriggerPinkFill when failed', () => {
-      const { forceTriggerPinkFill } = resolveNodeColors(theme, true, failed, false);
-      expect(forceTriggerPinkFill).toBe(false);
-    });
+  it('uses the danger color token for the panel border on failure', () => {
+    expect(resolveNodeColors(theme, 'if', false, failed).panelBorder).toBe('danger-color');
   });
 
-  describe('borderRadius and hasStatusIcon', () => {
-    it('borderRadius is 8 and hasStatusIcon is true when running', () => {
-      const { borderRadius, hasStatusIcon } = resolveNodeColors(theme, false, running, false);
-      expect(borderRadius).toBe(8);
-      expect(hasStatusIcon).toBe(true);
+  it('recolors category chips on success and failure', () => {
+    const completed = resolveNodeColors(theme, 'if', false, success);
+    expect(completed.chipBackground).toBe('success-bg');
+    expect(completed.chipBorder).toBe('success-color');
+    expect(completed.chipIconColor).toBe('success-color');
+
+    const errored = resolveNodeColors(theme, 'console', false, failed);
+    expect(errored.chipBackground).toBe('danger-bg');
+    expect(errored.chipBorder).toBe('danger-color');
+    expect(errored.chipIconColor).toBe('danger-color');
+  });
+
+  it('recolors brand tiles on execution outcome but leaves the logo untinted', () => {
+    const completed = resolveNodeColors(theme, 'elasticsearch.search', false, success);
+    expect(completed.isBrandChip).toBe(true);
+    expect(completed.chipBackground).toBe('success-bg');
+    expect(completed.chipBorder).toBe('success-color');
+    expect(completed.chipIconColor).toBeUndefined();
+  });
+
+  it('uses trigger chip tokens when idle', () => {
+    const { chipBackground, chipIconColor, isBrandChip } = resolveNodeColors(
+      theme,
+      'manual',
+      true,
+      idle
+    );
+    expect(chipBackground).toBe('accent-bg');
+    expect(chipIconColor).toBe('accent-text');
+    expect(isBrandChip).toBe(false);
+  });
+
+  describe('hasStatusIcon', () => {
+    it('is true when running, completed, or failed', () => {
+      expect(resolveNodeColors(theme, 'http', false, running).hasStatusIcon).toBe(true);
+      expect(resolveNodeColors(theme, 'http', false, success).hasStatusIcon).toBe(true);
+      expect(resolveNodeColors(theme, 'http', false, failed).hasStatusIcon).toBe(true);
     });
 
-    it('borderRadius is 10 and hasStatusIcon is false when idle', () => {
-      const { borderRadius, hasStatusIcon } = resolveNodeColors(theme, false, idle, false);
-      expect(borderRadius).toBe(10);
-      expect(hasStatusIcon).toBe(false);
-    });
-
-    it('borderRadius is 10 and hasStatusIcon is true when completed', () => {
-      const { borderRadius, hasStatusIcon } = resolveNodeColors(theme, false, success, false);
-      expect(borderRadius).toBe(10);
-      expect(hasStatusIcon).toBe(true);
+    it('is false when idle', () => {
+      expect(resolveNodeColors(theme, 'http', false, idle).hasStatusIcon).toBe(false);
     });
   });
 });

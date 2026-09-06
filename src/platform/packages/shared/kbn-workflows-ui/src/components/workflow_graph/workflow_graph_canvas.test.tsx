@@ -291,3 +291,30 @@ describe('WorkflowGraphCanvas Fit to view button', () => {
     );
   });
 });
+
+describe('WorkflowGraphCanvas minimap collapse', () => {
+  beforeEach(() => {
+    mockStoreWidth = 0;
+    mockStoreHeight = 0;
+    mockNodesInitialized = false;
+    mockCapturedOnInit = undefined;
+  });
+
+  it('collapses the minimap and restores it from the expand control', () => {
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+
+    fireEvent.click(screen.getByTestId('workflowCanvas-collapse-minimap'));
+    expect(screen.queryByTestId('workflowCanvas-collapse-minimap')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowCanvas-expand-minimap')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('workflowCanvas-expand-minimap'));
+    expect(screen.getByTestId('workflowCanvas-collapse-minimap')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowCanvas-expand-minimap')).not.toBeInTheDocument();
+  });
+
+  it('does not render minimap controls when the minimap is disabled', () => {
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} showMinimap={false} />);
+    expect(screen.queryByTestId('workflowCanvas-collapse-minimap')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowCanvas-expand-minimap')).not.toBeInTheDocument();
+  });
+});

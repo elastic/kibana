@@ -29,7 +29,7 @@ export function getExecutionStatusVisual(
   switch (status) {
     case ExecutionStatus.COMPLETED:
       return {
-        color: euiTheme.colors.vis.euiColorVisSuccess0,
+        color: euiTheme.colors.success,
         bg: euiTheme.colors.backgroundBaseSuccess,
         iconType: 'checkCircleFill',
       };

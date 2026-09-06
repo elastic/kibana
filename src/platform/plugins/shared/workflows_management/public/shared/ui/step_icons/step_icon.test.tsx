@@ -39,6 +39,11 @@ describe('StepIcon', () => {
       expect(container.querySelector('[data-euiicon-type="play"]')).toBeInTheDocument();
     });
 
+    it('renders play icon for YAML trigger type "manual"', () => {
+      const { container } = render(<StepIcon stepType="manual" executionStatus={undefined} />);
+      expect(container.querySelector('[data-euiicon-type="play"]')).toBeInTheDocument();
+    });
+
     it('renders warning icon for trigger_alert', () => {
       const { container } = render(
         <StepIcon stepType="trigger_alert" executionStatus={undefined} />

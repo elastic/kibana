@@ -56,10 +56,10 @@ jest.mock('@xyflow/react', () => {
 import { WorkflowGraphEdge } from './workflow_graph_edge';
 
 // ---------------------------------------------------------------------------
-// Constants that mirror the implementation's FORK_BUS_TRUNK / FORK_BUS_LABEL_OFFSET.
+// Constants that mirror the implementation's FORK_BUS_TRUNK.
 // ---------------------------------------------------------------------------
-const FORK_BUS_TRUNK = 20;
-const FORK_BUS_LABEL_OFFSET = 20;
+const FORK_BUS_TRUNK = 24;
+const FORK_BUS_LABEL_OFFSET = 16 + 18;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -169,9 +169,10 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
       );
       const elseY = getLabelY();
 
-      // Labels must land on the same row (identical Y within 1px tolerance).
-      // This is the direct regression assertion for the bug.
+      // Labels must land on the same row (identical Y within 1px tolerance),
+      // on the drop past the bus corner — not on the horizontal bus.
       expect(Math.abs(thenY - elseY)).toBeLessThanOrEqual(1);
+      expect(thenY).toBe(100 + FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET);
     });
 
     it('aligns true-branch and false-branch labels in LR layout', () => {
@@ -243,10 +244,10 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
 
   describe('fallback guard — sub-trunk gap uses smooth-step', () => {
     it('falls back to smooth-step when the fork gap is below FORK_BUS_TRUNK (TB)', () => {
-      // Target is only 10px below source — less than FORK_BUS_TRUNK=20.
+      // Target is only 10px below source — less than FORK_BUS_TRUNK=24.
       // The bus would be degenerate; smooth-step is correct.
       // Our getSmoothStepPath mock returns midpoint Y = (100+110)/2 = 105.
-      // The bus would produce: sourceY + FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET = 100 + 20 + 20 = 140.
+      // The bus would produce: sourceY + FORK_BUS_TRUNK = 100 + 24 = 124.
       renderSingleEdge(
         makeEdgeProps({
           id: 'e-small-gap',
@@ -254,7 +255,7 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
           sourceY: 100,
           sourcePosition: Position.Bottom,
           targetX: 200,
-          targetY: 110, // gap = 10, below FORK_BUS_TRUNK (20)
+          targetY: 110, // gap = 10, below FORK_BUS_TRUNK (24)
           targetPosition: Position.Top,
           data: { branchType: 'then', label: 'true' },
         })
@@ -262,7 +263,7 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
       const y = getLabelY();
 
       const expectedSmoothStepY = (100 + 110) / 2; // 105
-      const busY = 100 + FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET; // 140
+      const busY = 100 + FORK_BUS_TRUNK; // 124
 
       // Should use smooth-step midpoint, not bus anchor.
       expect(y).toBeCloseTo(expectedSmoothStepY, 0);
@@ -298,13 +299,13 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
 describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
   // Coordinates from the offline layout probe of the real if_only topology:
   // placeholder at centerX=200, centerY=300; switch top at y=402.
-  // busY = targetY_top − MERGE_BUS_TRUNK = 402 − 20 = 382.
-  const MERGE_BUS_TRUNK = 20;
+  // busY = targetY_top − MERGE_BUS_TRUNK = 402 − 24 = 378.
+  const MERGE_BUS_TRUNK = 24;
 
   describe('TB — isMerge edge routes via merge bus', () => {
     it('routes an isMerge edge above gap threshold via merge bus, not smooth-step', () => {
-      // placeholder → switch: sourceY=300, targetY=402, gap=102 > MERGE_BUS_TRUNK(20).
-      // Merge bus busY = 402 − 20 = 382.  smooth-step midY = (300+402)/2 = 351.
+      // placeholder → switch: sourceY=300, targetY=402, gap=102 > MERGE_BUS_TRUNK(24).
+      // Merge bus busY = 402 − 24 = 378.  smooth-step midY = (300+402)/2 = 351.
       // The rendered path should NOT land at the smooth-step midpoint.
       renderSingleEdge(
         makeEdgeProps({
@@ -318,16 +319,16 @@ describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
           data: { isMerge: true }, // no branchType — this is the merge flag
         })
       );
-      // The path element should contain the busY (382), not the smooth-step midpoint (351).
+      // The path element should contain the busY (378), not the smooth-step midpoint (351).
       const path = document.querySelector('path.react-flow__edge-path');
       expect(path).not.toBeNull();
       const d = path?.getAttribute('d') ?? '';
-      expect(d).toContain('382');
+      expect(d).toContain('378');
       expect(d).not.toContain('351');
     });
 
     it('falls back to smooth-step when isMerge gap is below MERGE_BUS_TRUNK', () => {
-      // Gap = 10 < MERGE_BUS_TRUNK (20) → smooth-step.
+      // Gap = 10 < MERGE_BUS_TRUNK (24) → smooth-step.
       renderSingleEdge(
         makeEdgeProps({
           id: 'e-small-merge',
@@ -375,7 +376,7 @@ describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
       const placeholderPath =
         document.querySelector('path.react-flow__edge-path')?.getAttribute('d') ?? '';
 
-      // Both paths must contain busY = 402 − 20 = 382
+      // Both paths must contain busY = 402 − 24 = 378
       const busY = 402 - MERGE_BUS_TRUNK;
       expect(byePath).toContain(String(busY));
       expect(placeholderPath).toContain(String(busY));
@@ -404,5 +405,27 @@ describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
       const path = document.querySelector('path.react-flow__edge-path');
       expect(path?.getAttribute('marker-end')).toMatch(/url\(#arrow-/);
     });
+  });
+});
+
+describe('WorkflowGraphEdge — branch label casing', () => {
+  it('renders true / false in sentence case', () => {
+    renderSingleEdge(
+      makeEdgeProps({
+        id: 'e-then-label',
+        data: { branchType: 'then', label: 'true' },
+      })
+    );
+    expect(screen.getByText('true')).toBeInTheDocument();
+
+    cleanup();
+
+    renderSingleEdge(
+      makeEdgeProps({
+        id: 'e-else-label',
+        data: { branchType: 'else', label: 'false' },
+      })
+    );
+    expect(screen.getByText('false')).toBeInTheDocument();
   });
 });
