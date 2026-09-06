@@ -29,27 +29,36 @@ import { useKibana } from '../../common/lib/kibana';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import { ENTITY_GRID_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
+import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
+import { API_VERSIONS } from '../../../common/entity_analytics/constants';
 
-const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.zoo.pageTitle', {
+const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.testPage.pageTitle', {
   defaultMessage: 'Entity analytics (ES|QL)',
 });
 
 const MANAGEMENT_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.zoo.managementLink',
+  'xpack.securitySolution.entityAnalytics.testPage.managementLink',
   { defaultMessage: 'Management' }
 );
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 const GRID_COLUMNS: EuiDataGridColumn[] = [
-  { id: 'entity.id', displayAsText: 'Entity ID', initialWidth: 320 },
-  { id: 'entity.name', displayAsText: 'Name', initialWidth: 200 },
-  { id: 'entity.EngineMetadata.Type', displayAsText: 'Type', initialWidth: 100 },
+  { id: 'actions', displayAsText: 'Actions', initialWidth: 100, isSortable: false },
+  { id: 'entity.name', displayAsText: 'Entity name', initialWidth: 200 },
+  { id: 'entity.record_count', displayAsText: 'Records', initialWidth: 100, isSortable: false },
+  { id: 'entity.EngineMetadata.Type', displayAsText: 'Entity type', initialWidth: 120 },
   { id: 'entity.risk.calculated_score_norm', displayAsText: 'Risk score', initialWidth: 120 },
+  { id: 'risk_score_change', displayAsText: 'Risk score change', initialWidth: 140 },
   { id: 'asset.criticality', displayAsText: 'Asset criticality', initialWidth: 160 },
-  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 200 },
-  { id: 'last_seen_alert', displayAsText: 'Last seen alert', initialWidth: 200 },
-  { id: 'risk_score_change', displayAsText: 'Score Δ (1d)', initialWidth: 120 },
+  { id: 'entity.source', displayAsText: 'Source', initialWidth: 140, isSortable: false },
+  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 100, isSortable: false },
+  { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 180 },
+  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120, isSortable: false },
+  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100, isSortable: false },
+  { id: 'entity.attributes.watchlists', displayAsText: 'Watchlists', initialWidth: 200, isSortable: false },
+  { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 180, isSortable: false },
+  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
 ];
 
 interface EntityGridResponse {
@@ -86,7 +95,7 @@ const useEntityGridData = ({
   const [cachedTotal, setCachedTotal] = useState(0);
 
   const { data, isFetching } = useQuery(
-    ['entity-zoo-grid', sortField, sortDirection, pageIndex, pageSize, cursor],
+    ['entity-test-grid', sortField, sortDirection, pageIndex, pageSize, cursor],
     async () => {
       const result = await http.post<EntityGridResponse>(ENTITY_GRID_INTERNAL_URL, {
         version: '1',
@@ -115,12 +124,29 @@ const useEntityGridData = ({
   };
 };
 
-export const EntityAnalyticsZooPage: React.FC = () => {
+const useWatchlistNames = (): Map<string, string> => {
+  const { http } = useKibana().services;
+  const { data } = useQuery(['watchlist-names'], () =>
+    http.get<Array<{ id?: string; name: string }>>(`${WATCHLISTS_URL}/list`, {
+      version: API_VERSIONS.public.v1,
+    })
+  );
+  return useMemo(() => {
+    const map = new Map<string, string>();
+    for (const w of data ?? []) {
+      if (w.id) map.set(w.id, w.name);
+    }
+    return map;
+  }, [data]);
+};
+
+export const EntityAnalyticsTestPage: React.FC = () => {
   const spaceId = useSpaceId();
   const { dataView, isLoading: isDataViewLoading } = useEntityStoreDataView(spaceId);
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { euiTheme } = useEuiTheme();
 
+  const watchlistNames = useWatchlistNames();
   const [sortField, setSortField] = useState('entity.risk.calculated_score_norm');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [pageIndex, setPageIndex] = useState(0);
@@ -157,7 +183,7 @@ export const EntityAnalyticsZooPage: React.FC = () => {
       const relativeIndex = rowIndex - pageIndex * pageSize;
       const value = rows[relativeIndex]?.[columnId];
       if (value == null) return <>—</>;
-      if (columnId === 'last_seen_alert' || columnId === '@timestamp') {
+      if (columnId === 'last_seen_alert' || columnId === '@timestamp' || columnId === 'entity.lifecycle.first_seen') {
         const m = moment(value as string);
         return <>{m.isValid() ? m.fromNow() : String(value)}</>;
       }
@@ -169,9 +195,14 @@ export const EntityAnalyticsZooPage: React.FC = () => {
           return <EuiTextColor color="success">↓ {delta.toFixed(1)}</EuiTextColor>;
         return <>→ 0.0</>;
       }
+      if (columnId === 'entity.attributes.watchlists') {
+        const ids = value as string[];
+        if (!Array.isArray(ids) || ids.length === 0) return <>—</>;
+        return <>{ids.map((id) => watchlistNames.get(id) ?? id).join(', ')}</>;
+      }
       return <>{String(value)}</>;
     },
-    [rows, pageIndex, pageSize]
+    [rows, pageIndex, pageSize, watchlistNames]
   );
 
   const sorting = useMemo(
@@ -225,7 +256,7 @@ export const EntityAnalyticsZooPage: React.FC = () => {
     <>
       <Global styles={pageWrapperOverride} />
       <AppHeader title={PAGE_TITLE} menu={menu} />
-      <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsZooPage">
+      <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsTestPage">
         <div
           css={css`
             padding-block-start: ${euiTheme.size.base};
