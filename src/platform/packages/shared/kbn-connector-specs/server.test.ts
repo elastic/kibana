@@ -11,6 +11,7 @@ import { authTypeSpecs as authTypeDefinitions } from '.';
 import { authTypeSpecs as serverAuthTypeSpecs } from './server';
 
 const SERVER_OVERRIDE_AUTH_TYPES = [
+  'ApiKeyHeaderWithTlsAuth',
   'BearerWithTlsAuth',
   'KubernetesAksAuth',
   'KubernetesEksAuth',

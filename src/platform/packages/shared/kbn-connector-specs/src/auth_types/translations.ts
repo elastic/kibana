@@ -396,6 +396,13 @@ export const BEARER_WITH_TLS_AUTH_TOKEN_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const API_KEY_HEADER_WITH_TLS_AUTH_LABEL = i18n.translate(
+  'connectorSpecs.apiKeyHeaderWithTlsAuth.label',
+  {
+    defaultMessage: 'API key header (with TLS)',
+  }
+);
+
 export const BEARER_WITH_TLS_AUTH_CA_LABEL = i18n.translate(
   'connectorSpecs.bearerWithTlsAuth.ca.label',
   {
