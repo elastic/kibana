@@ -12,16 +12,10 @@ import type { Observable } from '../../../common/types/domain/observable/v1';
 import type { CaseUI } from '../../containers/types';
 import { OBSERVABLES_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCasesWorkflowExecutor } from '../workflows/use_cases_workflow_executor';
-import {
-  createCaseWorkflowFilter,
-  createCaseWorkflowComparator,
-} from '../workflows/use_run_case_workflow';
+import { useCaseWorkflowFilters } from '../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../workflows/run_case_workflow_modal';
 import * as i18n from './translations';
 import * as workflowI18n from '../workflows/translations';
-
-/** Stable empty array for workflow tag filtering (pass-through: all workflows shown). */
-const NO_WORKFLOW_TAGS: readonly string[] = [];
 
 export interface ObservablesBulkActionsProps {
   caseData: CaseUI;
@@ -54,8 +48,7 @@ export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
   );
 
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
-  const filterWorkflow = useMemo(() => createCaseWorkflowFilter(NO_WORKFLOW_TAGS), []);
-  const sortWorkflow = useMemo(() => createCaseWorkflowComparator(NO_WORKFLOW_TAGS), []);
+  const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
   const inputs = useMemo(() => ({}), []);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(

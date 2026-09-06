@@ -76,7 +76,7 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
           const typeLabel = found?.label ?? origin.typeKey;
           const observableNode = (
             <EuiBadge color="hollow" data-test-subj="workflow-observable-badge">
-              {typeLabel}: {origin.value}
+              {`${typeLabel}: ${origin.value}`}
             </EuiBadge>
           );
           return (

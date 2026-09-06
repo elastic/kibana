@@ -19,6 +19,8 @@ import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
+  MAX_LENGTH_PER_TAG,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringSchema } from '../../../schema_zod';
 import {
@@ -99,6 +101,13 @@ export const ObservableTypesConfigurationSchema = limitedArraySchema({
   }),
 });
 
+export const WorkflowTagsConfigurationSchema = limitedArraySchema({
+  codec: limitedStringSchema({ fieldName: 'workflow tag', min: 1, max: MAX_LENGTH_PER_TAG }),
+  min: 0,
+  max: MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+  fieldName: 'workflow tags',
+});
+
 export const TemplateConfigurationSchema = z.object({
   key: regexStringSchema({
     codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_TEMPLATE_KEY_LENGTH }),
@@ -138,6 +147,7 @@ export const ConfigurationRequestSchema = z.object({
   customFields: CustomFieldsConfigurationSchema.optional(),
   templates: TemplatesConfigurationSchema.optional(),
   observableTypes: ObservableTypesConfigurationSchema.optional(),
+  workflowTags: WorkflowTagsConfigurationSchema.optional(),
 });
 
 export const GetConfigurationFindRequestSchema = z.object({
@@ -154,6 +164,7 @@ export const ConfigurationPatchRequestSchema = z.object({
   customFields: CustomFieldsConfigurationSchema.optional(),
   templates: TemplatesConfigurationSchema.optional(),
   observableTypes: ObservableTypesConfigurationSchema.optional(),
+  workflowTags: WorkflowTagsConfigurationSchema.optional(),
   version: z.string(),
 });
 

@@ -76,6 +76,8 @@ export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
 
 export const ObservableTypesConfigurationRt = rt.array(CaseObservableTypeRt);
 
+export const WorkflowTagsConfigurationRt = rt.array(rt.string);
+
 export const TemplateConfigurationRt = rt.intersection([
   rt.strict({
     /**
@@ -128,6 +130,11 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
    * Observable types configured for the case
    */
   observableTypes: ObservableTypesConfigurationRt,
+  /**
+   * Tags used to filter workflows available in Cases workflow selectors.
+   * An empty array shows all workflows.
+   */
+  workflowTags: WorkflowTagsConfigurationRt,
 });
 
 export const CasesConfigureBasicRt = rt.intersection([
@@ -175,3 +182,4 @@ export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
 export type Configurations = rt.TypeOf<typeof ConfigurationsRt>;
 export type ObservableTypesConfiguration = rt.TypeOf<typeof ObservableTypesConfigurationRt>;
 export type ObservableTypeConfiguration = rt.TypeOf<typeof CaseObservableTypeRt>;
+export type WorkflowTagsConfiguration = rt.TypeOf<typeof WorkflowTagsConfigurationRt>;
