@@ -32,6 +32,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     renderers: {
       register: jest.fn(),
     },
+    surfaceProjection: {
+      register: jest.fn(),
+    },
     skills: {
       register: jest.fn(),
     },

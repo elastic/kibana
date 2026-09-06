@@ -357,3 +357,42 @@ export const getContentKey = (input: AttachmentInput, fallback: string): string 
   }
   return `${input.type}:${fallback}`;
 };
+
+export interface ResolveAttachmentVersionParams {
+  explicitVersion: string | number | undefined;
+  attachmentId: string;
+  attachmentRefs: AttachmentVersionRef[] | undefined;
+  attachment: VersionedAttachment;
+}
+
+/**
+ * Resolves the version a `<render_attachment>` tag refers to.
+ * Priority:
+ * 1. Explicit version from tag attributes
+ * 2. Version from cumulative attachment refs (highest version seen up to this round)
+ * 3. Latest available version as fallback
+ *
+ * Shared by the browser's remark plugin and the server-side surface projectors so a
+ * reply resolves to the same version wherever it is rendered.
+ */
+export const resolveAttachmentVersion = ({
+  explicitVersion,
+  attachmentId,
+  attachmentRefs,
+  attachment,
+}: ResolveAttachmentVersionParams): number | undefined => {
+  if (explicitVersion !== undefined) {
+    const parsed =
+      typeof explicitVersion === 'string' ? Number.parseInt(explicitVersion, 10) : explicitVersion;
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+
+  const ref = attachmentRefs?.find((r) => r.attachment_id === attachmentId);
+  if (ref) {
+    return ref.version;
+  }
+
+  return attachment.versions.at(-1)?.version;
+};

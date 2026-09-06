@@ -7,3 +7,8 @@
 
 export { CallbackDeliveryService } from './callback_delivery_service';
 export { deliverCallbackEvents } from './deliver_callback_events';
+export {
+  getExecutionSurface,
+  getSurfaceProjector,
+  projectRoundForSurface,
+} from './project_round_for_surface';
