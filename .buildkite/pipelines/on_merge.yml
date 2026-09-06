@@ -286,8 +286,44 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - label: 'Trigger Security Solution on-merge tests'
-    trigger: kibana-security-solution-on-merge
+  - label: 'Trigger Security Solution on-merge tests - Rule Management'
+    trigger: kibana-security-solution-on-merge-rule-management
+    async: false
+    soft_fail: true
+    depends_on:
+      - build
+    build:
+      branch: '${BUILDKITE_BRANCH}'
+
+  - label: 'Trigger Security Solution on-merge tests - Detection Engine'
+    trigger: kibana-security-solution-on-merge-detection-engine
+    async: false
+    soft_fail: true
+    depends_on:
+      - build
+    build:
+      branch: '${BUILDKITE_BRANCH}'
+
+  - label: 'Trigger Security Solution on-merge tests - Threat Hunting'
+    trigger: kibana-security-solution-on-merge-threat-hunting
+    async: false
+    soft_fail: true
+    depends_on:
+      - build
+    build:
+      branch: '${BUILDKITE_BRANCH}'
+
+  - label: 'Trigger Security Solution on-merge tests - Entity Analytics'
+    trigger: kibana-security-solution-on-merge-entity-analytics
+    async: false
+    soft_fail: true
+    depends_on:
+      - build
+    build:
+      branch: '${BUILDKITE_BRANCH}'
+
+  - label: 'Trigger Security Solution on-merge tests - Defend Workflows'
+    trigger: kibana-security-solution-on-merge-defend-workflows
     async: false
     soft_fail: true
     depends_on:
