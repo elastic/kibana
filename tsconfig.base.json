@@ -29,6 +29,8 @@
       "@kbn/actions-types/*": ["./src/platform/packages/shared/kbn-actions-types/*"],
       "@kbn/actions-utils": ["./src/platform/packages/shared/kbn-actions-utils"],
       "@kbn/actions-utils/*": ["./src/platform/packages/shared/kbn-actions-utils/*"],
+      "@kbn/adaptive-ui": ["./src/platform/packages/shared/adaptive-ui"],
+      "@kbn/adaptive-ui/*": ["./src/platform/packages/shared/adaptive-ui/*"],
       "@kbn/advanced-settings-plugin": ["./src/platform/plugins/private/advanced_settings"],
       "@kbn/advanced-settings-plugin/*": ["./src/platform/plugins/private/advanced_settings/*"],
       "@kbn/agent-builder-browser": ["./x-pack/platform/packages/shared/agent-builder/agent-builder-browser"],
