@@ -26,7 +26,7 @@
 @elastic/esql@4.23.0
 @elastic/eui-theme-borealis@8.0.0
 @elastic/eui-theme-common@10.0.0
-@elastic/eui@119.1.0
+@elastic/eui@120.0.0
 @elastic/numeral@2.5.1
 @elastic/pretty-printer@4.21.1
 @elastic/prismjs-esql@4.23.0
@@ -194,6 +194,7 @@ define-properties@1.2.1
 del@4.1.1
 des.js@1.1.0
 detect-node-es@1.1.0
+diff-match-patch@1.0.5
 diffie-hellman@5.0.3
 domain-browser@4.22.0
 dunder-proto@1.0.1
@@ -462,7 +463,6 @@ tabbable@5.3.3
 tapable@2.3.3
 terser-webpack-plugin@5.3.17
 terser@5.51.2
-text-diff@1.0.1
 timers-browserify@2.0.12
 tiny-invariant@1.3.3
 tiny-warning@1.0.3
