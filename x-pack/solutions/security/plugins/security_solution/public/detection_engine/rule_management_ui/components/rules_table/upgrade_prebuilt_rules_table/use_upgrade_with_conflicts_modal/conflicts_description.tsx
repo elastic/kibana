@@ -13,12 +13,18 @@ export interface RulesConflictStats {
   numOfRulesWithoutConflicts: number;
   numOfRulesWithSolvableConflicts: number;
   numOfRulesWithNonSolvableConflicts: number;
+  /**
+   * Number of rules with solvable conflicts whose rule type changes in the target version.
+   * Such rules are non-customized, so the type change auto-resolves to the target type.
+   */
+  numOfRulesWithRuleTypeChange: number;
 }
 
 export function ConflictsDescription({
   numOfRulesWithoutConflicts,
   numOfRulesWithSolvableConflicts,
   numOfRulesWithNonSolvableConflicts,
+  numOfRulesWithRuleTypeChange,
 }: RulesConflictStats): JSX.Element {
   return (
     <EuiText>
@@ -50,6 +56,8 @@ export function ConflictsDescription({
           numOfRulesWithSolvableConflicts,
           numOfRulesWithoutConflicts,
         })}
+      {numOfRulesWithRuleTypeChange > 0 &&
+        i18n.RULES_WITH_RULE_TYPE_CHANGE_WARNING(numOfRulesWithRuleTypeChange)}
       {numOfRulesWithoutConflicts > 0 && (
         <p>{i18n.RULES_WITHOUT_CONFLICTS_GUIDANCE(numOfRulesWithoutConflicts)}</p>
       )}
