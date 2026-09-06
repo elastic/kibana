@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -53,8 +53,8 @@ const TEST_SUBJ = {
   flyout: 'actionPolicyDetailsFlyout',
   title: 'actionPolicyDetailsFlyoutTitle',
   closeButton: 'detailsFlyoutCloseButton',
-  editButton: 'detailsFlyoutEditButton',
-  actionsMenuButton: 'detailsFlyoutActionsMenuButton',
+  closeIcon: 'detailsFlyoutCloseIcon',
+  takeActionButton: 'detailsFlyoutTakeActionButton',
 } as const;
 
 const futureIso = (): string => new Date(Date.now() + 1000 * 60 * 60).toISOString();
@@ -156,9 +156,13 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('Disabled')).toBeInTheDocument();
     });
 
+    it('renders a snoozed-until chip when the policy is actively snoozed (regardless of canWrite)', () => {
+      renderFlyout({ policy: createPolicy({ snoozed_until: futureIso() }) });
+      expect(screen.getByText(/Snoozed until/i)).toBeInTheDocument();
+    });
+
     it('renders a snoozed-until chip for readers when the policy is actively snoozed', () => {
       renderFlyout({ canWrite: false, policy: createPolicy({ snoozed_until: futureIso() }) });
-
       expect(screen.getByText(/Snoozed until/i)).toBeInTheDocument();
     });
 
@@ -167,31 +171,23 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
     });
 
-    it('replaces the chip with the interactive unsnooze button for writers', () => {
-      renderFlyout({ policy: createPolicy({ snoozed_until: futureIso() }) });
-
-      expect(screen.getByTestId('actionPolicyUnsnoozeButton')).toBeInTheDocument();
-      expect(screen.queryByText(/^Snoozed until/i)).not.toBeInTheDocument();
-    });
-
-    it('renders the snooze bell for writers on an enabled policy', () => {
+    it('does not render the snooze bell or the header kebab menu', () => {
       renderFlyout();
 
-      expect(screen.getByTestId('actionPolicySnoozeButton')).toBeInTheDocument();
-    });
-
-    it('does not render the snooze bell for readers', () => {
-      renderFlyout({ canWrite: false });
-
       expect(screen.queryByTestId('actionPolicySnoozeButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('actionPolicyUnsnoozeButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('detailsFlyoutActionsMenuButton')).not.toBeInTheDocument();
     });
 
-    it('unsnoozes from the header when the policy is snoozed', async () => {
-      const { handlers } = renderFlyout({ policy: createPolicy({ snoozed_until: futureIso() }) });
+    it('keeps the close icon in the header', () => {
+      renderFlyout();
+      expect(screen.getByTestId(TEST_SUBJ.closeIcon)).toBeInTheDocument();
+    });
 
-      await userEvent.click(screen.getByTestId('actionPolicyUnsnoozeButton'));
-
-      expect(handlers.onCancelSnooze).toHaveBeenCalledWith('policy-1');
+    it('calls onClose when the close icon is clicked', () => {
+      const { handlers } = renderFlyout();
+      fireEvent.click(screen.getByTestId(TEST_SUBJ.closeIcon));
+      expect(handlers.onClose).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -286,7 +282,7 @@ describe('ActionPolicyDetailsFlyout', () => {
     });
   });
 
-  describe('footer actions', () => {
+  describe('footer', () => {
     it('calls onClose when the Close button is clicked', async () => {
       const user = userEvent.setup();
       const { handlers } = renderFlyout();
@@ -296,86 +292,110 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(handlers.onClose).toHaveBeenCalledTimes(1);
     });
 
-    it('closes the flyout and calls onEdit when Edit is clicked', async () => {
-      const user = userEvent.setup();
+    it('renders the Take action button for writers', () => {
+      renderFlyout();
+      expect(screen.getByTestId(TEST_SUBJ.takeActionButton)).toBeInTheDocument();
+    });
+
+    it('closes the flyout and calls onEdit when Edit is clicked in the Take action menu', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.editButton));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('editActionPolicy-policy-1'));
 
       expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onEdit).toHaveBeenCalledWith('policy-1');
     });
-  });
 
-  describe('actions menu', () => {
-    it('renders the actions menu trigger next to the close icon', () => {
-      renderFlyout();
-
-      expect(screen.getByTestId(TEST_SUBJ.actionsMenuButton)).toBeInTheDocument();
-    });
-
-    it('calls onClone without closing the flyout', async () => {
+    it('calls onClone when Clone is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Clone'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('cloneActionPolicy-policy-1'));
 
       expect(handlers.onClone).toHaveBeenCalledWith(policy);
-      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onDelete without closing the flyout', async () => {
+    it('calls onDisable when Disable is clicked in the Take action menu on an enabled policy', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const { handlers } = renderFlyout();
+
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('toggleEnabledActionPolicy-policy-1'));
+
+      expect(handlers.onDisable).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('calls onEnable when Enable is clicked in the Take action menu on a disabled policy', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const { handlers } = renderFlyout({ policy: createPolicy({ enabled: false }) });
+
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('toggleEnabledActionPolicy-policy-1'));
+
+      expect(handlers.onEnable).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('calls onUpdateApiKey when Update API key is clicked in the Take action menu', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const { handlers } = renderFlyout();
+
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('updateApiKeyActionPolicy-policy-1'));
+
+      expect(handlers.onUpdateApiKey).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('calls onDelete when Delete is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Delete'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('deleteActionPolicy-policy-1'));
 
       expect(handlers.onDelete).toHaveBeenCalledWith(policy);
-      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onDisable without closing the flyout when Disable is selected on an enabled policy', async () => {
+    it('opens the snooze modal when Snooze is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const { handlers, policy } = renderFlyout();
+      renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Disable'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('snoozeActionPolicy-policy-1'));
 
-      expect(handlers.onDisable).toHaveBeenCalledWith(policy.id);
-      expect(handlers.onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('actionPolicySnoozeModal')).toBeInTheDocument();
     });
 
-    it('calls onEnable without closing the flyout when Enable is selected on a disabled policy', async () => {
+    it('calls onSnooze when the snooze modal is applied', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const { handlers, policy } = renderFlyout({ policy: createPolicy({ enabled: false }) });
+      const { handlers } = renderFlyout();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Enable'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('snoozeActionPolicy-policy-1'));
+      await user.click(screen.getByTestId('actionPolicySnoozeModalApply'));
 
-      expect(handlers.onEnable).toHaveBeenCalledWith(policy.id);
-      expect(handlers.onClose).not.toHaveBeenCalled();
+      expect(handlers.onSnooze).toHaveBeenCalledTimes(1);
+      expect(handlers.onSnooze.mock.calls[0][0]).toBe('policy-1');
     });
 
-    it('calls onUpdateApiKey without closing the flyout', async () => {
+    it('calls onCancelSnooze when Unsnooze is clicked in the Take action menu', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const { handlers, policy } = renderFlyout();
+      const { handlers } = renderFlyout({ policy: createPolicy({ snoozed_until: futureIso() }) });
 
-      await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
-      await user.click(screen.getByText('Update API key'));
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+      await user.click(screen.getByTestId('unsnoozeActionPolicy-policy-1'));
 
-      expect(handlers.onUpdateApiKey).toHaveBeenCalledWith(policy.id);
-      expect(handlers.onClose).not.toHaveBeenCalled();
+      expect(handlers.onCancelSnooze).toHaveBeenCalledWith('policy-1');
     });
   });
 
   describe('when the user only has read privilege', () => {
-    it('hides the actions menu and the Edit footer button but keeps Close', () => {
+    it('hides the Take action button but keeps Close', () => {
       renderFlyout({ canWrite: false });
 
-      expect(screen.queryByTestId(TEST_SUBJ.actionsMenuButton)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(TEST_SUBJ.editButton)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ.takeActionButton)).not.toBeInTheDocument();
       expect(screen.getByTestId(TEST_SUBJ.closeButton)).toBeInTheDocument();
     });
 

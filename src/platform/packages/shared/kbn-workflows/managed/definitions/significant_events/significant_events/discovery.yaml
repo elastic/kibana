@@ -41,6 +41,10 @@ triggers:
         default: 80
         required: false
         description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
+      - name: rootTriggeredBy
+        type: string
+        required: false
+        description: 'Root workflow trigger type propagated by a managed driver.'
 outputs:
   - name: processedCount
     type: number
@@ -54,6 +58,41 @@ consts:
   INVESTIGATABLE_SEVERITIES: ['80-critical', '60-high']
 
 steps:
+  - name: bootstrap_cleanup_workflow
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      continue: true
+
+  - name: check_budget
+    type: kibana.request
+    if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
+      body:
+        group: 'detection'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    timeout: '10s'
+    on-failure:
+      continue: true
+
+  - name: exit_if_budget_denied
+    type: if
+    condition: '${{ steps.check_budget.output.allowed == false }}'
+    steps:
+      - name: output_budget_denied
+        type: workflow.output
+        with:
+          processedCount: 0
+          hasWork: false
+          suppressedRuleCount: 0
+
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_initial_vars
     type: data.set
@@ -397,36 +436,54 @@ steps:
                       ${{ steps.resolve_open_event.error == null
                         and steps.resolve_open_event.output.hits.hits[0] != null }}
                     steps:
-                      # The dedupe gate lives on this wrapping `if` step because
-                      # `workflow.executeAsync` does not support an inline `if`
-                      # (it is silently stripped during schema parsing).
+                      # Keep the dedupe condition as a wrapping step so the
+                      # quota gate can run only after event deduplication.
                       - name: guard_missing_investigation
                         type: if
                         condition: >-
                           ${{ steps.check_prior_investigation.error != null
                             or steps.check_prior_investigation.output.count == 0 }}
                         steps:
-                          - name: trigger_investigation
-                            type: workflow.executeAsync
+                          - name: consume_investigation_quota
+                            type: kibana.request
+                            if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
                             with:
-                              workflow-id: 'system-significant-events-investigation'
-                              inputs:
-                                message: |
-                                  {{ steps.resolve_open_event.output.hits.hits[0]._source.title }}
+                              method: POST
+                              path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
+                              body:
+                                group: 'investigation'
+                                critical: '${{ steps.resolve_open_event.output.hits.hits[0]._source.severity == "80-critical" }}'
+                              headers:
+                                x-elastic-internal-origin: 'kibana'
+                            timeout: '10s'
+                            on-failure:
+                              continue: true
 
-                                  {{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}
+                          - name: guard_investigation_quota
+                            type: if
+                            condition: '${{ steps.consume_investigation_quota.output.allowed != false }}'
+                            steps:
+                              - name: trigger_investigation
+                                type: workflow.executeAsync
+                                with:
+                                  workflow-id: 'system-significant-events-investigation'
+                                  inputs:
+                                    message: |
+                                      {{ steps.resolve_open_event.output.hits.hits[0]._source.title }}
 
-                                  Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis }}
-                                stream_names: '${{ steps.resolve_open_event.output.hits.hits[0]._source.stream_names | default: [] }}'
-                                concurrency_key: '{{ foreach.item.event_id }}'
-                                context:
-                                  source: 'significant_event'
-                                  trigger_type: 'automatic'
-                                  event_uuid: '{{ foreach.item.event_uuid }}'
-                                  event_id: '{{ foreach.item.event_id }}'
-                                  status: '{{ foreach.item.status }}'
-                                  causal_features: '${{ steps.resolve_open_event.output.hits.hits[0]._source.causal_features | default: [] }}'
-                                  blast_radius: '${{ steps.resolve_open_event.output.hits.hits[0]._source.blast_radius | default: [] }}'
+                                      {{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}
+
+                                      Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis }}
+                                    stream_names: '${{ steps.resolve_open_event.output.hits.hits[0]._source.stream_names | default: [] }}'
+                                    concurrency_key: '{{ foreach.item.event_id }}'
+                                    context:
+                                      source: 'significant_event'
+                                      trigger_type: 'automatic'
+                                      event_uuid: '{{ foreach.item.event_uuid }}'
+                                      event_id: '{{ foreach.item.event_id }}'
+                                      status: '{{ foreach.item.status }}'
+                                      causal_features: '${{ steps.resolve_open_event.output.hits.hits[0]._source.causal_features | default: [] }}'
+                                      blast_radius: '${{ steps.resolve_open_event.output.hits.hits[0]._source.blast_radius | default: [] }}'
 
   - name: output_result
     type: workflow.output

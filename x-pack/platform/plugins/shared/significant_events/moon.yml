@@ -69,6 +69,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/actions-plugin'
+  - '@kbn/connector-specs'
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/security-plugin'

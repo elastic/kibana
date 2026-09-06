@@ -56,7 +56,13 @@ const buildContainer = () => {
     basePath: { prepend: (p: string) => p, get: () => '' },
   } as any);
 
-  container.bind(CoreStart('docLinks')).toConstantValue({ links: {} } as any);
+  container.bind(CoreStart('docLinks')).toConstantValue({
+    links: {
+      alerting: {
+        actionPolicies: 'https://docs.test/action-policies',
+      },
+    },
+  } as any);
 
   container.bind(ActionPoliciesApi).toSelf();
   container.bind(RulesApi).toSelf();

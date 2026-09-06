@@ -8,3 +8,5 @@
 export const ONBOARDING_SEEN_STORAGE_KEY = 'vectordb.onboarding.completed';
 
 export const ONBOARDING_API_KEY_STORAGE_KEY = 'vectordb.onboarding.apiKey';
+
+export const ONBOARDING_LANGUAGE_STORAGE_KEY = 'vectordb.onboarding.language';

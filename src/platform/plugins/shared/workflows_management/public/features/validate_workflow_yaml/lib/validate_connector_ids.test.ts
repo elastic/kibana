@@ -20,6 +20,23 @@ describe('validateConnectorIds', () => {
   };
 
   const mockConnectorTypes: Record<string, ConnectorTypeInfo> = {
+    '.inboundWebhook': {
+      actionTypeId: '.inboundWebhook',
+      displayName: 'Inbound Webhook',
+      instances: [
+        {
+          id: 'testyng',
+          name: 'testyng',
+          isPreconfigured: false,
+          isDeprecated: false,
+        },
+      ],
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'gold',
+      subActions: [],
+    },
     '.slack': {
       actionTypeId: '.slack',
       displayName: 'Slack',
@@ -91,6 +108,25 @@ describe('validateConnectorIds', () => {
       expect(results[0].hoverMessage).toBeDefined();
       expect(typeof results[0].hoverMessage).toBe('string');
       expect(results[0]).not.toHaveProperty('ruleId');
+    });
+
+    it('should accept an inbound webhook instance id on a trigger connector-id', () => {
+      const connectorIdItems: ConnectorIdItem[] = [
+        createConnectorIdItem({
+          key: 'testyng',
+          connectorType: '.inboundWebhook',
+        }),
+      ];
+
+      const results = validateConnectorIds(connectorIdItems, mockConnectorTypes, '');
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({
+        severity: 'info',
+        message: null,
+        owner: 'connector-id-validation',
+        beforeMessage: '✓ testyng',
+      });
     });
   });
 
