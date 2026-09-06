@@ -91,4 +91,25 @@ describe('resolveWorkflowAnonymizationOptions', () => {
       expect.stringContaining('retaining legacy anonymization')
     );
   });
+
+  it('logs and falls back to legacy when provider does not support synchronous execution', () => {
+    const logger = { error: jest.fn() };
+    const asyncOnlyProvider: WorkflowAnonymizationProvider = {
+      supportsSynchronousExecution: false,
+      execute: jest.fn(),
+    };
+
+    expect(
+      resolveWorkflowAnonymizationOptions({
+        enabled: true,
+        failureMode: 'block',
+        preLLMTimeoutMs: 5000,
+        provider: asyncOnlyProvider,
+        logger,
+      })
+    ).toBeUndefined();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('retaining legacy anonymization')
+    );
+  });
 });
