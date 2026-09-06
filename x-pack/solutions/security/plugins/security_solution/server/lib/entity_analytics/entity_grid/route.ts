@@ -482,7 +482,15 @@ export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoute
           const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
           const total = (countRow?.total as number) ?? 0;
 
-          await enrichPageRows(pageRows, sort, alertsIndex, riskScoreIndex, window, rawQuery, logger);
+          await enrichPageRows(
+            pageRows,
+            sort,
+            alertsIndex,
+            riskScoreIndex,
+            window,
+            rawQuery,
+            logger
+          );
 
           const lastRow = pageRows[pageRows.length - 1];
           const nextCursor =
