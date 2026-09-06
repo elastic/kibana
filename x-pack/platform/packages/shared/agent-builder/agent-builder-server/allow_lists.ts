@@ -128,6 +128,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'render_view',
   'get_authoring_context',
   'request_registered_view',
+  'post_view_to_slack',
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];

@@ -34,13 +34,19 @@ export class AdaptiveUiPlugin
   }
 
   setup(
-    _coreSetup: CoreSetup<PluginStartDependencies, AdaptiveUiPluginStart>,
+    coreSetup: CoreSetup<PluginStartDependencies, AdaptiveUiPluginStart>,
     { agentBuilder }: PluginSetupDependencies
   ): AdaptiveUiPluginSetup {
     const registry = createAdaptiveUiViewRegistry();
 
+    // Actions start isn't available until start; resolve it lazily at tool-call time.
+    const getActions = async () => {
+      const [, { actions }] = await coreSetup.getStartServices();
+      return actions;
+    };
+
     registerAdaptiveUiViewAttachment(agentBuilder);
-    registerAdaptiveUiTools(agentBuilder, { registry });
+    registerAdaptiveUiTools(agentBuilder, { registry, getActions, http: coreSetup.http });
     agentBuilder.renderers.register(viewRendererTypeDefinition);
 
     this.logger.debug('Adaptive UI attachment, tools, and view renderer registered.');

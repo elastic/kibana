@@ -20,6 +20,7 @@ export const adaptiveUiTools = {
   renderView: 'render_view',
   getAuthoringContext: 'get_authoring_context',
   requestRegisteredView: 'request_registered_view',
+  postViewToSlack: 'post_view_to_slack',
 } as const;
 
 /** Ids of the code-owned views in the Adaptive UI registry. */
