@@ -204,7 +204,7 @@
     },
     {
       "id": "security-persona-matrix-attack-discovery",
-      "name": "Security Persona Matrix — Attack Discovery (Chrysalis kill-chains)",
+      "name": "Security Persona Matrix \u2014 Attack Discovery (Chrysalis kill-chains)",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/attack_discovery.playwright.config.ts",
       "tags": [
@@ -364,6 +364,51 @@
       ],
       "ciLabels": [
         "evals:security-esql-generation-regression"
+      ]
+    },
+    {
+      "id": "security-watch-escalation-chain",
+      "name": "Security Watch Escalation Chain (Floor \u2192 Dark \u2192 Deep \u2192 Detection)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain/playwright.config.ts",
+      "serverConfigSet": "evals_tracing",
+      "tags": [
+        "security",
+        "watch",
+        "pnd"
+      ],
+      "ciLabels": [
+        "evals:security-watch-escalation-chain"
+      ]
+    },
+    {
+      "id": "security-deep-watch-forensics",
+      "name": "Security Deep Watch Forensics",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-forensics/playwright.config.ts",
+      "serverConfigSet": "evals_tracing",
+      "tags": [
+        "security",
+        "deep-watch",
+        "pnd"
+      ],
+      "ciLabels": [
+        "evals:security-deep-watch-forensics"
+      ]
+    },
+    {
+      "id": "security-deep-watch-raw-log-corroboration",
+      "name": "Security Deep Watch Raw Log Corroboration",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-raw-log-corroboration/playwright.config.ts",
+      "serverConfigSet": "evals_tracing",
+      "tags": [
+        "security",
+        "deep-watch",
+        "pnd"
+      ],
+      "ciLabels": [
+        "evals:security-deep-watch-raw-log-corroboration"
       ]
     },
     {
