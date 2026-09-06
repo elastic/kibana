@@ -11,6 +11,7 @@ export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adh
 export { getESQLTimeField } from './utils/get_time_field';
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
+export { upsertESQLMetadataFields } from './utils/upsert_esql_metadata_fields';
 export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,

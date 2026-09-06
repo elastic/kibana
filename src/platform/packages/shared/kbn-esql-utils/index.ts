@@ -20,6 +20,7 @@ export {
   getIndexForESQLQuery,
   getInitialESQLQuery,
   getESQLWithSafeLimit,
+  upsertESQLMetadataFields,
   appendToESQLQuery,
   escapeStringValue,
   buildJoinedFilter,
