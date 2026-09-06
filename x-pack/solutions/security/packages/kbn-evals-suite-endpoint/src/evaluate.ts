@@ -22,12 +22,14 @@ export const evaluate = base.extend<
   }
 >({
   evaluateDataset: [
-    ({ agentBuilderClient, evaluators, executorClient }, use) => {
+    ({ agentBuilderClient, evaluators, executorClient, traceEsClient, log }, use) => {
       use(
         createEvaluateSecurityDataset({
           agentBuilderClient,
           evaluators,
           executorClient,
+          traceEsClient,
+          log,
         })
       );
     },

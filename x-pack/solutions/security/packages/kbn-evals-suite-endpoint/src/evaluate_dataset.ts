@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   AgentBuilderClient,
   DefaultEvaluators,
@@ -12,8 +14,17 @@ import type {
   Evaluator,
   EvalsExecutorClient,
   Example,
+  TaskOutput,
 } from '@kbn/evals';
 import { converseQuestionToTaskOutput } from './converse_task';
+import {
+  createForensicTrajectoryEvaluator,
+  wrapSkillInvocationForDistractors,
+} from './evaluate_forensic_dataset';
+import { createSecuritySkillInvocationEvaluator } from './security_skill_invocation_evaluator';
+
+/** Must match defineSkillType({ name }) in endpoint_response_actions/index.ts. */
+export const ENDPOINT_RESPONSE_ACTIONS_SKILL_NAME = 'endpoint-response-actions';
 
 export interface SecurityDatasetExample extends Example {
   input: {
@@ -21,7 +32,9 @@ export interface SecurityDatasetExample extends Example {
   };
   output: {
     criteria: string[];
+    tool_sequence?: string[];
   };
+  metadata?: Record<string, unknown>;
 }
 
 export type EvaluateSecurityDataset = (options: {
@@ -52,10 +65,14 @@ export function createEvaluateSecurityDataset({
   evaluators,
   executorClient,
   agentBuilderClient,
+  traceEsClient,
+  log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   agentBuilderClient: AgentBuilderClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
 }): EvaluateSecurityDataset {
   return async function evaluateSecurityDataset({
     dataset: { name, description, examples },
@@ -70,14 +87,35 @@ export function createEvaluateSecurityDataset({
       name,
       description,
       examples,
-    } satisfies EvaluationDataset;
+    } satisfies EvaluationDataset<SecurityDatasetExample>;
+
+    const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+      evaluators.traceBasedEvaluators;
 
     await executorClient.runExperiment(
       {
         datasets: [dataset],
         task: async ({ input }) => converseQuestionToTaskOutput(agentBuilderClient, input.question),
       },
-      [createEndpointCriteriaEvaluator({ evaluators })]
+      [
+        createEndpointCriteriaEvaluator({ evaluators }) as Evaluator<
+          SecurityDatasetExample,
+          TaskOutput
+        >,
+        toolCalls as Evaluator<SecurityDatasetExample, TaskOutput>,
+        latency as Evaluator<SecurityDatasetExample, TaskOutput>,
+        inputTokens as Evaluator<SecurityDatasetExample, TaskOutput>,
+        outputTokens as Evaluator<SecurityDatasetExample, TaskOutput>,
+        cachedTokens as Evaluator<SecurityDatasetExample, TaskOutput>,
+        wrapSkillInvocationForDistractors(
+          createSecuritySkillInvocationEvaluator({
+            traceEsClient,
+            log,
+            skillName: ENDPOINT_RESPONSE_ACTIONS_SKILL_NAME,
+          }) as Evaluator<SecurityDatasetExample, TaskOutput>
+        ),
+        createForensicTrajectoryEvaluator() as Evaluator<SecurityDatasetExample, TaskOutput>,
+      ]
     );
   };
 }
