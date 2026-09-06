@@ -12,7 +12,7 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { registerAutoAttach, type AttachmentConverter } from './auto_attach';
 
-export const useAutoAttach = <FocusedItem>(
+export const useAutoAddToChat = <FocusedItem>(
   item: FocusedItem | undefined,
   converter: AttachmentConverter<FocusedItem>
 ): void => {

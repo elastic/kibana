@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { episodeAttachmentConverter, type FocusedEpisode } from './episode_auto_attach';
-import { useAutoAttach } from './use_auto_attach';
+import { useAutoAddToChat } from './use_auto_add_to_chat';
 
 export const useEpisodeAutoAttach = (
   episode: AlertEpisode | undefined,
@@ -22,5 +22,5 @@ export const useEpisodeAutoAttach = (
     [episode, options?.ruleName, options?.groupingFields]
   );
 
-  useAutoAttach(focused, episodeAttachmentConverter);
+  useAutoAddToChat(focused, episodeAttachmentConverter);
 };
