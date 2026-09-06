@@ -7,9 +7,7 @@
 
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 
-export type ConversationBinding =
-  | { kind: 'unbound' }
-  | { kind: 'bound'; id: string | undefined };
+export type ConversationBinding = { kind: 'unbound' } | { kind: 'bound'; id: string | undefined };
 
 export const toConversationBinding = (
   conversation: ActiveConversation | null

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { shouldRestageOnConversationChange, type ConversationBinding } from './conversation_binding';
+import {
+  shouldRestageOnConversationChange,
+  type ConversationBinding,
+} from './conversation_binding';
 
 const unbound: ConversationBinding = { kind: 'unbound' };
 const draft: ConversationBinding = { kind: 'bound', id: undefined };
