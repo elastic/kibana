@@ -539,6 +539,9 @@ export class LogsExtractionClient {
           // the sampled probe is not deterministic, so a re-drawn boundary would strand logs of
           // already-paged entities between the old and new slice end. The slice's log volume was
           // counted by the interrupted run, so it does not count against this run's cap.
+          // Note: maxLogsPerWindow caps volume per task execution, not per time window - a
+          // resumed execution starts with a fresh budget, so a time window that was interrupted
+          // mid-run can consume more than one budget in total.
           logsPageCursorEnd = resumeSliceEnd;
           entityPagination = resumeEntityPagination;
           lastLogsPages = false;
