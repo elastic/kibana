@@ -33,7 +33,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import { triggersActionsRoute, TRIGGERS_ACTIONS_RULES_CAPABILITY_ID } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -77,12 +77,7 @@ import type { AlertSummaryWidgetDependencies } from './application/sections/aler
 import type { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import type { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 
-import {
-  ALERTS_PAGE_ID,
-  CONNECTORS_PLUGIN_ID,
-  PLUGIN_ID,
-  RULES_CAPABILITY_ID,
-} from './common/constants';
+import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/constants';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
@@ -335,7 +330,7 @@ export class Plugin
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
-        capabilitiesId: RULES_CAPABILITY_ID,
+        capabilitiesId: TRIGGERS_ACTIONS_RULES_CAPABILITY_ID,
         order: 1,
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
