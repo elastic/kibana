@@ -224,6 +224,7 @@ const lastSeenAlertCountQuery = (alertsIndex: string, entityAlias: string): stri
     `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(
       ALLOWED_ENTITY_TYPES
     )})`,
+    `| KEEP \`${ENTITY_ID_FIELD}\``,
     `| STATS total = COUNT(*)`,
   ].join('\n');
 
@@ -242,8 +243,7 @@ const riskScoreChangeBaseQuery = (
   [
     `FROM ${riskScoreIndex}`,
     `| WHERE TRANGE("${yesterdayStart}", "${todayStart}")`,
-    `| EVAL \`entity.id\` = ${ENTITY_ID_COALESCE}`,
-    `| EVAL yesterday_score = ${RISK_SCORE_COALESCE}`,
+    `| EVAL \`entity.id\` = ${ENTITY_ID_COALESCE}, yesterday_score = ${RISK_SCORE_COALESCE}`,
     `| STATS yesterday_score = MAX(yesterday_score) BY \`entity.id\``,
     `| LOOKUP JOIN ${entityAlias} ON \`entity.id\``,
     `| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(
@@ -285,8 +285,11 @@ const yesterdayScoreEnrichQuery = (
   [
     `FROM ${riskScoreIndex}`,
     `| WHERE TRANGE("${yesterdayStart}", "${todayStart}")`,
-    `| EVAL entity_id = ${ENTITY_ID_COALESCE}`,
-    `| EVAL score = ${RISK_SCORE_COALESCE}`,
+    // Pre-filter using indexed name fields so Lucene skips unrelated risk docs before EVAL.
+    `| WHERE host.name IN (${toList(entityIds)}) OR user.name IN (${toList(
+      entityIds
+    )}) OR service.name IN (${toList(entityIds)})`,
+    `| EVAL entity_id = ${ENTITY_ID_COALESCE}, score = ${RISK_SCORE_COALESCE}`,
     `| WHERE entity_id IN (${toList(entityIds)})`,
     `| STATS yesterday_score = MAX(score) BY entity_id`,
   ].join('\n');
