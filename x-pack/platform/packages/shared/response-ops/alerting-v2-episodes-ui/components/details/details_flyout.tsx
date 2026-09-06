@@ -25,6 +25,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleLoaded } from '../../types/rule_state';
@@ -43,12 +45,19 @@ import { EpisodeActionsBar } from '../episode_actions_bar';
 
 type TabId = 'overview' | 'related' | 'timeline' | 'metadata' | 'runbook';
 
+export interface EpisodeFlyoutFooterExtraArgs {
+  episode: AlertEpisode | undefined;
+  ruleName?: string;
+  groupingFields?: readonly string[];
+}
+
 export interface AlertEpisodeDetailsFlyoutProps {
   episodeId: string;
   groupHash: string | undefined;
   onClose: () => void;
   services: AlertEpisodeDetailsServices;
   actions?: EpisodeAction[];
+  renderFooterExtra?: (args: EpisodeFlyoutFooterExtraArgs) => React.ReactNode;
 }
 
 export const AlertEpisodeDetailsFlyout = ({
@@ -57,6 +66,7 @@ export const AlertEpisodeDetailsFlyout = ({
   onClose,
   services,
   actions,
+  renderFooterExtra,
 }: AlertEpisodeDetailsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<TabId>('overview');
@@ -66,6 +76,17 @@ export const AlertEpisodeDetailsFlyout = ({
   const ruleId = episode?.['rule.id'];
   const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
   const showRuleDependentTabs = isRuleLoaded(ruleState);
+  const episodeData = parseEpisodeDataJson(episode?.episode_data);
+  const episodeDataRuleName =
+    typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
+  const loadedRuleName = showRuleDependentTabs ? ruleState.rule.metadata.name : undefined;
+  const episodeRuleName = loadedRuleName ?? episodeDataRuleName;
+  const groupingFields = showRuleDependentTabs ? ruleState.rule.grouping?.fields : undefined;
+  const footerExtra = renderFooterExtra?.({
+    episode,
+    ruleName: episodeRuleName,
+    groupingFields,
+  });
 
   const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
   const compatibleActions = useMemo(
@@ -289,14 +310,19 @@ export const AlertEpisodeDetailsFlyout = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                href={services.http.basePath.prepend(getAlertEpisodeDetailsPath(episodeId))}
-                data-test-subj="alertingV2EpisodeFlyoutViewDetailsButton"
-                iconType="eye"
-              >
-                {i18n.FLYOUT_VIEW_DETAILS}
-              </EuiButton>
+              <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+                {footerExtra ? <EuiFlexItem grow={false}>{footerExtra}</EuiFlexItem> : null}
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    href={services.http.basePath.prepend(getAlertEpisodeDetailsPath(episodeId))}
+                    data-test-subj="alertingV2EpisodeFlyoutViewDetailsButton"
+                    iconType="eye"
+                  >
+                    {i18n.FLYOUT_VIEW_DETAILS}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

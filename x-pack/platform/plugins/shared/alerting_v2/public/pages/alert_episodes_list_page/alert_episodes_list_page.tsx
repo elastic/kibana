@@ -54,6 +54,7 @@ import {
   EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
+import { EpisodeAddToChatButton } from '../../agent_builder/episode_add_to_chat_button';
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
@@ -385,6 +386,13 @@ export const AlertEpisodesListPage = () => {
         groupHash={hit.flattened.group_hash as string | undefined}
         onClose={closeFlyout}
         actions={episodeActions}
+        renderFooterExtra={({ episode, ruleName, groupingFields }) => (
+          <EpisodeAddToChatButton
+            episode={episode}
+            ruleName={ruleName}
+            groupingFields={groupingFields}
+          />
+        )}
         services={{
           data: services.data,
           http: services.http,

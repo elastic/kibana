@@ -114,4 +114,22 @@ describe('AlertEpisodeDetailsFlyout', () => {
     fireEvent.click(screen.getByLabelText('Close'));
     expect(onClose).toHaveBeenCalled();
   });
+
+  it('renders footer extra next to the view details button', () => {
+    const renderFooterExtra = jest.fn(() => <div data-test-subj="footerExtraStub" />);
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} renderFooterExtra={renderFooterExtra} />, {
+      wrapper: Wrapper,
+    });
+
+    expect(screen.getByTestId('footerExtraStub')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutViewDetailsButton')).toBeInTheDocument();
+    expect(renderFooterExtra).toHaveBeenCalledWith(
+      expect.objectContaining({
+        episode: undefined,
+        ruleName: 'Rule A',
+        groupingFields: undefined,
+      })
+    );
+  });
 });

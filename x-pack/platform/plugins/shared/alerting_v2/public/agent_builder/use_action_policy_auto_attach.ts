@@ -7,8 +7,8 @@
 
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { actionPolicyAttachmentConverter } from './action_policy_auto_attach';
-import { useAutoAttach } from './use_auto_attach';
+import { useAutoAddToChat } from './use_auto_add_to_chat';
 
 export const useActionPolicyAutoAttach = (policy: ActionPolicyResponse | undefined): void => {
-  useAutoAttach(policy, actionPolicyAttachmentConverter);
+  useAutoAddToChat(policy, actionPolicyAttachmentConverter);
 };
