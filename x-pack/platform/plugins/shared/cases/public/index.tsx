@@ -41,6 +41,8 @@ export type {
 } from './client/attachment_framework/types';
 export { AttachmentActionType, defineAttachment } from './client/attachment_framework/types';
 export { useCasesContext } from './components/cases_context/use_cases_context';
+export { useCaseAlertWorkflowRun } from './components/workflows/use_case_alert_workflow_run';
+export type { UseCaseAlertWorkflowRunParams } from './components/workflows/use_case_alert_workflow_run';
 export { ShowTableButton } from './components/attachments/common/show_table_button';
 export type {
   CasesTimelineIntegration,

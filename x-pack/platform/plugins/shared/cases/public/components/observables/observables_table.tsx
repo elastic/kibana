@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 
 import { EuiInMemoryTable, EuiSkeletonText, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
 
@@ -18,10 +18,12 @@ import { AddObservable } from './add_observable';
 import { ObservableActionsPopoverButton } from './observable_actions_popover_button';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { ObservablesUtilityBar } from './observables_utility_bar';
+import { useCanRunCaseWorkflow } from '../workflows/use_run_case_workflow';
 
 const getColumns = (
   caseData: CaseUI,
-  observableTypes: ObservableType[]
+  observableTypes: ObservableType[],
+  canRunWorkflow: boolean
 ): Array<EuiBasicTableColumn<Observable>> => [
   {
     name: i18n.OBSERVABLE_VALUE,
@@ -55,7 +57,13 @@ const getColumns = (
       {
         name: i18n.OBSERVABLE_ACTIONS,
         render: (observable: Observable) => {
-          return <ObservableActionsPopoverButton caseData={caseData} observable={observable} />;
+          return (
+            <ObservableActionsPopoverButton
+              caseData={caseData}
+              observable={observable}
+              canRunWorkflow={canRunWorkflow}
+            />
+          );
         },
       },
     ],
@@ -84,6 +92,28 @@ export const ObservablesTable = ({
   isLoading,
   onExtractObservablesChanged,
 }: ObservablesTableProps) => {
+  const canRunWorkflow = useCanRunCaseWorkflow();
+
+  // Store selected observable ids so derived `selected` always reflects the current list.
+  // When an observable is deleted or filtered out, it silently drops out of the selection
+  // without needing a reconciliation effect.
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
+
+  const selected = useMemo(
+    () => caseData.observables.filter(({ id }) => selectedIds.has(id)),
+    [caseData.observables, selectedIds]
+  );
+
+  const onSelectionChange = useCallback(
+    (items: Observable[]) => setSelectedIds(new Set(items.map(({ id }) => id))),
+    []
+  );
+
+  const selection: EuiTableSelectionType<Observable> | undefined = useMemo(
+    () => (canRunWorkflow ? { selected, onSelectionChange } : undefined),
+    [canRunWorkflow, onSelectionChange, selected]
+  );
+
   const filesTableRowProps = useCallback(
     (observable: Observable) => ({
       'data-test-subj': `cases-observables-table-row-${observable.id}`,
@@ -97,7 +127,10 @@ export const ObservablesTable = ({
     () => [...OBSERVABLE_TYPES_BUILTIN, ...currentConfiguration.observableTypes],
     [currentConfiguration.observableTypes]
   );
-  const columns = useMemo(() => getColumns(caseData, observableTypes), [caseData, observableTypes]);
+  const columns = useMemo(
+    () => getColumns(caseData, observableTypes, canRunWorkflow),
+    [caseData, observableTypes, canRunWorkflow]
+  );
 
   return isLoading || loadingCaseConfigure ? (
     <>
@@ -110,16 +143,20 @@ export const ObservablesTable = ({
         caseData={caseData}
         isLoading={isLoading}
         onExtractObservablesChanged={onExtractObservablesChanged}
+        selectedObservables={selected}
+        canRunWorkflow={canRunWorkflow}
       />
       <EuiSpacer size="xs" />
       <EuiInMemoryTable
         tableCaption={i18n.OBSERVABLES_TABLE}
         items={caseData.observables}
+        itemId="id"
         rowHeader="id"
         columns={columns}
         data-test-subj="cases-observables-table"
         noItemsMessage={<EmptyObservablesTable caseData={caseData} />}
         rowProps={filesTableRowProps}
+        selection={selection}
       />
     </>
   );

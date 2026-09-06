@@ -14,9 +14,11 @@ import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   MAX_CASES_PER_WORKFLOW_RUN,
   MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
+  MAX_OBSERVABLES_PER_CASE,
   MAX_WORKFLOW_INPUT_KEY_LENGTH,
   MAX_WORKFLOW_INPUTS_BYTES,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../constants';
 
 const idField = z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH);
@@ -26,10 +28,11 @@ const idField = z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH);
  * Each variant is a discriminated union member and carries only the identifiers
  * relevant to that surface — no overloaded `id` field.
  *
- * - `cases.case`       — triggered from the case detail page.
- * - `cases.observable` — triggered from the observables table for a specific observable.
- * - `cases.alert`      — triggered from the alerts table for a single alert.
- * - `cases.alerts`     — triggered from the alerts table with a multi-alert selection.
+ * - `cases.case`        — triggered from the case detail page.
+ * - `cases.observable`  — triggered from the observables table for a specific observable.
+ * - `cases.observables` — triggered from the observables table with a multi-observable selection.
+ * - `cases.alert`       — triggered from the alerts table for a single alert.
+ * - `cases.alerts`      — triggered from the alerts table with a multi-alert selection.
  *
  * `origin` is **optional** on the request. When absent the run is treated as a
  * list-surface (bulk) run: the caller was not looking at any specific sub-entity,
@@ -38,6 +41,17 @@ const idField = z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH);
  * The API schema carries identifiers only. Display enrichment (alert index, observable
  * typeKey/value) is derived server-side from the case at activity-write time so that
  * client-supplied label text cannot spoof the activity log.
+ *
+ * **Adding a new origin (new attachment surface)** touches three layers, in order:
+ *   common: `constants/workflow.ts` (constant + entry in `CASE_WORKFLOW_ORIGIN_TYPES`),
+ *           this file (new union member), `types/domain/user_action/workflow/constants.ts`
+ *           (re-export), `types/domain/user_action/workflow/v1.ts` (user-action shape).
+ *   public: `components/workflows/use_case_<surface>_workflow_run.ts` (read the
+ *           attachment context, build the origin, delegate to
+ *           `useOptionalCasesWorkflowExecutor`), `components/user_actions/workflow.tsx`
+ *           (activity label), `public/index.tsx` (only if a solution plugin renders it).
+ *   server: `routes/api/internal/run_workflow.ts`, `workflows/execution/validate_origin.ts`,
+ *           `workflows/execution/build_activity_origin.ts`, `workflows/execution/service.ts`.
  */
 export const CaseWorkflowRunOriginSchema = z.discriminatedUnion('type', [
   z
@@ -51,6 +65,13 @@ export const CaseWorkflowRunOriginSchema = z.discriminatedUnion('type', [
       type: z.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
       caseId: idField,
       observableId: idField,
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
+      caseId: idField,
+      observableIds: z.array(idField).min(1).max(MAX_OBSERVABLES_PER_CASE),
     })
     .strict(),
   z

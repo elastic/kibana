@@ -10,14 +10,15 @@ import type { WorkflowOrigin, Case } from '../../../common/types/domain';
 import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants';
 import { findAlertIndex } from './alert_attachment_utils';
 
 /**
  * Enriches an activity origin with display data derived from the already-fetched case:
- * - `cases.alert` → adds `index` from the matching alert attachment (both legacy and unified-v2 shapes).
+ * - `cases.alert`      → adds `index` from the matching alert attachment (both legacy and unified-v2 shapes).
  * - `cases.observable` → adds `typeKey` and `value` from the matching observable.
- * - all other origins → converted to the persisted `{ type, id }` shape.
+ * - all other origins  → converted to the persisted `{ type, id: caseId }` shape.
  *
  * `theCase` is optional: for multi-case runs the sub-entity origin types (`cases.alert`,
  * `cases.observable`) are rejected before this function is called, so the enrichment branches
@@ -52,6 +53,10 @@ export const buildActivityOrigin = ({
       return { ...activityOrigin, typeKey: obs.typeKey, value: obs.value };
     }
     return activityOrigin;
+  }
+
+  if (origin.type === OBSERVABLES_WORKFLOW_ORIGIN_TYPE) {
+    return { type: origin.type, id: origin.caseId, count: origin.observableIds.length };
   }
 
   return { type: origin.type, id: origin.caseId };

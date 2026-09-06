@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
@@ -15,6 +15,7 @@ import type { WorkflowOrigin, WorkflowUserAction } from '../../../common/types/d
 import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
@@ -73,11 +74,16 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
           ];
           const found = allObservableTypes.find((t) => t.key === origin.typeKey);
           const typeLabel = found?.label ?? origin.typeKey;
+          const observableNode = (
+            <EuiBadge color="hollow" data-test-subj="workflow-observable-badge">
+              {typeLabel}: {origin.value}
+            </EuiBadge>
+          );
           return (
             <FormattedMessage
               id="xpack.cases.caseView.userActions.ranWorkflowOnObservableDetailsLabel"
-              defaultMessage="ran {name} on observable {typeLabel}: {value}"
-              values={{ name: workflowNameNode, typeLabel, value: origin.value }}
+              defaultMessage="ran {name} on observable {observable}"
+              values={{ name: workflowNameNode, observable: observableNode }}
             />
           );
         }
@@ -97,6 +103,25 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
             values={{ name: workflowNameNode }}
           />
         );
+      case OBSERVABLES_WORKFLOW_ORIGIN_TYPE: {
+        const count = origin.count;
+        if (count !== undefined) {
+          return (
+            <FormattedMessage
+              id="xpack.cases.caseView.userActions.ranWorkflowOnObservablesCountLabel"
+              defaultMessage="ran {name} on {count, plural, one {# observable} other {# observables}}"
+              values={{ name: workflowNameNode, count }}
+            />
+          );
+        }
+        return (
+          <FormattedMessage
+            id="xpack.cases.caseView.userActions.ranWorkflowOnObservablesLabel"
+            defaultMessage="ran {name} on observables"
+            values={{ name: workflowNameNode }}
+          />
+        );
+      }
       case ALERTS_WORKFLOW_ORIGIN_TYPE:
         return (
           <FormattedMessage

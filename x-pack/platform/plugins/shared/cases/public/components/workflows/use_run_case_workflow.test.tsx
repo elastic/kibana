@@ -21,6 +21,8 @@ import { basicCase } from '../../containers/mock';
 jest.mock('../../common/lib/kibana');
 jest.mock('../cases_context/use_cases_context');
 jest.mock('./use_cases_workflow_executor', () => ({
+  // Partial mock — only stubs useCasesWorkflowExecutor; useOptionalCasesWorkflowExecutor is
+  // undefined here. If a future test renders a tree that calls the optional hook, add it.
   useCasesWorkflowExecutor: jest.fn().mockReturnValue(jest.fn()),
 }));
 
