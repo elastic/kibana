@@ -129,6 +129,8 @@ export function getUiSettings(
 
 Plugins can also pass an optional `deprecation` parameter to handle deprecation notices and renames. Deprecation warnings are rendered in the Advanced Settings UI and should also be added to the [Configure Kibana](/reference/configuration-reference/general-settings.md) guide.
 
+After you register, change, deprecate, or remove a UI setting, document it in `docs/reference/advanced-settings-space.yml` or `docs/reference/advanced-settings-global.yml`. Follow [`.agents/skills/kibana-settings-docs/SKILL.md`](../../../.agents/skills/kibana-settings-docs/SKILL.md).
+
 
 ## Server-side usage [server-side-usage]
 

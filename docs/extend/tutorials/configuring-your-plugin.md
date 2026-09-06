@@ -91,6 +91,8 @@ export const config = {
 };
 ```
 
+After you add, change, deprecate, or remove a `kibana.yml` setting, document it in `docs/reference/configuration-reference/`. Follow [`.agents/skills/kibana-settings-docs/SKILL.md`](../../../.agents/skills/kibana-settings-docs/SKILL.md).
+
 ## Handle plugin configuration deprecations [handle-plugin-configuration-deprecations]
 
 To manage deprecated configuration keys, use the `deprecations` config descriptor field. Deprecations are handled per-plugin, using relative paths from the plugin's configuration root instead of full property paths.
