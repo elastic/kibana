@@ -945,4 +945,26 @@ describe('GoogleDriveConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
+
+  describe('metadata-only guarantee (CONN-004 DoD)', () => {
+    it('listFilesIngest never returns content-bearing fields even if the API does', async () => {
+      const spec = GoogleDriveConnector.actions.listFilesIngest as { handler: (ctx: unknown, input: unknown) => Promise<any> };
+      const ctx = {
+        client: {
+          get: jest.fn().mockResolvedValue({
+            data: {
+              files: [
+                { id: 'f1', name: 'roadmap', mimeType: 'application/vnd.google-apps.document', content: 'SHOULD NOT LEAK' },
+              ],
+              nextPageToken: undefined,
+            },
+          }),
+        },
+      };
+      const res = await spec.handler(ctx, { folderId: 'folder1' });
+      expect(JSON.stringify(res)).not.toContain('SHOULD NOT LEAK');
+      expect(res.files[0]).toEqual({ id: 'f1', name: 'roadmap', mimeType: 'application/vnd.google-apps.document' });
+    });
+  });
+
 });

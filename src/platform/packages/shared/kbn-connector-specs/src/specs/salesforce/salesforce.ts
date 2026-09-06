@@ -48,6 +48,25 @@ interface SalesforceQueryResponse {
   records?: Array<Record<string, unknown>>;
 }
 
+
+/** Map Salesforce API errors to actionable messages (CONN-003 DoD). */
+function salesforceErrorMessage(error: unknown): string {
+  const anyError = error as { response?: { status?: number; data?: { message?: string; error?: string } }; message?: string };
+  const status = anyError?.response?.status;
+  const detail = anyError?.response?.data?.message ?? anyError?.response?.data?.error ?? anyError?.message ?? 'unknown error';
+  if (status === 401) {
+    return `Salesforce authentication failed (401): ${detail}. Check the connector credentials/token expiry, or re-authorize the connector.`;
+  }
+  if (status === 403) {
+    return `Salesforce access denied (403): ${detail}. The connected app lacks the required 'api' scope or the user has no access to this object.`;
+  }
+  return `Salesforce API error${status ? ` (${status})` : ''}: ${detail}`;
+}
+
+function throwSalesforceError(error: unknown): never {
+  throw new Error(salesforceErrorMessage(error));
+}
+
 const executeSalesforceSoql = async (
   ctx: Parameters<NonNullable<ConnectorSpec['actions']['query']>['handler']>[0],
   input: { soql: string; nextRecordsUrl?: string }
@@ -55,14 +74,22 @@ const executeSalesforceSoql = async (
   const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
   if (input.nextRecordsUrl) {
     const url = createPaginationUrl(baseUrl, input.nextRecordsUrl);
-    const response = await ctx.client.get(url, {});
-    return response.data as SalesforceQueryResponse;
+    try {
+      const response = await ctx.client.get(url, {});
+      return response.data as SalesforceQueryResponse;
+    } catch (error: unknown) {
+      throwSalesforceError(error);
+    }
   }
-  const response = await ctx.client.get(
-    `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`,
-    { params: { q: input.soql } }
-  );
-  return response.data as SalesforceQueryResponse;
+  try {
+    const response = await ctx.client.get(
+      `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`,
+      { params: { q: input.soql } }
+    );
+    return response.data as SalesforceQueryResponse;
+  } catch (error: unknown) {
+    throwSalesforceError(error);
+  }
 };
 
 const toSoqlIngestResult = (

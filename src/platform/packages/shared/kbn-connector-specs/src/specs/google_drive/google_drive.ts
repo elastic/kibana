@@ -468,7 +468,20 @@ export const GoogleDriveConnector: ConnectorSpec = {
       },
     },
 
-    getFileMetadata: {
+    
+/**
+ * CONN-004 metadata-only guarantee: ingest and metadata actions never return
+ * file content. Belt-and-braces removal of content-bearing fields if the API
+ * ever starts returning them for the fields= metadata projections.
+ */
+const DRIVE_CONTENT_FIELDS = ['content', 'data', 'body', 'binaryContent', 'base64Content'] as const;
+function stripFileContent<T extends Record<string, unknown>>(file: T): T {
+  const clone: Record<string, unknown> = { ...file };
+  for (const f of DRIVE_CONTENT_FIELDS) delete clone[f];
+  return clone as T;
+}
+
+getFileMetadata: {
       isTool: true,
       scope: 'read',
       description:
@@ -515,7 +528,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
                 const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files/${fileId}`, {
                   params: { fields: metadataFields, supportsAllDrives: true },
                 });
-                return response.data;
+                return stripFileContent(response.data as Record<string, unknown>) as never;
               } catch (error: unknown) {
                 throwGoogleDriveError(error);
                 throw error;
@@ -595,7 +608,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
           return {
             ok: true,
-            files: response.data.files ?? [],
+            files: (response.data.files ?? []).map(stripFileContent),
             nextPageToken,
             hasMore: Boolean(nextPageToken),
           };

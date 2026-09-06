@@ -364,4 +364,44 @@ describe('SalesforceConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
+
+  describe('soqlIngest auth/scope error handling (CONN-003 DoD)', () => {
+    const mk = (impl: () => any) => {
+      const spec = SalesforceConnector.actions.soqlIngest as { handler: (ctx: unknown, input: unknown) => Promise<unknown> };
+      const ctx = {
+        secrets: { tokenUrl: 'https://login.salesforce.com/services/oauth2/token' },
+        client: { get: impl },
+      };
+      return { spec, ctx };
+    };
+    it('surfaces an actionable message on 401 (expired/invalid credentials)', async () => {
+      const { spec, ctx } = mk(() =>
+        Promise.reject({
+          response: { status: 401, data: { message: 'Session expired or invalid' } },
+        })
+      );
+      await expect(spec.handler(ctx, { soql: 'SELECT Id FROM Case' })).rejects.toThrow(
+        /authentication failed \(401\).*re-authorize/s
+      );
+    });
+    it('surfaces an actionable message on 403 (missing api scope / object access)', async () => {
+      const { spec, ctx } = mk(() =>
+        Promise.reject({
+          response: { status: 403, data: { message: 'Requested operation not permitted' } },
+        })
+      );
+      await expect(spec.handler(ctx, { soql: 'SELECT Id FROM Case' })).rejects.toThrow(
+        /access denied \(403\).*'api' scope/s
+      );
+    });
+    it('passes through pagination calls with the same error handling', async () => {
+      const { spec, ctx } = mk(() =>
+        Promise.reject({ response: { status: 401, data: {} } })
+      );
+      await expect(
+        spec.handler(ctx, { nextRecordsUrl: '/services/data/v60.0/query/abc/next' })
+      ).rejects.toThrow(/401/);
+    });
+  });
+
 });
