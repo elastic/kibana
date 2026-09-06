@@ -11,6 +11,7 @@ import type {
   InvestigationSubjectType,
   InvestigationTriggerType,
   PaginatedResponse,
+  Severity,
 } from '../../common';
 
 export interface InvestigationAttributes extends InvestigationStructuredOutput {
@@ -55,6 +56,13 @@ export interface FindInvestigationsQuery<
   Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
 > {
   statuses?: InvestigationStatus[];
+  severities?: Severity[];
+  subjectTypes?: InvestigationSubjectType[];
+  /**
+   * Full-text query across subject_summary, summary, and conclusion.
+   * Passed as `search` + `searchFields` to the SO find API.
+   */
+  query?: string;
   concurrencyKey?: string;
   createdAfter?: string;
   createdBefore?: string;
@@ -62,16 +70,22 @@ export interface FindInvestigationsQuery<
   startedBefore?: string;
   completedAfter?: string;
   completedBefore?: string;
-  sortField?: 'created_at' | 'completed_at';
+  sortField?: 'created_at' | 'completed_at' | 'severity';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;
   fields?: Fields[];
 }
 
-export type FindInvestigationsResult<
+/** Counts of investigations at each severity tier, always zero-filled for all four options. */
+export type SeverityCounts = Record<Severity, number>;
+
+export interface FindInvestigationsResult<
   Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
-> = PaginatedResponse<ProjectedInvestigationRecord<Fields>>;
+> extends PaginatedResponse<ProjectedInvestigationRecord<Fields>> {
+  /** Severity facet counts. Always present; reflects base filters but not the active severity selection. */
+  severityCounts: SeverityCounts;
+}
 
 export interface InvestigationRepository {
   create(params: { id: string; attributes: InvestigationAttributes }): Promise<void>;

@@ -13,7 +13,7 @@ import type {
   Severity,
   TriggerFeedback,
 } from '@kbn/significant-events-schema';
-import type { InvestigationTriggerType } from './workflows/triggers';
+import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
 
 /**
  * Re-exported so consumers of these responses do not need their own dependency on
@@ -147,13 +147,19 @@ export interface InvestigationStatusEvent {
 
 export interface ListInvestigationsRequest {
   statuses?: InvestigationStatus[];
+  severities?: Severity[];
+  subject_types?: InvestigationSubjectType[];
+  /**
+   * Full-text query matched against subject_summary, summary, and conclusion.
+   */
+  query?: string;
   created_after?: string;
   created_before?: string;
   started_after?: string;
   started_before?: string;
   completed_after?: string;
   completed_before?: string;
-  sort_field?: 'created_at' | 'completed_at';
+  sort_field?: 'created_at' | 'completed_at' | 'severity';
   sort_order?: 'asc' | 'desc';
   page?: number;
   size?: number;
@@ -170,6 +176,8 @@ export type ListInvestigationItem = Pick<
   | 'concurrency_key'
   | 'executed_by'
   | 'subject'
+  | 'summary'
+  | 'impact'
 >;
 
 export interface PaginatedResponse<T> {
@@ -179,7 +187,13 @@ export interface PaginatedResponse<T> {
   total: number;
 }
 
-export type ListInvestigationsResponse = PaginatedResponse<ListInvestigationItem>;
+/** Counts of investigations at each severity tier, zero-filled for all four tiers. */
+export type SeverityCounts = Record<Severity, number>;
+
+export interface ListInvestigationsResponse extends PaginatedResponse<ListInvestigationItem> {
+  /** Severity facet counts. Reflects active search + date filters but not the active severity selection. */
+  severity_counts: SeverityCounts;
+}
 
 export {
   INVESTIGATION_STARTED_TRIGGER_ID,

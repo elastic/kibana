@@ -109,6 +109,7 @@ const findResult = (records: InvestigationRecord[]): FindInvestigationsResult =>
   page: 1,
   size: 20,
   total: records.length,
+  severityCounts: { '80-critical': 0, '60-high': 0, '40-medium': 0, '20-low': 0 },
 });
 
 const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
