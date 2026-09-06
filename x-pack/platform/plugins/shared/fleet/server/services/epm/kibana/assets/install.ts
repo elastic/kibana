@@ -104,6 +104,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
   [KibanaAssetType.workflow]: KibanaSavedObjectType.workflow,
   [KibanaAssetType.agent]: KibanaSavedObjectType.agent,
+  [KibanaAssetType.skill]: KibanaSavedObjectType.skill,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {

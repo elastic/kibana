@@ -7,7 +7,11 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
+import type {
+  AgentCreateRequest,
+  ConversationTemplate,
+  PersistedSkillCreateRequest,
+} from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
@@ -238,11 +242,25 @@ export interface TopSnippetsConfig {
 /**
  * Setup contract of the agentBuilder plugin.
  */
+
+/**
+ * Internal management API for package-owned persisted agents and skills
+ * (e.g. Fleet package install/uninstall).
+ */
+export interface AgentBuilderManagementSetup {
+  createOrUpdateAgent(params: AgentCreateRequest, request: KibanaRequest): Promise<unknown>;
+  deletePackageManagedAgent(agentId: string, spaceId: string): Promise<boolean>;
+  createOrUpdateSkill(params: PersistedSkillCreateRequest, request: KibanaRequest): Promise<unknown>;
+  deletePackageManagedSkill(skillId: string, spaceId: string): Promise<boolean>;
+}
+
 export interface AgentBuilderPluginSetup {
   /**
    * Agents setup contract, which can be used to register built-in agents.
    */
   agents: AgentsSetup;
+  /** Internal management API for programmatic agent/skill CRUD (Fleet package install). */
+  management: AgentBuilderManagementSetup;
   /**
    * Tools setup contract, which can be used to register built-in tools.
    */

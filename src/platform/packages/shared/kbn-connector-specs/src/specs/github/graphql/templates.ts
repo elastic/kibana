@@ -470,6 +470,7 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'graph.issueGraph',
+    resultPath: 'repository.issue',
     variablesSchema: z.object({ owner: z.string().min(1), repo: z.string().min(1), number: z.number().int() }),
     isPaginated: false,
     description:
@@ -526,6 +527,7 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'graph.pullRequestGraph',
+    resultPath: 'repository.pullRequest',
     variablesSchema: z.object({ owner: z.string().min(1), repo: z.string().min(1), number: z.number().int() }),
     isPaginated: false,
     description: 'Fetch a pull request with reviews, review threads, and linked closing issues.',

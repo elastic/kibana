@@ -26,7 +26,7 @@ import { getFleetPackageSkillId, parseFleetSkillYaml } from './fleet_skill_parse
 export async function stepInstallSkillAssets(
   context: Pick<
     InstallContext,
-    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId'
+    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'request'
   > & { installAsAdditionalSpace?: boolean }
 ) {
   const { logger, savedObjectsClient, packageInstallContext, spaceId, installAsAdditionalSpace } =
@@ -68,7 +68,7 @@ export async function stepInstallSkillAssets(
     for (const { fileName, content } of skillEntries) {
       const skillId = getFleetPackageSkillId({ pkgName, spaceId, fileName });
       const definition = parseFleetSkillYaml({ fileName, content }, skillId, pkgName);
-      await agentBuilderApi.createOrUpdateSkill(definition, spaceId);
+      await agentBuilderApi.createOrUpdateSkill(definition, context.request!);
       assetRefs.push({ id: skillId, type: KibanaSavedObjectType.skill });
     }
     await saveKibanaAssetsRefs(

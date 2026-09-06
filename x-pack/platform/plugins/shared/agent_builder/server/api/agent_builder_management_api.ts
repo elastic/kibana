@@ -15,11 +15,11 @@ import type {
 import { skillIndexName } from '../services/skills/persisted/client/storage';
 
 function fakeSkillRequest(): KibanaRequest {
-  return KibanaRequest.asInternal({
+  return {
     headers: {},
-    socket: { remoteAddress: '127.0.0.1', remotePort: 0 } as never,
+    socket: { remoteAddress: '127.0.0.1', remotePort: 0 },
     url: '/',
-  } as never);
+  } as unknown as KibanaRequest;
 }
 import { agentsIndexName } from '../services/agents/persisted/client/storage';
 import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../types';

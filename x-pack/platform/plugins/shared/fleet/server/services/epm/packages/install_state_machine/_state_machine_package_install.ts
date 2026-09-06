@@ -65,6 +65,7 @@ import { handleState } from './state_machine';
 import { stepCreateAlertingAssets } from './steps/step_create_alerting_assets';
 import { stepInstallWorkflowAssets } from './steps/step_install_workflow_assets';
 import { stepInstallAgentAssets } from './steps/step_install_agent_assets';
+import { stepInstallSkillAssets } from './steps/step_install_skill_assets';
 import { cleanupEsqlViewsStep, stepInstallEsqlViews } from './steps/step_install_esql_views';
 import {
   cleanupIndexAliasesStep,
@@ -202,7 +203,7 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
     onPostTransition: updateLatestExecutedState,
   },
   create_agent_assets: {
-    onTransition: async (context) => {
+    onTransition: async (context: Parameters<typeof stepInstallAgentAssets>[0]) => {
       await stepInstallAgentAssets(context);
       await stepInstallSkillAssets(context);
     },
