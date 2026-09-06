@@ -112321,11 +112321,6 @@ components:
                   type: array
               required:
                 - applications
-        role:
-          additionalProperties: false
-          description: Global role privileges.
-          type: object
-          properties: {}
       title: security_role_global_privileges
       type: object
     Kibana_HTTP_APIs_security_role_indices_privileges:
