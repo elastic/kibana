@@ -39,6 +39,7 @@ export async function stepInstallSkillAssets(
     logger.debug(`Skipping skill asset installation for ${pkgName}: agentBuilder unavailable`);
     return;
   }
+  logger.info(`AB005-TRACE entering skill install for ${pkgName}`);
   await withPackageSpan(`Install package skills for ${pkgName}`, async () => {
     const skillEntries: Array<{ fileName: string; content: string }> = [];
     await packageInstallContext.archiveIterator.traverseEntries(
@@ -46,7 +47,9 @@ export async function stepInstallSkillAssets(
         if (!entry.buffer) {
           return;
         }
-        const rel = entry.path.replace(/^kibana\/skill\//, '');
+        // Archive entries are prefixed with `<pkg>-<version>/`, so anchor on the
+        // kibana/skill/ segment anywhere in the path rather than at the start.
+        const rel = entry.path.replace(/^.*?kibana\/skill\//, '');
         skillEntries.push({
           fileName: rel,
           content: entry.buffer.toString('utf8'),
@@ -54,6 +57,9 @@ export async function stepInstallSkillAssets(
       },
       (entryPath) => {
         const parts = getPathParts(entryPath);
+        if (entryPath.includes('/skill/')) {
+          logger.info(`AB005-TRACE path=${entryPath} service=${parts.service} type=${parts.type}`);
+        }
         return (
           parts.service === 'kibana' &&
           parts.type === KibanaAssetType.skill &&
@@ -61,6 +67,7 @@ export async function stepInstallSkillAssets(
         );
       }
     );
+    logger.info(`AB005-TRACE skillEntries=${skillEntries.length} names=${JSON.stringify(skillEntries.map((e) => e.fileName))}`);
     if (skillEntries.length === 0) {
       return;
     }

@@ -121,15 +121,33 @@ export class AgentBuilderManagementApi {
     // Use the caller request: the skills registry runs an ES privilege check,
     // which fails with a synthetic credential-less request.
     const registry = await pluginStart.skills.getRegistry({ request });
-    if (await registry.has(params.id)) {
-      return registry.update(params.id, {
-        name: params.name,
-        description: params.description,
-        content: params.content,
-        tool_ids: params.tool_ids,
-      } as PersistedSkillUpdateRequest);
+    if (!(await registry.has(params.id))) {
+      return registry.create(params);
     }
-    return registry.create(params);
+    // The registry blocks direct updates of plugin-managed skills (a guard meant for
+    // end users). Package reinstall/upgrade must still refresh its own skill, so write
+    // the document through the internal client instead.
+    const [coreStart] = await this.getStartServices();
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const existing = await esClient.search<Record<string, unknown>>({
+      index: skillIndexName,
+      query: { term: { id: params.id } },
+      size: 1,
+    });
+    const hit = existing.hits.hits[0];
+    if (!hit?._id) {
+      return registry.create(params);
+    }
+    const updatedDocument = {
+      ...(hit._source ?? {}),
+      name: params.name,
+      description: params.description,
+      content: params.content,
+      tool_ids: params.tool_ids,
+      updated_at: new Date().toISOString(),
+    };
+    await esClient.index({ index: skillIndexName, id: hit._id, document: updatedDocument, refresh: true });
+    return registry.get(params.id);
   }
 
   /**

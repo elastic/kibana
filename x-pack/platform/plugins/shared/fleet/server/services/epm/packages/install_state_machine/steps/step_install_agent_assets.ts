@@ -77,17 +77,16 @@ export async function stepInstallAgentAssets(
   const agentBuilderApi = appContextService.getAgentBuilderSetup()?.management;
 
   if (!agentBuilderApi) {
-    logger.debug(`Skipping agent asset installation for ${pkgName}: agentBuilder unavailable`);
+    logger.info(`AB004-TRACE skip: agentBuilder unavailable for ${pkgName}`);
     return;
   }
 
   if (!context.request) {
-    logger.debug(
-      `Skipping agent asset installation for ${pkgName}: missing install request context`
-    );
+    logger.info(`AB004-TRACE skip: missing request context for ${pkgName}`);
     return;
   }
 
+  logger.info(`AB004-TRACE entering agent install for ${pkgName}`);
   await withPackageSpan(`Install package agents for ${pkgName}`, async () => {
     const agentEntries: Array<{ fileName: string; yaml: string }> = [];
 
@@ -125,6 +124,7 @@ export async function stepInstallAgentAssets(
         const agentId = getFleetPackageAgentId({ pkgName, spaceId, fileName });
         const agentYaml = substituteWorkflowConnectorIds(yaml, connectorVars);
         const definition = parseFleetAgentYaml(agentYaml, agentId);
+        logger.info(`AB004-TRACE agent=${agentId} readonly=${definition.readonly} labels=${JSON.stringify(definition.labels)}`);
 
         await agentBuilderApi.createOrUpdateAgent(definition, context.request!);
 
