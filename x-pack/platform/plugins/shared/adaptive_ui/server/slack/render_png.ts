@@ -9,6 +9,13 @@ import type { PrimitiveNode } from '@kbn/adaptive-ui';
 import { renderPNG } from '@kbn/adaptive-ui/node';
 
 /**
+ * Slack scales an inline image down to the message column and serves a
+ * thumbnail of it, so a 1x render lands soft on a HiDPI display even though the
+ * full-size view is sharp.
+ */
+const PIXEL_DENSITY = 2;
+
+/**
  * Rasterizes one chart node for Slack, which has no native chart block.
  *
  * `@kbn/adaptive-ui/node` pulls in native `@takumi-rs/core`, so import this
@@ -17,6 +24,9 @@ import { renderPNG } from '@kbn/adaptive-ui/node';
  * view chrome around the node.
  */
 export const renderNodePng = async (node: PrimitiveNode): Promise<Buffer> => {
-  const { png } = await renderPNG({ type: 'view', body: [node] });
+  const { png } = await renderPNG(
+    { type: 'view', body: [node] },
+    { devicePixelRatio: PIXEL_DENSITY }
+  );
   return png;
 };
