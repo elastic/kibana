@@ -30,6 +30,20 @@ export interface SurfaceProjectionInput {
 }
 
 /**
+ * A rasterized chart the host must upload before it can post `blocks`.
+ *
+ * Slack has no chart block, so a chart renders as an `image` block holding a placeholder
+ * `slack_file` ref. The host uploads the PNG and rewrites the matching ref to the file id
+ * it gets back — only the host holds the surface credential, so only it can upload.
+ */
+export interface SurfaceProjectionAsset {
+  /** Placeholder ref carried by the `image` block this PNG belongs to. */
+  ref: string;
+  png: Buffer;
+  altText: string;
+}
+
+/**
  * A reply rewritten for one surface. `message` is always populated so a host that
  * understands nothing else still has something to post.
  */
@@ -41,6 +55,11 @@ export interface SurfaceProjection {
    * it fall back to `message`.
    */
   blocks?: unknown[];
+  /**
+   * Assets `blocks` references by placeholder ref. A host that cannot upload must
+   * discard `blocks` too, since an unresolved ref fails the whole message.
+   */
+  assets?: SurfaceProjectionAsset[];
 }
 
 /**

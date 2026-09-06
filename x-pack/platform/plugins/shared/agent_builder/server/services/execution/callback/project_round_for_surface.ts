@@ -8,8 +8,26 @@
 import type { Logger } from '@kbn/logging';
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { ConversationOriginType, RoundCompleteEvent } from '@kbn/agent-builder-common';
-import type { AgentExecution, SurfaceProjectorDefinition } from '@kbn/agent-builder-server';
+import type {
+  AgentExecution,
+  SurfaceProjectionAsset,
+  SurfaceProjectorDefinition,
+} from '@kbn/agent-builder-server';
+import type {
+  SurfaceProjectionAssetPayload,
+  SurfaceProjectionPayload,
+} from '../../../../common/http_api/chat_callback';
 import type { SurfaceProjectionServiceStart } from '../../surface_projection';
+
+const toAssetPayload = ({
+  ref,
+  png,
+  altText,
+}: SurfaceProjectionAsset): SurfaceProjectionAssetPayload => ({
+  ref,
+  data: png.toString('base64'),
+  alt_text: altText,
+});
 
 /** Origin type of the execution, when it came from an external surface. */
 export const getExecutionSurface = (
@@ -31,13 +49,25 @@ export const getSurfaceProjector = ({
   return surface && surfaceProjection ? surfaceProjection.getProjector(surface) : undefined;
 };
 
+/** A projected delivery: the event to send, plus the surface payload to send alongside it. */
+export interface ProjectedDelivery {
+  event: RoundCompleteEvent;
+  projection?: Partial<Record<ConversationOriginType, SurfaceProjectionPayload>>;
+}
+
 /**
- * Returns a delivery-only copy of `event` whose response message has been rewritten
- * for the execution's surface, leaving the original untouched — it is shared with the
- * persistence subscriber, so the Kibana transcript keeps its `<render_attachment>` tags.
+ * Projects a round for its execution's surface, returning both halves of the delivery.
  *
- * Degrades to the original event whenever projection is unavailable or fails: a
- * readable-but-unprojected Slack post beats a dropped one.
+ * `event` is a delivery-only copy whose response message has been rewritten, leaving the
+ * original untouched — it is shared with the persistence subscriber, so the Kibana
+ * transcript keeps its `<render_attachment>` tags. The rewrite lands inside
+ * `response.message` because that is what an external host already posts.
+ *
+ * `projection` carries the same reply in the surface's own richer form for a host that
+ * knows to prefer it.
+ *
+ * Degrades to the unprojected event whenever projection is unavailable or fails: a
+ * readable-but-unprojected post beats a dropped one.
  */
 export const projectRoundForSurface = async ({
   execution,
@@ -49,12 +79,12 @@ export const projectRoundForSurface = async ({
   event: RoundCompleteEvent;
   projector: SurfaceProjectorDefinition;
   logger: Logger;
-}): Promise<RoundCompleteEvent> => {
+}): Promise<ProjectedDelivery> => {
   const { round, attachments } = event.data;
   const message = round.response?.message;
 
   if (!message) {
-    return event;
+    return { event };
   }
 
   try {
@@ -66,16 +96,27 @@ export const projectRoundForSurface = async ({
     });
 
     if (!projection) {
-      return event;
+      return { event };
     }
 
     return {
-      ...event,
-      data: {
-        ...event.data,
-        round: {
-          ...round,
-          response: { ...round.response, message: projection.message },
+      event: {
+        ...event,
+        data: {
+          ...event.data,
+          round: {
+            ...round,
+            response: { ...round.response, message: projection.message },
+          },
+        },
+      },
+      projection: {
+        [projector.surface]: {
+          text: projection.message,
+          ...(projection.blocks ? { blocks: projection.blocks } : {}),
+          ...(projection.assets?.length ? { assets: projection.assets.map(toAssetPayload) } : {}),
+          // Terminal projection is the only projection today, so it is always the last.
+          final: true,
         },
       },
     };
@@ -84,6 +125,6 @@ export const projectRoundForSurface = async ({
       `Surface projection failed for surface "${projector.surface}", delivering the unprojected reply: ${error.message}`
     );
 
-    return event;
+    return { event };
   }
 };
