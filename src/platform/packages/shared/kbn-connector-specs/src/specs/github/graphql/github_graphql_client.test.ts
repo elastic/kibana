@@ -9,82 +9,6 @@
 
 import type { ActionContext } from '../../../connector_spec';
 import {
-<<<<<<< HEAD
-  executeGitHubGraphQL,
-  extractPageInfo,
-  resolveGraphQLApiUrl,
-  shouldBackoffForRateLimit,
-} from './github_graphql_client';
-
-describe('github_graphql_client', () => {
-  describe('extractPageInfo', () => {
-    it('extracts pageInfo from a nested path', () => {
-      const data = {
-        organization: {
-          repositories: {
-            pageInfo: {
-              hasNextPage: true,
-              endCursor: 'cursor123',
-            },
-          },
-        },
-      };
-
-      expect(extractPageInfo(data, 'organization.repositories')).toEqual({
-        hasNextPage: true,
-        endCursor: 'cursor123',
-      });
-    });
-  });
-
-  describe('resolveGraphQLApiUrl', () => {
-    it('uses configured graphqlApiUrl when present', () => {
-      expect(resolveGraphQLApiUrl({ graphqlApiUrl: 'https://example.test/graphql' })).toBe(
-        'https://example.test/graphql'
-      );
-    });
-
-    it('falls back to the GitHub GraphQL endpoint', () => {
-      expect(resolveGraphQLApiUrl({})).toBe('https://api.github.com/graphql');
-    });
-  });
-
-  describe('shouldBackoffForRateLimit', () => {
-    it('returns true when remaining budget is low', () => {
-      expect(
-        shouldBackoffForRateLimit({
-          limit: 5000,
-          remaining: 50,
-          resetAt: '2026-06-24T12:00:00Z',
-        })
-      ).toBe(true);
-    });
-
-    it('returns false when remaining budget is healthy', () => {
-      expect(
-        shouldBackoffForRateLimit({
-          limit: 5000,
-          remaining: 4000,
-          resetAt: '2026-06-24T12:00:00Z',
-        })
-      ).toBe(false);
-    });
-  });
-
-  describe('executeGitHubGraphQL', () => {
-    const mockPost = jest.fn();
-    const mockContext = {
-      client: { post: mockPost },
-      log: { debug: jest.fn(), error: jest.fn() },
-      config: { graphqlApiUrl: 'https://api.github.com/graphql' },
-    } as unknown as ActionContext;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('returns normalized data, pageInfo, and rateLimit', async () => {
-=======
   GitHubRateLimitError,
   isGitHubRateLimitError,
   resolveGraphQLApiUrl,
@@ -359,25 +283,12 @@ describe('executeRunQueryTemplate', () => {
 
     it('falls back to extensions.rateLimit when data.rateLimit is absent', async () => {
       const ctx = makeContext(mockPost);
->>>>>>> 35f8e215b5a1 ([Connectors] Add GitHub GraphQL Ingest Plane (CONN-001, Phase 1))
       mockPost.mockResolvedValue({
         headers: {},
         data: {
           data: {
             organization: {
               repositories: {
-<<<<<<< HEAD
-                pageInfo: { hasNextPage: false, endCursor: null },
-                nodes: [{ name: 'kibana' }],
-              },
-            },
-          },
-          extensions: {
-            rateLimit: {
-              limit: 5000,
-              remaining: 4990,
-              resetAt: '2026-06-24T12:00:00Z',
-=======
                 nodes: [],
                 pageInfo: { hasNextPage: false, endCursor: null },
               },
@@ -407,52 +318,11 @@ describe('executeRunQueryTemplate', () => {
               issueCount: 7,
               nodes: [],
               pageInfo: { hasNextPage: false, endCursor: null },
->>>>>>> 35f8e215b5a1 ([Connectors] Add GitHub GraphQL Ingest Plane (CONN-001, Phase 1))
             },
           },
         },
       });
 
-<<<<<<< HEAD
-      const result = await executeGitHubGraphQL({
-        ctx: mockContext,
-        body: { query: 'query OrgRepos { organization(login: "elastic") { id } }' },
-        pageInfoPath: 'organization.repositories',
-        templateId: 'orgCatalog.repos',
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/graphql',
-        { query: 'query OrgRepos { organization(login: "elastic") { id } }' },
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-          }),
-        })
-      );
-      expect(result.templateId).toBe('orgCatalog.repos');
-      expect(result.pageInfo).toEqual({ hasNextPage: false, endCursor: null });
-      expect(result.rateLimit?.remaining).toBe(4990);
-      expect(result.shouldBackoff).toBe(false);
-    });
-
-    it('rejects mutation documents before calling the API', async () => {
-      await expect(
-        executeGitHubGraphQL({
-          ctx: mockContext,
-          body: { query: 'mutation X { createIssue(input: {}) { issue { id } } }' },
-        })
-      ).rejects.toThrow('GraphQL mutations are not allowed');
-
-      expect(mockPost).not.toHaveBeenCalled();
-    });
-
-    it('throws when GraphQL errors are returned', async () => {
-      mockPost.mockResolvedValue({
-        headers: {},
-        data: {
-          errors: [{ message: 'Could not resolve to a Repository' }],
-=======
       const result = await executeRunQueryTemplate({
         ctx,
         template: activitySearchIssuesTemplate,
@@ -473,19 +343,10 @@ describe('executeRunQueryTemplate', () => {
           errors: [
             { message: 'Could not resolve to a Repository', path: ['repository'] },
           ],
->>>>>>> 35f8e215b5a1 ([Connectors] Add GitHub GraphQL Ingest Plane (CONN-001, Phase 1))
         },
       });
 
       await expect(
-<<<<<<< HEAD
-        executeGitHubGraphQL({
-          ctx: mockContext,
-          body: { query: 'query X { repository(owner: "a", name: "b") { id } }' },
-        })
-      ).rejects.toThrow('Could not resolve to a Repository');
-    });
-=======
         executeRunQueryTemplate({
           ctx,
           template: orgCatalogReposTemplate,
@@ -796,6 +657,5 @@ describe('template variablesSchema validation', () => {
   it('activity.searchIssues rejects empty query', () => {
     const result = activitySearchIssuesTemplate.variablesSchema.safeParse({ query: '' });
     expect(result.success).toBe(false);
->>>>>>> 35f8e215b5a1 ([Connectors] Add GitHub GraphQL Ingest Plane (CONN-001, Phase 1))
   });
 });
