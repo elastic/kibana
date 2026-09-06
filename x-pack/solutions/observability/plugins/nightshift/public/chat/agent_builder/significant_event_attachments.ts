@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toKiFeatureViewSpec, toSigEventDetectionViewSpec } from '@kbn/adaptive-ui-adapters';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
@@ -29,6 +30,13 @@ const significantEventDetectionAttachmentDefinition: AttachmentUIDefinition<Sign
         defaultMessage: 'Significant Events detection',
       }),
     }),
+    getViewSpec: ({ data }) =>
+      toSigEventDetectionViewSpec({
+        rule_name: data.rule_name,
+        stream_name: data.stream_name,
+        change_point_type: data.change_point_type,
+        timestamp: data['@timestamp'],
+      }),
   };
 
 const kiFeatureAttachmentDefinition: AttachmentUIDefinition<KiFeatureAttachment> = {
@@ -45,6 +53,17 @@ const kiFeatureAttachmentDefinition: AttachmentUIDefinition<KiFeatureAttachment>
       defaultMessage: 'Knowledge indicator feature',
     }),
   }),
+  getViewSpec: ({ data }) =>
+    toKiFeatureViewSpec({
+      name: data.title ?? data.id,
+      type: data.type,
+      subtype: data.subtype,
+      description: data.description,
+      stream_name: data.stream_name,
+      confidence: data.confidence,
+      tags: data.tags,
+      filter: data.filter === undefined ? undefined : JSON.stringify(data.filter),
+    }),
 };
 
 export const registerNightshiftAgentBuilderAttachments = ({

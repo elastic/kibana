@@ -278,6 +278,7 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-plugin",
     "@kbn/core-ui-settings-server-mocks",
+    "@kbn/adaptive-ui-adapters",
     "@kbn/agent-builder-browser",
     "@kbn/lazy-object",
     "@kbn/ai-assistant-common",
@@ -292,6 +293,8 @@
     "@kbn/esql-language",
     "@kbn/workflows-ui",
     "@kbn/workflows",
+    "@kbn/deeplinks-workflows",
+    "@kbn/core-rendering-browser",
     "@kbn/controls-constants",
     "@kbn/anonymization-plugin",
     "@kbn/anonymization-common",
@@ -311,6 +314,5 @@
     "@kbn/chart-icons",
     "@kbn/core-mount-utils-browser",
     "@kbn/ui-callout",
-    "@kbn/shared-ux-utility",
   ]
 }

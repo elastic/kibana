@@ -6,6 +6,7 @@
   "include": ["common/**/*", "public/**/*", "test/scout/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/adaptive-ui-adapters",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-plugin",
     "@kbn/app-header",

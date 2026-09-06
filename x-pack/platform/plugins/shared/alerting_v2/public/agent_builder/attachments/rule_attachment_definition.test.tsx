@@ -125,6 +125,15 @@ describe('createRuleAttachmentDefinition', () => {
     });
   });
 
+  describe('getViewSpec', () => {
+    it('maps the rule onto an Adaptive UI ViewSpec', () => {
+      const definition = createRuleAttachmentDefinition(createMockServices());
+      const spec = definition.getViewSpec?.(createAttachment());
+      expect(spec?.title).toBe('My Rule');
+      expect(spec?.body.some((node) => node.type === 'codeBlock')).toBe(true);
+    });
+  });
+
   describe('renderInlineContent', () => {
     it('shows proposed status when no origin', () => {
       const services = createMockServices();

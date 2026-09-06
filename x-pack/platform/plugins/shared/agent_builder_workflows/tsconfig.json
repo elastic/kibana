@@ -10,6 +10,7 @@
     "@kbn/core",
     "@kbn/logging",
     "@kbn/config-schema",
+    "@kbn/adaptive-ui-adapters",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",

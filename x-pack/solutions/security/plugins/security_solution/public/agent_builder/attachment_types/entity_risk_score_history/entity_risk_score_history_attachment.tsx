@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toEntityRiskScoreHistoryViewSpec } from '@kbn/adaptive-ui-adapters';
 import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -99,6 +100,16 @@ export const createEntityRiskScoreHistoryAttachmentDefinition = ({
   return {
     getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
     getIcon: () => 'visLine',
+    getViewSpec: ({ data }) =>
+      toEntityRiskScoreHistoryViewSpec({
+        entity_name: data.identifier,
+        entity_type: data.identifierType,
+        interval: data.bucketInterval,
+        entries: data.entries.map((entry) => ({
+          timestamp: entry['@timestamp'],
+          score: entry.calculated_score_norm,
+        })),
+      }),
     renderInlineContent: (props: AttachmentRenderProps<EntityRiskScoreHistoryAttachment>) => (
       <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
         <LazyEntityRiskScoreHistoryInlineContent {...props} />

@@ -19,6 +19,7 @@ import { useConversationContext } from '../../../../../context/conversation/conv
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentAdaptiveBody } from './attachment_adaptive_body';
 import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
@@ -154,7 +155,8 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
   const maxWidth = uiDefinition?.getMaxWidth?.(attachment);
-  const isHeaderOnly = !uiDefinition.renderInlineContent;
+  const viewSpec = uiDefinition.getViewSpec?.(attachment);
+  const isHeaderOnly = !viewSpec && !uiDefinition.renderInlineContent;
 
   return (
     <EuiSplitPanel.Outer
@@ -193,16 +195,20 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         >
           <AttachmentRenderErrorBoundary key={attachmentPreviewKey}>
             {() =>
-              uiDefinition.renderInlineContent?.(
-                {
-                  attachment,
-                  isSidebar,
-                  screenContext,
-                  openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-                },
-                {
-                  registerActionButtons,
-                }
+              viewSpec ? (
+                <AttachmentAdaptiveBody spec={viewSpec} />
+              ) : (
+                uiDefinition.renderInlineContent?.(
+                  {
+                    attachment,
+                    isSidebar,
+                    screenContext,
+                    openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+                  },
+                  {
+                    registerActionButtons,
+                  }
+                )
               )
             }
           </AttachmentRenderErrorBoundary>

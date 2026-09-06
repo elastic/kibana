@@ -109,6 +109,7 @@
     "@kbn/rison",
     "@kbn/maintenance-windows-plugin",
     "@kbn/esql-types",
+    "@kbn/adaptive-ui-adapters",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
