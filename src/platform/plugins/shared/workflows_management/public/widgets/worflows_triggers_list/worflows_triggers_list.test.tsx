@@ -74,13 +74,21 @@ describe('WorkflowsTriggersList', () => {
 });
 
 describe('TriggerIcon', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ legacyFakeTimers: true });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should render the scheduled label as tooltip when next execution is unavailable', () => {
     render(<TriggerIcon triggerType="scheduled" />);
     expect(document.querySelector('[title="Scheduled"]')).toBeInTheDocument();
   });
 
   it('should render scheduled label and next execution in tooltip when data is available', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) });
     const { container } = render(
       <TriggerIcon triggerType="scheduled" nextExecution="Jan 15, 2025 11:00 AM" />
     );
@@ -89,13 +97,14 @@ describe('TriggerIcon', () => {
 
     const anchor = container.querySelector('.euiToolTipAnchor');
     await user.hover(anchor!);
+    jest.runOnlyPendingTimers();
 
     expect(await screen.findByText('Scheduled')).toBeInTheDocument();
     expect(screen.getByText('Next execution: Jan 15, 2025 11:00 AM')).toBeInTheDocument();
   });
 
   it('should render only next execution in tooltip when showLabelInTooltip is false', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) });
     const { container } = render(
       <TriggerIcon
         triggerType="scheduled"
@@ -106,6 +115,7 @@ describe('TriggerIcon', () => {
 
     const anchor = container.querySelector('.euiToolTipAnchor');
     await user.hover(anchor!);
+    jest.runOnlyPendingTimers();
 
     expect(await screen.findByText('Next execution: Jan 15, 2025 11:00 AM')).toBeInTheDocument();
     expect(screen.queryByText('Scheduled')).not.toBeInTheDocument();

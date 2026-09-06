@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
 import {
   createCommonMockServices,
   createIndexFormKibanaMocks,
@@ -22,12 +20,21 @@ import {
 } from './test_utils/workflow_form_test_setup';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { useKibana } from '../../../hooks/use_kibana';
+import { TestProvider } from '../../../shared/mocks/test_providers';
 
 jest.mock('../../../hooks/use_kibana');
 jest.mock('@kbn/unified-search-plugin/public', () => ({
   SearchBar: MockSearchBar,
   DataViewPicker: MockDataViewPicker,
 }));
+
+jest.mock('@kbn/unified-data-table', () => {
+  const actual = jest.requireActual('@kbn/unified-data-table');
+  return {
+    ...actual,
+    UnifiedDataTable: () => <div data-test-subj="unifiedDataTable" />,
+  };
+});
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
@@ -42,11 +49,7 @@ const mockStorage = {
   remove: jest.fn(),
 };
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <EuiProvider>
-    <I18nProvider>{children}</I18nProvider>
-  </EuiProvider>
-);
+const TestWrapper = TestProvider;
 
 describe('WorkflowExecuteIndexForm', () => {
   const mockSetValue = jest.fn();
