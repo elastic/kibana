@@ -104,4 +104,22 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   it('no longer references detection_actionability anywhere', () => {
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('detection_actionability');
   });
+
+  // MVP stores and processes plain text only. Reports no longer carry content.body_html,
+  // and the enrichment routes accept bounded text, so the enrich workflow must not send an
+  // html body to any step.
+  describe('plain-text-only enrichment', () => {
+    it('never references content.body_html', () => {
+      expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('body_html');
+    });
+
+    it.each(['assess_relevance', 'extract_iocs'])('%s sends body_text but not html', (stepName) => {
+      const step = findStepByName(workflow.steps, stepName) as {
+        with?: { body?: Record<string, unknown> };
+      };
+      const body = step?.with?.body ?? {};
+      expect(body).toHaveProperty('text');
+      expect(body).not.toHaveProperty('html');
+    });
+  });
 });
