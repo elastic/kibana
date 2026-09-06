@@ -235,6 +235,125 @@ describe('#sanitizeFields', () => {
     });
   });
 
+  describe('keys containing dots', () => {
+    it('should preserve dotted keys that are not masked', () => {
+      const snapshot = {
+        user: { 'first.name': 'bob' },
+        http: { 'request.id': 'abc' },
+        apiKey: 'sk-9f8a7b6c5d4e3f2a1b0c',
+      };
+      const fieldsToHash = { apiKey: true };
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+
+      expect(result.snapshot.user).toEqual({ 'first.name': 'bob' });
+      expect(result.snapshot.http).toEqual({ 'request.id': 'abc' });
+      expect(result.fields.hashed).toEqual(['apiKey']);
+    });
+
+    it('should match a dotted mask key literally and mask the dotted snapshot key', () => {
+      const snapshot = { user: { 'first.name': 'bob' } };
+      const fieldsToRedact = { user: { 'first.name': true } };
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
+
+      expect(result.snapshot).toEqual({ user: { 'first.name': REDACTED } });
+      expect(result.fields.redacted).toEqual(['user.first.name']);
+    });
+
+    it('should not treat a dotted mask key as a nested path', () => {
+      const snapshot = { user: { first: { name: 'bob' } } };
+      const fieldsToRedact = { user: { 'first.name': true } };
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
+
+      expect(result.snapshot).toEqual(snapshot);
+      expect(result.fields.redacted).toEqual([]);
+    });
+
+    it('should keep both keys when a dotted key collides with an equivalent nested path', () => {
+      const snapshot = {
+        user: { 'first.name': 'bob', first: { name: 'alice' } },
+      };
+      const fieldsToRedact = { user: { 'first.name': true } };
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
+
+      expect(result.snapshot).toEqual({
+        user: { 'first.name': REDACTED, first: { name: 'alice' } },
+      });
+      expect(result.fields.redacted).toEqual(['user.first.name']);
+    });
+
+    it('should mask dotted keys inside a subtree mask', () => {
+      const snapshot = { user: { 'first.name': 'bob', email: 'bob@example.com', age: 42 } };
+      const fieldsToRedact = { user: true };
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
+
+      expect(result.snapshot).toEqual({
+        user: { 'first.name': REDACTED, email: REDACTED, age: 42 },
+      });
+      expect(result.fields.redacted.sort()).toEqual(['user.email', 'user.first.name']);
+    });
+
+    it('should hash a dotted snapshot key matched by a dotted mask key', () => {
+      const snapshot = { api: { 'secret.key': 'sk-9f8a7b6c5d4e3f2a1b0c' } };
+      const fieldsToHash = { api: { 'secret.key': true } };
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "fields": Object {
+            "hashed": Array [
+              "api.secret.key",
+            ],
+            "redacted": Array [],
+          },
+          "snapshot": Object {
+            "api": Object {
+              "secret.key": "a41351a16cdc",
+            },
+          },
+        }
+      `);
+    });
+
+    it('should hash dotted keys inside a subtree mask and preserve unmatched dotted keys', () => {
+      const snapshot = {
+        api: { 'secret.key': 'sk-9f8a7b6c5d4e3f2a1b0c' },
+        http: { 'request.id': 'abc' },
+      };
+      const fieldsToHash = { api: true };
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "fields": Object {
+            "hashed": Array [
+              "api.secret.key",
+            ],
+            "redacted": Array [],
+          },
+          "snapshot": Object {
+            "api": Object {
+              "secret.key": "a41351a16cdc",
+            },
+            "http": Object {
+              "request.id": "abc",
+            },
+          },
+        }
+      `);
+    });
+
+    it('should redact rather than hash a dotted key matched by both masks', () => {
+      const snapshot = { user: { 'first.name': 'bob' } };
+      const fieldsToHash = { user: { 'first.name': true } };
+      const fieldsToRedact = { user: { 'first.name': true } };
+      const result = sanitizeFields(snapshot, { fieldsToHash, fieldsToRedact, salt: 'obj-id' });
+
+      expect(result.snapshot).toEqual({ user: { 'first.name': REDACTED } });
+      expect(result.fields.redacted).toEqual(['user.first.name']);
+      expect(result.fields.hashed).toEqual([]);
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle empty snapshot', () => {
       const result = sanitizeFields({}, { fieldsToHash: { api: true }, salt: 'obj-id' });

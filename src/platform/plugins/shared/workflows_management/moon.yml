@@ -96,6 +96,7 @@ dependsOn:
   - '@kbn/securitysolution-rules'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/shared-ux-utility'
+  - '@kbn/shared-ux-ai-components'
   - '@kbn/licensing-types'
   - '@kbn/core-lifecycle-server-mocks'
   - '@kbn/scout'

@@ -54,6 +54,7 @@ export const createMockOsqueryContext = (): OsqueryAppContext => {
       getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default' }),
     },
     getStartServices: jest.fn().mockResolvedValue([mockCoreStart, {}, {}]),
+    isCpsActive: jest.fn().mockResolvedValue(false),
   } as unknown as OsqueryAppContext;
 };
 

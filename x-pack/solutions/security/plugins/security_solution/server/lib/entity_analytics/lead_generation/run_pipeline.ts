@@ -26,6 +26,7 @@ import { registerObservationModules } from './observation_modules/register_modul
 import { errorMessage } from './observation_modules/utils';
 import { buildEntityLookupMap } from './entities_relationships';
 import { attachRelatedEntities } from './attach_related_entities';
+import { buildExploratoryLeads } from './exploratory_leads';
 import { createLeadDataClient } from './lead_data_client';
 import type { LeadActionDecision } from './lead_data_client';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
@@ -126,25 +127,38 @@ export const runLeadGenerationPipeline = async ({
   });
 
   const prepareStart = Date.now();
-  let candidates = await engine.prepareLeadCandidates(leadEntities);
+  const { confident, exploratory } = await engine.prepareLeadCandidates(leadEntities);
   logger.info(
     `[LeadGeneration][Telemetry] Prepare candidates: ${Date.now() - prepareStart}ms (${
-      candidates.length
-    } candidates)`
+      confident.length
+    } confident, ${exploratory.length} exploratory)`
   );
-  if (candidates.length === 0) {
+  if (confident.length === 0) {
     return;
   }
 
+  let confidentCandidates = confident;
+  let exploratoryCandidates = exploratory;
   const attachStart = Date.now();
   try {
-    candidates = await attachRelatedEntities({
-      candidates,
-      entitiesMap,
-      esClient,
-      spaceId,
-      logger,
-    });
+    [confidentCandidates, exploratoryCandidates] = await Promise.all([
+      attachRelatedEntities({
+        candidates: confident,
+        entitiesMap,
+        esClient,
+        spaceId,
+        logger,
+        withInteractionCounts: true,
+      }),
+      attachRelatedEntities({
+        candidates: exploratory,
+        entitiesMap,
+        esClient,
+        spaceId,
+        logger,
+        withInteractionCounts: false,
+      }),
+    ]);
   } catch (error) {
     logger.warn(
       `[LeadGeneration] Failed to attach related entities; continuing without them: ${errorMessage(
@@ -156,8 +170,14 @@ export const runLeadGenerationPipeline = async ({
 
   const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
 
+  const exploratoryLeads = await buildExploratoryLeads(exploratoryCandidates, {
+    chatModel,
+    logger,
+  });
+  const allCandidates = [...confidentCandidates, ...exploratoryLeads];
+
   const classifyStart = Date.now();
-  const decisions = await leadDataClient.classifyLeadCandidates(candidates);
+  const decisions = await leadDataClient.classifyLeadCandidates(allCandidates);
   const toSynthesize = decisions.filter(shouldRunLLMSynthesis);
   const refreshes = decisions.flatMap((item) =>
     item.decision.type === 'refresh'
@@ -183,7 +203,7 @@ export const runLeadGenerationPipeline = async ({
   logger.info(
     `[LeadGeneration][Telemetry] LLM synthesis: ${Date.now() - synthStart}ms (${
       synthesized.length
-    }/${candidates.length} leads; skipped ${candidates.length - toSynthesize.length})`
+    }/${allCandidates.length} leads; skipped ${allCandidates.length - toSynthesize.length})`
   );
 
   const runTimestamp = new Date().toISOString();
@@ -240,7 +260,7 @@ export const runLeadGenerationPipeline = async ({
 
   analytics?.reportEvent(LEAD_GENERATION_EXECUTION_EVENT.eventType, {
     spaceId,
-    leadsGenerated: candidates.length,
+    leadsGenerated: allCandidates.length,
     newLeads,
     revisedLeads,
     resurfacedLeads,

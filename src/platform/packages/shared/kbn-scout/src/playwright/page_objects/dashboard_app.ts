@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Download } from 'playwright-core';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { RenderablePage } from './renderable_page';
@@ -997,6 +998,20 @@ export class DashboardApp {
     await this.clickPanelAction('embeddablePanelAction-editPanel', title);
     await this.editInDiscoverLink.waitFor({ state: 'visible' });
     await this.editInDiscoverLink.click();
+  }
+
+  /** Generates and downloads a CSV report for a Discover session panel. */
+  async exportPanelAsCsv(title?: string): Promise<Download> {
+    await this.toasts.dismissAll();
+    await this.clickPanelAction('embeddablePanelAction-generateCsvReport', title);
+
+    const downloadButton = this.page.testSubj.locator('downloadCompletedReportButton');
+    // Report generation runs asynchronously and can be slow on shared CI workers.
+    await downloadButton.waitFor({ state: 'visible', timeout: 120_000 });
+
+    const downloadPromise = this.page.waitForEvent('download');
+    await downloadButton.click();
+    return downloadPromise;
   }
 
   /**
