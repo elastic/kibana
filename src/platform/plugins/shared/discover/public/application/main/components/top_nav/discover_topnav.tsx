@@ -45,6 +45,8 @@ import { DiscoverSessionSaveModalContainer } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
 import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
+import { FetchStatus } from '../../../types';
+import { useDataState } from '../../hooks/use_data_state';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -321,6 +323,14 @@ export const DiscoverTopNav = ({
     },
     [dispatch, setEsqlEditorUiState]
   );
+  const mainDataState = useDataState(dataStateContainer.data$.main$);
+  const esqlEditorInitialState = useMemo(
+    () =>
+      isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED
+        ? { ...esqlEditorUiState, isHistoryOpen: true }
+        : esqlEditorUiState,
+    [esqlEditorUiState, isEsqlMode, mainDataState.fetchStatus]
+  );
 
   const textBasedLanguageModeErrors = useMemo(
     () => (esqlModeErrors ? [esqlModeErrors] : undefined),
@@ -389,8 +399,11 @@ export const DiscoverTopNav = ({
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={searchDraftUiState}
         onDraftChange={onSearchDraftChange}
-        esqlEditorInitialState={esqlEditorUiState}
+        esqlEditorInitialState={esqlEditorInitialState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
+        closeHistoryOnSubmit={
+          isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED
+        }
         esqlVariablesConfig={
           isEsqlMode
             ? {

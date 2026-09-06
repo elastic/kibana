@@ -90,7 +90,11 @@ const listItems = [
   },
 ];
 
-export function KeyboardShortcuts() {
+export interface KeyboardShortcutsProps {
+  display?: 'popover' | 'inline';
+}
+
+export function KeyboardShortcuts({ display = 'popover' }: KeyboardShortcutsProps = {}) {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
@@ -100,6 +104,35 @@ export function KeyboardShortcuts() {
     defaultMessage: 'Keyboard shortcuts',
   });
   const labelId = useGeneratedHtmlId();
+
+  const cheatsheetItems = listItems.map(({ title, description }) => ({
+    title: description,
+    description: title,
+  }));
+
+  if (display === 'inline') {
+    return (
+      <EuiText
+        size="s"
+        data-test-subj="editorKeyboardShortcutsInline"
+        css={css`
+          min-width: ${mathWithUnits(euiTheme.size.xxl, (x) => x * 7)};
+        `}
+      >
+        <h3 id={labelId}>{label}</h3>
+        <EuiDescriptionList
+          aria-labelledby={labelId}
+          type="column"
+          columnWidths={['auto', 'auto']}
+          compressed
+          listItems={cheatsheetItems}
+          css={css`
+            row-gap: ${euiTheme.size.xs};
+          `}
+        />
+      </EuiText>
+    );
+  }
 
   const containerStyles = css`
     ${logicalCSS('max-height', '80vh')}

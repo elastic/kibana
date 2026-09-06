@@ -172,6 +172,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
+  closeHistoryOnSubmit?: QueryBarTopRowProps['closeHistoryOnSubmit'];
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
@@ -839,6 +840,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           bubbleSubmitEvent={this.props.bubbleSubmitEvent}
           esqlEditorInitialState={this.props.esqlEditorInitialState}
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
+          closeHistoryOnSubmit={this.props.closeHistoryOnSubmit}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}

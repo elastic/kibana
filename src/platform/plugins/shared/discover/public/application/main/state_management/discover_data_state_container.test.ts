@@ -60,6 +60,21 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
   });
 
+  test('fetch clears skipInitialFetch so later query switches do not return to the empty state', async () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const tabId = stateContainer.getCurrentTab().id;
+
+    stateContainer.internalState.dispatch(
+      internalStateActions.setSkipInitialFetch({ tabId, skipInitialFetch: true })
+    );
+    expect(stateContainer.getCurrentTab().skipInitialFetch).toBe(true);
+
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+    await dataState.fetch();
+
+    expect(stateContainer.getCurrentTab().skipInitialFetch).toBe(false);
+  });
+
   test('refetch$ triggers a search', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     jest.spyOn(stateContainer.searchSessionManager, 'getNextSearchSessionId');

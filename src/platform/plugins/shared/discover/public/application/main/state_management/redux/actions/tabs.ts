@@ -89,6 +89,7 @@ export const setTabs: InternalStateThunkActionCreator<
       newRecentlyClosedTab.appState = cloneDeep(tab.appState);
       newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
       newRecentlyClosedTab.profileState = cloneDeep(tab.profileState);
+      newRecentlyClosedTab.skipInitialFetch = false;
       justRemovedTabs.push(newRecentlyClosedTab);
 
       dispatch(disconnectTab({ tabId: tab.id }));
@@ -225,6 +226,21 @@ export const updateTabs: InternalStateThunkActionCreator<
         // the new tab is a fresh one
         const currentQuery = currentTab.appState.query;
         const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
+
+        tab.skipInitialFetch = true;
+        const currentRefreshInterval =
+          tab.globalState.refreshInterval ?? services.timefilter.getRefreshInterval();
+        tab.globalState = {
+          ...tab.globalState,
+          refreshInterval: { ...currentRefreshInterval, pause: true },
+        };
+        tab.uiState = {
+          ...tab.uiState,
+          esqlEditor: {
+            ...tab.uiState.esqlEditor,
+            isHistoryOpen: true,
+          },
+        };
 
         if (!currentQuery || !currentDataView) {
           return tab;

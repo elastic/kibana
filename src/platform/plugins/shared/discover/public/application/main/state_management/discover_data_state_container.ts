@@ -192,6 +192,9 @@ export function getDataStateContainer({
    */
   const refetch$ = new Subject<DataRefetchMsg>();
   const getInitialFetchStatus = () => {
+    if (getCurrentTab().skipInitialFetch) {
+      return FetchStatus.UNINITIALIZED;
+    }
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
       internalState.getState().persistedDiscoverSession?.id !== undefined ||
@@ -605,6 +608,14 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async () => {
+    if (getCurrentTab().skipInitialFetch) {
+      // The tab has been initialized by an explicit search; later query-language
+      // switches should fetch normally instead of returning to the empty state.
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.setSkipInitialFetch)({ skipInitialFetch: false })
+      );
+    }
+
     const query = getCurrentTab().appState.query;
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
     const currentDataView = currentDataView$.getValue();

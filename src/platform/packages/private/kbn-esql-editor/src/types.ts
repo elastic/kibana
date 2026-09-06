@@ -68,6 +68,8 @@ export interface ESQLEditorProps {
   allowQueryCancellation?: boolean;
   /** hide query history **/
   hideQueryHistory?: boolean;
+  /** Close the history panel when the user submits a query */
+  closeHistoryOnSubmit?: boolean;
   /** hide quick search **/
   hideQuickSearch?: boolean;
   /** adds border in the editor **/
