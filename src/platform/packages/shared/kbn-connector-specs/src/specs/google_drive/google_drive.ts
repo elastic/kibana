@@ -173,6 +173,18 @@ export const GoogleDriveConnector: ConnectorSpec = {
     },
   },
 
+/**
+ * CONN-004 metadata-only guarantee: ingest and metadata actions never return
+ * file content. Belt-and-braces removal of content-bearing fields if the API
+ * ever starts returning them for the fields= metadata projections.
+ */
+const DRIVE_CONTENT_FIELDS = ['content', 'data', 'body', 'binaryContent', 'base64Content'] as const;
+function stripFileContent<T extends Record<string, unknown>>(file: T): T {
+  const clone: Record<string, unknown> = { ...file };
+  for (const f of DRIVE_CONTENT_FIELDS) delete clone[f];
+  return clone as T;
+}
+
   actions: {
     searchFiles: {
       isTool: true,
@@ -469,18 +481,6 @@ export const GoogleDriveConnector: ConnectorSpec = {
     },
 
     
-/**
- * CONN-004 metadata-only guarantee: ingest and metadata actions never return
- * file content. Belt-and-braces removal of content-bearing fields if the API
- * ever starts returning them for the fields= metadata projections.
- */
-const DRIVE_CONTENT_FIELDS = ['content', 'data', 'body', 'binaryContent', 'base64Content'] as const;
-function stripFileContent<T extends Record<string, unknown>>(file: T): T {
-  const clone: Record<string, unknown> = { ...file };
-  for (const f of DRIVE_CONTENT_FIELDS) delete clone[f];
-  return clone as T;
-}
-
 getFileMetadata: {
       isTool: true,
       scope: 'read',
