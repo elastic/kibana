@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from 'zod';
 import type { GitHubQueryTemplate } from './types';
 
 export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   {
     id: 'orgCatalog.repos',
+    variablesSchema: z.object({ org: z.string().min(1) }),
+    isPaginated: true,
     description: 'List repositories for a GitHub organization with cursor pagination.',
     resultPath: 'organization.repositories',
     document: `
@@ -63,6 +66,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'orgCatalog.teams',
+    variablesSchema: z.object({ org: z.string().min(1) }),
+    isPaginated: true,
     description: 'List teams for a GitHub organization with cursor pagination.',
     resultPath: 'organization.teams',
     document: `
@@ -98,6 +103,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'orgCatalog.teamMembers',
+    variablesSchema: z.object({ org: z.string().min(1), teamSlug: z.string().min(1) }),
+    isPaginated: true,
     description: 'List members of a GitHub organization team with cursor pagination.',
     resultPath: 'organization.team.members',
     document: `
@@ -125,6 +132,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'orgCatalog.members',
+    variablesSchema: z.object({ org: z.string().min(1) }),
+    isPaginated: true,
     description: 'List members of a GitHub organization with role information.',
     resultPath: 'organization.membersWithRole',
     document: `
@@ -153,6 +162,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'orgCatalog.projects',
+    variablesSchema: z.object({ org: z.string().min(1) }),
+    isPaginated: true,
     description: 'List GitHub Projects v2 for an organization with cursor pagination.',
     resultPath: 'organization.projectsV2',
     document: `
@@ -181,6 +192,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'orgCatalog.projectViews',
+    variablesSchema: z.object({ org: z.string().min(1), projectNumber: z.number().int() }),
+    isPaginated: true,
     description:
       'List saved views for a GitHub Project v2 by project node id. Pass projectId from orgCatalog.projects.',
     resultPath: 'node.views',
@@ -210,6 +223,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'orgCatalog.projectItems',
+    variablesSchema: z.object({ org: z.string().min(1), projectNumber: z.number().int() }),
+    isPaginated: true,
     description:
       'List items for a GitHub Project v2 by project node id with cursor pagination. Pass projectId from orgCatalog.projects.',
     resultPath: 'node.items',
@@ -357,6 +372,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'activity.searchIssues',
+    variablesSchema: z.object({ query: z.string().min(1) }),
+    isPaginated: true,
     description:
       'Search issues org-wide. Pass a GitHub search query (e.g. "org:elastic updated:>2026-06-01 -is:pr").',
     resultPath: 'search',
@@ -401,6 +418,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'activity.searchPullRequests',
+    variablesSchema: z.object({ query: z.string().min(1) }),
+    isPaginated: true,
     description:
       'Search pull requests org-wide. Pass a GitHub search query (e.g. "org:elastic is:pr updated:>2026-06-01").',
     resultPath: 'search',
@@ -451,6 +470,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'graph.issueGraph',
+    variablesSchema: z.object({ owner: z.string().min(1), repo: z.string().min(1), number: z.number().int() }),
+    isPaginated: false,
     description:
       'Fetch an issue with parent issue, sub-issues, and comments for linkage enrichment.',
     document: `
@@ -505,6 +526,8 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'graph.pullRequestGraph',
+    variablesSchema: z.object({ owner: z.string().min(1), repo: z.string().min(1), number: z.number().int() }),
+    isPaginated: false,
     description: 'Fetch a pull request with reviews, review threads, and linked closing issues.',
     document: `
       query GraphPullRequest($owner: String!, $repo: String!, $number: Int!) {
