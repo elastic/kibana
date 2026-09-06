@@ -308,6 +308,12 @@ describe('discover session API transforms', () => {
               breakdownField: 'transaction.id',
               chartInterval: 'h',
               density: 'compact',
+              documentsDisplayMode: 'json',
+              jsonModeSettings: {
+                hideNulls: true,
+                wrapLines: false,
+                defaultRenderedNodes: 10,
+              },
               controlGroupJson: undefined,
               visContext: undefined,
             },
@@ -344,6 +350,12 @@ describe('discover session API transforms', () => {
               breakdownField: 'transaction.id',
               chartInterval: 'h',
               density: 'compact',
+              documentsDisplayMode: 'json',
+              jsonModeSettings: {
+                hideNulls: true,
+                wrapLines: false,
+                defaultRenderedNodes: 10,
+              },
               visContext: {
                 suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
                 requestData: {

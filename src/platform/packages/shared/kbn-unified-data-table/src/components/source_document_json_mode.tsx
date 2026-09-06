@@ -27,6 +27,7 @@ import { flattenedToNestedDocument, MAX_TREE_VALUES } from '../utils/build_docum
 import type { JsonModeSettings } from '../types';
 import type { FormatValue, GetLeafActions } from './json_tree_viewer/json_tree_viewer';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer/json_tree_viewer';
+import { DEFAULT_RENDERED_NODES } from './data_table_additional_display_settings';
 import { getDocumentText } from './json_tree_viewer/doc_scan';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -62,6 +63,7 @@ export const SourceDocumentJsonMode = ({
 
   const hideNulls = jsonModeSettings?.hideNulls ?? false;
   const wrapLines = jsonModeSettings?.wrapLines ?? true;
+  const defaultRenderedNodes = jsonModeSettings?.defaultRenderedNodes ?? DEFAULT_RENDERED_NODES;
 
   // Filter for / filter out actions per leaf.
   const getLeafActions = useCallback<GetLeafActions>(
@@ -193,6 +195,7 @@ export const SourceDocumentJsonMode = ({
         formatValue={formatTreeValue}
         getLeafActions={getLeafActions}
         wrapLines={wrapLines}
+        defaultRenderedNodes={defaultRenderedNodes}
       />
     </span>
   );

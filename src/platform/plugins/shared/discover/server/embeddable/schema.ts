@@ -72,6 +72,9 @@ const jsonModeSettingsSchema = z
       description:
         'When false, long values are truncated to a single line instead of wrapping while in JSON mode.',
     }),
+    default_rendered_nodes: z.number().min(10).max(200).optional().meta({
+      description: 'How many rows each JSON cell renders by default while in JSON mode.',
+    }),
   })
   .strict()
   .optional()
