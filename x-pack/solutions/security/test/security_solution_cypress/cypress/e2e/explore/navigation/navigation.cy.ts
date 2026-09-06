@@ -83,6 +83,7 @@ import {
   MANAGE_AUTOMATIC_MIGRATIONS_URL,
   TRANSLATED_RULES_PAGE_URL,
   TRANSLATED_DASHBOARDS_PAGE_URL,
+  CUSTOM_YARA_SIGNATURES_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
@@ -101,215 +102,231 @@ import {
   LAUNCHPAD_PAGE,
 } from '../../../screens/kibana_navigation';
 
-describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
-  before(() => {
-    // SIEM Readiness is behind an Advanced Setting (default off); enable it for Launchpad nav coverage.
-    enableSiemReadiness();
-  });
+describe(
+  'top-level navigation common to all pages in the Security app',
+  {
+    tags: '@ess',
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'customYaraSignaturesEnabled',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    before(() => {
+      // SIEM Readiness is behind an Advanced Setting (default off); enable it for Launchpad nav coverage.
+      enableSiemReadiness();
+    });
 
-  beforeEach(() => {
-    login();
-    visitWithTimeRange(TIMELINES_URL);
-  });
+    beforeEach(() => {
+      login();
+      visitWithTimeRange(TIMELINES_URL);
+    });
 
-  it('navigates to the Dashboards landing page', () => {
-    navigateFromHeaderTo(DASHBOARDS);
-    cy.url().should('include', DASHBOARDS_URL);
-  });
+    it('navigates to the Dashboards landing page', () => {
+      navigateFromHeaderTo(DASHBOARDS);
+      cy.url().should('include', DASHBOARDS_URL);
+    });
 
-  it('navigates to the Overview page from dashboard', () => {
-    cy.visit(DASHBOARDS_URL);
-    verifyNavigatesFromDashboardLandingTo('overview', OVERVIEW_URL);
-  });
+    it('navigates to the Overview page from dashboard', () => {
+      cy.visit(DASHBOARDS_URL);
+      verifyNavigatesFromDashboardLandingTo('overview', OVERVIEW_URL);
+    });
 
-  it('navigates to the Detection & Response page from dashboard', () => {
-    cy.visit(DASHBOARDS_URL);
-    verifyNavigatesFromDashboardLandingTo('detection_response', DETECTION_AND_RESPONSE_URL);
-  });
+    it('navigates to the Detection & Response page from dashboard', () => {
+      cy.visit(DASHBOARDS_URL);
+      verifyNavigatesFromDashboardLandingTo('detection_response', DETECTION_AND_RESPONSE_URL);
+    });
 
-  it('navigates to Kubernetes page from dashboard', () => {
-    cy.visit(DASHBOARDS_URL);
-    verifyNavigatesFromDashboardLandingTo('kubernetes', KUBERNETES_URL);
-  });
+    it('navigates to Kubernetes page from dashboard', () => {
+      cy.visit(DASHBOARDS_URL);
+      verifyNavigatesFromDashboardLandingTo('kubernetes', KUBERNETES_URL);
+    });
 
-  it('navigates to the CSP page from dashboard', () => {
-    cy.visit(DASHBOARDS_URL);
-    verifyNavigatesFromDashboardLandingTo('cloud_security_posture-dashboard', CSP_DASHBOARD_URL);
-  });
+    it('navigates to the CSP page from dashboard', () => {
+      cy.visit(DASHBOARDS_URL);
+      verifyNavigatesFromDashboardLandingTo('cloud_security_posture-dashboard', CSP_DASHBOARD_URL);
+    });
 
-  it('navigates to the Cloud Native Vulnerability Management page from dashboard', () => {
-    cy.visit(DASHBOARDS_URL);
-    verifyNavigatesFromDashboardLandingTo(
-      'cloud_security_posture-vulnerability_dashboard',
-      CLOUD_NATIVE_VULN_MGMT_URL
-    );
-  });
+    it('navigates to the Cloud Native Vulnerability Management page from dashboard', () => {
+      cy.visit(DASHBOARDS_URL);
+      verifyNavigatesFromDashboardLandingTo(
+        'cloud_security_posture-vulnerability_dashboard',
+        CLOUD_NATIVE_VULN_MGMT_URL
+      );
+    });
 
-  it('navigates to the Entity Analytics page from dashboard', () => {
-    cy.visit(DASHBOARDS_URL);
-    verifyNavigatesFromDashboardLandingTo('entity_analytics', ENTITY_ANALYTICS_URL);
-    cy.url().should('include', ENTITY_ANALYTICS_URL);
-  });
+    it('navigates to the Entity Analytics page from dashboard', () => {
+      cy.visit(DASHBOARDS_URL);
+      verifyNavigatesFromDashboardLandingTo('entity_analytics', ENTITY_ANALYTICS_URL);
+      cy.url().should('include', ENTITY_ANALYTICS_URL);
+    });
 
-  it('navigates to Data quality page from dashboard', () => {
-    cy.visit(DASHBOARDS_URL);
-    verifyNavigatesFromDashboardLandingTo('data_quality', DATA_QUALITY_URL);
-    cy.url().should('include', DATA_QUALITY_URL);
-  });
+    it('navigates to Data quality page from dashboard', () => {
+      cy.visit(DASHBOARDS_URL);
+      verifyNavigatesFromDashboardLandingTo('data_quality', DATA_QUALITY_URL);
+      cy.url().should('include', DATA_QUALITY_URL);
+    });
 
-  it('navigates to the Alerts page', () => {
-    navigateFromHeaderTo(ALERTS);
-    cy.url().should('include', ALERTS_URL);
-  });
+    it('navigates to the Alerts page', () => {
+      navigateFromHeaderTo(ALERTS);
+      cy.url().should('include', ALERTS_URL);
+    });
 
-  it('navigates to the Findings page', () => {
-    navigateFromHeaderTo(CSP_FINDINGS);
-    cy.url().should('include', CSP_FINDINGS_URL);
-  });
+    it('navigates to the Findings page', () => {
+      navigateFromHeaderTo(CSP_FINDINGS);
+      cy.url().should('include', CSP_FINDINGS_URL);
+    });
 
-  it('navigates to the Timelines page', () => {
-    navigateFromHeaderTo(TIMELINES);
-    cy.url().should('include', TIMELINES_URL);
-  });
+    it('navigates to the Timelines page', () => {
+      navigateFromHeaderTo(TIMELINES);
+      cy.url().should('include', TIMELINES_URL);
+    });
 
-  it('opens the Explore sub nav panel', () => {
-    navigateFromHeaderTo(EXPLORE);
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Hosts');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Network');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Users');
-  });
+    it('opens the Explore sub nav panel', () => {
+      navigateFromHeaderTo(EXPLORE);
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Hosts');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Network');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Users');
+    });
 
-  it('navigates to the Hosts page', () => {
-    navigateFromHeaderTo(HOSTS);
-    cy.url().should('include', HOSTS_URL);
-  });
+    it('navigates to the Hosts page', () => {
+      navigateFromHeaderTo(HOSTS);
+      cy.url().should('include', HOSTS_URL);
+    });
 
-  it('navigates to the Network page', () => {
-    navigateFromHeaderTo(NETWORK);
-    cy.url().should('include', NETWORK_URL);
-  });
+    it('navigates to the Network page', () => {
+      navigateFromHeaderTo(NETWORK);
+      cy.url().should('include', NETWORK_URL);
+    });
 
-  it('navigates to the Users page', () => {
-    navigateFromHeaderTo(USERS);
-    cy.url().should('include', USERS_URL);
-  });
+    it('navigates to the Users page', () => {
+      navigateFromHeaderTo(USERS);
+      cy.url().should('include', USERS_URL);
+    });
 
-  it('navigates to the Indicators page', () => {
-    navigateFromHeaderTo(INDICATORS);
-    cy.url().should('include', INDICATORS_URL);
-  });
+    it('navigates to the Indicators page', () => {
+      navigateFromHeaderTo(INDICATORS);
+      cy.url().should('include', INDICATORS_URL);
+    });
 
-  it('opens the Rules sub nav panel', () => {
-    navigateFromHeaderTo(RULES_NAV_LINK);
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Detection rules (SIEM)');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Benchmarks');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Shared exception lists');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'MITRE ATT&CK® Coverage');
-  });
+    it('opens the Rules sub nav panel', () => {
+      navigateFromHeaderTo(RULES_NAV_LINK);
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Detection rules (SIEM)');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Benchmarks');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Shared exception lists');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'MITRE ATT&CK® Coverage');
+    });
 
-  it('navigates to the Exceptions page', () => {
-    navigateFromHeaderTo(EXCEPTIONS);
-    cy.url().should('include', EXCEPTIONS_URL);
-  });
+    it('navigates to the Exceptions page', () => {
+      navigateFromHeaderTo(EXCEPTIONS);
+      cy.url().should('include', EXCEPTIONS_URL);
+    });
 
-  it('navigates to the Cases page', () => {
-    navigateFromHeaderTo(CASES);
-    cy.url().should('include', CASES_URL);
-  });
+    it('navigates to the Cases page', () => {
+      navigateFromHeaderTo(CASES);
+      cy.url().should('include', CASES_URL);
+    });
 
-  it('opens Launchpad sub nav panel', () => {
-    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Get started');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'SIEM Readiness');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Value report');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Manage Automatic Migrations');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Translated rules');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Translated dashboards');
-  });
+    it('opens Launchpad sub nav panel', () => {
+      navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Get started');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'SIEM Readiness');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Value report');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Manage Automatic Migrations');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Translated rules');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Translated dashboards');
+    });
 
-  it('navigates to the Get Started page from Launchpad', () => {
-    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
-    cy.get(GET_STARTED_TEST_SUBJ).click();
-    cy.url().should('include', GET_STARTED_URL);
-  });
+    it('navigates to the Get Started page from Launchpad', () => {
+      navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+      cy.get(GET_STARTED_TEST_SUBJ).click();
+      cy.url().should('include', GET_STARTED_URL);
+    });
 
-  it('navigates to SIEM Readiness page from Launchpad', () => {
-    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
-    cy.get(SIEM_READINESS_TEST_SUBJ).click();
-    cy.url().should('include', SIEM_READINESS_URL);
-  });
+    it('navigates to SIEM Readiness page from Launchpad', () => {
+      navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+      cy.get(SIEM_READINESS_TEST_SUBJ).click();
+      cy.url().should('include', SIEM_READINESS_URL);
+    });
 
-  it('navigates to the Value Report page from Launchpad', () => {
-    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
-    cy.get(VALUE_REPORTS_TEST_SUBJ).click();
-    cy.url().should('include', VALUE_REPORTS_URL);
-  });
+    it('navigates to the Value Report page from Launchpad', () => {
+      navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+      cy.get(VALUE_REPORTS_TEST_SUBJ).click();
+      cy.url().should('include', VALUE_REPORTS_URL);
+    });
 
-  it('navigates to the Manage Automatic Migrations page from Launchpad', () => {
-    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
-    cy.get(MANAGE_AUTOMATIC_MIGRATIONS_TEST_SUBJ).click();
-    cy.url().should('include', MANAGE_AUTOMATIC_MIGRATIONS_URL);
-  });
+    it('navigates to the Manage Automatic Migrations page from Launchpad', () => {
+      navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+      cy.get(MANAGE_AUTOMATIC_MIGRATIONS_TEST_SUBJ).click();
+      cy.url().should('include', MANAGE_AUTOMATIC_MIGRATIONS_URL);
+    });
 
-  it('navigates to the Translated Rules page from Launchpad', () => {
-    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
-    cy.get(LAUNCHPAD_TRANSLATED_RULES_PAGE).click();
-    cy.url().should('include', TRANSLATED_RULES_PAGE_URL);
-  });
+    it('navigates to the Translated Rules page from Launchpad', () => {
+      navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+      cy.get(LAUNCHPAD_TRANSLATED_RULES_PAGE).click();
+      cy.url().should('include', TRANSLATED_RULES_PAGE_URL);
+    });
 
-  it('navigates to Translated Dashboards page from Launchpad', () => {
-    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
-    cy.get(TRANSLATED_DASHBOARDS_PAGE).click();
-    cy.url().should('include', TRANSLATED_DASHBOARDS_PAGE_URL);
-  });
+    it('navigates to Translated Dashboards page from Launchpad', () => {
+      navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+      cy.get(TRANSLATED_DASHBOARDS_PAGE).click();
+      cy.url().should('include', TRANSLATED_DASHBOARDS_PAGE_URL);
+    });
 
-  it('opens the Manage sub nav panel', () => {
-    navigateFromHeaderTo(SETTINGS);
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Entity analytics');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Endpoints');
-    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Investigations');
-  });
+    it('opens the Manage sub nav panel', () => {
+      navigateFromHeaderTo(SETTINGS);
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Entity analytics');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Endpoints');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Investigations');
+    });
 
-  it('navigates to the Endpoints page', () => {
-    navigateFromHeaderTo(ENDPOINTS);
-    cy.url().should('include', ENDPOINTS_URL);
-  });
-  it('navigates to the Policies page', () => {
-    navigateFromHeaderTo(POLICIES);
-    cy.url().should('include', POLICIES_URL);
-  });
-  it('navigates to the Artifacts page from the Manage panel', () => {
-    navigateFromHeaderTo(ARTIFACTS);
-    cy.url().should('include', ADMINISTRATION_URL_PREFIX);
-  });
-  for (const [artifactName, artifactUrl] of [
-    ['trusted apps', TRUSTED_APPS_URL],
-    ['event filters', EVENT_FILTERS_URL],
-    ['blocklist', BLOCKLIST_URL],
-    ['endpoint exceptions', ENDPOINT_EXCEPTIONS_URL],
-    ['host isolation exceptions', HOST_ISOLATION_EXCEPTIONS_URL],
-    ['trusted devices', TRUSTED_DEVICES_URL],
-  ]) {
-    it(`${artifactName} deep links still resolve`, () => {
-      visit(artifactUrl);
-      cy.url().should('include', artifactUrl);
+    it('navigates to the Endpoints page', () => {
+      navigateFromHeaderTo(ENDPOINTS);
+      cy.url().should('include', ENDPOINTS_URL);
+    });
+    it('navigates to the Policies page', () => {
+      navigateFromHeaderTo(POLICIES);
+      cy.url().should('include', POLICIES_URL);
+    });
+    it('navigates to the Artifacts page from the Manage panel', () => {
+      navigateFromHeaderTo(ARTIFACTS);
+      cy.url().should('include', ADMINISTRATION_URL_PREFIX);
+    });
+    for (const [artifactName, artifactUrl] of [
+      ['trusted apps', TRUSTED_APPS_URL],
+      ['event filters', EVENT_FILTERS_URL],
+      ['blocklist', BLOCKLIST_URL],
+      ['endpoint exceptions', ENDPOINT_EXCEPTIONS_URL],
+      ['host isolation exceptions', HOST_ISOLATION_EXCEPTIONS_URL],
+      ['trusted devices', TRUSTED_DEVICES_URL],
+      ['custom yara signatures', CUSTOM_YARA_SIGNATURES_URL],
+    ]) {
+      it(`${artifactName} deep links still resolve`, () => {
+        visit(artifactUrl);
+        cy.url().should('include', artifactUrl);
+      });
+    }
+    it('navigates to the CSP Benchmarks page', () => {
+      navigateFromHeaderTo(CSP_BENCHMARKS);
+      cy.url().should('include', CSP_BENCHMARKS_URL);
     });
   }
-  it('navigates to the CSP Benchmarks page', () => {
-    navigateFromHeaderTo(CSP_BENCHMARKS);
-    cy.url().should('include', CSP_BENCHMARKS_URL);
-  });
-});
+);
 
 describe('Kibana navigation to all pages in the Security app ', { tags: '@ess' }, () => {
   beforeEach(() => {

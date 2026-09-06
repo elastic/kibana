@@ -36,6 +36,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
+  MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH,
 } from './constants';
 import { isDefaultOrMissing, getArtifactListPageUrlPath } from './url_routing';
 
@@ -302,6 +303,16 @@ export const getPolicyHostIsolationExceptionsPath = (
 export const getBlocklistsListPath = (location?: Partial<ArtifactListPageUrlParams>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_BLOCKLIST_PATH, {
     tabName: AdministrationSubTab.blocklist,
+  });
+
+  return getArtifactListPageUrlPath(path, location);
+};
+
+export const getCustomYaraSignaturesListPath = (
+  location?: Partial<ArtifactListPageUrlParams>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH, {
+    tabName: AdministrationSubTab.customYaraSignatures,
   });
 
   return getArtifactListPageUrlPath(path, location);
