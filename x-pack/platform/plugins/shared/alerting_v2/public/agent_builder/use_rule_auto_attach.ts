@@ -7,8 +7,8 @@
 
 import type { RuleApiResponse } from '../services/rules_api';
 import { ruleAttachmentConverter } from './rule_auto_attach';
-import { useAutoAttach } from './use_auto_attach';
+import { useAutoAddToChat } from './use_auto_add_to_chat';
 
 export const useRuleAutoAttach = (rule: RuleApiResponse | undefined): void => {
-  useAutoAttach(rule, ruleAttachmentConverter);
+  useAutoAddToChat(rule, ruleAttachmentConverter);
 };

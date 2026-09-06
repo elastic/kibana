@@ -110,6 +110,7 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/esql-types",
     "@kbn/agent-builder-plugin",
+    "@kbn/shared-ux-ai-components",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",

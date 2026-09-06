@@ -379,25 +379,28 @@ export const AlertEpisodesListPage = () => {
   );
 
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
-    (hit) => (
-      <AlertEpisodeDetailsFlyout
-        episodeId={hit.flattened['episode.id'] as string}
-        groupHash={hit.flattened.group_hash as string | undefined}
-        onClose={closeFlyout}
-        actions={episodeActions}
-        services={{
-          data: services.data,
-          http: services.http,
-          expressions: services.expressions,
-          userProfile: services.userProfile,
-          spaces: services.spaces,
-          uiSettings: services.uiSettings,
-          unifiedDocViewer: services.unifiedDocViewer,
-          dataViews: services.dataViews,
-        }}
-      />
-    ),
-    [closeFlyout, episodeActions, services]
+    (hit) => {
+      const episode = dataTableRecordToEpisode(hit);
+      return (
+        <AlertEpisodeDetailsFlyout
+          episode={episode}
+          rule={rulesCache[episode['rule.id']]}
+          onClose={closeFlyout}
+          actions={episodeActions}
+          services={{
+            data: services.data,
+            http: services.http,
+            expressions: services.expressions,
+            userProfile: services.userProfile,
+            spaces: services.spaces,
+            uiSettings: services.uiSettings,
+            unifiedDocViewer: services.unifiedDocViewer,
+            dataViews: services.dataViews,
+          }}
+        />
+      );
+    },
+    [closeFlyout, episodeActions, rulesCache, services]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
