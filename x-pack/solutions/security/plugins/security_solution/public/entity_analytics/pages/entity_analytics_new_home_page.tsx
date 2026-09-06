@@ -7,14 +7,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
-import {
-  EuiDataGrid,
-  EuiDataGridColumn,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGrid, EuiLoadingSpinner, EuiSpacer, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
@@ -191,10 +185,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const [visibleColumns, setVisibleColumns] = useState(GRID_COLUMNS.map((c) => c.id));
 
   const renderCellValue = useCallback(
-    ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+    (props: { rowIndex: number; columnId: string }) => {
+      const { rowIndex, columnId } = props;
       const relativeIndex = rowIndex - pageIndex * pageSize;
       const value = rows[relativeIndex]?.[columnId];
-      if (value == null) return <>—</>;
+      if (value == null) return <>{'—'}</>;
       if (
         columnId === 'last_seen_alert' ||
         columnId === '@timestamp' ||
@@ -205,13 +200,25 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       }
       if (columnId === 'risk_score_change') {
         const delta = value as number;
-        if (delta > 0) return <EuiTextColor color="danger">↑ +{delta.toFixed(1)}</EuiTextColor>;
-        if (delta < 0) return <EuiTextColor color="success">↓ {delta.toFixed(1)}</EuiTextColor>;
-        return <>→ 0.0</>;
+        if (delta > 0)
+          return (
+            <EuiTextColor color="danger">
+              {'↑ +'}
+              {delta.toFixed(1)}
+            </EuiTextColor>
+          );
+        if (delta < 0)
+          return (
+            <EuiTextColor color="success">
+              {'↓ '}
+              {delta.toFixed(1)}
+            </EuiTextColor>
+          );
+        return <>{'→ 0.0'}</>;
       }
       if (columnId === 'entity.attributes.watchlists') {
         const ids = value as string[];
-        if (!Array.isArray(ids) || ids.length === 0) return <>—</>;
+        if (!Array.isArray(ids) || ids.length === 0) return <>{'—'}</>;
         return <>{ids.map((id) => watchlistNames.get(id) ?? id).join(', ')}</>;
       }
       return <>{String(value)}</>;
@@ -279,7 +286,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             height: 100%;
           `}
         >
-          <div css={css`padding-inline: ${euiTheme.size.base};`}>
+          <div
+            css={css`
+              padding-inline: ${euiTheme.size.base};
+            `}
+          >
             <SiemSearchBar dataView={dataView} id={InputsModelId.global} hideDatePicker />
           </div>
 

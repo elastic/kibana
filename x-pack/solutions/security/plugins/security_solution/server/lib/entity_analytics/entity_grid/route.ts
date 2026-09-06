@@ -41,7 +41,10 @@ const VALID_FIELD_RE = /^[@\w.]+$/;
 
 // ── types ────────────────────────────────────────────────────────────────────
 
-type EsqlResponse = { columns: Array<{ name: string; type: string }>; values: unknown[][] };
+interface EsqlResponse {
+  columns: Array<{ name: string; type: string }>;
+  values: unknown[][];
+}
 type Row = Record<string, unknown>;
 type SortDir = 'asc' | 'desc';
 
@@ -63,7 +66,11 @@ interface RiskDateWindow {
 
 const esc = (s: string) => `"${s.replace(/"/g, '\\"')}"`;
 const toList = (items: readonly string[]) => items.map(esc).join(', ');
-const indent = (s: string) => s.split('\n').map((l) => `  ${l}`).join('\n');
+const indent = (s: string) =>
+  s
+    .split('\n')
+    .map((l) => `  ${l}`)
+    .join('\n');
 const toRows = (r: unknown): Row[] => {
   const { columns, values } = r as EsqlResponse;
   return values.map((row) => Object.fromEntries(columns.map((col, i) => [col.name, row[i]])));
@@ -84,13 +91,17 @@ const riskDateWindow = (): RiskDateWindow => ({
 
 // ── cursors ──────────────────────────────────────────────────────────────────
 
-const encodeCursor = (c: PageCursor): string =>
-  Buffer.from(JSON.stringify(c)).toString('base64');
+const encodeCursor = (c: PageCursor): string => Buffer.from(JSON.stringify(c)).toString('base64');
 
 const decodeCursor = (s: string): PageCursor =>
   JSON.parse(Buffer.from(s, 'base64').toString('utf8')) as PageCursor;
 
-const cursorClause = ({ sortField: f, sortDirection: dir, sortValue: v, entityId }: PageCursor): string => {
+const cursorClause = ({
+  sortField: f,
+  sortDirection: dir,
+  sortValue: v,
+  entityId,
+}: PageCursor): string => {
   const safeId = esc(entityId);
   if (v == null) return `| WHERE ${f} IS NULL AND ${ENTITY_ID_FIELD} > ${safeId}`;
   const op = dir === 'desc' ? '<' : '>';
@@ -104,12 +115,18 @@ const cursorClause = ({ sortField: f, sortDirection: dir, sortValue: v, entityId
 
 // Always NULLS LAST so entities without data appear at the bottom regardless of sort direction.
 const sortSuffix = (field: string, dir: SortDir, pageSize: number): string =>
-  `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC\n| LIMIT ${pageSize + 1}`;
+  `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC\n| LIMIT ${
+    pageSize + 1
+  }`;
 
 // ── query builders: native entity sort ───────────────────────────────────────
 
 const nativeEntityDataQuery = (
-  entityAlias: string, field: string, dir: SortDir, cursor: PageCursor | null, pageSize: number
+  entityAlias: string,
+  field: string,
+  dir: SortDir,
+  cursor: PageCursor | null,
+  pageSize: number
 ): string =>
   [
     `FROM ${entityAlias}`,
@@ -120,7 +137,9 @@ const nativeEntityDataQuery = (
   ].join('\n');
 
 const nativeEntityCountQuery = (entityAlias: string): string =>
-  `FROM ${entityAlias}\n| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})\n| STATS total = COUNT(*)`;
+  `FROM ${entityAlias}\n| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(
+    ALLOWED_ENTITY_TYPES
+  )})\n| STATS total = COUNT(*)`;
 
 // ── query builders: last_seen_alert sort ──────────────────────────────────────
 
@@ -139,8 +158,7 @@ const alertUnionQuery = (alertsIndex: string, nameFilter?: string): string => {
   // independently — a request straddling a 30-day boundary could see a one-doc discrepancy.
   // Low-impact (30d window), but fix by computing cutoff once per request like riskDateWindow().
   const cutoff = new Date(Date.now() - ALERT_LOOKBACK_DAYS * 86_400_000).toISOString();
-  const union = ALERT_ENTITY_FIELDS
-    .map((f) => alertLeg(alertsIndex, f, cutoff, nameFilter))
+  const union = ALERT_ENTITY_FIELDS.map((f) => alertLeg(alertsIndex, f, cutoff, nameFilter))
     .map((leg, i) => (i === 0 ? `FROM (\n${indent(leg)}\n)` : `(\n${indent(leg)}\n)`))
     .join(',\n');
   return [
@@ -155,12 +173,18 @@ const alertUnionQuery = (alertsIndex: string, nameFilter?: string): string => {
 // A future improvement: include all entities and treat no-alert as null (sort last).
 
 const lastSeenAlertDataQuery = (
-  alertsIndex: string, entityAlias: string, cursor: PageCursor | null, pageSize: number, dir: SortDir
+  alertsIndex: string,
+  entityAlias: string,
+  cursor: PageCursor | null,
+  pageSize: number,
+  dir: SortDir
 ): string => {
   const inner = [
     alertUnionQuery(alertsIndex),
     `| LOOKUP JOIN ${entityAlias} ON entity.name`,
-    `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`,
+    `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(
+      ALLOWED_ENTITY_TYPES
+    )})`,
     ...(cursor ? [cursorClause(cursor)] : []),
   ].join('\n');
   return `FROM (\n${indent(inner)}\n)\n${sortSuffix(LAST_SEEN_ALERT_FIELD, dir, pageSize)}`;
@@ -170,7 +194,9 @@ const lastSeenAlertCountQuery = (alertsIndex: string, entityAlias: string): stri
   [
     alertUnionQuery(alertsIndex),
     `| LOOKUP JOIN ${entityAlias} ON entity.name`,
-    `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`,
+    `| WHERE ${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(
+      ALLOWED_ENTITY_TYPES
+    )})`,
     `| STATS total = COUNT(*)`,
   ].join('\n');
 
@@ -182,7 +208,9 @@ const lastSeenAlertCountQuery = (alertsIndex: string, entityAlias: string): stri
 
 /** Base pipeline: risk history → LOOKUP JOIN entity store → compute delta. */
 const riskScoreChangeBaseQuery = (
-  riskScoreIndex: string, entityAlias: string, { yesterdayStart, todayStart }: RiskDateWindow
+  riskScoreIndex: string,
+  entityAlias: string,
+  { yesterdayStart, todayStart }: RiskDateWindow
 ): string =>
   [
     `FROM ${riskScoreIndex}`,
@@ -191,12 +219,19 @@ const riskScoreChangeBaseQuery = (
     `| EVAL yesterday_score = ${RISK_SCORE_COALESCE}`,
     `| STATS yesterday_score = MAX(yesterday_score) BY \`entity.id\``,
     `| LOOKUP JOIN ${entityAlias} ON \`entity.id\``,
-    `| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)}) AND ${RISK_SCORE_NORM_FIELD} IS NOT NULL`,
+    `| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(
+      ALLOWED_ENTITY_TYPES
+    )}) AND ${RISK_SCORE_NORM_FIELD} IS NOT NULL`,
     `| EVAL ${RISK_SCORE_CHANGE_FIELD} = ${RISK_SCORE_NORM_FIELD} - yesterday_score`,
   ].join('\n');
 
 const riskScoreChangeDataQuery = (
-  riskScoreIndex: string, entityAlias: string, cursor: PageCursor | null, pageSize: number, dir: SortDir, window: RiskDateWindow
+  riskScoreIndex: string,
+  entityAlias: string,
+  cursor: PageCursor | null,
+  pageSize: number,
+  dir: SortDir,
+  window: RiskDateWindow
 ): string =>
   [
     riskScoreChangeBaseQuery(riskScoreIndex, entityAlias, window),
@@ -204,14 +239,20 @@ const riskScoreChangeDataQuery = (
     sortSuffix(RISK_SCORE_CHANGE_FIELD, dir, pageSize),
   ].join('\n');
 
-const riskScoreChangeCountQuery = (riskScoreIndex: string, entityAlias: string, window: RiskDateWindow): string =>
+const riskScoreChangeCountQuery = (
+  riskScoreIndex: string,
+  entityAlias: string,
+  window: RiskDateWindow
+): string =>
   `${riskScoreChangeBaseQuery(riskScoreIndex, entityAlias, window)}\n| STATS total = COUNT(*)`;
 
 // ── query builders: per-page enrichment ──────────────────────────────────────
 
 /** Fetches (entity_id, yesterday_score) for a specific set of entity IDs. */
 const yesterdayScoreEnrichQuery = (
-  riskScoreIndex: string, entityIds: string[], { yesterdayStart, todayStart }: RiskDateWindow
+  riskScoreIndex: string,
+  entityIds: string[],
+  { yesterdayStart, todayStart }: RiskDateWindow
 ): string =>
   [
     `FROM ${riskScoreIndex}`,
@@ -229,7 +270,9 @@ export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoute
     .post({
       access: 'internal',
       path: ENTITY_GRID_INTERNAL_URL,
-      security: { authz: { requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`] } },
+      security: {
+        authz: { requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`] },
+      },
     })
     .addVersion(
       {
@@ -244,7 +287,11 @@ export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoute
                   direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
                 })
               ),
-              page_size: schema.number({ defaultValue: DEFAULT_PAGE_SIZE, min: 1, max: MAX_PAGE_SIZE }),
+              page_size: schema.number({
+                defaultValue: DEFAULT_PAGE_SIZE,
+                min: 1,
+                max: MAX_PAGE_SIZE,
+              }),
               cursor: schema.maybe(schema.string({ maxLength: 500 })),
             }),
           },
@@ -270,23 +317,28 @@ export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoute
 
           // Validate sort field to prevent ES|QL injection via the field name.
           if (!COMPUTED_SORT_FIELDS.has(sort.field) && !VALID_FIELD_RE.test(sort.field)) {
-            return siemResponse.error({ statusCode: 400, body: `Invalid sort field: ${sort.field}` });
+            return siemResponse.error({
+              statusCode: 400,
+              body: `Invalid sort field: ${sort.field}`,
+            });
           }
 
           const cursor = encodedCursor ? decodeCursor(encodedCursor) : null;
 
           // Validate cursor sort field too — cursor is client-supplied and not signed.
-          if (cursor && !COMPUTED_SORT_FIELDS.has(cursor.sortField) && !VALID_FIELD_RE.test(cursor.sortField)) {
+          if (
+            cursor &&
+            !COMPUTED_SORT_FIELDS.has(cursor.sortField) &&
+            !VALID_FIELD_RE.test(cursor.sortField)
+          ) {
             return siemResponse.error({ statusCode: 400, body: 'Invalid cursor' });
           }
 
           // filter is from the search bar and targets entity store fields — apply it only to
           // entity queries, not to alert or risk score index queries which have different schemas.
           const esqlOpts = filter ? { filter } : {};
-          const query = (q: string) =>
-            esClient.esql.query({ query: q, ...esqlOpts }).then(toRows);
-          const rawQuery = (q: string) =>
-            esClient.esql.query({ query: q }).then(toRows);
+          const query = (q: string) => esClient.esql.query({ query: q, ...esqlOpts }).then(toRows);
+          const rawQuery = (q: string) => esClient.esql.query({ query: q }).then(toRows);
 
           // Compute date window once so both data and count queries use the same day boundary.
           const window = riskDateWindow();
@@ -295,17 +347,39 @@ export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoute
           let countQuery: string;
 
           if (sort.field === LAST_SEEN_ALERT_FIELD) {
-            dataQuery = lastSeenAlertDataQuery(alertsIndex, entityAlias, cursor, pageSize, sort.direction);
+            dataQuery = lastSeenAlertDataQuery(
+              alertsIndex,
+              entityAlias,
+              cursor,
+              pageSize,
+              sort.direction
+            );
             countQuery = lastSeenAlertCountQuery(alertsIndex, entityAlias);
           } else if (sort.field === RISK_SCORE_CHANGE_FIELD) {
-            dataQuery = riskScoreChangeDataQuery(riskScoreIndex, entityAlias, cursor, pageSize, sort.direction, window);
+            dataQuery = riskScoreChangeDataQuery(
+              riskScoreIndex,
+              entityAlias,
+              cursor,
+              pageSize,
+              sort.direction,
+              window
+            );
             countQuery = riskScoreChangeCountQuery(riskScoreIndex, entityAlias, window);
           } else {
-            dataQuery = nativeEntityDataQuery(entityAlias, sort.field, sort.direction, cursor, pageSize);
+            dataQuery = nativeEntityDataQuery(
+              entityAlias,
+              sort.field,
+              sort.direction,
+              cursor,
+              pageSize
+            );
             countQuery = nativeEntityCountQuery(entityAlias);
           }
 
-          const [[...allRows], [countRow]] = await Promise.all([query(dataQuery), query(countQuery)]);
+          const [[...allRows], [countRow]] = await Promise.all([
+            query(dataQuery),
+            query(countQuery),
+          ]);
           const hasNextPage = allRows.length > pageSize;
           const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
           const total = (countRow?.total as number) ?? 0;
@@ -315,26 +389,36 @@ export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoute
             const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
 
             const tryEnrich = (q: string, label: string) =>
-              rawQuery(q).catch((e: unknown) => { logger.warn(`${label}: ${e}`); return null; });
+              rawQuery(q).catch((e: unknown) => {
+                logger.warn(`${label}: ${e}`);
+                return null;
+              });
 
             const [alertRows, scoreRows] = await Promise.all([
               sort.field !== LAST_SEEN_ALERT_FIELD
                 ? tryEnrich(alertUnionQuery(alertsIndex, toList(entityNames)), 'alert enrich')
                 : null,
               sort.field !== RISK_SCORE_CHANGE_FIELD
-                ? tryEnrich(yesterdayScoreEnrichQuery(riskScoreIndex, entityIds, window), 'score enrich')
+                ? tryEnrich(
+                    yesterdayScoreEnrichQuery(riskScoreIndex, entityIds, window),
+                    'score enrich'
+                  )
                 : null,
             ]);
 
             if (alertRows) {
               // alertUnionQuery ends with `| RENAME entity_name AS entity.name` so the key is "entity.name"
-              const byName = new Map(alertRows.map((r) => [r['entity.name'] as string, r[LAST_SEEN_ALERT_FIELD]]));
+              const byName = new Map(
+                alertRows.map((r) => [r['entity.name'] as string, r[LAST_SEEN_ALERT_FIELD]])
+              );
               for (const row of pageRows)
                 row[LAST_SEEN_ALERT_FIELD] = byName.get(row['entity.name'] as string) ?? null;
             }
 
             if (scoreRows) {
-              const byId = new Map(scoreRows.map((r) => [r.entity_id as string, r.yesterday_score as number]));
+              const byId = new Map(
+                scoreRows.map((r) => [r.entity_id as string, r.yesterday_score as number])
+              );
               for (const row of pageRows) {
                 const cur = row[RISK_SCORE_NORM_FIELD] as number | null;
                 const yday = byId.get(row[ENTITY_ID_FIELD] as string) ?? null;
