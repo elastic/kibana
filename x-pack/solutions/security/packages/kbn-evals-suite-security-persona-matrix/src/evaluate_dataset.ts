@@ -18,6 +18,7 @@ import {
   type EvaluationDataset,
   type Evaluator,
   type TaskOutput,
+  TRACE_INDEX_PATTERN,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
@@ -357,7 +358,7 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
       ])
       .join(' OR ');
 
-    const query = `FROM traces-*
+    const query = `FROM ${TRACE_INDEX_PATTERN}
 | WHERE trace.id == "${traceId}"
 | STATS
   total_tool_spans = COUNT(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { createTraceBasedEvaluator, type TraceBasedEvaluatorConfig } from './factory';
+export { createTraceBasedEvaluator, TRACE_INDEX_PATTERN, type TraceBasedEvaluatorConfig } from './factory';
 export {
   createInputTokensEvaluator,
   createOutputTokensEvaluator,
