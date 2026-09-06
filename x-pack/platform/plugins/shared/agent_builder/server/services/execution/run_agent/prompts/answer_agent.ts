@@ -10,7 +10,10 @@ import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { convertPreviousRounds } from '../utils/to_langchain_messages';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
-import { attachmentToolsInstructions } from './utils/attachments';
+import {
+  attachmentToolsInstructions,
+  hasSelectedAttachmentTools,
+} from './utils/attachments';
 import type { PromptFactoryParams, AnswerAgentPromptRuntimeParams } from './types';
 
 type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimeParams;
@@ -68,7 +71,7 @@ Your role is to be the **final answering agent** in a multi-agent flow. You must
 
 ${customInstructionsBlock(customInstructions)}
 
-${attachmentToolsInstructions()}
+${attachmentToolsInstructions({ enabled: hasSelectedAttachmentTools(toolManager) })}
 
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.

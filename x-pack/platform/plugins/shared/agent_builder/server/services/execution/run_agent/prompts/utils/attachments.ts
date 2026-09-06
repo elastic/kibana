@@ -5,16 +5,31 @@
  * 2.0.
  */
 
+import { attachmentTools } from '@kbn/agent-builder-common';
 import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type { ProcessedAttachmentType } from '@kbn/agent-builder-server';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
+
+/**
+ * True when at least one built-in `attachments.*` tool was selected for this run.
+ * Used to gate attachment tool instructions so prompts do not advertise unavailable tools.
+ */
+export const hasSelectedAttachmentTools = (toolManager: ToolManager): boolean =>
+  Object.values(attachmentTools).some((toolId) => toolManager.getExecutable(toolId) !== undefined);
 
 /**
  * Static, conversation-independent instructions for using the attachment tools.
  * Does not reference any specific attachment ids, types, or counts, so it is safe to
  * keep in the system prompt: its text never changes as attachments are added, read,
  * or updated during a conversation.
+ *
+ * Returns an empty string when `enabled` is false (no attachment tools granted).
  */
-export const attachmentToolsInstructions = (): string => {
+export const attachmentToolsInstructions = ({ enabled = true }: { enabled?: boolean } = {}): string => {
+  if (!enabled) {
+    return '';
+  }
+
   return `## ATTACHMENTS
 
 The conversation may contain attachments. Only their metadata (id, type, version, description) is
