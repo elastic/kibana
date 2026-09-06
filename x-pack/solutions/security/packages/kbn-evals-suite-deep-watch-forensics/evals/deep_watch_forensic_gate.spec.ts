@@ -123,6 +123,14 @@ evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, ()
                 actualForensics: result.forensicsRan,
               };
               outcomes.push(outcome);
+              if (result.output.gate === 'agent_no_structured_output') {
+                // v21: harness error, not a verdict. Fail loudly so an empty
+                // agent run can never masquerade as a scored row.
+                throw new Error(
+                  `Harness error on ${row.id}: agent ended without structured output ` +
+                    `(execution ${result.executionId}).`
+                );
+              }
 
               const {
                 gateCorrectness,

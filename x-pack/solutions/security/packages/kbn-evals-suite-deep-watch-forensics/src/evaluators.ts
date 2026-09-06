@@ -88,6 +88,21 @@ export const validOutputContract = (output: DeepWatchOutput): number => {
   if (output.isIncident != null && typeof output.isIncident !== 'boolean') {
     return 0;
   }
+  // v21: an assessed verdict must carry the fields it claims to have assessed.
+  // An empty rationale on gate=assessed means the agent run ended without a
+  // structured output and the defaults masked it — a harness error, not a pass.
+  if ((output as { gate?: string }).gate === 'assessed') {
+    if (typeof output.isIncident !== 'boolean') {
+      return 0;
+    }
+    if (typeof output.rationale !== 'string' || output.rationale.trim() === '') {
+      return 0;
+    }
+  }
+  if ((output as { gate?: string }).gate === 'agent_no_structured_output') {
+    // Surfaced distinctly by v21: never a contract pass.
+    return 0;
+  }
   return 1;
 };
 

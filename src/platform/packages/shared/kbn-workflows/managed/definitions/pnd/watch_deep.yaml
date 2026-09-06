@@ -48,6 +48,7 @@ outputs:
       enum:
         - assessed
         - no_host_resolved
+        - agent_no_structured_output
     rationale:
       type: string
     proposal:
@@ -605,15 +606,38 @@ steps:
       # The follow-up pass supersedes the first when it ran: its outputs are
       # consolidated across every host. Floor still sees the same three
       # outputs either way.
-      - name: emit_result
-        type: workflow.output
-        status: completed
-        with:
-          isIncident: "${{ steps.follow_up_analysis.output.structured_output.isIncident | default: steps.forensic_analysis.output.structured_output.isIncident }}"
-          gate: assessed
-          rationale: "{{ steps.follow_up_analysis.output.structured_output.rationale | default: steps.forensic_analysis.output.structured_output.rationale }}"
-          proposal: "{{ steps.follow_up_analysis.output.structured_output.proposal | default: steps.forensic_analysis.output.structured_output.proposal }}"
-          recommendedActions: "${{ steps.follow_up_analysis.output.structured_output.recommendedActions | default: steps.forensic_analysis.output.structured_output.recommendedActions }}"
+      - name: when_structured_output
+        type: if
+        # An agent run that ended without a structured output must not be
+        # readable as an assessed verdict. Distinguish it explicitly: evals
+        # and ops treat agent_no_structured_output as a harness error,
+        # never as "not an incident".
+        condition: "${{ steps.follow_up_analysis.output.structured_output.isIncident != blank or steps.forensic_analysis.output.structured_output.isIncident != blank }}"
+        steps:
+          - name: emit_result
+            type: workflow.output
+            status: completed
+            with:
+              isIncident: "${{ steps.follow_up_analysis.output.structured_output.isIncident | default: steps.forensic_analysis.output.structured_output.isIncident }}"
+              gate: assessed
+              rationale: "{{ steps.follow_up_analysis.output.structured_output.rationale | default: steps.forensic_analysis.output.structured_output.rationale }}"
+              proposal: "{{ steps.follow_up_analysis.output.structured_output.proposal | default: steps.forensic_analysis.output.structured_output.proposal }}"
+              recommendedActions: "${{ steps.follow_up_analysis.output.structured_output.recommendedActions | default: steps.forensic_analysis.output.structured_output.recommendedActions }}"
+        else:
+          - name: emit_no_structured_output
+            type: workflow.output
+            status: completed
+            with:
+              isIncident: false
+              gate: agent_no_structured_output
+              rationale: >
+                Forensic Watch harness error: the forensic agent run ended
+                without a structured output (no isIncident was produced).
+                This is not a verdict — re-run or investigate the agent
+                execution.
+              proposal: >
+                No proposal: the agent produced no structured assessment.
+              recommendedActions: []
     else:
       - name: emit_no_host
         type: workflow.output

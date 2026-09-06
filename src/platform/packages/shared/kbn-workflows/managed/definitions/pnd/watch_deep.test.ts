@@ -192,7 +192,9 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
       'verify_lead_hosts',
       'follow_up_analysis',
       'record_reasoning',
+      'when_structured_output',
       'emit_result',
+      'emit_no_structured_output',
       'emit_no_host',
     ]);
   });
@@ -222,7 +224,7 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
       isIncident: { type: 'boolean' },
       gate: {
         type: 'string',
-        enum: ['assessed', 'no_host_resolved'],
+        enum: ['assessed', 'no_host_resolved', 'agent_no_structured_output'],
       },
       rationale: { type: 'string' },
       proposal: { type: 'string' },
@@ -436,6 +438,15 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
     it('emits gate: no_host_resolved on the skip path and gate: assessed otherwise', () => {
       expect(getStep('emit_no_host').with?.gate).toBe('no_host_resolved');
       expect(getStep('emit_result').with?.gate).toBe('assessed');
+    });
+
+    // v21: an agent run ending without structured output must surface as a
+    // distinct harness-error gate, not an assessed verdict.
+    it('routes empty agent output to a distinct agent_no_structured_output gate', () => {
+      const guard = getStep('when_structured_output');
+      expect(guard.type).toBe('if');
+      expect(String(guard.condition)).toContain('structured_output.isIncident != blank');
+      expect(getStep('emit_no_structured_output').with?.gate).toBe('agent_no_structured_output');
     });
 
     // v20: verdicts are scoped to the investigated host + narrative hosts, so

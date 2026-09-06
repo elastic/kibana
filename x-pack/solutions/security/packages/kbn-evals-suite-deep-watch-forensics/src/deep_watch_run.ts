@@ -18,6 +18,8 @@ import {
 /** Shape of the Forensics Watch `workflow.output` contract we grade against. */
 export interface DeepWatchOutput {
   isIncident?: boolean;
+  /** v20+: why this verdict: assessed | no_host_resolved | agent_no_structured_output */
+  gate?: string;
   rationale?: string;
   proposal?: string;
   patientZero?: string;
