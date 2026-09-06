@@ -377,4 +377,13 @@ export const ConnectorIconsMap: Map<
     '.urlscan_io',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
   ],
+  [
+    '.google_threat_intelligence',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleThreatIntelligence" */ './specs/google_threat_intelligence/icon'
+        )
+    ),
+  ],
 ]);
