@@ -133,6 +133,12 @@ describe('watch_deep.yaml (catalog identity)', () => {
     expect(parsed.tags).toEqual(['watch', 'watch-deep']);
   });
 
+  it('sets a workflow-level timeout, so the forensic agent step is not expired mid-run', () => {
+    // Without this the engine default expires the run and the ai.agent step
+    // ends with an empty structured output (~30s into the agent loop).
+    expect((parsed as any).settings?.timeout).toBe('30d');
+  });
+
   it('states the Forensic Watch mandate', () => {
     expect(parsed.consts?.watch_policy?.mandate).toBe('Endpoint forensics');
   });

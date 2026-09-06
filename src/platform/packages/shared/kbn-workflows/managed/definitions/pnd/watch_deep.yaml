@@ -13,6 +13,11 @@ enabled: false
 tags:
   - watch
   - watch-deep
+# Engine default workflow timeout is short; without this the forensic ai.agent
+# step is expired mid-run (~30s into the agent loop) and the run ends with an
+# empty structured output. Match the Floor's HITL horizon.
+settings:
+  timeout: 30d
 triggers:
   - type: alert
   - type: manual
