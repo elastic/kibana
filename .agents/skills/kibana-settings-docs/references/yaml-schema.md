@@ -277,7 +277,7 @@ Version-scoped caveat that is not a previous default:
           From this version, you can no longer turn the example feature on or off with this setting.
 ```
 
-If `:applies_to:` is not the first line, the badge does not attach to the note. Use a gated note for a previous default, and for extra admonition prose such as a version-scoped caveat. Use inline `{applies_to}` in the description for other version-scoped behavior. Do not put a previous default in the description.
+If `:applies_to:` is not the first line, the badge does not attach to the note. Use a gated note for a previous default, and for extra admonition prose such as a version-scoped caveat. When a note already exists or when a note would complicate the reading flow, to not pile them up, it's ok to use inline applies_to in the description instead.
 
 ### Version syntax
 
