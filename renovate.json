@@ -2563,6 +2563,14 @@
       "enabled": true
     },
     {
+      "groupName": "jsondiffpatch",
+      "matchDepNames": ["jsondiffpatch"],
+      "reviewers": ["team:kibana-presentation", "team:security-solution"],
+      "matchBaseBranches": ["main"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
       "groupName": "eui-illustrations",
       "matchDepNames": ["@elastic/eui-illustrations"],
       "reviewers": ["team:eui-team"],

@@ -34,6 +34,7 @@ import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities
 import { getDashboardAccessControlState } from '../../utils/get_dashboard_access_control_state';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { useShareOptions } from './share/use_share_options';
+import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 
 export const useDashboardMenuItems = ({
   maybeRedirect,
@@ -52,14 +53,17 @@ export const useDashboardMenuItems = ({
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
 
-  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
+  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl, canRedo, canUndo] =
     useBatchedPublishingSubjects(
       dashboardApi.hasOverlays$,
       dashboardApi.hasUnsavedChanges$,
       dashboardApi.savedObjectId$,
       dashboardApi.viewMode$,
-      dashboardApi.accessControl$
+      dashboardApi.accessControl$,
+      dashboardInternalApi.canRedo$,
+      dashboardInternalApi.canUndo$
     );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
@@ -216,6 +220,23 @@ export const useDashboardMenuItems = ({
     hasUnsavedChanges,
     isResetting,
   ]);
+
+  const historyConfig = useMemo(() => {
+    return {
+      undo: {
+        disabled: disableTopNav || !canUndo,
+        onClick: () => {
+          dashboardInternalApi.undo();
+        },
+      },
+      redo: {
+        disabled: disableTopNav || !canRedo,
+        onClick: async () => {
+          dashboardInternalApi.redo();
+        },
+      },
+    };
+  }, [disableTopNav, canRedo, canUndo, dashboardInternalApi]);
 
   /**
    * Register all of the top nav configs that can be used by dashboard.
@@ -439,7 +460,7 @@ export const useDashboardMenuItems = ({
       viewModeConfig.primaryActionItem = menuItems.edit;
     }
 
-    return viewModeConfig;
+    return { ...viewModeConfig, historyConfig };
   }, [
     menuItems.fullScreen,
     menuItems.duplicate,
@@ -451,6 +472,7 @@ export const useDashboardMenuItems = ({
     dashboardApi.isManaged,
     showResetChange,
     hasExportMenuItems,
+    historyConfig,
     shareAction,
   ]);
 
@@ -482,7 +504,7 @@ export const useDashboardMenuItems = ({
       primaryActionItem: menuItems.save,
     };
 
-    return editModeConfig;
+    return { ...editModeConfig, historyConfig };
   }, [
     menuItems.switchToViewMode,
     menuItems.export,
@@ -492,6 +514,7 @@ export const useDashboardMenuItems = ({
     menuItems.save,
     menuItems.add,
     hasExportMenuItems,
+    historyConfig,
     shareAction,
   ]);
 

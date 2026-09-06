@@ -24,7 +24,7 @@ import type { DashboardPanel } from '../../server';
 import type { DashboardSaveEvent } from './types';
 import { getSampleDashboardState } from '../mocks';
 
-const setStateMock = () => {};
+const setStateMock = () => new Promise<void>((resolve) => resolve());
 
 const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
 const layoutManagerMock = {

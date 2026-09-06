@@ -99,7 +99,7 @@ export const getMonitorsEmbeddableFactory = (
         ),
         getComparators: () => ({
           ...titleComparators,
-          filters: 'referenceEquality',
+          filters: 'deepEquality',
           view: 'referenceEquality',
         }),
         defaultState: {

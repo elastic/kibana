@@ -78,6 +78,7 @@ function getDefaultLensApiMock() {
     hasLibraryItemWithTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
     anyStateChange$: of(),
+    latestState$: of({}),
     serializeState: jest.fn(),
     getLegacySerializedState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
