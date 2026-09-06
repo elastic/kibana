@@ -26,10 +26,12 @@ import {
   SlackResolveChannelIdInputSchema,
   SlackSearchMessagesInputSchema,
   SlackSendMessageInputSchema,
+  SlackUploadFileInputSchema,
   SlackWhoAmIInputSchema,
   SLACK_SEARCH_DEFAULT_COUNT,
   type SlackAssistantSearchContextResponse,
   type SlackAuthTestResponse,
+  type SlackCompleteUploadExternalResponse,
   type SlackConversationsHistoryResponse,
   type SlackConversationsListParams,
   type SlackConversationsListResponse,
@@ -41,6 +43,7 @@ import {
   type SlackGetConversationHistoryInput,
   type SlackGetConversationInfoInput,
   type SlackGetFileInfoInput,
+  type SlackGetUploadUrlExternalResponse,
   type SlackInviteToConversationInput,
   type SlackListChannelsInput,
   type SlackListFilesInput,
@@ -50,6 +53,7 @@ import {
   type SlackResolveChannelIdInput,
   type SlackSearchMessagesInput,
   type SlackSendMessageInput,
+  type SlackUploadFileInput,
   type SlackWhoAmIInput,
 } from './types';
 
@@ -61,6 +65,9 @@ const SLACK_RETRY_MAX_DELAY_MS = 60_000;
 const SLACK_RETRY_EXPONENT_CAP = 6;
 const SLACK_MAX_RETRIES = 5;
 
+const SLACK_FILE_READY_POLL_INTERVAL_MS = 500;
+const SLACK_FILE_READY_MAX_POLLS = 12;
+
 // Tiny async sleep helper
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -70,18 +77,28 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 const asString = (v: unknown): string | undefined => (typeof v === 'string' ? v : undefined);
 
 function getHeader(headers: unknown, headerName: string): string | undefined {
-  if (!isRecord(headers)) return undefined;
+  if (!isRecord(headers)) {
+    return undefined;
+  }
   const needle = headerName.toLowerCase();
   for (const [k, v] of Object.entries(headers)) {
-    if (k.toLowerCase() !== needle) continue;
-    if (typeof v === 'string') return v;
-    if (Array.isArray(v) && typeof v[0] === 'string') return v[0];
+    if (k.toLowerCase() !== needle) {
+      continue;
+    }
+    if (typeof v === 'string') {
+      return v;
+    }
+    if (Array.isArray(v) && typeof v[0] === 'string') {
+      return v[0];
+    }
   }
   return undefined;
 }
 
 function getSlackErrorFields(responseData: unknown): SlackErrorFields {
-  if (!isRecord(responseData)) return {};
+  if (!isRecord(responseData)) {
+    return {};
+  }
   return {
     error: asString(responseData.error),
     needed: asString(responseData.needed),
@@ -101,8 +118,12 @@ function formatSlackApiErrorMessage(params: {
   const extras: string[] = [];
   // Be careful about echoing back scope details in user-facing errors. We include only the minimum
   // Slack-provided hints that help diagnose the failure without exposing token scope inventories.
-  if (needed) extras.push(`needed=${needed}`);
-  if (provided) extras.push(`provided=${provided}`);
+  if (needed) {
+    extras.push(`needed=${needed}`);
+  }
+  if (provided) {
+    extras.push(`provided=${provided}`);
+  }
 
   return extras.length > 0
     ? `Slack ${action} error: ${error} (${extras.join(', ')})`
@@ -178,6 +199,50 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
 }
 
 /**
+ * `files.completeUploadExternal` returns before Slack finishes processing the
+ * file, and referencing one that isn't ready from a Block Kit `image` block
+ * fails the whole message with `invalid_blocks`. Poll `files.info` until a
+ * `mimetype` appears, the documented readiness signal. Requires `files:read`;
+ * without it we fall back to a fixed delay rather than failing the upload.
+ */
+async function waitForSlackFileReady(params: {
+  ctx: ActionContext;
+  fileId: string;
+  pollIntervalMs?: number;
+  maxPolls?: number;
+}): Promise<void> {
+  const {
+    ctx,
+    fileId,
+    pollIntervalMs = SLACK_FILE_READY_POLL_INTERVAL_MS,
+    maxPolls = SLACK_FILE_READY_MAX_POLLS,
+  } = params;
+
+  for (let attempt = 0; attempt < maxPolls; attempt++) {
+    const response = await ctx.client.get<SlackFilesInfoResponse>(`${SLACK_API_BASE}/files.info`, {
+      params: { file: fileId },
+    });
+
+    if (response.data.ok && response.data.file?.mimetype) {
+      return;
+    }
+
+    const { error } = getSlackErrorFields(response.data);
+    if (error === 'missing_scope' || error === 'not_allowed_token_type') {
+      ctx.log.debug(
+        `Slack uploadFile cannot confirm readiness for ${fileId} without files:read; waiting instead.`
+      );
+      await sleep(pollIntervalMs * 4);
+      return;
+    }
+
+    await sleep(pollIntervalMs);
+  }
+
+  ctx.log.debug(`Slack uploadFile gave up waiting for ${fileId} to become ready.`);
+}
+
+/**
  * Slack connector using OAuth2 Authorization Code flow (Slack OAuth v2),
  * with an additional temporary bearer token option for local testing.
  *
@@ -189,6 +254,11 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  * - search:read.public, search:read.private, search:read.im, search:read.mpim, search:read.files - search messages and files
  * - files:read - look up file metadata (getFileInfo, listFiles) and file references on messages
  * - users:read, users:read.email - list workspace users and look up users by email
+ *
+ * `uploadFile` additionally requires `files:write`. It is absent from the EARS
+ * and OAuth scope defaults below because widening those forces every existing
+ * connector instance to re-authorize; grant it on the Slack app and use a bot
+ * token until it is added deliberately.
  *
  * auth.test (the underlying call for the whoAmI sub-action and the connector's
  * own test handler) does not require an explicit scope — any valid token works.
@@ -297,10 +367,18 @@ export const Slack: ConnectorSpec = {
         const typedInput: SlackSearchMessagesInput = SlackSearchMessagesInputSchema.parse(input);
 
         const queryParts: string[] = [typedInput.query];
-        if (typedInput.inChannel) queryParts.push(`in:${typedInput.inChannel}`);
-        if (typedInput.fromUser) queryParts.push(`from:${typedInput.fromUser}`);
-        if (typedInput.after) queryParts.push(`after:${typedInput.after}`);
-        if (typedInput.before) queryParts.push(`before:${typedInput.before}`);
+        if (typedInput.inChannel) {
+          queryParts.push(`in:${typedInput.inChannel}`);
+        }
+        if (typedInput.fromUser) {
+          queryParts.push(`from:${typedInput.fromUser}`);
+        }
+        if (typedInput.after) {
+          queryParts.push(`after:${typedInput.after}`);
+        }
+        if (typedInput.before) {
+          queryParts.push(`before:${typedInput.before}`);
+        }
         const finalQuery = queryParts.filter(Boolean).join(' ');
 
         const count = typedInput.count ?? SLACK_SEARCH_DEFAULT_COUNT;
@@ -312,9 +390,15 @@ export const Slack: ConnectorSpec = {
           include_bots: typedInput.includeBots ?? false,
           include_message_blocks: typedInput.includeMessageBlocks ?? true,
         };
-        if (typedInput.sort) requestBody.sort = typedInput.sort;
-        if (typedInput.sortDir) requestBody.sort_dir = typedInput.sortDir;
-        if (typedInput.cursor) requestBody.cursor = typedInput.cursor;
+        if (typedInput.sort) {
+          requestBody.sort = typedInput.sort;
+        }
+        if (typedInput.sortDir) {
+          requestBody.sort_dir = typedInput.sortDir;
+        }
+        if (typedInput.cursor) {
+          requestBody.cursor = typedInput.cursor;
+        }
 
         try {
           ctx.log.debug(`Slack searchMessages request`);
@@ -485,7 +569,9 @@ export const Slack: ConnectorSpec = {
           const channels = response.data.channels ?? [];
           const found = channels.find((c) => {
             const cName = (c.name ?? '').toString().toLowerCase();
-            if (!cName) return false;
+            if (!cName) {
+              return false;
+            }
             return input.match === 'exact' ? cName === nameNorm : cName.includes(nameNorm);
           });
 
@@ -539,10 +625,18 @@ export const Slack: ConnectorSpec = {
           channel: typedInput.channel,
           limit: typedInput.limit,
         };
-        if (typedInput.oldest) params.oldest = typedInput.oldest;
-        if (typedInput.latest) params.latest = typedInput.latest;
-        if (typedInput.inclusive !== undefined) params.inclusive = typedInput.inclusive;
-        if (typedInput.cursor) params.cursor = typedInput.cursor;
+        if (typedInput.oldest) {
+          params.oldest = typedInput.oldest;
+        }
+        if (typedInput.latest) {
+          params.latest = typedInput.latest;
+        }
+        if (typedInput.inclusive !== undefined) {
+          params.inclusive = typedInput.inclusive;
+        }
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
 
         const response = await slackRequestWithRateLimitRetry<SlackConversationsHistoryResponse>({
           ctx,
@@ -697,7 +791,9 @@ export const Slack: ConnectorSpec = {
         const params: Record<string, string | number | boolean> = {
           limit: typedInput.limit,
         };
-        if (typedInput.cursor) params.cursor = typedInput.cursor;
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
         if (typedInput.includeLocale !== undefined) {
           params.include_locale = typedInput.includeLocale;
         }
@@ -780,8 +876,12 @@ export const Slack: ConnectorSpec = {
           exclude_archived: typedInput.excludeArchived,
           limit: typedInput.limit,
         };
-        if (typedInput.user) params.user = typedInput.user;
-        if (typedInput.cursor) params.cursor = typedInput.cursor;
+        if (typedInput.user) {
+          params.user = typedInput.user;
+        }
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
 
         const response = await slackRequestWithRateLimitRetry<SlackConversationsListResponse>({
           ctx,
@@ -924,11 +1024,21 @@ export const Slack: ConnectorSpec = {
           count: typedInput.count,
           page: typedInput.page,
         };
-        if (typedInput.channel) params.channel = typedInput.channel;
-        if (typedInput.user) params.user = typedInput.user;
-        if (typedInput.tsFrom) params.ts_from = typedInput.tsFrom;
-        if (typedInput.tsTo) params.ts_to = typedInput.tsTo;
-        if (typedInput.types) params.types = typedInput.types;
+        if (typedInput.channel) {
+          params.channel = typedInput.channel;
+        }
+        if (typedInput.user) {
+          params.user = typedInput.user;
+        }
+        if (typedInput.tsFrom) {
+          params.ts_from = typedInput.tsFrom;
+        }
+        if (typedInput.tsTo) {
+          params.ts_to = typedInput.tsTo;
+        }
+        if (typedInput.types) {
+          params.types = typedInput.types;
+        }
 
         const response = await slackRequestWithRateLimitRetry<SlackFilesListResponse>({
           ctx,
@@ -1099,7 +1209,7 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
+        'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Pass `blocks` to send Slack Block Kit (with `text` as the notification fallback). Returns the message timestamp, which can be used as threadTs to post a reply in a thread. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
       input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
@@ -1114,6 +1224,9 @@ export const Slack: ConnectorSpec = {
           text: typedInput.text,
         };
 
+        if (typedInput.blocks) {
+          payload.blocks = typedInput.blocks;
+        }
         if (typedInput.threadTs) {
           payload.thread_ts = typedInput.threadTs;
         }
@@ -1153,6 +1266,98 @@ export const Slack: ConnectorSpec = {
           const err = error as AxiosError<unknown>;
           ctx.log.error(
             `Slack sendMessage failed: ${err.message}, Status: ${
+              err.response?.status
+            }, Data: ${JSON.stringify(err.response?.data)}`
+          );
+          throw error;
+        }
+      },
+    },
+
+    // https://api.slack.com/messaging/files#uploading_files
+    // Three steps: reserve an upload URL, PUT the bytes to it, then complete.
+    // The bytes go to a Slack-supplied host (`files.slack.com`), which must also
+    // be permitted by `xpack.actions.allowedHosts`.
+    uploadFile: {
+      // Orchestrated by callers that already hold the bytes (e.g. rendering a
+      // chart to PNG); an agent has nothing to pass for `file`.
+      isTool: false,
+      scope: 'write',
+      description:
+        'Upload a file to Slack and return its file ID. Pass base64-encoded content. Provide `channel` to share the file into a conversation, or omit it to upload without sharing — for example to reference the returned ID from a Block Kit `image` block via `slack_file`.',
+      input: SlackUploadFileInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackUploadFileInput = SlackUploadFileInputSchema.parse(input);
+        const { filename, title, channel } = typedInput;
+        const bytes = Buffer.from(typedInput.file, 'base64');
+
+        if (bytes.byteLength === 0) {
+          throw new Error('Slack uploadFile error: `file` did not decode to any bytes');
+        }
+
+        try {
+          ctx.log.debug(
+            `Slack uploadFile request: filename=${filename}, bytes=${bytes.byteLength}`
+          );
+
+          const reservation = await slackRequestWithRateLimitRetry({
+            ctx,
+            action: 'uploadFile',
+            maxRetries: SLACK_MAX_RETRIES,
+            request: () =>
+              ctx.client.get<SlackGetUploadUrlExternalResponse>(
+                `${SLACK_API_BASE}/files.getUploadURLExternal`,
+                { params: { filename, length: bytes.byteLength } }
+              ),
+          });
+
+          const { upload_url: uploadUrl, file_id: fileId } = reservation.data;
+          if (!reservation.data.ok || !uploadUrl || !fileId) {
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'uploadFile',
+                responseData: reservation.data,
+                responseHeaders: reservation.headers,
+              })
+            );
+          }
+
+          const form = new FormData();
+          form.append('file', new Blob([new Uint8Array(bytes)]), filename);
+          await ctx.client.post(uploadUrl, form);
+
+          const completion = await slackRequestWithRateLimitRetry({
+            ctx,
+            action: 'uploadFile',
+            maxRetries: SLACK_MAX_RETRIES,
+            request: () =>
+              ctx.client.post<SlackCompleteUploadExternalResponse>(
+                `${SLACK_API_BASE}/files.completeUploadExternal`,
+                {
+                  files: [{ id: fileId, title: title ?? filename }],
+                  ...(channel ? { channel_id: channel } : {}),
+                },
+                { headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+              ),
+          });
+
+          if (!completion.data.ok) {
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'uploadFile',
+                responseData: completion.data,
+                responseHeaders: completion.headers,
+              })
+            );
+          }
+
+          await waitForSlackFileReady({ ctx, fileId });
+
+          return { ok: true as const, fileId, files: completion.data.files };
+        } catch (error) {
+          const err = error as AxiosError<unknown>;
+          ctx.log.error(
+            `Slack uploadFile failed: ${err.message}, Status: ${
               err.response?.status
             }, Data: ${JSON.stringify(err.response?.data)}`
           );

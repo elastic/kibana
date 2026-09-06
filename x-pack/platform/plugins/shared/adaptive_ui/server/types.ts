@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
+  actions: ActionsPluginSetup;
 }
 
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
+  actions: ActionsPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

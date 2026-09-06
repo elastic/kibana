@@ -630,6 +630,52 @@ export interface SlackFilesInfoResponse extends SlackErrorFields {
   response_metadata?: { next_cursor?: string };
 }
 
+const SLACK_MAX_FILENAME_LENGTH = 255;
+const SLACK_MAX_FILE_TITLE_LENGTH = 255;
+// Slack's external-upload ceiling is far higher, but the payload crosses the
+// connector boundary as an in-memory base64 string, so cap it well below that.
+// 7,000,000 base64 chars is roughly 5 MiB of decoded bytes.
+const SLACK_MAX_UPLOAD_BASE64_LENGTH = 7_000_000;
+
+export const SlackUploadFileInputSchema = lazySchema(() =>
+  z.object({
+    filename: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_FILENAME_LENGTH)
+      .describe('Filename to register the upload under (e.g. "chart.png").'),
+    file: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_UPLOAD_BASE64_LENGTH)
+      .describe('Base64-encoded file content.'),
+    title: z
+      .string()
+      .max(SLACK_MAX_FILE_TITLE_LENGTH)
+      .optional()
+      .describe('Human-readable title for the file. Defaults to `filename`.'),
+    channel: z
+      .string()
+      .max(SLACK_MAX_ID_LENGTH)
+      .optional()
+      .describe(
+        'Conversation ID to share the file into on completion. Omit to upload without sharing, e.g. to reference the file id from a Block Kit `image` block.'
+      ),
+  })
+);
+export type SlackUploadFileInput = z.infer<typeof SlackUploadFileInputSchema>;
+
+export interface SlackGetUploadUrlExternalResponse extends SlackErrorFields {
+  ok: boolean;
+  upload_url?: string;
+  file_id?: string;
+}
+
+export interface SlackCompleteUploadExternalResponse extends SlackErrorFields {
+  ok: boolean;
+  files?: SlackFile[];
+}
+
 export const SlackSendMessageInputSchema = lazySchema(() =>
   z.object({
     channel: z
@@ -638,7 +684,19 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
       .describe(
         'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use listChannels to browse available channels, or resolveChannelId when you know the channel name and need its ID.'
       ),
-    text: z.string().min(1).describe('The message text to send'),
+    text: z
+      .string()
+      .min(1)
+      .describe(
+        'The message text to send. When `blocks` is provided, this is the notification/fallback text Slack shows in previews and to clients that cannot render blocks.'
+      ),
+    blocks: z
+      .array(z.record(z.string(), z.unknown()))
+      .max(50)
+      .optional()
+      .describe(
+        'Optional Slack Block Kit blocks (max 50). When provided, the message renders these blocks and `text` becomes the notification fallback. See https://api.slack.com/reference/block-kit/blocks.'
+      ),
     threadTs: z
       .string()
       .optional()
