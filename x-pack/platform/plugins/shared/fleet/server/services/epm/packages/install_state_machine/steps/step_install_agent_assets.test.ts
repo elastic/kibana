@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseFleetAgentYaml } from './step_install_agent_assets';
+import { getFleetPackageAgentId, parseFleetAgentYaml } from './step_install_agent_assets';
 import { substituteFleetAgentIds } from './step_install_workflow_assets';
 
 describe('parseFleetAgentYaml', () => {
