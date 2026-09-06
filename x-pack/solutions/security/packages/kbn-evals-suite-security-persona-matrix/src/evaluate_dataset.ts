@@ -118,12 +118,47 @@ export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => (
 });
 
 /**
+ * Tools whose successful result is itself the user-facing deliverable: they
+ * render an artifact (a rule) inline in the conversation. A run that ends on
+ * one of these has answered the user even with no closing prose.
+ */
+const ARTIFACT_PRODUCING_TOOL_IDS = new Set([
+  'security.create_detection_rule',
+  'security.update_detection_rule',
+]);
+
+/**
+ * True when the run produced a rendered artifact: an artifact-producing tool
+ * returned `success: true` with a `rule` payload. Mirrors the shape asserted
+ * by the dataset references ("renders the created rule attachment inline").
+ */
+const hasRenderedArtifact = (output: TaskOutput): boolean =>
+  getToolCallSteps(output).some((step) => {
+    if (!step.tool_id || !ARTIFACT_PRODUCING_TOOL_IDS.has(step.tool_id)) {
+      return false;
+    }
+    return (step.results ?? []).some((result) => {
+      const data = (result as { data?: { success?: unknown; rule?: unknown } } | undefined)?.data;
+      return Boolean(data?.success === true && data?.rule);
+    });
+  });
+
+/**
  * Regression gate for the empty-final-message failure mode: 62% of
  * detection-rule-edit runs in the 2026-08-21 sweep ended on a tool call with
  * no user-facing closing text, leaving judges (and users) with nothing to
- * read. Scores 1 when the task output contains any non-empty message,
- * otherwise 0. N/A only when the task produced no output at all (harness
- * failure — already surfaced by every other evaluator).
+ * read.
+ *
+ * Scores 1 when the run leaves the user something to read: either non-empty
+ * closing prose, or a rendered artifact (a successfully created/updated rule).
+ * The artifact clause exists because `detection-rule-edit` references
+ * explicitly ask the agent to render the rule attachment inline "rather than
+ * describing the rule in prose only" — scoring those runs 0 measured the
+ * harness, not the model. Runs that end silently *without* producing an
+ * artifact still score 0: that is the real premature-termination failure.
+ *
+ * N/A only when the task produced no output at all (harness failure — already
+ * surfaced by every other evaluator).
  */
 export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => ({
   name: 'FinalAnswerPresent',
@@ -138,14 +173,21 @@ export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => (
         explanation: 'No task output — skipping FinalAnswerPresent.',
       };
     }
-    const hasAnswer = (taskOutput.messages ?? []).some(
+    const hasMessage = (taskOutput.messages ?? []).some(
       (msg) => typeof msg?.message === 'string' && msg.message.trim().length > 0
     );
+    if (hasMessage) {
+      return { score: 1, explanation: 'Final user-facing message present.' };
+    }
+    if (hasRenderedArtifact(output as TaskOutput)) {
+      return {
+        score: 1,
+        explanation: 'No closing prose, but the run rendered a rule artifact inline.',
+      };
+    }
     return {
-      score: hasAnswer ? 1 : 0,
-      explanation: hasAnswer
-        ? 'Final user-facing message present.'
-        : 'Run ended without a user-facing final message.',
+      score: 0,
+      explanation: 'Run ended without a user-facing final message or rendered artifact.',
     };
   },
 });

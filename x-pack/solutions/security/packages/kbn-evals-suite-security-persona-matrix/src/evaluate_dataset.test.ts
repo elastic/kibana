@@ -312,6 +312,62 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
     expect(result.score).toBe(0);
   });
 
+  const ruleToolStep = (data: unknown, toolId = 'security.create_detection_rule') => ({
+    type: 'tool_call',
+    tool_id: toolId,
+    results: [{ type: 'other', data }],
+  });
+
+  // The detection-rule-edit references ask the agent to render the created rule
+  // attachment inline "rather than describing the rule in prose only", so a run
+  // that ends on a successful rule tool call HAS answered the user. Scoring it 0
+  // measured the harness, not the model: 86% of FinalAnswerPresent=0 runs in the
+  // family had successfully created a rule.
+  it('scores 1 when the run ended on a rendered rule artifact instead of prose', async () => {
+    const result = await evaluate({
+      messages: [{ message: '' }],
+      steps: [ruleToolStep({ success: true, rule: { id: 'abc', severity: 'high' } })],
+    });
+    expect(result.score).toBe(1);
+    expect(result.explanation).toContain('artifact');
+  });
+
+  it('scores 1 for an update_detection_rule artifact as well', async () => {
+    const result = await evaluate({
+      messages: [],
+      steps: [
+        ruleToolStep({ success: true, rule: { id: 'abc' } }, 'security.update_detection_rule'),
+      ],
+    });
+    expect(result.score).toBe(1);
+  });
+
+  // The gate must keep biting real silent failures: 27 of 196 FinalAnswerPresent=0
+  // runs in the family produced no rule at all.
+  it('still scores 0 when the rule tool call failed', async () => {
+    const result = await evaluate({
+      messages: [{ message: '' }],
+      steps: [ruleToolStep({ success: false, rule: { id: 'abc' } })],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('still scores 0 when a rule tool reported success without a rule payload', async () => {
+    const result = await evaluate({
+      messages: [{ message: '' }],
+      steps: [ruleToolStep({ success: true })],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('does not count a non-artifact tool call as an answer', async () => {
+    const result = await evaluate({
+      messages: [{ message: '' }],
+      steps: [ruleToolStep({ success: true, rule: { id: 'abc' } }, 'security.run_rule_preview')],
+    });
+    expect(result.score).toBe(0);
+  });
+
   it('returns N/A when there is no task output at all', async () => {
     const result = await evaluate(undefined);
     expect(result.score).toBeNull();
