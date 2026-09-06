@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { toSignificantEventAttachmentViewSpec } from '@kbn/adaptive-ui-adapters';
 import {
   ActionButtonType,
   type AttachmentUIDefinition,
@@ -59,6 +60,7 @@ export const significantEventAttachmentDefinition: AttachmentUIDefinition<Signif
         },
       ];
     },
+    getViewSpec: ({ data }) => toSignificantEventAttachmentViewSpec(data),
     renderCanvasContent: ({ attachment }) => (
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
         <SignificantEventDetails event={attachment.data} />

@@ -47,6 +47,12 @@ jest.mock('../../../../../hooks/use_agent_builder_service', () => ({
   }),
 }));
 
+jest.mock('./attachment_adaptive_body', () => ({
+  AttachmentAdaptiveBody: ({ spec }: { spec: { title?: string } }) => (
+    <div data-test-subj="attachment-adaptive-body">{spec.title}</div>
+  ),
+}));
+
 const dynamicActionHandler = jest.fn();
 
 const DynamicInlineContent = ({ callbacks }: { callbacks?: InlineRenderCallbacks }) => {
@@ -116,6 +122,52 @@ describe('InlineAttachmentWithActions', () => {
     );
 
     expect(screen.getByText("Couldn't render this attachment")).not.toBeNull();
+  });
+
+  it('renders getViewSpec as the inline body when renderInlineContent is absent', () => {
+    const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
+    const attachmentsService = {
+      getAttachmentUiDefinition: jest.fn().mockReturnValue({
+        getLabel: () => 'Test attachment',
+        getViewSpec: () => ({ type: 'view', title: 'Nightshift event', body: [] }),
+      }),
+      updateOrigin: jest.fn(),
+    };
+
+    render(
+      <InlineAttachmentWithActions
+        attachment={attachment}
+        attachmentsService={attachmentsService as unknown as AttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(screen.getByTestId('attachment-adaptive-body').textContent).toBe('Nightshift event');
+  });
+
+  it('prefers getViewSpec over renderInlineContent', () => {
+    const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
+    const attachmentsService = {
+      getAttachmentUiDefinition: jest.fn().mockReturnValue({
+        getLabel: () => 'Test attachment',
+        getViewSpec: () => ({ type: 'view', title: 'Spec wins', body: [] }),
+        renderInlineContent: () => <div>native inline</div>,
+      }),
+      updateOrigin: jest.fn(),
+    };
+
+    render(
+      <InlineAttachmentWithActions
+        attachment={attachment}
+        attachmentsService={attachmentsService as unknown as AttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(screen.getByTestId('attachment-adaptive-body').textContent).toBe('Spec wins');
+    expect(screen.queryByText('native inline')).toBeNull();
   });
 
   it('renders action buttons registered by inline content', async () => {

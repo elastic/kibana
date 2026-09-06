@@ -16,6 +16,7 @@ import { useConversationContext } from '../../../../../context/conversation/conv
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentAdaptiveBody } from './attachment_adaptive_body';
 import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { useCanvasContext } from './canvas_context';
 
@@ -122,7 +123,12 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     closeCanvas,
   ]);
 
-  if (!canvasState || !uiDefinition?.renderCanvasContent) {
+  const canvasViewSpec =
+    canvasState && uiDefinition && !uiDefinition.renderCanvasContent
+      ? uiDefinition.getViewSpec?.(canvasState.attachment)
+      : undefined;
+
+  if (!canvasState || !uiDefinition || (!uiDefinition.renderCanvasContent && !canvasViewSpec)) {
     return null;
   }
 
@@ -176,18 +182,22 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
           key={`${attachment.id}:${attachment.versionData?.version ?? 'latest'}`}
         >
           {() =>
-            renderCanvasContent(
-              {
-                attachment,
-                isSidebar,
-                openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-              },
-              {
-                registerActionButtons,
-                updateOrigin,
-                closeCanvas,
-              }
-            )
+            renderCanvasContent ? (
+              renderCanvasContent(
+                {
+                  attachment,
+                  isSidebar,
+                  openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+                },
+                {
+                  registerActionButtons,
+                  updateOrigin,
+                  closeCanvas,
+                }
+              )
+            ) : canvasViewSpec ? (
+              <AttachmentAdaptiveBody spec={canvasViewSpec} />
+            ) : null
           }
         </AttachmentRenderErrorBoundary>
       </EuiFlyoutBody>

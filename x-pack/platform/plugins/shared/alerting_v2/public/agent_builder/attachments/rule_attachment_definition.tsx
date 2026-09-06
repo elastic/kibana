@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { toAlertingRuleViewSpec } from '@kbn/adaptive-ui-adapters';
 import {
   ActionButtonType,
   type AttachmentUIDefinition,
@@ -33,6 +34,21 @@ export const createRuleAttachmentDefinition = ({
   getIcon: () => 'watchesApp',
 
   canvasWidth: '40vw',
+
+  getViewSpec: ({ data }) =>
+    toAlertingRuleViewSpec({
+      metadata: {
+        name: data.metadata.name,
+        description: data.metadata.description,
+        tags: data.metadata.tags,
+        builder_type: data.metadata.builder_type ?? undefined,
+      },
+      kind: data.kind,
+      time_field: data.time_field,
+      schedule: data.schedule,
+      query: data.query,
+      enabled: data.enabled,
+    }),
 
   renderInlineContent: (props) => <RuleInlineContent {...props} />,
 
