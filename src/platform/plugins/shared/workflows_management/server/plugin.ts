@@ -126,7 +126,6 @@ export class WorkflowsPlugin
       audit,
     });
 
-    // The availability wrapper accesses this lazy context for every workflows request.
     core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(
       'workflowsManagement',
       async (_context, request) => {
@@ -138,7 +137,7 @@ export class WorkflowsPlugin
           );
         }
 
-        const spaceId = spaces?.getSpaceId(request) ?? 'default';
+        const spaceId = spaces.getSpaceId(request);
 
         this.executionDataViewsBootstrap.ensureForSpaceFireAndForget(
           spaceId,

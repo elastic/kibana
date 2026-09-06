@@ -117,15 +117,14 @@ export class ExecutionDataViewsBootstrap {
           );
         }
       } catch (err) {
-        if (isAlreadyExistsError(err)) {
-          const existing = await this.getDataViewIfExists(dvService, id);
-          if (existing === null) {
-            throw err;
-          }
-          this.logger.debug(`ExecutionDataViewsBootstrap: data view ${id} already exists`);
-        } else {
+        if (!isAlreadyExistsError(err)) {
           throw err;
         }
+        const existing = await this.getDataViewIfExists(dvService, id);
+        if (existing === null) {
+          throw err;
+        }
+        this.logger.debug(`ExecutionDataViewsBootstrap: data view ${id} already exists`);
       }
     }
   }
