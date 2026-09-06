@@ -17,7 +17,7 @@ export const strings = {
   },
   get projectPickerButtonAriaLabel() {
     return i18n.translate('cpsUtils.projectPicker.projectPickerButtonLabel', {
-      defaultMessage: 'Cross-project search project picker',
+      defaultMessage: 'Cross-project search scope selector',
     });
   },
   get projectPickerButtonDisabledAriaLabel() {

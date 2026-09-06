@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, type EuiButtonEmptyProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -20,9 +20,17 @@ export interface RuleQueryInspectorProps {
   ruleId: string;
   ruleTypeId: string;
   alertId?: string;
+  size?: EuiButtonEmptyProps['size'];
+  color?: EuiButtonEmptyProps['color'];
 }
 
-export function RuleQueryInspector({ ruleId, ruleTypeId, alertId }: RuleQueryInspectorProps) {
+export function RuleQueryInspector({
+  ruleId,
+  ruleTypeId,
+  alertId,
+  size,
+  color,
+}: RuleQueryInspectorProps) {
   const {
     http,
     inspector,
@@ -64,6 +72,8 @@ export function RuleQueryInspector({ ruleId, ruleTypeId, alertId }: RuleQueryIns
   return (
     <EuiButtonEmpty
       data-test-subj="ruleQueryInspectorButton"
+      size={size}
+      color={color}
       iconType="inspect"
       onClick={handleInspect}
       isLoading={isLoading}

@@ -25,8 +25,18 @@ import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings'
 import { ServiceFieldsForm } from './service_fields_form';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
 
-function getDefaultDsInputs(dsInfo: DataStreamInfo | undefined, isSingleDs: boolean): string[] {
-  return isSingleDs ? dsInfo?.inputs ?? [] : dsInfo?.defaultEnabledInputs ?? [];
+function getDefaultDsInputs(
+  dsInfo: DataStreamInfo | undefined,
+  isSingleDs: boolean,
+  serviceDefaultEnabledInputs?: string[]
+): string[] {
+  if (isSingleDs) {
+    // For single-DS services, prefer the entry-level defaultEnabledInputs (which may have been
+    // overridden in the static matrix, e.g. ECF OTel entries default to S3 only). Fall back to
+    // all DS inputs when no override is set (original behaviour for non-ECF services).
+    return serviceDefaultEnabledInputs?.length ? serviceDefaultEnabledInputs : dsInfo?.inputs ?? [];
+  }
+  return dsInfo?.defaultEnabledInputs ?? [];
 }
 
 interface ServiceSettingsFlyoutProps {
@@ -59,7 +69,13 @@ export function ServiceSettingsFlyout({
     const enabledDataStreams = service.dataStreams.filter((dsId) => {
       const dsVars = draftByDs[dsId];
       if (dsVars) return dsVars.enabledInputs.length > 0;
-      return getDefaultDsInputs(service.varDefsByDataStream?.[dsId], isSingleDs).length > 0;
+      return (
+        getDefaultDsInputs(
+          service.varDefsByDataStream?.[dsId],
+          isSingleDs,
+          service.defaultEnabledInputs
+        ).length > 0
+      );
     });
     onApply(draftByDs, enabledDataStreams);
   };
@@ -93,7 +109,7 @@ export function ServiceSettingsFlyout({
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
               const existing = prev[dsId] ?? {
-                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs),
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
                 varsByInput: {},
               };
               return {
@@ -112,7 +128,7 @@ export function ServiceSettingsFlyout({
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
               const existing = prev[dsId] ?? {
-                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs),
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
                 varsByInput: {},
               };
               return {

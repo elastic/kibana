@@ -39,7 +39,7 @@ describe('JobIdFilter', () => {
     fireEvent.click(getByTestId('job-id-filter-button'));
     fireEvent.click(getByText('test_job_2'));
 
-    expect(onSelectCb).toBeCalledWith(['test_job_2']);
+    expect(onSelectCb).toHaveBeenCalledWith(['test_job_2']);
   });
 
   it('displays job id as selected when it is present in selectedJobIds', () => {

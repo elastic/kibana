@@ -1,5 +1,5 @@
 {
-  "sha1": "50d921bdc5648542005f2042dd471f1f4aaa7fc0",
+  "sha1": "c7bbe5d37463bdf9b5028b1e04974cba7e988498",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -231,8 +231,8 @@
       }
     },
     {
-      "id": "ea06d464054f10f-a8952be5ce2dfb9",
-      "title": "Hosts Page - Alerts Tab should correctly load the Alerts tab",
+      "id": "ea06d464054f10f-78eab3c3e6337fa",
+      "title": "Hosts Page - Alerts Tab loads the alerts tab with live alerts",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -242,104 +242,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
-        "line": 55,
-        "column": 38
-      }
-    },
-    {
-      "id": "ea06d464054f10f-00c1ebb85914de7",
-      "title": "Hosts Page - Alerts Tab should display the correct active alerts count badge",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
-        "line": 56,
-        "column": 41
-      }
-    },
-    {
-      "id": "ea06d464054f10f-f78f9bcec9bd2e1",
-      "title": "Hosts Page - Alerts Tab should filter alerts to show all statuses",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
-        "line": 59,
-        "column": 72
-      }
-    },
-    {
-      "id": "ea06d464054f10f-525a63ab62000bc",
-      "title": "Hosts Page - Alerts Tab should filter alerts to show only active alerts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
-        "line": 62,
-        "column": 7
-      }
-    },
-    {
-      "id": "ea06d464054f10f-805f3668b4d14c1",
-      "title": "Hosts Page - Alerts Tab should filter alerts to show only recovered alerts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
-        "line": 68,
-        "column": 14
-      }
-    },
-    {
-      "id": "ea06d464054f10f-c7795a8abd6a88b",
-      "title": "Hosts Page - Alerts Tab should render the alerts table with cells",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
-        "line": 72,
-        "column": 23
-      }
-    },
-    {
-      "id": "869e353ba67458c-a2bd0a115e9e812",
-      "title": "Hosts Page - Content should render the correct page title",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_content.spec.ts",
-        "line": 31,
-        "column": 13
+        "line": 48,
+        "column": 10
       }
     },
     {
@@ -354,24 +258,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_content.spec.ts",
-        "line": 34,
-        "column": 9
-      }
-    },
-    {
-      "id": "869e353ba67458c-ec8e612353c61b5",
-      "title": "Hosts Page - Content should load 11 lens metric charts in the Metrics tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_content.spec.ts",
-        "line": 47,
-        "column": 15
+        "line": 28,
+        "column": 33
       }
     },
     {
@@ -386,109 +274,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_content.spec.ts",
-        "line": 60,
-        "column": 22
+        "line": 38,
+        "column": 11
       }
     },
     {
-      "id": "dabc65f5da31ebe-fb23c5e0de6c6c5",
-      "title": "Hosts Page - Metadata Filter Add and remove metadata filter from host flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_metadata_filter.spec.ts",
-        "line": 26,
-        "column": 15
-      }
-    },
-    {
-      "id": "dabc65f5da31ebe-a99c866d6ac97cd",
-      "title": "Hosts Page - Metadata Filter Adding a metadata filter hides other hosts from the table",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_metadata_filter.spec.ts",
-        "line": 53,
-        "column": 22
-      }
-    },
-    {
-      "id": "003281d82ca0442-5cb55578e07a030",
-      "title": "Hosts Page - Search Query should filter the table content on a KQL search submit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search_query.spec.ts",
-        "line": 40,
-        "column": 7
-      }
-    },
-    {
-      "id": "003281d82ca0442-eb9dd626af6a329",
-      "title": "Hosts Page - Search Query should update the KPI tiles on a search submit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search_query.spec.ts",
-        "line": 63,
-        "column": 15
-      }
-    },
-    {
-      "id": "003281d82ca0442-9436e4f09d9246e",
-      "title": "Hosts Page - Search Query should show an error callout when an invalid KQL query is submitted",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search_query.spec.ts",
-        "line": 91,
-        "column": 22
-      }
-    },
-    {
-      "id": "003281d82ca0442-d249c155c8a3a64",
-      "title": "Hosts Page - Search Query should show no data message when query matches no hosts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search_query.spec.ts",
-        "line": 97,
-        "column": 22
-      }
-    },
-    {
-      "id": "e0dfab470c8cdf4-3df745974a5aa43",
-      "title": "Hosts Page - Search Search using the Hosts page search bar",
+      "id": "e0dfab470c8cdf4-2533b7500332823",
+      "title": "Hosts Page - Search Controls filters the table when a KQL query is submitted",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -498,13 +290,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
-        "line": 36,
-        "column": 67
+        "line": 28,
+        "column": 57
       }
     },
     {
-      "id": "e0dfab470c8cdf4-fbaa70a0ae45105",
-      "title": "Hosts Page - Search Search using the flyout search bar",
+      "id": "e0dfab470c8cdf4-04929c64d9e0c41",
+      "title": "Hosts Page - Search Controls filters the table by excluding a cloud provider",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -514,13 +306,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
-        "line": 41,
-        "column": 86
+        "line": 37,
+        "column": 22
       }
     },
     {
-      "id": "e0dfab470c8cdf4-e9c2121846875ba",
-      "title": "Hosts Page - Search Filter hosts using the Cloud Provider control",
+      "id": "e0dfab470c8cdf4-d7c6511e7a1b888",
+      "title": "Hosts Page - Search Controls filters the table by excluding an operating system",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -530,93 +322,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
-        "line": 55,
-        "column": 13
-      }
-    },
-    {
-      "id": "e0dfab470c8cdf4-1bc13daa71111e7",
-      "title": "Hosts Page - Search Filter hosts using the Operating System control",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
-        "line": 73,
-        "column": 10
-      }
-    },
-    {
-      "id": "2a28cf173721683-ca154041039d459",
-      "title": "Hosts Page - Table should render a table with the correct number of hosts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 41,
-        "column": 13
-      }
-    },
-    {
-      "id": "2a28cf173721683-8eda4da125d5852",
-      "title": "Hosts Page - Table should render metric values for each host entry",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 44,
-        "column": 9
-      }
-    },
-    {
-      "id": "2a28cf173721683-cd6ee75a8a910af",
-      "title": "Hosts Page - Table should select and filter hosts inside the table",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
         "line": 54,
-        "column": 20
-      }
-    },
-    {
-      "id": "2a28cf173721683-f53437f2837788b",
-      "title": "Hosts Page - Table should display correct KPI tile values",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 75,
         "column": 25
       }
     },
     {
-      "id": "2a28cf173721683-aacaac19d0ad998",
-      "title": "Hosts Page - Table should paginate to 5 rows per page and navigate to the last page",
+      "id": "2a28cf173721683-34cbbd22ecf23f5",
+      "title": "Hosts Page - Table Filters filters the table to selected hosts",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -626,13 +338,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 94,
-        "column": 7
+        "line": 31,
+        "column": 26
       }
     },
     {
-      "id": "2a28cf173721683-ac6fdbb524d01ee",
-      "title": "Hosts Page - Table should show all hosts when page size is increased",
+      "id": "2a28cf173721683-fd55b5ca043bcd8",
+      "title": "Hosts Page - Table Filters adds and removes a flyout metadata filter on the hosts table",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -642,72 +354,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 106,
-        "column": 23
-      }
-    },
-    {
-      "id": "2a28cf173721683-6e36e4ed3f8191b",
-      "title": "Hosts Page - Table should sort by CPU usage ascending",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 119,
-        "column": 32
-      }
-    },
-    {
-      "id": "2a28cf173721683-bb28b5f24f22406",
-      "title": "Hosts Page - Table should sort by CPU usage descending",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 133,
-        "column": 22
-      }
-    },
-    {
-      "id": "2a28cf173721683-44ef574e8bd4a56",
-      "title": "Hosts Page - Table should sort by title ascending",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 146,
-        "column": 72
-      }
-    },
-    {
-      "id": "2a28cf173721683-1e2eea6b2f8c004",
-      "title": "Hosts Page - Table should sort by title descending",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 159,
-        "column": 9
+        "line": 43,
+        "column": 25
       }
     },
     {
@@ -722,8 +370,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_time_drift.spec.ts",
-        "line": 29,
-        "column": 10
+        "line": 34,
+        "column": 5
       }
     },
     {
@@ -738,7 +386,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_time_drift.spec.ts",
-        "line": 68,
+        "line": 69,
         "column": 25
       }
     },

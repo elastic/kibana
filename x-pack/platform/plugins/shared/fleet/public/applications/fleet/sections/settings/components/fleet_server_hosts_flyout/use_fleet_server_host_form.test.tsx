@@ -41,7 +41,7 @@ describe('useFleetServerHostsForm', () => {
           },
         ]
       `);
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -67,7 +67,7 @@ describe('useFleetServerHostsForm', () => {
 
     await act(() => result.current.submit());
 
-    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
   });
 
   it('should submit a valid form with SSL options', async () => {
@@ -100,7 +100,7 @@ describe('useFleetServerHostsForm', () => {
 
     await act(() => result.current.submit());
 
-    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
   });
 
   describe('SSL certificate path validation', () => {
@@ -126,7 +126,7 @@ describe('useFleetServerHostsForm', () => {
 
       await testRenderer.waitFor(() => {
         expect(result.current.inputs.sslCertificateInput.errors).toBeDefined();
-        expect(onSuccess).not.toBeCalled();
+        expect(onSuccess).not.toHaveBeenCalled();
         expect(result.current.isDisabled).toBeTruthy();
       });
     });
@@ -157,7 +157,7 @@ describe('useFleetServerHostsForm', () => {
 
       await testRenderer.waitFor(() => {
         expect(result.current.inputs.sslEsCertificateAuthoritiesInput.props.errors).toBeDefined();
-        expect(onSuccess).not.toBeCalled();
+        expect(onSuccess).not.toHaveBeenCalled();
         expect(result.current.isDisabled).toBeTruthy();
       });
     });
@@ -187,7 +187,7 @@ describe('useFleetServerHostsForm', () => {
 
       await act(() => result.current.submit());
 
-      await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+      await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
     });
   });
 
@@ -303,7 +303,7 @@ describe('useFleetServerHostsForm', () => {
             body: JSON.stringify({ is_default: true }),
           })
         );
-        expect(onSuccess).toBeCalled();
+        expect(onSuccess).toHaveBeenCalled();
       });
     });
 
@@ -362,7 +362,7 @@ describe('useFleetServerHostsForm', () => {
     await act(() => result.current.submit());
 
     await testRenderer.waitFor(() => {
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
 
@@ -370,7 +370,7 @@ describe('useFleetServerHostsForm', () => {
     expect(result.current.isDisabled).toBeFalsy();
 
     await act(() => result.current.submit());
-    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
   });
 
   it('should send explicit null when clearing an existing ssl secret key', async () => {
@@ -400,7 +400,7 @@ describe('useFleetServerHostsForm', () => {
     await act(() => result.current.submit());
 
     await testRenderer.waitFor(() => {
-      expect(onSuccess).toBeCalled();
+      expect(onSuccess).toHaveBeenCalled();
       const [, putOptions] = testRenderer.startServices.http.put.mock.calls[0] as unknown as [
         string,
         { body: string }
@@ -438,7 +438,7 @@ describe('useFleetServerHostsForm', () => {
     await act(() => result.current.submit());
 
     await testRenderer.waitFor(() => {
-      expect(onSuccess).toBeCalled();
+      expect(onSuccess).toHaveBeenCalled();
       const [, putOptions] = testRenderer.startServices.http.put.mock.calls[0] as unknown as [
         string,
         { body: string }

@@ -7,9 +7,5 @@
 
 import { QueryClient } from '@kbn/react-query';
 
-/**
- * Shared React Query client for the Significant Events app shell and the
- * embeddable Knowledge Indicators panel, so mutations in either invalidate
- * the same cache.
- */
+/** Shared React Query client for the Significant Events app. */
 export const significantEventsQueryClient = new QueryClient();

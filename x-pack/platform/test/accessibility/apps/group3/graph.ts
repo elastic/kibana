@@ -12,7 +12,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const browser = getService('browser');
-  const { common, header, home } = getPageObjects(['common', 'header', 'home']);
+  const { common, header, home, appMenu, graph } = getPageObjects([
+    'common',
+    'header',
+    'home',
+    'appMenu',
+    'graph',
+  ]);
 
   describe('Graph app a11y tests', () => {
     before(async () => {
@@ -58,13 +64,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Graph save panel', async function () {
-      await testSubjects.click('graphSaveButton');
+      await appMenu.clickMenuItem('graphSaveButton');
       await a11y.testAppSnapshot();
       await testSubjects.click('saveCancelButton');
     });
 
     it('Graph settings - advanced settings tab', async function () {
-      await testSubjects.click('graphSettingsButton');
+      await graph.clickSettingsButton();
       await a11y.testAppSnapshot();
     });
 
@@ -80,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Graph settings drilldown tab - add new drilldown', async function () {
-      await testSubjects.click('graphSettingsButton');
+      await graph.clickSettingsButton();
       await testSubjects.click('drillDowns');
       await testSubjects.click('graphAddNewTemplate');
       await a11y.testAppSnapshot();
@@ -88,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Create new graph page', async function () {
-      await testSubjects.click('graphNewButton');
+      await appMenu.clickMenuItem('graphNewButton');
       await testSubjects.click('confirmModalConfirmButton');
       await a11y.testAppSnapshot();
     });

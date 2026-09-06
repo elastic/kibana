@@ -54,8 +54,8 @@ test('executes a single action mapped to a trigger', async () => {
 
   jest.runAllTimers();
 
-  expect(executeFn).toBeCalledTimes(1);
-  expect(executeFn).toBeCalledWith(expect.objectContaining(context));
+  expect(executeFn).toHaveBeenCalledTimes(1);
+  expect(executeFn).toHaveBeenCalledWith(expect.objectContaining(context));
 });
 
 test("doesn't throw an error if there are no compatible actions to execute", async () => {
@@ -84,7 +84,7 @@ test('does not execute an incompatible action', async () => {
 
   jest.runAllTimers();
 
-  expect(executeFn).toBeCalledTimes(1);
+  expect(executeFn).toHaveBeenCalledTimes(1);
 });
 
 test('shows a context menu when more than one action is mapped to a trigger', async () => {
@@ -105,7 +105,7 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   jest.runAllTimers();
 
   await waitFor(() => {
-    expect(executeFn).toBeCalledTimes(0);
+    expect(executeFn).toHaveBeenCalledTimes(0);
     expect(openContextMenu).toHaveBeenCalledTimes(1);
   });
 });
@@ -126,7 +126,7 @@ test('shows a context menu when there is only one action mapped to a trigger and
   jest.runAllTimers();
 
   await waitFor(() => {
-    expect(executeFn).toBeCalledTimes(0);
+    expect(executeFn).toHaveBeenCalledTimes(0);
     expect(openContextMenu).toHaveBeenCalledTimes(1);
   });
 });
@@ -166,7 +166,7 @@ test("doesn't show a context menu for auto executable actions", async () => {
   jest.runAllTimers();
 
   await waitFor(() => {
-    expect(executeFn).toBeCalledTimes(2);
+    expect(executeFn).toHaveBeenCalledTimes(2);
     expect(openContextMenu).toHaveBeenCalledTimes(0);
   });
 });
@@ -183,7 +183,7 @@ test('passes trigger into execute', async () => {
   const context = { foo: 'bar' };
   await start.executeTriggerActions(ON_OPEN_PANEL_MENU, context);
   jest.runAllTimers();
-  expect(executeFn).toBeCalledWith({
+  expect(executeFn).toHaveBeenCalledWith({
     ...context,
     trigger: start.getTrigger(ON_OPEN_PANEL_MENU),
   });

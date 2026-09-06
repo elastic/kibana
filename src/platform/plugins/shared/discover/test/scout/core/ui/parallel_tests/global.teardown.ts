@@ -9,6 +9,19 @@
 
 import { globalTeardownHook } from '@kbn/scout';
 
-globalTeardownHook('Teardown Discover core tests data', async ({ log }) => {
-  log.debug('[teardown:core] no custom teardown required');
-});
+const testRunId = process.env.TEST_RUN_ID;
+if (!testRunId) {
+  throw new Error('TEST_RUN_ID is required for the legacy log stream data namespace');
+}
+
+const legacyLogStreamDataStream = `logs-synth.discover-${testRunId}`;
+
+globalTeardownHook(
+  'Teardown legacy log stream embeddable data',
+  { tag: '@local-stateful-classic' },
+  async ({ esClient, log }) => {
+    log.debug(`[teardown:legacy_log_stream] deleting ${legacyLogStreamDataStream}...`);
+    await esClient.indices.deleteDataStream({ name: legacyLogStreamDataStream }, { ignore: [404] });
+    log.debug('[teardown:legacy_log_stream] synthtrace logs deleted');
+  }
+);

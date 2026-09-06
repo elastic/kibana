@@ -22,19 +22,21 @@ export const AlertsTabBadge = () => {
   });
 
   if (loading) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj="hostsView-tabs-alerts-count-loading" />;
   }
 
   if (error) {
     return (
-      <EuiIconTip
-        content={i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.countError', {
-          defaultMessage:
-            'The active alert count was not retrieved correctly, try reloading the page.',
-        })}
-        type="warning"
-        color="warning"
-      />
+      <span data-test-subj="hostsView-tabs-alerts-count-error">
+        <EuiIconTip
+          content={i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.countError', {
+            defaultMessage:
+              'The active alert count was not retrieved correctly, try reloading the page.',
+          })}
+          type="warning"
+          color="warning"
+        />
+      </span>
     );
   }
 

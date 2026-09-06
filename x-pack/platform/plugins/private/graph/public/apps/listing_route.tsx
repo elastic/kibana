@@ -7,14 +7,13 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { KibanaContentListPage } from '@kbn/content-list-page';
 import { ContentListClientProvider } from '@kbn/content-list-provider-client';
 import type { TableListViewFindItemsFn } from '@kbn/content-list-provider-client';
 import type { ContentListItem } from '@kbn/content-list-provider';
+import { AppHeader, APP_HEADER_TEST_SUBJECTS, type AppHeaderMenu } from '@kbn/app-header';
 import { GraphContentList } from '../components/content_list';
 import { findSavedWorkspace, deleteSavedWorkspace } from '../helpers/saved_workspace_utils';
 import { getEditPath, getEditUrl, getNewPath, setBreadcrumbs } from '../services/url';
@@ -81,22 +80,22 @@ export function ListingRoute({
     path: '#/tutorial_directory/sampleData',
   });
 
-  const createGraphButton = useMemo(
-    () => (
-      <EuiButton
-        fill
-        iconType="plusCircle"
-        onClick={onCreateGraph}
-        data-test-subj="graphCreateGraphButton"
-      >
-        <FormattedMessage
-          id="xpack.graph.listing.createGraphButtonLabel"
-          defaultMessage="Create graph"
-        />
-      </EuiButton>
-    ),
-    [onCreateGraph]
-  );
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (!canSave) {
+      return undefined;
+    }
+    return {
+      primaryActionItem: {
+        id: 'create',
+        iconType: 'plusCircle',
+        label: i18n.translate('xpack.graph.listing.createGraphButtonLabel', {
+          defaultMessage: 'Create graph',
+        }),
+        testId: 'graphCreateGraphButton',
+        run: onCreateGraph,
+      },
+    };
+  }, [canSave, onCreateGraph]);
 
   const getHref = useCallback(
     ({ id }: ContentListItem) => getEditUrl(addBasePath, { id }),
@@ -141,16 +140,14 @@ export function ListingRoute({
         selection: canDelete,
       }}
     >
+      <AppHeader
+        title={i18n.translate('xpack.graph.listing.graphsTitle', {
+          defaultMessage: 'Graphs',
+        })}
+        menu={menu}
+      />
       <KibanaContentListPage>
-        <KibanaContentListPage.Header
-          title={i18n.translate('xpack.graph.listing.graphsTitle', {
-            defaultMessage: 'Graphs',
-          })}
-          {...(canSave && {
-            actions: createGraphButton,
-          })}
-        />
-        <KibanaContentListPage.Section>
+        <KibanaContentListPage.Section aria-labelledby={APP_HEADER_TEST_SUBJECTS.title}>
           <GraphContentList {...{ canSave, sampleDataUrl, onCreateGraph }} />
         </KibanaContentListPage.Section>
       </KibanaContentListPage>

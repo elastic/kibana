@@ -39,6 +39,8 @@ interface Props {
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
   hideRefreshButton?: boolean;
+  onRefreshReady?: (refresh: () => void) => void;
+  onRefreshLoadingChange?: (isLoading: boolean) => void;
   appId?: string;
   onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   getColumns?: (params: {
@@ -66,6 +68,8 @@ export function SearchSessionsMgmtTable({
   kibanaVersion,
   searchUsageCollector,
   hideRefreshButton = false,
+  onRefreshReady,
+  onRefreshLoadingChange,
   getColumns = getDefaultColumns,
   appId,
   onBackgroundSearchOpened,
@@ -140,6 +144,14 @@ export function SearchSessionsMgmtTable({
       refreshTimeoutRef.current = window.setTimeout(doRefresh, refreshInterval);
     }
   }, [api, refreshInterval, locators, appId]);
+
+  useEffect(() => {
+    onRefreshReady?.(doRefresh);
+  }, [doRefresh, onRefreshReady]);
+
+  useEffect(() => {
+    onRefreshLoadingChange?.(debouncedIsLoading);
+  }, [debouncedIsLoading, onRefreshLoadingChange]);
 
   // initial data load
   useEffect(() => {

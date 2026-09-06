@@ -11,6 +11,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { AlertingAuthorizationClientFactoryOpts } from './alerting_authorization_client_factory';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 jest.mock('./authorization/alerting_authorization');
 
@@ -101,7 +102,7 @@ describe('AlertingAuthorizationClientFactory', () => {
       });
 
       const request = mockRouter.createKibanaRequest();
-      await factory.createForSpace(request, 'custom-space');
+      await factory.createForSpace(request, asSpaceId('custom-space'));
 
       // Should have logged a debug message about the fallback
       expect(logger.debug).toHaveBeenCalledWith(
@@ -131,7 +132,7 @@ describe('AlertingAuthorizationClientFactory', () => {
       });
 
       const request = mockRouter.createKibanaRequest();
-      await factory.createForSpace(request, 'custom-space');
+      await factory.createForSpace(request, asSpaceId('custom-space'));
 
       const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
       expect(AlertingAuthorization.create).toHaveBeenCalledWith({

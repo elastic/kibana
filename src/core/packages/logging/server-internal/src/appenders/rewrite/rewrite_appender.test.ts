@@ -76,7 +76,7 @@ describe('RewriteAppender', () => {
       appender.addAppender(...createAppenderMock('mock1'));
       expect(() => {
         appender.append(createLogRecord());
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
 

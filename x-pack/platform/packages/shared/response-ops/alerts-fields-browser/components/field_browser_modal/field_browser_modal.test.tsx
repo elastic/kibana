@@ -52,7 +52,7 @@ describe('FieldBrowserModal', () => {
     renderComponent();
 
     await userEvent.click(screen.getByTestId('close'));
-    expect(mockOnHide).toBeCalled();
+    expect(mockOnHide).toHaveBeenCalled();
   });
 
   test('it renders the Reset Fields button', () => {
@@ -73,7 +73,7 @@ describe('FieldBrowserModal', () => {
 
     await userEvent.click(screen.getByTestId('reset-fields'));
 
-    expect(mockOnHide).toBeCalled();
+    expect(mockOnHide).toHaveBeenCalled();
   });
 
   test('it renders the search', () => {
@@ -110,7 +110,7 @@ describe('FieldBrowserModal', () => {
     await userEvent.click(screen.getByTestId('field-search'));
     await userEvent.paste(inputText);
 
-    expect(onSearchInputChange).toBeCalledWith(inputText);
+    expect(onSearchInputChange).toHaveBeenCalledWith(inputText);
   });
 
   test('it renders the CreateFieldButton when it is provided', () => {

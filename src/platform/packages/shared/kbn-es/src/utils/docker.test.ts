@@ -803,9 +803,7 @@ describe('setupServerlessVolumes()', () => {
     });
 
     await volumeCmdTest(volumeCmd);
-    await expect(
-      Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
-    ).rejects.toThrowError();
+    await expect(Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)).rejects.toThrow();
   });
 
   test('should add SSL and IDP metadata volumes when ssl is passed', async () => {

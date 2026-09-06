@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export function getSpaceSelectorUrl(serverBasePath: string) {
-  return `${serverBasePath}/spaces/space_selector`;
+export function getSpaceSelectorUrl(serverBasePath: string, next?: string) {
+  const url = `${serverBasePath}/spaces/space_selector`;
+  return next ? `${url}?next=${encodeURIComponent(next)}` : url;
 }

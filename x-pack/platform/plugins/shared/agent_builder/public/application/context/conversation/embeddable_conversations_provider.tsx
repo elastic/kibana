@@ -253,7 +253,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
-      shouldStickToBottom: true,
       isEmbeddedContext: true,
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,

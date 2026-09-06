@@ -159,7 +159,7 @@ describe('threshold_executor', () => {
         licensing,
         scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
       });
-      expect(mockScheduledNotificationResponseAction).toBeCalledWith({
+      expect(mockScheduledNotificationResponseAction).toHaveBeenCalledWith({
         signals: result.createdSignals,
         signalsCount: result.createdSignalsCount,
         responseActions: sharedParams.completeRule.ruleParams.responseActions,

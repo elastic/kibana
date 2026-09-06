@@ -13,16 +13,33 @@ import type {
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import { getVegaEmbeddableSchema } from './embeddable/schema';
+import { getTransforms } from './embeddable/transforms';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { home, usageCollection }: VisTypeVegaPluginSetupDependencies) {
+  public setup(core: CoreSetup, { embeddable }: VisTypeVegaPluginSetupDependencies) {
+    core
+      .getStartServices()
+      .then(async ([{ featureFlags }]) => {
+        const standaloneEmbeddableEnabled = await featureFlags.getBooleanValue(
+          VEGA_STANDALONE_EMBEDDABLE_FLAG,
+          false
+        );
+        embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
+          title: 'Vega',
+          getTransforms,
+          getSchema: (getDrilldownsSchema) =>
+            standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
+        });
+      })
+      .catch(() => {});
     return {};
   }
 
   public start(core: CoreStart) {
     return {};
   }
-  public stop() {}
 }

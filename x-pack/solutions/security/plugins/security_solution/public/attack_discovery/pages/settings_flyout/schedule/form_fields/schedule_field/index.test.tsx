@@ -76,7 +76,7 @@ describe('ScheduleField', () => {
       fireEvent.change(timeValueInput, { target: { value: '-7' } });
     });
     await waitFor(() => {
-      expect(defaultField.setValue).not.toBeCalled();
+      expect(defaultField.setValue).not.toHaveBeenCalled();
     });
   });
 
@@ -86,7 +86,7 @@ describe('ScheduleField', () => {
       fireEvent.change(timeValueInput, { target: { value: 'hello there' } });
     });
     await waitFor(() => {
-      expect(defaultField.setValue).not.toBeCalled();
+      expect(defaultField.setValue).not.toHaveBeenCalled();
     });
   });
 });

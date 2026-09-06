@@ -95,7 +95,7 @@ describe('AnalyticsIndex', () => {
   it('checks if the index exists', async () => {
     await index.upsertIndex();
 
-    expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
+    expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
   });
 
   it('creates index if it does not exist', async () => {
@@ -103,9 +103,12 @@ describe('AnalyticsIndex', () => {
 
     await index.upsertIndex();
 
-    expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
-    expect(esClient.putScript).toBeCalledWith({ id: painlessScriptId, script: painlessScript });
-    expect(esClient.indices.create).toBeCalledWith({
+    expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
+    expect(esClient.putScript).toHaveBeenCalledWith({
+      id: painlessScriptId,
+      script: painlessScript,
+    });
+    expect(esClient.indices.create).toHaveBeenCalledWith({
       index: indexName,
       timeout: '300s',
       mappings: {
@@ -154,15 +157,18 @@ describe('AnalyticsIndex', () => {
 
     await index.upsertIndex();
 
-    expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
-    expect(esClient.indices.getMapping).toBeCalledWith({ index: indexName });
-    expect(esClient.putScript).toBeCalledWith({ id: painlessScriptId, script: painlessScript });
-    expect(esClient.indices.putMapping).toBeCalledWith({
+    expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
+    expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+    expect(esClient.putScript).toHaveBeenCalledWith({
+      id: painlessScriptId,
+      script: painlessScript,
+    });
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: indexName,
       ...mappings,
       _meta: mappingsMeta,
     });
-    expect(scheduleCAIBackfillTaskMock).toBeCalledWith({
+    expect(scheduleCAIBackfillTaskMock).toHaveBeenCalledWith({
       taskId,
       sourceIndex,
       sourceQuery,
@@ -189,13 +195,13 @@ describe('AnalyticsIndex', () => {
 
     await index.upsertIndex();
 
-    expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
-    expect(esClient.indices.getMapping).toBeCalledWith({ index: indexName });
-    expect(esClient.putScript).toBeCalledTimes(0);
-    expect(esClient.indices.putMapping).toBeCalledTimes(0);
-    expect(scheduleCAIBackfillTaskMock).toBeCalledTimes(0);
+    expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
+    expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+    expect(esClient.putScript).toHaveBeenCalledTimes(0);
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(0);
+    expect(scheduleCAIBackfillTaskMock).toHaveBeenCalledTimes(0);
 
-    expect(logger.debug).toBeCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       `[${indexName}] Mapping version is up to date. Skipping update.`,
       { tags: ['cai-index-creation', `${indexName}`] }
     );
@@ -207,13 +213,13 @@ describe('AnalyticsIndex', () => {
 
     await index.upsertIndex();
 
-    expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
-    expect(esClient.indices.getMapping).toBeCalledWith({ index: indexName });
-    expect(esClient.putScript).toBeCalledTimes(0);
-    expect(esClient.indices.putMapping).toBeCalledTimes(0);
-    expect(scheduleCAIBackfillTaskMock).toBeCalledTimes(0);
+    expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
+    expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+    expect(esClient.putScript).toHaveBeenCalledTimes(0);
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(0);
+    expect(scheduleCAIBackfillTaskMock).toHaveBeenCalledTimes(0);
 
-    expect(logger.debug).toBeCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       `[${indexName}] Mapping version is up to date. Skipping update.`,
       { tags: ['cai-index-creation', `${indexName}`] }
     );
@@ -227,9 +233,9 @@ describe('AnalyticsIndex', () => {
         .mockResolvedValue(true);
       await index.upsertIndex();
 
-      expect(nextBackOff).toBeCalledTimes(2);
-      expect(esClient.indices.exists).toBeCalledTimes(3);
-      expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
+      expect(nextBackOff).toHaveBeenCalledTimes(2);
+      expect(esClient.indices.exists).toHaveBeenCalledTimes(3);
+      expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
     });
 
     it('retries if the esClient throws a retryable error when creating an index', async () => {
@@ -240,10 +246,13 @@ describe('AnalyticsIndex', () => {
 
       await index.upsertIndex();
 
-      expect(nextBackOff).toBeCalledTimes(1);
-      expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
-      expect(esClient.putScript).toBeCalledWith({ id: painlessScriptId, script: painlessScript });
-      expect(esClient.indices.create).toBeCalledTimes(2);
+      expect(nextBackOff).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
+      expect(esClient.putScript).toHaveBeenCalledWith({
+        id: painlessScriptId,
+        script: painlessScript,
+      });
+      expect(esClient.indices.create).toHaveBeenCalledTimes(2);
       expect(scheduleCAIBackfillTaskMock).toHaveBeenCalledWith({
         taskId,
         sourceIndex,
@@ -275,19 +284,22 @@ describe('AnalyticsIndex', () => {
 
       await index.upsertIndex();
 
-      expect(nextBackOff).toBeCalledTimes(1);
-      expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
-      expect(esClient.indices.getMapping).toBeCalledWith({ index: indexName });
-      expect(esClient.putScript).toBeCalledWith({ id: painlessScriptId, script: painlessScript });
+      expect(nextBackOff).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
+      expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(esClient.putScript).toHaveBeenCalledWith({
+        id: painlessScriptId,
+        script: painlessScript,
+      });
 
-      expect(esClient.indices.putMapping).toBeCalledTimes(2);
-      expect(esClient.indices.putMapping).toBeCalledWith({
+      expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
+      expect(esClient.indices.putMapping).toHaveBeenCalledWith({
         index: indexName,
         ...mappings,
         _meta: mappingsMeta,
       });
 
-      expect(scheduleCAIBackfillTaskMock).toBeCalledWith({
+      expect(scheduleCAIBackfillTaskMock).toHaveBeenCalledWith({
         taskId,
         sourceIndex,
         sourceQuery,
@@ -302,7 +314,7 @@ describe('AnalyticsIndex', () => {
 
       await expect(index.upsertIndex()).resolves.not.toThrow();
 
-      expect(nextBackOff).toBeCalledTimes(0);
+      expect(nextBackOff).toHaveBeenCalledTimes(0);
       // Paths in the algorithm after the error are not called.
       expect(esClient.indices.getMapping).not.toHaveBeenCalled();
     });
@@ -322,11 +334,11 @@ describe('AnalyticsIndex', () => {
 
       await index.upsertIndex();
 
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         `[${indexName}] Index already exists. Skipping creation.`,
         { tags: ['cai-index-creation', `${indexName}`] }
       );
-      expect(logger.error).not.toBeCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('logs multi_project_pending_exception errors as info', async () => {
@@ -344,12 +356,12 @@ describe('AnalyticsIndex', () => {
 
       await index.upsertIndex();
 
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         `[${indexName}] Multi-project setup. Skipping creation.`,
         { tags: ['cai-index-creation', `${indexName}`] }
       );
-      expect(logger.error).not.toBeCalled();
-      expect(nextBackOff).toBeCalledTimes(0);
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(nextBackOff).toHaveBeenCalledTimes(0);
     });
   });
 });

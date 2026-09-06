@@ -110,7 +110,7 @@ describe('createInitListener', () => {
 
     expect(jest.mocked(mockDataViewsService.getIdsWithTitle)).toHaveBeenCalled();
 
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       sharedDataViewManagerSlice.actions.setDataViews([
         {
           id: 'logs-*',
@@ -123,38 +123,38 @@ describe('createInitListener', () => {
         },
       ])
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       sharedDataViewManagerSlice.actions.setDataViewId({
         defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
       })
     );
 
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.default,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.timeline,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.alerts,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_ATTACK_DATA_VIEW_ID,
         scope: PageScope.attacks,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: PageScope.analyzer,
@@ -173,7 +173,7 @@ describe('createInitListener', () => {
     it('should dispatch error correctly', async () => {
       await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
-      expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
         sharedDataViewManagerSlice.actions.error()
       );
       expect(mockToastsDanger).toHaveBeenCalledWith({
