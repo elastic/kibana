@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
@@ -65,6 +66,12 @@ export interface DocumentFlyoutWrapperProps {
    * Optional test subject forwarded to the document flyout header without adding a layout wrapper.
    */
   dataTestSubj?: string;
+  /**
+   * `true` while in-flyout pagination is still resolving which document to show (e.g. it navigated
+   * to a page the source hasn't loaded yet). Forwarded to `DocumentFlyout` so the previously
+   * displayed document stays mounted behind a spinner instead of unmounting the whole flyout.
+   */
+  isPaginationLoading?: boolean;
 }
 
 /**
@@ -79,6 +86,7 @@ export const DocumentFlyoutWrapper = memo(
     renderCellActions,
     onAlertUpdated,
     dataTestSubj,
+    isPaginationLoading,
   }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
@@ -103,18 +111,36 @@ export const DocumentFlyoutWrapper = memo(
       refetchDocument();
     }, [onAlertUpdated, refetchDocument]);
 
+    // Last document this wrapper successfully resolved. Paginating and refetching both
+    // send `useEsDocSearch` back to `Loading` with `hit` momentarily undefined; keeping
+    // the previous one lets us re-render the flyout around it instead of unmounting the
+    // whole thing (which would take the header's pagination controls with it).
+    const lastResolvedHit = useRef<DataTableRecord | null>(null);
+    useEffect(() => {
+      if (requestState === ElasticRequestState.Found && hit) {
+        lastResolvedHit.current = hit;
+      }
+    }, [hit, requestState]);
+
+    const isReloading = requestState === ElasticRequestState.Loading && !!lastResolvedHit.current;
+    const displayedHit = hit ?? lastResolvedHit.current;
+
     const isAlert = useMemo(
-      () => hit && (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
-      [hit]
+      () =>
+        displayedHit && (getFieldValue(displayedHit, EVENT_KIND) as string) === EventKind.signal,
+      [displayedHit]
     );
 
     const { hasAlertsRead, loading: isAlertsPrivilegesLoading } = useAlertsPrivileges();
     const missingAlertsPrivilege = isAlert && !isAlertsPrivilegesLoading && !hasAlertsRead;
 
+    // Only drop to the bare loading state on a cold load. Once a document has been
+    // resolved, `isReloading` keeps the flyout mounted and lets the body render its own
+    // spinner, so paginating or refetching after a mutation doesn't tear down the header.
     if (
       isDataViewLoading ||
       (isAlert && isAlertsPrivilegesLoading) ||
-      requestState === ElasticRequestState.Loading
+      (requestState === ElasticRequestState.Loading && !isReloading)
     ) {
       return <FlyoutLoading data-test-subj="document-overview-wrapper-loading" />;
     }
@@ -135,7 +161,7 @@ export const DocumentFlyoutWrapper = memo(
       );
     }
 
-    if (requestState === ElasticRequestState.Found && hit) {
+    if ((requestState === ElasticRequestState.Found || isReloading) && displayedHit) {
       return (
         <>
           {isDataViewDegraded && (
@@ -151,17 +177,18 @@ export const DocumentFlyoutWrapper = memo(
             </DataViewDegradedCallout>
           )}
           <DocumentFlyout
-            hit={hit}
+            hit={displayedHit}
             renderCellActions={renderCellActions}
             onAlertUpdated={handleAlertUpdated}
             dataTestSubj={dataTestSubj}
+            isPaginationLoading={isPaginationLoading || isReloading}
           />
         </>
       );
     }
 
-    if (requestState === ElasticRequestState.NotFound) {
-      return (
+    const unavailableDocumentCallout =
+      requestState === ElasticRequestState.NotFound ? (
         <EuiCallOut
           announceOnMount
           color="danger"
@@ -169,17 +196,33 @@ export const DocumentFlyoutWrapper = memo(
           title={DOCUMENT_NOT_FOUND}
           data-test-subj="document-overview-wrapper-not-found"
         />
-      );
-    }
-
-    if (requestState === ElasticRequestState.Error) {
-      return (
+      ) : requestState === ElasticRequestState.Error ? (
         <EuiCallOut
           announceOnMount
           color="danger"
           iconType="warning"
           title={FETCH_ERROR}
           data-test-subj="document-overview-fetch-error"
+        />
+      ) : null;
+
+    if (unavailableDocumentCallout) {
+      // Paginating onto a document that no longer resolves (deleted, or moved out of its index)
+      // must not take the whole panel down with it: keep the last document that did resolve
+      // mounted so the header's pagination controls survive, and surface the failure in the body
+      // instead. Without a previous document there is nothing to keep mounted, so the callout
+      // stands alone.
+      if (!lastResolvedHit.current) {
+        return unavailableDocumentCallout;
+      }
+
+      return (
+        <DocumentFlyout
+          hit={lastResolvedHit.current}
+          renderCellActions={renderCellActions}
+          onAlertUpdated={handleAlertUpdated}
+          dataTestSubj={dataTestSubj}
+          unavailableDocumentCallout={unavailableDocumentCallout}
         />
       );
     }
