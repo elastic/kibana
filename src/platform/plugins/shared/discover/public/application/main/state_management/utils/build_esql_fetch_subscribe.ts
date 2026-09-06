@@ -201,6 +201,9 @@ export const buildEsqlFetchSubscribe = ({
     dataSubjects.documents$.next({
       ...next,
       fetchStatus: FetchStatus.COMPLETE,
+      ...(next.isBackgroundRevalidation !== undefined && {
+        isBackgroundRevalidation: false,
+      }),
     });
   };
 

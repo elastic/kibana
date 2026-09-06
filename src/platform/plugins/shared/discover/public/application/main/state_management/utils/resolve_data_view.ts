@@ -10,6 +10,10 @@
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { getEsqlDataView } from '@kbn/discover-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { isEqual } from 'lodash';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from '../redux';
 
@@ -238,3 +242,52 @@ export const loadAndResolveDataView = async ({
 
   return { fallback, dataView };
 };
+
+export interface LocalTabDataViewState {
+  query: Query | AggregateQuery | undefined;
+  spec: DataViewSpec | undefined;
+}
+
+/** Resolves the Data View needed to start an ES|QL tab. */
+export async function resolveInitialEsqlDataView({
+  query,
+  localTabState,
+  currentDataView,
+  services,
+}: {
+  query: AggregateQuery;
+  localTabState: LocalTabDataViewState | undefined;
+  currentDataView: DataView | undefined;
+  services: Pick<DiscoverServices, 'dataViews' | 'http'>;
+}): Promise<{ dataView: DataView; refreshFields?: () => void }> {
+  const localSpec = localTabState?.spec;
+  if (
+    !localTabState ||
+    !localSpec?.id ||
+    !isEqual(localTabState.query, query) ||
+    localSpec.title !== getIndexPatternFromESQLQuery(query.esql)
+  ) {
+    return { dataView: await getEsqlDataView(query, currentDataView, services) };
+  }
+
+  // ES|QL Data Views are tab-owned. Do not reuse a mutable instance from another tab.
+  services.dataViews.clearInstanceCache(localSpec.id);
+
+  const dataView = await services.dataViews.create(
+    {
+      ...localSpec,
+      // Tab state normally has no fields; also ignore stale fields from older stored state.
+      fields: undefined,
+    },
+    true
+  );
+
+  return {
+    dataView,
+    refreshFields: () => {
+      // A failed background refresh must not replace the usable restored Data View.
+      const displayErrors = false;
+      void services.dataViews.refreshFields(dataView, displayErrors).catch(() => {});
+    },
+  };
+}

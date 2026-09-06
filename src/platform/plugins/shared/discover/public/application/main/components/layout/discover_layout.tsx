@@ -151,7 +151,7 @@ export function DiscoverLayout() {
   }, [dataView]);
 
   const resultState = useMemo(
-    () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
+    () => getResultState(dataState.fetchStatus, dataState.foundDocuments),
     [dataState.fetchStatus, dataState.foundDocuments]
   );
 
@@ -274,6 +274,10 @@ export function DiscoverLayout() {
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const isLoading =
+    !documentState.isBackgroundRevalidation &&
+    (documentState.fetchStatus === FetchStatus.LOADING ||
+      documentState.fetchStatus === FetchStatus.PARTIAL);
 
   const esqlModeWarning = useMemo(() => {
     if (isEsqlMode) {
@@ -318,7 +322,14 @@ export function DiscoverLayout() {
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
         />
-        {resultState === 'loading' && <LoadingSpinner />}
+        {resultState === 'loading' && (
+          // TODO: TEmporary Hack: Delay this only for the first ES|QL fetch when a previous document reference
+          // exists. Hide it on a cache hit, but show it immediately on a miss; keep cold loads
+          // and explicit refreshes unchanged.
+          <EuiDelayRender delay={300}>
+            <LoadingSpinner />
+          </EuiDelayRender>
+        )}
       </>
     );
   }, [
@@ -331,10 +342,6 @@ export function DiscoverLayout() {
     onDropFieldToTable,
     dataStateContainer,
   ]);
-
-  const isLoading =
-    documentState.fetchStatus === FetchStatus.LOADING ||
-    documentState.fetchStatus === FetchStatus.PARTIAL;
 
   const onCancelClick = useCallback(() => {
     dataStateContainer.cancel();

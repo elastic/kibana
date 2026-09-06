@@ -13,7 +13,6 @@ import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { getEsqlDataView } from '@kbn/discover-utils';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
@@ -21,7 +20,11 @@ import type { DiscoverDataStateContainer } from '../../discover_data_state_conta
 import { appendAdHocDataViews } from './data_views';
 import { setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
-import { loadAndResolveDataView } from '../../utils/resolve_data_view';
+import {
+  loadAndResolveDataView,
+  resolveInitialEsqlDataView,
+  type LocalTabDataViewState,
+} from '../../utils/resolve_data_view';
 import { isDataViewSource } from '../../../../../../common/data_sources';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
@@ -44,6 +47,7 @@ export interface InitializeSingleTabsParams {
   esqlControls: ControlPanelsState<OptionsListESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
   profileState?: ProfileStateMap;
+  useEsqlTabState?: boolean;
 }
 
 export const initializeSingleTab = createInternalStateAsyncThunk(
@@ -58,6 +62,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         esqlControls,
         defaultUrlState,
         profileState,
+        useEsqlTabState,
       },
     }: TabActionPayload<{ initializeSingleTabParams: InitializeSingleTabsParams }>,
     {
@@ -179,15 +184,25 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Tab initialization
      */
 
-    let dataView: DataView;
+    let preparedDataView: { dataView: DataView; refreshFields?: () => void };
 
     if (isOfAggregateQueryType(initialQuery)) {
-      // Regardless of what was requested, we always use ad hoc data views for ES|QL
-      dataView = await getEsqlDataView(
-        initialQuery,
-        persistedTabDataView ?? currentDataView$.getValue(),
-        services
-      );
+      let localTabState: LocalTabDataViewState | undefined;
+      if (useEsqlTabState) {
+        localTabState = {
+          query: tabInitialInternalState?.serializedSearchSource?.query,
+          spec: initialAdHocDataViewSpec,
+        };
+      }
+
+      // Tabs already store a Data View spec without fields. Reuse it on return so the first
+      // fetch does not wait for fields, then refresh them in the background.
+      preparedDataView = await resolveInitialEsqlDataView({
+        query: initialQuery,
+        localTabState,
+        currentDataView: persistedTabDataView ?? currentDataView$.getValue(),
+        services,
+      });
     } else {
       // Load the requested data view if one exists, or a fallback otherwise
       const result = await loadAndResolveDataView({
@@ -201,10 +216,13 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         runtimeStateManager,
       });
 
-      dataView = result.dataView;
+      preparedDataView = { dataView: result.dataView };
     }
 
+    const { dataView } = preparedDataView;
+
     dispatch(setDataView({ tabId, dataView }));
+    preparedDataView.refreshFields?.();
 
     if (!dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));

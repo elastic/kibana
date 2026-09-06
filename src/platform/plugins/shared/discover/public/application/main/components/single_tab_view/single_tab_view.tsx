@@ -55,6 +55,7 @@ export interface SingleTabViewProps {
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   searchSessionManager: DiscoverSearchSessionManager;
+  useEsqlTabState: boolean;
 }
 
 export const SingleTabView = ({
@@ -64,6 +65,7 @@ export const SingleTabView = ({
   internalState,
   runtimeStateManager,
   searchSessionManager,
+  useEsqlTabState,
 }: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
@@ -111,6 +113,7 @@ export const SingleTabView = ({
         urlStateStorage,
         injectCurrentTab,
         getCurrentTab,
+        useEsqlTabState,
       });
 
       dispatch(
@@ -122,6 +125,7 @@ export const SingleTabView = ({
             esqlControls,
             defaultUrlState,
             profileState,
+            useEsqlTabState,
           },
         })
       );

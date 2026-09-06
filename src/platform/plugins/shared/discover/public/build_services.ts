@@ -81,6 +81,7 @@ import {
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
+import type { EsqlResultCacheService } from './esql_result_cache/service';
 
 /**
  * Location state of internal Discover history instance
@@ -167,6 +168,7 @@ export interface DiscoverServices {
   logsDataAccess?: LogsDataAccessPluginStart;
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
+  esqlResultCache: EsqlResultCacheService;
   logger: Logger;
   feedback?: DiscoverStartPlugins['feedback'];
 }
@@ -184,6 +186,7 @@ export const buildServices = ({
   profilesManager,
   profileStateRegistry,
   ebtManager,
+  esqlResultCache,
   setHeaderActionMenu = noop,
 }: {
   core: CoreStart;
@@ -198,6 +201,7 @@ export const buildServices = ({
   profilesManager: ProfilesManager;
   profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
+  esqlResultCache: EsqlResultCacheService;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }): DiscoverServices => {
   const { usageCollection } = plugins;
@@ -275,6 +279,7 @@ export const buildServices = ({
     profilesManager,
     profileStateRegistry,
     ebtManager,
+    esqlResultCache,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
     cps: plugins.cps,
