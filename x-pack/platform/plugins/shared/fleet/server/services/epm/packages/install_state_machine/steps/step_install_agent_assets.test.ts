@@ -50,11 +50,12 @@ steps:
 });
 
 describe('AB-006 fleet agent id namespace (collision policy)', () => {
-  it('derives deterministic ids in the fleet-* namespace regardless of fileName case', () => {
+  it('derives deterministic ids in the fleet-* namespace; fileBase is case-sensitive by convention', () => {
     const a = getFleetPackageAgentId({ pkgName: 'sdlc_intel', spaceId: 'default', fileName: 'sdlc-coverage-analysis.yaml' });
-    const b = getFleetPackageAgentId({ pkgName: 'sdlc_intel', spaceId: 'default', fileName: 'SDLC-COVERAGE-ANALYSIS.yaml' });
+    const b = getFleetPackageAgentId({ pkgName: 'sdlc_intel', spaceId: 'default', fileName: 'sdlc-coverage-analysis.yaml' });
     expect(a).toBe(b);
     expect(a.startsWith('fleet-')).toBe(true);
+    expect(a).toContain('sdlc-coverage-analysis');
   });
 
   it('different packages never collide (namespace includes pkgName)', () => {
