@@ -132,6 +132,7 @@ export class InferencePlugin
   private endpointIdCache: InferenceEndpointIdCache;
   private tokenUsageLogger: TokenUsageLogger;
   private workflowAnonymizationProvider?: WorkflowAnonymizationProvider;
+  private workflowAnonymizationOptions?: WorkflowAnonymizationOptions;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
@@ -160,7 +161,7 @@ export class InferencePlugin
         this.workflowAnonymizationProvider = provider;
       },
       anonymizationConfig: {
-        triggerCacheTtlMs: this.config.anonymization.triggerCacheTtlSeconds * 1000,
+        triggerCacheTtlMs: Math.round(this.config.anonymization.triggerCacheTtlSeconds * 1000),
         workflowDrivenEnabled: this.config.anonymization.workflowDriven,
       },
     };
@@ -199,11 +200,28 @@ export class InferencePlugin
       );
     }
 
+    this.workflowAnonymizationOptions = resolveWorkflowAnonymizationOptions({
+      enabled: this.config.anonymization.workflowDriven,
+      failureMode: this.config.anonymization.failureMode,
+      preLLMTimeoutMs: this.config.anonymization.preLLMTimeoutMs,
+      provider: this.workflowAnonymizationProvider,
+      logger: this.logger,
+    });
+
     const workerConfig = this.config.workers.anonymization;
-    const effectiveWorkerConfig =
-      this.config.anonymization.workflowDriven && workerConfig.minThreads < workerConfig.maxThreads
-        ? { ...workerConfig, minThreads: workerConfig.maxThreads }
-        : workerConfig;
+    const needsMinThreadsOverride =
+      this.config.anonymization.workflowDriven && workerConfig.minThreads < workerConfig.maxThreads;
+    if (needsMinThreadsOverride) {
+      this.logger.info(
+        `Workflow-driven anonymization executes synchronously on the request path; ` +
+          `overriding minThreads from ${workerConfig.minThreads} to ${workerConfig.maxThreads} ` +
+          `to keep workers pre-warmed and avoid cold-start latency. ` +
+          `Set xpack.inference.workers.anonymization.minThreads equal to maxThreads to suppress this adjustment.`
+      );
+    }
+    const effectiveWorkerConfig = needsMinThreadsOverride
+      ? { ...workerConfig, minThreads: workerConfig.maxThreads }
+      : workerConfig;
 
     this.regexWorker = new RegexWorkerService(
       effectiveWorkerConfig,
