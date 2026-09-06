@@ -294,6 +294,96 @@ const yesterdayScoreEnrichQuery = (
     `| STATS yesterday_score = MAX(score) BY entity_id`,
   ].join('\n');
 
+// ── route helpers ─────────────────────────────────────────────────────────────
+
+interface QueryPair {
+  dataQuery: string;
+  countQuery: string;
+}
+
+const buildPageQueries = (
+  sort: { field: string; direction: SortDir },
+  cursor: PageCursor | null,
+  pageSize: number,
+  entityAlias: string,
+  alertsIndex: string,
+  riskScoreIndex: string,
+  window: RiskDateWindow
+): QueryPair => {
+  if (sort.field === LAST_SEEN_ALERT_FIELD) {
+    return {
+      dataQuery: lastSeenAlertDataQuery(alertsIndex, entityAlias, cursor, pageSize, sort.direction),
+      countQuery: lastSeenAlertCountQuery(alertsIndex, entityAlias),
+    };
+  }
+  if (sort.field === RISK_SCORE_CHANGE_FIELD) {
+    return {
+      dataQuery: riskScoreChangeDataQuery(
+        riskScoreIndex,
+        entityAlias,
+        cursor,
+        pageSize,
+        sort.direction,
+        window
+      ),
+      countQuery: riskScoreChangeCountQuery(riskScoreIndex, entityAlias, window),
+    };
+  }
+  return {
+    dataQuery: nativeEntityDataQuery(entityAlias, sort.field, sort.direction, cursor, pageSize),
+    countQuery: nativeEntityCountQuery(entityAlias),
+  };
+};
+
+const enrichPageRows = async (
+  pageRows: Row[],
+  sort: { field: string; direction: SortDir },
+  alertsIndex: string,
+  riskScoreIndex: string,
+  window: RiskDateWindow,
+  rawQuery: (q: string) => Promise<Row[]>,
+  logger: EntityAnalyticsRoutesDeps['logger']
+): Promise<void> => {
+  if (pageRows.length === 0) return;
+
+  const entityNames = pageRows.map((r) => r['entity.name'] as string).filter(Boolean);
+  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
+
+  const tryEnrich = (q: string, label: string) =>
+    rawQuery(q).catch((e: unknown) => {
+      logger.warn(`${label}: ${e}`);
+      return null;
+    });
+
+  const [alertRows, scoreRows] = await Promise.all([
+    sort.field !== LAST_SEEN_ALERT_FIELD
+      ? tryEnrich(alertUnionQuery(alertsIndex, toList(entityNames)), 'alert enrich')
+      : null,
+    sort.field !== RISK_SCORE_CHANGE_FIELD
+      ? tryEnrich(yesterdayScoreEnrichQuery(riskScoreIndex, entityIds, window), 'score enrich')
+      : null,
+  ]);
+
+  if (alertRows) {
+    const byName = new Map(
+      alertRows.map((r) => [r['entity.name'] as string, r[LAST_SEEN_ALERT_FIELD]])
+    );
+    for (const row of pageRows)
+      row[LAST_SEEN_ALERT_FIELD] = byName.get(row['entity.name'] as string) ?? null;
+  }
+
+  if (scoreRows) {
+    const byId = new Map(
+      scoreRows.map((r) => [r.entity_id as string, r.yesterday_score as number])
+    );
+    for (const row of pageRows) {
+      const cur = row[RISK_SCORE_NORM_FIELD] as number | null;
+      const yday = byId.get(row[ENTITY_ID_FIELD] as string) ?? null;
+      row[RISK_SCORE_CHANGE_FIELD] = cur != null && yday != null ? cur - yday : null;
+    }
+  }
+};
+
 // ── route ─────────────────────────────────────────────────────────────────────
 
 export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
@@ -373,41 +463,16 @@ export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoute
           const rawQuery = (q: string) =>
             esClient.esql.query({ query: q, drop_null_columns: true }).then(toRows);
 
-          // Compute date window once so both data and count queries use the same day boundary.
           const window = riskDateWindow();
-
-          let dataQuery: string;
-          let countQuery: string;
-
-          if (sort.field === LAST_SEEN_ALERT_FIELD) {
-            dataQuery = lastSeenAlertDataQuery(
-              alertsIndex,
-              entityAlias,
-              cursor,
-              pageSize,
-              sort.direction
-            );
-            countQuery = lastSeenAlertCountQuery(alertsIndex, entityAlias);
-          } else if (sort.field === RISK_SCORE_CHANGE_FIELD) {
-            dataQuery = riskScoreChangeDataQuery(
-              riskScoreIndex,
-              entityAlias,
-              cursor,
-              pageSize,
-              sort.direction,
-              window
-            );
-            countQuery = riskScoreChangeCountQuery(riskScoreIndex, entityAlias, window);
-          } else {
-            dataQuery = nativeEntityDataQuery(
-              entityAlias,
-              sort.field,
-              sort.direction,
-              cursor,
-              pageSize
-            );
-            countQuery = nativeEntityCountQuery(entityAlias);
-          }
+          const { dataQuery, countQuery } = buildPageQueries(
+            sort,
+            cursor,
+            pageSize,
+            entityAlias,
+            alertsIndex,
+            riskScoreIndex,
+            window
+          );
 
           const [[...allRows], [countRow]] = await Promise.all([
             query(dataQuery),
@@ -417,48 +482,7 @@ export const registerEntityGridRoute = ({ router, logger }: EntityAnalyticsRoute
           const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
           const total = (countRow?.total as number) ?? 0;
 
-          if (pageRows.length > 0) {
-            const entityNames = pageRows.map((r) => r['entity.name'] as string).filter(Boolean);
-            const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
-
-            const tryEnrich = (q: string, label: string) =>
-              rawQuery(q).catch((e: unknown) => {
-                logger.warn(`${label}: ${e}`);
-                return null;
-              });
-
-            const [alertRows, scoreRows] = await Promise.all([
-              sort.field !== LAST_SEEN_ALERT_FIELD
-                ? tryEnrich(alertUnionQuery(alertsIndex, toList(entityNames)), 'alert enrich')
-                : null,
-              sort.field !== RISK_SCORE_CHANGE_FIELD
-                ? tryEnrich(
-                    yesterdayScoreEnrichQuery(riskScoreIndex, entityIds, window),
-                    'score enrich'
-                  )
-                : null,
-            ]);
-
-            if (alertRows) {
-              // alertUnionQuery ends with `| RENAME entity_name AS entity.name` so the key is "entity.name"
-              const byName = new Map(
-                alertRows.map((r) => [r['entity.name'] as string, r[LAST_SEEN_ALERT_FIELD]])
-              );
-              for (const row of pageRows)
-                row[LAST_SEEN_ALERT_FIELD] = byName.get(row['entity.name'] as string) ?? null;
-            }
-
-            if (scoreRows) {
-              const byId = new Map(
-                scoreRows.map((r) => [r.entity_id as string, r.yesterday_score as number])
-              );
-              for (const row of pageRows) {
-                const cur = row[RISK_SCORE_NORM_FIELD] as number | null;
-                const yday = byId.get(row[ENTITY_ID_FIELD] as string) ?? null;
-                row[RISK_SCORE_CHANGE_FIELD] = cur != null && yday != null ? cur - yday : null;
-              }
-            }
-          }
+          await enrichPageRows(pageRows, sort, alertsIndex, riskScoreIndex, window, rawQuery, logger);
 
           const lastRow = pageRows[pageRows.length - 1];
           const nextCursor =
