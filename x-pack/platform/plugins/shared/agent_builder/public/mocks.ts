@@ -50,6 +50,7 @@ const createAttachmentStartMock = (): AttachmentServiceStartContractMock => {
   return {
     addAttachmentType: jest.fn(),
     getAttachmentUiDefinition: jest.fn(),
+    registerShareProvider: jest.fn(),
   };
 };
 

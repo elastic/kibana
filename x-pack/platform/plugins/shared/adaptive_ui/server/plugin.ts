@@ -17,6 +17,7 @@ import { registerAdaptiveUiViewAttachment } from './attachment_types/adaptive_ui
 import { registerAdaptiveUiTools } from './tools';
 import { createAdaptiveUiViewRegistry } from './registered_views';
 import { viewRendererTypeDefinition } from './renderers/view_renderer';
+import { registerAdaptiveUiRoutes } from './routes';
 
 export class AdaptiveUiPlugin
   implements
@@ -62,8 +63,14 @@ export class AdaptiveUiPlugin
       getNightshiftInvestigations,
     });
     agentBuilder.renderers.register(viewRendererTypeDefinition);
+    registerAdaptiveUiRoutes({
+      router: coreSetup.http.createRouter(),
+      logger: this.logger,
+      getActions,
+      http: coreSetup.http,
+    });
 
-    this.logger.debug('Adaptive UI attachment, tools, and view renderer registered.');
+    this.logger.debug('Adaptive UI attachment, tools, view renderer, and routes registered.');
     return {};
   }
 

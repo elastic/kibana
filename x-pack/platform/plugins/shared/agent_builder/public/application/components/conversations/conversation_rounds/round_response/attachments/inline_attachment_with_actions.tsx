@@ -157,6 +157,11 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   const maxWidth = uiDefinition?.getMaxWidth?.(attachment);
   const viewSpec = uiDefinition.getViewSpec?.(attachment);
   const isHeaderOnly = !viewSpec && !uiDefinition.renderInlineContent;
+  const shareSlot = attachmentsService.getShareProvider()?.({
+    attachment,
+    spec: viewSpec,
+    isCanvas: false,
+  });
 
   return (
     <EuiSplitPanel.Outer
@@ -175,6 +180,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         subtitle={header?.subtitle}
         badges={header?.badges}
         actionButtons={inlineActionButtons}
+        {...{ shareSlot }}
         previewBadgeState={resolvedPreviewBadgeState}
         onClosePreview={closeCanvas}
         isHeaderOnly={isHeaderOnly}
