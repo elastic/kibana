@@ -14,13 +14,6 @@ import type {
 } from '@kbn/agent-builder-common';
 import { skillIndexName } from '../services/skills/persisted/client/storage';
 
-function fakeSkillRequest(): KibanaRequest {
-  return {
-    headers: {},
-    socket: { remoteAddress: '127.0.0.1', remotePort: 0 },
-    url: '/',
-  } as unknown as KibanaRequest;
-}
 import { agentsIndexName } from '../services/agents/persisted/client/storage';
 import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../types';
 
@@ -120,12 +113,14 @@ export class AgentBuilderManagementApi {
    * AB-005: create or update a package-managed persisted skill
    * (system context; plugin_id makes it readonly in the UI).
    */
-  public async createOrUpdateSkill(params: PersistedSkillCreateRequest, spaceId: string) {
+  public async createOrUpdateSkill(params: PersistedSkillCreateRequest, request: KibanaRequest) {
     const [, , pluginStart] = await this.getStartServices();
     if (!pluginStart?.skills) {
       throw new Error('agentBuilder skills service is not available');
     }
-    const registry = await pluginStart.skills.getRegistry({ request: fakeSkillRequest() });
+    // Use the caller request: the skills registry runs an ES privilege check,
+    // which fails with a synthetic credential-less request.
+    const registry = await pluginStart.skills.getRegistry({ request });
     if (await registry.has(params.id)) {
       return registry.update(params.id, {
         name: params.name,
