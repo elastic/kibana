@@ -43,6 +43,7 @@ export class VisualizePageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
   private readonly toasts = this.ctx.getService('toasts');
 
   index = {
@@ -72,6 +73,16 @@ export class VisualizePageObject extends FtrService {
    *  Try to speed resets a bit if the Visualize library breadcrumb is available
    */
   private async clickOnVisualizeLibraryBreadcrumb() {
+    if (await this.testSubjects.exists('appHeaderBack', { timeout: 500 })) {
+      const ariaLabel = await this.testSubjects.getAttribute('appHeaderBack', 'aria-label');
+      if (ariaLabel?.includes('Visualize library')) {
+        await this.testSubjects.click('appHeaderBack');
+        if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+          await this.testSubjects.click('confirmModalConfirmButton');
+        }
+        return true;
+      }
+    }
     // Try to navigate to the Visualize Listing page from breadcrumb if available
     const selector = '[data-test-subj="breadcrumb first"][title="Visualize library"]';
     const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector);
@@ -190,11 +201,11 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async navigateToLensFromAnotherVisualization() {
-    await this.testSubjects.click('visualizeEditInLensButton');
+    await this.appMenu.clickMenuItem('visualizeEditInLensButton');
   }
 
   public async hasNavigateToLensButton() {
-    return await this.testSubjects.exists('visualizeEditInLensButton');
+    return await this.appMenu.menuItemExists('visualizeEditInLensButton');
   }
 
   public async hasVisType(type: string) {
@@ -357,11 +368,18 @@ export class VisualizePageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
     const isOpen = await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
     if (!isOpen) {
-      await this.testSubjects.click('visualizeSaveButton');
+      await this.appMenu.clickMenuItem('visualizeSaveButton');
     }
   }
 
   public async clickLoadSavedVisButton() {
+    if (await this.testSubjects.exists('appHeaderBack', { timeout: 1000 })) {
+      const ariaLabel = await this.testSubjects.getAttribute('appHeaderBack', 'aria-label');
+      if (ariaLabel?.includes('Visualize library')) {
+        await this.testSubjects.click('appHeaderBack');
+        return;
+      }
+    }
     await this.testSubjects.click('breadcrumb first');
   }
 
@@ -388,6 +406,13 @@ export class VisualizePageObject extends FtrService {
 
   public async clickLandingPageBreadcrumbLink() {
     this.log.debug('clickLandingPageBreadcrumbLink');
+    if (await this.testSubjects.exists('appHeaderBack', { timeout: 1000 })) {
+      const ariaLabel = await this.testSubjects.getAttribute('appHeaderBack', 'aria-label');
+      if (ariaLabel?.includes('Visualize library')) {
+        await this.testSubjects.click('appHeaderBack');
+        return;
+      }
+    }
     await this.find.clickByCssSelector(`a[href="#${VisualizeConstants.LANDING_PAGE_PATH}"]`);
   }
 
@@ -513,24 +538,27 @@ export class VisualizePageObject extends FtrService {
 
   public async saveVisualizationAndReturn() {
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.existOrFail('visualizesaveAndReturnButton');
-    await this.testSubjects.click('visualizesaveAndReturnButton');
+    await this.appMenu.existOrFail('visualizesaveAndReturnButton');
+    await this.appMenu.clickMenuItem('visualizesaveAndReturnButton');
   }
 
   public async linkedToOriginatingApp() {
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.existOrFail('visualizesaveAndReturnButton');
+    await this.appMenu.existOrFail('visualizesaveAndReturnButton');
   }
 
   public async notLinkedToOriginatingApp() {
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.missingOrFail('visualizesaveAndReturnButton');
+    const exists = await this.appMenu.menuItemExists('visualizesaveAndReturnButton');
+    if (exists) {
+      throw new Error('Expected visualizesaveAndReturnButton to be missing');
+    }
   }
 
   public async cancelAndReturn(showConfirmModal: boolean) {
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.existOrFail('visualizeCancelAndReturnButton');
-    await this.testSubjects.click('visualizeCancelAndReturnButton');
+    await this.appMenu.existOrFail('visualizeCancelAndReturnButton');
+    await this.appMenu.clickMenuItem('visualizeCancelAndReturnButton');
     if (showConfirmModal) {
       await this.retry.waitFor(
         'confirm modal to show',

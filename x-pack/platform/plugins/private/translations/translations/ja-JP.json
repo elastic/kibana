@@ -10954,7 +10954,6 @@
     "visualizations.topNavMenu.saveVisualizationObjectType": "ビジュアライゼーション",
     "visualizations.topNavMenu.saveVisualizationToLibraryButtonLabel": "ライブラリに保存",
     "visualizations.topNavMenu.shareVisualizationButtonAriaLabel": "ビジュアライゼーションを共有",
-    "visualizations.topNavMenu.shareVisualizationButtonLabel": "共有",
     "visualizations.topNavMenu.updatePanel": "{originatingAppName}でパネルを更新",
     "visualizations.visualizationLoadingFailedErrorMessage": "ビジュアライゼーションを読み込めませんでした",
     "visualizations.visualizationTypeInvalidMessage": "無効なビジュアライゼーションタイプ \"{visType}\"",

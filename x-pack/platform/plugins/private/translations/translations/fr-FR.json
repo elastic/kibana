@@ -10921,7 +10921,6 @@
     "visualizations.topNavMenu.saveVisualizationObjectType": "visualisation",
     "visualizations.topNavMenu.saveVisualizationToLibraryButtonLabel": "Enregistrer dans la bibliothèque",
     "visualizations.topNavMenu.shareVisualizationButtonAriaLabel": "Partager la visualisation",
-    "visualizations.topNavMenu.shareVisualizationButtonLabel": "partager",
     "visualizations.topNavMenu.updatePanel": "Mettre à jour le panneau sur {originatingAppName}",
     "visualizations.visualizationLoadingFailedErrorMessage": "Impossible de charger la visualisation",
     "visualizations.visualizationTypeInvalidMessage": "Type de visualisation non valide \"{visType}\"",

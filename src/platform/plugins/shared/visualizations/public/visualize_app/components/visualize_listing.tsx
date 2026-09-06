@@ -18,6 +18,7 @@ import useMount from 'react-use/lib/useMount';
 import { useLocation, useParams } from 'react-router-dom';
 
 import type { Reference } from '@kbn/content-management-utils';
+import { AppHeader, type AppHeaderMenu, type AppHeaderTab } from '@kbn/app-header';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   TabbedTableListView,
@@ -48,6 +49,7 @@ import {
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import type { VisualizeServices } from '../types';
+import { getReadOnlyBadge } from '../utils';
 import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
 import {
   toTableListViewSavedObject,
@@ -293,6 +295,7 @@ export const VisualizeListing = () => {
       kbnUrlStateStorage,
       listingViewRegistry,
       serverless,
+      visualizeCapabilities,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -346,6 +349,7 @@ export const VisualizeListing = () => {
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
+  const { createItem, ...listTableProps } = tableViewProps;
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
     const calloutMessage = (
@@ -402,11 +406,11 @@ export const VisualizeListing = () => {
               getOnClickTitle={(item) =>
                 item.attributes.readOnly || item.error
                   ? undefined
-                  : () => tableViewProps.editItem?.(item)
+                  : () => listTableProps.editItem?.(item)
               }
               getDetailViewLink={getVisualizeListItemLink}
               tableCaption={visualizeLibraryPageTitle}
-              {...tableViewProps}
+              {...listTableProps}
               onFetchSuccess={propsFromParent.onFetchSuccess}
               setPageDataTestSubject={propsFromParent.setPageDataTestSubject}
             />
@@ -420,7 +424,7 @@ export const VisualizeListing = () => {
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    tableViewProps,
+    listTableProps,
     getVisualizeListItemLink,
   ]);
 
@@ -430,16 +434,55 @@ export const VisualizeListing = () => {
   );
 
   const { activeTab } = useParams<{ activeTab: string }>();
+  const selectedTabId = activeTab ?? visualizeTab.id;
+
+  const headerTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      tabs.map((tab) => ({
+        id: tab.id,
+        label: tab.title,
+        isSelected: tab.id === selectedTabId,
+        onClick: () => {
+          application.navigateToUrl(`#/${tab.id}`);
+        },
+      })),
+    [application, selectedTabId, tabs]
+  );
+
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (selectedTabId !== visualizeTab.id || !createItem) {
+      return undefined;
+    }
+    return {
+      primaryActionItem: {
+        id: 'create',
+        iconType: 'plusCircle',
+        label: i18n.translate('visualizations.listing.createVisualizationButtonLabel', {
+          defaultMessage: 'Create visualization',
+        }),
+        testId: 'newItemButton',
+        run: createItem,
+      },
+    };
+  }, [createItem, selectedTabId, visualizeTab.id]);
+
+  const badges = useMemo(
+    () => (visualizeCapabilities.save ? undefined : [getReadOnlyBadge()]),
+    [visualizeCapabilities.save]
+  );
 
   return (
-    <TabbedTableListView
-      headingId="visualizeListingHeading"
-      title={visualizeLibraryPageTitle}
-      tabs={tabs}
-      activeTabId={activeTab}
-      changeActiveTab={(id) => {
-        application.navigateToUrl(`#/${id}`);
-      }}
-    />
+    <>
+      <AppHeader title={visualizeLibraryPageTitle} tabs={headerTabs} menu={menu} badges={badges} />
+      <TabbedTableListView
+        headingId="visualizeListingHeading"
+        hideTabs
+        tabs={tabs}
+        activeTabId={activeTab}
+        changeActiveTab={(id) => {
+          application.navigateToUrl(`#/${id}`);
+        }}
+      />
+    </>
   );
 };
