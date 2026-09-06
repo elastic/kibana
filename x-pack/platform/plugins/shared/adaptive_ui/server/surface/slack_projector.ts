@@ -36,8 +36,8 @@ const renderChartAssets = async (
   requests: readonly SlackAssetRequest[],
   logger?: Logger
 ): Promise<SurfaceProjectionAsset[] | undefined> => {
-  // `@kbn/adaptive-ui/node` pulls in satori and native resvg; a reply with no chart
-  // should never load the rasterizer.
+  // `@kbn/adaptive-ui/node` pulls in native `@takumi-rs/core`; a reply with no
+  // chart should never load the renderer.
   const assets: SurfaceProjectionAsset[] = [];
   let totalBytes = 0;
 

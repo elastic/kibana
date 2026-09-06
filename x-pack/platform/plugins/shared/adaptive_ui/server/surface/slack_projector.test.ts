@@ -15,7 +15,7 @@ import { createSlackSurfaceProjector } from './slack_projector';
 
 const mockRenderNodePng = jest.fn<Promise<Buffer>, [unknown]>();
 
-// The real rasterizer pulls in satori and native resvg; the projector's contract is which
+// The real renderer pulls in native `@takumi-rs/core`; the projector's contract is which
 // bytes it ships, not how they were drawn.
 jest.mock('../slack/render_png', () => ({
   renderNodePng: (node: unknown) => mockRenderNodePng(node),
@@ -125,7 +125,7 @@ describe('createSlackSurfaceProjector', () => {
     });
 
     it('degrades charts to text when rasterizing fails', async () => {
-      mockRenderNodePng.mockRejectedValue(new Error('resvg unavailable'));
+      mockRenderNodePng.mockRejectedValue(new Error('renderer unavailable'));
 
       const projection = await projectChart();
 
