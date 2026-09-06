@@ -30,7 +30,9 @@ function textFromUnknown(value: unknown): string {
     if (typeof content === 'string') return content;
     if (Array.isArray(content)) {
       return content
-        .map((part) => (part && typeof part === 'object' ? String((part as { text?: unknown }).text ?? '') : ''))
+        .map((part) =>
+          part && typeof part === 'object' ? String((part as { text?: unknown }).text ?? '') : ''
+        )
         .join('\n');
     }
   }

@@ -121,7 +121,8 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
           // Tool inputs are still valid grounding evidence even when the final
           // narrative summarizes without naming indices.
           [...toolIds].some(
-            (id) => (id as string).includes('generate_esql') || (id as string).includes('execute_esql')
+            (id) =>
+              (id as string).includes('generate_esql') || (id as string).includes('execute_esql')
           );
 
         const success = skillInvoked && searchToolCalled && hasQueryReferences;
