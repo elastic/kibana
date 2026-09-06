@@ -111,6 +111,58 @@ function seedCompletedStepWithSize(
 describe('StepIoService', () => {
   const EVICTION_THRESHOLD = 100; // bytes
 
+  describe('flush', () => {
+    it('persists step changes before a terminal workflow status', async () => {
+      const { state, service, stepExecutionRepository, workflowExecutionRepository } =
+        buildHarness();
+      const stepWrite = Promise.withResolvers<void>();
+      stepExecutionRepository.bulkUpsert.mockReturnValue(stepWrite.promise);
+      state.upsertStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        status: ExecutionStatus.COMPLETED,
+      });
+      service.setStepOutput('step-1', { result: 'done' });
+      state.updateWorkflowExecution({ status: ExecutionStatus.COMPLETED });
+
+      const flushPromise = service.flush();
+      await Promise.resolve();
+
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+      expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+
+      stepWrite.resolve();
+      await flushPromise;
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
+    });
+
+    it('persists non-terminal workflow and step changes concurrently', async () => {
+      const { state, service, stepExecutionRepository, workflowExecutionRepository } =
+        buildHarness();
+      const workflowWrite = Promise.withResolvers<void>();
+      const stepWrite = Promise.withResolvers<void>();
+      workflowExecutionRepository.updateWorkflowExecution.mockReturnValue(workflowWrite.promise);
+      stepExecutionRepository.bulkUpsert.mockReturnValue(stepWrite.promise);
+      state.upsertStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        status: ExecutionStatus.RUNNING,
+      });
+      state.updateWorkflowExecution({ status: ExecutionStatus.RUNNING });
+
+      const flushPromise = service.flush();
+      await Promise.resolve();
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+
+      workflowWrite.resolve();
+      stepWrite.resolve();
+      await flushPromise;
+    });
+  });
+
   describe('IO reads/writes', () => {
     it('returns step output via service when state owns the doc', () => {
       const { state, service } = buildHarness();
