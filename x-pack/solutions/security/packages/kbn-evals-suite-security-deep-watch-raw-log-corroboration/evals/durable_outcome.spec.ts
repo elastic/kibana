@@ -18,6 +18,7 @@
 
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
 import { SCENARIOS } from '../src/dataset';
+import { logScorecard } from '../src/scorecard_log';
 import { SKILL_ID } from '../src/constants';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
 
@@ -93,6 +94,15 @@ evaluate.describe(
             `persisted=${hasPersistedRef}, complete=${reportComplete}`
         );
 
+        const scorecard = {
+          skillInvoked: skillInvoked ? 1 : 0,
+          durableWriteCalled: hasEmitCorroboration ? 1 : 0,
+          durableOutcomeVerified: hasPersistedRef ? 1 : 0,
+          reportCompleteness: reportComplete ? 1 : 0,
+        };
+
+        logScorecard(log, { level: 'L4', exampleId: scenario.id, scorecard });
+
         return {
           success,
           explanation:
@@ -100,12 +110,7 @@ evaluate.describe(
             `Durable write: ${hasEmitCorroboration}. ` +
             `Persisted ref: ${hasPersistedRef}. ` +
             `Report complete: ${reportComplete}.`,
-          scorecard: {
-            skillInvoked: skillInvoked ? 1 : 0,
-            durableWriteCalled: hasEmitCorroboration ? 1 : 0,
-            durableOutcomeVerified: hasPersistedRef ? 1 : 0,
-            reportCompleteness: reportComplete ? 1 : 0,
-          },
+          scorecard,
         };
       }
     );

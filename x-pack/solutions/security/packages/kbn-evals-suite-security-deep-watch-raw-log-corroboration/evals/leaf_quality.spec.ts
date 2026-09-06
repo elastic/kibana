@@ -16,6 +16,8 @@
 
 import { tags, selectEvaluators, getToolCallSteps, type Example } from '@kbn/evals';
 import { getNarrativeText, countDistinctClaims } from '../src/narrative_claims';
+import { logScorecard } from '../src/scorecard_log';
+import { selectShard } from '../src/select_shard';
 import { evaluate as base } from '../src/evaluate';
 import { SCENARIOS } from '../src/dataset';
 import { SKILL_ID, TOOL_IDS } from '../src/constants';
@@ -60,7 +62,8 @@ const buildExamples = (): RawLogEvalExample[] =>
     },
   }));
 
-const examples = buildExamples();
+// Sharded sweeps run one stride slice per stack; unset means the full dataset.
+const examples = selectShard(buildExamples(), process.env.EVAL_SHARD);
 
 base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.classic }, () => {
   base.beforeAll(async ({ esClient, log }) => {
@@ -127,6 +130,26 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
 
         const success = skillInvoked && searchToolCalled && hasQueryReferences;
 
+        const scorecard = {
+          skillInvoked: skillInvoked ? 1 : 0,
+          correctToolCalled: searchToolCalled ? 1 : 0,
+          corroborationDepth: corroboratedCount >= example.output.minCorroboratedCount ? 1 : 0,
+          gapIdentification: gapCount <= example.output.maxGapCount + 1 ? 1 : 0,
+          groundedness: hasQueryReferences ? 1 : 0,
+        };
+
+        const metrics = selected.reduce((acc, ev) => {
+          acc[ev.name] = 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        logScorecard(log, {
+          level: 'L2',
+          exampleId: example.id ?? example.metadata?.case_id ?? 'unknown',
+          scorecard,
+          metrics,
+        });
+
         return {
           success,
           explanation:
@@ -134,17 +157,8 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
             `Search tool called: ${searchToolCalled}. ` +
             `Corroborated: ${corroboratedCount}, Gaps: ${gapCount}. ` +
             `Grounded: ${hasQueryReferences}.`,
-          scorecard: {
-            skillInvoked: skillInvoked ? 1 : 0,
-            correctToolCalled: searchToolCalled ? 1 : 0,
-            corroborationDepth: corroboratedCount >= example.output.minCorroboratedCount ? 1 : 0,
-            gapIdentification: gapCount <= example.output.maxGapCount + 1 ? 1 : 0,
-            groundedness: hasQueryReferences ? 1 : 0,
-          },
-          metrics: selected.reduce((acc, ev) => {
-            acc[ev.name] = 1;
-            return acc;
-          }, {} as Record<string, number>),
+          scorecard,
+          metrics,
         };
       }
     );

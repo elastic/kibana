@@ -20,6 +20,7 @@
 
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
 import { SCENARIOS } from '../src/dataset';
+import { logScorecard } from '../src/scorecard_log';
 import { SKILL_ID, TOOL_IDS } from '../src/constants';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
 
@@ -107,21 +108,25 @@ evaluate.describe(
             `structured=${structuredOutput}, pivot=${pivotLogic}`
         );
 
+        const scorecard = {
+          pipelineDiscovery: hasDiscovery ? 1 : 0,
+          pipelineEsql: hasEsql ? 1 : 0,
+          pipelineSearch: hasSearch ? 1 : 0,
+          pipelineSkillInvoked: hasSkillInvoke ? 1 : 0,
+          pipelineMultiStep: multiStep ? 1 : 0,
+          pipelineStructuredOutput: structuredOutput ? 1 : 0,
+          pipelinePivotLogic: pivotLogic ? 1 : 0,
+        };
+
+        logScorecard(log, { level: 'L3', exampleId: scenario.id, scorecard });
+
         return {
           success,
           explanation:
             `Esql: ${hasEsql}. MultiStep: ${multiStep} (${toolCallSteps.length} calls). ` +
             `Structured: ${structuredOutput}. Pivot: ${pivotLogic}. ` +
             `Discovery: ${hasDiscovery}, Search: ${hasSearch}, Skill: ${hasSkillInvoke}.`,
-          scorecard: {
-            pipelineDiscovery: hasDiscovery ? 1 : 0,
-            pipelineEsql: hasEsql ? 1 : 0,
-            pipelineSearch: hasSearch ? 1 : 0,
-            pipelineSkillInvoked: hasSkillInvoke ? 1 : 0,
-            pipelineMultiStep: multiStep ? 1 : 0,
-            pipelineStructuredOutput: structuredOutput ? 1 : 0,
-            pipelinePivotLogic: pivotLogic ? 1 : 0,
-          },
+          scorecard,
         };
       }
     );
