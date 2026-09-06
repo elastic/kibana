@@ -7,6 +7,7 @@
 
 import type { BuildFlavor } from '@kbn/config';
 import { i18n } from '@kbn/i18n';
+import type { RoleDataSourcePrivilege } from '@kbn/security-plugin-types-common';
 
 import type {
   Role,
@@ -279,6 +280,82 @@ export class RoleValidator {
     return valid();
   }
 
+  public validateDataSourcePrivileges(role: Role): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    const dataSourcePrivileges = role.elasticsearch.global?.data_source ?? [];
+
+    const areDataSourcesInvalid = dataSourcePrivileges.reduce((isInvalid, privilege) => {
+      if (
+        this.validateDataSourcePrivilegeNamesField(privilege).isInvalid ||
+        this.validateDataSourcePrivilegePrivilegesField(privilege).isInvalid
+      ) {
+        return true;
+      }
+      return isInvalid;
+    }, false);
+
+    if (areDataSourcesInvalid) {
+      return invalid();
+    }
+
+    return valid();
+  }
+
+  public validateDataSourcePrivilegeNamesField(
+    dataSourcePrivilege: RoleDataSourcePrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (!dataSourcePrivilege.privileges.length) {
+      return valid();
+    }
+
+    if (!dataSourcePrivilege.names.length) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.oneDataSourceRequiredWarningMessage',
+          {
+            defaultMessage: 'Enter or select at least one data source pattern',
+          }
+        )
+      );
+    }
+
+    return valid();
+  }
+
+  public validateDataSourcePrivilegePrivilegesField(
+    dataSourcePrivilege: RoleDataSourcePrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (!dataSourcePrivilege.names.length) {
+      return valid();
+    }
+
+    if (!dataSourcePrivilege.privileges.length) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.oneDataSourcePrivilegeRequiredWarningMessage',
+          {
+            defaultMessage: 'Enter or select at least one privilege',
+          }
+        )
+      );
+    }
+
+    return valid();
+  }
+
   public validateRemoteClusterPrivilegeClusterField(
     remoteClusterPrivilege: RoleRemoteClusterPrivilege
   ): RoleValidationResult {
@@ -404,6 +481,7 @@ export class RoleValidator {
     const { isInvalid: isNameInvalid } = this.validateRoleName(role);
     const { isInvalid: areIndicesInvalid } = this.validateIndexPrivileges(role);
     const { isInvalid: areRemoteIndicesInvalid } = this.validateRemoteIndexPrivileges(role);
+    const { isInvalid: areDataSourcePrivilegesInvalid } = this.validateDataSourcePrivileges(role);
     const { isInvalid: areSpacePrivilegesInvalid } = this.validateSpacePrivileges(role);
     const { isInvalid: areRemoteClusterPrivilegesInvalid } =
       this.validateRemoteClusterPrivileges(role);
@@ -412,6 +490,7 @@ export class RoleValidator {
       isNameInvalid ||
       areIndicesInvalid ||
       areRemoteIndicesInvalid ||
+      areDataSourcePrivilegesInvalid ||
       areSpacePrivilegesInvalid ||
       areRemoteClusterPrivilegesInvalid
     ) {

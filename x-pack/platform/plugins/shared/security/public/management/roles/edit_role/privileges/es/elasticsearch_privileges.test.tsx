@@ -67,6 +67,84 @@ test('it renders index privileges section', () => {
   expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
 });
 
+test('it does not render data source privileges section by default', () => {
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />);
+  expect(wrapper.find('DataSourcePrivileges')).toHaveLength(0);
+});
+
+test('it renders data source privileges section when `isDataFederationEnabled` is enabled', () => {
+  const wrapper = shallowWithIntl(
+    <ElasticsearchPrivileges {...getProps()} isDataFederationEnabled />
+  );
+  expect(wrapper.find('DataSourcePrivileges')).toHaveLength(1);
+});
+
+test('it preserves existing global.data_source when editing other fields while data federation is disabled', () => {
+  const props = getProps();
+  const roleWithDataSourcePrivileges = {
+    ...props.role,
+    elasticsearch: {
+      ...props.role.elasticsearch,
+      global: {
+        application: { manage: { applications: ['kibana-*'] } },
+        data_source: [{ names: ['acme_*'], privileges: ['read'] }],
+      },
+    },
+  };
+
+  const wrapper = shallowWithIntl(
+    <ElasticsearchPrivileges {...props} role={roleWithDataSourcePrivileges as any} />
+  );
+
+  (wrapper.instance() as ElasticsearchPrivileges).onClusterPrivilegesChange(['monitor']);
+
+  expect(props.onChange).toHaveBeenCalledWith({
+    ...roleWithDataSourcePrivileges,
+    elasticsearch: {
+      ...roleWithDataSourcePrivileges.elasticsearch,
+      cluster: ['monitor'],
+    },
+  });
+});
+
+test('addDataSourcePrivilege appends', () => {
+  const props = getProps();
+  const roleWithObjectGlobal = {
+    ...props.role,
+    elasticsearch: {
+      ...props.role.elasticsearch,
+      global: {
+        application: { manage: { applications: ['kibana-*'] } },
+        data_source: [{ names: ['acme_*'], privileges: ['read'] }],
+      },
+    },
+  };
+
+  const wrapper = shallowWithIntl(
+    <ElasticsearchPrivileges
+      {...props}
+      role={roleWithObjectGlobal as any}
+      isDataFederationEnabled
+    />
+  );
+
+  (wrapper.find('DataSourcePrivileges').prop('onAdd') as unknown as () => void)();
+
+  expect(props.onChange).toHaveBeenCalledWith({
+    ...roleWithObjectGlobal,
+    elasticsearch: {
+      ...roleWithObjectGlobal.elasticsearch,
+      global: {
+        ...(roleWithObjectGlobal.elasticsearch.global as any),
+        data_source: [
+          { names: ['acme_*'], privileges: ['read'] },
+          { names: [], privileges: [] },
+        ],
+      },
+    },
+  });
+});
+
 test('it does not render remote index privileges section by default', () => {
   const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />);
   expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);

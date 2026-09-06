@@ -15,6 +15,87 @@ import { GLOBAL_RESOURCE } from './constants';
  * Elasticsearch specific portion of the role definition.
  * See more details at https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api.html#security-role-apis.
  */
+const dataSourcePrivilegesEntrySchema = schema.object(
+  {
+    names: schema.arrayOf(
+      schema.string({
+        meta: {
+          description:
+            'A list of data source names or wildcard patterns to which the permissions in this entry apply.',
+        },
+        maxLength: 1000,
+      }),
+      { minSize: 1, maxSize: 100 }
+    ),
+    privileges: schema.arrayOf(
+      schema.oneOf([
+        schema.literal('create'),
+        schema.literal('read_metadata'),
+        schema.literal('delete'),
+        schema.literal('read'),
+        schema.literal('manage'),
+      ]),
+      {
+        minSize: 1,
+        maxSize: 5,
+        meta: {
+          description:
+            'The data source privileges that role members have for the specified data sources.',
+        },
+      }
+    ),
+  },
+  {
+    meta: {
+      id: 'security_role_data_source_privileges',
+      description: 'The data source privileges entry.',
+    },
+  }
+);
+
+const applicationsSchema = (description: string) =>
+  schema.arrayOf(
+    schema.string({
+      meta: { description },
+      maxLength: 100,
+    }),
+    { maxSize: 1000 }
+  );
+
+const globalPrivilegeEntrySchema = schema.object(
+  {
+    application: schema.maybe(
+      schema.object({
+        manage: schema.maybe(
+          schema.object({
+            applications: applicationsSchema(
+              'A list of application names that the role can manage at the global privilege scope.'
+            ),
+          })
+        ),
+      })
+    ),
+    profile: schema.maybe(
+      schema.object({
+        write: schema.maybe(
+          schema.object({
+            applications: applicationsSchema(
+              'A list of application names whose user profile data the role can write at the global privilege scope.'
+            ),
+          })
+        ),
+      })
+    ),
+    data_source: schema.maybe(schema.arrayOf(dataSourcePrivilegesEntrySchema, { maxSize: 1000 })),
+  },
+  {
+    meta: {
+      id: 'security_role_global_privileges',
+      description: 'Global privileges for the role.',
+    },
+  }
+);
+
 export const elasticsearchRoleSchema = schema.object(
   {
     /**
@@ -276,6 +357,12 @@ export const elasticsearchRoleSchema = schema.object(
         { maxSize: 100 }
       )
     ),
+
+    /**
+     * An optional object defining global privileges. A global privilege is a form of cluster privilege
+     * that is request-aware.
+     */
+    global: schema.maybe(globalPrivilegeEntrySchema),
   },
   {
     meta: {
