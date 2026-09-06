@@ -315,6 +315,10 @@ export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
   defaultMessage: 'Quick Connect OAuth 2.0',
 });
 
+export const RELAY_LABEL = i18n.translate('connectorSpecs.relay.label', {
+  defaultMessage: 'Elastic app (bot user)',
+});
+
 export const GCP_SERVICE_ACCOUNT_LABEL = i18n.translate('connectorSpecs.gcpServiceAccount.label', {
   defaultMessage: 'GCP Service Account',
 });

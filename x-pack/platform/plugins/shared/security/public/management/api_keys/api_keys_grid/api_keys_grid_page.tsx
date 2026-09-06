@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { CoreStart } from '@kbn/core/public';
 import type { ICPSManager } from '@kbn/cps-utils';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
@@ -62,6 +63,22 @@ const DEFAULT_TABLE_STATE: ApiKeysTableState = {
 };
 
 const PLUS_SIGN_REGEX = /[+]/g;
+
+const createApiKeyButtonLabel = i18n.translate(
+  'xpack.security.management.apiKeys.table.createButton',
+  { defaultMessage: 'Create API key' }
+);
+
+const apiKeysTitle = i18n.translate('xpack.security.management.apiKeys.table.apiKeysTitle', {
+  defaultMessage: 'API keys',
+});
+
+const apiKeysDescription = i18n.translate(
+  'xpack.security.management.apiKeys.table.apiKeysAllDescription',
+  {
+    defaultMessage: 'Allow external services to access the Elastic Stack on behalf of a user.',
+  }
+);
 
 export interface APIKeysGridPageProps {
   cpsManager?: ICPSManager;
@@ -233,54 +250,32 @@ export const APIKeysGridPage: FunctionComponent<APIKeysGridPageProps> = ({ cpsMa
     onFilterChange({ type: nextType });
   }, [state.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!state.value) {
-    if (state.loading) {
-      return (
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
-            defaultMessage="Loading API keys…"
-          />
-        </SectionLoading>
-      );
-    }
+  const loaded = state.value;
+  const queryResult = loaded?.[0];
 
-    return (
-      <ApiKeysEmptyPrompt error={state.error}>
-        <EuiButton iconType="refresh" onClick={() => queryApiKeysAndAggregations(tableState)}>
-          <FormattedMessage
-            id="xpack.security.accountManagement.apiKeys.retryButton"
-            defaultMessage="Try again"
-          />
-        </EuiButton>
-      </ApiKeysEmptyPrompt>
-    );
-  }
-
-  const [queryResult, currentUser] = state.value;
-
-  const {
-    aggregations,
-    canManageApiKeys,
-    canManageOwnApiKeys,
-    canManageCrossClusterApiKeys,
-    aggregationTotal: totalKeys,
-  } = queryResult;
+  const aggregations = queryResult?.aggregations;
+  const canManageApiKeys = queryResult?.canManageApiKeys ?? false;
+  const canManageOwnApiKeys = queryResult?.canManageOwnApiKeys ?? false;
+  const canManageCrossClusterApiKeys = queryResult?.canManageCrossClusterApiKeys ?? false;
+  const totalKeys = queryResult?.aggregationTotal ?? 0;
 
   // Check if the query result is an error or success
   // Using 'in' operator for type-safe property access
-  const hasQueryError = 'queryError' in queryResult && queryResult.queryError;
-  const queryError = hasQueryError ? queryResult.queryError : undefined;
+  const hasQueryError = Boolean(
+    queryResult && 'queryError' in queryResult && queryResult.queryError
+  );
+  const queryError = hasQueryError ? queryResult?.queryError : undefined;
 
   // Extract success-only properties when there's no query error
   // Cast to access properties that only exist on success result
-  const successResult = !hasQueryError
-    ? (queryResult as {
-        apiKeys: CategorizedApiKey[];
-        total: number;
-        searchAfter?: estypes.SortResults;
-      })
-    : undefined;
+  const successResult =
+    queryResult && !hasQueryError
+      ? (queryResult as {
+          apiKeys: CategorizedApiKey[];
+          total: number;
+          searchAfter?: estypes.SortResults;
+        })
+      : undefined;
 
   const apiKeys = successResult?.apiKeys ?? [];
   const filteredItemTotal = successResult?.total ?? 0;
@@ -292,6 +287,126 @@ export const APIKeysGridPage: FunctionComponent<APIKeysGridPageProps> = ({ cpsMa
   const hasMoreResults = apiKeys.length === tableState.size && !!responseSearchAfter;
 
   const categorizedApiKeys = apiKeys;
+
+  const createApiKeyNavigate = reactRouterNavigate(history, '/create');
+  const showCreateInHeader = Boolean(loaded) && totalKeys > 0 && !readOnly;
+  const menu: AppHeaderMenu | undefined = showCreateInHeader
+    ? {
+        primaryActionItem: {
+          id: 'createApiKey',
+          label: createApiKeyButtonLabel,
+          iconType: 'plusCircle',
+          testId: 'apiKeysCreateTableButton',
+          href: createApiKeyNavigate.href,
+          run: () => history.push('/create'),
+        },
+      }
+    : undefined;
+
+  let body: React.ReactNode;
+  if (!loaded) {
+    body = state.loading ? (
+      <SectionLoading inline data-test-subj="sectionLoading">
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
+          defaultMessage="Loading API keys…"
+        />
+      </SectionLoading>
+    ) : (
+      <ApiKeysEmptyPrompt error={state.error}>
+        <EuiButton iconType="refresh" onClick={() => queryApiKeysAndAggregations(tableState)}>
+          <FormattedMessage
+            id="xpack.security.accountManagement.apiKeys.retryButton"
+            defaultMessage="Try again"
+          />
+        </EuiButton>
+      </ApiKeysEmptyPrompt>
+    );
+  } else if (totalKeys === 0) {
+    body = (
+      <>
+        <ApiKeysCpsCallout cpsManager={cpsManager} />
+        <ApiKeysEmptyPrompt readOnly={readOnly}>
+          <EuiButton
+            {...reactRouterNavigate(history, '/create')}
+            fill
+            iconType="plusCircle"
+            data-test-subj="apiKeysCreatePromptButton"
+          >
+            {createApiKeyButtonLabel}
+          </EuiButton>
+        </ApiKeysEmptyPrompt>
+      </>
+    );
+  } else {
+    body = (
+      <KibanaPageTemplate.Section paddingSize="none">
+        <ApiKeysCpsCallout cpsManager={cpsManager} />
+
+        {createdApiKey && (
+          <>
+            <ApiKeyCreatedCallout createdApiKey={createdApiKey} />
+            <EuiSpacer />
+          </>
+        )}
+
+        {canManageOwnApiKeys && !canManageApiKeys ? (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
+                  defaultMessage="You only have permission to manage your own API keys."
+                />
+              }
+            />
+            <EuiSpacer />
+          </>
+        ) : undefined}
+
+        <InvalidateProvider
+          isAdmin={canManageApiKeys}
+          notifications={services.notifications}
+          apiKeysAPIClient={new APIKeysAPIClient(services.http)}
+        >
+          {(invalidateApiKeyPrompt) => (
+            <ApiKeysTable
+              apiKeys={categorizedApiKeys}
+              onClick={(apiKey) => setOpenedApiKey(apiKey)}
+              query={tableState.query}
+              queryFilters={tableState.filters}
+              onDelete={(apiKeysToDelete) =>
+                invalidateApiKeyPrompt(apiKeysToDelete, () =>
+                  queryApiKeysAndAggregations(tableState)
+                )
+              }
+              currentUser={loaded[1]}
+              createdApiKey={createdApiKey}
+              canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+              canManageApiKeys={canManageApiKeys}
+              canManageOwnApiKeys={canManageOwnApiKeys}
+              readOnly={readOnly}
+              loading={state.loading}
+              totalItemCount={filteredItemTotal}
+              onTableChange={onTableChange}
+              onSearchChange={onSearchChange}
+              onFilterChange={onFilterChange}
+              aggregations={aggregations}
+              sortingOptions={tableState.sort}
+              queryErrors={queryError}
+              resetQuery={resetQueryOnError}
+              hasNextPage={hasMoreResults}
+              hasPreviousPage={searchAfterHistory.length > 0}
+              onNextPage={() => responseSearchAfter && onNextPage(responseSearchAfter)}
+              onPreviousPage={onPreviousPage}
+              onRefresh={() => queryApiKeysAndAggregations(tableState)}
+            />
+          )}
+        </InvalidateProvider>
+      </KibanaPageTemplate.Section>
+    );
+  }
 
   return (
     <>
@@ -319,8 +434,8 @@ export const APIKeysGridPage: FunctionComponent<APIKeysGridPageProps> = ({ cpsMa
             }}
             onCancel={() => history.push({ pathname: '/' })}
             canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
-            currentUser={currentUser}
-            isLoadingCurrentUser={state.loading}
+            currentUser={loaded?.[1]}
+            isLoadingCurrentUser={!loaded || state.loading}
             readOnly={readOnly}
           />
         </Breadcrumb>
@@ -346,130 +461,20 @@ export const APIKeysGridPage: FunctionComponent<APIKeysGridPageProps> = ({ cpsMa
           apiKey={openedApiKey}
           readOnly={readOnly}
           canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
-          currentUser={currentUser}
-          isLoadingCurrentUser={state.loading}
+          currentUser={loaded?.[1]}
+          isLoadingCurrentUser={!loaded || state.loading}
         />
       )}
-      {totalKeys === 0 ? (
-        <>
-          <ApiKeysCpsCallout cpsManager={cpsManager} />
-          <ApiKeysEmptyPrompt readOnly={readOnly}>
-            <EuiButton
-              {...reactRouterNavigate(history, '/create')}
-              fill
-              iconType="plusCircle"
-              data-test-subj="apiKeysCreatePromptButton"
-            >
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.createButton"
-                defaultMessage="Create API key"
-              />
-            </EuiButton>
-          </ApiKeysEmptyPrompt>
-        </>
-      ) : (
-        <>
-          <KibanaPageTemplate.Header
-            pageTitle={
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.apiKeysTitle"
-                defaultMessage="API keys"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                defaultMessage="Allow external services to access the Elastic Stack on behalf of a user."
-              />
-            }
-            rightSideItems={
-              !readOnly
-                ? [
-                    <EuiButton
-                      {...reactRouterNavigate(history, '/create')}
-                      fill
-                      iconType="plusCircle"
-                      data-test-subj="apiKeysCreateTableButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.security.management.apiKeys.table.createButton"
-                        defaultMessage="Create API key"
-                      />
-                    </EuiButton>,
-                  ]
-                : undefined
-            }
-            paddingSize="none"
-            bottomBorder
-          />
-          <EuiSpacer />
-          <KibanaPageTemplate.Section paddingSize="none">
-            <ApiKeysCpsCallout cpsManager={cpsManager} />
 
-            {createdApiKey && (
-              <>
-                <ApiKeyCreatedCallout createdApiKey={createdApiKey} />
-                <EuiSpacer />
-              </>
-            )}
-
-            {canManageOwnApiKeys && !canManageApiKeys ? (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  title={
-                    <FormattedMessage
-                      id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
-                      defaultMessage="You only have permission to manage your own API keys."
-                    />
-                  }
-                />
-                <EuiSpacer />
-              </>
-            ) : undefined}
-
-            <InvalidateProvider
-              isAdmin={canManageApiKeys}
-              notifications={services.notifications}
-              apiKeysAPIClient={new APIKeysAPIClient(services.http)}
-            >
-              {(invalidateApiKeyPrompt) => (
-                <ApiKeysTable
-                  apiKeys={categorizedApiKeys}
-                  onClick={(apiKey) => setOpenedApiKey(apiKey)}
-                  query={tableState.query}
-                  queryFilters={tableState.filters}
-                  onDelete={(apiKeysToDelete) =>
-                    invalidateApiKeyPrompt(apiKeysToDelete, () =>
-                      queryApiKeysAndAggregations(tableState)
-                    )
-                  }
-                  currentUser={currentUser}
-                  createdApiKey={createdApiKey}
-                  canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
-                  canManageApiKeys={canManageApiKeys}
-                  canManageOwnApiKeys={canManageOwnApiKeys}
-                  readOnly={readOnly}
-                  loading={state.loading}
-                  totalItemCount={filteredItemTotal}
-                  onTableChange={onTableChange}
-                  onSearchChange={onSearchChange}
-                  onFilterChange={onFilterChange}
-                  aggregations={aggregations}
-                  sortingOptions={tableState.sort}
-                  queryErrors={queryError}
-                  resetQuery={resetQueryOnError}
-                  hasNextPage={hasMoreResults}
-                  hasPreviousPage={searchAfterHistory.length > 0}
-                  onNextPage={() => responseSearchAfter && onNextPage(responseSearchAfter)}
-                  onPreviousPage={onPreviousPage}
-                  onRefresh={() => queryApiKeysAndAggregations(tableState)}
-                />
-              )}
-            </InvalidateProvider>
-          </KibanaPageTemplate.Section>
-        </>
-      )}
+      <AppHeader
+        title={apiKeysTitle}
+        description={apiKeysDescription}
+        menu={menu}
+        docLink={services.docLinks.links.management.apiKeys}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+      {body}
     </>
   );
 };

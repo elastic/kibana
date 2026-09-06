@@ -4217,6 +4217,80 @@ describe('create()', () => {
     );
   });
 
+  test('mints a framework-owned key instead of persisting the caller credential when the cloneApiKey option is set', async () => {
+    // No actions: the file-level uuid mock is a counter, and consuming uuids here would shift
+    // the hardcoded uuid expectations of later tests.
+    const data = getMockData({ actions: [] });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.cloneAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: 'cloned-id', name: 'cloned', api_key: 'cloned-secret' },
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        running: false,
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        params: { bar: true },
+        actions: [],
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: { actions: [], scheduledTaskId: 'task-123' },
+      references: [],
+    });
+
+    await rulesClient.create({ data, options: { cloneApiKey: true } });
+
+    expect(rulesClientParams.cloneAPIKey).toHaveBeenCalledWith('Alerting: 123/abc');
+    expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalled();
+    expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        apiKey: Buffer.from('cloned-id:cloned-secret').toString('base64'),
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: false,
+      }),
+      expect.any(Object)
+    );
+  });
+
+  test('ignores the cloneApiKey option when the request is not authenticated with an API key', async () => {
+    // No actions: see the uuid-counter note in the previous test.
+    const data = getMockData({ actions: [] });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        running: false,
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        params: { bar: true },
+        actions: [],
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: { actions: [], scheduledTaskId: 'task-123' },
+      references: [],
+    });
+
+    await rulesClient.create({ data, options: { cloneApiKey: true } });
+
+    expect(rulesClientParams.cloneAPIKey).not.toHaveBeenCalled();
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/abc');
+  });
+
   test('throws error and does not add API key to invalidatePendingApiKey SO when create saved object fails if the user is authenticated using an api key', async () => {
     const data = getMockData();
     rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({

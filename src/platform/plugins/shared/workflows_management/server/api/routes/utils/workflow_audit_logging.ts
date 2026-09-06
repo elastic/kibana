@@ -33,6 +33,8 @@ export const WorkflowManagementAuditActions = {
   TEST_STEP: 'workflow_test_step',
   CANCEL_EXECUTION: 'workflow_execution_cancel',
   RESUME_EXECUTION: 'workflow_execution_resume',
+  HITL_WAITING: 'workflow_hitl_waiting',
+  HITL_TIMED_OUT: 'workflow_hitl_timed_out',
 } as const;
 
 type WorkflowAuditEventType = 'access' | 'change' | 'creation' | 'deletion';
@@ -441,14 +443,35 @@ export class WorkflowManagementAuditLog {
   }
 
   logExecutionCanceled(
-    request: KibanaRequest,
-    params: { executionId: string; error?: unknown }
+    request: KibanaRequest | undefined,
+    params: {
+      executionId?: string;
+      /** Used for bulk-cancel failures where no single execution id applies. */
+      workflowId?: string;
+      error?: unknown;
+      channel?: string;
+    }
   ): void {
-    const { executionId, error } = params;
-    const message =
-      error !== undefined
-        ? `User failed to cancel workflow execution [executionId=${executionId}]`
-        : `User canceled workflow execution [executionId=${executionId}]`;
+    const { executionId, workflowId, error, channel } = params;
+    const actor = this.getActor(request);
+    const channelPart = channel !== undefined ? ` [channel=${channel}]` : '';
+
+    let targetPart = '';
+    if (executionId !== undefined) {
+      targetPart = `[executionId=${executionId}]`;
+    } else if (workflowId !== undefined) {
+      targetPart = `[workflowId=${workflowId}]`;
+    }
+
+    let message: string;
+    if (error !== undefined && executionId === undefined) {
+      message = `${actor} failed to cancel all active workflow executions ${targetPart}${channelPart}`;
+    } else if (error !== undefined) {
+      message = `${actor} failed to cancel workflow execution ${targetPart}${channelPart}`;
+    } else {
+      message = `${actor} canceled workflow execution ${targetPart}${channelPart}`;
+    }
+
     this.log(
       request,
       createEvent(WorkflowManagementAuditActions.CANCEL_EXECUTION, 'change', message, error)
@@ -456,25 +479,64 @@ export class WorkflowManagementAuditLog {
   }
 
   logExecutionResumed(
-    request: KibanaRequest,
+    request: KibanaRequest | undefined,
     params: {
       executionId: string;
       error?: unknown;
       /** Present on success; mirrors execution context written by the engine. */
       resumedBy?: string;
+      channel?: string;
     }
   ): void {
-    const { executionId, error, resumedBy } = params;
+    const { executionId, error, resumedBy, channel } = params;
+    const actor = this.getActor(request);
+    const channelPart = channel !== undefined ? ` [channel=${channel}]` : '';
     let message: string;
     if (error !== undefined) {
-      message = `User failed to resume workflow execution [executionId=${executionId}]`;
+      message = `${actor} failed to resume workflow execution [executionId=${executionId}]${channelPart}`;
     } else {
       const responderPart = resumedBy !== undefined ? ` [responder=${resumedBy}]` : '';
-      message = `User resumed workflow execution [executionId=${executionId}]${responderPart}`;
+      message = `${actor} resumed workflow execution [executionId=${executionId}]${responderPart}${channelPart}`;
     }
     this.log(
       request,
       createEvent(WorkflowManagementAuditActions.RESUME_EXECUTION, 'change', message, error)
+    );
+  }
+
+  logHitlWaiting(
+    request: KibanaRequest | undefined,
+    params: { executionId: string; stepExecutionId?: string; stepType?: string }
+  ): void {
+    const { executionId, stepExecutionId, stepType } = params;
+    const actor = this.getActor(request);
+    const stepPart = stepExecutionId !== undefined ? ` [stepExecutionId=${stepExecutionId}]` : '';
+    const typePart = stepType !== undefined ? ` [stepType=${stepType}]` : '';
+    this.log(
+      request,
+      createEvent(
+        WorkflowManagementAuditActions.HITL_WAITING,
+        'change',
+        `${actor} opened HITL wait [executionId=${executionId}]${stepPart}${typePart}`
+      )
+    );
+  }
+
+  logHitlTimedOut(
+    request: KibanaRequest | undefined,
+    params: { executionId: string; stepExecutionId?: string; stepType?: string }
+  ): void {
+    const { executionId, stepExecutionId, stepType } = params;
+    const actor = this.getActor(request);
+    const stepPart = stepExecutionId !== undefined ? ` [stepExecutionId=${stepExecutionId}]` : '';
+    const typePart = stepType !== undefined ? ` [stepType=${stepType}]` : '';
+    this.log(
+      request,
+      createEvent(
+        WorkflowManagementAuditActions.HITL_TIMED_OUT,
+        'change',
+        `${actor} timed out HITL wait [executionId=${executionId}]${stepPart}${typePart}`
+      )
     );
   }
 }

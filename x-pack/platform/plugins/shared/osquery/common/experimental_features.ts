@@ -25,11 +25,11 @@ export const allowedExperimentalValues = Object.freeze({
    */
   rruleScheduling: true,
   /**
-   * Enables osquery cross-project search (CPS) read support on serverless. When enabled
-   * (and the platform `cps.cpsEnabled` flag is on), osquery result and action-response
-   * reads fan out across linked projects as the current user, and the read-only CPS
-   * project picker is registered on osquery pages. Has no effect on stateful Kibana or
-   * when CPS is disabled.
+   * Enables osquery cross-project search (CPS) read support on serverless. When enabled, osquery
+   * result and action-response reads fan out across linked projects as the current user, and the
+   * read-only CPS project picker is registered on osquery pages. Fan-out additionally requires the
+   * request to resolve at least one linked project via `cps.isCpsActive()`, so a serverless project
+   * with no linked projects reads exactly as it did before CPS. Has no effect on stateful Kibana.
    */
   crossProjectSearch: false,
 });

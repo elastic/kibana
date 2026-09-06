@@ -83,7 +83,7 @@ describe('HomePage', () => {
           navigateToApp,
           capabilities: { vectordbIndexStats: { canMonitorAllIndices } },
         },
-        docLinks: { links: { enterpriseSearch: { vectorDatabaseGetStarted: DOCS_URL } } },
+        docLinks: { links: { enterpriseSearch: { vectorDatabaseFullTextSearch: DOCS_URL } } },
       },
     });
   };

@@ -11,6 +11,7 @@ import { performance } from 'node:perf_hooks';
 
 import {
   checkForTripleQuotesAndEsqlQuery,
+  createInsideConsoleStringChecker,
   endsWithConsoleBodyContinuation,
   getLineRemainderWithoutConsoleComments,
   isInsideConsoleComment,
@@ -473,5 +474,78 @@ describe('triple_quote_scanner', () => {
   it('does not retain container state for oversized fallback input', () => {
     const request = `POST _search\n${'['.repeat(100_001)}"""`;
     expect(isInsideTripleQuotedJsonValue(request)).toBe(false);
+  });
+
+  describe('createInsideConsoleStringChecker', () => {
+    const lineStartOffsets = (text: string): number[] => {
+      const offsets = [0];
+      for (const line of text.split('\n').slice(0, -1)) {
+        offsets.push(offsets[offsets.length - 1] + line.length + 1);
+      }
+      return offsets;
+    };
+
+    it('reports line starts inside an unterminated triple-quoted value', () => {
+      const text = 'POST _query\n{\n  "script": """\n  GET _all\n  {\n  }';
+      const isInsideString = createInsideConsoleStringChecker(text);
+      const offsets = lineStartOffsets(text);
+
+      expect(isInsideString(offsets[1])).toBe(false); // {
+      expect(isInsideString(offsets[3])).toBe(true); // GET _all
+      expect(isInsideString(offsets[5])).toBe(true); // }
+      expect(isInsideString(text.length)).toBe(true);
+    });
+
+    it('reports offsets outside once a triple-quoted value closes', () => {
+      const text = 'POST _query\n{\n  "script": """done"""\n}\nGET _search';
+      const isInsideString = createInsideConsoleStringChecker(text);
+      const offsets = lineStartOffsets(text);
+
+      expect(isInsideString(offsets[3])).toBe(false); // }
+      expect(isInsideString(offsets[4])).toBe(false); // GET _search
+    });
+
+    it('reports offsets inside a standard string value spanning the query point', () => {
+      const text = 'GET _search\n{"field": "unclosed\nPOST _search';
+      const isInsideString = createInsideConsoleStringChecker(text);
+      const offsets = lineStartOffsets(text);
+
+      expect(isInsideString(offsets[2])).toBe(true); // POST _search
+    });
+
+    it('ignores quotes inside comments', () => {
+      const text = 'GET _search\n{\n# "\nPOST _search';
+      const isInsideString = createInsideConsoleStringChecker(text);
+      const offsets = lineStartOffsets(text);
+
+      expect(isInsideString(offsets[3])).toBe(false); // POST _search
+    });
+
+    it('does not treat a quote in a request-line url as opening a string', () => {
+      const text = 'GET /a"b\nPOST /c';
+      const isInsideString = createInsideConsoleStringChecker(text);
+      const offsets = lineStartOffsets(text);
+
+      expect(isInsideString(offsets[1])).toBe(false); // POST /c
+    });
+
+    it('treats the opening quote offset as outside its string', () => {
+      const text = 'GET _search\n{"a": "v"}';
+      const isInsideString = createInsideConsoleStringChecker(text);
+      const openingQuoteOffset = text.indexOf('"a');
+
+      expect(isInsideString(openingQuoteOffset)).toBe(false);
+      expect(isInsideString(openingQuoteOffset + 1)).toBe(true);
+    });
+
+    it('treats the closing delimiter offsets as inside the string', () => {
+      const text = 'GET _search\n{"a": """v"""}';
+      const isInsideString = createInsideConsoleStringChecker(text);
+      const closingQuoteOffset = text.lastIndexOf('"""');
+
+      expect(isInsideString(closingQuoteOffset)).toBe(true);
+      expect(isInsideString(closingQuoteOffset + 2)).toBe(true);
+      expect(isInsideString(closingQuoteOffset + 3)).toBe(false);
+    });
   });
 });
