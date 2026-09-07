@@ -7,6 +7,7 @@
 
 import {
   VISUALIZATION_ATTACHMENT_TYPE,
+  isCustomContentVisualization,
   type ChartVisualizationAttachmentData,
   type VisualizationAttachmentData,
 } from '@kbn/agent-builder-visualizations-common';
@@ -23,6 +24,20 @@ import {
   extractEsqlFromLens,
 } from '../lens_reference';
 import { visualizationAttachmentDataSchema } from './visualization_schema';
+
+/**
+ * How the attachment describes itself to the agent, which picks its edit path from this.
+ * Lens is the fallback because attachments predating the `renderer` field are Lens.
+ */
+const describeKind = (data: VisualizationAttachmentData): string => {
+  if (isCustomContentVisualization(data)) {
+    return 'Renderer: Custom content (HTML template)';
+  }
+  if (data.renderer === 'vega') {
+    return 'Renderer: Vega';
+  }
+  return data.chart_type ? `Chart type: ${data.chart_type}` : 'Renderer: Lens';
+};
 
 /**
  * Creates the definition for the unified `visualization` attachment type.
@@ -88,24 +103,12 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
     format: (attachment) => ({
       getRepresentation: () => {
         const { data } = attachment;
-        // Matched per renderer rather than falling through to Lens: a custom content
-        // attachment described as Lens would send the agent down the wrong edit path.
-        let kindLine: string;
-        if (data.renderer === 'custom_content') {
-          kindLine = 'Renderer: Custom content (HTML template)';
-        } else if (data.renderer === 'vega') {
-          kindLine = 'Renderer: Vega';
-        } else if (data.chart_type) {
-          kindLine = `Chart type: ${data.chart_type}`;
-        } else {
-          kindLine = 'Renderer: Lens';
-        }
         return {
           type: 'text',
           value: [
             'Visualization attachment',
             `Query: ${data.query}`,
-            kindLine,
+            describeKind(data),
             // Custom content is the only renderer that can be static.
             data.esql ? `ES|QL: ${data.esql}` : 'ES|QL: none (static content)',
           ].join('\n'),

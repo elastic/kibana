@@ -153,7 +153,13 @@ const createVisualizationSchema = z
       });
     }
 
-    if (ctx.value.contentMode && ctx.value.renderer !== 'custom_content') {
+    // Only checkable on create: an update omits `renderer` by design, so the renderer is
+    // not known here and the handler ignores contentMode for non-custom-content edits.
+    if (
+      ctx.value.contentMode &&
+      !ctx.value.attachment_id &&
+      ctx.value.renderer !== 'custom_content'
+    ) {
       ctx.issues.push({
         code: 'custom',
         message: 'contentMode only applies to the custom_content renderer.',
@@ -187,6 +193,7 @@ You choose how to render the request via the "renderer" parameter:
       SupportedChartType
     ).join(', ')}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.
+- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. "chartType" does not apply. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Pass contentMode: "static" for a panel that genuinely has no data.
 
 When updating via "attachment_id", omit "renderer" because the existing visualization determines it. "chartType" is optional on updates.
 
@@ -195,7 +202,7 @@ Only pass "time_range" when the user explicitly named a time window (e.g. "last 
 This tool will:
 1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)
 2. Generate an ES|QL query if not provided
-3. Generate and validate the visualization (Lens config or Vega-Lite spec) for the chosen renderer
+3. Generate and validate the visualization (Lens config, Vega-Lite spec, or custom content HTML template) for the chosen renderer
 4. Store the result as an attachment (creating new or updating existing) for future modifications
 
 Ground first: make sure the target index exists and every field you reference is real before calling this tool. If you omit "index" the tool auto-discovers one, but that fails when the referenced fields are invented or absent from the cluster (do NOT assume APM/metrics schemas are present). For multi-panel requests, resolve the index once up front and pass the same "index" to every call rather than firing several index-less calls in parallel.`,
@@ -277,8 +284,15 @@ Ground first: make sure the target index exists and every field you reference is
           let isQueryChanging = esql !== undefined && esql !== existingEsql;
           let mergedEsql = esql ?? existingEsql;
 
-          if (contentMode === 'static') {
-            // Explicitly requested: drop any query rather than keeping a stale one.
+          // A stored panel with no query is static by construction — it was created that
+          // way — so editing its wording or styling must not silently turn it into a
+          // data-backed panel, or fail because no query can be generated for content that
+          // never had one. Only `contentMode: 'data'` opts an existing static panel in.
+          const isEstablishedStatic =
+            Boolean(existingData) && !existingEsql && contentMode !== 'data';
+
+          if (contentMode === 'static' || isEstablishedStatic) {
+            // Drop any query rather than keeping a stale one.
             mergedEsql = undefined;
             isQueryChanging = false;
           } else if (!mergedEsql) {

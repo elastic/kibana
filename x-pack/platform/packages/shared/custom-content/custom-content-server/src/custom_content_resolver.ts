@@ -51,7 +51,7 @@ Add it up from the markup you actually wrote, top to bottom:
 Worked example — a heading plus four status cards in a two-column grid:
 32 + 60 + (2 rows x 130) = 352, so emit \`<!-- cc-height: 352 -->\`.
 
-Size for the data you were actually given. If the schema description or prompt says there are four items, size for four rows — do NOT pad for rows that might exist later. When a LIMIT in the query caps the rows, size for that limit. Between \${CUSTOM_CONTENT_MIN_HEIGHT} and \${CUSTOM_CONTENT_MAX_HEIGHT}.
+Size for the data you were actually given. If the schema description or prompt says there are four items, size for four rows — do NOT pad for rows that might exist later. When a LIMIT in the query caps the rows, size for that limit. Between ${CUSTOM_CONTENT_MIN_HEIGHT} and ${CUSTOM_CONTENT_MAX_HEIGHT}.
 
 Emit nothing before this comment — no markdown fence, no blank line.`;
 
@@ -190,7 +190,7 @@ CONTENT RULES:
 export const extractDeclaredHeight = (
   rawTemplate: string
 ): { template: string; height: number } => {
-  const match = rawTemplate.match(/^\s*<!--\s*cc-height:\s*(\d{1,5})\s*-->\s*/i);
+  const match = rawTemplate.match(/^\s*<!--\s*cc-height:\s*(\d+)\s*-->\s*/i);
   if (!match) {
     return { template: rawTemplate, height: CUSTOM_CONTENT_DEFAULT_HEIGHT };
   }

@@ -316,6 +316,40 @@ describe('createVisualizationTool handler', () => {
     expect(data.time_range).toBeUndefined();
   });
 
+  it('treats an attachment with no renderer as Lens when updating', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'legacy',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            query: 'old query',
+            visualization: { type: 'lnsXY' },
+            esql: 'FROM old',
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      { query: 'tweak it', attachment_id: 'legacy' },
+      { attachments }
+    );
+
+    expect(mockBuildLens).toHaveBeenCalledTimes(1);
+    expect(mockBuildVega).not.toHaveBeenCalled();
+    // The prior config is handed to the Lens builder rather than discarded.
+    expect(mockBuildLens).toHaveBeenCalledWith(
+      expect.objectContaining({ parsedExistingConfig: { type: 'lnsXY' } })
+    );
+
+    const [{ data }] = result.results;
+    expect(data.renderer).toBe('lens');
+  });
+
   it('reuses the existing time_range on edit instead of probing', async () => {
     const attachments = createAttachments();
     attachments.getAttachmentRecord.mockReturnValue({
@@ -623,6 +657,57 @@ describe('createVisualizationTool handler', () => {
       const [{ data }] = result.results;
       expect(data.renderer).toBe('custom_content');
       expect(data.attachment_id).toBe('att-1');
+    });
+
+    const staticAttachment = () => {
+      const attachments = createAttachments();
+      attachments.getAttachmentRecord.mockReturnValue({
+        id: 'banner',
+        type: VISUALIZATION_ATTACHMENT_TYPE,
+        current_version: 1,
+        versions: [
+          {
+            version: 1,
+            data: {
+              renderer: 'custom_content',
+              query: 'a welcome banner',
+              visualization: { template: '<div>hi</div>' },
+            },
+          },
+        ],
+      });
+      return attachments;
+    };
+
+    // A stored panel with no query is static by construction. `renderer` cannot be passed
+    // on an update, so without this the agent has no way to say "still static" and a
+    // wording tweak would either invent a query or fail outright.
+    it('does not generate a query when editing a panel that is already static', async () => {
+      const { result } = await runHandler(
+        { query: 'make the subtitle smaller', attachment_id: 'banner' },
+        { attachments: staticAttachment() }
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: undefined, existingTemplate: '<div>hi</div>' })
+      );
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.visualization);
+      expect(data.esql).toBeUndefined();
+    });
+
+    it('adds data to a static panel when the edit asks for it explicitly', async () => {
+      const { result } = await runHandler(
+        { query: 'show the log count too', attachment_id: 'banner', contentMode: 'data' },
+        { attachments: staticAttachment() }
+      );
+
+      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
+
+      const [{ data }] = result.results;
+      expect(data.esql).toBe('FROM logs | STATS count() BY host');
     });
 
     it('reports a template generation failure as an error result', async () => {
