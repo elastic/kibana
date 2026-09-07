@@ -544,6 +544,18 @@ apiTest.describe(
           responseType: 'json',
         });
 
+        // Register any duplicates before asserting: `expect` throws synchronously, so if this
+        // ever regresses to a 200 the rules would survive into the next run on the shared
+        // server — and that regression is exactly the escalation this test guards against.
+        const created = (
+          bulkResponse.body as { attributes?: { results?: { created?: Array<{ id: string }> } } }
+        ).attributes?.results?.created;
+        if (created) {
+          for (const rule of created) {
+            createdRuleIds.push(rule.id);
+          }
+        }
+
         // The bulk actions route reports per-rule failures with a 500 envelope; the
         // authz rejection itself is surfaced as `status_code: 403` in `attributes.errors`.
         expect(bulkResponse).toHaveStatusCode(500);
@@ -554,14 +566,6 @@ apiTest.describe(
             }),
           })
         );
-        const created = (
-          bulkResponse.body as { attributes?: { results?: { created?: Array<{ id: string }> } } }
-        ).attributes?.results?.created;
-        if (created) {
-          for (const rule of created) {
-            createdRuleIds.push(rule.id);
-          }
-        }
       }
     );
   }

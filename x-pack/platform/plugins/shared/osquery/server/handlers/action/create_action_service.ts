@@ -41,7 +41,14 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
    * stored content so the decision matches what actually runs.
    */
   const containsDynamicQueries = async (
-    params: CreateLiveQueryRequestBodySchema,
+    // Only the referenced ids and the SQL are read, so accept that narrow shape rather than a
+    // full request body: callers pass a rule's persisted params, not a live-query payload.
+    params: {
+      query?: string;
+      queries?: Array<{ query?: string }>;
+      saved_query_id?: string;
+      pack_id?: string;
+    },
     options?: { space?: { id: string } }
   ): Promise<boolean> => {
     const persisted = params.queries?.length
