@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/274803
+type: breaking-change
+products:
+- product: cloud-serverless
+- product: kibana
+title: Limit exception list entry string lengths for endpoint artifacts
