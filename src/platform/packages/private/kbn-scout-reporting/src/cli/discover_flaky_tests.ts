@@ -73,8 +73,8 @@ const readFrameworks = (flagsReader: FlagsReader): TestFramework[] => {
   return frameworks.filter(isTestFramework);
 };
 
-const TITLE_COL_WIDTH = 50;
-const FILE_COL_WIDTH = 46;
+const TITLE_COL_WIDTH = 40;
+const FILE_COL_WIDTH = 40;
 const OWNERS_COL_WIDTH = 34;
 
 // cell padding takes 2 columns and a broken line ends in the separator
@@ -82,21 +82,29 @@ const contentWidth = (colWidth: number): number => colWidth - 3;
 
 /**
  * cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/` and
- * owner handles on `-` ourselves, keeping the separator at the end of the broken line.
+ * owner handles on `-` ourselves, keeping the separator at the end of the broken line. A single
+ * segment longer than the width is split hard rather than truncated.
  */
 const wrapOn = (text: string, separator: string, width: number): string => {
   const lines: string[] = [];
   let current = '';
+  const flush = () => {
+    for (let start = 0; start < current.length; start += width) {
+      lines.push(current.slice(start, start + width));
+    }
+    current = '';
+  };
   for (const segment of text.split(separator)) {
     const candidate = current ? `${current}${separator}${segment}` : segment;
     if (candidate.length > width && current) {
-      lines.push(`${current}${separator}`);
+      current += separator;
+      flush();
       current = segment;
     } else {
       current = candidate;
     }
   }
-  lines.push(current);
+  flush();
   return lines.join('\n');
 };
 
@@ -156,16 +164,7 @@ const buildTopFlakyTable = (
   now: Date
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: [
-      '#',
-      'Failed builds',
-      'Flakiest branch',
-      'Latest',
-      'Test',
-      'File',
-      'Framework',
-      'Owners',
-    ],
+    head: ['#', 'Failed builds', 'Flakiest', 'Latest', 'Test', 'File', 'Framework', 'Owners'],
     colWidths: [null, null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH, null, OWNERS_COL_WIDTH],
     wordWrap: true,
   });
@@ -180,7 +179,7 @@ const buildTopFlakyTable = (
       {
         rowSpan,
         content: [
-          chalk.yellow(wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH))),
+          chalk.cyan(wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH))),
           notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
         ]
           .filter(Boolean)
