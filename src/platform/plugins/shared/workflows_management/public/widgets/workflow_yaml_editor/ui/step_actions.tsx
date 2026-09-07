@@ -34,17 +34,17 @@ import {
 
 export interface StepActionsProps {
   onStepRun?: (params: { stepId: string; actionType: string }) => void;
-  onMoveStepUp?: () => void;
-  onMoveStepDown?: () => void;
-  canMoveUp?: boolean;
-  canMoveDown?: boolean;
+  onMoveStepUp: () => void;
+  onMoveStepDown: () => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
 }
 
 const MODIFIER_KEY = isMac ? '⌘' : 'Ctrl';
 const ALT_KEY = isMac ? '⌥' : 'Alt';
 
 export const StepActions = React.memo<StepActionsProps>(
-  ({ onStepRun, onMoveStepUp, onMoveStepDown, canMoveUp = false, canMoveDown = false }) => {
+  ({ onStepRun, onMoveStepUp, onMoveStepDown, canMoveUp, canMoveDown }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
     const isExecutionsTab = useSelector(selectIsExecutionsTab);
@@ -109,8 +109,6 @@ export const StepActions = React.memo<StepActionsProps>(
       return null;
     }
 
-    const showMoveButtons = !isExecutionsTab && (onMoveStepUp || onMoveStepDown);
-
     return (
       <EuiFlexGroup
         gutterSize="xs"
@@ -118,7 +116,7 @@ export const StepActions = React.memo<StepActionsProps>(
         responsive={false}
         css={componentStyles.actionsRow}
       >
-        {focusedStepInfo && !isExecutionsTab && (
+        {!isExecutionsTab && (
           <EuiFlexItem grow={false}>
             <RunStepButton
               onClick={() =>
@@ -130,12 +128,12 @@ export const StepActions = React.memo<StepActionsProps>(
             />
           </EuiFlexItem>
         )}
-        {showMoveButtons && (
+        {!isExecutionsTab && (
           <>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={moveUpTooltip} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="arrowUp"
+                  iconType="chevronSingleUp"
                   iconSize="s"
                   onClick={onMoveStepUp}
                   disabled={!canMoveUp}
@@ -147,7 +145,7 @@ export const StepActions = React.memo<StepActionsProps>(
             <EuiFlexItem grow={false}>
               <EuiToolTip content={moveDownTooltip} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   iconSize="s"
                   onClick={onMoveStepDown}
                   disabled={!canMoveDown}

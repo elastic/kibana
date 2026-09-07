@@ -15,6 +15,7 @@ describe('getFieldsFromZodSchema', () => {
     const schema = z.object({
       mode: z.enum(['fast', 'accurate']).describe('Processing mode'),
       note: z.string().describe('Optional note').optional(),
+      nullableNote: z.string().nullable().optional(),
     });
 
     expect(getFieldsFromZodSchema(schema)).toEqual([
@@ -28,6 +29,12 @@ describe('getFieldsFromZodSchema', () => {
         name: 'note',
         typeName: 'STRING',
         description: 'Optional note',
+        required: false,
+      },
+      {
+        name: 'nullableNote',
+        typeName: 'STRING',
+        description: undefined,
         required: false,
       },
     ]);

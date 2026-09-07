@@ -300,11 +300,30 @@ describe('ActionsMenu', () => {
       fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
       expect(getKeyboardActiveLabel()).toContain('Triggers');
 
-      fireEvent.keyDown(searchInput, { key: 'a' });
+      expect(fireEvent.keyDown(searchInput, { key: 'a' })).toBe(true);
+      fireEvent.change(searchInput, { target: { value: 'a' } });
 
       expect(getKeyboardActiveLabel()).toBeNull();
       expect(document.activeElement).toBe(searchInput);
-      expect(searchInput.value).toContain('a');
+      expect(searchInput.value).toBe('a');
+    });
+
+    it('preserves native search editing after list navigation', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText(
+        'Search step, command or # to go to a step'
+      ) as HTMLInputElement;
+      fireEvent.change(searchInput, { target: { value: 'tr' } });
+      searchInput.focus();
+      searchInput.setSelectionRange(1, 1);
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).not.toBeNull();
+
+      expect(fireEvent.keyDown(searchInput, { key: 'Backspace' })).toBe(true);
+      expect(getKeyboardActiveLabel()).toBeNull();
+      expect(searchInput.value).toBe('tr');
+      expect(searchInput.selectionStart).toBe(1);
     });
   });
 });

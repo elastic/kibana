@@ -52,7 +52,6 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
         jumpToStepEntries={jumpToStepEntries}
         onCommandSelected={onCommandSelected}
         onJumpToStep={onJumpToStep}
-        onClose={closePopover}
       />
     </EuiModal>
   );

@@ -8,7 +8,7 @@
  */
 
 import { type Document, isScalar, isSeq, visit, type YAMLMap, type YAMLSeq } from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { getStepNode, isNestedStepKey, isStepLikeMap } from '@kbn/workflows-yaml';
 import type { InsertedLineRange } from './get_line_range_for_edit';
 import { getMonacoRangeFromYamlNode } from '../utils';
@@ -52,9 +52,7 @@ function getSiblingSteps(seq: YAMLSeq): YAMLMap[] {
   return seq.items.filter(isStepLikeMap);
 }
 
-/**
- * Whether the named step can move up/down within its parent `steps` / `else` array.
- */
+/** Gets the available moves for a step within its parent sequence. */
 export function getStepMoveState(
   document: Document | null | undefined,
   stepId: string
@@ -101,13 +99,23 @@ function getStepBlockLineRange(
   if (!range) {
     return null;
   }
+  let startLine = range.startLineNumber;
+  if (stepNode.commentBefore) {
+    while (startLine > 1) {
+      const previousLine = model.getLineContent(startLine - 1).trim();
+      if (previousLine !== '' && !previousLine.startsWith('#')) {
+        break;
+      }
+      startLine -= 1;
+    }
+  }
   // YAML map ranges often end at column 1 of the following line (after a trailing \n).
   let endLine = range.endLineNumber;
   if (range.endColumn === 1 && endLine > range.startLineNumber) {
     endLine -= 1;
   }
   return {
-    startLine: range.startLineNumber,
+    startLine,
     endLine,
   };
 }
@@ -123,10 +131,7 @@ function getLineBlockText(
   return model.getValue().slice(start, end);
 }
 
-/**
- * Swap the step with its adjacent sibling in the YAML `steps` / `else` sequence.
- * Preserves formatting between the two blocks. Returns the new line range of the moved step.
- */
+/** Swaps a step with its adjacent sibling and returns its new line range. */
 export function reorderStep(
   model: monaco.editor.ITextModel,
   document: Document | null | undefined,
@@ -192,8 +197,6 @@ export function reorderStep(
     editor.pushUndoStop();
   }
 
-  // After swap, the moved step occupies the former upper start when moving up.
-  // When moving down, it starts immediately after the neighbor block we placed first.
   if (direction === 'up') {
     const lineCount = lowerText.split('\n').length;
     return {

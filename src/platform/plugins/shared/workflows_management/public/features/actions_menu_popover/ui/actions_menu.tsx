@@ -10,8 +10,6 @@
 import type { EuiBreadcrumb, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBreadcrumbs,
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelectable,
@@ -51,12 +49,8 @@ export type { EditorCommand, JumpToStepEntry };
 
 const SEARCH_INPUT_NAME = 'actions-menu-search';
 const SELECTABLE_ID = 'actions-menu-selectable';
+const SEARCH_VIRTUALIZATION_THRESHOLD = 30;
 
-const REQUEST_ACTION_URL = 'https://github.com/elastic/workflows';
-
-const LIST_SLIDE_MS = 220;
-
-/** Post-navigation keyboard focus target for the left list. */
 type PendingListFocus = 'first' | 'none' | { optionId: string };
 
 function getActionableDisplayOptions<T extends EuiSelectableOption>(options: T[]): T[] {
@@ -70,22 +64,16 @@ function isCategoryOption(option: EuiSelectableOption): boolean {
   return isActionGroup(action) || isActionConnectorGroup(action);
 }
 
-function getNavDirection(fromPath: string[], toPath: string[]): 'forward' | 'back' {
-  const isPrefix = fromPath.length <= toPath.length && fromPath.every((id, i) => id === toPath[i]);
-  if (isPrefix) {
-    return 'forward';
+function getOptionsAtPath(rootOptions: ActionOptionData[], path: string[]): ActionOptionData[] {
+  let options = rootOptions;
+  for (const id of path) {
+    const option = options.find((item) => item.id === id);
+    if (!option || !isActionGroup(option)) {
+      return [];
+    }
+    options = option.options;
   }
-  const isAncestor = toPath.length < fromPath.length && toPath.every((id, i) => id === fromPath[i]);
-  if (isAncestor) {
-    return 'back';
-  }
-  return toPath.length >= fromPath.length ? 'forward' : 'back';
-}
-
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
+  return options;
 }
 
 export interface ActionsMenuProps {
@@ -94,7 +82,6 @@ export interface ActionsMenuProps {
   jumpToStepEntries?: JumpToStepEntry[];
   onCommandSelected?: (commandId: string) => void;
   onJumpToStep?: (lineNumber: number) => void;
-  onClose?: () => void;
 }
 
 function resolvePathLabels(
@@ -122,7 +109,6 @@ export function ActionsMenu({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
-  onClose,
 }: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -130,9 +116,6 @@ export function ActionsMenu({
   const { workflowsExtensions } = useKibana().services;
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
-  const listViewportRef = useRef<HTMLDivElement | null>(null);
-  const listPaneRef = useRef<HTMLDivElement | null>(null);
-  const isSlidingRef = useRef(false);
   const pendingListFocusRef = useRef<PendingListFocus | null>(null);
   const keyboardIndexRef = useRef<number | null>(null);
   const defaultOptions = useMemo(
@@ -141,12 +124,10 @@ export function ActionsMenu({
   );
   const flatOptions = useMemo(() => flattenOptions(defaultOptions), [defaultOptions]);
 
-  const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
   const [hoveredOption, setHoveredOption] = useState<ActionOptionData | null>(null);
   const [pinnedOption, setPinnedOption] = useState<ActionOptionData | null>(null);
   const [hoveredJumpEntry, setHoveredJumpEntry] = useState<JumpToStepEntry | null>(null);
-  /** Index into actionable (non-label) display options; null = nothing keyboard-selected. */
   const [keyboardIndex, setKeyboardIndex] = useState<number | null>(null);
   keyboardIndexRef.current = keyboardIndex;
 
@@ -160,12 +141,10 @@ export function ActionsMenu({
     setHoveredJumpEntry(null);
   }, []);
 
-  // Focus search when the menu first mounts; arrow keys then own list selection.
   useEffect(() => {
     focusSearch();
   }, [focusSearch]);
 
-  /** Prevent clicks in the menu chrome from stealing focus away from search. */
   const keepSearchFocused = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest(`input[name="${SEARCH_INPUT_NAME}"]`)) {
@@ -174,22 +153,21 @@ export function ActionsMenu({
     e.preventDefault();
   }, []);
 
-  useEffect(() => {
-    if (currentPath.length === 0) {
-      setOptions(defaultOptions);
-    } else {
-      let nextOptions = defaultOptions;
-      for (const id of currentPath) {
-        const next = nextOptions.find((o) => o.id === id);
-        if (next && isActionGroup(next)) {
-          nextOptions = next.options;
-        } else {
-          nextOptions = [];
-        }
-      }
-      setOptions(nextOptions);
+  const options = useMemo(() => {
+    if (!searchTerm.startsWith(STEPS_PREFIX)) {
+      return getOptionsAtPath(defaultOptions, currentPath);
     }
-  }, [defaultOptions, currentPath]);
+    const query = searchTerm.slice(STEPS_PREFIX.length).trim().toLowerCase();
+    if (!query) {
+      return flatOptions;
+    }
+    return flatOptions
+      .filter((option) => isActionSearchMatch(option, query))
+      .sort((a, b) => {
+        const rankDiff = getActionMatchRank(a, query) - getActionMatchRank(b, query);
+        return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
+      });
+  }, [currentPath, defaultOptions, flatOptions, searchTerm]);
 
   const displayOptions = useDisplayOptions({
     options,
@@ -287,7 +265,6 @@ export function ActionsMenu({
     (e: React.MouseEvent<HTMLElement>) => {
       const el = e.target as HTMLElement;
 
-      // Mouse hover takes over highlight + preview from keyboard selection.
       if (keyboardIndexRef.current != null) {
         setKeyboardIndex(null);
       }
@@ -303,7 +280,6 @@ export function ActionsMenu({
         return;
       }
 
-      // Commands have no right-panel preview — keep the last preview as-is.
       if (el.closest('[data-command-id]')) {
         return;
       }
@@ -324,90 +300,13 @@ export function ActionsMenu({
   const navigateToPath = useCallback(
     (nextPath: string[], pendingFocus: PendingListFocus = 'none') => {
       pendingListFocusRef.current = pendingFocus;
-      const applyNavigation = () => {
-        let nextOptions: ActionOptionData[] = defaultOptions;
-        for (const id of nextPath) {
-          const nextOption = nextOptions.find((option) => option.id === id);
-          if (nextOption && isActionGroup(nextOption)) {
-            nextOptions = nextOption.options;
-          } else {
-            nextOptions = [];
-          }
-        }
-        setCurrentPath(nextPath);
-        setOptions(nextOptions);
-        setPinnedOption(null);
-        setHoveredOption(null);
-        setHoveredJumpEntry(null);
-        // Clear now; pending focus effect re-selects after the list re-renders.
-        setKeyboardIndex(null);
-      };
-
-      const pathUnchanged =
-        nextPath.length === currentPath.length && nextPath.every((id, i) => id === currentPath[i]);
-      if (pathUnchanged) {
-        applyNavigation();
-        return;
-      }
-
-      const viewport = listViewportRef.current;
-      const pane = listPaneRef.current;
-      // Skip when reduced-motion is on, a slide is in flight, or layout isn't ready (e.g. jsdom)
-      if (
-        !viewport ||
-        !pane ||
-        prefersReducedMotion() ||
-        isSlidingRef.current ||
-        viewport.clientWidth === 0
-      ) {
-        applyNavigation();
-        return;
-      }
-
-      const direction = getNavDirection(currentPath, nextPath);
-      isSlidingRef.current = true;
-
-      const outgoing = pane.cloneNode(true) as HTMLElement;
-      outgoing.setAttribute('aria-hidden', 'true');
-      outgoing.style.position = 'absolute';
-      outgoing.style.inset = '0';
-      outgoing.style.width = '100%';
-      outgoing.style.height = '100%';
-      outgoing.style.zIndex = '1';
-      outgoing.style.pointerEvents = 'none';
-      outgoing.style.backgroundColor = euiTheme.colors.backgroundBasePlain;
-      viewport.appendChild(outgoing);
-
-      // Park the incoming pane off-screen before React swaps the list content
-      pane.style.transition = 'none';
-      pane.style.transform = direction === 'forward' ? 'translateX(100%)' : 'translateX(-100%)';
-
-      applyNavigation();
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const transition = `transform ${LIST_SLIDE_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
-          outgoing.style.transition = transition;
-          pane.style.transition = transition;
-          outgoing.style.transform =
-            direction === 'forward' ? 'translateX(-100%)' : 'translateX(100%)';
-          pane.style.transform = 'translateX(0)';
-
-          let cleaned = false;
-          const cleanup = () => {
-            if (cleaned) return;
-            cleaned = true;
-            outgoing.remove();
-            pane.style.transition = '';
-            pane.style.transform = '';
-            isSlidingRef.current = false;
-          };
-          outgoing.addEventListener('transitionend', cleanup, { once: true });
-          window.setTimeout(cleanup, LIST_SLIDE_MS + 80);
-        });
-      });
+      setCurrentPath(nextPath);
+      setPinnedOption(null);
+      setHoveredOption(null);
+      setHoveredJumpEntry(null);
+      setKeyboardIndex(null);
     },
-    [currentPath, defaultOptions, euiTheme.colors.backgroundBasePlain]
+    []
   );
 
   const handleStepOrGroupSelected = useCallback(
@@ -415,7 +314,6 @@ export function ActionsMenu({
       if (isActionGroup(action)) {
         const nextPath = action.pathIds ?? [...currentPath, action.id];
         setSearchTerm('');
-        // Mouse/click browse: no keyboard selection at the new level.
         navigateToPath([...nextPath], 'none');
       } else {
         setPinnedOption(null);
@@ -431,23 +329,6 @@ export function ActionsMenu({
       onActionSelected(action);
     },
     [onActionSelected]
-  );
-
-  const handlePinPreview = useCallback((action: ActionOptionData, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPinnedOption(action);
-    setHoveredOption(action);
-    setHoveredJumpEntry(null);
-  }, []);
-
-  const handleAddFromRow = useCallback(
-    (action: ActionOptionData, e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      handleAddStep(action);
-    },
-    [handleAddStep]
   );
 
   const handleChange = (
@@ -511,7 +392,6 @@ export function ActionsMenu({
     if (index == null) return;
     const option = actionableDisplayOptionsRef.current[index];
     if (!option) return;
-    // Enter on a category drills in and selects the first child (keyboard path).
     if (isCategoryOption(option)) {
       enterCategoryFromKeyboard();
       return;
@@ -531,33 +411,6 @@ export function ActionsMenu({
     if (searchValue.length > 0) {
       setCurrentPath([]);
     }
-
-    // Steps: prefix keeps a flat, ranked list in `options` for the unlimited results view.
-    if (searchValue.startsWith(STEPS_PREFIX)) {
-      const query = searchValue.slice(STEPS_PREFIX.length).trim().toLowerCase();
-      if (query.length === 0) {
-        setOptions(flatOptions);
-      } else {
-        const matches = flatOptions
-          .filter((option) => isActionSearchMatch(option, query))
-          .sort((a, b) => {
-            const rankDiff = getActionMatchRank(a, query) - getActionMatchRank(b, query);
-            return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
-          });
-        setOptions(matches);
-      }
-      return;
-    }
-
-    if (searchValue.trimStart().startsWith('#')) {
-      return;
-    }
-
-    // Normal search mode builds sectioned results from categoryTree in useDisplayOptions.
-    // Reset browse-level options to the root tree when clearing search.
-    if (searchValue.length === 0) {
-      setOptions(defaultOptions);
-    }
   };
 
   const handleSearchChangeRef = useRef(handleSearchChange);
@@ -566,7 +419,6 @@ export function ActionsMenu({
   const setKeyboardIndexAndPreviewRef = useRef(setKeyboardIndexAndPreview);
   setKeyboardIndexAndPreviewRef.current = setKeyboardIndexAndPreview;
 
-  // List keyboard navigation + typing returns focus to search.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const input = searchInputRef.current;
@@ -575,7 +427,6 @@ export function ActionsMenu({
 
       const menuEl = menuContainerRef.current;
       if (menuEl && !menuEl.contains(document.activeElement) && document.activeElement !== input) {
-        // Ignore keys when focus is completely outside the menu.
         if (!menuEl.contains(e.target as Node)) return;
       }
       const eventTarget = e.target as HTMLElement;
@@ -605,7 +456,7 @@ export function ActionsMenu({
       }
 
       if (e.key === 'ArrowRight') {
-        if (!inListNavMode) return; // caret movement in search
+        if (!inListNavMode) return;
         e.preventDefault();
         e.stopPropagation();
         enterCategoryFromKeyboard();
@@ -613,7 +464,7 @@ export function ActionsMenu({
       }
 
       if (e.key === 'ArrowLeft') {
-        if (!inListNavMode) return; // caret movement in search
+        if (!inListNavMode) return;
         e.preventDefault();
         e.stopPropagation();
         leaveCategoryFromKeyboard();
@@ -627,10 +478,14 @@ export function ActionsMenu({
         return;
       }
 
-      // Typing while list-focused returns to search and clears selection.
-      if (isSearchFocused && !inListNavMode) return;
-
       const isPrintable = e.key.length === 1;
+      if (isSearchFocused) {
+        if (inListNavMode && (isPrintable || e.key === 'Backspace' || e.key === 'Delete')) {
+          clearKeyboardSelection();
+        }
+        return;
+      }
+
       if (!isPrintable && e.key !== 'Backspace' && e.key !== 'Delete') return;
 
       e.preventDefault();
@@ -723,6 +578,8 @@ export function ActionsMenu({
     activeOptionIndex === undefined
       ? undefined
       : `${SELECTABLE_ID}_listbox_option-${activeOptionIndex}`;
+  const isSearchVirtualized =
+    searchTerm.length > 0 && displayOptions.length > SEARCH_VIRTUALIZATION_THRESHOLD;
 
   return (
     <EuiSelectable
@@ -744,6 +601,7 @@ export function ActionsMenu({
         onChange: handleSearchChange,
         compressed: true,
         isClearable: true,
+        fullWidth: true,
         inputRef: (node: HTMLInputElement | null) => {
           searchInputRef.current = node;
         },
@@ -771,8 +629,8 @@ export function ActionsMenu({
         activeOptionIndex,
         paddingSize: 'none',
         onFocusBadge: false,
-        isVirtualized: searchTerm.startsWith(STEPS_PREFIX),
-        ...(searchTerm.startsWith(STEPS_PREFIX) && { rowHeight: 64 }),
+        isVirtualized: isSearchVirtualized,
+        ...(isSearchVirtualized && { rowHeight: 64 }),
       }}
       renderOption={(rawOption, searchValue) =>
         renderActionOption({
@@ -783,45 +641,24 @@ export function ActionsMenu({
           actionableDisplayOptions,
           styles,
           euiTheme,
-          handlePinPreview,
-          handleAddFromRow,
         })
       }
       css={styles.selectable}
       singleSelection
+      height="full"
     >
       {(list, search) => (
         <div ref={menuContainerRef} css={styles.container} onMouseDown={keepSearchFocused}>
-          {/* Full-width header: title + search */}
           <div css={styles.header}>
-            <div css={styles.titleRow}>
-              <EuiTitle size="xxs">
-                <h3 css={styles.title}>
-                  <FormattedMessage
-                    id="workflows.actionsMenu.title"
-                    defaultMessage="Actions menu"
-                  />
-                </h3>
-              </EuiTitle>
-              {onClose && (
-                <EuiButtonEmpty
-                  onClick={onClose}
-                  iconType="cross"
-                  size="xs"
-                  flush="right"
-                  color="text"
-                  aria-label={i18n.translate('workflows.actionsMenu.close', {
-                    defaultMessage: 'Close actions menu',
-                  })}
-                  css={styles.closeButton}
-                />
-              )}
-            </div>
-            <div css={styles.searchRow}>{search}</div>
+            <EuiTitle size="xxs">
+              <h3 css={styles.title}>
+                <FormattedMessage id="workflows.actionsMenu.title" defaultMessage="Actions menu" />
+              </h3>
+            </EuiTitle>
+            <div>{search}</div>
           </div>
 
           <EuiFlexGroup gutterSize="none" css={styles.body}>
-            {/* Left column — list */}
             <EuiFlexItem css={styles.leftColumn} onMouseMove={handleListMouseMove}>
               {showBreadcrumbs && (
                 <div css={styles.breadcrumbRow}>
@@ -844,30 +681,14 @@ export function ActionsMenu({
                       values={{ query: searchTerm.trim() }}
                     />
                   </EuiText>
-                  <EuiButton
-                    size="s"
-                    href={REQUEST_ACTION_URL}
-                    target="_blank"
-                    iconType="popout"
-                    iconSide="right"
-                    color="primary"
-                  >
-                    <FormattedMessage
-                      id="workflows.actionsMenu.requestAction"
-                      defaultMessage="Request an action"
-                    />
-                  </EuiButton>
                 </div>
               ) : (
-                <div ref={listViewportRef} css={styles.listViewport}>
-                  <div ref={listPaneRef} css={styles.listPane}>
-                    {list}
-                  </div>
+                <div css={styles.listViewport}>
+                  <div css={styles.listPane}>{list}</div>
                 </div>
               )}
             </EuiFlexItem>
 
-            {/* Right column — preview */}
             <EuiFlexItem css={styles.rightColumn}>
               <ActionsMenuPreviewPanel
                 hoveredOption={previewOption}
@@ -875,8 +696,6 @@ export function ActionsMenu({
                 onStepSelected={handleStepOrGroupSelected}
                 onAddStep={handleAddStep}
                 onPinPreview={(action, parentSection) => {
-                  // From a category preview: open that category on the left so the
-                  // list matches the right panel, then pin this step's detail.
                   if (
                     parentSection &&
                     (isActionGroup(parentSection) || isActionConnectorGroup(parentSection))

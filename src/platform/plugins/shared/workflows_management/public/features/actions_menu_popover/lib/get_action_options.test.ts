@@ -449,6 +449,24 @@ describe('getActionOptions', () => {
     }
   });
 
+  it('should not double-decode connector descriptions', () => {
+    const mockConnector = {
+      type: 'elasticsearch.search',
+      description: '<strong>Search</strong> &amp; inspect &amp;lt;safe&amp;gt;.',
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const elasticsearchGroup = result.find((group) => group.id === 'elasticsearch');
+
+    expect(elasticsearchGroup).toBeDefined();
+    if (elasticsearchGroup && isActionGroup(elasticsearchGroup)) {
+      expect(elasticsearchGroup.options[0].description).toBe('Search & inspect &lt;safe&gt;.');
+    }
+  });
+
   it('should add kibana connectors to kibana group', () => {
     const mockConnector = {
       type: 'kibana.saved_object',

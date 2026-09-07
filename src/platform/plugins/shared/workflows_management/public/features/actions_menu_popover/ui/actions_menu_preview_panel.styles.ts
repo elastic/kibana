@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import { aiIconTileCss } from './ai_icon_tile';
 
 export const panelStyles = {
-  // Category preview: title stays put; list scrolls with scrollbar flush to panel edge
   sectionPanel: css({
     display: 'flex',
     flexDirection: 'column',
@@ -32,29 +31,22 @@ export const panelStyles = {
     flex: 1,
     minHeight: 0,
     overflowY: 'auto',
-    // Left/bottom inset for the card; no right padding so the scrollbar
-    // sits flush against the right panel edge.
     padding: '0 0 16px 16px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'stretch',
   }),
-  // Figma: Frame 8 steps list — r=8, connected rows with outer card border.
-  // Sizes to content; scroll appears on stepListScroll when it overflows.
-  // overflow:hidden keeps row backgrounds clipped to the card radius.
   stepList: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: '0 0 auto',
       alignSelf: 'flex-start',
       boxSizing: 'border-box',
-      // Full width minus the flush-scrollbar gutter
       width: 'calc(100% - 16px)',
       borderRadius: euiTheme.border.radius.medium,
       border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       overflow: 'hidden',
     }),
-  // Figma: Info frame — bg=gray, r=4, pad=[16,24,24,24], gap=16
   panel: ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'flex',
@@ -71,7 +63,6 @@ export const panelStyles = {
     flexDirection: 'column',
     gap: '6px',
   }),
-  // Borealis: semiBold token is 500; 600 (`bold`) is the visible semibold weight
   titleBlockText: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontSize: '14px',
@@ -95,7 +86,6 @@ export const panelStyles = {
       WebkitLineClamp: 3,
       overflow: 'hidden',
     }),
-  // Tabs + field list; 8px gap between tab underline and the bordered list
   tabsAndFields: css({
     flexShrink: 0,
     display: 'flex',
@@ -109,7 +99,6 @@ export const panelStyles = {
     css({
       marginInlineStart: euiTheme.size.xs,
     }),
-  // Mockup: bordered field list — r=8, connected rows
   fieldList: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBasePlain,
@@ -117,7 +106,6 @@ export const panelStyles = {
       borderRadius: '8px',
       overflow: 'hidden',
     }),
-  // Figma: field-inner — pad=[16,16,16,16], gap=4
   fieldRow: css({
     padding: '16px',
     display: 'flex',
@@ -129,7 +117,6 @@ export const panelStyles = {
     alignItems: 'center',
     gap: '8px',
   }),
-  // Neutral text-token chip (matches EuiCode default), uppercase monospace
   typeBadge: ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'inline-block',
@@ -153,7 +140,6 @@ export const panelStyles = {
   fieldName: css({
     fontWeight: 600,
   }),
-  // Mockup: Required uses danger/red emphasis on the trailing edge
   requiredBadge: ({ euiTheme }: UseEuiTheme) =>
     css({
       marginLeft: 'auto',
@@ -197,7 +183,6 @@ export const defaultPanelStyles = {
     flexDirection: 'column',
     height: '100%',
   }),
-  // Figma: Info hero — r=4, pad=[16,24,24,24], gap=16, flex:1
   hero: ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'flex',
@@ -214,7 +199,6 @@ export const defaultPanelStyles = {
     height: '128px',
     flexShrink: 0,
   }),
-  // Figma: TEXT — fs=14, fw=500, lh=24
   heroText: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontSize: '14px',
@@ -224,7 +208,6 @@ export const defaultPanelStyles = {
       margin: 0,
       textAlign: 'center',
     }),
-  // Figma: connected Documentation + Download schema block
   cardsSection: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
@@ -284,7 +267,7 @@ export const previewStepRowStyles = {
         opacity: 0,
         pointerEvents: 'none',
       },
-      '&:hover .rowActions': {
+      '&:hover .rowActions, &:focus-within .rowActions': {
         opacity: 1,
         pointerEvents: 'auto',
       },
@@ -301,7 +284,6 @@ export const previewStepRowStyles = {
     cursor: 'pointer',
     textAlign: 'left',
   }),
-  // Keep radius on the same rule as fill so corners render cleanly
   iconContainer: css({
     width: '40px',
     height: '40px',
@@ -312,7 +294,6 @@ export const previewStepRowStyles = {
     borderRadius: '8px',
     boxSizing: 'border-box',
   }),
-  // AI — Primary→Assistance gradients (same recipe as AiButton / AI Agent)
   iconContainerPlatform: aiIconTileCss,
   iconContainerTrigger: ({ euiTheme }: UseEuiTheme) =>
     css({

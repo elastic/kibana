@@ -34,11 +34,11 @@ import {
 } from './actions_menu_preview_panel.styles';
 import { ActionsMenuAiIcon } from './ai_icon_tile';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
-import { stepSchemas } from '../../../../common/step_schemas';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { useWorkflowJsonSchema } from '../../validate_workflow_yaml/model/use_workflow_json_schema';
 import { getIconGlyphColor } from '../lib/get_action_options';
+import { getStepPreviewData } from '../lib/get_step_preview_data';
 import { getFieldsFromZodSchema } from '../lib/get_step_preview_fields';
 import type { ActionOptionData, JumpToStepEntry } from '../types';
 import {
@@ -55,7 +55,6 @@ interface ActionsMenuPreviewPanelProps {
   hoveredJumpEntry?: JumpToStepEntry | null;
   onStepSelected: (action: ActionOptionData) => void;
   onAddStep?: (action: ActionOptionData) => void;
-  /** Pin step detail; when `parentSection` is set, also navigate left into that category. */
   onPinPreview?: (action: ActionOptionData, parentSection?: ActionOptionData) => void;
 }
 export function ActionsMenuPreviewPanel({
@@ -73,43 +72,21 @@ export function ActionsMenuPreviewPanel({
     : false;
   const isLeaf = hoveredOption ? !isGroup : false;
 
-  const stepDef = useMemo(() => {
+  const previewData = useMemo(() => {
     if (!hoveredOption || !isLeaf) return undefined;
-    return stepSchemas.getStepDefinition(hoveredOption.id);
+    return getStepPreviewData(hoveredOption.id);
   }, [hoveredOption, isLeaf]);
 
-  const connectorDef = useMemo(() => {
-    if (!hoveredOption || !isLeaf || stepDef) return undefined;
-    return stepSchemas.getAllConnectorsMapCache()?.get(hoveredOption.id);
-  }, [hoveredOption, isLeaf, stepDef]);
-
-  const inputFields = useMemo(() => {
-    const schema =
-      (stepDef as { inputSchema?: Parameters<typeof getFieldsFromZodSchema>[0] } | undefined)
-        ?.inputSchema ??
-      (connectorDef as { paramsSchema?: Parameters<typeof getFieldsFromZodSchema>[0] } | undefined)
-        ?.paramsSchema;
-    return getFieldsFromZodSchema(schema);
-  }, [stepDef, connectorDef]);
-
-  const outputFields = useMemo(() => {
-    const schema =
-      (stepDef as { outputSchema?: Parameters<typeof getFieldsFromZodSchema>[0] } | undefined)
-        ?.outputSchema ??
-      (connectorDef as { outputSchema?: Parameters<typeof getFieldsFromZodSchema>[0] } | undefined)
-        ?.outputSchema;
-    return getFieldsFromZodSchema(schema);
-  }, [stepDef, connectorDef]);
-
-  const examples: string[] = useMemo(() => {
-    return (
-      (stepDef as { documentation?: { examples?: string[] } } | undefined)?.documentation
-        ?.examples ?? []
-    );
-  }, [stepDef]);
-
-  const docUrl =
-    (connectorDef as { documentation?: string | null } | undefined)?.documentation ?? undefined;
+  const inputFields = useMemo(
+    () => getFieldsFromZodSchema(previewData?.inputSchema),
+    [previewData]
+  );
+  const outputFields = useMemo(
+    () => getFieldsFromZodSchema(previewData?.outputSchema),
+    [previewData]
+  );
+  const examples = previewData?.examples ?? [];
+  const docUrl = previewData?.documentationUrl;
 
   const fields = activeTab === 'inputs' ? inputFields : outputFields;
 
@@ -147,7 +124,6 @@ export function ActionsMenuPreviewPanel({
     />
   );
 }
-/* ── Default state ── */
 
 function DefaultPanel() {
   const styles = useMemoCss(defaultPanelStyles);
@@ -169,7 +145,7 @@ function DefaultPanel() {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url));
     } catch (error) {
       notifications?.toasts.addError(error as Error, {
         title: i18n.translate('workflows.actionsMenu.preview.downloadSchemaError', {
@@ -209,7 +185,7 @@ function DefaultPanel() {
           description={i18n.translate('workflows.actionsMenu.preview.documentationDesc', {
             defaultMessage: 'Learn how workflows steps work',
           })}
-          iconType="popout"
+          iconType="external"
           href={WORKFLOWS_DOCUMENTATION_URL}
         />
         <ResourceCard
@@ -276,7 +252,6 @@ function ResourceCard({
     </button>
   );
 }
-/* ── Jump step YAML preview ── */
 
 function JumpStepPanel({ entry }: { entry: JumpToStepEntry }) {
   const styles = useMemoCss(panelStyles);
@@ -303,7 +278,6 @@ function JumpStepPanel({ entry }: { entry: JumpToStepEntry }) {
     </div>
   );
 }
-/* ── Section preview ── */
 
 function SectionPreviewPanel({
   section,
@@ -351,7 +325,6 @@ function SectionPreviewPanel({
     </div>
   );
 }
-/* ── Step detail ── */
 
 function StepDetailPanel({
   step,
@@ -405,7 +378,7 @@ function StepDetailPanel({
                 size="xs"
                 href={docUrl}
                 target="_blank"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 flush="left"
                 data-test-subj="actionsMenuPreviewDocumentation"
@@ -511,13 +484,12 @@ function StepDetailPanel({
   );
 }
 
-/* ── Step row (used in section preview) ── */
-
 function getPreviewIconContainerStyle(
   step: ActionOptionData,
   styles: ReturnType<typeof useMemoCss<typeof previewStepRowStyles>>
 ) {
-  switch (step.iconVariant) {
+  const { iconVariant } = step;
+  switch (iconVariant) {
     case 'trigger':
       return styles.iconContainerTrigger;
     case 'external':
@@ -528,8 +500,13 @@ function getPreviewIconContainerStyle(
     case 'dataTransformation':
       return styles.iconContainerDataTransformation;
     case 'platform':
-    default:
       return styles.iconContainerPlatform;
+    case undefined:
+      return styles.iconContainerPlatform;
+    default: {
+      const exhaustiveCheck: never = iconVariant;
+      return exhaustiveCheck;
+    }
   }
 }
 
@@ -551,7 +528,6 @@ function PreviewStepRow({
   const glyphColor =
     getIconGlyphColor(step.iconVariant, euiTheme) ??
     ('iconColor' in step ? step.iconColor : undefined);
-  // Menu may override connector glyphs (e.g. AI → sparkles)
   const preferMenuIcon =
     iconType === 'sparkles' || iconType === 'database' || iconType === 'branch';
   const showLeafActions = !isGroup && (onAdd || onPinPreview);
@@ -592,7 +568,13 @@ function PreviewStepRow({
           )}
         </span>
         {isGroup && (
-          <EuiIcon type="arrowRight" size="s" color="subdued" aria-hidden css={styles.chevron} />
+          <EuiIcon
+            type="chevronSingleRight"
+            size="s"
+            color="subdued"
+            aria-hidden
+            css={styles.chevron}
+          />
         )}
       </button>
       {showLeafActions && (
@@ -615,7 +597,7 @@ function PreviewStepRow({
           {onAdd && (
             <EuiToolTip content={addStepLabel} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 size="m"
                 iconSize="m"
                 color="text"

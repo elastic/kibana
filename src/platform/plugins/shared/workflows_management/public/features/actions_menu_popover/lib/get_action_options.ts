@@ -50,11 +50,11 @@ function stripHtml(text: string | null | undefined): string | undefined {
   const noTags = text.replace(/<[^>]*>/g, ' ');
   const decoded = noTags
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
   const noMarkdown = decoded
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
     .replace(/\*\*([^*]+)\*\*/g, '$1')
@@ -369,7 +369,6 @@ export function getActionOptions(
         let groupOption = externalGroup;
         if (hasSubAction) {
           let connectorGroup = externalGroup.options.find((option) => option.id === baseType);
-          // create a group for the basetype if not yet exists
           if (!connectorGroup) {
             baseTypeInstancesCount[baseType] = 0;
             const newConnectorGroup: ActionConnectorGroup = {
@@ -382,11 +381,8 @@ export function getActionOptions(
             connectorGroup = newConnectorGroup;
             externalGroup.options.push(newConnectorGroup);
           } else if (connectorGroup.label === baseType) {
-            // Upgrade raw id labels once we have a friendlier family name
             connectorGroup.label = getExternalConnectorGroupLabel(baseType, connector);
           }
-          // We know connectorGroup is an ActionGroup because we either found it in options
-          // (which are ActionOptionData[]) or we just created it with the options property
           if (isActionGroup(connectorGroup)) {
             groupOption = connectorGroup;
           }
@@ -394,7 +390,6 @@ export function getActionOptions(
         baseTypeInstancesCount[baseType] += connector.instances?.length || 0;
         groupOption.instancesLabel = getInstancesLabel(baseTypeInstancesCount[baseType]);
 
-        // groupOption is always an ActionGroup here (either externalGroup or a validated connectorGroup)
         if (isActionGroup(groupOption)) {
           groupOption.options.push({
             id: connector.type,
@@ -412,7 +407,6 @@ export function getActionOptions(
   mergeNestedStepGroups(stepGroups);
 
   triggersGroup.iconVariant = 'trigger';
-  // ES / Kibana / Cases share External systems & apps tile colors (subdued + plain)
   elasticSearchGroup.iconVariant = 'neutral';
   kibanaGroup.iconVariant = 'neutral';
   kibanaCasesGroup.iconVariant = 'neutral';
@@ -421,7 +415,6 @@ export function getActionOptions(
   externalGroup.iconVariant = 'external';
   flowControlGroup.iconVariant = 'flowControl';
 
-  // AI category always uses the sparkles glyph on the platform tile
   for (const opt of isActionGroup(aiGroup) ? aiGroup.options : []) {
     if ('iconType' in opt) {
       opt.iconType = 'sparkles';
@@ -438,20 +431,17 @@ export function getActionOptions(
     dataTransformationGroup,
     flowControlGroup,
   ];
-  // Subcategory lists (and nested groups within them) are A–Z by label.
-  // Root categories keep the intentional color-grouped order above.
-  // Triggers keep built-ins first (manual/alert/scheduled), then registered groups.
   for (const group of topLevelOptions) {
-    if (!('options' in group)) {
-      // no-op for type narrowing
-    } else if (group.id === 'triggers') {
-      for (const opt of group.options) {
-        if ('options' in opt) {
-          sortOptionsByLabel(opt.options);
+    if (isActionGroup(group)) {
+      if (group.id === 'triggers') {
+        for (const opt of group.options) {
+          if ('options' in opt) {
+            sortOptionsByLabel(opt.options);
+          }
         }
+      } else {
+        sortOptionsByLabel(group.options);
       }
-    } else {
-      sortOptionsByLabel(group.options);
     }
   }
   assignActionPathIds(topLevelOptions);
@@ -459,7 +449,6 @@ export function getActionOptions(
   return topLevelOptions;
 }
 
-/** Sort a group's children alphabetically; recurses into nested groups. */
 function sortOptionsByLabel(options: ActionOptionData[]): void {
   options.sort((a, b) => compareActionLabels(a.label, b.label));
   for (const opt of options) {
@@ -469,10 +458,7 @@ function sortOptionsByLabel(options: ActionOptionData[]): void {
   }
 }
 
-/**
- * Glyph color for menu icon tiles (Figma semantic text tokens).
- * Soft pastel tile fills pair with matching Text/* colors — not inverse/white.
- */
+/** Gets the semantic icon color for a menu tile. */
 export function getIconGlyphColor(
   variant: IconVariant | undefined,
   euiTheme: UseEuiTheme['euiTheme']
@@ -489,8 +475,12 @@ export function getIconGlyphColor(
     case 'external':
     case 'neutral':
       return euiTheme.colors.textParagraph;
-    default:
+    case undefined:
       return undefined;
+    default: {
+      const exhaustiveCheck: never = variant;
+      return exhaustiveCheck;
+    }
   }
 }
 
@@ -514,10 +504,6 @@ function assignIconVariants(
   }
 }
 
-/**
- * Sets `pathIds` on every item (groups and leaves) so search can group by root category
- * and navigation works when selecting from search results.
- */
 function assignActionPathIds(
   options: ActionOptionData[],
   parentPath: readonly string[] = []

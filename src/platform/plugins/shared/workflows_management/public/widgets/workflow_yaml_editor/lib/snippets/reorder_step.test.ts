@@ -8,7 +8,7 @@
  */
 
 import { parseDocument } from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { getStepMoveState, reorderStep } from './reorder_step';
 import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
 
@@ -164,6 +164,64 @@ describe('reorderStep', () => {
     const result = reorderStep(model as unknown as monaco.editor.ITextModel, doc, 'first', 'down');
 
     expect(result).toEqual({ lineStart: 5, lineEnd: 6 });
+  });
+
+  it('moves a leading comment with a step when moving up', () => {
+    const yaml = `steps:
+  - name: first
+    type: wait
+  # Keep with second
+  - name: second
+    type: wait`;
+    const model = createFakeMonacoModel(yaml);
+    const doc = parseDocument(yaml);
+
+    const result = reorderStep(model as unknown as monaco.editor.ITextModel, doc, 'second', 'up');
+
+    expect(result).toEqual({ lineStart: 2, lineEnd: 4 });
+    expect(model.pushEditOperations).toHaveBeenCalledWith(
+      null,
+      [
+        {
+          range: new monaco.Range(2, 1, 6, model.getLineMaxColumn(6)),
+          text: `  # Keep with second
+  - name: second
+    type: wait
+  - name: first
+    type: wait`,
+        },
+      ],
+      expect.any(Function)
+    );
+  });
+
+  it('moves a leading comment with a step when moving down', () => {
+    const yaml = `steps:
+  - name: first
+    type: wait
+  # Keep with second
+  - name: second
+    type: wait`;
+    const model = createFakeMonacoModel(yaml);
+    const doc = parseDocument(yaml);
+
+    const result = reorderStep(model as unknown as monaco.editor.ITextModel, doc, 'first', 'down');
+
+    expect(result).toEqual({ lineStart: 5, lineEnd: 6 });
+    expect(model.pushEditOperations).toHaveBeenCalledWith(
+      null,
+      [
+        {
+          range: new monaco.Range(2, 1, 6, model.getLineMaxColumn(6)),
+          text: `  # Keep with second
+  - name: second
+    type: wait
+  - name: first
+    type: wait`,
+        },
+      ],
+      expect.any(Function)
+    );
   });
 
   it('returns undefined when the step cannot move further', () => {

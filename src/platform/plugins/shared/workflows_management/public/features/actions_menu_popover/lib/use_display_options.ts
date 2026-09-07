@@ -20,9 +20,7 @@ export const STEPS_PREFIX = 'Steps: ';
 export const MAX_VISIBLE_STEPS = 7;
 
 interface UseDisplayOptionsArgs {
-  /** Current browse-level options (root categories or a subgroup). */
   options: ActionOptionData[];
-  /** Full category tree — used to section search results by root category. */
   categoryTree?: ActionOptionData[];
   searchTerm: string;
   commands?: EditorCommand[];
@@ -73,10 +71,6 @@ export function isActionSearchMatch(option: ActionOptionData, normalizedTerm: st
   return getActionMatchRank(option, normalizedTerm) <= MAX_ACTION_MATCH_RANK;
 }
 
-/**
- * Collect matching items under a category. Skips the category root itself
- * (it becomes the section header). Nested matches get a parent-context description.
- */
 function collectCategoryMatches(
   node: ActionOptionData,
   term: string,
@@ -91,7 +85,6 @@ function collectCategoryMatches(
       parent
         ? {
             ...node,
-            // e.g. "Shodan - Count results" when nested under a connector group
             description: `${parent.label} - ${node.label}`,
           }
         : node
@@ -211,7 +204,6 @@ export function buildDisplayOptions({
   const hasSearch = term.length > 0;
 
   if (currentPath.length > 0 && !hasSearch) {
-    // Always present subcategory rows A–Z (External, Cases, Data transformation, …)
     const sortedOptions = [...options].sort((a, b) =>
       a.label.localeCompare(b.label, undefined, { sensitivity: 'base', numeric: true })
     );
@@ -251,7 +243,6 @@ export function buildDisplayOptions({
     return result;
   }
 
-  // Search mode: section results by root category (mockup: External / Data transformation / …)
   if (hasSearch) {
     const tree = categoryTree ?? options;
     return buildSearchModeOptions({
@@ -262,7 +253,6 @@ export function buildDisplayOptions({
     });
   }
 
-  // Root browse list (no search)
   result.push({
     label: i18n.translate('workflows.actionsMenu.addStepGroupLabel', {
       defaultMessage: 'Add trigger or step',

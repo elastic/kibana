@@ -10,14 +10,12 @@
 import type { EuiSelectableOption, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiBetaBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
   EuiIcon,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import type { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -57,6 +55,10 @@ function getSelectableOptionKey(option: EuiSelectableOption): string | undefined
       return `jump:${itemData.entry.id}`;
     case 'nav':
       return `nav:${itemData.target}`;
+    default: {
+      const exhaustiveCheck: never = itemData;
+      return exhaustiveCheck;
+    }
   }
 }
 
@@ -80,8 +82,13 @@ function getIconOuterStyle(variant: IconVariant | undefined, styles: ActionsMenu
     case 'dataTransformation':
       return styles.iconOuterDataTransformation;
     case 'platform':
-    default:
       return styles.iconOuterPlatform;
+    case undefined:
+      return styles.iconOuterPlatform;
+    default: {
+      const exhaustiveCheck: never = variant;
+      return exhaustiveCheck;
+    }
   }
 }
 
@@ -93,8 +100,6 @@ interface RenderActionOptionParams {
   actionableDisplayOptions: EuiSelectableOption[];
   styles: ActionsMenuStyles;
   euiTheme: EuiThemeComputed;
-  handlePinPreview: (action: ActionOptionData, event: React.MouseEvent) => void;
-  handleAddFromRow: (action: ActionOptionData, event: React.MouseEvent) => void;
 }
 
 export function renderActionOption({
@@ -105,12 +110,8 @@ export function renderActionOption({
   actionableDisplayOptions,
   styles,
   euiTheme,
-  handlePinPreview,
-  handleAddFromRow,
 }: RenderActionOptionParams): React.ReactNode {
   const itemData = getMenuItemData(rawOption);
-  // Prefer controlled searchTerm so highlights stay correct in search mode
-  // even if EuiSelectable's renderOption search arg is stale/empty.
   const rawSearch = (searchTerm || searchValue).trim();
   const effectiveSearch = rawSearch.startsWith(STEPS_PREFIX)
     ? rawSearch.slice(STEPS_PREFIX.length).trim()
@@ -134,7 +135,6 @@ export function renderActionOption({
         className={keyboardActiveClassName}
         data-command-id={command.id}
       >
-        {' '}
         <EuiFlexGroup
           alignItems="center"
           css={styles.actionOption}
@@ -194,7 +194,6 @@ export function renderActionOption({
         className={keyboardActiveClassName}
         data-jump-id={itemData.entry.id}
       >
-        {' '}
         <EuiText size="s">
           <EuiHighlight search={effectiveSearch} highlightAll>
             {rawOption.label}
@@ -232,12 +231,6 @@ export function renderActionOption({
   const glyphColor =
     getIconGlyphColor(action.iconVariant, euiTheme) ??
     ('iconColor' in action ? action.iconColor : undefined);
-  const viewDetailsLabel = i18n.translate('workflows.actionsMenu.viewDetails', {
-    defaultMessage: 'View details',
-  });
-  const addStepLabel = i18n.translate('workflows.actionsMenu.addStep', {
-    defaultMessage: 'Add step',
-  });
 
   return (
     <div
@@ -252,7 +245,6 @@ export function renderActionOption({
         >
           <span css={shouldUseGroupStyle ? styles.groupIconInner : styles.actionIconInner}>
             {isActionConnectorGroup(action) || isActionConnectorOption(action) ? (
-              // Prefer an explicit menu icon (e.g. sparkles for AI) over the connector glyph
               'iconType' in action && action.iconType === 'sparkles' ? (
                 <ActionsMenuAiIcon />
               ) : (
@@ -316,46 +308,9 @@ export function renderActionOption({
         </EuiFlexGroup>
         {shouldUseGroupStyle ? (
           <EuiFlexItem grow={false} css={styles.arrowContainer}>
-            <EuiIcon type="arrowRight" size="s" css={styles.arrow} aria-hidden={true} />
+            <EuiIcon type="chevronSingleRight" size="s" css={styles.arrow} aria-hidden={true} />
           </EuiFlexItem>
-        ) : (
-          <span className="rowActions" css={styles.rowActions}>
-            <EuiToolTip content={viewDetailsLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="info"
-                size="m"
-                iconSize="m"
-                color="text"
-                display="empty"
-                css={styles.rowActionButton}
-                aria-label={viewDetailsLabel}
-                data-test-subj="actionsMenuItemInfo"
-                onClick={(event: React.MouseEvent) => handlePinPreview(action, event)}
-                onMouseDown={(event: React.MouseEvent) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-              />
-            </EuiToolTip>
-            <EuiToolTip content={addStepLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="plusInCircle"
-                size="m"
-                iconSize="m"
-                color="text"
-                display="base"
-                css={styles.rowActionButton}
-                aria-label={addStepLabel}
-                data-test-subj="actionsMenuItemAdd"
-                onClick={(event: React.MouseEvent) => handleAddFromRow(action, event)}
-                onMouseDown={(event: React.MouseEvent) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-              />
-            </EuiToolTip>
-          </span>
-        )}
+        ) : null}
       </EuiFlexGroup>
     </div>
   );
