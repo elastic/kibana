@@ -6,32 +6,29 @@
  */
 
 import type {
-  Conversation,
   ConversationAccessControl,
   ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
-  ConversationWithoutRounds,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
 
-export interface ConversationPermissions {
-  rename: boolean;
-  delete: boolean;
-  update_access_control: boolean;
-}
-
-export type ConversationWithPermissions = Conversation & {
-  permissions: ConversationPermissions;
-};
-
-export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
-  permissions: ConversationPermissions;
-};
+export type {
+  ConversationPermissions,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
 
 export type GetConversationResponse = ConversationWithPermissions;
 
 export type ListConversationsResponseItem = ConversationWithoutRoundsWithPermissions;
 
 export interface ListConversationsResponse {
+  pagination: {
+    total: number;
+    page: number;
+    per_page: number;
+  };
   results: ListConversationsResponseItem[];
 }
 

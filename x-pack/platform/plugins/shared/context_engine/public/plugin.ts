@@ -63,6 +63,10 @@ export class ContextEnginePlugin
     core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>,
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
+    setupDeps.workflowsExtensions.registerStepDefinition(() =>
+      import('./step_types/verify_ki_step').then((m) => m.VerifyKiStepDefinition)
+    );
+
     this.setupAgentBuilderStart(core);
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,

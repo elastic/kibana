@@ -31,9 +31,9 @@ import {
   useStateFromPublishingSubject,
   apiPublishesApproximation,
 } from '@kbn/presentation-publishing';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { isOperation } from '../../../types_guards';
 import { LayerHeader } from './layer_header';
@@ -327,13 +327,9 @@ export function LayerPanel(props: LayerPanelProps) {
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() ||
-    isOfAggregateQueryType(editorProps.attributes?.state.query) ||
-    false;
+    datasource?.isTextBasedLanguage() || isTextBasedAttributes(editorProps.attributes) || false;
   const shouldRenderESQLEditor =
-    isTextBasedLanguage &&
-    canEditTextBasedQuery &&
-    isOfAggregateQueryType(editorProps.attributes?.state.query);
+    isTextBasedLanguage && canEditTextBasedQuery && isTextBasedAttributes(editorProps.attributes);
 
   const visualizationLayerSettings = useMemo(
     () =>

@@ -76,6 +76,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
         deploymentId: cloudId === null ? null : extractDeploymentId(cloudId),
         isMlAutoscalingEnabled: resp.isMlAutoscalingEnabled,
         cloudUrl: resp.cloudUrl ?? null,
+        isMlCpsEnabled: resp.isMlCpsEnabled,
       });
     } catch (error) {
       setCloudInfo(null);

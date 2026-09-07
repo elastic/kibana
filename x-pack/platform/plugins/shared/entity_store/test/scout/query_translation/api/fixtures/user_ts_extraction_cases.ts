@@ -7,7 +7,7 @@
 
 /**
  * Strict expectations for `user.ts` identity + extraction rules, aligned with
- * `test/scout/common/es_archives/updates/data.json` documents (unless `ingestSource` is set).
+ * `test/scout/common/es_archives/logs/data.json` documents (unless `ingestSource` is set).
  *
  * Used by Scout `dsl_translation` / `painless_translation` and by
  * `common/domain/euid/user_ts_extraction_cases.test.ts` to guard against drift.
@@ -28,7 +28,7 @@ export interface UserTsExpectedMeta {
 export interface UserTsExtractionCase {
   /** Stable id for test titles / debugging */
   readonly id: string;
-  /** Elasticsearch query that must match exactly one document in the updates archive */
+  /** Elasticsearch query that must match exactly one document in the logs archive */
   readonly query: object;
   /**
    * Document shape passed to `getEuidDslFilterBasedOnDocument('user', doc)` (subset of `_source`
@@ -49,7 +49,7 @@ export interface UserTsExtractionCase {
   readonly expectNoPerDocumentDsl?: boolean;
 }
 
-/** Cases backed by `es_archives/updates/data.json` (plus optional ingested-only rows). */
+/** Cases backed by `es_archives/logs/data.json` (plus optional ingested-only rows). */
 export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
   // --- IDP: event.kind asset + event.module namespace mapping (user.ts fieldEvaluations) ---
   {

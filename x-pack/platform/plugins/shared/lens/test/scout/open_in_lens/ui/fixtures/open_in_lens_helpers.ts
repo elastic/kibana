@@ -11,7 +11,7 @@ import {
   DATA_TEST_SUBJECTS,
   LOGSTASH_IN_RANGE_DATES,
   DATA_VIEW_ID,
-} from '../../../common/ui/fixtures/constants';
+} from '../../../common/fixtures/constants';
 import {
   getImportedDashboardId,
   type ImportedSavedObject,

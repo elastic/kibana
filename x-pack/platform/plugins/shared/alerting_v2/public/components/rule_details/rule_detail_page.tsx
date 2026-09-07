@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { useRuleAutoAttach } from '../../agent_builder/use_rule_auto_attach';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
@@ -73,6 +74,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { euiTheme } = useEuiTheme();
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
+  useRuleAutoAttach(rule);
 
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -82,7 +84,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { mutate: runRule } = useRunRule();
-  const { flyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const { flyout, confirmationModal, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [showUpdateApiKeyConfirmation, setShowUpdateApiKeyConfirmation] = React.useState(false);
@@ -223,7 +225,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         badges={badges}
         metadata={headerMetadata}
         menu={menu}
-        spacing="flush"
+        spacing="bleed"
         sticky={false}
       />
       <KibanaPageTemplate.Section
@@ -315,6 +317,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         />
       )}
       {flyout}
+      {confirmationModal}
       {changeHistoryModal}
     </KibanaPageTemplate>
   );

@@ -79,7 +79,7 @@ const getDeleteLabelFromRegistry = ({
   };
 
   const attachmentType = registry.get(attachmentTypeId);
-  const attachmentLabel = attachmentType.getAttachmentRemovalObject?.(props).event ?? null;
+  const attachmentLabel = attachmentType.getRemovalActivity?.(props).event ?? null;
 
   return attachmentLabel != null ? attachmentLabel : registeredAttachmentCommonLabel;
 };

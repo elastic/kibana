@@ -15,6 +15,7 @@ export type {
   ExperimentalFeatures,
   SubAgentExecutor,
   SubAgentExecution,
+  ConversationClient,
 } from './provider';
 export type {
   RunAgentFn,
@@ -34,6 +35,7 @@ export type {
   AgentAvailabilityConfig,
 } from './builtin_definition';
 export type { AgentTypeDefinition, AgentTypeRegistry } from './type_definition';
+export type { AiIndexDetail, AiIndexResolver } from './ai_index_resolver';
 export {
   mergeAgentConfiguration,
   ADMIN_INSTRUCTIONS_HEADER,

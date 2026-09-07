@@ -8,7 +8,7 @@
  */
 import { dirname, resolve } from 'path';
 import { globbySync } from 'globby';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { getKibanaDir } from '#pipeline-utils';
 
 /**

@@ -39,6 +39,7 @@ import { deleteConnectors } from '../../tasks/api_calls/common';
 import { login } from '../../tasks/login';
 import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
+import { getMockConversation } from '../../objects/assistant';
 import { getNewRule } from '../../objects/rule';
 import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
@@ -78,9 +79,14 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     deletePrompts();
     login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
     setPreferredChatExperienceToClassic();
-    createAzureConnector();
-    waitForConversation(mockConvo1);
-    waitForConversation(mockConvo2);
+    createAzureConnector().then(({ body: connector }) => {
+      const apiConfig = {
+        ...getMockConversation().apiConfig,
+        connectorId: connector.id,
+      };
+      waitForConversation({ ...mockConvo1, apiConfig });
+      waitForConversation({ ...mockConvo2, apiConfig });
+    });
   });
 
   describe('System Prompts', () => {
@@ -113,8 +119,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       assertErrorResponse();
     });
 
-    // Skipping this test as it fails on CI
-    it.skip('Last selected system prompt persists in conversation', () => {
+    it('Last selected system prompt persists in conversation', () => {
       visitGetStartedPage();
       openAssistant();
       selectConversation(mockConvo1.title);

@@ -6,6 +6,7 @@
  */
 
 import { API_VERSIONS, EVALS_EVALUATORS_URL, INTERNAL_API_ACCESS } from '@kbn/evals-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
@@ -18,7 +19,11 @@ const toJsonSchema = (schema: z.ZodType) => {
   return jsonSchema;
 };
 
-export const registerListEvaluatorsRoute = ({ router, evaluatorRegistry }: RouteDependencies) => {
+export const registerListEvaluatorsRoute = ({
+  router,
+  evaluatorRegistry,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_EVALUATORS_URL,
@@ -34,11 +39,15 @@ export const registerListEvaluatorsRoute = ({ router, evaluatorRegistry }: Route
         version: API_VERSIONS.internal.v1,
         validate: false,
       },
-      async (_context, _request, response) => {
-        const evaluators = evaluatorRegistry.list().map((evaluator) => ({
+      async (_context, request, response) => {
+        const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+        const definitions = await evaluatorRegistry.asScoped({ spaceId }).list();
+
+        const evaluators = definitions.map((evaluator) => ({
           name: evaluator.name,
           version: evaluator.version,
           kind: evaluator.kind,
+          origin: evaluator.origin,
           description: evaluator.description,
           ...(evaluator.referenceDataSchema
             ? {
