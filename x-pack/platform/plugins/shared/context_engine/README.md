@@ -139,37 +139,26 @@ the AI index API (they return 404 while it is off).
 
 ### Self-referential exclusion
 
-The feedback loop must not generate signals about itself. An analysis run reads
-signals, traces and the AI index it is diagnosing through `execute_esql` — tool
-calls that would otherwise be traced, turned into signals, and analyzed on the
-next pass, until the loop's own reads are the dominant "evidence" in the store.
-
-Two filters cover the two ways that happens, because neither is sufficient
-alone.
+The feedback loop does not generate signals about itself. Two filters exclude
+its own reads.
 
 **By target index.** `server/tasks/self_referential.ts` recognizes reads of the
 loop's own observability surface: the `context-engine-` user namespace (signals,
 improvements), the `.contextengine-` system namespace (the AI index registry),
 and `traces-agent_builder.otel-*`. `build` in `server/tasks/transform.ts` drops
-those spans **before** round context is computed, so an analysis round neither
-emits signals nor inflates the `looped` / `fell_back_to_raw` counters of the
-round it shares a trace with. Matching on namespace prefixes rather than on
-individual index names means stores added later are covered without touching
-the list. A bare `FROM *` is deliberately *not* treated as self-referential: it
-reads everything, so it is a genuine coverage signal rather than the loop
-observing itself.
+those spans before round context is computed, so an analysis round emits no
+signals and does not affect the `looped` / `fell_back_to_raw` counters of the
+round it shares a trace with. Matching is on namespace prefixes. A bare `FROM *`
+is not treated as self-referential.
 
-**By round.** The target-index filter cannot see the largest leak: diagnosing an
-AI index means querying that AI index, which is indistinguishable from an agent
-genuinely retrieving from it. So `generate_signals` also drops every span whose
-round loaded the `analyze-and-improve` skill, identified from the round's
-`load_skill` span. That lookup is scoped by `trace_id` and not by the watermark,
-so a round whose skill load and queries fall in different batches is still
-excluded. The watermark still advances over the dropped rounds, which would
-otherwise be re-read on every run.
+**By round.** `generate_signals` drops every span whose round loaded the
+`analyze-and-improve` skill, identified from the round's `load_skill` span. The
+lookup is scoped by `trace_id`, so a round whose skill load and queries fall in
+different batches is still excluded. The watermark advances over the dropped
+rounds.
 
-The round filter depends on the agent actually calling `load_skill`; an agent
-carrying the same guidance in its instructions would go unmarked.
+The round filter depends on the agent calling `load_skill`; an agent carrying
+the same guidance in its instructions goes unmarked.
 
 ## Improvements
 
@@ -251,15 +240,13 @@ proposals in the improvements store. Runs are scheduled per AI index by
 | `context-engine.getFeedbackContext` | Everything one run reads |
 | `context-engine.recordImprovements` | Record what a run proposed |
 
-**Workflow steps rather than HTTP routes.** The workflow is the only caller of
-either, and both need plugin services a request could not otherwise reach: the
-selection code the interactive hand-off will share, and the improvements
-service, whose write is a read-modify-write under optimistic concurrency
-control rather than a plain index operation. A step reaches those directly.
+Both are workflow steps, not HTTP routes, and both reach plugin services
+directly: the signal selection code and the improvements service, whose write is
+a read-modify-write under optimistic concurrency control.
 
 Both steps require the `context_engine:feedbackLoop` advanced setting and act as
-the workflow owner. A scheduled run is a managed workflow owned by a real user,
-so there is no path here that reads or writes as Kibana.
+the workflow owner. A scheduled run is a managed workflow owned by a real user;
+nothing here reads or writes as Kibana.
 
 ### The runner
 
@@ -268,104 +255,76 @@ installed once per AI index with the index id and interval templated in. Its
 shape is three steps: fetch the context, run the index's agent against it with
 a forced output schema, record the result.
 
-The briefing is handed over as the agent's `message`. The existing
-`platform.context_engine.ai_index` attachment is deliberately **not** used: it
-carries the `save_automation` tool and instructions to ask the user questions,
-both of which belong to the interactive setup conversation and neither of which
-an unattended, propose-only run should have.
+The briefing is handed over as the agent's `message`. The
+`platform.context_engine.ai_index` attachment is not used: it carries the
+`save_automation` tool and instructions to ask the user questions, which belong
+to the interactive setup conversation.
 
-A **managed workflow rather than a Task Manager task** because the `ai.agent`
-step already runs under the workflow owner's identity. A scheduled analysis has
-no request to borrow credentials from, and the workflow owner is the user who
-turned analysis on — which is also who the run should be acting as.
+The `ai.agent` step runs under the workflow owner's identity — the user who
+turned analysis on.
 
 The workflow carries a `concurrency` guard keyed on the AI index with
-`strategy: drop`. Two overlapping runs would read the same signals and propose
-the same changes, and only the first would de-duplicate against the other.
+`strategy: drop`, so two runs for one index never overlap.
 
 `enablement: 'enforced'` makes the workflow instance's existence the desired
 state, so reconciliation is install-or-uninstall: turning analysis off removes
-the instance rather than leaving a disabled one behind. Changing the interval
-reinstalls, because a scheduled trigger's interval is written into the YAML at
-install time. Everything else about a run — which agent, which signals, which
-actions — is read per run through the context endpoint, so only the interval
-needs this.
+the instance. Changing the interval reinstalls, since a scheduled trigger's
+interval is written into the YAML at install time. Everything else about a run —
+which agent, which signals, which actions — is read per run through the context
+step.
 
-Reconciliation is best-effort and happens after the configuration is stored.
-The configuration is the record of intent; failing the write because Task
-Manager could not be told would leave the caller retrying a change that has in
-fact been made.
+Reconciliation is best-effort and happens after the configuration is stored. A
+failure to reconcile does not fail the configuration write.
 
 ### Selecting an index's signals
 
-A run selects over everything `signal_time_range` and `signal_filter` admit;
-there is no restriction by signal type. What a signal's type governs is how it
-is *attributed* to an AI index, because signals record that an agent ran a query,
-not which AI index the query was meant to serve. A signal is admitted by any of
-three paths:
+A run selects over everything `signal_time_range` and `signal_filter` admit,
+with no restriction by signal type. A signal's type governs how it is
+*attributed* to an AI index. A signal is admitted by any of three paths:
 
 1. **Retrieval.** A `ki_retrieval` tool call names the KI index it read in
-   `data.target_index`, so it is matched against the AI index's `dest.value`.
-   This is exact.
-2. **Fallback.** A `raw_access` tool call is the `coverage_gap` case — the agent
-   gave up on the KIs and read the underlying data — and names no KI index at
-   all. These matter most for improving an index, so they are attributed two
-   ways: by target, against the raw indices the index's own ES|QL sources read;
-   and by conversation, against conversations already tied to the index by the
+   `data.target_index`, matched exactly against the AI index's `dest.value`.
+2. **Fallback.** A `raw_access` tool call names no KI index. It is attributed
+   two ways: by target, against the raw indices the index's own ES|QL sources
+   read; and by conversation, against conversations tied to the index by the
    first pass.
-3. **Everything else.** A signal that is not a tool call carries no
-   `query_kind` or `target_index` to attribute on, so the window and the index's
-   `signal_filter` are what scope it. Such a signal reaches the run's total but
-   forms no pattern, because patterns are keyed on fields it does not have —
-   how a second signal type should group is a decision for whoever adds one.
-   This path is inert until then; it is here so that adding a type does not
-   require teaching the run about it first.
+3. **Everything else.** A signal that is not a tool call carries no `query_kind`
+   or `target_index`, so the window and the index's `signal_filter` are what
+   scope it. It reaches the run's total but forms no pattern, since patterns are
+   keyed on fields it does not have.
 
-Management-agent signals are excluded: they describe Context Engine's own
-tooling rather than an agent failing to find context. Signals carrying no
-`data.agent.class` at all are unaffected.
+Management-agent signals are excluded. Signals carrying no `data.agent.class`
+are unaffected.
 
-**Every space is read.** Signals are per-space because conversations are, but an
-AI index is global and so is the pipeline it describes. Restricting to the
-caller's space would analyze a fraction of the evidence and present it as the
-whole picture. The spaces a run actually drew from are recorded on each
-improvement's `provenance.signal_spaces`.
+**Every space is read**, because an AI index is global while signals are
+per-space. The spaces a run drew from are recorded on each improvement's
+`provenance.signal_spaces`.
 
-Signals are then folded into ranked patterns — grouped by tag, target index and
-tool, and scored by frequency weighted by how much the tag means. The grouping
-is an aggregation over the whole window, so a pattern's count is the number of
-signals that actually occurred, not the number a run happened to read. Only the
-example query and provenance ids attached to each pattern come from documents,
-of which a run reads at most `MAX_ANALYSIS_SIGNALS`; a pattern occurring only
-outside that sample still gets its true count, just no example.
+Signals are folded into ranked patterns — grouped by tag, target index and tool,
+and scored by frequency weighted by tag. The grouping is an aggregation over the
+whole window, so a pattern's count is the number of signals that occurred, not
+the number a run read. The example query and provenance ids attached to each
+pattern come from documents, of which a run reads at most
+`MAX_ANALYSIS_SIGNALS`; a pattern occurring only outside that sample still gets
+its true count, with no example.
 
-Bucketing on the multi-valued `tags` field is what gives the grouping its two
-useful properties for free: a signal tagged both `query_error` and
-`coverage_gap` counts in both patterns, because those are two different problems
-with two different fixes, and an untagged signal produces no bucket at all, so a
-retrieval that worked never becomes something to act on.
+Bucketing is on the multi-valued `tags` field, so a signal tagged both
+`query_error` and `coverage_gap` counts in both patterns, and an untagged signal
+produces no bucket.
 
-The patterns, not the signal count, decide whether a run happens: a window full
-of healthy retrievals has signals but nothing to analyze, and spending an LLM
-call to be told so is a run's most common failure mode.
+A run happens only when there are patterns, not merely signals.
 
 ### What a run may propose
 
-The run answers with structured output, and the schema it is given is built from
-the index's `allowed_actions` — narrowing the `action` enum to what is permitted,
-or omitting the improvements array entirely for an observe-only index. The same
-policy is enforced again on write, re-read from the index rather than taken from
-the request, so a run briefed before the policy changed cannot write under the
-old one.
+The run answers with structured output. Its schema is built from the index's
+`allowed_actions`, narrowing the `action` enum to what is permitted, or omitting
+the improvements array for an observe-only index. The policy is enforced again
+on write, re-read from the index.
 
-The server derives each `improvement_id` from the action and its target. A run
-that could name its own would be able to merge two unrelated proposals or fork
-one problem across many, and the store's idempotency would stop meaning
-anything.
+The server derives each `improvement_id` from the action and its target; a run
+cannot name its own.
 
-A bad proposal is skipped, not fatal. A run is unattended, and failing a batch
-of eight because one named a missing `ki_id` would throw away seven good ones
-and leave the run nothing to report. Every rejection comes back as a `skipped`
+A bad proposal is skipped, not fatal. Every rejection comes back as a `skipped`
 entry with a reason: `invalid`, `action_not_allowed`, `duplicate`, `conflict`,
 or `limit_exceeded`.
 
