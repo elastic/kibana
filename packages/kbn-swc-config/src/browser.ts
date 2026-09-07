@@ -40,6 +40,9 @@ export interface SwcLoaderOptions {
     target: string;
     keepClassNames: boolean;
     externalHelpers: boolean;
+    experimental?: {
+      plugins: Array<[string, Record<string, unknown>]>;
+    };
   };
   sourceMaps?: boolean | 'inline';
   inlineSourcesContent?: boolean;
