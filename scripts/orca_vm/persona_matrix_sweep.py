@@ -247,6 +247,22 @@ SKILL_INVOCATION_REMOTE = (
     "Projects/kibana/x-pack/platform/packages/shared/"
     "kbn-evals/src/evaluators/trace_based/skill_invocation.ts"
 )
+# Every remaining trace_based evaluator. These build their own ES|QL and the
+# VM's main checkout still hardcodes `FROM traces-*`, which resolves to zero
+# authorized indices on the golden cluster and fails with
+# `Unknown column [trace.id]` -- 51 errored docs per metric per model, read as
+# "no tool calls" rather than a broken instrument. Ship the whole directory
+# rather than naming files one at a time, so a new evaluator cannot be missed.
+_TRACE_DIR_LOCAL = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trace_based"
+)
+_TRACE_DIR_REMOTE = (
+    "Projects/kibana/x-pack/platform/packages/shared/"
+    "kbn-evals/src/evaluators/trace_based"
+)
+TRACE_METRIC_FILES = ("latency.ts", "tokens.ts", "tool_calls.ts", "chat_calls.ts")
 # The @kbn/evals barrel. evaluate_dataset.ts imports TRACE_INDEX_PATTERN from the
 # package root, not from the module that defines it, so shipping factory.ts alone
 # is not enough: the stale barrel has no such export and the import silently
@@ -757,6 +773,8 @@ def deploy(ip: str) -> None:
     scp(str(PATCHED_RETRY_UTILS), ip, RETRY_UTILS_REMOTE)
     scp(str(PATCHED_TRACE_FACTORY), ip, TRACE_FACTORY_REMOTE)
     scp(str(PATCHED_SKILL_INVOCATION), ip, SKILL_INVOCATION_REMOTE)
+    for _f in TRACE_METRIC_FILES:
+        scp(str(_TRACE_DIR_LOCAL / _f), ip, f"{_TRACE_DIR_REMOTE}/{_f}")
     scp(str(PATCHED_TRACE_BARREL), ip, TRACE_BARREL_REMOTE)
     scp(str(PATCHED_EVALS_BARREL), ip, EVALS_BARREL_REMOTE)
     scp(str(PATCHED_CHAT_CLIENT), ip, CHAT_CLIENT_REMOTE)
@@ -852,6 +870,13 @@ def deploy(ip: str) -> None:
         # constant is undefined at runtime even when factory.ts is correct.
         f"grep -q TRACE_INDEX_PATTERN ~/{EVALS_BARREL_REMOTE}",
         f"grep -q TRACE_INDEX_PATTERN ~/{TRACE_BARREL_REMOTE}",
+        # Every metric evaluator must interpolate the constant. The stale main
+        # form is a literal `FROM traces-*`, which resolves to zero authorized
+        # indices on golden and errors with `Unknown column [trace.id]`.
+        *[
+            f"! grep -q 'FROM traces-\\*' ~/{_TRACE_DIR_REMOTE}/{_f}"
+            for _f in TRACE_METRIC_FILES
+        ],
     ]
     persona_checks = [
         f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE}",
