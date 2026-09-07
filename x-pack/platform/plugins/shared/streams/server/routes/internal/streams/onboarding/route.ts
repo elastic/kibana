@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { conflict } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { OnboardingStep } from '@kbn/streams-schema';
+import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
   getOnboardingTaskId,
@@ -22,6 +23,18 @@ import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
 const saveQueriesSchema = BooleanFromString.optional().default(true);
+
+// Task IDs append a saveQueries suffix that can collide with a real stream name.
+const getStoredOnboardingStreamName = async (
+  taskClient: { get: (id: string) => Promise<{ task?: { params?: { streamName?: string } } }> },
+  taskId: string
+): Promise<string | undefined> => {
+  const task = await taskClient.get(taskId);
+  const storedStreamName = task.task?.params?.streamName;
+  return typeof storedStreamName === 'string' && storedStreamName.length > 0
+    ? storedStreamName
+    : undefined;
+};
 
 export type OnboardingTaskResult = TaskResult<OnboardingResult>;
 
@@ -82,6 +95,10 @@ export const onboardingTaskRoute = createServerRoute({
     const { saveQueries } = query;
 
     const onboardingTaskId = getOnboardingTaskId(streamName, saveQueries);
+    const storedStreamName = await getStoredOnboardingStreamName(taskClient, onboardingTaskId);
+    if (storedStreamName !== undefined && storedStreamName !== streamName) {
+      throw conflict('Onboarding task does not belong to this stream');
+    }
 
     const actionParams =
       body.action === 'schedule'
@@ -143,6 +160,10 @@ export const onboardingStatusRoute = createServerRoute({
     await streamsClient.assertReadAccess(streamName);
 
     const taskId = getOnboardingTaskId(streamName, saveQueries);
+    const storedStreamName = await getStoredOnboardingStreamName(taskClient, taskId);
+    if (storedStreamName !== undefined && storedStreamName !== streamName) {
+      return { status: TaskStatus.NotStarted };
+    }
 
     return taskClient.getStatus<OnboardingTaskParams, OnboardingResult>(taskId);
   },
