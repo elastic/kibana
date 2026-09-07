@@ -24,6 +24,23 @@ export type SelectableTableColumn<T extends object> = EuiBasicTableColumn<T> & {
 export const MANAGEMENT_TABLE_COLUMNS_STORAGE_KEY = 'synthetics.management.monitorList.columns.v1.';
 export const OVERVIEW_TABLE_COLUMNS_STORAGE_KEY = 'synthetics.overview.compactTable.columns.v1.';
 
+function selectorItemsKey(columns: ColumnSelectorItem[]): string {
+  return columns.map((col) => `${col.id}\0${col.name}`).join('\n');
+}
+
+function parseSelectorItems(key: string): ColumnSelectorItem[] {
+  if (!key) {
+    return [];
+  }
+  return key.split('\n').map((row) => {
+    const sep = row.indexOf('\0');
+    return {
+      id: sep === -1 ? row : row.slice(0, sep),
+      name: sep === -1 ? row : row.slice(sep + 1),
+    };
+  });
+}
+
 export function useColumnSelectorButton({
   columns,
   defaultVisibleColumnIds,
@@ -53,17 +70,19 @@ export function useTableColumnSelector<T extends object>({
   columns: Array<EuiBasicTableColumn<T>>;
   ColumnSelector: ReactNode;
 } {
-  const selectorItems = useMemo(
-    (): ColumnSelectorItem[] =>
-      columns.flatMap((col) => {
-        if (col.id == null) {
-          return [];
-        }
-        const name = col.selectorName ?? (typeof col.name === 'string' ? col.name : col.id);
-        return [{ id: col.id, name }];
-      }),
-    [columns]
-  );
+  // Parent table hooks often return a new `columns` array each render. Derive a
+  // content key so the EUI column-selector hook does not see a new
+  // `availableColumns` identity and infinite-loop via `useDependentState`.
+  const itemsKey = columns
+    .flatMap((col) => {
+      if (col.id == null) {
+        return [];
+      }
+      const name = col.selectorName ?? (typeof col.name === 'string' ? col.name : col.id);
+      return [`${col.id}\0${name}`];
+    })
+    .join('\n');
+  const selectorItems = useMemo(() => parseSelectorItems(itemsKey), [itemsKey]);
 
   const { resolvedVisibleIds, ColumnSelector } = useColumnSelectorState({
     columns: selectorItems,
@@ -93,7 +112,12 @@ function useColumnSelectorState({
   resolvedVisibleIds: string[];
   ColumnSelector: ReactNode;
 } {
-  const selectableIds = useMemo(() => new Set(columns.map((col) => col.id)), [columns]);
+  const itemsKey = selectorItemsKey(columns);
+  const stableColumns = useMemo(() => parseSelectorItems(itemsKey), [itemsKey]);
+  const selectableIds = useMemo(
+    () => new Set(stableColumns.map((col) => col.id)),
+    [stableColumns]
+  );
 
   const { visibleColumnIds, setVisibleColumnIds } = usePersistedColumnIds(
     storageKeyPrefix,
@@ -113,8 +137,8 @@ function useColumnSelectorState({
   }, [defaultVisibleColumnIds, selectableIds, visibleColumnIds]);
 
   const gridColumns = useMemo(
-    () => columns.map((col) => ({ id: col.id })) as EuiDataGridColumn[],
-    [columns]
+    () => stableColumns.map((col) => ({ id: col.id })) as EuiDataGridColumn[],
+    [stableColumns]
   );
 
   const columnVisibility = useMemo(
@@ -129,11 +153,11 @@ function useColumnSelectorState({
 
   const displayValues = useMemo(
     () =>
-      columns.reduce<Record<string, string>>((acc, col) => {
+      stableColumns.reduce<Record<string, string>>((acc, col) => {
         acc[col.id] = col.name;
         return acc;
       }, {}),
-    [columns]
+    [stableColumns]
   );
 
   const [ColumnSelector] = useDataGridColumnSelector(

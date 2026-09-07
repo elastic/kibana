@@ -76,4 +76,31 @@ describe('useTableColumnSelector', () => {
 
     expect(result.current.columns.map((col) => col.name)).toEqual(['Always', 'Created', 'Actions']);
   });
+
+  it('does not loop when the parent passes a new columns array each render', () => {
+    const makeColumns = () => allColumns.map((col) => ({ ...col }));
+    const { result, rerender } = renderHook(
+      ({ columns }) =>
+        useTableColumnSelector({
+          columns,
+          defaultVisibleColumnIds,
+          storageKeyPrefix: STORAGE_KEY_PREFIX,
+        }),
+      { initialProps: { columns: makeColumns() } }
+    );
+
+    const view = render(<>{result.current.ColumnSelector}</>);
+    for (let i = 0; i < 25; i++) {
+      rerender({ columns: makeColumns() });
+      view.rerender(<>{result.current.ColumnSelector}</>);
+    }
+
+    expect(result.current.columns.map((col) => col.name)).toEqual([
+      'Always',
+      'Type',
+      'Last modified',
+      'Actions',
+    ]);
+    expect(view.getByText('Columns')).toBeInTheDocument();
+  });
 });

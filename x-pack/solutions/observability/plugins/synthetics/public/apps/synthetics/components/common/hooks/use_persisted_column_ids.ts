@@ -42,7 +42,15 @@ function getSnapshotFor(key: string, defaults: string[]): string[] {
   return snapshots.get(key)!;
 }
 
+function idsEqual(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((id, i) => id === b[i]);
+}
+
 function writeSnapshot(key: string, next: string[]) {
+  const prev = snapshots.get(key);
+  if (prev && idsEqual(prev, next)) {
+    return;
+  }
   snapshots.set(key, next);
   if (typeof window !== 'undefined') {
     try {
