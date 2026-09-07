@@ -9,10 +9,12 @@ import { firstValueFrom, of, toArray } from 'rxjs';
 import {
   ChatEventType,
   ConversationRoundStatus,
+  ConversationRoundStepType,
   ConversationOriginType,
   isRoundCompleteEvent,
   isRelevantSkillsStep,
   type ChatEvent,
+  type ConversationRoundStep,
 } from '@kbn/agent-builder-common';
 import type { ConversationStateManager, ModelProvider } from '@kbn/agent-builder-server/runner';
 import {
@@ -179,6 +181,72 @@ describe('addRoundCompleteEvent', () => {
       id: 'U123',
       full_name: 'Jane Doe',
       username: 'jane',
+    });
+  });
+
+  it('emits a resume_execution payload whose follow-up leads with the resolved tool-call step', async () => {
+    const pendingRound = {
+      ...createRound({
+        status: ConversationRoundStatus.awaitingPrompt,
+        input: { message: 'delete it' },
+      }),
+      steps: [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'my_tool',
+          params: {},
+          results: [],
+        } as ConversationRoundStep,
+      ],
+    };
+
+    const toolResultEvent = {
+      type: ChatEventType.toolResult,
+      data: {
+        tool_call_id: 'call-1',
+        tool_id: 'my_tool',
+        results: [{ type: 'other', data: 'resolved' }],
+      },
+    } as unknown as ConvertedEvents;
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: { message_id: 'm', message_content: 'deleted' },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 1, errorCount: 0 } as never) as ConvertedEvents,
+        toolResultEvent,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          pendingRound,
+          userInput: { message: '' },
+          startTime: new Date('2026-01-01T00:05:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const rc = events.find(isRoundCompleteEvent);
+    expect(rc?.data.resumed).toBe(true);
+    expect(rc?.data.resume_execution).toBeDefined();
+
+    // exec_k content leads with the resolved copy of the paused tool call...
+    const followUpSteps = rc!.data.resume_execution!.follow_up_round.steps;
+    expect(followUpSteps[0]).toMatchObject({
+      tool_call_id: 'call-1',
+      results: [{ type: 'other', data: 'resolved' }],
+    });
+    // ...and the merged round the UI reads shows the same resolved call in place.
+    const mergedToolCall = rc!.data.round.steps.find(
+      (s) => s.type === ConversationRoundStepType.toolCall
+    );
+    expect(mergedToolCall).toMatchObject({
+      tool_call_id: 'call-1',
+      results: [{ type: 'other', data: 'resolved' }],
     });
   });
 

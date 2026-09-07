@@ -1689,6 +1689,109 @@ describe('conversation model converters', () => {
       );
     });
 
+    it('refreshes the preserved user_message when a rounds-path input change hits a resumed round', () => {
+      const actor = { type: 'user', id: 'u1' } as never;
+      const agent = { type: 'agent', id: 'a1' } as never;
+      const summary = {
+        model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+        time_to_first_token: 1,
+        time_to_last_token: 2,
+      };
+      const events = [
+        {
+          id: 'mr::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: '2025-08-04T07:00:00.000Z',
+          actor,
+          data: { message: 'do it' },
+        },
+        {
+          id: 'mr::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:00:00.000Z',
+          actor: agent,
+          execution_id: 'mr::execution',
+          trigger_event_id: 'mr::user_message',
+          data: { trigger_type: 'user_message' },
+        },
+        {
+          id: 'mr::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:00:01.000Z',
+          actor: agent,
+          execution_id: 'mr::execution',
+          trigger_event_id: 'mr::user_message',
+          data: {
+            ...summary,
+            outcome: {
+              type: 'prompt_requested',
+              prompts: [{ type: AgentPromptType.confirmation, id: 'p1' }],
+            },
+          },
+        },
+        {
+          id: 'mr::prompt_response::1',
+          type: TimelineEventType.promptResponse,
+          created_at: '2025-08-04T07:05:00.000Z',
+          actor,
+          data: {
+            prompt_requested_event_id: 'mr::execution_terminated',
+            responses: { p1: { allow: true } },
+          },
+        },
+        {
+          id: 'mr::execution::1::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:05:00.000Z',
+          actor: agent,
+          execution_id: 'mr::execution::1',
+          trigger_event_id: 'mr::prompt_response::1',
+          data: { trigger_type: 'prompt_response' },
+        },
+        {
+          id: 'mr::execution::1::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:05:01.000Z',
+          actor: agent,
+          execution_id: 'mr::execution::1',
+          trigger_event_id: 'mr::prompt_response::1',
+          data: { ...summary, outcome: { type: 'responded', response: { message: 'done' } } },
+        },
+      ] as never[];
+
+      const rounds = eventsToRounds(events);
+      const conversation: Conversation = {
+        ...eventsNativeStored(),
+        id: 'conv-multi-exec-refresh',
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        events,
+        rounds,
+      };
+
+      // Simulate addAttachmentsToLastRound: the round's input gains new attachment_refs.
+      const withRefs = {
+        ...rounds[0],
+        input: { ...rounds[0].input, attachment_refs: [{ attachment_id: 'att-1', version: 1 }] },
+      };
+
+      const updated = updateConversation({
+        conversation,
+        update: { id: conversation.id, rounds: [withRefs] },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      // The multi-execution timeline still survives...
+      expect(updated.events?.map((e) => e.id)).toEqual(
+        expect.arrayContaining(['mr::execution::1::execution_terminated'])
+      );
+      // ...and the preserved user_message now reflects the new attachment_refs (reaches events).
+      const userMessage = updated.events?.find((e) => e.id === 'mr::user_message');
+      expect((userMessage?.data as { attachment_refs?: unknown }).attachment_refs).toEqual([
+        { attachment_id: 'att-1', version: 1 },
+      ]);
+    });
+
     it('regenerates round-derived events when rounds change', () => {
       const conversation = eventsNativeStored();
       const newRound = {

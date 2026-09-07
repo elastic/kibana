@@ -72,7 +72,7 @@ const executionEvents = ({
   outcome: ExecutionOutcome;
   createdAt: string;
 }): TimelineEvent[] => {
-  const idPrefix = executionId; // e.g. `${roundId}::execution` or `${roundId}::execution::1`
+  const idPrefix = executionId === `${roundId}::execution` ? roundId : executionId;
   return [
     {
       id: `${idPrefix}::execution_started`,
@@ -137,7 +137,7 @@ describe('eventsToRounds — multi-execution HITL fold', () => {
         created_at: '2024-01-01T00:05:00.000Z',
         actor: userActor,
         data: {
-          prompt_requested_event_id: 'r1::execution::execution_terminated',
+          prompt_requested_event_id: 'r1::execution_terminated',
           responses: { p1: { answers: [{ choice: [0] }] } },
         },
       },
@@ -201,7 +201,7 @@ describe('eventsToRounds — multi-execution HITL fold', () => {
         created_at: '2024-01-01T00:05:00.000Z',
         actor: userActor,
         data: {
-          prompt_requested_event_id: 'r1::execution::execution_terminated',
+          prompt_requested_event_id: 'r1::execution_terminated',
           responses: { 'tools.my_tool.confirmation': { allow: true } },
         },
       },
@@ -275,5 +275,195 @@ describe('eventsToRounds — multi-execution HITL fold', () => {
     const rounds = eventsToRounds(events);
     expect(rounds.map((r) => r.id)).toEqual(['a', 'b']);
     expect(rounds.map((r) => r.response.message)).toEqual(['first', 'second']);
+  });
+
+  it("recovers the resume's own input (message + attachment_refs) from the prompt_response", () => {
+    const events: TimelineEvent[] = [
+      {
+        id: 'r1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2024-01-01T00:00:00.000Z',
+        actor: userActor,
+        data: { message: 'hi', attachment_refs: [{ attachment_id: 'att-1', version: 1 }] },
+      },
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution',
+        triggerEventId: 'r1::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [askStep('p1')],
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [{ type: AgentPromptType.ask_user_question, id: 'p1', questions: [] }],
+        },
+        createdAt: '2024-01-01T00:00:00.000Z',
+      }),
+      {
+        id: 'r1::prompt_response::1',
+        type: TimelineEventType.promptResponse,
+        created_at: '2024-01-01T00:05:00.000Z',
+        actor: userActor,
+        data: {
+          prompt_requested_event_id: 'r1::execution_terminated',
+          responses: { p1: { answers: [{ choice: [0] }] } },
+          // the resume also carried a message + accessed a new attachment
+          input: {
+            message: 'also check X',
+            attachment_refs: [{ attachment_id: 'att-2', version: 1 }],
+          },
+        },
+      },
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::1',
+        triggerEventId: 'r1::prompt_response::1',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [reasoningStep('done')],
+        outcome: { type: 'responded', response: { message: 'ok' } },
+        createdAt: '2024-01-01T00:05:00.000Z',
+      }),
+    ];
+
+    const round = eventsToRounds(events)[0];
+    // mergeRoundInput: resume message wins, attachment_refs are unioned across both executions
+    expect(round.input.message).toBe('also check X');
+    expect(round.input.attachment_refs).toEqual([
+      { attachment_id: 'att-1', version: 1 },
+      { attachment_id: 'att-2', version: 1 },
+    ]);
+  });
+
+  it('folds a re-pause chain (exec_0 -> exec_1 -> exec_2) into one completed round', () => {
+    const events: TimelineEvent[] = [
+      {
+        id: 'r1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2024-01-01T00:00:00.000Z',
+        actor: userActor,
+        data: { message: 'go' },
+      },
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution',
+        triggerEventId: 'r1::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [askStep('p1')],
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [{ type: AgentPromptType.ask_user_question, id: 'p1', questions: [] }],
+        },
+        createdAt: '2024-01-01T00:00:00.000Z',
+      }),
+      {
+        id: 'r1::prompt_response::1',
+        type: TimelineEventType.promptResponse,
+        created_at: '2024-01-01T00:05:00.000Z',
+        actor: userActor,
+        data: {
+          prompt_requested_event_id: 'r1::execution_terminated',
+          responses: { p1: { answers: [{ choice: [0] }] } },
+        },
+      },
+      // exec_1 answers p1 but pauses again on p2
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::1',
+        triggerEventId: 'r1::prompt_response::1',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [askStep('p2')],
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [{ type: AgentPromptType.ask_user_question, id: 'p2', questions: [] }],
+        },
+        createdAt: '2024-01-01T00:05:00.000Z',
+      }),
+      {
+        id: 'r1::prompt_response::2',
+        type: TimelineEventType.promptResponse,
+        created_at: '2024-01-01T00:10:00.000Z',
+        actor: userActor,
+        data: {
+          prompt_requested_event_id: 'r1::execution::1::execution_terminated',
+          responses: { p2: { answers: [{ choice: [1] }] } },
+        },
+      },
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::2',
+        triggerEventId: 'r1::prompt_response::2',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [reasoningStep('finally')],
+        outcome: { type: 'responded', response: { message: 'all done' } },
+        createdAt: '2024-01-01T00:10:00.000Z',
+      }),
+    ];
+
+    const rounds = eventsToRounds(events);
+    expect(rounds).toHaveLength(1);
+    const round = rounds[0];
+    expect(round.status).toBe(ConversationRoundStatus.completed);
+    expect(round.response).toEqual({ message: 'all done' });
+    const asks = round.steps.filter((s) => s.type === ConversationRoundStepType.askUserQuestion);
+    expect(asks).toHaveLength(2);
+    expect(asks.map((a) => (a as { answers?: unknown }).answers)).toEqual([
+      [{ choice: [0] }],
+      [{ choice: [1] }],
+    ]);
+    // counters summed across all three executions
+    expect(round.time_to_last_token).toBe(300);
+    expect(round.model_usage.llm_calls).toBe(3);
+  });
+
+  it('folds a denied tool-call resume (error result) into one completed round', () => {
+    const events: TimelineEvent[] = [
+      {
+        id: 'r1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2024-01-01T00:00:00.000Z',
+        actor: userActor,
+        data: { message: 'delete prod' },
+      },
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution',
+        triggerEventId: 'r1::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [toolStep('call-1', [])],
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [{ type: AgentPromptType.confirmation, id: 'tools.my_tool.confirmation' }],
+        },
+        createdAt: '2024-01-01T00:00:00.000Z',
+      }),
+      {
+        id: 'r1::prompt_response::1',
+        type: TimelineEventType.promptResponse,
+        created_at: '2024-01-01T00:05:00.000Z',
+        actor: userActor,
+        data: {
+          prompt_requested_event_id: 'r1::execution_terminated',
+          responses: { 'tools.my_tool.confirmation': { allow: false } },
+        },
+      },
+      // deny still re-runs the tool, which short-circuits to an error result
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::1',
+        triggerEventId: 'r1::prompt_response::1',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [toolStep('call-1', [{ type: 'error', message: 'The user chose not to proceed.' }])],
+        outcome: { type: 'responded', response: { message: 'not done' } },
+        createdAt: '2024-01-01T00:05:00.000Z',
+      }),
+    ];
+
+    const round = eventsToRounds(events)[0];
+    expect(round.status).toBe(ConversationRoundStatus.completed);
+    const toolSteps = round.steps.filter((s) => s.type === ConversationRoundStepType.toolCall);
+    expect(toolSteps).toHaveLength(1);
+    expect(toolSteps[0]).toMatchObject({
+      tool_call_id: 'call-1',
+      results: [{ type: 'error', message: 'The user chose not to proceed.' }],
+    });
   });
 });

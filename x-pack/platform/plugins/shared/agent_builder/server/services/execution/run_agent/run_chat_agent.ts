@@ -127,11 +127,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversationClient,
   } = context;
 
-  // The agent context is reconstructed from the conversation's event timeline (falling back to
-  // stored rounds only for legacy, pre-events documents). This single reconstruction feeds the
-  // whole context path — message building, token estimation, compaction, the resume initializer,
-  // pending-round detection and input preflight — so nothing reads `conversation.rounds` directly
-  // and the views can't diverge (notably for a multi-execution HITL round).
+  // Reconstruct the context once from the event timeline (legacy docs fall back to stored rounds)
+  // and feed it to every context consumer, so message building, pending-round detection and
   const previousRounds = conversation ? roundsForContext(conversation) : [];
 
   ensureValidInput({ input: nextInput, previousRounds, action });

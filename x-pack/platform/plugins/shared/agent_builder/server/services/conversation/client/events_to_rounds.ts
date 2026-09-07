@@ -94,10 +94,10 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
     const steps = stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated.data.steps ?? [];
 
     const userMessage = isInitial ? (trigger as UserMessageEvent) : undefined;
+    const resumeInput = isResume ? (trigger as PromptResponseEvent).data.input : undefined;
     const round: ConversationRound = {
       id: roundIdFromExecutionId(executionId),
-      // A resume execution carries no user message; the fold keeps exec_0's input.
-      input: userMessage ? toRoundInput(userMessage) : { message: '' },
+      input: userMessage ? toRoundInput(userMessage) : resumeInput ?? { message: '' },
       started_at: userMessage ? userMessage.created_at : terminated.created_at,
       ...(userMessage ? authorAndOrigin(userMessage) : {}),
       ...terminatedRoundFields(terminated.data, steps),

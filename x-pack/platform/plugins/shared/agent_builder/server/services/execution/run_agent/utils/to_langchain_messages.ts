@@ -75,15 +75,8 @@ export interface ConversationToLangchainOptions {
 }
 
 /**
- * Prepares the LLM message history for a conversation. This is the message half of the
- * events-native context pipeline: `prepareConversation` reconstructs the conversation's context
- * from its event timeline (via `roundsForContext` → `eventsToRounds`, folding any HITL
- * pause/resume executions into their round) and processes attachments; `prepareMessages` turns that
- * reconstructed, attachment-processed context into LangChain messages. A resumed round therefore
- * renders as a single coherent exchange (the answered `ask_user_question` / resolved tool call in
- * position), because the resolution happened during reconstruction.
- *
- * When `resultTransformer` is provided, tool results from previous rounds are passed through it.
+ * Builds the LangChain message history from the (events-derived) processed conversation. When
+ * `resultTransformer` is provided, previous rounds' tool results are passed through it.
  */
 export const prepareMessages = async ({
   conversation,

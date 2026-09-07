@@ -334,6 +334,11 @@ export const appendResumeExecution$ = ({
               .filter((id): id is string => Boolean(id) && executionBelongsToRound(id!, round.id))
           );
           const executionIndex = roundExecutionIds.size; // exec_0 present -> 1 for the first resume
+          if (executionIndex < 1) {
+            throw new Error(
+              `appendResumeExecution$: no prior execution stored for round ${round.id}; cannot resume`
+            );
+          }
           const promptRequestedEventId = executionTerminatedEventId(round.id, executionIndex - 1);
 
           const promptResponse = promptResponseEvent({
@@ -341,6 +346,7 @@ export const appendResumeExecution$ = ({
             executionIndex,
             promptRequestedEventId,
             responses: input.prompts ?? {},
+            input: followUpRound.input,
             conversation,
             author,
             createdAt: followUpRound.started_at,

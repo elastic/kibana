@@ -60,7 +60,12 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { isRoundDerivedEventId, roundToEvents, roundsToEvents } from './rounds_to_events';
+import {
+  isRoundDerivedEventId,
+  roundToEvents,
+  roundsToEvents,
+  userMessageEvent,
+} from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 
 export type Document = Omit<
@@ -103,7 +108,12 @@ const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
       (event) => event.id.startsWith(`${round.id}::`) && isRoundDerivedEventId(event.id)
     );
     if (hasResumeExecution(round.id, storedForRound)) {
-      roundDerived.push(...storedForRound);
+      const refreshedUserMessage = userMessageEvent(round, merged);
+      roundDerived.push(
+        ...storedForRound.map((event) =>
+          event.id === refreshedUserMessage.id ? refreshedUserMessage : event
+        )
+      );
     } else {
       roundDerived.push(...roundToEvents(round, merged));
     }

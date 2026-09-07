@@ -12,6 +12,7 @@ import type {
   EventActor,
   ExecutionOutcome,
   ExecutionRunSummary,
+  RoundInput,
   TimelineEvent,
 } from '@kbn/agent-builder-common';
 import {
@@ -242,6 +243,7 @@ export const promptResponseEvent = ({
   executionIndex,
   promptRequestedEventId,
   responses,
+  input,
   conversation,
   author,
   createdAt,
@@ -250,6 +252,8 @@ export const promptResponseEvent = ({
   executionIndex: number;
   promptRequestedEventId: string;
   responses: Record<string, PromptResponse>;
+  /** The round input the resume contributed; persisted here since a resume has no user_message. */
+  input?: RoundInput;
   conversation: Conversation;
   author?: ConversationRoundAuthor;
   createdAt: string;
@@ -258,7 +262,11 @@ export const promptResponseEvent = ({
   type: TimelineEventType.promptResponse,
   created_at: createdAt,
   actor: userMessageActor(conversation, { author }),
-  data: { prompt_requested_event_id: promptRequestedEventId, responses },
+  data: {
+    prompt_requested_event_id: promptRequestedEventId,
+    responses,
+    ...(input ? { input } : {}),
+  },
 });
 
 /**
