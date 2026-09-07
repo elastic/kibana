@@ -98,7 +98,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.contextEngine.landing.managedRow.knowledgeIndicatorsLabel"
-              defaultMessage="Knowledge indicators"
+              defaultMessage="Knowledge Indicators"
             />
           </EuiText>
           <EuiText size="s" data-test-subj="contextAiIndexManagedRowKnowledgeIndicators">
