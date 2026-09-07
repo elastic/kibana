@@ -713,9 +713,9 @@ export const WorkflowYAMLEditor = ({
           editor.focus();
         }
       }
-      closeActionsPopover();
+      dismissActionsPopover();
     },
-    [closeActionsPopover, highlightStepRange, isReadOnlyYaml]
+    [dismissActionsPopover, highlightStepRange, isReadOnlyYaml]
   );
 
   const editorCommands: EditorCommand[] = useMemo(() => {

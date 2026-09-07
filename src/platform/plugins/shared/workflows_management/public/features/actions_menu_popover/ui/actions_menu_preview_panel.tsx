@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiImage,
+  EuiMarkdownFormat,
   EuiNotificationBadge,
   EuiTab,
   EuiTabs,
@@ -433,7 +434,7 @@ function StepDetailPanel({
             ) : (
               examples.map((example, idx) => (
                 <div key={idx} css={styles.yamlPreview}>
-                  <pre css={styles.codeText}>{example}</pre>
+                  <EuiMarkdownFormat textSize="xs">{example}</EuiMarkdownFormat>
                 </div>
               ))
             )}
