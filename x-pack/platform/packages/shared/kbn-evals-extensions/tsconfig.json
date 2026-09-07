@@ -14,6 +14,9 @@
     "@kbn/tooling-log",
     "@kbn/config-schema",
     "@kbn/some-dev-log",
-    "@kbn/kbn-client"
+    "@kbn/kbn-client",
+    "@kbn/repo-info",
+    "@kbn/core",
+    "@kbn/inference-plugin"
   ]
 }
