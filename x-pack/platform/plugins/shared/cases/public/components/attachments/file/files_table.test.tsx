@@ -136,7 +136,7 @@ describe('FilesTable', () => {
     );
 
     await waitFor(() => {
-      expect(filesClient.getDownloadHref).toBeCalled();
+      expect(filesClient.getDownloadHref).toHaveBeenCalled();
     });
 
     await waitFor(() => {

@@ -13,3 +13,6 @@ export {
   resolveZoneTestSubj,
 } from './config_context';
 export type { FlyoutTemplateConfig } from './config_context';
+export { FlyoutTabsProvider, useFlyoutTabs } from './tabs_context';
+export type { FlyoutTabsState } from './tabs_context';
+export { FlyoutHeaderCollapseProvider, useFlyoutHeaderCollapse } from './collapse_context';

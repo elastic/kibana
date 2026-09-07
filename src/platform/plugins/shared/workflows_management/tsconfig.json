@@ -15,6 +15,7 @@
     "server/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/esql-language",
     "@kbn/esql-types",
@@ -93,6 +94,7 @@
     "@kbn/securitysolution-rules",
     "@kbn/alerts-as-data-utils",
     "@kbn/shared-ux-utility",
+    "@kbn/shared-ux-ai-components",
     "@kbn/licensing-types",
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/scout",

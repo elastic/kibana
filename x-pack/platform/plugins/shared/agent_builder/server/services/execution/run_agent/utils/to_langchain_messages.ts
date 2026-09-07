@@ -9,6 +9,7 @@ import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import type {
   AssistantResponse,
+  ConversationRoundAuthor,
   ConversationRoundStep,
   ReasoningStep,
   ToolCallStep,
@@ -16,6 +17,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
+  getConversationRoundAuthorDisplayName,
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
@@ -229,7 +231,7 @@ const formatRoundInput = ({
   attachmentTypes?: ProcessedAttachmentType[];
   attachmentTypeInstructionsProvided?: Set<string>;
 }): HumanMessage => {
-  const { message, attachments, attachment_context, attachment_refs } = input;
+  const { message, attachments, attachment_context, attachment_refs, author } = input;
 
   let content = message;
 
@@ -270,21 +272,56 @@ const formatRoundInput = ({
     }
   }
 
-  if (timestamp && timestamp !== new Date(0).toISOString()) {
-    content = `[Sent: ${formatDate(timestamp)}]\n\n${content}`;
+  const prefix = formatInputPrefix({ author, timestamp });
+  if (prefix) {
+    content = `${prefix}\n\n${content}`;
   }
 
   return createUserMessage(content);
 };
 
+const formatInputPrefix = ({
+  author,
+  timestamp,
+}: {
+  author?: ConversationRoundAuthor;
+  timestamp?: string;
+}): string | undefined => {
+  const parts: string[] = [];
+  const authorLabel = getAuthorLabel(author);
+  if (authorLabel) {
+    parts.push(`User: ${authorLabel}`);
+  }
+  if (timestamp && timestamp !== new Date(0).toISOString()) {
+    parts.push(`Sent: ${formatDate(timestamp)}`);
+  }
+  if (parts.length === 0) {
+    return undefined;
+  }
+  return `[${parts.join(' — ')}]`;
+};
+
+const getAuthorLabel = (author?: ConversationRoundAuthor): string | undefined => {
+  if (!author) return undefined;
+
+  const displayName = getConversationRoundAuthorDisplayName(author);
+
+  if (displayName) {
+    return displayName;
+  }
+
+  return author.id;
+};
+
 const formatAttachment = ({ attachment }: { attachment: ProcessedAttachment }): XmlNode => {
+  const { representation } = attachment;
   return {
     tagName: 'attachment',
     attributes: {
       type: attachment.attachment.type,
       id: attachment.attachment.id,
     },
-    children: [attachment.representation.value],
+    children: [representation.type === 'text' ? representation.value : ''],
   };
 };
 

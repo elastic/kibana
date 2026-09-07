@@ -25,7 +25,6 @@ import {
   defaultDoc,
 } from '../mocks';
 import { createMemoryHistory } from 'history';
-import type { Query } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
@@ -169,6 +168,105 @@ describe('Lens App', () => {
   it('renders the editor frame', async () => {
     await renderApp();
     expect(screen.getByText('Editor frame')).toBeInTheDocument();
+  });
+
+  describe('ChromeAppHeaderRegistration', () => {
+    function enableChromeNextProjectHeader() {
+      (services.chrome.getChromeStyle as jest.Mock).mockReturnValue('project');
+      (services.chrome.getChromeStyle$ as jest.Mock).mockReturnValue(
+        new BehaviorSubject('project')
+      );
+      (services.chrome.next.appHeader.set as jest.Mock).mockReturnValue(jest.fn());
+    }
+
+    it('registers title and leaves menu to setHeaderActionMenu / search bar separate', async () => {
+      enableChromeNextProjectHeader();
+      await renderApp();
+
+      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: undefined,
+          back: undefined,
+          menu: undefined,
+          spacing: 'compact',
+        })
+      );
+      expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
+        expect.objectContaining({
+          showFilterBar: true,
+          showQueryInput: true,
+        }),
+        {}
+      );
+      expect(screen.getByTestId('lnsApp_topNav')).toBeInTheDocument();
+    });
+
+    it('registers the document title when a saved visualization is loaded', async () => {
+      enableChromeNextProjectHeader();
+      await renderApp({
+        preloadedState: {
+          persistedDoc: getLensDocumentMock({
+            title: 'My Lens visualization',
+          }),
+        },
+      });
+
+      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'My Lens visualization',
+        })
+      );
+    });
+
+    it('registers the managed badge', async () => {
+      enableChromeNextProjectHeader();
+      await renderApp({
+        preloadedState: {
+          managed: true,
+        },
+      });
+
+      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          badges: expect.arrayContaining([
+            expect.objectContaining({
+              'data-test-subj': 'managedContentBadge',
+            }),
+          ]),
+        })
+      );
+    });
+
+    it('registers an explicit back to the originating dashboard when editing from a panel', async () => {
+      enableChromeNextProjectHeader();
+      props.redirectToOrigin = jest.fn();
+      props.incomingState = {
+        originatingApp: 'dashboards',
+        originatingPath: '/view/abc',
+      };
+      services.getOriginatingAppName = jest.fn(() => 'Dashboards');
+
+      await renderApp();
+
+      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          back: expect.objectContaining({
+            href: expect.stringContaining('dashboards'),
+            label: 'Dashboards',
+            onClick: expect.any(Function),
+          }),
+        })
+      );
+
+      const registeredConfig = (services.chrome.next.appHeader.set as jest.Mock).mock.calls.at(
+        -1
+      )?.[0];
+      const event = { preventDefault: jest.fn() };
+      registeredConfig.back.onClick(event);
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(props.redirectToOrigin).toHaveBeenCalled();
+    });
   });
 
   it('updates global filters with store state', async () => {
@@ -551,7 +649,7 @@ describe('Lens App', () => {
       const document = {
         savedObjectId: defaultSavedObjectId,
         state: {
-          query: 'fake query',
+          query: { query: 'fake query', language: 'kuery' },
           filters: [{ query: { match_phrase: { src: 'test' } } }],
         },
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
@@ -561,7 +659,7 @@ describe('Lens App', () => {
       act(() => {
         lensStore.dispatch(
           setState({
-            query: 'fake query' as unknown as Query,
+            query: { query: 'fake query', language: 'kuery' },
             persistedDoc: document,
           })
         );

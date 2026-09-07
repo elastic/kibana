@@ -130,7 +130,7 @@ FROM test-index-*
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
 | EVAL recent.entity.id = recent.entity.EngineMetadata.UntypedId
-| LOOKUP JOIN latest-index
+| LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 49),
@@ -409,7 +409,7 @@ FROM test-index-*
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
-| LOOKUP JOIN latest-index
+| LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
@@ -711,7 +711,7 @@ FROM test-index-*
                 AND recent.entity.EngineMetadata.UntypedId > \\"123\\")
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
-| LOOKUP JOIN latest-index
+| LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
@@ -1013,7 +1013,7 @@ FROM test-index-*
                 AND recent.entity.EngineMetadata.UntypedId > \\"recover\\")
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
-| LOOKUP JOIN latest-index
+| LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
@@ -1275,7 +1275,7 @@ FROM test-index-*
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"service:\\", recent.entity.EngineMetadata.UntypedId)
-| LOOKUP JOIN latest-index
+| LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  service.entity.id = COALESCE(service.entity.id, recent.service.entity.id),
@@ -1531,7 +1531,7 @@ TRUE, _euid_branch_1_formula, NULL)
  recent.host.name = LAST(TO_STRING(host.name), @timestamp) WHERE TO_STRING(host.name) IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
 | EVAL recent.entity.id = CONCAT(\\"user:\\", recent.entity.EngineMetadata.UntypedId)
-| LOOKUP JOIN latest-index
+| LOOKUP JOIN _coordinator:latest-index
       ON recent.entity.id == entity.id
 | WHERE TO_STRING(entity.id) IS NOT NULL OR TO_STRING(recent.entity.namespace) == \\"local\\" OR MV_CONTAINS(TO_STRING(recent.event.kind), \\"asset\\") OR (TO_STRING(recent.event.kind) != \\"enrichment\\" OR TO_STRING(recent.event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(recent.event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(recent.event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"group\\")) 
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC

@@ -7,27 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiButton, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import type { FlyoutTemplateProps } from './types';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FlyoutTemplate } from './flyout_template';
+import {
+  type SharedStoryArgs,
+  buildFlyoutProps,
+  usePaginationProps,
+  unstructuredBlocks,
+  headerZone,
+  bodyZone,
+  footerZone,
+  fillContent,
+  bodyText,
+} from './stories_helpers';
 
-interface Args {
-  numLeadingActions: number;
-  numTrailingActions: number;
-  numPages: number;
-  paginationJump: boolean;
-  numUnstructuredBlocks: number;
-  titleIcon: boolean;
-  description: boolean;
-  footer: boolean;
-  secondaryActionIcon: boolean;
-  resizable: boolean;
-  type: NonNullable<FlyoutTemplateProps['type']>;
-  ownFocus: boolean;
-}
+type Args = SharedStoryArgs & {
+  headerIsCollapsed: boolean;
+  numTabs: number;
+};
 
 const meta: Meta<Args> = {
   title: 'Flyout Template/Template',
@@ -37,8 +37,12 @@ const meta: Meta<Args> = {
     numPages: 0,
     paginationJump: false,
     numUnstructuredBlocks: 0,
+    numTabs: 0,
     titleIcon: false,
     description: true,
+    numMetaBlocks: 0,
+    numBadges: 0,
+    numInfoBlocks: 0,
     footer: true,
     secondaryActionIcon: true,
     resizable: true,
@@ -77,6 +81,22 @@ const meta: Meta<Args> = {
       control: { type: 'boolean' },
       table: { category: 'Header' },
     },
+    numMetaBlocks: {
+      name: 'Meta blocks',
+      control: { type: 'range', min: 0, max: 4, step: 1 },
+      table: { category: 'Header' },
+    },
+    numBadges: {
+      // Max is above the overflow threshold, so the `+N more` popover is reachable.
+      name: 'Badges',
+      control: { type: 'range', min: 0, max: 8, step: 1 },
+      table: { category: 'Header' },
+    },
+    numInfoBlocks: {
+      name: 'Info blocks',
+      control: { type: 'range', min: 0, max: 10, step: 1 },
+      table: { category: 'Header' },
+    },
     numUnstructuredBlocks: {
       name: 'Unstructured blocks',
       control: { type: 'range', min: 0, max: 2, step: 1 },
@@ -105,135 +125,6 @@ const meta: Meta<Args> = {
   },
 };
 
-const LEADING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps']>['leadingActions'] = [
-  { iconType: 'documents', onClick: action('back'), 'aria-label': 'View surrounding documents', toolTipContent: 'View surrounding documents' },
-  { iconType: 'document', onClick: action('back'), 'aria-label': 'View document', toolTipContent: 'View document' },
-]; // prettier-ignore
-
-const TRAILING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps']>['trailingActions'] = [
-  { iconType: 'share', onClick: action('share'), 'aria-label': 'Share', toolTipContent: 'Share' },
-  { iconType: 'gear', onClick: action('settings'), 'aria-label': 'Settings', toolTipContent: 'Settings' },
-]; // prettier-ignore
-
-/** Maps shared story args to `FlyoutTemplate` props. Pagination is handled per-story via useState. */
-const buildFlyoutProps = (
-  args: Args,
-  paginationProps?: FlyoutTemplateProps['flyoutMenuProps']
-): Omit<FlyoutTemplateProps, 'onClose' | 'children'> => {
-  const { numLeadingActions, numTrailingActions, resizable, type, ownFocus } = args;
-  const leadingActions = LEADING_ACTIONS.slice(0, numLeadingActions);
-  const trailingActions = TRAILING_ACTIONS.slice(0, numTrailingActions);
-  const hasMenuContent = leadingActions.length > 0 || trailingActions.length > 0 || paginationProps;
-  const flyoutMenuProps: FlyoutTemplateProps['flyoutMenuProps'] = hasMenuContent
-    ? {
-        ...(leadingActions.length > 0 ? { leadingActions } : {}),
-        ...(trailingActions.length > 0 ? { trailingActions } : {}),
-        ...paginationProps,
-      }
-    : undefined;
-  return {
-    type,
-    resizable,
-    ...(resizable ? { minWidth: 320 } : {}),
-    ...(type === 'overlay' ? { ownFocus } : {}),
-    ...(flyoutMenuProps ? { flyoutMenuProps } : {}),
-  };
-};
-
-/** Returns flyoutMenuProps containing pagination, or undefined when numPages is 0. */
-const usePaginationProps = (args: Args): FlyoutTemplateProps['flyoutMenuProps'] | undefined => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  if (args.numPages === 0) return undefined;
-  const total = args.numPages;
-  return {
-    pagination: {
-      currentIndex,
-      total,
-      onPrevious: () => setCurrentIndex((i) => Math.max(0, i - 1)),
-      onNext: () => setCurrentIndex((i) => Math.min(total - 1, i + 1)),
-      ...(args.paginationJump
-        ? {
-            onFirst: () => setCurrentIndex(0),
-            onLast: () => setCurrentIndex(total - 1),
-          }
-        : {}),
-    },
-  };
-};
-
-const HEADER_DESCRIPTION = 'Mar 30, 2022 @ 10:01:21.313';
-
-/** Maps the title icon arg onto the header's icon/tooltip pair. */
-const buildTitleIconProps = (args: Args) =>
-  args.titleIcon
-    ? { titleIcon: 'info' as const, titleTooltip: 'Additional context about this flyout.' }
-    : {};
-
-/** Stand-ins for self-contained widgets that bring their own chrome. */
-const UNSTRUCTURED_BLOCKS: Array<{ id: string; label: string; height: number }> = [
-  { id: 'filterBar', label: 'Unstructured content: Filter Bar', height: 48 },
-  { id: 'dataGrid', label: 'Unstructured content: Data Grid', height: 320 },
-];
-
-/** Content the template does not own, so each block brings its own bottom spacing. */
-const unstructuredBlocks = (count: number) =>
-  UNSTRUCTURED_BLOCKS.slice(0, count).map(({ id, label, height }) => (
-    <React.Fragment key={id}>
-      <EuiPanel color="primary" hasShadow={false} css={{ minHeight: height }}>
-        <EuiText size="s" textAlign="center">
-          <p>
-            <em>{label}</em>
-          </p>
-        </EuiText>
-      </EuiPanel>
-      <EuiSpacer size="m" />
-    </React.Fragment>
-  ));
-
-const FILLER_TEXT: string[] = [
-  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.',
-  'Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.',
-  'Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat.',
-  'Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim.',
-  'Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue.',
-  'Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales.',
-];
-
-const fillContent = (starter?: string): string =>
-  `${starter ? starter + ' ' : ''}${FILLER_TEXT[Math.floor(Math.random() * FILLER_TEXT.length)]}`;
-
-const bodyText = (content: string) => (
-  <EuiText size="s">
-    <p>{content}</p>
-  </EuiText>
-);
-
-/**
- * Each zone below is called inline (not rendered as a component) so the root still
- * sees `FlyoutTemplate.Header`/`Body`/`Footer` as its own direct children.
- */
-const headerZone = (args: Args, title: string) => (
-  <FlyoutTemplate.Header
-    title={title}
-    {...buildTitleIconProps(args)}
-    description={args.description ? HEADER_DESCRIPTION : undefined}
-  />
-);
-
-const bodyZone = (content: React.ReactNode) => <FlyoutTemplate.Body>{content}</FlyoutTemplate.Body>;
-
-const footerZone = (args: Args) =>
-  args.footer ? (
-    <FlyoutTemplate.Footer>
-      <FlyoutTemplate.Footer.SecondaryAction
-        label="Discard"
-        onClick={action('discard')}
-        {...(args.secondaryActionIcon ? { iconType: 'trash' } : {})}
-      />
-      <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={action('save')} />
-    </FlyoutTemplate.Footer>
-  ) : null;
-
 export default meta;
 
 type Story = StoryObj<Args>;
@@ -259,6 +150,7 @@ export const MenuBarPagination: Story = {
     titleIcon: { table: { disable: true } },
     description: { table: { disable: true } },
     footer: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
   },
   args: {
     numUnstructuredBlocks: 1,
@@ -346,6 +238,7 @@ export const MenuBarHistory: Story = {
     description: { table: { disable: true } },
     numPages: { table: { disable: true } },
     footer: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
   },
   args: {
     numLeadingActions: 0,
@@ -356,4 +249,150 @@ export const MenuBarHistory: Story = {
     footer: true,
   },
   render: WithHistoryRender,
+};
+
+/** Long enough that the body overflows at any realistic viewport height, so collapse can engage. */
+const OVERFLOWING_PARAGRAPH_COUNT = 12;
+
+const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
+  const pagination = usePaginationProps(args);
+  return (
+    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+      {headerZone(
+        args,
+        'Flyout title is quite long, so that it takes up 2 lines of text and then some',
+        undefined,
+        { collapsed: args.headerIsCollapsed }
+      )}
+      {bodyZone(
+        <>
+          {unstructuredBlocks(args.numUnstructuredBlocks)}
+          {Array.from({ length: OVERFLOWING_PARAGRAPH_COUNT }, (_, index) => (
+            <React.Fragment key={index}>
+              {bodyText(fillContent(`Paragraph ${index + 1}.`))}
+              <EuiSpacer size="s" />
+            </React.Fragment>
+          ))}
+        </>
+      )}
+      {footerZone(args)}
+    </FlyoutTemplate>
+  );
+};
+
+export const HeaderCollapseOnScroll: Story = {
+  argTypes: {
+    numPages: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
+    headerIsCollapsed: {
+      name: 'Force collapsed',
+      control: { type: 'boolean' },
+      table: { category: 'Header' },
+    },
+  },
+  args: {
+    numLeadingActions: 0,
+    numTrailingActions: 0,
+    numUnstructuredBlocks: 2,
+    titleIcon: true,
+    description: true,
+    footer: true,
+    headerIsCollapsed: false,
+  },
+  render: HeaderCollapseOnScrollRender,
+};
+
+const TABS: Array<{ id: string; label: string; detail: string }> = [
+  { id: 'overview', label: 'Overview', detail: 'Overview panel content.' },
+  { id: 'metadata', label: 'Metadata', detail: 'Metadata panel content.' },
+  { id: 'timeline', label: 'Timeline', detail: 'Timeline panel content.' },
+  { id: 'insights', label: 'Insights', detail: 'Insights panel content.' },
+];
+
+const TabsRender = (args: Args): React.JSX.Element => {
+  const visibleTabs = TABS.slice(0, args.numTabs);
+  const [selectedTabId, setSelectedTabId] = useState<string | undefined>(visibleTabs[0]?.id);
+
+  useEffect(() => {
+    if (!visibleTabs.some((tab) => tab.id === selectedTabId)) {
+      setSelectedTabId(visibleTabs[0]?.id);
+    }
+  }, [visibleTabs, selectedTabId]);
+
+  return (
+    <>
+      <EuiText size="s">
+        <p>
+          These buttons live outside the flyout and drive the same <code>selectedTabId</code> state
+          as the tab bar below, proving that tab selection is controlled end-to-end.
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+        {visibleTabs.map(({ id, label }) => (
+          <EuiFlexItem grow={false} key={id}>
+            <EuiButton size="s" fill={selectedTabId === id} onClick={() => setSelectedTabId(id)}>
+              {label}
+            </EuiButton>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+
+      <FlyoutTemplate
+        onClose={action('onClose')}
+        size="m"
+        {...buildFlyoutProps(args)}
+        tabs={visibleTabs.map(({ id, label }) => ({ id, label }))}
+        selectedTabId={selectedTabId}
+        onTabChange={setSelectedTabId}
+      >
+        {headerZone(args, 'Tabs demo', undefined, { collapsed: args.headerIsCollapsed })}
+
+        <FlyoutTemplate.Body>
+          {visibleTabs.map(({ id, label, detail }) => (
+            <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
+              {unstructuredBlocks(args.numUnstructuredBlocks)}
+              <EuiText size="s">
+                <p>{fillContent(detail)}</p>
+                <p>{fillContent()}</p>
+              </EuiText>
+            </FlyoutTemplate.Body.TabPanel>
+          ))}
+        </FlyoutTemplate.Body>
+
+        {footerZone(args)}
+      </FlyoutTemplate>
+    </>
+  );
+};
+
+export const Tabs: StoryObj<Args> = {
+  argTypes: {
+    numTabs: {
+      name: 'Tabs',
+      control: { type: 'range', min: 1, max: TABS.length, step: 1 },
+      table: { category: 'Header' },
+    },
+    headerIsCollapsed: {
+      name: 'Force collapsed',
+      control: { type: 'boolean' },
+      table: { category: 'Header' },
+    },
+    numLeadingActions: { name: 'Leading actions', table: { category: 'Menu bar' } },
+    numTrailingActions: { name: 'Trailing actions', table: { category: 'Menu bar' } },
+    numPages: { table: { disable: true } },
+    paginationJump: { table: { disable: true } },
+  },
+  args: {
+    numTabs: 4,
+    titleIcon: false,
+    description: true,
+    footer: true,
+    headerIsCollapsed: false,
+    numLeadingActions: 0,
+    numTrailingActions: 0,
+    numUnstructuredBlocks: 1,
+  },
+  render: TabsRender,
 };

@@ -83,11 +83,12 @@ function useFallbackProps(): FallbackProps {
     const backTargets: AppHeaderBack[] = [];
     for (let i = breadcrumbs.length - 2; i >= 0; i--) {
       const crumb = breadcrumbs[i];
-      if (crumb.href && !isCurrentLocation(crumb.href)) {
+      const label = getBreadcrumbText(crumb);
+      if (label && crumb.href && !isCurrentLocation(crumb.href)) {
         backTargets.push({
           href: crumb.href,
           onClick: crumb.onClick,
-          label: getBreadcrumbText(crumb),
+          label,
         });
       }
     }
@@ -106,7 +107,7 @@ function useFallbackProps(): FallbackProps {
 
 function useAppHeaderConfig(): ChromeAppHeaderConfig | undefined {
   const chrome = useChromeService();
-  const config$ = useMemo(() => chrome.next.appHeader.get$(), [chrome]);
+  const config$ = useMemo(() => chrome.appHeader.get$(), [chrome]);
   return useObservable(config$, undefined);
 }
 

@@ -13,7 +13,8 @@ import { getRepoFiles } from '@kbn/get-repo-files';
 import { getCodeOwnersEntries } from '@kbn/code-owners';
 import ignore from 'ignore';
 
-const IGNORED_FILENAMES = ['moon.yml', 'version_dependencies.txt'];
+// Non-test artifacts that live under FTR trees (generated package.json, moon inputs, …)
+const IGNORED_FILENAMES = ['moon.yml', 'version_dependencies.txt', 'package.json'];
 
 const isIgnoredFile = (repoRel: string): boolean =>
   IGNORED_FILENAMES.some((fileName) => repoRel.endsWith(`/${fileName}`));

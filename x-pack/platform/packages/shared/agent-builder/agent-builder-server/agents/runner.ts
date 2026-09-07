@@ -10,7 +10,7 @@ import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type {
   ChatAgentEvent,
   AgentExecutionMode,
-  InteractivityConfig,
+  InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
 import type { AgentParams, AgentResponse } from './provider';
 
@@ -30,7 +30,7 @@ export interface RunAgentParams {
   /**
    * Interactivity configuration for this run,
    */
-  interactive?: InteractivityConfig;
+  interactive?: InteractivityConfigInput;
   /**
    * The id of the parent execution that spawned this one, when applicable.
    */
