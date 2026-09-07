@@ -5925,14 +5925,17 @@ components:
         runtime_mappings:
           additionalProperties:
             $ref: '#/components/schemas/RuntimeFieldMapping'
-          description: Optional map of runtime field name to runtime field mapping,
-            forwarded verbatim to the underlying `_update_by_query` as
-            `runtime_mappings`. Use this to attach data view runtime fields
-            (including scripted fields) so the close query can match fields not
-            natively mapped on the alerts index. Unlike `runtime_fields`, the
-            caller-supplied mapping (including any Painless `script.source`) is
-            used as-is by Elasticsearch. Limited to 100 entries combined with
-            `runtime_fields`; larger maps are rejected.
+          description: 'Optional map of runtime field name to runtime field mapping. For
+            each entry the server forwards `type`, `script.source`, and `format`
+            to the underlying `_update_by_query` as `runtime_mappings`, so the
+            close query can match fields not natively mapped on the alerts index
+            (e.g. data view runtime fields with Painless scripts). Unlike
+            `runtime_fields`, the caller-supplied Painless script is preserved
+            and executed by Elasticsearch at query time. The server always sets
+            `on_script_error: continue` regardless of any value supplied by the
+            caller, so a single alert that causes a script error is skipped
+            rather than aborting the entire close. Limited to 100 unique field
+            names combined with `runtime_fields`; larger maps are rejected.'
           maxProperties: 100
           type: object
         status:
@@ -10564,14 +10567,17 @@ components:
         runtime_mappings:
           additionalProperties:
             $ref: '#/components/schemas/RuntimeFieldMapping'
-          description: Optional map of runtime field name to runtime field mapping,
-            forwarded verbatim to the underlying `_update_by_query` as
-            `runtime_mappings`. Use this to attach data view runtime fields
-            (including scripted fields) so the close query can match fields not
-            natively mapped on the alerts index. Unlike `runtime_fields`, the
-            caller-supplied mapping (including any Painless `script.source`) is
-            used as-is by Elasticsearch. Limited to 100 entries combined with
-            `runtime_fields`; larger maps are rejected.
+          description: 'Optional map of runtime field name to runtime field mapping. For
+            each entry the server forwards `type`, `script.source`, and `format`
+            to the underlying `_update_by_query` as `runtime_mappings`, so the
+            close query can match fields not natively mapped on the alerts index
+            (e.g. data view runtime fields with Painless scripts). Unlike
+            `runtime_fields`, the caller-supplied Painless script is preserved
+            and executed by Elasticsearch at query time. The server always sets
+            `on_script_error: continue` regardless of any value supplied by the
+            caller, so a single alert that causes a script error is skipped
+            rather than aborting the entire close. Limited to 100 unique field
+            names combined with `runtime_fields`; larger maps are rejected.'
           maxProperties: 100
           type: object
         status:
