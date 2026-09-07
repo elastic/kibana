@@ -11,7 +11,12 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { copyToClipboard } from '@elastic/eui';
-import { JsonTreeViewer, type FormatValue, type TreeExpansionState } from './json_tree_viewer';
+import {
+  JsonTreeViewer,
+  type FormatValue,
+  type GetLeafActions,
+  type TreeExpansionState,
+} from './json_tree_viewer';
 import { ROOT_ID, getNodeId } from './tree_model';
 
 jest.mock('@elastic/eui', () => ({
@@ -32,6 +37,18 @@ describe('JsonTreeViewer', () => {
 
     expect(screen.getByTestId(rowTestId('message'))).toHaveTextContent('"hello"');
     expect(screen.getByTestId(rowTestId('count'))).toHaveTextContent('5');
+  });
+
+  it('renders an empty-object placeholder when there are no visible fields', () => {
+    render(<JsonTreeViewer json={{}} />);
+
+    expect(screen.getByTestId('jsonTreeViewerEmpty')).toHaveTextContent('{0 fields}');
+  });
+
+  it('renders an empty-array placeholder when there are no visible items', () => {
+    render(<JsonTreeViewer json={[]} />);
+
+    expect(screen.getByTestId('jsonTreeViewerEmpty')).toHaveTextContent('[0 items]');
   });
 
   // In-table search and virtual scrolling remounts every cell, which would collapse all nodes in the tree.
@@ -107,6 +124,45 @@ describe('JsonTreeViewer', () => {
     expect(pager).toHaveFocus();
   });
 
+  it('labels the pager with how many more of the total fields will be shown', () => {
+    const doc = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`field_${i}`, i]));
+    render(<JsonTreeViewer json={doc} />);
+
+    expect(screen.getByTestId(moreTestId())).toHaveTextContent('Show 2 more of 12 fields');
+  });
+
+  describe('recursive expand', () => {
+    it('expands the whole subtree on Cmd/Ctrl-click', async () => {
+      const user = userEvent.setup();
+      render(<JsonTreeViewer json={{ user: { address: { city: 'Berlin' } } }} />);
+
+      // Collapsed: only the top-level `user` row is visible.
+      expect(screen.queryByTestId(rowTestId('user.address'))).not.toBeInTheDocument();
+
+      await user.keyboard('{Control>}');
+      await user.click(screen.getByTestId(rowTestId('user')));
+      await user.keyboard('{/Control}');
+
+      expect(screen.getByTestId(rowTestId('user.address'))).toBeVisible();
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
+    });
+
+    it('keeps each expanded level capped at the pager limit', async () => {
+      const user = userEvent.setup();
+      // A nested collection of 12 must still page at 10 after a recursive expand (no DOM explosion).
+      const doc = { logs: Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`f${i}`, i])) };
+      render(<JsonTreeViewer json={doc} />);
+
+      await user.keyboard('{Control>}');
+      await user.click(screen.getByTestId(rowTestId('logs')));
+      await user.keyboard('{/Control}');
+
+      expect(screen.getByTestId(rowTestId('logs.f0'))).toBeVisible();
+      expect(screen.queryByTestId(rowTestId('logs.f11'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(moreTestId(getNodeId(['logs'])))).toBeVisible();
+    });
+  });
+
   describe('keyboard navigation', () => {
     it('steps from a leaf row into its copy-value button with ArrowRight', async () => {
       render(<JsonTreeViewer json={{ message: 'hello' }} />);
@@ -118,7 +174,7 @@ describe('JsonTreeViewer', () => {
     });
 
     it('steps from a pager row into its first button with ArrowRight', async () => {
-      // 12 fields capped at 10 renders a "Show 2 more fields" pager row.
+      // 12 fields capped at 10 renders a "Show 2 more of 12 fields" pager row.
       const doc = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`field_${i}`, i]));
       render(<JsonTreeViewer json={doc} />);
 
@@ -143,7 +199,7 @@ describe('JsonTreeViewer', () => {
     });
 
     it('moves between the two pager buttons with the Right and Left arrows', async () => {
-      // 25 fields: after one reveal the pager row shows both "Show 5 more" and "Show fewer".
+      // 25 fields: after one reveal the pager row shows both "Show 5 more of 25 fields" and "Show fewer".
       const doc = Object.fromEntries(Array.from({ length: 25 }, (_, i) => [`field_${i}`, i]));
       render(<JsonTreeViewer json={doc} />);
       await userEvent.click(screen.getByTestId(moreTestId()));
@@ -174,6 +230,27 @@ describe('JsonTreeViewer', () => {
       await userEvent.keyboard('{ArrowUp}');
 
       expect(screen.getByTestId('jsonTreeViewerExpandAll')).toHaveFocus();
+    });
+
+    it('moves between the header controls with the Right and Left arrows', async () => {
+      render(<JsonTreeViewer json={{ user: { city: 'Berlin' } }} />);
+
+      screen.getByTestId('jsonTreeViewerExpandAll').focus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId('jsonTreeViewerCopyAll')).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(screen.getByTestId('jsonTreeViewerExpandAll')).toHaveFocus();
+    });
+
+    it('steps from the first row up to Copy all when there is no Expand all control', async () => {
+      // A flat document has no expandable collections, so Copy all is the only header control.
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+
+      screen.getByTestId(rowTestId('message')).focus();
+      await userEvent.keyboard('{ArrowUp}');
+
+      expect(screen.getByTestId('jsonTreeViewerCopyAll')).toHaveFocus();
     });
   });
 
@@ -316,6 +393,132 @@ describe('JsonTreeViewer', () => {
 
       expect(screen.queryByTestId('jsonTreeViewerExpandAll')).not.toBeInTheDocument();
       expect(screen.getByTestId('custom-header')).toBeVisible();
+    });
+  });
+
+  describe('getLeafActions', () => {
+    const twoActions =
+      (onFilterFor: () => void, onFilterOut: () => void): GetLeafActions =>
+      ({ path }) =>
+        [
+          {
+            id: 'filterFor',
+            iconType: 'plusCircle',
+            label: 'Filter for',
+            'data-test-subj': `treeFilterFor-${path.join('.')}`,
+            onClick: onFilterFor,
+          },
+          {
+            id: 'filterOut',
+            iconType: 'minusCircle',
+            label: 'Filter out',
+            'data-test-subj': `treeFilterOut-${path.join('.')}`,
+            onClick: onFilterOut,
+          },
+        ];
+
+    it('renders the host actions after the copy button on a leaf row', () => {
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          getLeafActions={twoActions(jest.fn(), jest.fn())}
+        />
+      );
+
+      const actions = within(screen.getByTestId(rowTestId('message')));
+      expect(actions.getByTestId(copyTestId('message'))).toBeInTheDocument();
+      expect(actions.getByTestId('treeFilterFor-message')).toBeInTheDocument();
+      expect(actions.getByTestId('treeFilterOut-message')).toBeInTheDocument();
+    });
+
+    it('invokes an action onClick when the button is clicked', async () => {
+      const onFilterFor = jest.fn();
+      const onFilterOut = jest.fn();
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          getLeafActions={twoActions(onFilterFor, onFilterOut)}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('treeFilterFor-message'));
+      expect(onFilterFor).toHaveBeenCalledTimes(1);
+      expect(onFilterOut).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByTestId('treeFilterOut-message'));
+      expect(onFilterOut).toHaveBeenCalledTimes(1);
+    });
+
+    it('moves focus across the copy and action buttons with Right/Left arrows, back to the row at the edges', async () => {
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          getLeafActions={twoActions(jest.fn(), jest.fn())}
+        />
+      );
+
+      const row = screen.getByTestId(rowTestId('message'));
+      row.focus();
+
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId(copyTestId('message'))).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId('treeFilterFor-message')).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId('treeFilterOut-message')).toHaveFocus();
+
+      // Past the last action, focus returns to the row.
+      await userEvent.keyboard('{ArrowRight}');
+      expect(row).toHaveFocus();
+
+      // And Left from the first action returns to the row too.
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId(copyTestId('message'))).toHaveFocus();
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(row).toHaveFocus();
+    });
+  });
+
+  describe('copy all', () => {
+    beforeEach(() => copyToClipboardMock.mockClear());
+
+    it('copies the whole document as pretty-printed JSON', async () => {
+      const doc = { user: { name: 'Alice' }, count: 5 };
+      render(<JsonTreeViewer json={doc} />);
+
+      await userEvent.click(screen.getByTestId('jsonTreeViewerCopyAll'));
+
+      expect(copyToClipboardMock).toHaveBeenCalledWith(JSON.stringify(doc, null, 2));
+    });
+
+    it('renders even when there are no expandable collections', () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+
+      expect(screen.getByTestId('jsonTreeViewerCopyAll')).toBeVisible();
+      expect(screen.queryByTestId('jsonTreeViewerExpandAll')).not.toBeInTheDocument();
+    });
+
+    it('confirms the copy by swapping the icon to a success check', async () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+      const button = screen.getByTestId('jsonTreeViewerCopyAll');
+      expect(button.querySelector('[data-euiicon-type="copy"]')).toBeInTheDocument();
+
+      await userEvent.click(button);
+
+      expect(button.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
+      expect(button.querySelector('[data-euiicon-type="copy"]')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('wrapLines', () => {
+    it('applies distinct container styling when wrapping is disabled', () => {
+      const { rerender } = render(<JsonTreeViewer json={{ message: 'hello' }} wrapLines />);
+      const wrappingClassName = screen.getByRole('tree').parentElement?.className;
+
+      rerender(<JsonTreeViewer json={{ message: 'hello' }} wrapLines={false} />);
+      const noWrapClassName = screen.getByRole('tree').parentElement?.className;
+
+      expect(noWrapClassName).not.toEqual(wrappingClassName);
     });
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import type { ComponentType } from 'react';
+import type { IconType } from '@elastic/eui';
 import type { Conversation } from '@kbn/agent-builder-common';
 
 /**
@@ -38,6 +39,10 @@ export interface ConversationTemplateTabDefinition {
  * at render time, so registration order across plugins does not matter.
  */
 export interface ConversationTemplateUIDefinition {
+  /** Localized display name for the template, shown in the conversation UI (e.g. title badge). */
+  name: string;
+  /** Optional icon shown alongside the name. */
+  icon?: IconType;
   /** Tab ids rendered in this order. Ids with no registered tab are skipped. */
   tabs: readonly string[];
 }

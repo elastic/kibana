@@ -1,8 +1,7 @@
 {
-  "sha1": "59d02d42d2783494cd619cf77e891c8b86cd7337",
+  "sha1": "de9d732f7b57eebf296edd8fb538c5f014a37cf1",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -97,6 +96,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
         "line": 84,
         "column": 51
+      }
+    },
+    {
+      "id": "a56530651b7f21f-596439d3ed034eb",
+      "title": "DisableScalablePrivateLocation disabling sharding clears a leftover agent pin before the location is persisted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/disable_scalable_private_location.spec.ts",
+        "line": 45,
+        "column": 23
       }
     },
     {
@@ -585,8 +598,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 116,
-        "column": 60
+        "line": 142,
+        "column": 25
       }
     },
     {
@@ -599,8 +612,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 136,
-        "column": 90
+        "line": 165,
+        "column": 86
       }
     },
     {
@@ -613,8 +626,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 171,
-        "column": 20
+        "line": 202,
+        "column": 19
       }
     },
     {
@@ -627,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 209,
-        "column": 9
+        "line": 251,
+        "column": 17
       }
     },
     {
@@ -641,8 +654,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 247,
-        "column": 6
+        "line": 292,
+        "column": 15
       }
     },
     {
@@ -655,8 +668,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 214,
-        "column": 27
+        "line": 333,
+        "column": 17
       }
     },
     {
@@ -669,8 +682,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 275,
-        "column": 20
+        "line": 359,
+        "column": 11
       }
     },
     {
@@ -814,6 +827,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
         "line": 310,
         "column": 9
+      }
+    },
+    {
+      "id": "78b337e953ebd4b-cdd38b3892a5251",
+      "title": "ScalablePrivateLocationMonitorCrud creates, updates, and deletes a monitor against a scalable private location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_monitor_crud.spec.ts",
+        "line": 59,
+        "column": 28
       }
     }
   ]

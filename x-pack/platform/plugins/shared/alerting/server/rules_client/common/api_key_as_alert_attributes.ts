@@ -14,11 +14,21 @@ import {
   PROVISION_UIAM_API_KEYS_FEATURE_FLAG,
 } from '../../application/rule/constants';
 
+/**
+ * Stale API key attributes to remove from a rule's stored attributes before spreading in a newly
+ * created key set. `getApiKeyRuleProperties` omits the UIAM attributes when no UIAM key was
+ * minted, so without this the old values would survive the spread.
+ *
+ * Callers must persist the result as a whole document (`create` with `overwrite: true`, or
+ * `bulkCreate`). In a partial saved-object update attributes are merged, so a stripped attribute
+ * is merely absent from the payload and keeps its stored value instead of being removed.
+ */
 export const API_KEY_ATTRIBUTES_TO_STRIP = [
   'apiKey',
   'apiKeyOwner',
   'apiKeyCreatedByUser',
   'uiamApiKey',
+  'uiamApiKeyExternal',
 ] as const;
 
 interface ApiKeyRuleProperties {
@@ -26,6 +36,7 @@ interface ApiKeyRuleProperties {
   apiKeyOwner: string | null;
   apiKeyCreatedByUser: boolean | null;
   uiamApiKey?: string | null;
+  uiamApiKeyExternal?: boolean | null;
 }
 
 const encodeApiKey = (id?: string, key?: string): string | null => {
@@ -57,13 +68,23 @@ const getApiKeyRuleProperties = (
   }
 
   const encodedApiKey = encodeApiKey(esApiKeyId, esApiKey);
-  const encodedUiamApiKey = encodeApiKey(uiamApiKeyId, uiamApiKey);
+  // Framework-granted UIAM keys are stored as `base64(id:key)`. User-created Cloud API
+  // keys are raw `essu_` credentials with no key id — store them as-is; alerting never
+  // invalidates them, so no id is needed.
+  const encodedUiamApiKey =
+    encodeApiKey(uiamApiKeyId, uiamApiKey) ?? (createdByUser && uiamApiKey ? uiamApiKey : null);
 
   return {
     apiKeyOwner: username,
     apiKey: encodedApiKey,
     apiKeyCreatedByUser: createdByUser,
     ...(encodedUiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
+    // UIAM's verdict on whether the key is an external (user-created Cloud) API key, captured
+    // at authentication time. Rule runs use it to withhold the UIAM shared secret, which UIAM
+    // rejects for external keys. Written whenever a UIAM key is written, not only when true,
+    // so that it can never disagree with the key it describes: a stale `true` would withhold
+    // the shared secret from a freshly granted internal key.
+    ...(encodedUiamApiKey ? { uiamApiKeyExternal: apiKey.uiamResult?.external === true } : {}),
   };
 };
 
@@ -75,7 +96,10 @@ export function apiKeyAsAlertAttributes(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
   createdByUser: boolean
-): Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'> {
+): Pick<
+  RawRule,
+  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+> {
   return getApiKeyRuleProperties(apiKey, username, createdByUser);
 }
 
@@ -83,7 +107,10 @@ export function apiKeyAsRuleDomainProperties(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
   createdByUser: boolean
-): Pick<RuleDomain, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'> {
+): Pick<
+  RuleDomain,
+  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+> {
   return getApiKeyRuleProperties(apiKey, username, createdByUser);
 }
 

@@ -218,19 +218,31 @@ export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> =
   // treat it as not-loading so the form renders global fields without a template selected.
   const isLoadingFields = Boolean(templateId) && isLoadingFieldsRaw;
 
+  // Pass each section's fields as condition context to the other so that show_when /
+  // required_when conditions can reference fields across the global/template boundary.
+  // Without this, a $ref global field whose show_when references another global field in the
+  // opposite section would receive an "unknown field" fallback (always-show) from the evaluator.
   const globalFieldsFragment = useMemo(
     () =>
       visibleGlobalInlineFields.length ? (
-        <FieldsRenderer resolvedFields={visibleGlobalInlineFields} />
+        <FieldsRenderer
+          resolvedFields={visibleGlobalInlineFields}
+          conditionContextFields={templateFields}
+        />
       ) : null,
-    [visibleGlobalInlineFields]
+    [visibleGlobalInlineFields, templateFields]
   );
 
   const templateFieldsFragment = useMemo(() => {
     if (!templateId || template?.definition?.fields === undefined) return null;
     if (!templateFields.length) return null;
-    return <FieldsRenderer resolvedFields={templateFields} />;
-  }, [templateId, template, templateFields]);
+    return (
+      <FieldsRenderer
+        resolvedFields={templateFields}
+        conditionContextFields={visibleGlobalInlineFields}
+      />
+    );
+  }, [templateId, template, templateFields, visibleGlobalInlineFields]);
 
   if (isLoading || isLoadingFields || isLoadingGlobalDefs) {
     return <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />;

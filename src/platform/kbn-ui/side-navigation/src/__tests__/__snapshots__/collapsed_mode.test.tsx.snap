@@ -10,40 +10,10 @@ exports[`Collapsed mode should render the side navigation 1`] = `
     <div
       class="kbnChromeNav-root css-8nqrb0-getNavWrapperStyles"
     >
-      <span
-        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-        id="generated-id_euiToolTipAnchor"
-      >
-        <div
-          class="css-1lxxlvf-wrapperStyles"
-          data-test-subj="kbnChromeNav-logoWrapper"
-        >
-          <a
-            aria-label="Solution homepage"
-            class="css-r2tafp-buttonStyles"
-            data-highlighted="false"
-            data-menu-item="true"
-            data-test-subj="kbnChromeNav-logo"
-            href="/"
-            id="home"
-          >
-            <div
-              class="kbnChromeNav-iconWrapper"
-            >
-              <span
-                aria-hidden="true"
-                color="currentColor"
-                data-euiicon-type="logoElastic"
-              />
-            </div>
-            <div
-              class="euiText emotion-euiText-m-euiScreenReaderOnly"
-            >
-              Solution
-            </div>
-          </a>
-        </div>
-      </span>
+      <div
+        aria-hidden="true"
+        class="css-350mvo-topSeparatorStyles"
+      />
       <p
         class="emotion-euiScreenReaderOnly"
         id="main-navigation-instructions_generated-id"

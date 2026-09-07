@@ -31,6 +31,7 @@ import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilien
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
+import { deleteLegacyRemoteStateSavedObjects } from '../saved_objects/remote_log_extraction_state/types';
 import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
@@ -61,18 +62,13 @@ import {
   getLegacySecurityLatestEntityIndexPattern,
 } from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
-import { getUpdatesIndexTemplateId } from './updates_index_template';
-import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
-import {
-  getUpdatesEntitiesDataStreamName,
-  getLegacySecurityUpdatesEntitiesDataStreamName,
-} from './updates_data_stream';
+import { getComponentTemplateName } from './component_templates';
+import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import {
   getMetadataEntitiesDataStreamName,
   getLegacySecurityMetadataEntitiesDataStreamName,
 } from './metadata_data_stream';
 import type { LogsExtractionClient } from '../logs_extraction';
-import type { RemoteLogExtractionStateClient } from '../saved_objects/remote_log_extraction_state';
 import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import {
@@ -91,7 +87,6 @@ interface AssetManagerDependencies {
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
@@ -108,7 +103,6 @@ export class AssetManagerClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
-  private readonly remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
@@ -124,7 +118,6 @@ export class AssetManagerClient {
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
     this.globalStateClient = deps.globalStateClient;
-    this.remoteLogExtractionStateClient = deps.remoteLogExtractionStateClient;
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
@@ -270,10 +263,7 @@ export class AssetManagerClient {
       await this.stop(type);
 
       // Per-type saved objects — always safe to remove for this type alone.
-      await Promise.all([
-        this.engineDescriptorClient.delete(type),
-        this.remoteLogExtractionStateClient.delete(type),
-      ]);
+      await this.engineDescriptorClient.delete(type);
 
       // The ES indices/data streams are shared across all entity types in the namespace
       // (their names carry the namespace, not the type). Only remove them once no engine
@@ -339,6 +329,11 @@ export class AssetManagerClient {
         namespace: this.namespace,
       }),
       this.globalStateClient.delete(),
+      deleteLegacyRemoteStateSavedObjects({
+        soClient: this.savedObjectsClient,
+        namespace: this.namespace,
+        logger: this.logger,
+      }),
     ]);
 
     this.logger.debug(
@@ -559,50 +554,17 @@ export class AssetManagerClient {
   private async getIndexTemplateComponents(): Promise<EngineComponentStatus[]> {
     const resource = 'index_template';
     const latestId = getLatestIndexTemplateId(this.namespace);
-    const updatesId = getUpdatesIndexTemplateId(this.namespace);
-    const [latestExists, updatesExists] = await Promise.all([
-      this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: latestId })),
-      this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: updatesId })),
-    ]);
-    return [
-      { id: latestId, installed: latestExists, resource },
-      { id: updatesId, installed: updatesExists, resource },
-    ];
+    const latestExists = await this.tryAsBoolean(
+      this.esClient.indices.getIndexTemplate({ name: latestId })
+    );
+    return [{ id: latestId, installed: latestExists, resource }];
   }
 
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
-    const legacyLatestIndex = getLegacySecurityLatestEntitiesIndexName(this.namespace);
-    const updatesDataStreamName = getUpdatesEntitiesDataStreamName(this.namespace);
-    const legacyUpdatesDataStreamName = getLegacySecurityUpdatesEntitiesDataStreamName(
-      this.namespace
-    );
-    const [latestExists, legacyLatestExists, updatesExists, legacyUpdatesExists] =
-      await Promise.all([
-        this.esClient.indices.exists({ index: latestIndex }),
-        this.esClient.indices.exists({ index: legacyLatestIndex }),
-        this.tryAsBoolean(this.esClient.indices.getDataStream({ name: updatesDataStreamName })),
-        this.tryAsBoolean(
-          this.esClient.indices.getDataStream({ name: legacyUpdatesDataStreamName })
-        ),
-      ]);
-    return [
-      {
-        id: latestExists ? latestIndex : legacyLatestExists ? legacyLatestIndex : latestIndex,
-        installed: latestExists || legacyLatestExists,
-        resource,
-      },
-      {
-        id: updatesExists
-          ? updatesDataStreamName
-          : legacyUpdatesExists
-          ? legacyUpdatesDataStreamName
-          : updatesDataStreamName,
-        installed: updatesExists || legacyUpdatesExists,
-        resource,
-      },
-    ];
+    const latestExists = await this.esClient.indices.exists({ index: latestIndex });
+    return [{ id: latestIndex, installed: latestExists, resource }];
   }
 
   private async getComponentTemplateComponents(
@@ -610,15 +572,10 @@ export class AssetManagerClient {
   ): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'component_template';
     const latestName = getComponentTemplateName(definition.type, this.namespace);
-    const updatesName = getUpdatesComponentTemplateName(definition.type, this.namespace);
-    const [latestExists, updatesExists] = await Promise.all([
-      this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name: latestName })),
-      this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name: updatesName })),
-    ]);
-    return [
-      { id: latestName, installed: latestExists, resource },
-      { id: updatesName, installed: updatesExists, resource },
-    ];
+    const latestExists = await this.tryAsBoolean(
+      this.esClient.cluster.getComponentTemplate({ name: latestName })
+    );
+    return [{ id: latestName, installed: latestExists, resource }];
   }
 
   private async getIlmPolicyComponents(): Promise<EngineComponentStatus[]> {
@@ -661,17 +618,15 @@ export class AssetManagerClient {
   }
 
   /**
-   * Checks whether the three shared per-namespace assets exist (latest index, updates data stream,
-   * metadata data stream) and reinstalls any that are missing. Returns true if anything was
-   * recreated, false if all assets were already present.
+   * Checks whether the two shared per-namespace assets exist (latest index, metadata data stream)
+   * and reinstalls any that are missing. Returns true if anything was recreated, false if all
+   * assets were already present.
    *
    * Safe to call from a running task — the underlying creates use `throwIfExists: false`.
    */
   public async reinstallSharedAssetsIfMissing(): Promise<boolean> {
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
     const legacyLatestIndex = getLegacySecurityLatestEntitiesIndexName(this.namespace);
-    const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
-    const legacyUpdatesDataStream = getLegacySecurityUpdatesEntitiesDataStreamName(this.namespace);
     const metadataDataStream = getMetadataEntitiesDataStreamName(this.namespace);
     const legacyMetadataDataStream = getLegacySecurityMetadataEntitiesDataStreamName(
       this.namespace
@@ -682,29 +637,24 @@ export class AssetManagerClient {
         .getDataStream({ name }, { ignore: [404] })
         .then((r) => (r?.data_streams?.length ?? 0) > 0);
 
-    const [latestExists, updatesExists, metadataExists] = await Promise.all([
+    const [latestExists, metadataExists] = await Promise.all([
       this.esClient.indices
         .exists({ index: latestIndex })
         .then(
           async (exists) => exists || this.esClient.indices.exists({ index: legacyLatestIndex })
         ),
-      dataStreamExists(updatesDataStream).then(
-        async (exists) => exists || dataStreamExists(legacyUpdatesDataStream)
-      ),
       dataStreamExists(metadataDataStream).then(
         async (exists) => exists || dataStreamExists(legacyMetadataDataStream)
       ),
     ]);
 
-    if (latestExists && updatesExists && metadataExists) {
+    if (latestExists && metadataExists) {
       return false;
     }
 
-    const missing = [
-      !latestExists && latestIndex,
-      !updatesExists && updatesDataStream,
-      !metadataExists && metadataDataStream,
-    ].filter(Boolean);
+    const missing = [!latestExists && latestIndex, !metadataExists && metadataDataStream].filter(
+      Boolean
+    );
     this.logger.warn(
       `Recreating missing entity store assets in ${this.namespace}: ${missing.join(', ')}`
     );

@@ -39,3 +39,39 @@ export const FETCH_RULE_ERROR = i18n.translate(
     defaultMessage: 'Failed to load rule',
   }
 );
+
+/** --- Rule cell --- */
+export const RULE_CELL_EMPTY_RULE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.ruleCell.emptyRule',
+  {
+    defaultMessage: '—',
+  }
+);
+
+export const RULE_CELL_MISSING_RULE_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.ruleCell.missingRuleLabel',
+  {
+    defaultMessage: 'Unavailable rule',
+  }
+);
+
+export const RULE_CELL_MISSING_RULE_TOOLTIP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.ruleCell.missingRuleTooltip',
+  {
+    defaultMessage:
+      'This rule is not available. It may have been deleted, or you may not have access to it.',
+  }
+);
+
+export const getRuleCellCopyRuleIdTooltip = (ruleId: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.ruleCell.copyRuleIdTooltip', {
+    defaultMessage: 'Click to copy the full rule ID: {ruleId}',
+    values: { ruleId },
+  });
+
+export const RULE_CELL_RULE_ID_COPIED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.ruleCell.ruleIdCopied',
+  {
+    defaultMessage: 'Rule ID copied',
+  }
+);
