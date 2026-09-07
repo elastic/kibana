@@ -8,6 +8,7 @@
 import type { ComponentType } from 'react';
 import type { IconType } from '@elastic/eui';
 import type { Conversation } from '@kbn/agent-builder-common';
+import type { AttachmentServiceStartContract } from '../attachments';
 
 /**
  * Props passed to a conversation template tab's `content` component.
@@ -15,6 +16,8 @@ import type { Conversation } from '@kbn/agent-builder-common';
 export interface ConversationTemplateTabRenderProps {
   /** The conversation the flyout is showing. */
   conversation: Conversation;
+  /** Public service for looking up attachment UI definitions. */
+  attachmentsService: AttachmentServiceStartContract;
 }
 
 /**
