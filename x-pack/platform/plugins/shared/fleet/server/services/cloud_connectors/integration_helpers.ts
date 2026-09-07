@@ -24,6 +24,8 @@ import {
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
   CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
+  SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
+  SUPPORTS_IDENTITY_FEDERATION_VAR_NAME,
 } from '../../../common/constants/cloud_connector';
 
 import type {
@@ -200,12 +202,17 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
 }
 
 /**
- * Backfills credential vars from an existing cloud connector into a package policy's stream vars,
- * but only for vars not already set by the caller. Used when an onboarding flow reuses a connector
- * by ID without supplying credentials in the request — the connector holds them.
+ * Backfills credential vars and the identity-federation flag from an existing cloud connector into
+ * a package policy's vars, but only for credential vars not already set by the caller. Used when
+ * an onboarding flow reuses a connector by ID without supplying credentials in the request — the
+ * connector holds them.
  *
- * Currently only AWS role_arn is backfilled (the only plain-text credential in the reuse path).
- * TODO: extend to Azure and GCP once those onboarding flows adopt connector reuse.
+ * Currently only AWS role_arn credentials are backfilled (the only plain-text credential in the
+ * reuse path). The identity-federation flag (supports_cloud_connectors /
+ * supports_identity_federation) is set for all providers.
+ *
+ * TODO: extend credential backfill to Azure and GCP once those onboarding flows adopt connector
+ * reuse.
  */
 export function injectConnectorVarsIntoPolicy(
   packagePolicy: NewPackagePolicy,
@@ -233,6 +240,15 @@ export function injectConnectorVarsIntoPolicy(
           break;
         }
       }
+    }
+  }
+
+  // Set the identity-federation flag so the beats AWS input uses the federated auth path
+  // rather than the container's default execution role. Packages use one of two var names
+  // (renamed in elastic/integrations#19828); set both if present.
+  for (const flagName of [SUPPORTS_CLOUD_CONNECTORS_VAR_NAME, SUPPORTS_IDENTITY_FEDERATION_VAR_NAME]) {
+    if (flagName in updatedVars) {
+      updatedVars[flagName] = { ...updatedVars[flagName], value: true };
     }
   }
 

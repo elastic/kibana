@@ -293,5 +293,36 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
 
       expect(result.packagePolicy.inputs[0].streams[0].vars?.role_arn?.value).toBeUndefined();
     });
+
+    it('sets supports_cloud_connectors to true alongside the backfilled role_arn', async () => {
+      const soClient = savedObjectsClientMock.create();
+      mockConnectorUsage(soClient, []);
+      getByIdSpy.mockResolvedValue({
+        id: 'connector-1',
+        name: 'AWS Production',
+        cloudProvider: 'aws',
+        vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123:role/elastic' } },
+      } as any);
+
+      const result = await createAndIntegrateCloudConnector({
+        packagePolicy: buildPolicyWithStreamVars({
+          role_arn: { type: 'text', value: undefined },
+          supports_cloud_connectors: { type: 'bool', value: false },
+        }),
+        agentPolicy: buildAgentPolicy(),
+        policyName: 'test-policy',
+        packageInfo: buildPackageInfo('aws_securityhub'),
+        soClient,
+        esClient,
+        logger,
+      });
+
+      expect(result.packagePolicy.inputs[0].streams[0].vars?.role_arn?.value).toBe(
+        'arn:aws:iam::123:role/elastic'
+      );
+      expect(result.packagePolicy.inputs[0].streams[0].vars?.supports_cloud_connectors?.value).toBe(
+        true
+      );
+    });
   });
 });
