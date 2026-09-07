@@ -74,6 +74,7 @@ const suggestResult = (
   canSuggest: false,
   suggestAutomation: jest.fn(),
   startGuidedSetup: jest.fn(),
+  conversation: { isRunning: false },
   ...overrides,
 });
 

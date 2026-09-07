@@ -20,6 +20,7 @@ import {
   ANALYZE_AND_IMPROVE_SKILL_ID,
 } from '../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
+import { createAiIndexConversationTracker } from './ai_index_conversations';
 
 const AGENT_BUILDER_CAPABILITY = 'agentBuilder';
 
@@ -101,18 +102,28 @@ export const createSuggestAutomationProvider = ({
   agentBuilder: AgentBuilderPluginStart | undefined;
   application: ApplicationStart;
 }): SuggestAutomationProvider => {
+  const tracker = createAiIndexConversationTracker({
+    agentBuilder,
+    storage: typeof window === 'undefined' ? undefined : window.localStorage,
+  });
+
   const openWith = (aiIndex: GetAiIndexResponse, initialMessage: string): void => {
     if (!agentBuilder?.openChat) {
       return;
     }
 
-    // No `newConversation`, so the session tag resumes the thread already going about this index
-    // rather than starting a fresh one each time the button is pressed. Setting up an index and
-    // then automating it is one piece of work, and the agent keeps what it learned in between.
-    // `initialMessage` only applies to the first visit, which is when the skills need loading.
+    const conversationId = tracker.getConversationId(aiIndex.id);
+    tracker.bindNextConversation(aiIndex.id);
+
+    // Setting an index up and then automating it is one piece of work, so both buttons return to
+    // the same thread and the agent keeps what it learned in between. `conversationId` is passed
+    // when we have one because the session tag can only restore in the browser that started it.
+    //
+    // The brief is only sent on the first visit. Resending it into a thread that has already run
+    // would re-issue instructions the agent has since worked past.
     agentBuilder.openChat({
       autoSendInitialMessage: false,
-      initialMessage,
+      ...(conversationId ? { conversationId } : { initialMessage }),
       sessionTag: aiIndexSessionTag(aiIndex.id),
       // Re-sent on every open so a resumed conversation sees the index as it is now, not as it was
       // when the thread started. Attachments are consumed by the next message, not accumulated.
@@ -130,6 +141,11 @@ export const createSuggestAutomationProvider = ({
     suggestAutomation: ({ aiIndex }) => openWith(aiIndex, SUGGEST_AUTOMATION_INITIAL_MESSAGE),
 
     startGuidedSetup: ({ aiIndex }) => openWith(aiIndex, GUIDED_SETUP_INITIAL_MESSAGE),
+
+    subscribeToConversationState: (aiIndexId, onChange) => {
+      const subscription = tracker.state$(aiIndexId).subscribe(onChange);
+      return () => subscription.unsubscribe();
+    },
 
     subscribeToAutomationSaved: (aiIndexId, onSaved) => {
       if (!agentBuilder?.events) {

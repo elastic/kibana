@@ -43,6 +43,7 @@ describe('ContextEnginePlugin', () => {
         suggestAutomation: jest.fn(),
         startGuidedSetup: jest.fn(),
         subscribeToAutomationSaved: () => () => {},
+        subscribeToConversationState: () => () => {},
       },
     };
 

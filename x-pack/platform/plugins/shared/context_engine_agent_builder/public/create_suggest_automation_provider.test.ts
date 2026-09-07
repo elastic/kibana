@@ -65,10 +65,13 @@ const createProvider = ({
 
   const provider = createSuggestAutomationProvider({ agentBuilder, application });
 
-  return { provider, openChat, chatEvents$, getChatEvents$ };
+  return { provider, openChat, chatEvents$, getChatEvents$, activeConversation$ };
 };
 
 describe('createSuggestAutomationProvider', () => {
+  // The conversation binding is kept in localStorage, which outlives an individual provider.
+  beforeEach(() => window.localStorage.clear());
+
   it('returns canSuggest false when agent builder is unavailable', () => {
     const { provider } = createProvider({ hasAgentBuilder: false });
 
@@ -123,6 +126,41 @@ describe('createSuggestAutomationProvider', () => {
         ],
       })
     );
+  });
+
+  it('returns to the conversation it already started rather than briefing a new one', () => {
+    const { provider, openChat, activeConversation$ } = createProvider();
+
+    provider.startGuidedSetup({ aiIndex, onSaved: jest.fn() });
+    activeConversation$.next({ id: 'conv-setup' });
+
+    // Setup and automation are one piece of work, so the second button lands in the same thread.
+    provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
+
+    const [options] = openChat.mock.calls[1];
+    expect(options.conversationId).toBe('conv-setup');
+    // Re-issuing the brief would send the agent back over ground it has already covered.
+    expect(options.initialMessage).toBeUndefined();
+    // The attachment still goes every time, so the agent sees the index as it is now.
+    expect(options.attachments).toHaveLength(1);
+  });
+
+  it('reports the conversation it opened and whether the agent is still working', () => {
+    const { provider, activeConversation$, chatEvents$ } = createProvider();
+    const seen: Array<{ conversationId?: string; isRunning: boolean }> = [];
+
+    provider.subscribeToConversationState('my-ai-index', (state) => seen.push(state));
+    expect(seen[0]).toEqual({ isRunning: false });
+
+    provider.startGuidedSetup({ aiIndex, onSaved: jest.fn() });
+    activeConversation$.next({ id: 'conv-setup' });
+    expect(seen[seen.length - 1]).toEqual({ conversationId: 'conv-setup', isRunning: false });
+
+    chatEvents$.next({ type: ChatEventType.messageChunk, data: { text_chunk: 'working' } });
+    expect(seen[seen.length - 1]).toEqual({ conversationId: 'conv-setup', isRunning: true });
+
+    chatEvents$.next({ type: ChatEventType.roundComplete, data: { round: {} } });
+    expect(seen[seen.length - 1]).toEqual({ conversationId: 'conv-setup', isRunning: false });
   });
 
   it('opens guided setup with the same attachment but a setup brief', () => {

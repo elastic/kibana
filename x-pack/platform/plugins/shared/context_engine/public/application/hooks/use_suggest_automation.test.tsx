@@ -11,7 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
-import type { SuggestAutomationProvider } from '../../types';
+import type { AiIndexConversationState, SuggestAutomationProvider } from '../../types';
 import type { ContextEngineServices } from './use_kibana';
 import { useSuggestAutomation } from './use_suggest_automation';
 
@@ -48,11 +48,21 @@ const renderSuggestHook = ({
     return jest.fn();
   });
 
+  let conversationStateCallback: ((state: AiIndexConversationState) => void) | undefined;
+  const subscribeToConversationStateMock = jest.fn(
+    (_aiIndexId: string, callback: (state: AiIndexConversationState) => void) => {
+      conversationStateCallback = callback;
+      callback({ isRunning: false });
+      return jest.fn();
+    }
+  );
+
   const provider: SuggestAutomationProvider = {
     canSuggest: canSuggestMock,
     suggestAutomation: suggestAutomationMock,
     startGuidedSetup: startGuidedSetupMock,
     subscribeToAutomationSaved: subscribeToAutomationSavedMock,
+    subscribeToConversationState: subscribeToConversationStateMock,
   };
 
   const services = {
@@ -78,7 +88,9 @@ const renderSuggestHook = ({
     suggestAutomationMock,
     startGuidedSetupMock,
     subscribeToAutomationSavedMock,
+    subscribeToConversationStateMock,
     triggerAutomationSaved: () => automationSavedCallback?.(),
+    emitConversationState: (state: AiIndexConversationState) => conversationStateCallback?.(state),
     onSaved,
   };
 };

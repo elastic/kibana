@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AiButton } from '@kbn/shared-ux-ai-components';
 import React, { useMemo } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { SOURCE_IMPROVEMENT_ACTIONS } from '../../../../common/http_api/improvement_actions';
@@ -27,6 +26,7 @@ import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { toSourceType } from '../../utils/sources';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
+import { AssistantActionButton } from './assistant_action_button';
 import { ScopedImprovements } from './scoped_improvements';
 
 interface SourcesPanelProps {
@@ -54,7 +54,11 @@ export const SourcesPanel = ({
   const { connectorNameById, connectorActionTypeById } = useDataConnectors({
     enabled: hasConnectorSources,
   });
-  const { canSuggest, startGuidedSetup } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
+  const { canSuggest, startGuidedSetup, conversation } = useSuggestAutomation({
+    aiIndex,
+    isManaged,
+    onSaved,
+  });
 
   // Offered alongside Edit, where the other panels put their assistant action, rather than inside
   // the empty state. Only while the index has no sources: "set this up" is an answer to an index
@@ -89,16 +93,23 @@ export const SourcesPanel = ({
             <EuiFlexGroup gutterSize="s" responsive={false}>
               {showGuidedSetup && (
                 <EuiFlexItem grow={false}>
-                  <AiButton
-                    size="s"
-                    iconType="productAgent"
+                  <AssistantActionButton
+                    conversation={conversation}
                     onClick={startGuidedSetup}
+                    startLabel={i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.sources.setUpButton',
+                      { defaultMessage: 'Help me set this up' }
+                    )}
+                    continueLabel={i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.sources.continueSetUpButton',
+                      { defaultMessage: 'Continue setup' }
+                    )}
+                    workingLabel={i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.sources.setUpWorkingButton',
+                      { defaultMessage: 'Setting up…' }
+                    )}
                     data-test-subj="contextSetUpAiIndexButton"
-                  >
-                    {i18n.translate('xpack.contextEngine.aiIndexDetail.sources.setUpButton', {
-                      defaultMessage: 'Help me set this up',
-                    })}
-                  </AiButton>
+                  />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>

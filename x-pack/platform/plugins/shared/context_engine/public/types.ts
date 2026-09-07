@@ -81,6 +81,33 @@ export interface SuggestAutomationProvider {
   startGuidedSetup: (params: SuggestAutomationParams) => void;
   /** Subscribe to successful save_automation tool results for an AI index. Returns unsubscribe. */
   subscribeToAutomationSaved: (aiIndexId: string, onSaved: () => void) => () => void;
+  /**
+   * Subscribe to what this page's assistant buttons already have going for an AI index. Returns
+   * unsubscribe. Emits the current state immediately.
+   */
+  subscribeToConversationState: (
+    aiIndexId: string,
+    onChange: (state: AiIndexConversationState) => void
+  ) => () => void;
+}
+
+/**
+ * What the page knows about the conversation its own buttons opened for an AI index.
+ *
+ * Both fields are best-effort readings of the assistant, not a record it keeps for us. They exist
+ * so the page can offer to continue rather than silently starting again.
+ */
+export interface AiIndexConversationState {
+  /** The conversation these buttons last opened, once the user has sent something in it. */
+  conversationId?: string;
+  /**
+   * Whether the agent is producing output right now.
+   *
+   * Only observable while the sidebar is mounted — the event stream is torn down with it — so this
+   * goes false when the user closes the sidebar on a run that is still going, and after a reload.
+   * False therefore means "not known to be working", not "finished".
+   */
+  isRunning: boolean;
 }
 
 /** Suggest-automation hooks registered by context_engine_agent_builder. */

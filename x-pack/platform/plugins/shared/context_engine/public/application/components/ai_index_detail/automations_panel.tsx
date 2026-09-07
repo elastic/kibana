@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
-import { AiButton } from '@kbn/shared-ux-ai-components';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
@@ -30,6 +29,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getAiIndexDetailPath } from '../../paths';
+import { AssistantActionButton } from './assistant_action_button';
 import { AutomationRow } from './automation_row';
 import { ScopedImprovements } from './scoped_improvements';
 
@@ -73,7 +73,11 @@ export const AutomationsPanel = ({
     createAndAttach,
   } = useAutomationsEditor({ aiIndex, onSaved });
   const { summaries, isLoading: isLoadingSummaries } = useWorkflowSummaries(workflowIds);
-  const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
+  const { canSuggest, suggestAutomation, conversation } = useSuggestAutomation({
+    aiIndex,
+    isManaged,
+    onSaved,
+  });
 
   const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(aiIndex.id)}` : '';
 
@@ -134,16 +138,23 @@ export const AutomationsPanel = ({
             <EuiFlexGroup gutterSize="s" responsive={false}>
               {canSuggest && (
                 <EuiFlexItem grow={false}>
-                  <AiButton
-                    size="s"
-                    iconType="productAgent"
+                  <AssistantActionButton
+                    conversation={conversation}
                     onClick={suggestAutomation}
+                    startLabel={i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.automations.suggestButton',
+                      { defaultMessage: 'Suggest automation' }
+                    )}
+                    continueLabel={i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.automations.continueSuggestButton',
+                      { defaultMessage: 'Continue with the assistant' }
+                    )}
+                    workingLabel={i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.automations.suggestWorkingButton',
+                      { defaultMessage: 'Working…' }
+                    )}
                     data-test-subj="contextSuggestAutomationButton"
-                  >
-                    {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.suggestButton', {
-                      defaultMessage: 'Suggest automation',
-                    })}
-                  </AiButton>
+                  />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
