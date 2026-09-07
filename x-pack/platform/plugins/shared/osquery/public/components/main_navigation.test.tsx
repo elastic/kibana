@@ -79,6 +79,9 @@ describe('MainNavigation', () => {
     expect(screen.getByText('Packs')).toBeInTheDocument();
     expect(screen.getByText('Queries')).toBeInTheDocument();
     expect(screen.getAllByRole('tab')).toHaveLength(3);
+    expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute('href', 'history');
+    expect(screen.getByRole('tab', { name: 'Packs' })).toHaveAttribute('href', 'packs');
+    expect(screen.getByRole('tab', { name: 'Queries' })).toHaveAttribute('href', 'saved_queries');
   });
 
   it('should show "Run query" as the primary action', () => {
