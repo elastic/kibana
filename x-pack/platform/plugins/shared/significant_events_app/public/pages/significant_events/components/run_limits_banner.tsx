@@ -61,6 +61,7 @@ export const RunQuotaExhaustionCallout = ({
 
   return (
     <EuiCallOut
+      announceOnMount
       color="warning"
       iconType="warning"
       data-test-subj="significantEventsRunLimitsBanner"
