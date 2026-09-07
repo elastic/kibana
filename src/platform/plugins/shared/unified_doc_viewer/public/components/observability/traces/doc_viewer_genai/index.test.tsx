@@ -109,11 +109,14 @@ describe('DocViewerObsTracesGenAi', () => {
     expect(screen.queryByTestId(HINT)).not.toBeInTheDocument();
   });
 
-  it('shows a skeleton while long messages are being recovered', () => {
+  it('keeps the tab rendered while long messages are being recovered', () => {
+    // Recovery only affects the conversation, so replacing the whole tab with a
+    // skeleton would hide metadata that is already available.
     (useGenAiData as jest.Mock).mockReturnValue({
-      genAi: undefined,
+      genAi: emptyConversation,
       isGenAiSpan: true,
       loading: true,
+      unrecoverableLongFields: false,
     });
 
     renderWithI18n(
@@ -125,7 +128,8 @@ describe('DocViewerObsTracesGenAi', () => {
     );
 
     expect(screen.getByTestId('unifiedDocViewerObsTracesGenAiLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('unifiedDocViewerObsTracesGenAi')).not.toBeInTheDocument();
+    expect(screen.getByTestId('unifiedDocViewerObsTracesGenAi')).toBeInTheDocument();
+    expect(screen.getByTestId('mockGenAiTab')).toBeInTheDocument();
   });
 
   it('renders nothing for a document without gen_ai data', () => {

@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCode, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { GenAiTab } from '@kbn/apm-ui-shared';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,15 +48,6 @@ export function DocViewerObsTracesGenAi({
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
     : 0;
 
-  if (loading) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiSkeletonText lines={5} data-test-subj="unifiedDocViewerObsTracesGenAiLoading" />
-      </>
-    );
-  }
-
   if (!genAi) {
     return null;
   }
@@ -74,6 +72,35 @@ export function DocViewerObsTracesGenAi({
       }
     >
       <EuiSpacer size="m" />
+      {/*
+       * Recovery only affects the conversation, so the rest of the tab renders
+       * straight away rather than being replaced by a full-tab skeleton.
+       * `GenAiTab` omits the conversation section entirely when it has no
+       * messages, so it simply appears once the values arrive.
+       */}
+      {loading && (
+        <>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            data-test-subj="unifiedDocViewerObsTracesGenAiLoading"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="unifiedDocViewer.observability.traces.genAi.loadingMessages"
+                  defaultMessage="Loading messages…"
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {showMetadataHint && (
         <>
           <KbnInfoCallout
